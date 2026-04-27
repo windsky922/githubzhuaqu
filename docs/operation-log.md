@@ -67,3 +67,51 @@ docs/project-architecture.md
 
 后续如果进入开发阶段，再按 `docs/project-architecture.md` 中的开发顺序实施。
 
+---
+
+## 2026-04-27 追加：基于 pi-mono 的重新架构审查
+
+### 1. 学习参考项目
+
+参考链接：
+
+```text
+https://github.com/badlogic/pi-mono
+```
+
+重点学习内容：
+
+1. `pi-mono` 是围绕 AI Agent 构建的 monorepo，包含统一 LLM API、Agent runtime、coding agent、TUI、Web UI、Slack bot 和 vLLM pods 管理工具。
+2. `pi-coding-agent` 的核心思想是最小核心、工具扩展、Prompt Templates、Skills、AGENTS.md、Sessions 和 Extensions。
+3. 对本项目最有价值的是项目级 Agent 规则、提示词模板外置、运行历史记录、可扩展但不过度复杂的模块边界。
+
+### 2. 审查新版架构文档
+
+输入文件：
+
+```text
+D:\liulanqixiazai\github-weekly-agent-rearchitecture-from-pi-mono.md
+```
+
+结论：
+
+1. 新版架构方向正确，适合作为原架构的升级版。
+2. `AGENTS.md` 和 `prompts/weekly_report.md` 应纳入第一阶段。
+3. `data/` 历史记录设计应保留，但要区分不可变运行摘要和可变去重状态。
+4. `skills/` 目录只应作为后续预留说明，MVP 阶段不建议创建空 Skill 文件，避免增加无实际用途的维护面。
+5. GitHub Actions 自动提交必须加入防循环、并发控制和变更检测。
+
+### 3. 本次新增文档
+
+输出文件：
+
+```text
+docs/pi-mono-rearchitecture-review.md
+```
+
+该文档记录：
+
+1. 从 `pi-mono` 学到的可采纳设计。
+2. 新版架构中建议保留的部分。
+3. 需要收敛或延后的部分。
+4. 面向“代码简洁完整”的最终开发建议。

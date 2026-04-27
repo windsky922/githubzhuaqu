@@ -10,6 +10,7 @@
 |---|---|
 | `docs/architecture-review.md` | 对原始架构文档的审查结论、问题和优化建议 |
 | `docs/project-architecture.md` | 优化后的完整项目架构、MVP 范围、目录规划和开发路线 |
+| `docs/pi-mono-rearchitecture-review.md` | 基于 `badlogic/pi-mono` 学习后的新版架构审查和采纳建议 |
 | `docs/operation-log.md` | 本次 Codex 操作过程和日志记录 |
 
 ## 项目目标
@@ -63,4 +64,3 @@ GitHub 热点项目采集
 | `TELEGRAM_CHAT_ID` | Telegram 接收方 Chat ID |
 
 `GITHUB_TOKEN` 由 GitHub Actions 自动提供，用于把新增周报提交回仓库。
-
