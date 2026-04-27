@@ -103,7 +103,7 @@ def _generate_with_kimi(repositories: list[Repository], queries: list[str], sett
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": json.dumps(user_payload, ensure_ascii=False)},
         ],
-        "temperature": 0.3,
+        "temperature": 1,
     }
     base_url = settings.kimi_base_url.rstrip("/")
     url = base_url if base_url.endswith("/chat/completions") else base_url + "/chat/completions"

@@ -197,3 +197,53 @@ py main.py
 5. `python main.py`
 6. `GH_SEARCH_TOKEN` 等环境变量名
 7. `.github/workflows/weekly.yml` 中的工作流关键字
+
+---
+
+## 2026-04-27 追加：GitHub Secrets 配置测试
+
+### 1. 测试方式
+
+新增临时检查工作流：
+
+```text
+.github/workflows/secrets-check.yml
+```
+
+该工作流通过 GitHub Actions 读取仓库 Secrets，并验证：
+
+1. `GH_SEARCH_TOKEN` 是否存在并可访问 GitHub API。
+2. `KIMI_API_KEY`、`KIMI_BASE_URL`、`KIMI_MODEL` 是否存在并可调用 Kimi API。
+3. `TELEGRAM_BOT_TOKEN`、`TELEGRAM_CHAT_ID` 是否存在并可发送 Telegram 测试消息。
+
+### 2. 第一次测试结果
+
+运行结论：失败。
+
+已确认：
+
+1. 所有必要 Secrets 都能被 GitHub Actions 读取到。
+2. `GH_SEARCH_TOKEN` 验证通过，GitHub API 剩余额度正常。
+
+失败点：
+
+```text
+Kimi API 返回 HTTP 400。
+```
+
+### 3. 失败原因
+
+GitHub Actions 日志显示：
+
+```text
+invalid temperature: only 1 is allowed for this model
+```
+
+说明当前配置的 Kimi 模型只允许 `temperature=1`。
+
+### 4. 修复动作
+
+已将以下位置的 `temperature` 改为 `1`：
+
+1. `src/reporter.py`
+2. `.github/workflows/secrets-check.yml`
