@@ -2,7 +2,7 @@
 
 用于自动整理每周 GitHub 热点项目，并将中文周报推送到手机端的 Agent 项目规划仓库。
 
-当前阶段只做架构审查和项目文档沉淀，暂不进入代码开发。
+当前已进入第一阶段 MVP 开发：项目可以搜索 GitHub 热点仓库，生成中文 Markdown 周报，按配置推送到 Telegram，并归档运行摘要。
 
 ## 当前文档
 
@@ -38,7 +38,7 @@ GitHub 热点项目采集
 
 ## 第一阶段范围
 
-第一阶段只实现稳定可用的 MVP：
+第一阶段 MVP 范围：
 
 1. 每周一自动运行，支持手动触发。
 2. 搜索最近 7 天 GitHub 热点项目。
@@ -49,6 +49,22 @@ GitHub 热点项目采集
 7. GitHub Actions 自动提交新增周报。
 
 暂不开发 README 深度抓取、历史去重数据库、网页展示和复杂推荐模型。
+
+## 本地运行
+
+```bash
+py -m unittest discover -v
+py main.py
+```
+
+在 GitHub Actions 中会使用：
+
+```bash
+python -m unittest
+python main.py
+```
+
+未配置 Kimi 时会生成基础版周报；未配置 Telegram 时会跳过推送但保留归档。
 
 ## 后续开发前置事项
 

@@ -1,0 +1,29 @@
+{
+  "preferred_topics": [
+    "agent",
+    "codex",
+    "skills",
+    "llm",
+    "ai",
+    "machine-learning",
+    "java",
+    "python",
+    "automation",
+    "github-actions",
+    "telegram"
+  ],
+  "preferred_languages": [
+    "Python",
+    "Java",
+    "TypeScript",
+    "JavaScript"
+  ],
+  "exclude_keywords": [
+    "mirror",
+    "test repo",
+    "scam"
+  ],
+  "max_projects": 10,
+  "min_stars": 20
+}
+

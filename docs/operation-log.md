@@ -115,3 +115,52 @@ docs/pi-mono-rearchitecture-review.md
 2. 新版架构中建议保留的部分。
 3. 需要收敛或延后的部分。
 4. 面向“代码简洁完整”的最终开发建议。
+
+---
+
+## 2026-04-27 追加：第一阶段 MVP 开发
+
+### 1. 开发范围
+
+严格按照收敛后的 MVP 架构开发，未创建暂缓的 `skills/`、Web Dashboard、SQLite 或复杂插件系统。
+
+本次实现内容：
+
+1. `AGENTS.md` 项目级 Agent 开发规则。
+2. `prompts/weekly_report.md` 独立周报提示词。
+3. `main.py` 主流程编排。
+4. `src/collector.py` GitHub Search API 采集。
+5. `src/processor.py` 去重、过滤、评分和排序。
+6. `src/reporter.py` Kimi 生成和 fallback 基础报告。
+7. `src/sender.py` Telegram 分段推送。
+8. `src/archive.py` Markdown、原始数据和运行摘要归档。
+9. `src/settings.py` 环境变量和兴趣配置读取。
+10. `src/utils.py` 日期、分段和通用辅助函数。
+11. `.github/workflows/weekly.yml` 定时和手动触发工作流。
+12. `tests/` 最小单元测试。
+
+### 2. 简洁性处理
+
+1. 暂不增加外部依赖，`requirements.txt` 保持标准库实现。
+2. 暂不拆分 HTTP clients，避免 MVP 过度抽象。
+3. 暂不创建 Skill 目录，等工作流稳定后再产品化。
+4. 每个模块只负责一个主要职责。
+
+### 3. 本地验证
+
+已执行：
+
+```text
+py -m unittest discover -v
+py -m compileall main.py src tests
+py main.py
+```
+
+验证结果：
+
+1. 3 个单元测试通过。
+2. Python 编译检查通过。
+3. 端到端运行成功生成报告。
+4. 本地未配置 Telegram，程序按设计输出 `Telegram is not configured`，未阻断归档流程。
+
+本地验证生成的临时报告和运行数据不作为源码提交。

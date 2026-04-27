@@ -1,0 +1,2 @@
+"""GitHub Weekly Agent package."""
+
