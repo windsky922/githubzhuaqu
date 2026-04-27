@@ -204,7 +204,7 @@ py main.py
 
 ### 1. 测试方式
 
-新增临时检查工作流：
+新增检查工作流：
 
 ```text
 .github/workflows/secrets-check.yml
@@ -216,7 +216,7 @@ py main.py
 2. `KIMI_API_KEY`、`KIMI_BASE_URL`、`KIMI_MODEL` 是否存在并可调用 Kimi API。
 3. `TELEGRAM_BOT_TOKEN`、`TELEGRAM_CHAT_ID` 是否存在并可发送 Telegram 测试消息。
 
-### 2. 第一次测试结果
+### 2. 初始测试结果
 
 运行结论：失败。
 
@@ -247,3 +247,26 @@ invalid temperature: only 1 is allowed for this model
 
 1. `src/reporter.py`
 2. `.github/workflows/secrets-check.yml`
+
+### 5. 最终测试结果
+
+最终运行结果：成功。
+
+已确认：
+
+1. `GH_SEARCH_TOKEN` 已配置，并通过 GitHub API 验证。
+2. `KIMI_API_KEY` 已配置。
+3. `KIMI_BASE_URL` 已配置。
+4. `KIMI_MODEL` 已配置。
+5. Kimi API 可以连通并返回 `choices`。
+6. `TELEGRAM_BOT_TOKEN` 已配置。
+7. `TELEGRAM_CHAT_ID` 已配置。
+8. Telegram 测试消息发送成功。
+
+GitHub Actions 成功运行链接：
+
+```text
+https://github.com/windsky922/githubzhuaqu/actions/runs/24992511910
+```
+
+说明：本次 Kimi 轻量测试请求返回内容为空，但 HTTP 调用成功并返回了有效 `choices` 字段，因此判断为 API 配置可用。正式周报生成流程会使用完整提示词和项目数据调用 Kimi。

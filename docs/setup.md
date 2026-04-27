@@ -30,3 +30,19 @@ python main.py
 ```bash
 python -m unittest
 ```
+
+## 检查 Secrets 配置
+
+仓库中提供了 `Secrets 配置检查` 工作流，用于验证 GitHub、Kimi 和 Telegram 的密钥配置。
+
+路径：
+
+```text
+Actions -> Secrets 配置检查 -> Run workflow
+```
+
+验证内容：
+
+1. `GH_SEARCH_TOKEN` 是否可以访问 GitHub API。
+2. `KIMI_API_KEY`、`KIMI_BASE_URL`、`KIMI_MODEL` 是否可以访问 Kimi API。
+3. `TELEGRAM_BOT_TOKEN` 和 `TELEGRAM_CHAT_ID` 是否可以发送 Telegram 测试消息。
