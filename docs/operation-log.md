@@ -164,3 +164,36 @@ py main.py
 4. 本地未配置 Telegram，程序按设计输出 `Telegram is not configured`，未阻断归档流程。
 
 本地验证生成的临时报告和运行数据不作为源码提交。
+
+---
+
+## 2026-04-27 追加：文档中文化
+
+### 1. 用户要求
+
+用户要求项目中所有文档使用中文书写，将英文写成的部分重新用中文表达。
+
+### 2. 本次处理范围
+
+本次已将以下文档性文件中的英文说明改写为中文：
+
+1. `AGENTS.md`
+2. `docs/architecture.md`
+3. `docs/setup.md`
+4. `docs/roadmap.md`
+5. `prompts/weekly_report.md`
+6. `.env.example`
+7. `requirements.txt`
+8. `.github/workflows/weekly.yml` 中面向用户显示的工作流名称和步骤名称
+
+### 3. 保留内容
+
+以下内容属于技术名词、命令、路径、环境变量名或 GitHub Actions 语法，保持原样：
+
+1. `GitHub Weekly Agent`
+2. `GitHub Actions`
+3. `Telegram`
+4. `Kimi API`
+5. `python main.py`
+6. `GH_SEARCH_TOKEN` 等环境变量名
+7. `.github/workflows/weekly.yml` 中的工作流关键字

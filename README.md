@@ -2,7 +2,7 @@
 
 用于自动整理每周 GitHub 热点项目，并将中文周报推送到手机端的 Agent 项目规划仓库。
 
-当前已进入第一阶段 MVP 开发：项目可以搜索 GitHub 热点仓库，生成中文 Markdown 周报，按配置推送到 Telegram，并归档运行摘要。
+当前已进入第一阶段最小可用版本开发：项目可以搜索 GitHub 热点仓库，生成中文 Markdown 周报，按配置推送到 Telegram，并归档运行摘要。
 
 ## 当前文档
 
@@ -38,7 +38,7 @@ GitHub 热点项目采集
 
 ## 第一阶段范围
 
-第一阶段 MVP 范围：
+第一阶段最小可用版本范围：
 
 1. 每周一自动运行，支持手动触发。
 2. 搜索最近 7 天 GitHub 热点项目。
@@ -68,9 +68,9 @@ python main.py
 
 ## 后续开发前置事项
 
-开发前需要准备以下 GitHub Secrets：
+开发前需要准备以下 GitHub Actions 密钥：
 
-| Secret | 用途 |
+| 密钥名称 | 用途 |
 |---|---|
 | `GH_SEARCH_TOKEN` | GitHub Search API 访问令牌，可先使用低权限 token |
 | `KIMI_API_KEY` | Kimi API Key |

@@ -1,3 +1,2 @@
-# MVP uses only the Python standard library.
-# Add dependencies only when they remove real complexity.
-
+# 第一阶段最小可用版本只使用 Python 标准库。
+# 只有当依赖能明显减少真实复杂度时，才新增第三方依赖。

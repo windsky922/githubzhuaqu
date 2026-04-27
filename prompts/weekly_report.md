@@ -1,4 +1,4 @@
-# Weekly GitHub Report Prompt
+# GitHub 每周热点项目周报提示词
 
 你是一个专业的 GitHub 开源项目分析助手。
 
@@ -21,4 +21,3 @@
 - 保留所有 GitHub 原链接
 - 不虚构 Star、Fork、作者、发布时间或 License
 - 每个重点项目分析控制在 100 到 200 字左右
-

@@ -1,31 +1,31 @@
-# Setup
+# 项目配置
 
-## GitHub Secrets
+## GitHub Actions 密钥
 
-Configure these in GitHub repository settings under `Settings -> Secrets and variables -> Actions`.
+请在 GitHub 仓库的 `Settings -> Secrets and variables -> Actions` 中配置以下密钥。
 
-| Secret | Required | Purpose |
+| 密钥名称 | 是否必须 | 用途 |
 |---|---:|---|
-| `GH_SEARCH_TOKEN` | Recommended | Higher GitHub Search API rate limits |
-| `KIMI_API_KEY` | Optional | Enables model-generated report |
-| `KIMI_BASE_URL` | Optional | Defaults to `https://api.moonshot.cn/v1` |
-| `KIMI_MODEL` | Optional | Required with `KIMI_API_KEY` for Kimi generation |
-| `TELEGRAM_BOT_TOKEN` | Optional | Enables Telegram sending |
-| `TELEGRAM_CHAT_ID` | Optional | Telegram recipient chat ID |
+| `GH_SEARCH_TOKEN` | 推荐 | 提高 GitHub Search API 速率限制 |
+| `KIMI_API_KEY` | 可选 | 启用模型生成周报 |
+| `KIMI_BASE_URL` | 可选 | 默认值为 `https://api.moonshot.cn/v1` |
+| `KIMI_MODEL` | 可选 | 配合 `KIMI_API_KEY` 使用，指定 Kimi 模型 |
+| `TELEGRAM_BOT_TOKEN` | 可选 | 启用 Telegram 推送 |
+| `TELEGRAM_CHAT_ID` | 可选 | Telegram 接收方 Chat ID |
 
-If Kimi is not configured, the program writes a fallback report.
+如果未配置 Kimi，程序会生成降级版周报。
 
-If Telegram is not configured, the program still archives reports and run summaries.
+如果未配置 Telegram，程序仍会归档周报和运行摘要。
 
-## Local Run
+## 本地运行
 
 ```bash
 python main.py
 ```
 
-Optional local environment variables can be copied from `.env.example` into your shell environment. The program does not read `.env` automatically to avoid adding dependencies.
+本地运行时，可以参考 `.env.example` 手动设置环境变量。为了避免增加依赖，程序不会自动读取 `.env` 文件。
 
-## Tests
+## 测试
 
 ```bash
 python -m unittest

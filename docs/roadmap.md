@@ -1,23 +1,22 @@
-# Roadmap
+# 项目路线图
 
-## Stage 1: MVP
+## 第一阶段：最小可用版本
 
-1. Collect GitHub repositories from recent search queries.
-2. Filter and rank repositories.
-3. Generate a Kimi report or fallback report.
-4. Archive reports and run summaries.
-5. Send Telegram messages when configured.
-6. Run weekly via GitHub Actions.
+1. 根据近期搜索条件采集 GitHub 仓库。
+2. 对仓库进行过滤和排序。
+3. 生成 Kimi 周报或降级版基础周报。
+4. 归档周报和运行摘要。
+5. 在配置 Telegram 后发送消息。
+6. 通过 GitHub Actions 每周自动运行。
 
-## Stage 2: Better Data
+## 第二阶段：增强数据质量
 
-1. Fetch README content for selected repositories.
-2. Track sent repositories in `data/state/sent_repos.json`.
-3. Improve scoring with historical Star deltas.
+1. 抓取入选仓库的 README 内容。
+2. 在 `data/state/sent_repos.json` 中记录已推送仓库。
+3. 结合历史 Star 增量优化评分。
 
-## Stage 3: Productized Output
+## 第三阶段：产品化输出
 
-1. Generate GitHub Pages weekly archive.
-2. Add trend summaries.
-3. Package a real Codex Skill only after the project workflow is stable.
-
+1. 生成 GitHub Pages 周报归档页面。
+2. 增加趋势总结。
+3. 在项目流程稳定后，再封装真正可用的 Codex 技能。
