@@ -270,3 +270,86 @@ https://github.com/windsky922/githubzhuaqu/actions/runs/24992511910
 ```
 
 说明：本次 Kimi 轻量测试请求返回内容为空，但 HTTP 调用成功并返回了有效 `choices` 字段，因此判断为 API 配置可用。正式周报生成流程会使用完整提示词和项目数据调用 Kimi。
+
+---
+
+## 2026-04-28 追加：完整周报工作流验证
+
+### 1. 验证目的
+
+在用户完成 GitHub Secrets 配置后，对完整自动化链路进行验证，确认从 GitHub Actions 到周报归档、Kimi 生成和 Telegram 推送的流程可以正常运行。
+
+验证链路：
+
+```text
+GitHub Actions
+-> python -m unittest
+-> python main.py
+-> GitHub 项目采集
+-> Kimi 中文周报生成
+-> reports/ 与 data/ 归档
+-> Telegram 推送
+-> Actions 自动提交归档文件
+```
+
+### 2. 临时触发方式
+
+为避免等待每周定时任务，临时给 `.github/workflows/weekly.yml` 增加了仅用于测试的 `push` 触发器。
+
+测试完成后已移除该临时触发器，正式工作流保留：
+
+1. `workflow_dispatch` 手动触发。
+2. 每周一 UTC 00:00 的定时触发。
+
+### 3. 第一次完整流程测试
+
+运行链接：
+
+```text
+https://github.com/windsky922/githubzhuaqu/actions/runs/25031865017
+```
+
+运行结论：成功。
+
+归档结果：
+
+1. `reports/2026-04-28.md`
+2. `data/raw/2026-04-28.json`
+3. `data/runs/2026-04-28.json`
+
+本次结果显示 Telegram 推送成功，但 Kimi 周报生成使用了降级报告。为便于后续定位，随后在运行摘要中增加了 `report_error` 字段，并增强了 Kimi 响应内容提取逻辑。
+
+### 4. 第二次完整流程测试
+
+运行链接：
+
+```text
+https://github.com/windsky922/githubzhuaqu/actions/runs/25031996992
+```
+
+运行结论：成功。
+
+关键结果：
+
+1. `collected_count`: 165
+2. `selected_count`: 10
+3. `kimi_used`: true
+4. `fallback_used`: false
+5. `telegram_sent`: true
+6. `report_path`: `reports/2026-04-28.md`
+7. `run_summary_path`: `data/runs/2026-04-28.json`
+
+说明：第二次完整流程已经确认 Kimi 正常生成中文周报，Telegram 正常推送，Actions 自动归档提交正常执行。
+
+### 5. 本次代码与文档调整
+
+1. `src/models.py`：为运行摘要增加 `report_error` 字段。
+2. `src/reporter.py`：让 Kimi 生成失败时返回明确错误原因，并兼容更多响应内容结构。
+3. `main.py`：写入 `report_error`，便于从 `data/runs/` 追踪模型生成问题。
+4. `tests/test_reporter.py`：增加 Kimi 响应内容提取测试。
+5. `.github/workflows/weekly.yml`：移除测试用 `push` 触发器。
+6. `docs/operation-log.md`：记录完整工作流验证过程和结果。
+
+### 6. 当前结论
+
+Secrets 配置已经通过完整链路验证。当前项目已具备按周自动抓取 GitHub 热点项目、生成中文周报、推送到 Telegram、归档运行结果并自动提交到 GitHub 的基础能力。

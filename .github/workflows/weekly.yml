@@ -1,11 +1,7 @@
 name: GitHub 每周热点项目智能体
-# 临时 push 触发器用于完整流程测试，测试完成后移除。
 
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - ".github/workflows/weekly.yml"
   schedule:
     - cron: "0 0 * * 1"
 
