@@ -33,6 +33,7 @@ main.py
 9. Telegram 推送成功后记录已推送仓库，后续运行过滤重复项目。
 10. 对最终入选仓库抓取 README 摘要，作为 Kimi 和降级报告的补充上下文。
 11. 维护 Star 历史状态，并将 Star 增量纳入排序评分。
+12. 生成 GitHub Pages 周报归档页面。
 
 暂缓实现：
 
@@ -85,3 +86,12 @@ star_growth = 当前 Star - 历史 Star
 5. 创建时间新鲜度：10%
 
 这种设计不会让短期增长完全压过项目基础质量，但可以让近期增长明显的项目获得更高排名。
+
+## GitHub Pages 归档页面
+
+`scripts/build_pages.py` 会读取 `reports/` 和 `data/runs/`，生成：
+
+1. `docs/index.md`：周报归档首页。
+2. `docs/weekly/YYYY-MM-DD.md`：适合 GitHub Pages 浏览的周报副本。
+
+每次 GitHub Actions 生成周报后，都会自动刷新归档页面并提交到仓库。

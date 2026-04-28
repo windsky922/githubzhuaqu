@@ -563,3 +563,76 @@ py -m compileall main.py src tests
 ```
 
 验证结果：通过。
+
+---
+
+## 2026-04-28 追加：第三阶段 GitHub Pages 周报归档页面
+
+### 1. 开发目的
+
+进入第三阶段产品化输出后，优先实现轻量的周报归档页面，让生成的周报可以通过 GitHub Pages 直接浏览。
+
+### 2. 本次实现
+
+新增脚本：
+
+```text
+scripts/build_pages.py
+```
+
+该脚本负责：
+
+1. 读取 `reports/` 下的周报。
+2. 读取 `data/runs/` 下的运行摘要。
+3. 生成 `docs/index.md` 周报归档首页。
+4. 将周报同步到 `docs/weekly/YYYY-MM-DD.md`。
+
+### 3. 工作流变化
+
+`.github/workflows/weekly.yml` 新增步骤：
+
+```text
+python scripts/build_pages.py
+```
+
+自动提交范围新增：
+
+```text
+docs/index.md
+docs/weekly
+```
+
+### 4. 本次生成文件
+
+```text
+docs/index.md
+docs/weekly/2026-04-28.md
+```
+
+### 5. GitHub Pages 启用方式
+
+在 GitHub 仓库中进入：
+
+```text
+Settings -> Pages
+```
+
+设置：
+
+```text
+Source: Deploy from a branch
+Branch: main
+Folder: /docs
+```
+
+### 6. 本地验证
+
+已执行：
+
+```text
+py scripts/build_pages.py
+py -m unittest
+py -m compileall main.py src tests scripts
+```
+
+验证结果：通过。

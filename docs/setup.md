@@ -56,3 +56,28 @@ Actions -> Secrets 配置检查 -> Run workflow
 不需要手动创建该文件。首次成功推送后，GitHub Actions 会把它和周报归档一起提交回仓库。
 
 如果需要重新推送历史项目，可以在确认风险后手动编辑该文件，删除对应仓库记录。不要删除 `reports/` 和 `data/runs/` 中的历史归档。
+
+## GitHub Pages 配置
+
+项目会自动生成 GitHub Pages 可用的周报归档文件：
+
+```text
+docs/index.md
+docs/weekly/YYYY-MM-DD.md
+```
+
+如需启用网页访问，请在 GitHub 仓库中进入：
+
+```text
+Settings -> Pages
+```
+
+然后设置：
+
+```text
+Source: Deploy from a branch
+Branch: main
+Folder: /docs
+```
+
+启用后，后续每次 GitHub Actions 生成周报，都会同步刷新归档页面。

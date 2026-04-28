@@ -50,6 +50,7 @@ GitHub 热点项目采集
 8. Telegram 推送成功后，将本次仓库记录到 `data/state/sent_repos.json`，后续运行会跳过已推送仓库。
 9. 对最终入选项目抓取 README 摘要，提升周报分析质量。
 10. 在 `data/state/star_history.json` 中记录仓库 Star 历史，用于后续评分时计算新增 Star。
+11. 生成 `docs/index.md` 和 `docs/weekly/`，用于 GitHub Pages 周报归档页面。
 
 暂不开发 SQLite 历史数据库、网页展示和复杂推荐模型。
 
@@ -83,6 +84,19 @@ python main.py
 | `TELEGRAM_CHAT_ID` | Telegram 接收方 Chat ID |
 
 `GITHUB_TOKEN` 由 GitHub Actions 自动提供，用于把新增周报提交回仓库。
+
+## GitHub Pages
+
+周报归档页面已生成到 `docs/index.md`。
+
+在 GitHub 仓库中进入 `Settings -> Pages`，将发布来源设置为：
+
+```text
+Deploy from a branch
+main / docs
+```
+
+启用后即可通过 GitHub Pages 浏览周报归档。
 
 ## 状态文件
 
