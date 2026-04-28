@@ -41,7 +41,7 @@ def fallback_report(repositories: list[Repository], queries: list[str], settings
     )
     for index, repo in enumerate(repositories, start=1):
         lines.append(
-            f"| {index} | {repo.full_name} | {repo.category} | {repo.stargazers_count} | {repo.star_growth} | {repo.forks_count} | {repo.language} | [GitHub]({repo.html_url}) |"
+            f"| {index} | {repo.full_name} | {repo.category} | {repo.stargazers_count} | {repo.star_growth} | {repo.forks_count} | {repo.language} | [{repo.html_url}]({repo.html_url}) |"
         )
 
     lines.extend(["", "## 三、重点项目分析", ""])
@@ -55,7 +55,7 @@ def fallback_report(repositories: list[Repository], queries: list[str], settings
                 f"- README 摘要：{_short_text(repo.readme_excerpt) or '未获取到 README 内容。'}",
                 f"- 技术信息：主要语言 {repo.language}，Star {repo.stargazers_count}，Fork {repo.forks_count}，较上次记录新增 Star {repo.star_growth}。",
                 f"- 学习价值：可作为了解 {repo.category} 相关开源实践的参考。",
-                f"- 原链接：[GitHub]({repo.html_url})",
+                f"- 原链接：[{repo.html_url}]({repo.html_url})",
                 "",
             ]
         )
@@ -67,7 +67,7 @@ def fallback_report(repositories: list[Repository], queries: list[str], settings
         ]
     )
     for repo in repositories[:3]:
-        lines.append(f"- [{repo.full_name}]({repo.html_url})")
+        lines.append(f"- {repo.full_name}：[{repo.html_url}]({repo.html_url})")
 
     lines.extend(
         [
@@ -98,9 +98,14 @@ def normalize_report_markdown(report: str) -> str:
 def _link_github_urls(line: str) -> str:
     if "https://github.com/" not in line:
         return line
+    line = re.sub(
+        r"\[GitHub\]\((https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)\)",
+        lambda match: f"[{match.group(1)}]({match.group(1)})",
+        line,
+    )
     return re.sub(
-        r"(?<!\]\()https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+",
-        lambda match: f"[GitHub]({match.group(0)})",
+        r"(?<![\[\(])https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+",
+        lambda match: f"[{match.group(0)}]({match.group(0)})",
         line,
     )
 

@@ -23,7 +23,7 @@ def process_repositories(
     unique = _dedupe(repositories)
     filtered = [repo for repo in unique if _is_usable(repo, settings)]
     _score(filtered, settings, star_history or {})
-    filtered.sort(key=lambda repo: repo.score, reverse=True)
+    filtered.sort(key=lambda repo: (repo.score, repo.star_growth, repo.stargazers_count), reverse=True)
     return filtered[: settings.max_projects]
 
 
@@ -64,10 +64,10 @@ def _score(repositories: list[Repository], settings: Settings, star_history: dic
         freshness_score = _freshness_score(repo.pushed_at or repo.updated_at, settings.days_back)
         repo.category = _category(repo)
         repo.score = round(
-            0.35 * star_score
-            + 0.15 * fork_score
-            + 0.25 * topic_score
-            + 0.15 * growth_score
+            0.25 * star_score
+            + 0.05 * fork_score
+            + 0.20 * topic_score
+            + 0.40 * growth_score
             + 0.10 * freshness_score,
             4,
         )

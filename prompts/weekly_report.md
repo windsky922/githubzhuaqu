@@ -19,9 +19,9 @@
 - 正式、清晰、适合 Telegram 手机阅读
 - 不要编造未提供的信息
 - 只分析用户数据中提供的最近一周活跃项目，不要自行加入其他项目
-- 热点项目总览中的链接列必须使用 Markdown 超链接格式，例如 `[GitHub](https://github.com/owner/repo)`
+- 热点项目总览中的链接列必须显示完整 URL，并使用 Markdown 超链接格式，例如 `[https://github.com/owner/repo](https://github.com/owner/repo)`
 - 优先参考 README 摘要；如果 README 摘要为空，再说明“仅根据仓库名称和简介判断”
 - 保留所有 GitHub 原链接
 - 不虚构 Star、Fork、作者、发布时间或 License
-- 如果项目数据包含 `star_growth`，请结合它判断近期热度，但不要夸大增长意义
+- 如果项目数据包含 `star_growth`，必须优先结合新增 Star 判断近期热度，但不要夸大增长意义
 - 每个重点项目分析控制在 100 到 200 字左右

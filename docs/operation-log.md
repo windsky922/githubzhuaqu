@@ -806,3 +806,81 @@ py -m compileall main.py src tests scripts
 ```
 
 验证结果：通过。
+
+---
+
+## 2026-04-28 追加：提高新增 Star 权重与完整链接显示
+
+### 1. 用户要求
+
+用户要求：
+
+1. 将新增 Star 作为重要筛选依据。
+2. 链接部分应显示完整链接，而不是只显示 `GitHub`。
+
+### 2. 评分调整
+
+已将综合评分权重调整为：
+
+1. Star 增量：40%
+2. 总 Star：25%
+3. 兴趣主题匹配：20%
+4. 活跃时间新鲜度：10%
+5. Fork：5%
+
+同时排序时增加明确的兜底顺序：
+
+```text
+score -> star_growth -> stargazers_count
+```
+
+这样新增 Star 会成为判断“本周最火爆”的主要依据。
+
+### 3. 链接显示调整
+
+周报中的 GitHub 链接统一显示为完整 URL，并保持可点击：
+
+```text
+[https://github.com/owner/repo](https://github.com/owner/repo)
+```
+
+报告清洗逻辑也会把模型生成的短文本链接：
+
+```text
+[GitHub](https://github.com/owner/repo)
+```
+
+转换为完整 URL 文本链接。
+
+### 4. 本地验证
+
+已补充测试，覆盖：
+
+1. 新增 Star 对排序的优先影响。
+2. 原始 GitHub URL 转换为完整 URL 文本链接。
+3. `[GitHub](...)` 链接转换为完整 URL 文本链接。
+
+已执行：
+
+```text
+py -m unittest
+py -m compileall main.py src tests scripts
+```
+
+验证结果：通过。
+
+### 5. 当前页面重新生成
+
+已重新执行：
+
+```text
+py main.py
+py scripts/build_pages.py
+```
+
+当前 `2026-04-28` 周报已按新增 Star 高权重重新排序，前两项为：
+
+1. `NousResearch/hermes-agent`，新增 Star 25。
+2. `affaan-m/everything-claude-code`，新增 Star 10。
+
+报告和 Pages 页面中的链接均显示完整 URL。

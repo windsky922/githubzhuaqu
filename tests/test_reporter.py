@@ -53,26 +53,33 @@ class ReporterTest(unittest.TestCase):
 
         self.assertEqual(_extract_content(data), "正文")
 
-    def test_normalizes_language_and_github_table_links(self):
+    def test_normalizes_language_and_github_table_links_with_full_url_text(self):
         report = "| 项目 | 主要语言 | 链接 |\n| demo | 蟒蛇 | https://github.com/a/b |"
 
         result = normalize_report_markdown(report)
 
-        self.assertIn("| demo | Python | [GitHub](https://github.com/a/b) |", result)
+        self.assertIn("| demo | Python | [https://github.com/a/b](https://github.com/a/b) |", result)
 
     def test_normalizes_standalone_github_links(self):
         report = "https://github.com/a/b"
 
         result = normalize_report_markdown(report)
 
-        self.assertEqual(result.strip(), "[GitHub](https://github.com/a/b)")
+        self.assertEqual(result.strip(), "[https://github.com/a/b](https://github.com/a/b)")
 
     def test_keeps_existing_markdown_github_links(self):
+        report = "[https://github.com/a/b](https://github.com/a/b)"
+
+        result = normalize_report_markdown(report)
+
+        self.assertEqual(result.strip(), "[https://github.com/a/b](https://github.com/a/b)")
+
+    def test_rewrites_short_github_link_text_to_full_url(self):
         report = "[GitHub](https://github.com/a/b)"
 
         result = normalize_report_markdown(report)
 
-        self.assertEqual(result.strip(), "[GitHub](https://github.com/a/b)")
+        self.assertEqual(result.strip(), "[https://github.com/a/b](https://github.com/a/b)")
 
 
 if __name__ == "__main__":

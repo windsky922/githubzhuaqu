@@ -94,6 +94,31 @@ class ProcessorTest(unittest.TestCase):
         self.assertEqual(result[0].full_name, "b/growing")
         self.assertEqual(result[0].star_growth, 60)
 
+    def test_star_growth_is_primary_hotness_signal(self):
+        settings = Settings(
+            root=None,
+            run_date="2026-04-27",
+            since_date="2026-04-20",
+            days_back=7,
+            min_stars=20,
+            max_projects=2,
+            github_token="",
+            kimi_api_key="",
+            kimi_base_url="",
+            kimi_model="",
+            telegram_bot_token="",
+            telegram_chat_id="",
+            interests={"preferred_topics": [], "preferred_languages": [], "exclude_keywords": []},
+        )
+        items = [
+            repo("a/huge-stable", 10000, topics=[]),
+            repo("b/smaller-growing", 1000, topics=[]),
+        ]
+
+        result = process_repositories(items, settings, {"a/huge-stable": 10000, "b/smaller-growing": 100})
+
+        self.assertEqual(result[0].full_name, "b/smaller-growing")
+
     def test_keeps_old_project_when_active_this_week(self):
         settings = Settings(
             root=None,
