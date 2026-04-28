@@ -1,0 +1,22 @@
+{
+  "run_date": "2026-04-28",
+  "status": "success",
+  "queries": [
+    "created:>=2026-04-21 stars:>20",
+    "topic:ai created:>=2026-04-21 stars:>20",
+    "topic:agent created:>=2026-04-21 stars:>10",
+    "topic:llm created:>=2026-04-21 stars:>10",
+    "language:Python created:>=2026-04-21 stars:>20",
+    "language:TypeScript created:>=2026-04-21 stars:>20",
+    "pushed:>=2026-04-21 stars:>100"
+  ],
+  "collected_count": 165,
+  "selected_count": 10,
+  "report_path": "reports/2026-04-28.md",
+  "run_summary_path": "data/runs/2026-04-28.json",
+  "kimi_used": false,
+  "fallback_used": true,
+  "telegram_sent": true,
+  "telegram_error": "",
+  "error": ""
+}
