@@ -52,8 +52,10 @@ class RunSummary:
     queries: list[str] = field(default_factory=list)
     collected_count: int = 0
     selected_count: int = 0
+    skipped_sent_count: int = 0
     report_path: str = ""
     run_summary_path: str = ""
+    state_path: str = ""
     kimi_used: bool = False
     fallback_used: bool = False
     report_error: str = ""

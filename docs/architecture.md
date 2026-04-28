@@ -8,10 +8,12 @@
 main.py
 -> src.settings.load_settings
 -> src.collector.collect_repositories
+-> src.state.load_sent_repository_names
 -> src.processor.process_repositories
 -> src.reporter.generate_report
 -> src.archive.archive_run
 -> src.sender.send_report
+-> src.state.write_sent_repositories
 -> src.archive.write_run_summary
 ```
 
@@ -27,6 +29,7 @@ main.py
 6. Markdown 周报归档到 `reports/`。
 7. 运行摘要归档到 `data/runs/`。
 8. GitHub Actions 支持每周定时运行和手动触发。
+9. Telegram 推送成功后记录已推送仓库，后续运行过滤重复项目。
 
 暂缓实现：
 
@@ -35,3 +38,15 @@ main.py
 3. 网页仪表盘。
 4. 正式发布技能包。
 5. Telegram 交互式机器人。
+
+## 状态文件
+
+`data/state/sent_repos.json` 用于记录已经成功推送到 Telegram 的仓库。
+
+写入时机：
+
+1. 本次运行成功生成周报。
+2. Telegram 推送成功。
+3. 本次筛选列表不为空。
+
+如果 Telegram 未配置或发送失败，程序仍然归档周报和运行摘要，但不会把仓库写入已推送状态，避免后续遗漏应推送项目。

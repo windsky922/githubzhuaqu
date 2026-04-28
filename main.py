@@ -10,6 +10,7 @@ from src.processor import process_repositories
 from src.reporter import generate_report
 from src.sender import send_report
 from src.settings import load_settings
+from src.state import filter_unsent_repositories, load_sent_repository_names, write_sent_repositories
 from src.utils import clean_error, date_range
 
 
@@ -21,7 +22,9 @@ def main() -> int:
 
     try:
         collected, queries = collect_repositories(settings)
-        selected = process_repositories(collected, settings)
+        sent_names = load_sent_repository_names(settings)
+        unsent_collected = filter_unsent_repositories(collected, sent_names)
+        selected = process_repositories(unsent_collected, settings)
         report, fallback_used, report_error = generate_report(selected, queries, settings)
 
         report_path = write_report(report, settings)
@@ -30,6 +33,7 @@ def main() -> int:
         summary.queries = queries
         summary.collected_count = len(collected)
         summary.selected_count = len(selected)
+        summary.skipped_sent_count = len({repo.full_name for repo in collected if repo.full_name in sent_names})
         summary.report_path = report_path.relative_to(settings.root).as_posix()
         summary.fallback_used = fallback_used
         summary.kimi_used = not fallback_used
@@ -38,6 +42,8 @@ def main() -> int:
         sent, send_error = send_report(report, settings)
         summary.telegram_sent = sent
         summary.telegram_error = send_error
+        if sent and selected:
+            summary.state_path = write_sent_repositories(selected, settings)
         summary.status = "success" if selected else "empty"
     except Exception as error:
         summary.status = "failed"

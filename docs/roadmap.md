@@ -11,8 +11,8 @@
 
 ## 第二阶段：增强数据质量
 
-1. 抓取入选仓库的 README 内容。
-2. 在 `data/state/sent_repos.json` 中记录已推送仓库。
+1. 在 `data/state/sent_repos.json` 中记录已推送仓库。已完成。
+2. 抓取入选仓库的 README 内容。
 3. 结合历史 Star 增量优化评分。
 
 ## 第三阶段：产品化输出

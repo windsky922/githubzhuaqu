@@ -353,3 +353,85 @@ https://github.com/windsky922/githubzhuaqu/actions/runs/25031996992
 ### 6. 当前结论
 
 Secrets 配置已经通过完整链路验证。当前项目已具备按周自动抓取 GitHub 热点项目、生成中文周报、推送到 Telegram、归档运行结果并自动提交到 GitHub 的基础能力。
+
+---
+
+## 2026-04-28 追加：第二阶段已推送仓库状态记录
+
+### 1. 开发目的
+
+进入第二阶段数据质量增强后，优先实现最小且必要的历史状态能力，避免同一仓库在后续周报中被重复推送。
+
+### 2. 本次实现
+
+新增模块：
+
+```text
+src/state.py
+```
+
+该模块负责：
+
+1. 读取 `data/state/sent_repos.json`。
+2. 过滤已经成功推送过的仓库。
+3. Telegram 推送成功后写入新的已推送仓库。
+4. 兼容旧的字符串数组格式和新的对象数组格式。
+
+### 3. 主流程变化
+
+新的处理顺序：
+
+```text
+collect_repositories
+-> load_sent_repository_names
+-> filter_unsent_repositories
+-> process_repositories
+-> generate_report
+-> send_report
+-> write_sent_repositories
+```
+
+状态写入条件：
+
+1. Telegram 推送成功。
+2. 本次筛选出的新仓库列表不为空。
+
+如果 Kimi 不可用，仍可使用降级版周报；如果 Telegram 不可用或发送失败，则不会写入已推送状态，避免遗漏后续真实推送。
+
+### 4. 运行摘要变化
+
+`data/runs/YYYY-MM-DD.json` 新增字段：
+
+1. `skipped_sent_count`：本次采集结果中被历史推送状态跳过的仓库数。
+2. `state_path`：本次成功写入的状态文件路径。
+
+### 5. 工作流变化
+
+`.github/workflows/weekly.yml` 的自动提交范围增加：
+
+```text
+data/state
+```
+
+这样 GitHub Actions 生成的已推送状态会和周报、原始数据、运行摘要一起提交回仓库。
+
+### 6. 本地验证
+
+已执行：
+
+```text
+py -m unittest
+py -m compileall main.py src tests
+```
+
+验证结果：通过。
+
+### 7. 初始状态写入
+
+由于 `2026-04-28` 的完整工作流已经确认 Telegram 推送成功，本次同步创建：
+
+```text
+data/state/sent_repos.json
+```
+
+该文件使用 `data/raw/2026-04-28.json` 中的 10 个已推送仓库初始化，避免下一次运行重复推送同一批项目。

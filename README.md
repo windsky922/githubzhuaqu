@@ -2,7 +2,7 @@
 
 用于自动整理每周 GitHub 热点项目，并将中文周报推送到手机端的 Agent 项目规划仓库。
 
-当前已进入第一阶段最小可用版本开发：项目可以搜索 GitHub 热点仓库，生成中文 Markdown 周报，按配置推送到 Telegram，并归档运行摘要。
+当前已完成第一阶段最小可用版本，并开始第二阶段数据质量增强：项目可以搜索 GitHub 热点仓库，生成中文 Markdown 周报，按配置推送到 Telegram，归档运行摘要，并记录已成功推送过的仓库。
 
 ## 当前文档
 
@@ -47,8 +47,9 @@ GitHub 热点项目采集
 5. 将周报推送到 Telegram。
 6. 将周报保存到 `reports/YYYY-MM-DD.md`。
 7. GitHub Actions 自动提交新增周报。
+8. Telegram 推送成功后，将本次仓库记录到 `data/state/sent_repos.json`，后续运行会跳过已推送仓库。
 
-暂不开发 README 深度抓取、历史去重数据库、网页展示和复杂推荐模型。
+暂不开发 README 深度抓取、SQLite 历史数据库、网页展示和复杂推荐模型。
 
 ## 本地运行
 
@@ -80,3 +81,9 @@ python main.py
 | `TELEGRAM_CHAT_ID` | Telegram 接收方 Chat ID |
 
 `GITHUB_TOKEN` 由 GitHub Actions 自动提供，用于把新增周报提交回仓库。
+
+## 状态文件
+
+`data/state/sent_repos.json` 由程序自动生成，用于记录已经成功推送到 Telegram 的仓库。
+
+如果需要重新推送历史项目，可以在确认风险后手动编辑该文件，删除对应仓库记录。不要删除 `reports/` 和 `data/runs/` 中的历史归档。

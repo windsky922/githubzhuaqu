@@ -46,3 +46,11 @@ Actions -> Secrets 配置检查 -> Run workflow
 1. `GH_SEARCH_TOKEN` 是否可以访问 GitHub API。
 2. `KIMI_API_KEY`、`KIMI_BASE_URL`、`KIMI_MODEL` 是否可以访问 Kimi API。
 3. `TELEGRAM_BOT_TOKEN` 和 `TELEGRAM_CHAT_ID` 是否可以发送 Telegram 测试消息。
+
+## 状态文件说明
+
+`data/state/sent_repos.json` 由程序自动生成，用于记录已经成功推送到 Telegram 的仓库。
+
+不需要手动创建该文件。首次成功推送后，GitHub Actions 会把它和周报归档一起提交回仓库。
+
+如果需要重新推送历史项目，可以在确认风险后手动编辑该文件，删除对应仓库记录。不要删除 `reports/` 和 `data/runs/` 中的历史归档。
