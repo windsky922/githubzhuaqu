@@ -2,6 +2,9 @@ name: GitHub 每周热点项目智能体
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/weekly.yml"
   schedule:
     - cron: "0 0 * * 1"
 
