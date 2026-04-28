@@ -14,6 +14,7 @@ class Repository:
     language: str
     created_at: str
     updated_at: str
+    pushed_at: str = ""
     topics: list[str] = field(default_factory=list)
     archived: bool = False
     fork: bool = False
@@ -36,6 +37,7 @@ class Repository:
             language=str(item.get("language") or "Unknown"),
             created_at=str(item.get("created_at") or ""),
             updated_at=str(item.get("updated_at") or ""),
+            pushed_at=str(item.get("pushed_at") or item.get("updated_at") or ""),
             topics=list(item.get("topics") or []),
             archived=bool(item.get("archived") or False),
             fork=bool(item.get("fork") or False),

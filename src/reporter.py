@@ -26,7 +26,7 @@ def fallback_report(repositories: list[Repository], queries: list[str], settings
         "",
     ]
     if repositories:
-        lines.append("本周根据 GitHub Search API 结果生成基础版周报。Kimi API 未启用或调用失败，因此以下分析基于仓库名称、简介、README 摘要、语言、Star 和 Fork 数据。")
+        lines.append("本周根据 GitHub Search API 结果生成降级版周报。以下分析基于仓库名称、简介、README 摘要、语言、Star 和 Fork 数据；具体降级原因记录在本次运行摘要中。")
     else:
         lines.append("本周未发现符合条件的项目，或 GitHub Search API 暂时不可用。")
 

@@ -5,7 +5,17 @@ from src.processor import process_repositories
 from src.settings import Settings
 
 
-def repo(name, stars, description="desc", fork=False, archived=False, topics=None, created_at="2026-04-25T00:00:00Z"):
+def repo(
+    name,
+    stars,
+    description="desc",
+    fork=False,
+    archived=False,
+    topics=None,
+    created_at="2026-04-25T00:00:00Z",
+    updated_at="2026-04-25T00:00:00Z",
+    pushed_at="2026-04-25T00:00:00Z",
+):
     return Repository(
         full_name=name,
         html_url=f"https://github.com/{name}",
@@ -14,7 +24,8 @@ def repo(name, stars, description="desc", fork=False, archived=False, topics=Non
         forks_count=10,
         language="Python",
         created_at=created_at,
-        updated_at="2026-04-25T00:00:00Z",
+        updated_at=updated_at,
+        pushed_at=pushed_at,
         topics=topics or ["agent"],
         fork=fork,
         archived=archived,
@@ -49,7 +60,7 @@ class ProcessorTest(unittest.TestCase):
             repo("c/three", 10),
             repo("d/four", 80, description="mirror repo"),
             repo("e/five", 90),
-            repo("f/old", 200, created_at="2026-04-01T00:00:00Z"),
+            repo("f/inactive", 200, updated_at="2026-04-01T00:00:00Z", pushed_at="2026-04-01T00:00:00Z"),
         ]
 
         result = process_repositories(items, settings)
@@ -82,6 +93,28 @@ class ProcessorTest(unittest.TestCase):
 
         self.assertEqual(result[0].full_name, "b/growing")
         self.assertEqual(result[0].star_growth, 60)
+
+    def test_keeps_old_project_when_active_this_week(self):
+        settings = Settings(
+            root=None,
+            run_date="2026-04-27",
+            since_date="2026-04-20",
+            days_back=7,
+            min_stars=20,
+            max_projects=2,
+            github_token="",
+            kimi_api_key="",
+            kimi_base_url="",
+            kimi_model="",
+            telegram_bot_token="",
+            telegram_chat_id="",
+            interests={"preferred_topics": [], "preferred_languages": [], "exclude_keywords": []},
+        )
+        items = [repo("a/old-active", 100, created_at="2020-01-01T00:00:00Z")]
+
+        result = process_repositories(items, settings)
+
+        self.assertEqual([item.full_name for item in result], ["a/old-active"])
 
 
 if __name__ == "__main__":

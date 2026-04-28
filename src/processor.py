@@ -42,7 +42,7 @@ def _is_usable(repo: Repository, settings: Settings) -> bool:
         return False
     if not repo.description.strip():
         return False
-    if not _created_since(repo.created_at, settings.since_date):
+    if not _active_since(repo, settings.since_date):
         return False
     text = f"{repo.full_name} {repo.description}".lower()
     excluded = settings.interests.get("exclude_keywords", [])
@@ -61,7 +61,7 @@ def _score(repositories: list[Repository], settings: Settings, star_history: dic
         fork_score = repo.forks_count / max_forks if max_forks else 0
         growth_score = repo.star_growth / max_growth if max_growth else 0
         topic_score = _topic_score(repo, settings)
-        freshness_score = _freshness_score(repo.created_at, settings.days_back)
+        freshness_score = _freshness_score(repo.pushed_at or repo.updated_at, settings.days_back)
         repo.category = _category(repo)
         repo.score = round(
             0.35 * star_score
@@ -103,13 +103,14 @@ def _freshness_score(created_at: str, days_back: int) -> float:
     return max(0.0, 1 - age_days / max(days_back, 1))
 
 
-def _created_since(created_at: str, since_date: str) -> bool:
+def _active_since(repo: Repository, since_date: str) -> bool:
+    active_at = repo.pushed_at or repo.updated_at
     try:
-        created = datetime.fromisoformat(created_at.replace("Z", "+00:00")).date()
+        active = datetime.fromisoformat(active_at.replace("Z", "+00:00")).date()
         since = datetime.fromisoformat(since_date).date()
     except ValueError:
         return False
-    return created >= since
+    return active >= since
 
 
 def _category(repo: Repository) -> str:

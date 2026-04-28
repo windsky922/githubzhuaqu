@@ -17,13 +17,14 @@ def build_queries(settings: Settings) -> list[str]:
     since = settings.since_date
     min_stars = settings.min_stars
     return [
-        f"created:>={since} stars:>{min_stars}",
-        f"topic:ai created:>={since} stars:>{min_stars}",
-        f"topic:agent created:>={since} stars:>10",
-        f"topic:llm created:>={since} stars:>10",
-        f"language:Python created:>={since} stars:>{min_stars}",
-        f"language:TypeScript created:>={since} stars:>{min_stars}",
-        f"topic:automation created:>={since} stars:>10",
+        f"pushed:>={since} stars:>{min_stars}",
+        f"topic:ai pushed:>={since} stars:>{min_stars}",
+        f"topic:agent pushed:>={since} stars:>10",
+        f"topic:llm pushed:>={since} stars:>10",
+        f"topic:automation pushed:>={since} stars:>10",
+        f"language:Python pushed:>={since} stars:>{min_stars}",
+        f"language:TypeScript pushed:>={since} stars:>{min_stars}",
+        f"created:>={since} stars:>10",
     ]
 
 

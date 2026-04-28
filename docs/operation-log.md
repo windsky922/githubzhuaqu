@@ -700,3 +700,109 @@ py -m compileall main.py src tests scripts
 ```
 
 验证结果：通过。
+
+---
+
+## 2026-04-28 追加：修正“本周最火爆”定义与 Kimi 降级原因
+
+### 1. 用户纠正
+
+用户指出：项目应当是一周内最火爆的项目，而不是生成时间或创建时间在一周之内的项目。
+
+这是正确的。本项目的采集逻辑应以“最近一周活跃且热度高”为主，不能只看 `created_at`。
+
+### 2. 采集逻辑修正
+
+已将主查询从 `created:>=...` 改为 `pushed:>=...`：
+
+```text
+pushed:>=YYYY-MM-DD stars:>N
+topic:ai pushed:>=YYYY-MM-DD stars:>N
+topic:agent pushed:>=YYYY-MM-DD stars:>10
+topic:llm pushed:>=YYYY-MM-DD stars:>10
+topic:automation pushed:>=YYYY-MM-DD stars:>10
+language:Python pushed:>=YYYY-MM-DD stars:>N
+language:TypeScript pushed:>=YYYY-MM-DD stars:>N
+created:>=YYYY-MM-DD stars:>10
+```
+
+其中 `created` 查询只作为补充，用于捕捉本周新出现且增长较快的项目。
+
+### 3. 过滤逻辑修正
+
+`Repository` 新增字段：
+
+```text
+pushed_at
+```
+
+处理阶段不再要求 `created_at >= since_date`，改为要求：
+
+```text
+pushed_at 或 updated_at >= since_date
+```
+
+这样老项目只要本周仍然活跃且热度高，也可以进入周报。
+
+### 4. Kimi 降级原因判断
+
+本次页面显示“ Kimi API 未启用或调用失败”的直接原因是：为了修正页面，我在本地执行了：
+
+```text
+py main.py
+```
+
+当前本地环境没有配置：
+
+```text
+KIMI_API_KEY
+KIMI_MODEL
+```
+
+因此程序按设计生成降级版 Markdown 周报，并在 `data/runs/2026-04-28.json` 中记录：
+
+```text
+"kimi_used": false
+"fallback_used": true
+"report_error": "Kimi API 未配置"
+```
+
+这不是 GitHub Actions Secrets 失效。之前 GitHub Actions 自动归档提交 `3767552` 中的运行摘要显示：
+
+```text
+"kimi_used": true
+"fallback_used": false
+"telegram_sent": true
+```
+
+说明在 GitHub Actions 环境中，Kimi Secrets 曾经正常生效。
+
+### 5. 当前页面重新生成
+
+已重新执行：
+
+```text
+py main.py
+py scripts/build_pages.py
+```
+
+当前 `2026-04-28` 页面已经按最近一周活跃项目重新生成。由于本地未配置 Kimi 和 Telegram，本次页面为降级版，且不会写入已推送状态。
+
+### 6. 校验结果
+
+已确认：
+
+1. `data/raw/2026-04-28.json` 中所有入选项目的 `pushed_at` 或 `updated_at` 都不早于 `2026-04-21`。
+2. 报告中没有“蟒蛇”。
+3. 热门项目总览中的 GitHub 链接为 Markdown 超链接。
+
+### 7. 本地验证
+
+已执行：
+
+```text
+py -m unittest
+py -m compileall main.py src tests scripts
+```
+
+验证结果：通过。
