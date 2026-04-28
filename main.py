@@ -10,7 +10,13 @@ from src.processor import process_repositories
 from src.reporter import generate_report
 from src.sender import send_report
 from src.settings import load_settings
-from src.state import filter_unsent_repositories, load_sent_repository_names, write_sent_repositories
+from src.state import (
+    filter_unsent_repositories,
+    load_sent_repository_names,
+    load_star_history,
+    write_sent_repositories,
+    write_star_history,
+)
 from src.utils import clean_error, date_range
 
 
@@ -23,20 +29,24 @@ def main() -> int:
     try:
         collected, queries = collect_repositories(settings)
         sent_names = load_sent_repository_names(settings)
+        star_history = load_star_history(settings)
         unsent_collected = filter_unsent_repositories(collected, sent_names)
-        selected = process_repositories(unsent_collected, settings)
+        selected = process_repositories(unsent_collected, settings, star_history)
         readme_fetched_count = enrich_repositories_with_readmes(selected, settings)
         report, fallback_used, report_error = generate_report(selected, queries, settings)
 
         report_path = write_report(report, settings)
         write_raw_repositories(selected, settings)
+        star_history_path, star_history_updated_count = write_star_history(collected, settings)
 
         summary.queries = queries
         summary.collected_count = len(collected)
         summary.selected_count = len(selected)
         summary.skipped_sent_count = len({repo.full_name for repo in collected if repo.full_name in sent_names})
         summary.readme_fetched_count = readme_fetched_count
+        summary.star_history_updated_count = star_history_updated_count
         summary.report_path = report_path.relative_to(settings.root).as_posix()
+        summary.star_history_path = star_history_path
         summary.fallback_used = fallback_used
         summary.kimi_used = not fallback_used
         summary.report_error = report_error

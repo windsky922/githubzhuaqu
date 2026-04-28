@@ -6,7 +6,13 @@ from pathlib import Path
 
 from src.models import Repository
 from src.settings import Settings
-from src.state import filter_unsent_repositories, load_sent_repository_names, write_sent_repositories
+from src.state import (
+    filter_unsent_repositories,
+    load_sent_repository_names,
+    load_star_history,
+    write_sent_repositories,
+    write_star_history,
+)
 
 
 def repo(name):
@@ -72,6 +78,21 @@ class StateTest(unittest.TestCase):
             names = load_sent_repository_names(settings(root))
 
             self.assertEqual(names, {"owner/one"})
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
+    def test_records_and_loads_star_history(self):
+        root = Path.cwd() / f".tmp-state-test-{uuid.uuid4().hex}"
+        try:
+            root.mkdir()
+            current_settings = settings(root)
+
+            path, count = write_star_history([repo("owner/one")], current_settings)
+            history = load_star_history(current_settings)
+
+            self.assertEqual(path, "data/state/star_history.json")
+            self.assertEqual(count, 1)
+            self.assertEqual(history, {"owner/one": 100})
         finally:
             shutil.rmtree(root, ignore_errors=True)
 

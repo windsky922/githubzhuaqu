@@ -20,6 +20,7 @@ class Repository:
     open_issues_count: int = 0
     license_name: str = ""
     readme_excerpt: str = ""
+    star_growth: int = 0
     score: float = 0.0
     category: str = "Other"
 
@@ -55,9 +56,11 @@ class RunSummary:
     selected_count: int = 0
     skipped_sent_count: int = 0
     readme_fetched_count: int = 0
+    star_history_updated_count: int = 0
     report_path: str = ""
     run_summary_path: str = ""
     state_path: str = ""
+    star_history_path: str = ""
     kimi_used: bool = False
     fallback_used: bool = False
     report_error: str = ""

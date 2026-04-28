@@ -492,3 +492,74 @@ py -m compileall main.py src tests
 ```
 
 验证结果：通过。
+
+---
+
+## 2026-04-28 追加：第二阶段 Star 增量评分
+
+### 1. 开发目的
+
+补齐第二阶段数据质量增强中的历史热度能力。单纯按总 Star 排序容易长期偏向大型老项目；加入 Star 增量后，可以更好发现近期增长明显的项目。
+
+### 2. 本次实现
+
+新增状态文件：
+
+```text
+data/state/star_history.json
+```
+
+该文件记录：
+
+1. 仓库完整名称。
+2. 仓库链接。
+3. 最近一次采集到的 Star 数。
+4. 最近一次采集日期。
+
+### 3. 评分变化
+
+`Repository` 新增字段：
+
+```text
+star_growth
+```
+
+计算方式：
+
+```text
+star_growth = 当前 Star - 历史 Star
+```
+
+如果没有历史记录，则增长值为 0。
+
+当前评分权重：
+
+1. 总 Star：35%
+2. Fork：15%
+3. 兴趣主题匹配：25%
+4. Star 增量：15%
+5. 创建时间新鲜度：10%
+
+### 4. 主流程变化
+
+主流程会在处理仓库前读取 Star 历史，在完成本次归档时写入最新 Star 历史。
+
+运行摘要新增字段：
+
+1. `star_history_updated_count`
+2. `star_history_path`
+
+### 5. 初始状态写入
+
+由于 `2026-04-28` 已经有一次成功完整运行，本次使用 `data/raw/2026-04-28.json` 初始化 `data/state/star_history.json`，为下一次运行提供增量基线。
+
+### 6. 本地验证
+
+已执行：
+
+```text
+py -m unittest
+py -m compileall main.py src tests
+```
+
+验证结果：通过。

@@ -34,13 +34,13 @@ def fallback_report(repositories: list[Repository], queries: list[str], settings
             "",
             "## 二、热点项目总览",
             "",
-            "| 序号 | 项目 | 方向 | Star | Fork | 语言 | 链接 |",
-            "|---:|---|---|---:|---:|---|---|",
+            "| 序号 | 项目 | 方向 | Star | 新增 Star | Fork | 语言 | 链接 |",
+            "|---:|---|---|---:|---:|---:|---|---|",
         ]
     )
     for index, repo in enumerate(repositories, start=1):
         lines.append(
-            f"| {index} | {repo.full_name} | {repo.category} | {repo.stargazers_count} | {repo.forks_count} | {repo.language} | [GitHub]({repo.html_url}) |"
+            f"| {index} | {repo.full_name} | {repo.category} | {repo.stargazers_count} | {repo.star_growth} | {repo.forks_count} | {repo.language} | [GitHub]({repo.html_url}) |"
         )
 
     lines.extend(["", "## 三、重点项目分析", ""])
@@ -52,7 +52,7 @@ def fallback_report(repositories: list[Repository], queries: list[str], settings
                 f"- 项目定位：仅根据仓库名称和简介判断，属于 {repo.category} 方向。",
                 f"- 简介：{repo.description}",
                 f"- README 摘要：{repo.readme_excerpt or '未获取到 README 内容。'}",
-                f"- 技术信息：主要语言 {repo.language}，Star {repo.stargazers_count}，Fork {repo.forks_count}。",
+                f"- 技术信息：主要语言 {repo.language}，Star {repo.stargazers_count}，Fork {repo.forks_count}，较上次记录新增 Star {repo.star_growth}。",
                 f"- 学习价值：可作为了解 {repo.category} 相关开源实践的参考。",
                 f"- 原链接：{repo.html_url}",
                 "",

@@ -51,6 +51,8 @@ Actions -> Secrets 配置检查 -> Run workflow
 
 `data/state/sent_repos.json` 由程序自动生成，用于记录已经成功推送到 Telegram 的仓库。
 
+`data/state/star_history.json` 由程序自动生成，用于记录仓库上次采集时的 Star 数，后续运行会据此计算新增 Star 并优化排序。
+
 不需要手动创建该文件。首次成功推送后，GitHub Actions 会把它和周报归档一起提交回仓库。
 
 如果需要重新推送历史项目，可以在确认风险后手动编辑该文件，删除对应仓库记录。不要删除 `reports/` 和 `data/runs/` 中的历史归档。

@@ -2,7 +2,7 @@
 
 用于自动整理每周 GitHub 热点项目，并将中文周报推送到手机端的 Agent 项目规划仓库。
 
-当前已完成第一阶段最小可用版本，并开始第二阶段数据质量增强：项目可以搜索 GitHub 热点仓库，读取入选项目 README 摘要，生成中文 Markdown 周报，按配置推送到 Telegram，归档运行摘要，并记录已成功推送过的仓库。
+当前已完成第一阶段最小可用版本，并开始第二阶段数据质量增强：项目可以搜索 GitHub 热点仓库，读取入选项目 README 摘要，结合历史 Star 增量评分，生成中文 Markdown 周报，按配置推送到 Telegram，归档运行摘要，并记录已成功推送过的仓库。
 
 ## 当前文档
 
@@ -49,6 +49,7 @@ GitHub 热点项目采集
 7. GitHub Actions 自动提交新增周报。
 8. Telegram 推送成功后，将本次仓库记录到 `data/state/sent_repos.json`，后续运行会跳过已推送仓库。
 9. 对最终入选项目抓取 README 摘要，提升周报分析质量。
+10. 在 `data/state/star_history.json` 中记录仓库 Star 历史，用于后续评分时计算新增 Star。
 
 暂不开发 SQLite 历史数据库、网页展示和复杂推荐模型。
 
@@ -86,5 +87,7 @@ python main.py
 ## 状态文件
 
 `data/state/sent_repos.json` 由程序自动生成，用于记录已经成功推送到 Telegram 的仓库。
+
+`data/state/star_history.json` 由程序自动生成，用于记录仓库上次被采集时的 Star 数，后续运行会据此计算新增 Star。
 
 如果需要重新推送历史项目，可以在确认风险后手动编辑该文件，删除对应仓库记录。不要删除 `reports/` 和 `data/runs/` 中的历史归档。

@@ -15,10 +15,14 @@ CATEGORIES = {
 }
 
 
-def process_repositories(repositories: list[Repository], settings: Settings) -> list[Repository]:
+def process_repositories(
+    repositories: list[Repository],
+    settings: Settings,
+    star_history: dict[str, int] | None = None,
+) -> list[Repository]:
     unique = _dedupe(repositories)
     filtered = [repo for repo in unique if _is_usable(repo, settings)]
-    _score(filtered, settings)
+    _score(filtered, settings, star_history or {})
     filtered.sort(key=lambda repo: repo.score, reverse=True)
     return filtered[: settings.max_projects]
 
@@ -43,23 +47,35 @@ def _is_usable(repo: Repository, settings: Settings) -> bool:
     return not any(keyword.lower() in text for keyword in excluded)
 
 
-def _score(repositories: list[Repository], settings: Settings) -> None:
+def _score(repositories: list[Repository], settings: Settings, star_history: dict[str, int]) -> None:
     max_stars = max((repo.stargazers_count for repo in repositories), default=1)
     max_forks = max((repo.forks_count for repo in repositories), default=1)
+    for repo in repositories:
+        repo.star_growth = _star_growth(repo, star_history)
+    max_growth = max((repo.star_growth for repo in repositories), default=0)
 
     for repo in repositories:
         star_score = repo.stargazers_count / max_stars if max_stars else 0
         fork_score = repo.forks_count / max_forks if max_forks else 0
+        growth_score = repo.star_growth / max_growth if max_growth else 0
         topic_score = _topic_score(repo, settings)
         freshness_score = _freshness_score(repo.created_at, settings.days_back)
         repo.category = _category(repo)
         repo.score = round(
-            0.45 * star_score
-            + 0.20 * fork_score
+            0.35 * star_score
+            + 0.15 * fork_score
             + 0.25 * topic_score
+            + 0.15 * growth_score
             + 0.10 * freshness_score,
             4,
         )
+
+
+def _star_growth(repo: Repository, star_history: dict[str, int]) -> int:
+    previous = star_history.get(repo.full_name)
+    if previous is None:
+        return 0
+    return max(0, repo.stargazers_count - previous)
 
 
 def _topic_score(repo: Repository, settings: Settings) -> float:
@@ -91,4 +107,3 @@ def _category(repo: Repository) -> str:
         if any(keyword in text for keyword in keywords):
             return category
     return "Other"
-
