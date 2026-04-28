@@ -22,7 +22,7 @@ def main() -> int:
     try:
         collected, queries = collect_repositories(settings)
         selected = process_repositories(collected, settings)
-        report, fallback_used = generate_report(selected, queries, settings)
+        report, fallback_used, report_error = generate_report(selected, queries, settings)
 
         report_path = write_report(report, settings)
         write_raw_repositories(selected, settings)
@@ -33,6 +33,7 @@ def main() -> int:
         summary.report_path = report_path.relative_to(settings.root).as_posix()
         summary.fallback_used = fallback_used
         summary.kimi_used = not fallback_used
+        summary.report_error = report_error
 
         sent, send_error = send_report(report, settings)
         summary.telegram_sent = sent

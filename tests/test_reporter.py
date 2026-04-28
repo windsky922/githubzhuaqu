@@ -1,7 +1,7 @@
 import unittest
 
 from src.models import Repository
-from src.reporter import fallback_report
+from src.reporter import _extract_content, fallback_report
 from src.settings import Settings
 
 
@@ -43,7 +43,16 @@ class ReporterTest(unittest.TestCase):
         self.assertIn("Star 120", report)
         self.assertIn("created:>=2026-04-20 stars:>20", report)
 
+    def test_extracts_content_from_openai_style_response(self):
+        data = {"choices": [{"message": {"content": "正文"}}]}
+
+        self.assertEqual(_extract_content(data), "正文")
+
+    def test_extracts_content_from_list_response(self):
+        data = {"choices": [{"message": {"content": [{"text": "正文"}]}}]}
+
+        self.assertEqual(_extract_content(data), "正文")
+
 
 if __name__ == "__main__":
     unittest.main()
-

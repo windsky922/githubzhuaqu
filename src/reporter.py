@@ -8,13 +8,13 @@ from .models import Repository
 from .settings import Settings
 
 
-def generate_report(repositories: list[Repository], queries: list[str], settings: Settings) -> tuple[str, bool]:
+def generate_report(repositories: list[Repository], queries: list[str], settings: Settings) -> tuple[str, bool, str]:
     if settings.kimi_api_key and settings.kimi_model:
         try:
-            return _generate_with_kimi(repositories, queries, settings), False
-        except Exception:
-            return fallback_report(repositories, queries, settings), True
-    return fallback_report(repositories, queries, settings), True
+            return _generate_with_kimi(repositories, queries, settings), False, ""
+        except Exception as error:
+            return fallback_report(repositories, queries, settings), True, str(error)
+    return fallback_report(repositories, queries, settings), True, "Kimi API 未配置"
 
 
 def fallback_report(repositories: list[Repository], queries: list[str], settings: Settings) -> str:
@@ -123,7 +123,43 @@ def _generate_with_kimi(repositories: list[Repository], queries: list[str], sett
         body = error.read().decode("utf-8", errors="replace")
         raise RuntimeError(f"Kimi API error {error.code}: {body}") from error
 
-    content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
+    content = _extract_content(data)
     if not content.strip():
-        raise RuntimeError("Kimi API returned empty report")
+        raise RuntimeError(f"Kimi API 返回空报告，响应结构：{_response_shape(data)}")
     return content.strip() + "\n"
+
+
+def _extract_content(data: dict) -> str:
+    choice = (data.get("choices") or [{}])[0]
+    message = choice.get("message") or {}
+    content = message.get("content")
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        parts = []
+        for item in content:
+            if isinstance(item, dict):
+                parts.append(str(item.get("text") or item.get("content") or ""))
+            else:
+                parts.append(str(item))
+        return "\n".join(part for part in parts if part)
+    for key in ("reasoning_content", "text", "output_text"):
+        value = message.get(key) or choice.get(key)
+        if isinstance(value, str) and value.strip():
+            return value
+    return ""
+
+
+def _response_shape(data: dict) -> str:
+    choice = (data.get("choices") or [{}])[0]
+    message = choice.get("message") or {}
+    return json.dumps(
+        {
+            "top_level_keys": sorted(data.keys()),
+            "choice_keys": sorted(choice.keys()),
+            "message_keys": sorted(message.keys()),
+            "finish_reason": choice.get("finish_reason"),
+            "content_type": type(message.get("content")).__name__,
+        },
+        ensure_ascii=False,
+    )

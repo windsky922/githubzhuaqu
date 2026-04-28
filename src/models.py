@@ -56,10 +56,10 @@ class RunSummary:
     run_summary_path: str = ""
     kimi_used: bool = False
     fallback_used: bool = False
+    report_error: str = ""
     telegram_sent: bool = False
     telegram_error: str = ""
     error: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
-
