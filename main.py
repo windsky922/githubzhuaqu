@@ -4,7 +4,7 @@ import sys
 import os
 
 from src.archive import write_raw_repositories, write_report, write_run_summary
-from src.collector import collect_repositories
+from src.collector import collect_repositories, enrich_repositories_with_readmes
 from src.models import RunSummary
 from src.processor import process_repositories
 from src.reporter import generate_report
@@ -25,6 +25,7 @@ def main() -> int:
         sent_names = load_sent_repository_names(settings)
         unsent_collected = filter_unsent_repositories(collected, sent_names)
         selected = process_repositories(unsent_collected, settings)
+        readme_fetched_count = enrich_repositories_with_readmes(selected, settings)
         report, fallback_used, report_error = generate_report(selected, queries, settings)
 
         report_path = write_report(report, settings)
@@ -34,6 +35,7 @@ def main() -> int:
         summary.collected_count = len(collected)
         summary.selected_count = len(selected)
         summary.skipped_sent_count = len({repo.full_name for repo in collected if repo.full_name in sent_names})
+        summary.readme_fetched_count = readme_fetched_count
         summary.report_path = report_path.relative_to(settings.root).as_posix()
         summary.fallback_used = fallback_used
         summary.kimi_used = not fallback_used

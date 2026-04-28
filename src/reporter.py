@@ -25,7 +25,7 @@ def fallback_report(repositories: list[Repository], queries: list[str], settings
         "",
     ]
     if repositories:
-        lines.append("本周根据 GitHub Search API 结果生成基础版周报。Kimi API 未启用或调用失败，因此以下分析仅基于仓库名称、简介、语言、Star 和 Fork 数据。")
+        lines.append("本周根据 GitHub Search API 结果生成基础版周报。Kimi API 未启用或调用失败，因此以下分析基于仓库名称、简介、README 摘要、语言、Star 和 Fork 数据。")
     else:
         lines.append("本周未发现符合条件的项目，或 GitHub Search API 暂时不可用。")
 
@@ -51,6 +51,7 @@ def fallback_report(repositories: list[Repository], queries: list[str], settings
                 "",
                 f"- 项目定位：仅根据仓库名称和简介判断，属于 {repo.category} 方向。",
                 f"- 简介：{repo.description}",
+                f"- README 摘要：{repo.readme_excerpt or '未获取到 README 内容。'}",
                 f"- 技术信息：主要语言 {repo.language}，Star {repo.stargazers_count}，Fork {repo.forks_count}。",
                 f"- 学习价值：可作为了解 {repo.category} 相关开源实践的参考。",
                 f"- 原链接：{repo.html_url}",

@@ -435,3 +435,60 @@ data/state/sent_repos.json
 ```
 
 该文件使用 `data/raw/2026-04-28.json` 中的 10 个已推送仓库初始化，避免下一次运行重复推送同一批项目。
+
+---
+
+## 2026-04-28 追加：第二阶段 README 摘要抓取
+
+### 1. 开发目的
+
+提升周报内容质量。仅依赖仓库名称和简介时，Kimi 对项目定位容易过于粗略；加入 README 摘要后，可以让周报更准确地说明项目用途、特性和学习价值。
+
+### 2. 实现范围
+
+本次实现保持简洁，不增加新依赖，不引入复杂缓存或数据库。
+
+新增能力：
+
+1. 对最终入选周报的仓库抓取 README。
+2. 清洗 README 中的多余空白。
+3. 每个仓库只保留前 2000 个字符作为摘要。
+4. 单个 README 获取失败时跳过，不影响整体运行。
+5. Kimi 提示词要求优先参考 README 摘要。
+6. 降级版周报也会展示 README 摘要。
+
+### 3. 主流程变化
+
+新的处理顺序：
+
+```text
+collect_repositories
+-> load_sent_repository_names
+-> filter_unsent_repositories
+-> process_repositories
+-> enrich_repositories_with_readmes
+-> generate_report
+-> send_report
+-> write_sent_repositories
+```
+
+### 4. 运行摘要变化
+
+`data/runs/YYYY-MM-DD.json` 新增字段：
+
+```text
+readme_fetched_count
+```
+
+该字段记录本次成功获取 README 摘要的入选仓库数量。
+
+### 5. 本地验证
+
+已执行：
+
+```text
+py -m unittest
+py -m compileall main.py src tests
+```
+
+验证结果：通过。

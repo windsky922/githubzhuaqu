@@ -19,6 +19,7 @@ class Repository:
     fork: bool = False
     open_issues_count: int = 0
     license_name: str = ""
+    readme_excerpt: str = ""
     score: float = 0.0
     category: str = "Other"
 
@@ -53,6 +54,7 @@ class RunSummary:
     collected_count: int = 0
     selected_count: int = 0
     skipped_sent_count: int = 0
+    readme_fetched_count: int = 0
     report_path: str = ""
     run_summary_path: str = ""
     state_path: str = ""

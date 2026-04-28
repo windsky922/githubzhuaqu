@@ -10,6 +10,7 @@ main.py
 -> src.collector.collect_repositories
 -> src.state.load_sent_repository_names
 -> src.processor.process_repositories
+-> src.collector.enrich_repositories_with_readmes
 -> src.reporter.generate_report
 -> src.archive.archive_run
 -> src.sender.send_report
@@ -30,14 +31,14 @@ main.py
 7. 运行摘要归档到 `data/runs/`。
 8. GitHub Actions 支持每周定时运行和手动触发。
 9. Telegram 推送成功后记录已推送仓库，后续运行过滤重复项目。
+10. 对最终入选仓库抓取 README 摘要，作为 Kimi 和降级报告的补充上下文。
 
 暂缓实现：
 
-1. README 深度抓取。
-2. SQLite 历史数据库。
-3. 网页仪表盘。
-4. 正式发布技能包。
-5. Telegram 交互式机器人。
+1. SQLite 历史数据库。
+2. 网页仪表盘。
+3. 正式发布技能包。
+4. Telegram 交互式机器人。
 
 ## 状态文件
 
@@ -50,3 +51,14 @@ main.py
 3. 本次筛选列表不为空。
 
 如果 Telegram 未配置或发送失败，程序仍然归档周报和运行摘要，但不会把仓库写入已推送状态，避免后续遗漏应推送项目。
+
+## README 摘要
+
+程序只对最终入选周报的仓库抓取 README，不对全部搜索结果抓取，避免 GitHub API 请求量过大。
+
+处理规则：
+
+1. 使用 GitHub README API 读取仓库默认 README。
+2. 每个请求设置超时。
+3. 单个仓库 README 获取失败时跳过，不影响整体周报。
+4. 只保留前 2000 个字符的清洗后摘要，避免提示词过长。
