@@ -23,7 +23,7 @@ def build_queries(settings: Settings) -> list[str]:
         f"topic:llm created:>={since} stars:>10",
         f"language:Python created:>={since} stars:>{min_stars}",
         f"language:TypeScript created:>={since} stars:>{min_stars}",
-        f"pushed:>={since} stars:>100",
+        f"topic:automation created:>={since} stars:>10",
     ]
 
 

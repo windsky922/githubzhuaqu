@@ -636,3 +636,67 @@ py -m compileall main.py src tests scripts
 ```
 
 验证结果：通过。
+
+---
+
+## 2026-04-28 追加：周报页面内容与链接格式修正
+
+### 1. 用户反馈
+
+用户反馈 GitHub Pages 中生成的周报页面存在以下问题：
+
+1. 需要确保页面内容属于本周范围。
+2. “主要语言”中不能出现“蟒蛇”这类中文直译，应保留 `Python` 等技术语言英文名称。
+3. 热门项目总览中的 GitHub 链接应为可点击超链接。
+4. 修改后需要检查代码是否存在冗余或明显问题。
+
+### 2. 本次修正
+
+采集范围修正：
+
+1. 移除 `pushed:>=...` 查询，避免历史老项目仅因本周更新而进入“本周创建项目”周报。
+2. 在处理阶段增加 `created_at >= since_date` 二次校验，即使 GitHub Search 查询变化，也不会让非本周创建项目进入周报。
+
+报告格式修正：
+
+1. Kimi 输出和降级报告都会经过 `normalize_report_markdown` 清洗。
+2. 将“蟒蛇”统一替换为 `Python`。
+3. 将 GitHub 原始 URL 转为 Markdown 超链接。
+4. 已经是 Markdown 格式的链接不会重复包装。
+5. 降级版周报中的 README 摘要截断展示，避免页面过长影响阅读。
+
+提示词修正：
+
+1. 要求技术语言名称保留官方英文名称。
+2. 要求只分析用户数据提供的本周创建项目。
+3. 要求热点项目总览中的链接列使用 Markdown 超链接格式。
+
+### 3. 当前页面重新生成
+
+已重新执行：
+
+```text
+py main.py
+py scripts/build_pages.py
+```
+
+说明：本地环境没有 Kimi 和 Telegram 密钥，因此本次重新生成的 `2026-04-28` 页面为降级版周报，且不会写入已推送状态。GitHub Actions 后续正式运行时仍会读取仓库 Secrets 并使用 Kimi 与 Telegram。
+
+### 4. 校验结果
+
+已确认：
+
+1. `reports/2026-04-28.md` 和 `docs/weekly/2026-04-28.md` 中没有“蟒蛇”。
+2. 热门项目总览中的 GitHub 链接已为 `[GitHub](...)` Markdown 超链接。
+3. `data/raw/2026-04-28.json` 中所有入选项目的 `created_at` 都不早于 `2026-04-21`。
+
+### 5. 本地验证
+
+已执行：
+
+```text
+py -m unittest
+py -m compileall main.py src tests scripts
+```
+
+验证结果：通过。

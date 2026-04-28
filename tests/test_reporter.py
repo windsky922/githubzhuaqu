@@ -1,7 +1,7 @@
 import unittest
 
 from src.models import Repository
-from src.reporter import _extract_content, fallback_report
+from src.reporter import _extract_content, fallback_report, normalize_report_markdown
 from src.settings import Settings
 
 
@@ -52,6 +52,27 @@ class ReporterTest(unittest.TestCase):
         data = {"choices": [{"message": {"content": [{"text": "正文"}]}}]}
 
         self.assertEqual(_extract_content(data), "正文")
+
+    def test_normalizes_language_and_github_table_links(self):
+        report = "| 项目 | 主要语言 | 链接 |\n| demo | 蟒蛇 | https://github.com/a/b |"
+
+        result = normalize_report_markdown(report)
+
+        self.assertIn("| demo | Python | [GitHub](https://github.com/a/b) |", result)
+
+    def test_normalizes_standalone_github_links(self):
+        report = "https://github.com/a/b"
+
+        result = normalize_report_markdown(report)
+
+        self.assertEqual(result.strip(), "[GitHub](https://github.com/a/b)")
+
+    def test_keeps_existing_markdown_github_links(self):
+        report = "[GitHub](https://github.com/a/b)"
+
+        result = normalize_report_markdown(report)
+
+        self.assertEqual(result.strip(), "[GitHub](https://github.com/a/b)")
 
 
 if __name__ == "__main__":

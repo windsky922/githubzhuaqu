@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import urllib.error
 import urllib.request
 
@@ -11,10 +12,10 @@ from .settings import Settings
 def generate_report(repositories: list[Repository], queries: list[str], settings: Settings) -> tuple[str, bool, str]:
     if settings.kimi_api_key and settings.kimi_model:
         try:
-            return _generate_with_kimi(repositories, queries, settings), False, ""
+            return normalize_report_markdown(_generate_with_kimi(repositories, queries, settings)), False, ""
         except Exception as error:
-            return fallback_report(repositories, queries, settings), True, str(error)
-    return fallback_report(repositories, queries, settings), True, "Kimi API 未配置"
+            return normalize_report_markdown(fallback_report(repositories, queries, settings)), True, str(error)
+    return normalize_report_markdown(fallback_report(repositories, queries, settings)), True, "Kimi API 未配置"
 
 
 def fallback_report(repositories: list[Repository], queries: list[str], settings: Settings) -> str:
@@ -51,10 +52,10 @@ def fallback_report(repositories: list[Repository], queries: list[str], settings
                 "",
                 f"- 项目定位：仅根据仓库名称和简介判断，属于 {repo.category} 方向。",
                 f"- 简介：{repo.description}",
-                f"- README 摘要：{repo.readme_excerpt or '未获取到 README 内容。'}",
+                f"- README 摘要：{_short_text(repo.readme_excerpt) or '未获取到 README 内容。'}",
                 f"- 技术信息：主要语言 {repo.language}，Star {repo.stargazers_count}，Fork {repo.forks_count}，较上次记录新增 Star {repo.star_growth}。",
                 f"- 学习价值：可作为了解 {repo.category} 相关开源实践的参考。",
-                f"- 原链接：{repo.html_url}",
+                f"- 原链接：[GitHub]({repo.html_url})",
                 "",
             ]
         )
@@ -66,7 +67,7 @@ def fallback_report(repositories: list[Repository], queries: list[str], settings
         ]
     )
     for repo in repositories[:3]:
-        lines.append(f"- {repo.full_name}：{repo.html_url}")
+        lines.append(f"- [{repo.full_name}]({repo.html_url})")
 
     lines.extend(
         [
@@ -86,6 +87,28 @@ def fallback_report(repositories: list[Repository], queries: list[str], settings
     )
     lines.extend(f"  - `{query}`" for query in queries)
     return "\n".join(lines).strip() + "\n"
+
+
+def normalize_report_markdown(report: str) -> str:
+    normalized = report.replace("蟒蛇", "Python")
+    lines = [_link_github_urls(line) for line in normalized.splitlines()]
+    return "\n".join(lines).strip() + "\n"
+
+
+def _link_github_urls(line: str) -> str:
+    if "https://github.com/" not in line:
+        return line
+    return re.sub(
+        r"(?<!\]\()https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+",
+        lambda match: f"[GitHub]({match.group(0)})",
+        line,
+    )
+
+
+def _short_text(text: str, limit: int = 320) -> str:
+    if len(text) <= limit:
+        return text
+    return text[:limit].rstrip() + "..."
 
 
 def _generate_with_kimi(repositories: list[Repository], queries: list[str], settings: Settings) -> str:

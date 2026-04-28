@@ -42,6 +42,8 @@ def _is_usable(repo: Repository, settings: Settings) -> bool:
         return False
     if not repo.description.strip():
         return False
+    if not _created_since(repo.created_at, settings.since_date):
+        return False
     text = f"{repo.full_name} {repo.description}".lower()
     excluded = settings.interests.get("exclude_keywords", [])
     return not any(keyword.lower() in text for keyword in excluded)
@@ -99,6 +101,15 @@ def _freshness_score(created_at: str, days_back: int) -> float:
         return 0
     age_days = max(0, (datetime.now(UTC) - created).days)
     return max(0.0, 1 - age_days / max(days_back, 1))
+
+
+def _created_since(created_at: str, since_date: str) -> bool:
+    try:
+        created = datetime.fromisoformat(created_at.replace("Z", "+00:00")).date()
+        since = datetime.fromisoformat(since_date).date()
+    except ValueError:
+        return False
+    return created >= since
 
 
 def _category(repo: Repository) -> str:

@@ -5,7 +5,7 @@ from src.processor import process_repositories
 from src.settings import Settings
 
 
-def repo(name, stars, description="desc", fork=False, archived=False, topics=None):
+def repo(name, stars, description="desc", fork=False, archived=False, topics=None, created_at="2026-04-25T00:00:00Z"):
     return Repository(
         full_name=name,
         html_url=f"https://github.com/{name}",
@@ -13,7 +13,7 @@ def repo(name, stars, description="desc", fork=False, archived=False, topics=Non
         stargazers_count=stars,
         forks_count=10,
         language="Python",
-        created_at="2026-04-25T00:00:00Z",
+        created_at=created_at,
         updated_at="2026-04-25T00:00:00Z",
         topics=topics or ["agent"],
         fork=fork,
@@ -49,6 +49,7 @@ class ProcessorTest(unittest.TestCase):
             repo("c/three", 10),
             repo("d/four", 80, description="mirror repo"),
             repo("e/five", 90),
+            repo("f/old", 200, created_at="2026-04-01T00:00:00Z"),
         ]
 
         result = process_repositories(items, settings)

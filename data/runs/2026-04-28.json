@@ -8,16 +8,21 @@
     "topic:llm created:>=2026-04-21 stars:>10",
     "language:Python created:>=2026-04-21 stars:>20",
     "language:TypeScript created:>=2026-04-21 stars:>20",
-    "pushed:>=2026-04-21 stars:>100"
+    "topic:automation created:>=2026-04-21 stars:>10"
   ],
-  "collected_count": 165,
+  "collected_count": 150,
   "selected_count": 10,
+  "skipped_sent_count": 0,
+  "readme_fetched_count": 10,
+  "star_history_updated_count": 111,
   "report_path": "reports/2026-04-28.md",
   "run_summary_path": "data/runs/2026-04-28.json",
-  "kimi_used": true,
-  "fallback_used": false,
-  "report_error": "",
-  "telegram_sent": true,
-  "telegram_error": "",
+  "state_path": "",
+  "star_history_path": "data/state/star_history.json",
+  "kimi_used": false,
+  "fallback_used": true,
+  "report_error": "Kimi API 未配置",
+  "telegram_sent": false,
+  "telegram_error": "Telegram is not configured",
   "error": ""
 }
