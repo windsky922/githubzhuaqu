@@ -2022,3 +2022,42 @@ tests/test_report_checks.py
 ### 3. 冗余文案修正
 
 降级周报结论文案中仍提到“后续加入 README 深度分析和历史去重”，但这两类能力已经部分实现。本轮改为提醒用户优先查看 Trending 排名靠前、近期增长明显且匹配兴趣的项目，并强调复用前仍需人工审查代码、依赖和许可证。
+
+---
+
+## 2026-04-29 追加：Telegram 改为推送周报链接
+
+### 1. 用户要求
+
+用户希望 Telegram 中直接推送 GitHub Actions 运行后由 Kimi 生成并归档到 GitHub Pages 的周报链接，而不是推送完整 Markdown 正文，方便在手机上阅读。同时需要为后续接入微信、飞书等渠道预留入口。
+
+### 2. 本次实现
+
+更新：
+
+```text
+src/sender.py
+src/settings.py
+tests/test_sender.py
+.env.example
+docs/setup.md
+docs/future-plan.md
+```
+
+具体变化：
+
+1. `send_report` 不再把完整 Markdown 拆分发送到 Telegram。
+2. 新增 `build_report_message`，统一构建短版推送消息。
+3. 新增 `report_url`，用于生成周报公开访问链接。
+4. 新增 `REPORT_BASE_URL` 配置，适配自定义域名、自定义 Pages 路径或未来其他展示入口。
+5. 如果未配置 `REPORT_BASE_URL`，GitHub Actions 中会根据 `GITHUB_REPOSITORY` 自动推导 GitHub Pages 链接。
+
+默认链接格式：
+
+```text
+https://<owner>.github.io/<repo>/weekly/YYYY-MM-DD.md
+```
+
+### 3. 后续渠道预留
+
+当前仍保持 Telegram 单渠道，不提前创建复杂的 `channels` 框架。后续接入微信、飞书时，可以复用 `build_report_message` 和 `report_url`，只新增对应渠道的发送函数即可。

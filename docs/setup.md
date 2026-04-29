@@ -13,10 +13,23 @@
 | `KIMI_TIMEOUT_SECONDS` | 可选 | Kimi 请求超时时间，默认 `120` 秒 |
 | `TELEGRAM_BOT_TOKEN` | 可选 | 启用 Telegram 推送 |
 | `TELEGRAM_CHAT_ID` | 可选 | Telegram 接收方 Chat ID |
+| `REPORT_BASE_URL` | 可选 | 周报公开访问目录，留空时 GitHub Actions 会根据仓库名推导 GitHub Pages 地址 |
 
 如果未配置 Kimi，程序会生成降级版周报。
 
 如果未配置 Telegram，程序仍会归档周报和运行摘要。
+
+Telegram 当前只推送周报链接，不推送完整 Markdown 正文。这个链接指向 GitHub Pages 上的周报页面，也就是 GitHub Actions 运行后由 Kimi 生成并归档的那份周报。默认链接格式为：
+
+```text
+https://<owner>.github.io/<repo>/weekly/YYYY-MM-DD.md
+```
+
+如果你的 Pages 域名或路径不同，可以配置 `REPORT_BASE_URL`，例如：
+
+```text
+REPORT_BASE_URL=https://example.com/weekly
+```
 
 ## 本地运行
 

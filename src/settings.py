@@ -24,6 +24,7 @@ class Settings:
     telegram_bot_token: str
     telegram_chat_id: str
     interests: dict
+    report_base_url: str = ""
 
 
 def _int_env(name: str, default: int) -> int:
@@ -68,4 +69,5 @@ def load_settings(run_date: str, since_date: str) -> Settings:
         telegram_bot_token=os.getenv("TELEGRAM_BOT_TOKEN", ""),
         telegram_chat_id=os.getenv("TELEGRAM_CHAT_ID", ""),
         interests=interests,
+        report_base_url=os.getenv("REPORT_BASE_URL", ""),
     )

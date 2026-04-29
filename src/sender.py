@@ -1,26 +1,55 @@
 from __future__ import annotations
 
 import json
+import os
 import urllib.error
 import urllib.parse
 import urllib.request
 
 from .settings import Settings
-from .utils import chunk_text
 
 
 def send_report(report: str, settings: Settings) -> tuple[bool, str]:
     if not settings.telegram_bot_token or not settings.telegram_chat_id:
         return False, "Telegram is not configured"
+    message = build_report_message(settings)
+    if not message:
+        return False, "Report URL is not configured"
 
-    chunks = chunk_text(report, limit=3500)
-    for index, chunk in enumerate(chunks, start=1):
-        prefix = f"GitHub 每周热点项目周报 ({index}/{len(chunks)})\n\n" if len(chunks) > 1 else ""
-        try:
-            _send_message(prefix + chunk, settings)
-        except Exception as error:
-            return False, str(error)
+    try:
+        _send_message(message, settings)
+    except Exception as error:
+        return False, str(error)
     return True, ""
+
+
+def build_report_message(settings: Settings) -> str:
+    url = report_url(settings)
+    if not url:
+        return ""
+    return "\n".join(
+        [
+            f"GitHub 每周热点项目周报 - {settings.run_date}",
+            "",
+            f"阅读链接：{url}",
+        ]
+    )
+
+
+def report_url(settings: Settings) -> str:
+    base_url = settings.report_base_url.strip().rstrip("/")
+    if not base_url:
+        repository = _github_repository()
+        if not repository:
+            return ""
+        owner, name = repository.split("/", 1)
+        base_url = f"https://{owner}.github.io/{name}/weekly"
+    return f"{base_url}/{settings.run_date}.md"
+
+
+def _github_repository() -> str:
+    value = os.getenv("GITHUB_REPOSITORY", "")
+    return value if "/" in value else ""
 
 
 def _send_message(text: str, settings: Settings) -> None:
@@ -29,7 +58,6 @@ def _send_message(text: str, settings: Settings) -> None:
         {
             "chat_id": settings.telegram_chat_id,
             "text": text,
-            "disable_web_page_preview": "true",
         }
     ).encode("utf-8")
     request = urllib.request.Request(url, data=payload, method="POST")
@@ -41,4 +69,3 @@ def _send_message(text: str, settings: Settings) -> None:
         raise RuntimeError(f"Telegram API error {error.code}: {body}") from error
     if not data.get("ok"):
         raise RuntimeError(f"Telegram API returned failure: {data}")
-
