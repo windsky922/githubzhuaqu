@@ -1199,3 +1199,54 @@ docs/setup.md
 ### 3. 处理结论
 
 本次不把 `config/interests.json` 加入 `.gitignore`。原因是该文件不是密钥文件，并且 GitHub Actions 需要从仓库读取它才能使用自定义偏好。
+
+---
+
+## 2026-04-29 追加：GitHub Actions 真实运行复测
+
+### 1. 复测结果
+
+已通过 GitHub CLI 手动触发每周周报工作流：
+
+```text
+https://github.com/windsky922/githubzhuaqu/actions/runs/25087537033
+```
+
+运行结论：成功。
+
+关键结果：
+
+1. `collected_count`: 210
+2. `selected_count`: 10
+3. `collector_errors`: []
+4. `readme_fetched_count`: 10
+5. `telegram_sent`: true
+6. `raw_repositories_path`: `data/raw/2026-04-29.json`
+7. `selected_repositories_path`: `data/selected/2026-04-29.json`
+8. `trend_summary_path`: `data/trends/2026-04-29.json`
+
+### 2. 发现的问题
+
+本次 Kimi 调用超时，运行摘要记录：
+
+```text
+"report_error": "The read operation timed out"
+```
+
+因此本次周报使用降级模板生成，但主流程、Telegram 推送和归档均成功。
+
+### 3. 修复动作
+
+已将 Kimi 请求超时时间从固定 60 秒调整为可配置项：
+
+```text
+KIMI_TIMEOUT_SECONDS
+```
+
+默认值为：
+
+```text
+120
+```
+
+同时更新 `.env.example` 和 `docs/setup.md`。

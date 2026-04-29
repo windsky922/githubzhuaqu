@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import urllib.error
 import urllib.request
@@ -174,7 +175,7 @@ def _generate_with_kimi(
         method="POST",
     )
     try:
-        with urllib.request.urlopen(request, timeout=60) as response:
+        with urllib.request.urlopen(request, timeout=_kimi_timeout_seconds()) as response:
             data = json.loads(response.read().decode("utf-8"))
     except urllib.error.HTTPError as error:
         body = error.read().decode("utf-8", errors="replace")
@@ -184,6 +185,13 @@ def _generate_with_kimi(
     if not content.strip():
         raise RuntimeError(f"Kimi API 返回空报告，响应结构：{_response_shape(data)}")
     return content.strip() + "\n"
+
+
+def _kimi_timeout_seconds() -> int:
+    try:
+        return int(os.getenv("KIMI_TIMEOUT_SECONDS", "120"))
+    except ValueError:
+        return 120
 
 
 def _extract_content(data: dict) -> str:

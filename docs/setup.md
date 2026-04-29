@@ -10,6 +10,7 @@
 | `KIMI_API_KEY` | 可选 | 启用模型生成周报 |
 | `KIMI_BASE_URL` | 可选 | 默认值为 `https://api.moonshot.cn/v1` |
 | `KIMI_MODEL` | 可选 | 配合 `KIMI_API_KEY` 使用，指定 Kimi 模型 |
+| `KIMI_TIMEOUT_SECONDS` | 可选 | Kimi 请求超时时间，默认 `120` 秒 |
 | `TELEGRAM_BOT_TOKEN` | 可选 | 启用 Telegram 推送 |
 | `TELEGRAM_CHAT_ID` | 可选 | Telegram 接收方 Chat ID |
 
