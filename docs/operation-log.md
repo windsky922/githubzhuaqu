@@ -2103,3 +2103,27 @@ docs/future-plan.md
 ### 4. 设计边界
 
 该规则只保护 Trending 周榜前 10，不取消其他 Search API 辅助项目。周报剩余名额仍按综合评分补齐，继续保留垂直方向和个性化调整空间。
+
+---
+
+## 2026-04-29 追加：Pages 历史项目索引提交范围修复
+
+### 1. 问题来源
+
+复核 workflow 时发现，`scripts/build_pages.py` 会生成：
+
+```text
+docs/projects.md
+```
+
+但 `.github/workflows/weekly.yml` 的自动提交范围只包含 `docs/index.md` 和 `docs/weekly`，没有包含 `docs/projects.md`。这会导致 GitHub Actions 运行后，历史项目索引可能没有随最新数据一起提交。
+
+### 2. 本次修复
+
+更新：
+
+```text
+.github/workflows/weekly.yml
+```
+
+将 `docs/projects.md` 加入自动提交范围，确保每次周报生成后，GitHub Pages 首页、周报页面和历史项目索引都能同步刷新。
