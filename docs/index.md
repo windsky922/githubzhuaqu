@@ -9,21 +9,22 @@
 ## 最新运行摘要
 
 - 入选项目：10 个
-- 采集候选：224 个
-- 生成方式：Kimi
+- 采集候选：223 个
+- 生成方式：降级模板
 - Telegram：已推送
-- 采集错误：7 条
+- 采集错误：0 条
 
 ## 最新趋势要点
 
-- AI Agent 是本期最集中的方向，共 6 个项目。
-- Python 是本期出现最多的主要语言，共 5 个项目。
-- 本期入选项目累计新增 Star 39。
-- coleam00/Archon 是本期新增 Star 最高的项目，新增 12。
+- AI Agent 是本期最集中的方向，共 5 个项目。
+- Python 是本期出现最多的主要语言，共 4 个项目。
+- 本期入选项目累计新增 Star 293。
+- huggingface/ml-intern 是本期 GitHub Trending 排名最高的项目，周榜排名 2。
+- CJackHwang/ds2api 是本期新增 Star 最高的项目，新增 131。
 
 ## 全部周报
 
-- [2026-04-29](weekly/2026-04-29.md)：10 个项目，Kimi，Telegram 已推送，主语言 Python，主方向 AI Agent，新增 Star 39
+- [2026-04-29](weekly/2026-04-29.md)：10 个项目，降级模板，Telegram 已推送，主语言 Python，主方向 AI Agent，新增 Star 293，Trending 项目 3
 - [2026-04-28](weekly/2026-04-28.md)：10 个项目，降级模板，Telegram 未推送，主语言 Python，主方向 AI Agent，新增 Star 32
 
 ## 项目文档

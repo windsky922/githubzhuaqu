@@ -1,80 +1,128 @@
 {
   "total_projects": 10,
-  "total_star_growth": 39,
+  "trending_project_count": 3,
+  "total_star_growth": 293,
   "top_languages": [
     {
       "name": "Python",
-      "count": 5
-    },
-    {
-      "name": "TypeScript",
       "count": 4
     },
     {
-      "name": "Shell",
+      "name": "TypeScript",
+      "count": 2
+    },
+    {
+      "name": "Go",
+      "count": 1
+    },
+    {
+      "name": "JavaScript",
+      "count": 1
+    },
+    {
+      "name": "Java",
+      "count": 1
+    },
+    {
+      "name": "MDX",
       "count": 1
     }
   ],
   "top_categories": [
     {
       "name": "AI Agent",
-      "count": 6
+      "count": 5
     },
     {
       "name": "LLM Tooling",
-      "count": 3
+      "count": 2
+    },
+    {
+      "name": "Machine Learning",
+      "count": 1
+    },
+    {
+      "name": "Other",
+      "count": 1
     },
     {
       "name": "Developer Tools",
       "count": 1
     }
   ],
-  "top_star_growth": [
+  "top_trending": [
     {
-      "full_name": "coleam00/Archon",
-      "html_url": "https://github.com/coleam00/Archon",
-      "star_growth": 12,
-      "stargazers_count": 20074,
-      "language": "TypeScript",
-      "category": "AI Agent"
+      "full_name": "huggingface/ml-intern",
+      "html_url": "https://github.com/huggingface/ml-intern",
+      "trending_rank": 2,
+      "stargazers_count": 7374,
+      "language": "Python",
+      "category": "Machine Learning"
     },
     {
-      "full_name": "Yeachan-Heo/oh-my-claudecode",
-      "html_url": "https://github.com/Yeachan-Heo/oh-my-claudecode",
-      "star_growth": 11,
-      "stargazers_count": 31853,
-      "language": "TypeScript",
-      "category": "AI Agent"
-    },
-    {
-      "full_name": "upstash/context7",
-      "html_url": "https://github.com/upstash/context7",
-      "star_growth": 8,
-      "stargazers_count": 54044,
-      "language": "TypeScript",
+      "full_name": "CJackHwang/ds2api",
+      "html_url": "https://github.com/CJackHwang/ds2api",
+      "trending_rank": 8,
+      "stargazers_count": 2620,
+      "language": "Go",
       "category": "LLM Tooling"
     },
     {
-      "full_name": "docling-project/docling",
-      "html_url": "https://github.com/docling-project/docling",
-      "star_growth": 5,
-      "stargazers_count": 58754,
-      "language": "Python",
-      "category": "Developer Tools"
+      "full_name": "Anil-matcha/Open-Generative-AI",
+      "html_url": "https://github.com/Anil-matcha/Open-Generative-AI",
+      "trending_rank": 10,
+      "stargazers_count": 10023,
+      "language": "JavaScript",
+      "category": "Other"
+    }
+  ],
+  "top_star_growth": [
+    {
+      "full_name": "CJackHwang/ds2api",
+      "html_url": "https://github.com/CJackHwang/ds2api",
+      "star_growth": 131,
+      "stargazers_count": 2620,
+      "language": "Go",
+      "category": "LLM Tooling"
     },
     {
-      "full_name": "oraios/serena",
-      "html_url": "https://github.com/oraios/serena",
-      "star_growth": 3,
-      "stargazers_count": 23564,
+      "full_name": "Anil-matcha/Open-Generative-AI",
+      "html_url": "https://github.com/Anil-matcha/Open-Generative-AI",
+      "star_growth": 129,
+      "stargazers_count": 10023,
+      "language": "JavaScript",
+      "category": "Other"
+    },
+    {
+      "full_name": "apache/airflow",
+      "html_url": "https://github.com/apache/airflow",
+      "star_growth": 7,
+      "stargazers_count": 45236,
       "language": "Python",
+      "category": "AI Agent"
+    },
+    {
+      "full_name": "ray-project/ray",
+      "html_url": "https://github.com/ray-project/ray",
+      "star_growth": 7,
+      "stargazers_count": 42366,
+      "language": "Python",
+      "category": "LLM Tooling"
+    },
+    {
+      "full_name": "CopilotKit/CopilotKit",
+      "html_url": "https://github.com/CopilotKit/CopilotKit",
+      "star_growth": 7,
+      "stargazers_count": 30507,
+      "language": "TypeScript",
       "category": "AI Agent"
     }
   ],
   "summary_points": [
-    "AI Agent 是本期最集中的方向，共 6 个项目。",
-    "Python 是本期出现最多的主要语言，共 5 个项目。",
-    "本期入选项目累计新增 Star 39。",
-    "coleam00/Archon 是本期新增 Star 最高的项目，新增 12。"
+    "AI Agent 是本期最集中的方向，共 5 个项目。",
+    "Python 是本期出现最多的主要语言，共 4 个项目。",
+    "本期入选项目累计新增 Star 293。",
+    "huggingface/ml-intern 是本期 GitHub Trending 排名最高的项目，周榜排名 2。",
+    "CJackHwang/ds2api 是本期新增 Star 最高的项目，新增 131。"
   ]
 }

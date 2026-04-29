@@ -11,25 +11,17 @@
     "language:Python pushed:>=2026-04-22 stars:>20",
     "language:TypeScript pushed:>=2026-04-22 stars:>20"
   ],
-  "collected_count": 224,
+  "collected_count": 223,
   "selected_count": 10,
-  "skipped_sent_count": 60,
-  "collector_errors": [
-    "GitHub Trending weekly sponsors/explore: GitHub API error 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/repos#get-a-repository\",\"status\":\"404\"}",
-    "GitHub Trending weekly apps/dependabot: GitHub API error 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/repos#get-a-repository\",\"status\":\"404\"}",
-    "GitHub Trending weekly sponsors/mattpocock: GitHub API error 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/repos#get-a-repository\",\"status\":\"404\"}",
-    "GitHub Trending weekly sponsors/Fincept-Corporation: GitHub API error 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/repos#get-a-repository\",\"status\":\"404\"}",
-    "GitHub Trending weekly apps/github-actions: GitHub API error 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/repos#get-a-repository\",\"status\":\"404\"}",
-    "GitHub Trending weekly sponsors/GyulyVGC: GitHub API error 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/repos#get-a-repository\",\"status\":\"404\"}",
-    "GitHub Trending weekly apps/allcontributors: GitHub API error 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/repos#get-a-repository\",\"status\":\"404\"}"
-  ],
+  "skipped_sent_count": 70,
+  "collector_errors": [],
   "collector_stats": [
     {
       "source": "github_trending",
       "query": "GitHub Trending weekly",
-      "status": "partial",
-      "count": 14,
-      "error": "sponsors/explore: GitHub API error 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/repos#get-a-repository\",\"status\":\"404\"}; apps/dependabot: GitHub API error 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/repos#get-a-repository\",\"status\":\"404\"}; sponsors/mattpocock: GitHub API error 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/repos#get-a-repository\",\"status\":\"404\"}"
+      "status": "success",
+      "count": 13,
+      "error": ""
     },
     {
       "source": "github_search",
@@ -90,9 +82,9 @@
   "state_path": "data/state/sent_repos.json",
   "star_history_path": "data/state/star_history.json",
   "trend_summary_path": "data/trends/2026-04-29.json",
-  "kimi_used": true,
-  "fallback_used": false,
-  "report_error": "",
+  "kimi_used": false,
+  "fallback_used": true,
+  "report_error": "Kimi 周报质量检查失败：报告缺少项目来源：apache/airflow GitHub Search；报告缺少项目来源：ray-project/ray GitHub Search；报告缺少项目来源：CopilotKit/CopilotKit GitHub Search；报告缺少项目来源：1Panel-dev/MaxKB GitHub Search；报告缺少项目来源：alibaba/nacos GitHub Search",
   "telegram_sent": true,
   "telegram_error": "",
   "error": ""

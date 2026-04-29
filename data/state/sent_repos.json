@@ -1,5 +1,10 @@
 [
   {
+    "full_name": "1Panel-dev/MaxKB",
+    "html_url": "https://github.com/1Panel-dev/MaxKB",
+    "first_sent_at": "2026-04-29"
+  },
+  {
     "full_name": "521xueweihan/HelloGitHub",
     "html_url": "https://github.com/521xueweihan/HelloGitHub",
     "first_sent_at": "2026-04-29"
@@ -15,8 +20,18 @@
     "first_sent_at": "2026-04-29"
   },
   {
+    "full_name": "alibaba/nacos",
+    "html_url": "https://github.com/alibaba/nacos",
+    "first_sent_at": "2026-04-29"
+  },
+  {
     "full_name": "Alishahryar1/free-claude-code",
     "html_url": "https://github.com/Alishahryar1/free-claude-code",
+    "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "Anil-matcha/Open-Generative-AI",
+    "html_url": "https://github.com/Anil-matcha/Open-Generative-AI",
     "first_sent_at": "2026-04-29"
   },
   {
@@ -27,6 +42,11 @@
   {
     "full_name": "anthropics/skills",
     "html_url": "https://github.com/anthropics/skills",
+    "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "apache/airflow",
+    "html_url": "https://github.com/apache/airflow",
     "first_sent_at": "2026-04-29"
   },
   {
@@ -52,6 +72,11 @@
   {
     "full_name": "bytedance/deer-flow",
     "html_url": "https://github.com/bytedance/deer-flow",
+    "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "CJackHwang/ds2api",
+    "html_url": "https://github.com/CJackHwang/ds2api",
     "first_sent_at": "2026-04-29"
   },
   {
@@ -85,6 +110,11 @@
     "first_sent_at": "2026-04-29"
   },
   {
+    "full_name": "CopilotKit/CopilotKit",
+    "html_url": "https://github.com/CopilotKit/CopilotKit",
+    "first_sent_at": "2026-04-29"
+  },
+  {
     "full_name": "D4Vinci/Scrapling",
     "html_url": "https://github.com/D4Vinci/Scrapling",
     "first_sent_at": "2026-04-29"
@@ -92,6 +122,11 @@
   {
     "full_name": "datawhalechina/hello-agents",
     "html_url": "https://github.com/datawhalechina/hello-agents",
+    "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "deepset-ai/haystack",
+    "html_url": "https://github.com/deepset-ai/haystack",
     "first_sent_at": "2026-04-29"
   },
   {
@@ -170,6 +205,11 @@
     "first_sent_at": "2026-04-29"
   },
   {
+    "full_name": "huggingface/ml-intern",
+    "html_url": "https://github.com/huggingface/ml-intern",
+    "first_sent_at": "2026-04-29"
+  },
+  {
     "full_name": "huggingface/transformers",
     "html_url": "https://github.com/huggingface/transformers",
     "first_sent_at": "2026-04-28"
@@ -187,6 +227,11 @@
   {
     "full_name": "langgenius/dify",
     "html_url": "https://github.com/langgenius/dify",
+    "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "leon-ai/leon",
+    "html_url": "https://github.com/leon-ai/leon",
     "first_sent_at": "2026-04-29"
   },
   {
@@ -262,6 +307,11 @@
   {
     "full_name": "oraios/serena",
     "html_url": "https://github.com/oraios/serena",
+    "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "ray-project/ray",
+    "html_url": "https://github.com/ray-project/ray",
     "first_sent_at": "2026-04-29"
   },
   {
