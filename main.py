@@ -68,11 +68,15 @@ def main() -> int:
         summary.kimi_used = not fallback_used
         summary.report_error = report_error
 
-        sent, send_error = send_report(report, settings)
-        summary.telegram_sent = sent
-        summary.telegram_error = send_error
-        if sent and selected:
-            summary.state_path = write_sent_repositories(selected, settings)
+        if _skip_telegram_send():
+            summary.telegram_sent = False
+            summary.telegram_error = "Telegram send skipped"
+        else:
+            sent, send_error = send_report(report, settings)
+            summary.telegram_sent = sent
+            summary.telegram_error = send_error
+            if sent and selected:
+                summary.state_path = write_sent_repositories(selected, settings)
         summary.status = "success" if selected else "empty"
     except Exception as error:
         summary.status = "failed"
@@ -103,6 +107,10 @@ def _days_back() -> int:
         return int(os.getenv("DAYS_BACK", "7"))
     except ValueError:
         return 7
+
+
+def _skip_telegram_send() -> bool:
+    return os.getenv("SKIP_TELEGRAM_SEND", "").lower() in {"1", "true", "yes"}
 
 
 if __name__ == "__main__":

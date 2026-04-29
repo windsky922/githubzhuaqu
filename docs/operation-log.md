@@ -2127,3 +2127,38 @@ docs/projects.md
 ```
 
 将 `docs/projects.md` 加入自动提交范围，确保每次周报生成后，GitHub Pages 首页、周报页面和历史项目索引都能同步刷新。
+
+---
+
+## 2026-04-29 追加：Telegram 链接发送顺序调整
+
+### 1. 问题来源
+
+Telegram 已经改为推送 GitHub Pages 周报链接，但原流程是在 `main.py` 内生成报告后立即发送 Telegram。此时 `scripts/build_pages.py` 还没有生成 `docs/weekly/YYYY-MM-DD.md`，GitHub Actions 也还没有把页面提交到仓库，因此用户点击链接时可能遇到页面尚未发布的问题。
+
+### 2. 本次调整
+
+更新：
+
+```text
+main.py
+scripts/send_report_link.py
+.github/workflows/weekly.yml
+tests/test_send_report_link.py
+```
+
+新的 Actions 顺序：
+
+```text
+python main.py（跳过 Telegram）
+python scripts/build_pages.py
+提交 reports/data/docs 归档
+python scripts/send_report_link.py（发送 Pages 链接）
+提交 data/runs 和 data/state 中的推送状态
+```
+
+### 3. 设计边界
+
+1. 本地运行 `python main.py` 默认仍可直接尝试发送 Telegram，保持兼容。
+2. GitHub Actions 中通过 `SKIP_TELEGRAM_SEND=true` 跳过主流程内发送，改由归档提交后的独立脚本发送。
+3. 如果 Telegram 未配置或发送失败，脚本会记录状态，但不阻断已经完成的周报归档。

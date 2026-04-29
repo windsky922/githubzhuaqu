@@ -42,6 +42,7 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           REPORT_BASE_URL: ${{ vars.REPORT_BASE_URL || secrets.REPORT_BASE_URL }}
+          SKIP_TELEGRAM_SEND: "true"
         run: python main.py
 
       - name: 生成周报归档页面
@@ -56,5 +57,24 @@ jobs:
             echo "没有需要提交的归档变更。"
           else
             git commit -m "chore: archive weekly github report [skip ci]"
+            git push
+          fi
+
+      - name: 推送周报链接到 Telegram
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          REPORT_BASE_URL: ${{ vars.REPORT_BASE_URL || secrets.REPORT_BASE_URL }}
+        run: python scripts/send_report_link.py
+
+      - name: 提交推送状态
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/runs data/state
+          if git diff --cached --quiet; then
+            echo "没有需要提交的推送状态变更。"
+          else
+            git commit -m "chore: record telegram delivery [skip ci]"
             git push
           fi
