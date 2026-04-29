@@ -118,15 +118,54 @@ class ReporterTest(unittest.TestCase):
 
         with patch(
             "src.reporter._generate_with_kimi",
-            side_effect=[RuntimeError("content_filter high risk"), "Kimi 正文"],
+            side_effect=[
+                RuntimeError("content_filter high risk"),
+                "owner/project [https://github.com/owner/project](https://github.com/owner/project)",
+            ],
         ) as generate:
             report, fallback_used, report_error = generate_report(repositories, [], settings, {})
 
-        self.assertEqual(report.strip(), "Kimi 正文")
+        self.assertIn("owner/project", report)
         self.assertFalse(fallback_used)
         self.assertEqual(report_error, "")
         self.assertEqual(generate.call_count, 2)
         self.assertFalse(generate.call_args_list[1].kwargs["include_readme"])
+
+    def test_falls_back_when_kimi_report_fails_quality_check(self):
+        settings = Settings(
+            root=None,
+            run_date="2026-04-27",
+            since_date="2026-04-20",
+            days_back=7,
+            min_stars=20,
+            max_projects=10,
+            github_token="",
+            kimi_api_key="key",
+            kimi_base_url="https://api.example.com/v1",
+            kimi_model="model",
+            telegram_bot_token="",
+            telegram_chat_id="",
+            interests={},
+        )
+        repositories = [
+            Repository(
+                full_name="owner/project",
+                html_url="https://github.com/owner/project",
+                description="Useful agent tool",
+                stargazers_count=120,
+                forks_count=20,
+                language="Python",
+                created_at="2026-04-25T00:00:00Z",
+                updated_at="2026-04-25T00:00:00Z",
+            )
+        ]
+
+        with patch("src.reporter._generate_with_kimi", return_value="缺少项目和链接"):
+            report, fallback_used, report_error = generate_report(repositories, [], settings, {})
+
+        self.assertTrue(fallback_used)
+        self.assertIn("Kimi 周报质量检查失败", report_error)
+        self.assertIn("owner/project", report)
 
 
 if __name__ == "__main__":

@@ -7,6 +7,7 @@ import urllib.error
 import urllib.request
 
 from .models import Repository
+from .report_checks import check_report_quality
 from .settings import Settings
 
 
@@ -18,20 +19,22 @@ def generate_report(
 ) -> tuple[str, bool, str]:
     if settings.kimi_api_key and settings.kimi_model:
         try:
-            return normalize_report_markdown(
-                _generate_with_kimi(repositories, queries, settings, trend_summary or {})
+            return _checked_kimi_report(
+                _generate_with_kimi(repositories, queries, settings, trend_summary or {}),
+                repositories,
             ), False, ""
         except Exception as error:
             if _is_content_filter_error(error):
                 try:
-                    return normalize_report_markdown(
+                    return _checked_kimi_report(
                         _generate_with_kimi(
                             repositories,
                             queries,
                             settings,
                             trend_summary or {},
                             include_readme=False,
-                        )
+                        ),
+                        repositories,
                     ), False, ""
                 except Exception as retry_error:
                     error = RuntimeError(f"{error}; retry_without_readme: {retry_error}")
@@ -120,6 +123,14 @@ def fallback_report(
     )
     lines.extend(f"  - `{query}`" for query in queries)
     return "\n".join(lines).strip() + "\n"
+
+
+def _checked_kimi_report(report: str, repositories: list[Repository]) -> str:
+    normalized = normalize_report_markdown(report)
+    quality_errors = check_report_quality(normalized, repositories)
+    if quality_errors:
+        raise RuntimeError("Kimi 周报质量检查失败：" + "；".join(quality_errors[:5]))
+    return normalized
 
 
 def _trend_lines(trend_summary: dict) -> list[str]:
