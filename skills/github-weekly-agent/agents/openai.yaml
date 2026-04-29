@@ -1,0 +1,4 @@
+interface:
+  display_name: "GitHub 周报 Agent"
+  short_description: "维护每周GitHub热点周报自动化流程"
+  default_prompt: "Use $github-weekly-agent to maintain the weekly GitHub hot-project report automation."

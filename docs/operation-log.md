@@ -1324,3 +1324,44 @@ actions/setup-python@v5 -> actions/setup-python@v6
 ### 5. 测试补充
 
 已增加测试：当第一次 Kimi 调用返回 `content_filter high risk` 时，程序会自动以不包含 README 摘要的 payload 重试，并在重试成功时返回 Kimi 周报。
+
+---
+
+## 2026-04-29 追加：Codex 技能封装
+
+### 1. 开发目的
+
+路线图第三阶段最后一项是“在项目流程稳定后，再封装真正可用的 Codex 技能”。当前采集、筛选、Kimi 周报、Telegram 推送、归档和 GitHub Actions 已完成多次真实运行验证，因此开始封装技能。
+
+### 2. 本次实现
+
+新增技能目录：
+
+```text
+skills/github-weekly-agent/
+```
+
+核心文件：
+
+```text
+skills/github-weekly-agent/SKILL.md
+```
+
+技能内容覆盖：
+
+1. 项目维护约束。
+2. 主流程。
+3. 目录职责。
+4. 采集与排序修改规范。
+5. 周报生成修改规范。
+6. 归档和 GitHub Pages 修改规范。
+7. GitHub Actions 修改规范。
+8. 本地验证和真实链路验证方式。
+
+### 3. 简洁性处理
+
+本次只创建必要的技能说明，不增加脚本、模板或资产，避免重复维护已有项目代码。
+
+### 4. 路线图更新
+
+`docs/roadmap.md` 中第三阶段 Codex 技能封装标记为已完成。
