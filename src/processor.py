@@ -71,6 +71,7 @@ def _score(repositories: list[Repository], settings: Settings, star_history: dic
             + 0.10 * freshness_score,
             4,
         )
+        repo.selection_reasons = _selection_reasons(repo, topic_score)
 
 
 def _star_growth(repo: Repository, star_history: dict[str, int]) -> int:
@@ -92,6 +93,19 @@ def _topic_score(repo: Repository, settings: Settings) -> float:
         return 0
     hits = len(preferred.intersection(repo_terms))
     return min(1.0, hits / 3)
+
+
+def _selection_reasons(repo: Repository, topic_score: float) -> list[str]:
+    reasons = []
+    if repo.star_growth > 0:
+        reasons.append(f"较上次记录新增 Star {repo.star_growth}，近期热度上升。")
+    if repo.stargazers_count > 0:
+        reasons.append(f"当前累计 Star {repo.stargazers_count}，具备一定社区关注度。")
+    if topic_score > 0:
+        reasons.append("仓库主题、语言或名称与关注方向匹配。")
+    if repo.pushed_at or repo.updated_at:
+        reasons.append("最近一周仍有更新或维护活动。")
+    return reasons[:4]
 
 
 def _freshness_score(created_at: str, days_back: int) -> float:

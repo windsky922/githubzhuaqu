@@ -34,6 +34,7 @@ class ReporterTest(unittest.TestCase):
                 created_at="2026-04-25T00:00:00Z",
                 updated_at="2026-04-25T00:00:00Z",
                 category="AI Agent",
+                selection_reasons=["新增 Star 明显。"],
             )
         ]
 
@@ -43,6 +44,7 @@ class ReporterTest(unittest.TestCase):
         self.assertIn("owner/project", report)
         self.assertIn("https://github.com/owner/project", report)
         self.assertIn("Star 120", report)
+        self.assertIn("新增 Star 明显", report)
         self.assertIn("created:>=2026-04-20 stars:>20", report)
         self.assertIn("Python 是本期出现最多的主要语言", report)
 

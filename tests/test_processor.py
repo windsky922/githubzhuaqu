@@ -119,6 +119,29 @@ class ProcessorTest(unittest.TestCase):
 
         self.assertEqual(result[0].full_name, "b/smaller-growing")
 
+    def test_adds_selection_reasons(self):
+        settings = Settings(
+            root=None,
+            run_date="2026-04-27",
+            since_date="2026-04-20",
+            days_back=7,
+            min_stars=20,
+            max_projects=1,
+            github_token="",
+            kimi_api_key="",
+            kimi_base_url="",
+            kimi_model="",
+            telegram_bot_token="",
+            telegram_chat_id="",
+            interests={"preferred_topics": ["agent"], "preferred_languages": ["Python"], "exclude_keywords": []},
+        )
+        items = [repo("a/reasoned", 100)]
+
+        result = process_repositories(items, settings, {"a/reasoned": 80})
+
+        self.assertTrue(result[0].selection_reasons)
+        self.assertTrue(any("新增 Star 20" in reason for reason in result[0].selection_reasons))
+
     def test_keeps_old_project_when_active_this_week(self):
         settings = Settings(
             root=None,

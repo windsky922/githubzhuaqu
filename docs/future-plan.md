@@ -131,6 +131,18 @@ tests/test_security_check.py
 3. 安全检查失败时应阻止自动提交疑似密钥。
 4. 外部项目风险只作为评分和周报提示，不应让整个工作流随意失败。
 
+## 已完成：入选原因记录
+
+目标：让每个入选项目的推荐逻辑更可解释。
+
+已经完成：
+
+1. `Repository` 增加 `selection_reasons` 字段。
+2. `src/processor.py` 根据新增 Star、累计 Star、主题匹配和近期活跃生成入选原因。
+3. `data/selected/YYYY-MM-DD.json` 保存入选原因。
+4. 降级版周报展示入选原因。
+5. Kimi 周报提示词要求优先使用 `selection_reasons` 解释项目为什么值得关注。
+
 ## 第八阶段：推送渠道扩展
 
 目标：不只依赖 Telegram。
@@ -202,11 +214,9 @@ tests/test_storage.py
 
 近期优先级：
 
-1. 项目自身安全检查。
-2. 报告质量检查。
-3. 入选原因记录。
-4. 数据源失败分项统计。
-5. GitHub Pages 首页摘要增强。
+1. 报告质量检查。
+2. 数据源失败分项统计。
+3. GitHub Pages 首页摘要增强。
 
 中期优先级：
 

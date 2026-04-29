@@ -22,6 +22,7 @@ class Repository:
     license_name: str = ""
     readme_excerpt: str = ""
     security_flags: list[str] = field(default_factory=list)
+    selection_reasons: list[str] = field(default_factory=list)
     star_growth: int = 0
     score: float = 0.0
     category: str = "Other"
