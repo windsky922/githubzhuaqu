@@ -1,14 +1,26 @@
 {
   "total_projects": 10,
-  "total_star_growth": 71,
+  "total_star_growth": 17,
   "top_languages": [
     {
-      "name": "TypeScript",
+      "name": "Python",
       "count": 5
     },
     {
-      "name": "Python",
-      "count": 4
+      "name": "JavaScript",
+      "count": 1
+    },
+    {
+      "name": "Java",
+      "count": 1
+    },
+    {
+      "name": "Go",
+      "count": 1
+    },
+    {
+      "name": "TypeScript",
+      "count": 1
     },
     {
       "name": "Unknown",
@@ -18,15 +30,15 @@
   "top_categories": [
     {
       "name": "AI Agent",
-      "count": 6
+      "count": 4
     },
     {
       "name": "Other",
-      "count": 2
+      "count": 3
     },
     {
       "name": "Developer Tools",
-      "count": 1
+      "count": 2
     },
     {
       "name": "LLM Tooling",
@@ -35,50 +47,50 @@
   ],
   "top_star_growth": [
     {
-      "full_name": "clash-verge-rev/clash-verge-rev",
-      "html_url": "https://github.com/clash-verge-rev/clash-verge-rev",
-      "star_growth": 17,
-      "stargazers_count": 114332,
-      "language": "TypeScript",
-      "category": "Developer Tools"
+      "full_name": "521xueweihan/HelloGitHub",
+      "html_url": "https://github.com/521xueweihan/HelloGitHub",
+      "star_growth": 4,
+      "stargazers_count": 153728,
+      "language": "Python",
+      "category": "Other"
     },
     {
-      "full_name": "thedotmack/claude-mem",
-      "html_url": "https://github.com/thedotmack/claude-mem",
-      "star_growth": 15,
-      "stargazers_count": 69254,
-      "language": "TypeScript",
+      "full_name": "facebook/react",
+      "html_url": "https://github.com/facebook/react",
+      "star_growth": 2,
+      "stargazers_count": 244754,
+      "language": "JavaScript",
+      "category": "Other"
+    },
+    {
+      "full_name": "jeecgboot/JeecgBoot",
+      "html_url": "https://github.com/jeecgboot/JeecgBoot",
+      "star_growth": 2,
+      "stargazers_count": 46014,
+      "language": "Java",
       "category": "AI Agent"
     },
     {
-      "full_name": "code-yeongyu/oh-my-openagent",
-      "html_url": "https://github.com/code-yeongyu/oh-my-openagent",
-      "star_growth": 12,
-      "stargazers_count": 54816,
-      "language": "TypeScript",
-      "category": "AI Agent"
-    },
-    {
-      "full_name": "lobehub/lobehub",
-      "html_url": "https://github.com/lobehub/lobehub",
-      "star_growth": 6,
-      "stargazers_count": 75818,
-      "language": "TypeScript",
-      "category": "AI Agent"
-    },
-    {
-      "full_name": "browser-use/browser-use",
-      "html_url": "https://github.com/browser-use/browser-use",
-      "star_growth": 5,
-      "stargazers_count": 91004,
+      "full_name": "volcengine/OpenViking",
+      "html_url": "https://github.com/volcengine/OpenViking",
+      "star_growth": 2,
+      "stargazers_count": 23219,
       "language": "Python",
       "category": "AI Agent"
+    },
+    {
+      "full_name": "hacksider/Deep-Live-Cam",
+      "html_url": "https://github.com/hacksider/Deep-Live-Cam",
+      "star_growth": 2,
+      "stargazers_count": 92433,
+      "language": "Python",
+      "category": "Developer Tools"
     }
   ],
   "summary_points": [
-    "AI Agent 是本期最集中的方向，共 6 个项目。",
-    "TypeScript 是本期出现最多的主要语言，共 5 个项目。",
-    "本期入选项目累计新增 Star 71。",
-    "clash-verge-rev/clash-verge-rev 是本期新增 Star 最高的项目，新增 17。"
+    "AI Agent 是本期最集中的方向，共 4 个项目。",
+    "Python 是本期出现最多的主要语言，共 5 个项目。",
+    "本期入选项目累计新增 Star 17。",
+    "521xueweihan/HelloGitHub 是本期新增 Star 最高的项目，新增 4。"
   ]
 }

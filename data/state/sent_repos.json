@@ -1,7 +1,17 @@
 [
   {
+    "full_name": "521xueweihan/HelloGitHub",
+    "html_url": "https://github.com/521xueweihan/HelloGitHub",
+    "first_sent_at": "2026-04-29"
+  },
+  {
     "full_name": "affaan-m/everything-claude-code",
     "html_url": "https://github.com/affaan-m/everything-claude-code",
+    "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "agentscope-ai/agentscope",
+    "html_url": "https://github.com/agentscope-ai/agentscope",
     "first_sent_at": "2026-04-29"
   },
   {
@@ -55,6 +65,16 @@
     "first_sent_at": "2026-04-29"
   },
   {
+    "full_name": "continuedev/continue",
+    "html_url": "https://github.com/continuedev/continue",
+    "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "D4Vinci/Scrapling",
+    "html_url": "https://github.com/D4Vinci/Scrapling",
+    "first_sent_at": "2026-04-29"
+  },
+  {
     "full_name": "datawhalechina/hello-agents",
     "html_url": "https://github.com/datawhalechina/hello-agents",
     "first_sent_at": "2026-04-29"
@@ -68,6 +88,11 @@
     "full_name": "f/prompts.chat",
     "html_url": "https://github.com/f/prompts.chat",
     "first_sent_at": "2026-04-28"
+  },
+  {
+    "full_name": "facebook/react",
+    "html_url": "https://github.com/facebook/react",
+    "first_sent_at": "2026-04-29"
   },
   {
     "full_name": "firecrawl/firecrawl",
@@ -85,8 +110,18 @@
     "first_sent_at": "2026-04-29"
   },
   {
+    "full_name": "github/gitignore",
+    "html_url": "https://github.com/github/gitignore",
+    "first_sent_at": "2026-04-29"
+  },
+  {
     "full_name": "github/spec-kit",
     "html_url": "https://github.com/github/spec-kit",
+    "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "hacksider/Deep-Live-Cam",
+    "html_url": "https://github.com/hacksider/Deep-Live-Cam",
     "first_sent_at": "2026-04-29"
   },
   {
@@ -98,6 +133,11 @@
     "full_name": "huggingface/transformers",
     "html_url": "https://github.com/huggingface/transformers",
     "first_sent_at": "2026-04-28"
+  },
+  {
+    "full_name": "jeecgboot/JeecgBoot",
+    "html_url": "https://github.com/jeecgboot/JeecgBoot",
+    "first_sent_at": "2026-04-29"
   },
   {
     "full_name": "langchain-ai/langchain",
@@ -132,6 +172,11 @@
   {
     "full_name": "obra/superpowers",
     "html_url": "https://github.com/obra/superpowers",
+    "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "ollama/ollama",
+    "html_url": "https://github.com/ollama/ollama",
     "first_sent_at": "2026-04-29"
   },
   {
@@ -192,6 +237,11 @@
   {
     "full_name": "vllm-project/vllm",
     "html_url": "https://github.com/vllm-project/vllm",
+    "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "volcengine/OpenViking",
+    "html_url": "https://github.com/volcengine/OpenViking",
     "first_sent_at": "2026-04-29"
   },
   {
