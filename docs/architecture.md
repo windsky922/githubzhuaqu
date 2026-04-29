@@ -143,3 +143,27 @@ data/trends/YYYY-MM-DD.json
 6. 可直接写入周报的一组趋势要点。
 
 Kimi 生成周报时会收到该趋势摘要；降级版周报也会直接展示趋势要点。
+
+## 后续扩展边界
+
+未来扩展应遵循“稳定核心 + 可插拔增强”的方式，不提前重构当前主流程。
+
+稳定核心继续保持：
+
+```text
+collector -> processor -> reporter -> archive -> sender
+```
+
+当某类能力明显变复杂时，再按职责拆分：
+
+1. `sources`：多数据源采集。
+2. `quality`：仓库质量评估和异常过滤。
+3. `report_checks`：周报结构和内容校验。
+4. `channels`：多推送渠道。
+5. `storage`：长期历史数据存储。
+
+详细演进计划见：
+
+```text
+docs/future-plan.md
+```
