@@ -195,7 +195,19 @@ def _repo_name_from_href(href: str) -> str:
     owner, repo = parts
     if not owner or not repo:
         return ""
-    ignored = {"features", "topics", "trending", "collections", "marketplace", "orgs", "login"}
+    ignored = {
+        "apps",
+        "collections",
+        "features",
+        "login",
+        "marketplace",
+        "orgs",
+        "settings",
+        "sponsors",
+        "topics",
+        "trending",
+        "users",
+    }
     if owner in ignored:
         return ""
     return f"{owner}/{repo}"

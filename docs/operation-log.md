@@ -1854,3 +1854,38 @@ tests/test_build_pages.py
 ### 3. 设计边界
 
 本次只增强展示与摘要，不改变采集排序逻辑。排序逻辑仍由上一轮的 `score_weights` 控制，后续可以通过 `config/interests.json` 调整权重。
+
+---
+
+## 2026-04-29 追加：Trending 页面非仓库链接过滤
+
+### 1. 问题来源
+
+检查 GitHub Actions 自动归档回来的 `data/runs/2026-04-29.json` 后发现，GitHub Trending 采集已经生效，但页面解析器把部分非仓库链接也当成仓库，例如：
+
+```text
+sponsors/explore
+apps/dependabot
+apps/github-actions
+```
+
+这些路径不是普通仓库，调用 GitHub 仓库详情 API 时会返回 404，导致运行摘要中出现不必要的 `collector_errors`。
+
+### 2. 本次修复
+
+更新：
+
+```text
+src/collector.py
+tests/test_collector.py
+```
+
+修复方式：
+
+1. 在 Trending 链接解析阶段过滤 `sponsors`、`apps`、`users`、`settings` 等非仓库路径前缀。
+2. 保留真实仓库路径解析逻辑，不改变 Trending 优先级和评分逻辑。
+3. 增加单元测试，确保 `sponsors/explore` 和 `apps/dependabot` 不会进入 Trending 仓库候选列表。
+
+### 3. 预期效果
+
+下一次 GitHub Actions 运行时，Trending 来源的 404 噪声应明显减少。若 GitHub 页面结构继续变化，后续再考虑把解析规则收紧到 Trending 项目卡片区域。

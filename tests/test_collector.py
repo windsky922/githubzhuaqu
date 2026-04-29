@@ -92,6 +92,8 @@ class CollectorTest(unittest.TestCase):
           <h2><a href="/owner/project">owner / project</a></h2>
           <a href="/owner/project/stargazers">stars</a>
           <h2><a href="/another/repo?since=weekly">another / repo</a></h2>
+          <a href="/sponsors/explore">Sponsors</a>
+          <a href="/apps/dependabot">Dependabot</a>
         </article>
         """
 
