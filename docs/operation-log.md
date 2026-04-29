@@ -2061,3 +2061,45 @@ https://<owner>.github.io/<repo>/weekly/YYYY-MM-DD.md
 ### 3. 后续渠道预留
 
 当前仍保持 Telegram 单渠道，不提前创建复杂的 `channels` 框架。后续接入微信、飞书时，可以复用 `build_report_message` 和 `report_url`，只新增对应渠道的发送函数即可。
+
+---
+
+## 2026-04-29 追加：Trending 入选保底与 Telegram 超链接修复
+
+### 1. 问题现象
+
+用户反馈真实运行后仍然没有把 GitHub Trending 放在足够重要的位置，希望 Trending 周榜前 10 的项目至少有 7 个进入热点项目周报。同时 Telegram 推送中的周报地址不能直接点击，需要以超链接形式发送。
+
+### 2. 原因判断
+
+仅依赖评分权重仍可能让高 Star、高增长的 Search API 项目挤掉 Trending Top 10 项目。另一个隐藏原因是历史去重会在排序前过滤已推送项目，如果某个 Trending Top 10 项目之前发过，它会被挡在周报外。
+
+Telegram 侧的问题是当前消息只发送纯文本地址，而且默认生成的是 `.md` 地址；GitHub Pages 更适合使用 `.html` 页面地址。
+
+### 3. 本次实现
+
+更新：
+
+```text
+src/processor.py
+src/state.py
+src/sender.py
+config/interests.example.json
+tests/test_processor.py
+tests/test_state.py
+tests/test_sender.py
+docs/setup.md
+docs/future-plan.md
+```
+
+具体变化：
+
+1. `process_repositories` 新增 Trending Top 10 保底选择逻辑。
+2. 默认 `min_trending_top10_projects` 为 `7`，即 Trending 前 10 中至少 7 个进入周报；如果可用项目不足 7 个，则保留实际可用数量。
+3. `filter_unsent_repositories` 对 Trending Top 10 项目放行，避免历史去重挡掉本周真正热门项目。
+4. Telegram 消息改为 HTML 超链接：`打开本周周报`。
+5. 周报链接从 GitHub Pages 的 `.md` 地址改为 `.html` 地址，更适合浏览器直接打开。
+
+### 4. 设计边界
+
+该规则只保护 Trending 周榜前 10，不取消其他 Search API 辅助项目。周报剩余名额仍按综合评分补齐，继续保留垂直方向和个性化调整空间。

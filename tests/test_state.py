@@ -69,6 +69,15 @@ class StateTest(unittest.TestCase):
 
         self.assertEqual([item.full_name for item in result], ["owner/two"])
 
+    def test_keeps_sent_top_trending_repositories(self):
+        trending = repo("owner/trending")
+        trending.trending_rank = 3
+        repositories = [repo("owner/one"), trending]
+
+        result = filter_unsent_repositories(repositories, {"owner/one", "owner/trending"})
+
+        self.assertEqual([item.full_name for item in result], ["owner/trending"])
+
     def test_loads_legacy_string_state(self):
         root = Path.cwd() / f".tmp-state-test-{uuid.uuid4().hex}"
         try:

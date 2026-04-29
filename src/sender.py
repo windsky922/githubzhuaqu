@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import html
 import json
 import os
 import urllib.error
@@ -31,7 +32,7 @@ def build_report_message(settings: Settings) -> str:
         [
             f"GitHub 每周热点项目周报 - {settings.run_date}",
             "",
-            f"阅读链接：{url}",
+            f'阅读链接：<a href="{html.escape(url, quote=True)}">打开本周周报</a>',
         ]
     )
 
@@ -44,7 +45,7 @@ def report_url(settings: Settings) -> str:
             return ""
         owner, name = repository.split("/", 1)
         base_url = f"https://{owner}.github.io/{name}/weekly"
-    return f"{base_url}/{settings.run_date}.md"
+    return f"{base_url}/{settings.run_date}.html"
 
 
 def _github_repository() -> str:
@@ -58,6 +59,7 @@ def _send_message(text: str, settings: Settings) -> None:
         {
             "chat_id": settings.telegram_chat_id,
             "text": text,
+            "parse_mode": "HTML",
         }
     ).encode("utf-8")
     request = urllib.request.Request(url, data=payload, method="POST")

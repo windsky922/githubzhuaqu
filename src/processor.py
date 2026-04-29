@@ -20,6 +20,8 @@ DEFAULT_SCORE_WEIGHTS = {
     "freshness": 0.10,
     "community": 0.05,
 }
+TRENDING_TOP_RANK_LIMIT = 10
+DEFAULT_MIN_TRENDING_TOP_PROJECTS = 7
 
 
 def process_repositories(
@@ -30,11 +32,31 @@ def process_repositories(
     unique = _dedupe(repositories)
     filtered = [repo for repo in unique if _is_usable(repo, settings)]
     _score(filtered, settings, star_history or {})
-    filtered.sort(
+    ranked = sorted(
+        filtered,
         key=lambda repo: (repo.score, repo.source_priority, -repo.trending_rank, repo.star_growth, repo.stargazers_count),
         reverse=True,
     )
-    return filtered[: settings.max_projects]
+    return _select_with_trending_floor(ranked, settings)
+
+
+def _select_with_trending_floor(ranked: list[Repository], settings: Settings) -> list[Repository]:
+    max_projects = settings.max_projects
+    min_trending = min(_int_interest(settings, "min_trending_top10_projects", DEFAULT_MIN_TRENDING_TOP_PROJECTS), max_projects)
+    protected_trending = sorted(
+        [repo for repo in ranked if 0 < repo.trending_rank <= TRENDING_TOP_RANK_LIMIT],
+        key=lambda repo: repo.trending_rank,
+    )[:min_trending]
+    selected: list[Repository] = []
+    selected_names: set[str] = set()
+    for repo in protected_trending + ranked:
+        if repo.full_name in selected_names:
+            continue
+        selected.append(repo)
+        selected_names.add(repo.full_name)
+        if len(selected) >= max_projects:
+            break
+    return selected
 
 
 def _dedupe(repositories: list[Repository]) -> list[Repository]:
@@ -127,6 +149,14 @@ def _score_weights(settings: Settings) -> dict[str, float]:
     if total <= 0:
         return DEFAULT_SCORE_WEIGHTS.copy()
     return {key: value / total for key, value in weights.items()}
+
+
+def _int_interest(settings: Settings, key: str, default: int) -> int:
+    try:
+        value = int(settings.interests.get(key, default))
+    except (TypeError, ValueError):
+        return default
+    return max(0, value)
 
 
 def _topic_score(repo: Repository, settings: Settings) -> float:

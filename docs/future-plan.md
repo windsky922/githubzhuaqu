@@ -183,6 +183,7 @@ tests/test_channels.py
 2. 运行摘要记录每个渠道的发送状态。
 3. 默认仍保持 Telegram 单渠道，避免过早复杂化。
 4. 推送内容优先使用统一的短消息和周报链接，完整 Markdown 继续归档在 `reports/` 和 GitHub Pages 中。
+5. Telegram 使用可点击超链接消息，微信、飞书后续复用同一份短消息结构。
 
 ## 第九阶段：展示页面增强
 

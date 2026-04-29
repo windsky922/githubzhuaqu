@@ -146,6 +146,37 @@ class ProcessorTest(unittest.TestCase):
         self.assertEqual(result[0].full_name, "a/trending")
         self.assertTrue(any("GitHub Trending 周榜" in reason for reason in result[0].selection_reasons))
 
+    def test_keeps_at_least_seven_trending_top_ten_projects(self):
+        settings = Settings(
+            root=None,
+            run_date="2026-04-27",
+            since_date="2026-04-20",
+            days_back=7,
+            min_stars=20,
+            max_projects=10,
+            github_token="",
+            kimi_api_key="",
+            kimi_base_url="",
+            kimi_model="",
+            telegram_bot_token="",
+            telegram_chat_id="",
+            interests={"preferred_topics": [], "preferred_languages": [], "exclude_keywords": []},
+        )
+        items = []
+        for rank in range(1, 11):
+            item = repo(f"trend/{rank}", 100 + rank, topics=[])
+            item.trending_rank = rank
+            item.sources = ["github_trending"]
+            item.source_priority = 100
+            items.append(item)
+        for index in range(1, 11):
+            items.append(repo(f"search/{index}", 10000 + index, topics=[]))
+
+        result = process_repositories(items, settings, {f"search/{index}": 100 for index in range(1, 11)})
+
+        trending_top_ten_count = len([item for item in result if 0 < item.trending_rank <= 10])
+        self.assertGreaterEqual(trending_top_ten_count, 7)
+
     def test_adds_selection_reasons(self):
         settings = Settings(
             root=None,

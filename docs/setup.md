@@ -22,7 +22,7 @@
 Telegram 当前只推送周报链接，不推送完整 Markdown 正文。这个链接指向 GitHub Pages 上的周报页面，也就是 GitHub Actions 运行后由 Kimi 生成并归档的那份周报。默认链接格式为：
 
 ```text
-https://<owner>.github.io/<repo>/weekly/YYYY-MM-DD.md
+https://<owner>.github.io/<repo>/weekly/YYYY-MM-DD.html
 ```
 
 如果你的 Pages 域名或路径不同，可以配置 `REPORT_BASE_URL`，例如：
@@ -68,6 +68,7 @@ config/interests.json
 9. `search_topics`：Search API 用于补充垂直方向的 topic 查询。
 10. `search_languages`：Search API 用于补充垂直方向的语言查询。
 11. `score_weights`：综合评分权重。当前默认把 `trending` 作为第一指标，其余信号作为辅助。
+12. `min_trending_top10_projects`：Trending 周榜前 10 中至少保留多少个项目进入周报，默认 `7`。
 
 如果希望 GitHub Actions 也使用你的自定义兴趣配置，需要把 `config/interests.json` 提交到仓库。该文件不应包含 API Key、Token 或 Chat ID。
 
