@@ -16,10 +16,10 @@
 
 ## 最新趋势要点
 
-- AI Agent 是本期最集中的方向，共 4 个项目。
-- Python 是本期出现最多的主要语言，共 5 个项目。
-- 本期入选项目累计新增 Star 17。
-- 521xueweihan/HelloGitHub 是本期新增 Star 最高的项目，新增 4。
+- AI Agent 是本期最集中的方向，共 7 个项目。
+- Python 是本期出现最多的主要语言，共 7 个项目。
+- 本期入选项目累计新增 Star 287。
+- santifer/career-ops 是本期新增 Star 最高的项目，新增 66。
 
 ## 全部周报
 
@@ -31,4 +31,5 @@
 - [架构说明](architecture.md)
 - [配置说明](setup.md)
 - [开发路线图](roadmap.md)
+- [未来更新规划](future-plan.md)
 - [操作日志](operation-log.md)
