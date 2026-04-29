@@ -16,15 +16,15 @@
 
 ## 最新趋势要点
 
-- AI Agent 是本期最集中的方向，共 5 个项目。
+- AI Agent 是本期最集中的方向，共 4 个项目。
 - Python 是本期出现最多的主要语言，共 4 个项目。
-- 本期入选项目累计新增 Star 293。
-- huggingface/ml-intern 是本期 GitHub Trending 排名最高的项目，周榜排名 2。
-- CJackHwang/ds2api 是本期新增 Star 最高的项目，新增 131。
+- 本期入选项目累计新增 Star 107。
+- Alishahryar1/free-claude-code 是本期 GitHub Trending 排名最高的项目，周榜排名 1。
+- mattpocock/skills 是本期新增 Star 最高的项目，新增 73。
 
 ## 全部周报
 
-- [2026-04-29](weekly/2026-04-29.md)：10 个项目，降级模板，Telegram 已推送，主语言 Python，主方向 AI Agent，新增 Star 293，Trending 项目 3
+- [2026-04-29](weekly/2026-04-29.md)：10 个项目，降级模板，Telegram 已推送，主语言 Python，主方向 AI Agent，新增 Star 107，Trending 项目 9
 - [2026-04-28](weekly/2026-04-28.md)：10 个项目，降级模板，Telegram 未推送，主语言 Python，主方向 AI Agent，新增 Star 32
 
 ## 项目文档

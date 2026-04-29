@@ -260,6 +260,11 @@
     "first_sent_at": "2026-04-29"
   },
   {
+    "full_name": "mksglu/context-mode",
+    "html_url": "https://github.com/mksglu/context-mode",
+    "first_sent_at": "2026-04-29"
+  },
+  {
     "full_name": "n8n-io/n8n",
     "html_url": "https://github.com/n8n-io/n8n",
     "first_sent_at": "2026-04-28"
@@ -310,6 +315,11 @@
     "first_sent_at": "2026-04-29"
   },
   {
+    "full_name": "pytorch/pytorch",
+    "html_url": "https://github.com/pytorch/pytorch",
+    "first_sent_at": "2026-04-29"
+  },
+  {
     "full_name": "ray-project/ray",
     "html_url": "https://github.com/ray-project/ray",
     "first_sent_at": "2026-04-29"
@@ -352,6 +362,11 @@
   {
     "full_name": "torvalds/linux",
     "html_url": "https://github.com/torvalds/linux",
+    "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "trycua/cua",
+    "html_url": "https://github.com/trycua/cua",
     "first_sent_at": "2026-04-29"
   },
   {
