@@ -31,5 +31,4 @@
 - [架构说明](architecture.md)
 - [配置说明](setup.md)
 - [开发路线图](roadmap.md)
-- [未来更新规划](future-plan.md)
 - [操作日志](operation-log.md)
