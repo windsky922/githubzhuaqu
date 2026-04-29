@@ -1406,3 +1406,49 @@ docs/future-plan.md
 ### 4. 设计结论
 
 后续不应提前重构为复杂框架。当前主流程保持稳定，只有当某类能力开始包含多个实现或明显变复杂时，再拆出 `sources`、`quality`、`report_checks`、`channels`、`storage` 等模块。
+
+---
+
+## 2026-04-29 追加：安全检查基础版本
+
+### 1. 用户要求
+
+用户要求在未来规划中加入安全性检查功能，用于检查项目是否存在安全风险，同时对当前工作方式做安全保护。
+
+### 2. 当前安全状态检查
+
+已检查：
+
+1. GitHub CLI 当前未登录，本机没有继续保留 CLI 登录态。
+2. 当前进程环境中未发现 `TOKEN`、`KEY`、`SECRET`、`CHAT_ID` 等密钥类环境变量名。
+3. 本次操作不读取、不输出任何真实密钥值。
+
+### 3. 本次实现
+
+新增：
+
+```text
+scripts/security_check.py
+tests/test_security_check.py
+```
+
+能力：
+
+1. 扫描源码、配置、workflow、文档和提示词中的疑似硬编码密钥。
+2. 检测 GitHub token、Telegram Bot Token、通用 key/token/secret/password/chat_id 赋值。
+3. 允许 GitHub Actions Secrets 引用和 `os.getenv` 这类安全读取方式。
+4. 排除 `data/` 和 `reports/`，避免把第三方 README 或生成报告误判为项目自身密钥。
+
+### 4. 工作流接入
+
+`.github/workflows/weekly.yml` 新增步骤：
+
+```text
+python scripts/security_check.py
+```
+
+该步骤在单元测试前运行。如果发现疑似硬编码密钥，工作流会失败，阻止继续生成和提交归档。
+
+### 5. 未来规划更新
+
+`docs/future-plan.md` 新增“安全风险检查”阶段，后续会扩展到入选仓库风险提示，例如可疑关键词、异常 Star 增长、许可证缺失和维护风险。

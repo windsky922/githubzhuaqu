@@ -23,6 +23,7 @@ collector -> processor -> reporter -> archive -> sender
 sources      数据源扩展
 quality      数据质量评估
 insights     趋势与洞察
+security     安全风险检查
 channels     推送渠道
 presentation 展示页面
 ```
@@ -93,7 +94,41 @@ src/report_checks.py
 tests/test_report_checks.py
 ```
 
-## 第七阶段：推送渠道扩展
+## 第七阶段：安全风险检查
+
+目标：降低推荐高风险项目、误提交密钥和执行不可信内容的风险。
+
+已经完成的基础保护：
+
+1. 新增 `scripts/security_check.py`，扫描源码、配置、workflow、文档和提示词中的疑似硬编码密钥。
+2. GitHub Actions 在测试前运行安全检查。
+3. 检查范围排除 `data/` 和 `reports/`，避免把第三方仓库 README 或生成报告当成项目自身密钥。
+
+后续建议任务：
+
+1. 为入选仓库增加安全信号：是否归档、是否 fork、是否有许可证、是否有近期维护、Issue 风险提示。
+2. 检查 README 和简介中是否包含明显诈骗、钓鱼、盗版、恶意软件下载等关键词。
+3. 对新增 Star 异常增长增加提示，不直接判定恶意，但在周报中标记“需人工复核”。
+4. 在 `data/selected/YYYY-MM-DD.json` 中增加 `security_flags` 字段。
+5. 在周报中增加“风险提示”小节，只提示风险，不替用户做安全背书。
+
+预留位置：
+
+```text
+src/security.py
+tests/test_security.py
+scripts/security_check.py
+tests/test_security_check.py
+```
+
+设计要求：
+
+1. 安全检查不能执行第三方仓库代码。
+2. 安全结论必须保守表达，避免把未验证项目写成“安全”。
+3. 安全检查失败时应阻止自动提交疑似密钥。
+4. 外部项目风险只作为评分和周报提示，不应让整个工作流随意失败。
+
+## 第八阶段：推送渠道扩展
 
 目标：不只依赖 Telegram。
 
@@ -117,7 +152,7 @@ tests/test_channels.py
 2. 运行摘要记录每个渠道的发送状态。
 3. 默认仍保持 Telegram 单渠道，避免过早复杂化。
 
-## 第八阶段：展示页面增强
+## 第九阶段：展示页面增强
 
 目标：让 GitHub Pages 不只是 Markdown 归档，而是更容易浏览和筛选。
 
@@ -138,7 +173,7 @@ scripts/build_pages.py
 
 触发条件：当历史周报超过 4 周后再优先处理。
 
-## 第九阶段：长期状态与数据库
+## 第十阶段：长期状态与数据库
 
 目标：当 JSON 状态文件开始难以维护时，再引入轻量数据库。
 
@@ -164,10 +199,11 @@ tests/test_storage.py
 
 近期优先级：
 
-1. 报告质量检查。
-2. 入选原因记录。
-3. 数据源失败分项统计。
-4. GitHub Pages 首页摘要增强。
+1. 项目自身安全检查。
+2. 报告质量检查。
+3. 入选原因记录。
+4. 数据源失败分项统计。
+5. GitHub Pages 首页摘要增强。
 
 中期优先级：
 
