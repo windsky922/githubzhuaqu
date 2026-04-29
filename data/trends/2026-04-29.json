@@ -1,84 +1,80 @@
 {
   "total_projects": 10,
-  "total_star_growth": 287,
+  "total_star_growth": 39,
   "top_languages": [
     {
       "name": "Python",
-      "count": 7
-    },
-    {
-      "name": "JavaScript",
-      "count": 1
-    },
-    {
-      "name": "HTML",
-      "count": 1
+      "count": 5
     },
     {
       "name": "TypeScript",
+      "count": 4
+    },
+    {
+      "name": "Shell",
       "count": 1
     }
   ],
   "top_categories": [
     {
       "name": "AI Agent",
-      "count": 7
+      "count": 6
     },
     {
       "name": "LLM Tooling",
-      "count": 2
+      "count": 3
     },
     {
-      "name": "Machine Learning",
+      "name": "Developer Tools",
       "count": 1
     }
   ],
   "top_star_growth": [
     {
-      "full_name": "santifer/career-ops",
-      "html_url": "https://github.com/santifer/career-ops",
-      "star_growth": 66,
-      "stargazers_count": 40771,
-      "language": "JavaScript",
+      "full_name": "coleam00/Archon",
+      "html_url": "https://github.com/coleam00/Archon",
+      "star_growth": 12,
+      "stargazers_count": 20074,
+      "language": "TypeScript",
       "category": "AI Agent"
     },
     {
-      "full_name": "DigitalPlatDev/FreeDomain",
-      "html_url": "https://github.com/DigitalPlatDev/FreeDomain",
-      "star_growth": 50,
-      "stargazers_count": 159236,
-      "language": "HTML",
-      "category": "Machine Learning"
-    },
-    {
-      "full_name": "MemPalace/mempalace",
-      "html_url": "https://github.com/MemPalace/mempalace",
-      "star_growth": 36,
-      "stargazers_count": 50249,
-      "language": "Python",
-      "category": "LLM Tooling"
-    },
-    {
-      "full_name": "hesreallyhim/awesome-claude-code",
-      "html_url": "https://github.com/hesreallyhim/awesome-claude-code",
-      "star_growth": 35,
-      "stargazers_count": 41762,
-      "language": "Python",
+      "full_name": "Yeachan-Heo/oh-my-claudecode",
+      "html_url": "https://github.com/Yeachan-Heo/oh-my-claudecode",
+      "star_growth": 11,
+      "stargazers_count": 31853,
+      "language": "TypeScript",
       "category": "AI Agent"
     },
     {
-      "full_name": "BerriAI/litellm",
-      "html_url": "https://github.com/BerriAI/litellm",
-      "star_growth": 26,
-      "stargazers_count": 45126,
-      "language": "Python",
+      "full_name": "upstash/context7",
+      "html_url": "https://github.com/upstash/context7",
+      "star_growth": 8,
+      "stargazers_count": 54044,
+      "language": "TypeScript",
       "category": "LLM Tooling"
+    },
+    {
+      "full_name": "docling-project/docling",
+      "html_url": "https://github.com/docling-project/docling",
+      "star_growth": 5,
+      "stargazers_count": 58754,
+      "language": "Python",
+      "category": "Developer Tools"
+    },
+    {
+      "full_name": "oraios/serena",
+      "html_url": "https://github.com/oraios/serena",
+      "star_growth": 3,
+      "stargazers_count": 23564,
+      "language": "Python",
+      "category": "AI Agent"
     }
   ],
   "summary_points": [
-    "AI Agent 是本期最集中的方向，共 7 个项目。",
-    "Python 是本期出现最多的主要语言，共 7 个项目。",
-    "本期入选项目累计新增 Star 287。",
-    "santifer/career-ops 是本期新增 Star 最高的项目，新增 66。"
+    "AI Agent 是本期最集中的方向，共 6 个项目。",
+    "Python 是本期出现最多的主要语言，共 5 个项目。",
+    "本期入选项目累计新增 Star 39。",
+    "coleam00/Archon 是本期新增 Star 最高的项目，新增 12。"
   ]
 }

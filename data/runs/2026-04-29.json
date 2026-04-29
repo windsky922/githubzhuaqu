@@ -2,56 +2,79 @@
   "run_date": "2026-04-29",
   "status": "success",
   "queries": [
+    "GitHub Trending weekly",
     "pushed:>=2026-04-22 stars:>20",
-    "topic:ai pushed:>=2026-04-22 stars:>20",
+    "topic:ai pushed:>=2026-04-22 stars:>10",
     "topic:agent pushed:>=2026-04-22 stars:>10",
     "topic:llm pushed:>=2026-04-22 stars:>10",
     "topic:automation pushed:>=2026-04-22 stars:>10",
     "language:Python pushed:>=2026-04-22 stars:>20",
     "language:TypeScript pushed:>=2026-04-22 stars:>20"
   ],
-  "collected_count": 210,
+  "collected_count": 224,
   "selected_count": 10,
-  "skipped_sent_count": 50,
-  "collector_errors": [],
+  "skipped_sent_count": 60,
+  "collector_errors": [
+    "GitHub Trending weekly sponsors/explore: GitHub API error 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/repos#get-a-repository\",\"status\":\"404\"}",
+    "GitHub Trending weekly apps/dependabot: GitHub API error 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/repos#get-a-repository\",\"status\":\"404\"}",
+    "GitHub Trending weekly sponsors/mattpocock: GitHub API error 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/repos#get-a-repository\",\"status\":\"404\"}",
+    "GitHub Trending weekly sponsors/Fincept-Corporation: GitHub API error 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/repos#get-a-repository\",\"status\":\"404\"}",
+    "GitHub Trending weekly apps/github-actions: GitHub API error 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/repos#get-a-repository\",\"status\":\"404\"}",
+    "GitHub Trending weekly sponsors/GyulyVGC: GitHub API error 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/repos#get-a-repository\",\"status\":\"404\"}",
+    "GitHub Trending weekly apps/allcontributors: GitHub API error 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/repos#get-a-repository\",\"status\":\"404\"}"
+  ],
   "collector_stats": [
     {
+      "source": "github_trending",
+      "query": "GitHub Trending weekly",
+      "status": "partial",
+      "count": 14,
+      "error": "sponsors/explore: GitHub API error 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/repos#get-a-repository\",\"status\":\"404\"}; apps/dependabot: GitHub API error 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/repos#get-a-repository\",\"status\":\"404\"}; sponsors/mattpocock: GitHub API error 404: {\"message\":\"Not Found\",\"documentation_url\":\"https://docs.github.com/rest/repos/repos#get-a-repository\",\"status\":\"404\"}"
+    },
+    {
+      "source": "github_search",
       "query": "pushed:>=2026-04-22 stars:>20",
       "status": "success",
       "count": 30,
       "error": ""
     },
     {
-      "query": "topic:ai pushed:>=2026-04-22 stars:>20",
+      "source": "github_search",
+      "query": "topic:ai pushed:>=2026-04-22 stars:>10",
       "status": "success",
       "count": 30,
       "error": ""
     },
     {
+      "source": "github_search",
       "query": "topic:agent pushed:>=2026-04-22 stars:>10",
       "status": "success",
       "count": 30,
       "error": ""
     },
     {
+      "source": "github_search",
       "query": "topic:llm pushed:>=2026-04-22 stars:>10",
       "status": "success",
       "count": 30,
       "error": ""
     },
     {
+      "source": "github_search",
       "query": "topic:automation pushed:>=2026-04-22 stars:>10",
       "status": "success",
       "count": 30,
       "error": ""
     },
     {
+      "source": "github_search",
       "query": "language:Python pushed:>=2026-04-22 stars:>20",
       "status": "success",
       "count": 30,
       "error": ""
     },
     {
+      "source": "github_search",
       "query": "language:TypeScript pushed:>=2026-04-22 stars:>20",
       "status": "success",
       "count": 30,
@@ -59,7 +82,7 @@
     }
   ],
   "readme_fetched_count": 10,
-  "star_history_updated_count": 149,
+  "star_history_updated_count": 163,
   "report_path": "reports/2026-04-29.md",
   "run_summary_path": "data/runs/2026-04-29.json",
   "raw_repositories_path": "data/raw/2026-04-29.json",

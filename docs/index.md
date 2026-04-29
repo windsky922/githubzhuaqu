@@ -9,21 +9,21 @@
 ## 最新运行摘要
 
 - 入选项目：10 个
-- 采集候选：210 个
+- 采集候选：224 个
 - 生成方式：Kimi
 - Telegram：已推送
-- 采集错误：0 条
+- 采集错误：7 条
 
 ## 最新趋势要点
 
-- AI Agent 是本期最集中的方向，共 7 个项目。
-- Python 是本期出现最多的主要语言，共 7 个项目。
-- 本期入选项目累计新增 Star 287。
-- santifer/career-ops 是本期新增 Star 最高的项目，新增 66。
+- AI Agent 是本期最集中的方向，共 6 个项目。
+- Python 是本期出现最多的主要语言，共 5 个项目。
+- 本期入选项目累计新增 Star 39。
+- coleam00/Archon 是本期新增 Star 最高的项目，新增 12。
 
 ## 全部周报
 
-- [2026-04-29](weekly/2026-04-29.md)：10 个项目，Kimi，Telegram 已推送，主语言 Python，主方向 AI Agent，新增 Star 287
+- [2026-04-29](weekly/2026-04-29.md)：10 个项目，Kimi，Telegram 已推送，主语言 Python，主方向 AI Agent，新增 Star 39
 - [2026-04-28](weekly/2026-04-28.md)：10 个项目，降级模板，Telegram 未推送，主语言 Python，主方向 AI Agent，新增 Star 32
 
 ## 项目文档
