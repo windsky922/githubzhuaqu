@@ -23,8 +23,8 @@
 
 ## 全部周报
 
-- [2026-04-29](weekly/2026-04-29.md)：10 个项目，Kimi，Telegram 已推送
-- [2026-04-28](weekly/2026-04-28.md)：10 个项目，降级模板，Telegram 未推送
+- [2026-04-29](weekly/2026-04-29.md)：10 个项目，Kimi，Telegram 已推送，主语言 Python，主方向 AI Agent，新增 Star 287
+- [2026-04-28](weekly/2026-04-28.md)：10 个项目，降级模板，Telegram 未推送，主语言 Python，主方向 AI Agent，新增 Star 32
 
 ## 项目文档
 

@@ -75,12 +75,15 @@ def _index_content(root: Path, reports: list[Path]) -> str:
 
 def _report_line(root: Path, report: Path) -> str:
     summary = _run_summary(root, report.stem)
+    trends = _trend_summary(root, report.stem)
     if not summary:
         return f"- [{report.stem}](weekly/{report.name})"
     selected_count = summary.get("selected_count", 0)
     kimi = "Kimi" if summary.get("kimi_used") else "降级模板"
     telegram = "已推送" if summary.get("telegram_sent") else "未推送"
-    return f"- [{report.stem}](weekly/{report.name})：{selected_count} 个项目，{kimi}，Telegram {telegram}"
+    trend_text = _report_trend_text(trends)
+    suffix = f"，{trend_text}" if trend_text else ""
+    return f"- [{report.stem}](weekly/{report.name})：{selected_count} 个项目，{kimi}，Telegram {telegram}{suffix}"
 
 
 def _run_summary(root: Path, run_date: str) -> dict:
@@ -130,6 +133,21 @@ def _latest_summary_lines(root: Path, run_date: str) -> list[str]:
         lines.extend(["", "## 最新趋势要点", ""])
         lines.extend(f"- {point}" for point in points[:5])
     return lines
+
+
+def _report_trend_text(trends: dict) -> str:
+    if not trends:
+        return ""
+    parts = []
+    top_languages = trends.get("top_languages") or []
+    top_categories = trends.get("top_categories") or []
+    if top_languages:
+        parts.append(f"主语言 {top_languages[0].get('name')}")
+    if top_categories:
+        parts.append(f"主方向 {top_categories[0].get('name')}")
+    if trends.get("total_star_growth") is not None:
+        parts.append(f"新增 Star {trends.get('total_star_growth')}")
+    return "，".join(part for part in parts if part)
 
 
 if __name__ == "__main__":

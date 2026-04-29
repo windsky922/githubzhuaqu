@@ -20,7 +20,15 @@ class BuildPagesTest(unittest.TestCase):
                 encoding="utf-8",
             )
             (root / "data" / "trends" / "2026-04-28.json").write_text(
-                json.dumps({"summary_points": ["Python 是本期主要语言。"]}, ensure_ascii=False),
+                json.dumps(
+                    {
+                        "summary_points": ["Python 是本期主要语言。"],
+                        "top_languages": [{"name": "Python", "count": 8}],
+                        "top_categories": [{"name": "AI Agent", "count": 4}],
+                        "total_star_growth": 20,
+                    },
+                    ensure_ascii=False,
+                ),
                 encoding="utf-8",
             )
 
@@ -34,6 +42,9 @@ class BuildPagesTest(unittest.TestCase):
             self.assertIn("最新运行摘要", index)
             self.assertIn("采集候选：100 个", index)
             self.assertIn("Python 是本期主要语言。", index)
+            self.assertIn("主语言 Python", index)
+            self.assertIn("主方向 AI Agent", index)
+            self.assertIn("新增 Star 20", index)
             self.assertIn("[未来更新规划](future-plan.md)", index)
         finally:
             shutil.rmtree(root, ignore_errors=True)

@@ -1666,3 +1666,36 @@ data/trends/YYYY-MM-DD.json
 ### 4. 设计边界
 
 本次仍保持 GitHub Pages 为轻量 Markdown，不引入前端框架。后续当历史周报数量增加后，再考虑筛选、项目卡片和趋势可视化。
+
+---
+
+## 2026-04-29 追加：历史周报趋势摘要
+
+### 1. 开发目的
+
+继续增强 GitHub Pages 的浏览效率，让“全部周报”列表不仅显示日期和推送状态，也能快速看出每期的主要语言、主要方向和新增 Star。
+
+### 2. 本次实现
+
+更新：
+
+```text
+scripts/build_pages.py
+tests/test_build_pages.py
+```
+
+`docs/index.md` 的每条历史周报记录会在存在趋势数据时追加：
+
+1. 主语言。
+2. 主方向。
+3. 累计新增 Star。
+
+### 3. 数据来源
+
+该信息来自：
+
+```text
+data/trends/YYYY-MM-DD.json
+```
+
+如果历史周报没有趋势数据，则保持原有简洁格式。
