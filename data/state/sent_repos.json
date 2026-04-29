@@ -1,17 +1,17 @@
 [
   {
+    "full_name": "affaan-m/everything-claude-code",
+    "html_url": "https://github.com/affaan-m/everything-claude-code",
+    "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "ComposioHQ/awesome-claude-skills",
+    "html_url": "https://github.com/ComposioHQ/awesome-claude-skills",
+    "first_sent_at": "2026-04-29"
+  },
+  {
     "full_name": "EbookFoundation/free-programming-books",
     "html_url": "https://github.com/EbookFoundation/free-programming-books",
-    "first_sent_at": "2026-04-28"
-  },
-  {
-    "full_name": "Significant-Gravitas/AutoGPT",
-    "html_url": "https://github.com/Significant-Gravitas/AutoGPT",
-    "first_sent_at": "2026-04-28"
-  },
-  {
-    "full_name": "Snailclimb/JavaGuide",
-    "html_url": "https://github.com/Snailclimb/JavaGuide",
     "first_sent_at": "2026-04-28"
   },
   {
@@ -30,6 +30,16 @@
     "first_sent_at": "2026-04-28"
   },
   {
+    "full_name": "langchain-ai/langchain",
+    "html_url": "https://github.com/langchain-ai/langchain",
+    "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "langgenius/dify",
+    "html_url": "https://github.com/langgenius/dify",
+    "first_sent_at": "2026-04-29"
+  },
+  {
     "full_name": "n8n-io/n8n",
     "html_url": "https://github.com/n8n-io/n8n",
     "first_sent_at": "2026-04-28"
@@ -40,13 +50,53 @@
     "first_sent_at": "2026-04-28"
   },
   {
+    "full_name": "NousResearch/hermes-agent",
+    "html_url": "https://github.com/NousResearch/hermes-agent",
+    "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "obra/superpowers",
+    "html_url": "https://github.com/obra/superpowers",
+    "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "open-webui/open-webui",
+    "html_url": "https://github.com/open-webui/open-webui",
+    "first_sent_at": "2026-04-29"
+  },
+  {
     "full_name": "openclaw/openclaw",
     "html_url": "https://github.com/openclaw/openclaw",
     "first_sent_at": "2026-04-28"
   },
   {
+    "full_name": "Significant-Gravitas/AutoGPT",
+    "html_url": "https://github.com/Significant-Gravitas/AutoGPT",
+    "first_sent_at": "2026-04-28"
+  },
+  {
+    "full_name": "Snailclimb/JavaGuide",
+    "html_url": "https://github.com/Snailclimb/JavaGuide",
+    "first_sent_at": "2026-04-28"
+  },
+  {
+    "full_name": "TauricResearch/TradingAgents",
+    "html_url": "https://github.com/TauricResearch/TradingAgents",
+    "first_sent_at": "2026-04-29"
+  },
+  {
     "full_name": "tensorflow/tensorflow",
     "html_url": "https://github.com/tensorflow/tensorflow",
     "first_sent_at": "2026-04-28"
+  },
+  {
+    "full_name": "vinta/awesome-python",
+    "html_url": "https://github.com/vinta/awesome-python",
+    "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "ZhuLinsen/daily_stock_analysis",
+    "html_url": "https://github.com/ZhuLinsen/daily_stock_analysis",
+    "first_sent_at": "2026-04-29"
   }
 ]
