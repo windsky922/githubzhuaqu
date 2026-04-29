@@ -5,8 +5,38 @@
     "first_sent_at": "2026-04-29"
   },
   {
+    "full_name": "anomalyco/opencode",
+    "html_url": "https://github.com/anomalyco/opencode",
+    "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "anthropics/skills",
+    "html_url": "https://github.com/anthropics/skills",
+    "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "AstrBotDevs/AstrBot",
+    "html_url": "https://github.com/AstrBotDevs/AstrBot",
+    "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "bytedance/deer-flow",
+    "html_url": "https://github.com/bytedance/deer-flow",
+    "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "Comfy-Org/ComfyUI",
+    "html_url": "https://github.com/Comfy-Org/ComfyUI",
+    "first_sent_at": "2026-04-29"
+  },
+  {
     "full_name": "ComposioHQ/awesome-claude-skills",
     "html_url": "https://github.com/ComposioHQ/awesome-claude-skills",
+    "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "datawhalechina/hello-agents",
+    "html_url": "https://github.com/datawhalechina/hello-agents",
     "first_sent_at": "2026-04-29"
   },
   {
@@ -23,6 +53,11 @@
     "full_name": "freeCodeCamp/freeCodeCamp",
     "html_url": "https://github.com/freeCodeCamp/freeCodeCamp",
     "first_sent_at": "2026-04-28"
+  },
+  {
+    "full_name": "garrytan/gstack",
+    "html_url": "https://github.com/garrytan/gstack",
+    "first_sent_at": "2026-04-29"
   },
   {
     "full_name": "huggingface/transformers",
@@ -70,9 +105,19 @@
     "first_sent_at": "2026-04-28"
   },
   {
+    "full_name": "OpenHands/OpenHands",
+    "html_url": "https://github.com/OpenHands/OpenHands",
+    "first_sent_at": "2026-04-29"
+  },
+  {
     "full_name": "Significant-Gravitas/AutoGPT",
     "html_url": "https://github.com/Significant-Gravitas/AutoGPT",
     "first_sent_at": "2026-04-28"
+  },
+  {
+    "full_name": "Skyvern-AI/skyvern",
+    "html_url": "https://github.com/Skyvern-AI/skyvern",
+    "first_sent_at": "2026-04-29"
   },
   {
     "full_name": "Snailclimb/JavaGuide",
@@ -88,6 +133,11 @@
     "full_name": "tensorflow/tensorflow",
     "html_url": "https://github.com/tensorflow/tensorflow",
     "first_sent_at": "2026-04-28"
+  },
+  {
+    "full_name": "torvalds/linux",
+    "html_url": "https://github.com/torvalds/linux",
+    "first_sent_at": "2026-04-29"
   },
   {
     "full_name": "vinta/awesome-python",
