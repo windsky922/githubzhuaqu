@@ -20,8 +20,28 @@
     "first_sent_at": "2026-04-29"
   },
   {
+    "full_name": "awesome-selfhosted/awesome-selfhosted",
+    "html_url": "https://github.com/awesome-selfhosted/awesome-selfhosted",
+    "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "browser-use/browser-use",
+    "html_url": "https://github.com/browser-use/browser-use",
+    "first_sent_at": "2026-04-29"
+  },
+  {
     "full_name": "bytedance/deer-flow",
     "html_url": "https://github.com/bytedance/deer-flow",
+    "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "clash-verge-rev/clash-verge-rev",
+    "html_url": "https://github.com/clash-verge-rev/clash-verge-rev",
+    "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "code-yeongyu/oh-my-openagent",
+    "html_url": "https://github.com/code-yeongyu/oh-my-openagent",
     "first_sent_at": "2026-04-29"
   },
   {
@@ -50,6 +70,11 @@
     "first_sent_at": "2026-04-28"
   },
   {
+    "full_name": "firecrawl/firecrawl",
+    "html_url": "https://github.com/firecrawl/firecrawl",
+    "first_sent_at": "2026-04-29"
+  },
+  {
     "full_name": "freeCodeCamp/freeCodeCamp",
     "html_url": "https://github.com/freeCodeCamp/freeCodeCamp",
     "first_sent_at": "2026-04-28"
@@ -57,6 +82,16 @@
   {
     "full_name": "garrytan/gstack",
     "html_url": "https://github.com/garrytan/gstack",
+    "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "github/spec-kit",
+    "html_url": "https://github.com/github/spec-kit",
+    "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "hiyouga/LlamaFactory",
+    "html_url": "https://github.com/hiyouga/LlamaFactory",
     "first_sent_at": "2026-04-29"
   },
   {
@@ -72,6 +107,11 @@
   {
     "full_name": "langgenius/dify",
     "html_url": "https://github.com/langgenius/dify",
+    "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "lobehub/lobehub",
+    "html_url": "https://github.com/lobehub/lobehub",
     "first_sent_at": "2026-04-29"
   },
   {
@@ -135,6 +175,11 @@
     "first_sent_at": "2026-04-28"
   },
   {
+    "full_name": "thedotmack/claude-mem",
+    "html_url": "https://github.com/thedotmack/claude-mem",
+    "first_sent_at": "2026-04-29"
+  },
+  {
     "full_name": "torvalds/linux",
     "html_url": "https://github.com/torvalds/linux",
     "first_sent_at": "2026-04-29"
@@ -142,6 +187,11 @@
   {
     "full_name": "vinta/awesome-python",
     "html_url": "https://github.com/vinta/awesome-python",
+    "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "vllm-project/vllm",
+    "html_url": "https://github.com/vllm-project/vllm",
     "first_sent_at": "2026-04-29"
   },
   {
