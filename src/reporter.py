@@ -59,10 +59,10 @@ def fallback_report(
         "",
     ]
     if repositories:
-        lines.append("本周根据 GitHub Search API 结果生成降级版周报。以下分析基于仓库名称、简介、README 摘要、语言、Star 和 Fork 数据；具体降级原因记录在本次运行摘要中。")
+        lines.append("本周根据 GitHub Trending 与 GitHub Search 采集结果生成降级版周报。以下分析基于仓库名称、简介、README 摘要、语言、Star、Fork 和 Trending 排名；具体降级原因记录在本次运行摘要中。")
         lines.extend(["", *_trend_lines(trend_summary or {})])
     else:
-        lines.append("本周未发现符合条件的项目，或 GitHub Search API 暂时不可用。")
+        lines.append("本周未发现符合条件的项目，或 GitHub 采集暂时不可用。")
 
     lines.extend(
         [

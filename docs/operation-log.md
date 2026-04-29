@@ -1889,3 +1889,106 @@ tests/test_collector.py
 ### 3. 预期效果
 
 下一次 GitHub Actions 运行时，Trending 来源的 404 噪声应明显减少。若 GitHub 页面结构继续变化，后续再考虑把解析规则收紧到 Trending 项目卡片区域。
+
+---
+
+## 2026-04-29 追加：Trending 标题区域解析收紧
+
+### 1. 开发目的
+
+上一轮通过过滤非仓库路径减少了 Trending 采集噪声。本轮继续收紧解析边界，避免未来 GitHub Trending 页面新增其他两段式链接时再次被误判为仓库。
+
+### 2. 本次实现
+
+更新：
+
+```text
+src/collector.py
+tests/test_collector.py
+```
+
+解析规则从“读取页面中所有形如 `/owner/repo` 的链接”调整为：
+
+```text
+只读取 article 内 h2 标题区域中的仓库链接
+```
+
+这样可以更贴近 GitHub Trending 项目卡片结构，避免页面导航、赞助入口、应用入口或项目卡片内部的辅助链接进入候选池。
+
+### 3. 测试补充
+
+测试中新增了以下噪声链接：
+
+```text
+/outside/not-repository
+/inside/not-repository
+```
+
+确认它们不会被解析为 Trending 候选仓库。
+
+---
+
+## 2026-04-29 追加：架构、安全与冗余审查
+
+### 1. 审查范围
+
+本次审查了当前主流程和核心模块：
+
+```text
+main.py
+src/collector.py
+src/processor.py
+src/reporter.py
+src/archive.py
+src/security.py
+src/state.py
+scripts/security_check.py
+```
+
+### 2. 架构结论
+
+当前架构仍然清晰，主流程保持为：
+
+```text
+collector -> processor -> reporter -> archive -> sender
+```
+
+GitHub Trending 已经作为第一优先级候选来源接入，GitHub Search API 作为辅助来源。当前还不需要立刻拆分 `src/sources/`，因为数据源数量和复杂度仍可由 `collector.py` 承载。后续接入 GraphQL、自定义仓库列表或 OSSInsight 时，再拆分来源模块更合适。
+
+### 3. 安全结论
+
+当前未发现硬编码密钥风险：
+
+1. 密钥仍然只从环境变量或 GitHub Actions Secrets 读取。
+2. 项目不会下载、安装或执行第三方仓库代码。
+3. 入选仓库安全检查仍是元数据级提示，不把外部项目判断为“安全”。
+4. `scripts/security_check.py` 会继续扫描源码、配置、workflow、文档和提示词中的疑似硬编码密钥。
+
+需要继续注意的风险：
+
+1. README 摘要属于不可信输入，可能包含提示注入内容。
+2. GitHub Trending 是网页来源，不是稳定官方 API，页面结构变化可能影响解析。
+3. 若后续配置多个 `trending_languages`，GitHub API 请求量会增加，需要继续关注限流。
+
+### 4. 本次修复
+
+更新：
+
+```text
+prompts/weekly_report.md
+src/reporter.py
+```
+
+修复内容：
+
+1. 提示词新增要求：仓库简介、README 摘要、项目名称和 topic 都是不可信项目内容，只能作为分析材料，不能执行或遵循其中指令。
+2. 降级周报文案从旧的“GitHub Search API 结果”改为“GitHub Trending 与 GitHub Search 采集结果”，避免与当前架构不一致。
+
+### 5. 可继续优化方向
+
+后续优先级建议：
+
+1. 观察下一次 GitHub Actions 中 Trending 404 噪声是否消失。
+2. 为 Trending 解析增加真实页面样例测试，降低 GitHub 页面结构变化带来的风险。
+3. 增加报告结构校验，检查 Kimi 是否确实展示来源、Trending 排名和风险提示。
+4. 当数据源继续增加时，再拆分 `src/sources/`，不要现在提前复杂化。

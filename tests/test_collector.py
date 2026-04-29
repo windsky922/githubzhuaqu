@@ -88,8 +88,10 @@ class CollectorTest(unittest.TestCase):
 
     def test_parse_trending_repository_names(self):
         html = """
+        <a href="/outside/not-repository">outside</a>
         <article>
           <h2><a href="/owner/project">owner / project</a></h2>
+          <a href="/inside/not-repository">inside</a>
           <a href="/owner/project/stargazers">stars</a>
           <h2><a href="/another/repo?since=weekly">another / repo</a></h2>
           <a href="/sponsors/explore">Sponsors</a>

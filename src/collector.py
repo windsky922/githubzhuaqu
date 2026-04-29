@@ -34,14 +34,30 @@ class _TrendingParser(HTMLParser):
     def __init__(self) -> None:
         super().__init__()
         self.full_names: list[str] = []
+        self._article_depth = 0
+        self._heading_depth = 0
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag == "article":
+            self._article_depth += 1
+            return
+        if tag == "h2" and self._article_depth:
+            self._heading_depth += 1
+            return
         if tag != "a":
+            return
+        if not self._article_depth or not self._heading_depth:
             return
         href = dict(attrs).get("href") or ""
         full_name = _repo_name_from_href(href)
         if full_name and full_name not in self.full_names:
             self.full_names.append(full_name)
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag == "h2" and self._heading_depth:
+            self._heading_depth -= 1
+        elif tag == "article" and self._article_depth:
+            self._article_depth -= 1
 
 
 def _request_json(url: str, token: str, timeout: int = 20) -> dict:
