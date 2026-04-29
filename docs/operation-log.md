@@ -1626,3 +1626,43 @@ collector_stats
 4. 是否存在 GitHub API 限流、网络异常或查询语法问题。
 
 该结构也为后续 GitHub Trending、GraphQL API 等多数据源扩展预留了统计入口。
+
+---
+
+## 2026-04-29 追加：GitHub Pages 首页摘要增强
+
+### 1. 开发目的
+
+继续第四阶段质量与可观测性增强，让 GitHub Pages 首页不只显示周报列表，也能快速看到最新运行状态和趋势要点。
+
+### 2. 本次实现
+
+更新：
+
+```text
+scripts/build_pages.py
+tests/test_build_pages.py
+```
+
+首页新增：
+
+1. 最新运行摘要。
+2. 入选项目数。
+3. 采集候选数。
+4. 生成方式。
+5. Telegram 推送状态。
+6. 采集错误数量。
+7. 最新趋势要点。
+
+### 3. 数据来源
+
+首页读取：
+
+```text
+data/runs/YYYY-MM-DD.json
+data/trends/YYYY-MM-DD.json
+```
+
+### 4. 设计边界
+
+本次仍保持 GitHub Pages 为轻量 Markdown，不引入前端框架。后续当历史周报数量增加后，再考虑筛选、项目卡片和趋势可视化。

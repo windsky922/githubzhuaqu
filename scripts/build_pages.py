@@ -47,6 +47,7 @@ def _index_content(root: Path, reports: list[Path]) -> str:
     if reports:
         latest = reports[0]
         lines.append(f"- [{latest.stem}](weekly/{latest.name})")
+        lines.extend(_latest_summary_lines(root, latest.stem))
     else:
         lines.append("- 暂无周报。")
 
@@ -64,6 +65,7 @@ def _index_content(root: Path, reports: list[Path]) -> str:
             "- [架构说明](architecture.md)",
             "- [配置说明](setup.md)",
             "- [开发路线图](roadmap.md)",
+            "- [未来更新规划](future-plan.md)",
             "- [操作日志](operation-log.md)",
             "",
         ]
@@ -90,6 +92,44 @@ def _run_summary(root: Path, run_date: str) -> dict:
     except json.JSONDecodeError:
         return {}
     return data if isinstance(data, dict) else {}
+
+
+def _trend_summary(root: Path, run_date: str) -> dict:
+    path = root / "data" / "trends" / f"{run_date}.json"
+    if not path.exists():
+        return {}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def _latest_summary_lines(root: Path, run_date: str) -> list[str]:
+    summary = _run_summary(root, run_date)
+    trends = _trend_summary(root, run_date)
+    if not summary and not trends:
+        return []
+
+    lines = ["", "## 最新运行摘要", ""]
+    if summary:
+        kimi = "Kimi" if summary.get("kimi_used") else "降级模板"
+        telegram = "已推送" if summary.get("telegram_sent") else "未推送"
+        collector_errors = len(summary.get("collector_errors") or [])
+        lines.extend(
+            [
+                f"- 入选项目：{summary.get('selected_count', 0)} 个",
+                f"- 采集候选：{summary.get('collected_count', 0)} 个",
+                f"- 生成方式：{kimi}",
+                f"- Telegram：{telegram}",
+                f"- 采集错误：{collector_errors} 条",
+            ]
+        )
+    points = trends.get("summary_points") or []
+    if points:
+        lines.extend(["", "## 最新趋势要点", ""])
+        lines.extend(f"- {point}" for point in points[:5])
+    return lines
 
 
 if __name__ == "__main__":
