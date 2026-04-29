@@ -1172,3 +1172,30 @@ data/selected
 2. 部分采集失败会返回错误列表。
 3. `config/interests.json` 优先于示例配置。
 4. `data/raw` 和 `data/selected` 写入不同路径。
+
+---
+
+## 2026-04-29 追加：配置说明补充
+
+### 1. 补充原因
+
+代码已经支持优先读取 `config/interests.json`，但配置文档中还没有说明该文件的用途和提交方式。
+
+### 2. 本次更新
+
+已更新：
+
+```text
+docs/setup.md
+```
+
+新增内容：
+
+1. `config/interests.json` 的读取优先级。
+2. `preferred_topics`、`preferred_languages`、`exclude_keywords`、`max_projects`、`min_stars` 的用途。
+3. 如果希望 GitHub Actions 使用自定义兴趣配置，需要将 `config/interests.json` 提交到仓库。
+4. `config/interests.json` 不应包含任何 API Key、Token 或 Chat ID。
+
+### 3. 处理结论
+
+本次不把 `config/interests.json` 加入 `.gitignore`。原因是该文件不是密钥文件，并且 GitHub Actions 需要从仓库读取它才能使用自定义偏好。

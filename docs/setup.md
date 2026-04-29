@@ -25,6 +25,32 @@ python main.py
 
 本地运行时，可以参考 `.env.example` 手动设置环境变量。为了避免增加依赖，程序不会自动读取 `.env` 文件。
 
+## 兴趣配置
+
+默认配置文件是：
+
+```text
+config/interests.example.json
+```
+
+如果需要自定义关注方向，可以复制一份为：
+
+```text
+config/interests.json
+```
+
+程序会优先读取 `config/interests.json`，不存在时才回退到 `config/interests.example.json`。
+
+常用字段：
+
+1. `preferred_topics`：优先关注的话题关键词。
+2. `preferred_languages`：优先关注的主要语言。
+3. `exclude_keywords`：需要排除的仓库关键词。
+4. `max_projects`：每期周报最多入选项目数。
+5. `min_stars`：候选仓库最低 Star 数。
+
+如果希望 GitHub Actions 也使用你的自定义兴趣配置，需要把 `config/interests.json` 提交到仓库。该文件不应包含 API Key、Token 或 Chat ID。
+
 ## 测试
 
 ```bash
