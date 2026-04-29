@@ -12,10 +12,54 @@
   ],
   "collected_count": 210,
   "selected_count": 10,
-  "skipped_sent_count": 40,
+  "skipped_sent_count": 50,
   "collector_errors": [],
+  "collector_stats": [
+    {
+      "query": "pushed:>=2026-04-22 stars:>20",
+      "status": "success",
+      "count": 30,
+      "error": ""
+    },
+    {
+      "query": "topic:ai pushed:>=2026-04-22 stars:>20",
+      "status": "success",
+      "count": 30,
+      "error": ""
+    },
+    {
+      "query": "topic:agent pushed:>=2026-04-22 stars:>10",
+      "status": "success",
+      "count": 30,
+      "error": ""
+    },
+    {
+      "query": "topic:llm pushed:>=2026-04-22 stars:>10",
+      "status": "success",
+      "count": 30,
+      "error": ""
+    },
+    {
+      "query": "topic:automation pushed:>=2026-04-22 stars:>10",
+      "status": "success",
+      "count": 30,
+      "error": ""
+    },
+    {
+      "query": "language:Python pushed:>=2026-04-22 stars:>20",
+      "status": "success",
+      "count": 30,
+      "error": ""
+    },
+    {
+      "query": "language:TypeScript pushed:>=2026-04-22 stars:>20",
+      "status": "success",
+      "count": 30,
+      "error": ""
+    }
+  ],
   "readme_fetched_count": 10,
-  "star_history_updated_count": 150,
+  "star_history_updated_count": 149,
   "report_path": "reports/2026-04-29.md",
   "run_summary_path": "data/runs/2026-04-29.json",
   "raw_repositories_path": "data/raw/2026-04-29.json",

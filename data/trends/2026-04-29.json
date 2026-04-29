@@ -1,96 +1,84 @@
 {
   "total_projects": 10,
-  "total_star_growth": 17,
+  "total_star_growth": 287,
   "top_languages": [
     {
       "name": "Python",
-      "count": 5
+      "count": 7
     },
     {
       "name": "JavaScript",
       "count": 1
     },
     {
-      "name": "Java",
-      "count": 1
-    },
-    {
-      "name": "Go",
+      "name": "HTML",
       "count": 1
     },
     {
       "name": "TypeScript",
-      "count": 1
-    },
-    {
-      "name": "Unknown",
       "count": 1
     }
   ],
   "top_categories": [
     {
       "name": "AI Agent",
-      "count": 4
-    },
-    {
-      "name": "Other",
-      "count": 3
-    },
-    {
-      "name": "Developer Tools",
-      "count": 2
+      "count": 7
     },
     {
       "name": "LLM Tooling",
+      "count": 2
+    },
+    {
+      "name": "Machine Learning",
       "count": 1
     }
   ],
   "top_star_growth": [
     {
-      "full_name": "521xueweihan/HelloGitHub",
-      "html_url": "https://github.com/521xueweihan/HelloGitHub",
-      "star_growth": 4,
-      "stargazers_count": 153728,
-      "language": "Python",
-      "category": "Other"
-    },
-    {
-      "full_name": "facebook/react",
-      "html_url": "https://github.com/facebook/react",
-      "star_growth": 2,
-      "stargazers_count": 244754,
+      "full_name": "santifer/career-ops",
+      "html_url": "https://github.com/santifer/career-ops",
+      "star_growth": 66,
+      "stargazers_count": 40771,
       "language": "JavaScript",
-      "category": "Other"
-    },
-    {
-      "full_name": "jeecgboot/JeecgBoot",
-      "html_url": "https://github.com/jeecgboot/JeecgBoot",
-      "star_growth": 2,
-      "stargazers_count": 46014,
-      "language": "Java",
       "category": "AI Agent"
     },
     {
-      "full_name": "volcengine/OpenViking",
-      "html_url": "https://github.com/volcengine/OpenViking",
-      "star_growth": 2,
-      "stargazers_count": 23219,
+      "full_name": "DigitalPlatDev/FreeDomain",
+      "html_url": "https://github.com/DigitalPlatDev/FreeDomain",
+      "star_growth": 50,
+      "stargazers_count": 159236,
+      "language": "HTML",
+      "category": "Machine Learning"
+    },
+    {
+      "full_name": "MemPalace/mempalace",
+      "html_url": "https://github.com/MemPalace/mempalace",
+      "star_growth": 36,
+      "stargazers_count": 50249,
+      "language": "Python",
+      "category": "LLM Tooling"
+    },
+    {
+      "full_name": "hesreallyhim/awesome-claude-code",
+      "html_url": "https://github.com/hesreallyhim/awesome-claude-code",
+      "star_growth": 35,
+      "stargazers_count": 41762,
       "language": "Python",
       "category": "AI Agent"
     },
     {
-      "full_name": "hacksider/Deep-Live-Cam",
-      "html_url": "https://github.com/hacksider/Deep-Live-Cam",
-      "star_growth": 2,
-      "stargazers_count": 92433,
+      "full_name": "BerriAI/litellm",
+      "html_url": "https://github.com/BerriAI/litellm",
+      "star_growth": 26,
+      "stargazers_count": 45126,
       "language": "Python",
-      "category": "Developer Tools"
+      "category": "LLM Tooling"
     }
   ],
   "summary_points": [
-    "AI Agent 是本期最集中的方向，共 4 个项目。",
-    "Python 是本期出现最多的主要语言，共 5 个项目。",
-    "本期入选项目累计新增 Star 17。",
-    "521xueweihan/HelloGitHub 是本期新增 Star 最高的项目，新增 4。"
+    "AI Agent 是本期最集中的方向，共 7 个项目。",
+    "Python 是本期出现最多的主要语言，共 7 个项目。",
+    "本期入选项目累计新增 Star 287。",
+    "santifer/career-ops 是本期新增 Star 最高的项目，新增 66。"
   ]
 }
