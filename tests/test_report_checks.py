@@ -17,6 +17,14 @@ def repo():
     )
 
 
+def trending_repo():
+    item = repo()
+    item.sources = ["github_trending"]
+    item.trending_rank = 3
+    item.security_flags = ["未识别到许可证，复用代码前需要人工确认授权。"]
+    return item
+
+
 class ReportChecksTest(unittest.TestCase):
     def test_accepts_complete_report(self):
         report = "owner/project [https://github.com/owner/project](https://github.com/owner/project)"
@@ -37,6 +45,25 @@ class ReportChecksTest(unittest.TestCase):
         errors = check_report_quality(report, [repo()])
 
         self.assertTrue(any("蟒蛇" in error for error in errors))
+
+    def test_requires_trending_source_rank_and_risk_when_present(self):
+        report = "owner/project [https://github.com/owner/project](https://github.com/owner/project)"
+
+        errors = check_report_quality(report, [trending_repo()])
+
+        self.assertTrue(any("项目来源" in error for error in errors))
+        self.assertTrue(any("Trending 排名" in error for error in errors))
+        self.assertTrue(any("风险提示" in error for error in errors))
+
+    def test_accepts_trending_source_rank_and_risk(self):
+        report = (
+            "owner/project GitHub Trending Trending 排名 3 风险提示：未识别到许可证。"
+            " [https://github.com/owner/project](https://github.com/owner/project)"
+        )
+
+        errors = check_report_quality(report, [trending_repo()])
+
+        self.assertEqual(errors, [])
 
 
 if __name__ == "__main__":

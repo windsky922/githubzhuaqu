@@ -13,4 +13,36 @@ def check_report_quality(report: str, repositories: list[Repository]) -> list[st
         expected_link = f"[{repo.html_url}]({repo.html_url})"
         if repo.html_url and expected_link not in report:
             errors.append(f"报告缺少完整 Markdown 链接：{repo.html_url}")
+        errors.extend(_source_errors(report, repo))
+        errors.extend(_trending_errors(report, repo))
+        errors.extend(_security_errors(report, repo))
     return errors
+
+
+def _source_errors(report: str, repo: Repository) -> list[str]:
+    labels = {
+        "github_trending": "GitHub Trending",
+        "github_search": "GitHub Search",
+    }
+    errors = []
+    for source in repo.sources:
+        label = labels.get(source, source)
+        if label and label not in report:
+            errors.append(f"报告缺少项目来源：{repo.full_name} {label}")
+    return errors
+
+
+def _trending_errors(report: str, repo: Repository) -> list[str]:
+    if repo.trending_rank <= 0:
+        return []
+    if "Trending" not in report or str(repo.trending_rank) not in report:
+        return [f"报告缺少 Trending 排名：{repo.full_name} #{repo.trending_rank}"]
+    return []
+
+
+def _security_errors(report: str, repo: Repository) -> list[str]:
+    if not repo.security_flags:
+        return []
+    if "风险" not in report and not any(flag in report for flag in repo.security_flags):
+        return [f"报告缺少风险提示：{repo.full_name}"]
+    return []

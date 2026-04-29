@@ -1992,3 +1992,33 @@ src/reporter.py
 2. 为 Trending 解析增加真实页面样例测试，降低 GitHub 页面结构变化带来的风险。
 3. 增加报告结构校验，检查 Kimi 是否确实展示来源、Trending 排名和风险提示。
 4. 当数据源继续增加时，再拆分 `src/sources/`，不要现在提前复杂化。
+
+---
+
+## 2026-04-29 追加：报告质量校验增强
+
+### 1. 开发目的
+
+当前采集和排序已经把 GitHub Trending 作为第一热度信号。为了避免 Kimi 周报漏掉关键字段，本轮增强报告质量校验，让模型输出必须体现项目来源、Trending 排名和风险提示。
+
+### 2. 本次实现
+
+更新：
+
+```text
+src/report_checks.py
+src/reporter.py
+tests/test_report_checks.py
+```
+
+校验规则：
+
+1. 如果项目包含 `sources`，报告中需要出现对应来源，例如 `GitHub Trending` 或 `GitHub Search`。
+2. 如果项目包含大于 0 的 `trending_rank`，报告中需要出现 `Trending` 和对应排名数字。
+3. 如果项目包含 `security_flags`，报告中需要出现风险提示相关内容。
+
+这些规则只在对应数据存在时触发，不会要求普通 Search 项目强行展示 Trending 排名。
+
+### 3. 冗余文案修正
+
+降级周报结论文案中仍提到“后续加入 README 深度分析和历史去重”，但这两类能力已经部分实现。本轮改为提醒用户优先查看 Trending 排名靠前、近期增长明显且匹配兴趣的项目，并强调复用前仍需人工审查代码、依赖和许可证。
