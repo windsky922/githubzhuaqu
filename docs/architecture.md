@@ -92,7 +92,30 @@ config/interests.example.json
 3. 单个仓库 README 获取失败时跳过，不影响整体周报。
 4. 只保留前 2000 个字符的清洗后摘要，避免提示词过长。
 
-## Star 增量评分
+## Trending 优先采集与评分
+
+当前采集链路以 GitHub Trending 周榜作为第一优先级候选来源，GitHub Search API 作为辅助候选来源。
+
+处理顺序：
+
+```text
+GitHub Trending weekly
+-> GitHub Search API 辅助查询
+-> 按仓库名去重并合并来源信号
+-> 最近一周活跃过滤
+-> 综合评分排序
+```
+
+`Repository` 会记录以下来源字段：
+
+1. `sources`：项目来自 `github_trending`、`github_search` 或多个来源。
+2. `trending_rank`：项目在 GitHub Trending 周榜中的排名。
+3. `trending_period`：当前为 `weekly`。
+4. `source_priority`：来源优先级，Trending 高于 Search。
+
+GitHub Trending 是网页来源，不是稳定的官方 API。因此它失败时不会中断整个流程，程序会继续使用 GitHub Search API 生成周报，并把失败原因写入运行摘要。
+
+## 综合热度评分
 
 `data/state/star_history.json` 用于记录仓库上次采集时的 Star 数。
 
@@ -104,15 +127,17 @@ star_growth = 当前 Star - 历史 Star
 
 如果仓库没有历史记录，则 `star_growth` 为 0。
 
-当前综合评分权重：
+当前综合评分以 Trending 为第一指标，其余信号作为辅助：
 
-1. Star 增量：40%
-2. 总 Star：25%
-3. 兴趣主题匹配：20%
+1. GitHub Trending 周榜排名：45%
+2. Star 增量：25%
+3. 兴趣主题匹配：15%
 4. 活跃时间新鲜度：10%
-5. Fork：5%
+5. 社区基础信号：5%，由总 Star 和 Fork 共同构成。
 
-这种设计把新增 Star 作为本周热度的核心信号，同时保留总 Star、主题匹配和近期活跃度，避免只按历史体量筛出长期热门老项目。
+这种设计把 Trending 作为本周热度的最高优先级，同时保留新增 Star、垂直兴趣匹配、近期活跃度和社区基础信号，避免只按单一 Star 数判断项目热度。
+
+评分权重可以通过 `config/interests.json` 中的 `score_weights` 调整。后续如果要做更细的个性化推荐，可以在不改主流程的前提下扩展该配置。
 
 周报候选项目以最近一周 `pushed_at` 或 `updated_at` 活跃为准，不要求仓库必须在最近一周创建。当前采集查询不再使用 `created` 条件，避免候选池偏向“新建项目”。
 
@@ -194,7 +219,7 @@ selection_reasons
 
 ## 采集分项统计
 
-`src/collector.py` 会为每条 GitHub Search 查询记录：
+`src/collector.py` 会为 GitHub Trending 和每条 GitHub Search 查询记录：
 
 ```text
 collector_stats
@@ -202,10 +227,11 @@ collector_stats
 
 每条记录包含：
 
-1. 查询条件。
-2. 成功或失败状态。
-3. 返回仓库数量。
-4. 失败原因。
+1. 数据来源。
+2. 查询条件。
+3. 成功、失败或部分失败状态。
+4. 返回仓库数量。
+5. 失败原因。
 
 该字段写入 `data/runs/YYYY-MM-DD.json`，用于判断本次采集是否完整，并为后续多数据源扩展预留统一统计结构。
 

@@ -49,6 +49,12 @@ config/interests.json
 3. `exclude_keywords`：需要排除的仓库关键词。
 4. `max_projects`：每期周报最多入选项目数。
 5. `min_stars`：候选仓库最低 Star 数。
+6. `enable_github_trending`：是否启用 GitHub Trending 周榜采集，默认启用。
+7. `trending_languages`：额外采集的 Trending 语言榜，例如 `["Python", "TypeScript"]`。默认只采集全站周榜，避免请求过多。
+8. `trending_max_repositories`：每个 Trending 榜最多补齐多少个仓库详情。
+9. `search_topics`：Search API 用于补充垂直方向的 topic 查询。
+10. `search_languages`：Search API 用于补充垂直方向的语言查询。
+11. `score_weights`：综合评分权重。当前默认把 `trending` 作为第一指标，其余信号作为辅助。
 
 如果希望 GitHub Actions 也使用你的自定义兴趣配置，需要把 `config/interests.json` 提交到仓库。该文件不应包含 API Key、Token 或 Chat ID。
 

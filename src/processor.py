@@ -13,6 +13,13 @@ CATEGORIES = {
     "Machine Learning": {"machine-learning", "ml", "deep-learning", "pytorch", "tensorflow"},
     "Automation": {"github-actions", "telegram", "bot", "automation"},
 }
+DEFAULT_SCORE_WEIGHTS = {
+    "trending": 0.45,
+    "star_growth": 0.25,
+    "topic": 0.15,
+    "freshness": 0.10,
+    "community": 0.05,
+}
 
 
 def process_repositories(
@@ -23,16 +30,31 @@ def process_repositories(
     unique = _dedupe(repositories)
     filtered = [repo for repo in unique if _is_usable(repo, settings)]
     _score(filtered, settings, star_history or {})
-    filtered.sort(key=lambda repo: (repo.score, repo.star_growth, repo.stargazers_count), reverse=True)
+    filtered.sort(
+        key=lambda repo: (repo.score, repo.source_priority, -repo.trending_rank, repo.star_growth, repo.stargazers_count),
+        reverse=True,
+    )
     return filtered[: settings.max_projects]
 
 
 def _dedupe(repositories: list[Repository]) -> list[Repository]:
     by_name: dict[str, Repository] = {}
     for repo in repositories:
-        if repo.full_name and repo.full_name not in by_name:
+        if not repo.full_name:
+            continue
+        if repo.full_name not in by_name:
             by_name[repo.full_name] = repo
+        else:
+            _merge_repository_signals(by_name[repo.full_name], repo)
     return list(by_name.values())
+
+
+def _merge_repository_signals(target: Repository, source: Repository) -> None:
+    target.sources = sorted(set(target.sources + source.sources))
+    if source.trending_rank and (not target.trending_rank or source.trending_rank < target.trending_rank):
+        target.trending_rank = source.trending_rank
+        target.trending_period = source.trending_period
+    target.source_priority = max(target.source_priority, source.source_priority)
 
 
 def _is_usable(repo: Repository, settings: Settings) -> bool:
@@ -55,20 +77,24 @@ def _score(repositories: list[Repository], settings: Settings, star_history: dic
     for repo in repositories:
         repo.star_growth = _star_growth(repo, star_history)
     max_growth = max((repo.star_growth for repo in repositories), default=0)
+    max_trending_rank = max((repo.trending_rank for repo in repositories if repo.trending_rank > 0), default=0)
+    weights = _score_weights(settings)
 
     for repo in repositories:
         star_score = repo.stargazers_count / max_stars if max_stars else 0
         fork_score = repo.forks_count / max_forks if max_forks else 0
         growth_score = repo.star_growth / max_growth if max_growth else 0
+        trending_score = _trending_score(repo, max_trending_rank)
         topic_score = _topic_score(repo, settings)
         freshness_score = _freshness_score(repo.pushed_at or repo.updated_at, settings.days_back)
+        community_score = (star_score + fork_score) / 2
         repo.category = _category(repo)
         repo.score = round(
-            0.25 * star_score
-            + 0.05 * fork_score
-            + 0.20 * topic_score
-            + 0.40 * growth_score
-            + 0.10 * freshness_score,
+            weights["trending"] * trending_score
+            + weights["star_growth"] * growth_score
+            + weights["topic"] * topic_score
+            + weights["freshness"] * freshness_score
+            + weights["community"] * community_score,
             4,
         )
         repo.selection_reasons = _selection_reasons(repo, topic_score)
@@ -79,6 +105,28 @@ def _star_growth(repo: Repository, star_history: dict[str, int]) -> int:
     if previous is None:
         return 0
     return max(0, repo.stargazers_count - previous)
+
+
+def _trending_score(repo: Repository, max_rank: int) -> float:
+    if not repo.trending_rank or not max_rank:
+        return 0
+    return max(0.0, (max_rank - repo.trending_rank + 1) / max_rank)
+
+
+def _score_weights(settings: Settings) -> dict[str, float]:
+    configured = settings.interests.get("score_weights", {}) or {}
+    weights = DEFAULT_SCORE_WEIGHTS.copy()
+    for key in weights:
+        try:
+            value = float(configured.get(key, weights[key]))
+        except (TypeError, ValueError):
+            continue
+        if value >= 0:
+            weights[key] = value
+    total = sum(weights.values())
+    if total <= 0:
+        return DEFAULT_SCORE_WEIGHTS.copy()
+    return {key: value / total for key, value in weights.items()}
 
 
 def _topic_score(repo: Repository, settings: Settings) -> float:
@@ -97,6 +145,8 @@ def _topic_score(repo: Repository, settings: Settings) -> float:
 
 def _selection_reasons(repo: Repository, topic_score: float) -> list[str]:
     reasons = []
+    if repo.trending_rank > 0:
+        reasons.append(f"进入 GitHub Trending 周榜第 {repo.trending_rank} 位，是本期最重要的热度信号。")
     if repo.star_growth > 0:
         reasons.append(f"较上次记录新增 Star {repo.star_growth}，近期热度上升。")
     if repo.stargazers_count > 0:

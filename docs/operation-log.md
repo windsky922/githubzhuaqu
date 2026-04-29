@@ -1744,3 +1744,79 @@ data/selected/
 ### 4. 设计边界
 
 本次仍保持 Markdown 页面，不引入前端框架。后续如果历史项目明显增多，再考虑按语言、方向、日期生成更细的分组页面。
+
+---
+
+## 2026-04-29 追加：GitHub Trending 第一优先级采集
+
+### 1. 用户要求
+
+用户明确希望以 GitHub Trending 作为热点考核的第一指标，其余信号作为辅助，同时保留垂直方向配置，方便后续做个性化调整。
+
+### 2. 架构判断
+
+本次没有提前拆出新的 `src/sources/` 目录，而是在现有 `src/collector.py` 中接入 Trending。原因是当前只有两个来源：GitHub Trending 和 GitHub Search API，直接在采集层扩展更简洁；等后续接入 GraphQL、自定义仓库列表或更多来源时，再拆分来源模块。
+
+当前数据源定位：
+
+1. GitHub Trending 周榜：第一优先级候选来源。
+2. GitHub Search API：辅助候选来源，主要用于补充垂直方向和 Trending 遗漏项目。
+3. 后续预留：GraphQL 细粒度热度、用户自定义关注仓库。
+
+### 3. 本次实现
+
+更新：
+
+```text
+src/models.py
+src/collector.py
+src/processor.py
+config/interests.example.json
+tests/test_collector.py
+tests/test_processor.py
+docs/architecture.md
+docs/future-plan.md
+docs/setup.md
+```
+
+新增仓库字段：
+
+1. `sources`：记录项目来自 `github_trending`、`github_search` 或多个来源。
+2. `trending_rank`：记录项目在 GitHub Trending 周榜中的排名。
+3. `trending_period`：当前为 `weekly`。
+4. `source_priority`：用于保留来源优先级，Trending 高于 Search。
+
+采集流程调整为：
+
+```text
+GitHub Trending weekly
+-> GitHub Search API 辅助查询
+-> 去重并合并来源信号
+-> 过滤最近一周活跃项目
+-> 综合评分排序
+```
+
+### 4. 评分调整
+
+当前默认评分权重：
+
+1. `trending`：45%。
+2. `star_growth`：25%。
+3. `topic`：15%。
+4. `freshness`：10%。
+5. `community`：5%。
+
+其中 `community` 由总 Star 和 Fork 共同构成。该设计把 Trending 作为第一指标，同时保留新增 Star、垂直方向匹配、近期活跃和社区基础信号。
+
+### 5. 个性化预留
+
+`config/interests.example.json` 新增：
+
+1. `enable_github_trending`：是否启用 Trending。
+2. `trending_languages`：额外采集指定语言的 Trending 榜。
+3. `trending_max_repositories`：限制每个 Trending 榜补齐详情的项目数。
+4. `search_topics`：Search API 的 topic 补充方向。
+5. `search_languages`：Search API 的语言补充方向。
+6. `score_weights`：综合评分权重。
+
+后续用户可以通过 `config/interests.json` 调整这些字段，不需要改主流程代码。

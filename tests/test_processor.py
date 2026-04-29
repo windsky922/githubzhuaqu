@@ -119,6 +119,33 @@ class ProcessorTest(unittest.TestCase):
 
         self.assertEqual(result[0].full_name, "b/smaller-growing")
 
+    def test_trending_rank_is_primary_hotness_signal(self):
+        settings = Settings(
+            root=None,
+            run_date="2026-04-27",
+            since_date="2026-04-20",
+            days_back=7,
+            min_stars=20,
+            max_projects=2,
+            github_token="",
+            kimi_api_key="",
+            kimi_base_url="",
+            kimi_model="",
+            telegram_bot_token="",
+            telegram_chat_id="",
+            interests={"preferred_topics": [], "preferred_languages": [], "exclude_keywords": []},
+        )
+        trending = repo("a/trending", 500, topics=[])
+        growing = repo("b/growing", 10000, topics=[])
+        trending.trending_rank = 1
+        trending.sources = ["github_trending"]
+        trending.source_priority = 100
+
+        result = process_repositories([growing, trending], settings, {"b/growing": 1000})
+
+        self.assertEqual(result[0].full_name, "a/trending")
+        self.assertTrue(any("GitHub Trending 周榜" in reason for reason in result[0].selection_reasons))
+
     def test_adds_selection_reasons(self):
         settings = Settings(
             root=None,

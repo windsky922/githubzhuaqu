@@ -23,6 +23,10 @@ class Repository:
     readme_excerpt: str = ""
     security_flags: list[str] = field(default_factory=list)
     selection_reasons: list[str] = field(default_factory=list)
+    sources: list[str] = field(default_factory=list)
+    trending_rank: int = 0
+    trending_period: str = ""
+    source_priority: int = 0
     star_growth: int = 0
     score: float = 0.0
     category: str = "Other"

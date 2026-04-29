@@ -18,6 +18,26 @@
     "TypeScript",
     "JavaScript"
   ],
+  "search_topics": [
+    "ai",
+    "agent",
+    "llm",
+    "automation"
+  ],
+  "search_languages": [
+    "Python",
+    "TypeScript"
+  ],
+  "enable_github_trending": true,
+  "trending_languages": [],
+  "trending_max_repositories": 25,
+  "score_weights": {
+    "trending": 0.45,
+    "star_growth": 0.25,
+    "topic": 0.15,
+    "freshness": 0.1,
+    "community": 0.05
+  },
   "exclude_keywords": [
     "mirror",
     "test repo",
@@ -26,4 +46,3 @@
   "max_projects": 10,
   "min_stars": 20
 }
-

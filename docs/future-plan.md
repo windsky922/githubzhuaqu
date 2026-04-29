@@ -59,11 +59,14 @@ tests/test_quality.py
 
 1. 运行摘要新增 `collector_stats`，记录每条 GitHub Search 查询的成功、失败、返回数量和错误原因。
 2. 保留 `collector_errors`，兼容旧的失败摘要字段。
+3. 接入 GitHub Trending 周榜作为第一优先级候选来源。
+4. `Repository` 增加 `sources`、`trending_rank`、`trending_period`、`source_priority`，为后续多来源融合保留字段。
+5. 评分权重改为以 Trending 排名为第一指标，Star 增量、垂直兴趣、活跃度和社区基础信号作为辅助。
 
 候选数据源：
 
-1. GitHub Search API：继续作为主数据源。
-2. GitHub Trending 页面：作为热点补充来源。
+1. GitHub Trending 页面：当前第一优先级来源。
+2. GitHub Search API：继续作为辅助来源和垂直方向补充。
 3. GitHub GraphQL API：用于获取更细的 Star、Issue、Release、Commit 数据。
 4. 用户自定义仓库列表：用于长期关注项目。
 
@@ -79,6 +82,8 @@ tests/test_sources.py
 1. 每个数据源返回统一的 `Repository` 结构。
 2. 数据源失败不应阻断其他数据源。
 3. 运行摘要记录每个数据源的成功、失败和返回数量。基础版本已完成。
+4. 个性化配置先保留在 `config/interests.json` 中，重点字段包括 `search_topics`、`search_languages`、`trending_languages` 和 `score_weights`。
+5. 暂不立即拆出 `src/sources/` 目录；当 Trending、Search、GraphQL、自定义仓库列表都需要独立维护时，再拆分来源模块。
 
 ## 第六阶段：报告质量增强
 
@@ -232,12 +237,14 @@ tests/test_storage.py
 
 近期优先级：
 
-1. GitHub Pages 历史项目筛选。
+1. 观察 GitHub Trending 页面解析在 GitHub Actions 中的稳定性。
+2. 根据真实周报结果微调 `score_weights`。
+3. GitHub Pages 历史项目筛选。
 
 中期优先级：
 
-1. GitHub Trending 补充数据源。
-2. 报告结构校验和自动重试。
+1. 报告结构校验和自动重试。
+2. GitHub GraphQL 细粒度热度补充。
 3. 多推送渠道抽象。
 
 长期优先级：
