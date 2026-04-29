@@ -9,16 +9,32 @@ from .models import Repository
 from .settings import Settings
 
 
-def generate_report(repositories: list[Repository], queries: list[str], settings: Settings) -> tuple[str, bool, str]:
+def generate_report(
+    repositories: list[Repository],
+    queries: list[str],
+    settings: Settings,
+    trend_summary: dict | None = None,
+) -> tuple[str, bool, str]:
     if settings.kimi_api_key and settings.kimi_model:
         try:
-            return normalize_report_markdown(_generate_with_kimi(repositories, queries, settings)), False, ""
+            return normalize_report_markdown(
+                _generate_with_kimi(repositories, queries, settings, trend_summary or {})
+            ), False, ""
         except Exception as error:
-            return normalize_report_markdown(fallback_report(repositories, queries, settings)), True, str(error)
-    return normalize_report_markdown(fallback_report(repositories, queries, settings)), True, "Kimi API 未配置"
+            return normalize_report_markdown(
+                fallback_report(repositories, queries, settings, trend_summary or {})
+            ), True, str(error)
+    return normalize_report_markdown(
+        fallback_report(repositories, queries, settings, trend_summary or {})
+    ), True, "Kimi API 未配置"
 
 
-def fallback_report(repositories: list[Repository], queries: list[str], settings: Settings) -> str:
+def fallback_report(
+    repositories: list[Repository],
+    queries: list[str],
+    settings: Settings,
+    trend_summary: dict | None = None,
+) -> str:
     lines = [
         f"# GitHub 每周热点项目周报 - {settings.run_date}",
         "",
@@ -27,6 +43,7 @@ def fallback_report(repositories: list[Repository], queries: list[str], settings
     ]
     if repositories:
         lines.append("本周根据 GitHub Search API 结果生成降级版周报。以下分析基于仓库名称、简介、README 摘要、语言、Star 和 Fork 数据；具体降级原因记录在本次运行摘要中。")
+        lines.extend(["", *_trend_lines(trend_summary or {})])
     else:
         lines.append("本周未发现符合条件的项目，或 GitHub Search API 暂时不可用。")
 
@@ -89,6 +106,11 @@ def fallback_report(repositories: list[Repository], queries: list[str], settings
     return "\n".join(lines).strip() + "\n"
 
 
+def _trend_lines(trend_summary: dict) -> list[str]:
+    points = trend_summary.get("summary_points") or []
+    return [f"- {point}" for point in points]
+
+
 def normalize_report_markdown(report: str) -> str:
     normalized = report.replace("蟒蛇", "Python")
     lines = [_link_github_urls(line) for line in normalized.splitlines()]
@@ -116,7 +138,12 @@ def _short_text(text: str, limit: int = 320) -> str:
     return text[:limit].rstrip() + "..."
 
 
-def _generate_with_kimi(repositories: list[Repository], queries: list[str], settings: Settings) -> str:
+def _generate_with_kimi(
+    repositories: list[Repository],
+    queries: list[str],
+    settings: Settings,
+    trend_summary: dict,
+) -> str:
     prompt_path = settings.root / "prompts" / "weekly_report.md"
     system_prompt = prompt_path.read_text(encoding="utf-8")
     user_payload = {
@@ -124,6 +151,7 @@ def _generate_with_kimi(repositories: list[Repository], queries: list[str], sett
         "since_date": settings.since_date,
         "queries": queries,
         "repositories": [repo.to_dict() for repo in repositories],
+        "trend_summary": trend_summary,
         "interests": settings.interests,
     }
     payload = {

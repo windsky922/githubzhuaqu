@@ -884,3 +884,61 @@ py scripts/build_pages.py
 2. `affaan-m/everything-claude-code`，新增 Star 10。
 
 报告和 Pages 页面中的链接均显示完整 URL。
+
+---
+
+## 2026-04-28 追加：第三阶段趋势总结
+
+### 1. 开发目的
+
+继续第三阶段产品化输出，增加数据驱动的趋势总结，减少周报趋势部分依赖模型自由发挥。
+
+### 2. 本次实现
+
+新增模块：
+
+```text
+src/trends.py
+```
+
+该模块根据本期入选仓库生成：
+
+1. 入选项目总数。
+2. 累计新增 Star。
+3. 主要语言分布。
+4. 项目方向分布。
+5. 新增 Star 最高的项目列表。
+6. 可直接写入周报的趋势要点。
+
+### 3. 归档文件
+
+新增归档路径：
+
+```text
+data/trends/YYYY-MM-DD.json
+```
+
+运行摘要新增字段：
+
+```text
+trend_summary_path
+```
+
+### 4. 报告生成变化
+
+Kimi 生成周报时会收到 `trend_summary`。如果本地未配置 Kimi，降级版周报也会在“本周趋势”部分展示趋势要点。
+
+### 5. 工作流变化
+
+`.github/workflows/weekly.yml` 自动提交范围增加：
+
+```text
+data/trends
+```
+
+### 6. 本地验证
+
+已补充测试：
+
+1. `tests/test_trends.py`
+2. `tests/test_reporter.py` 中的趋势要点展示断言

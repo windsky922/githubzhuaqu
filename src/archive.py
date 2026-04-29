@@ -25,6 +25,14 @@ def write_raw_repositories(repositories: list[Repository], settings: Settings) -
     return path
 
 
+def write_trend_summary(trend_summary: dict, settings: Settings) -> Path:
+    trends_dir = settings.root / "data" / "trends"
+    ensure_dir(trends_dir)
+    path = trends_dir / f"{settings.run_date}.json"
+    path.write_text(json.dumps(trend_summary, ensure_ascii=False, indent=2), encoding="utf-8")
+    return path
+
+
 def write_run_summary(summary: RunSummary, settings: Settings) -> Path:
     runs_dir = settings.root / "data" / "runs"
     ensure_dir(runs_dir)
@@ -36,4 +44,3 @@ def write_run_summary(summary: RunSummary, settings: Settings) -> Path:
 
 def _relative(path: Path, root: Path) -> str:
     return path.relative_to(root).as_posix()
-

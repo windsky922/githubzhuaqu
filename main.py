@@ -3,7 +3,7 @@ from __future__ import annotations
 import sys
 import os
 
-from src.archive import write_raw_repositories, write_report, write_run_summary
+from src.archive import write_raw_repositories, write_report, write_run_summary, write_trend_summary
 from src.collector import collect_repositories, enrich_repositories_with_readmes
 from src.models import RunSummary
 from src.processor import process_repositories
@@ -17,6 +17,7 @@ from src.state import (
     write_sent_repositories,
     write_star_history,
 )
+from src.trends import build_trend_summary
 from src.utils import clean_error, date_range
 
 
@@ -33,10 +34,12 @@ def main() -> int:
         unsent_collected = filter_unsent_repositories(collected, sent_names)
         selected = process_repositories(unsent_collected, settings, star_history)
         readme_fetched_count = enrich_repositories_with_readmes(selected, settings)
-        report, fallback_used, report_error = generate_report(selected, queries, settings)
+        trend_summary = build_trend_summary(selected)
+        report, fallback_used, report_error = generate_report(selected, queries, settings, trend_summary)
 
         report_path = write_report(report, settings)
         write_raw_repositories(selected, settings)
+        trend_summary_path = write_trend_summary(trend_summary, settings)
         star_history_path, star_history_updated_count = write_star_history(collected, settings)
 
         summary.queries = queries
@@ -46,6 +49,7 @@ def main() -> int:
         summary.readme_fetched_count = readme_fetched_count
         summary.star_history_updated_count = star_history_updated_count
         summary.report_path = report_path.relative_to(settings.root).as_posix()
+        summary.trend_summary_path = trend_summary_path.relative_to(settings.root).as_posix()
         summary.star_history_path = star_history_path
         summary.fallback_used = fallback_used
         summary.kimi_used = not fallback_used

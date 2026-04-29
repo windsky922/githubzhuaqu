@@ -20,6 +20,7 @@
   "run_summary_path": "data/runs/2026-04-28.json",
   "state_path": "",
   "star_history_path": "data/state/star_history.json",
+  "trend_summary_path": "data/trends/2026-04-28.json",
   "kimi_used": false,
   "fallback_used": true,
   "report_error": "Kimi API 未配置",

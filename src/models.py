@@ -63,6 +63,7 @@ class RunSummary:
     run_summary_path: str = ""
     state_path: str = ""
     star_history_path: str = ""
+    trend_summary_path: str = ""
     kimi_used: bool = False
     fallback_used: bool = False
     report_error: str = ""

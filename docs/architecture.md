@@ -34,6 +34,7 @@ main.py
 10. 对最终入选仓库抓取 README 摘要，作为 Kimi 和降级报告的补充上下文。
 11. 维护 Star 历史状态，并将 Star 增量纳入排序评分。
 12. 生成 GitHub Pages 周报归档页面。
+13. 生成数据驱动的趋势摘要，并归档到 `data/trends/`。
 
 暂缓实现：
 
@@ -97,3 +98,22 @@ star_growth = 当前 Star - 历史 Star
 2. `docs/weekly/YYYY-MM-DD.md`：适合 GitHub Pages 浏览的周报副本。
 
 每次 GitHub Actions 生成周报后，都会自动刷新归档页面并提交到仓库。
+
+## 趋势摘要
+
+`src/trends.py` 会根据本期入选仓库生成趋势摘要，输出到：
+
+```text
+data/trends/YYYY-MM-DD.json
+```
+
+趋势摘要包含：
+
+1. 入选项目总数。
+2. 累计新增 Star。
+3. 主要语言分布。
+4. 项目方向分布。
+5. 新增 Star 最高的项目列表。
+6. 可直接写入周报的一组趋势要点。
+
+Kimi 生成周报时会收到该趋势摘要；降级版周报也会直接展示趋势要点。

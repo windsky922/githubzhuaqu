@@ -36,12 +36,14 @@ class ReporterTest(unittest.TestCase):
             )
         ]
 
-        report = fallback_report(repositories, ["created:>=2026-04-20 stars:>20"], settings)
+        trend_summary = {"summary_points": ["Python 是本期出现最多的主要语言，共 1 个项目。"]}
+        report = fallback_report(repositories, ["created:>=2026-04-20 stars:>20"], settings, trend_summary)
 
         self.assertIn("owner/project", report)
         self.assertIn("https://github.com/owner/project", report)
         self.assertIn("Star 120", report)
         self.assertIn("created:>=2026-04-20 stars:>20", report)
+        self.assertIn("Python 是本期出现最多的主要语言", report)
 
     def test_extracts_content_from_openai_style_response(self):
         data = {"choices": [{"message": {"content": "正文"}}]}

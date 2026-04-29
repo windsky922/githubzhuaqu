@@ -1,0 +1,84 @@
+{
+  "total_projects": 10,
+  "total_star_growth": 32,
+  "top_languages": [
+    {
+      "name": "Python",
+      "count": 6
+    },
+    {
+      "name": "TypeScript",
+      "count": 2
+    },
+    {
+      "name": "Shell",
+      "count": 1
+    },
+    {
+      "name": "JavaScript",
+      "count": 1
+    }
+  ],
+  "top_categories": [
+    {
+      "name": "AI Agent",
+      "count": 8
+    },
+    {
+      "name": "LLM Tooling",
+      "count": 1
+    },
+    {
+      "name": "Other",
+      "count": 1
+    }
+  ],
+  "top_star_growth": [
+    {
+      "full_name": "TauricResearch/TradingAgents",
+      "html_url": "https://github.com/TauricResearch/TradingAgents",
+      "star_growth": 6,
+      "stargazers_count": 53978,
+      "language": "Python",
+      "category": "AI Agent"
+    },
+    {
+      "full_name": "obra/superpowers",
+      "html_url": "https://github.com/obra/superpowers",
+      "star_growth": 5,
+      "stargazers_count": 170224,
+      "language": "Shell",
+      "category": "AI Agent"
+    },
+    {
+      "full_name": "affaan-m/everything-claude-code",
+      "html_url": "https://github.com/affaan-m/everything-claude-code",
+      "star_growth": 4,
+      "stargazers_count": 168579,
+      "language": "JavaScript",
+      "category": "AI Agent"
+    },
+    {
+      "full_name": "thedotmack/claude-mem",
+      "html_url": "https://github.com/thedotmack/claude-mem",
+      "star_growth": 4,
+      "stargazers_count": 68717,
+      "language": "TypeScript",
+      "category": "AI Agent"
+    },
+    {
+      "full_name": "NousResearch/hermes-agent",
+      "html_url": "https://github.com/NousResearch/hermes-agent",
+      "star_growth": 3,
+      "stargazers_count": 121076,
+      "language": "Python",
+      "category": "AI Agent"
+    }
+  ],
+  "summary_points": [
+    "AI Agent 是本期最集中的方向，共 8 个项目。",
+    "Python 是本期出现最多的主要语言，共 6 个项目。",
+    "本期入选项目累计新增 Star 32。",
+    "TauricResearch/TradingAgents 是本期新增 Star 最高的项目，新增 6。"
+  ]
+}
