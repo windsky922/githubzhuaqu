@@ -942,3 +942,166 @@ data/trends
 
 1. `tests/test_trends.py`
 2. `tests/test_reporter.py` 中的趋势要点展示断言
+
+---
+
+## 2026-04-29 追加：阶段性代码审查记录
+
+### 1. 审查目的
+
+在趋势总结功能提交后，对当前代码进行阶段性审查，确认已经实现的能力、仍存在的风险点，以及下一步开发优先级。
+
+本次审查范围包括：
+
+1. `main.py`
+2. `src/collector.py`
+3. `src/processor.py`
+4. `src/reporter.py`
+5. `src/settings.py`
+6. `src/state.py`
+7. `src/trends.py`
+8. `.github/workflows/weekly.yml`
+9. 现有测试文件
+
+### 2. 已确认实现的能力
+
+当前项目已经实现：
+
+1. GitHub 近期活跃仓库采集。
+2. 仓库去重、过滤、评分和排序。
+3. 新增 Star 历史记录与评分加权。
+4. README 摘要抓取。
+5. Kimi 中文周报生成。
+6. Kimi 不可用时生成降级版 Markdown 周报。
+7. Telegram 手机推送。
+8. Telegram 不可用时保留归档。
+9. 周报、原始数据、运行摘要和趋势总结归档。
+10. GitHub Actions 定时运行、手动触发和自动提交归档。
+11. GitHub Pages 周报归档页面。
+12. 单元测试覆盖核心采集、处理、报告、状态和趋势逻辑。
+
+本地验证结果：
+
+```text
+py -m unittest
+```
+
+结果：20 个测试全部通过。
+
+### 3. 本次审查发现
+
+#### 问题 1：仍保留 `created` 查询，可能继续偏向“新建项目”
+
+位置：
+
+```text
+src/collector.py:27
+```
+
+说明：
+
+用户已经明确要求关注“一周内最火爆的项目”，而不是“这一周新创建的项目”。当前仍保留：
+
+```text
+created:>=... stars:>10
+```
+
+该查询会额外引入新建项目。虽然后续会经过活跃时间过滤，但它仍可能影响候选池来源。
+
+建议：
+
+1. 下一步移除该查询；或
+2. 将其作为低权重补充来源，并在运行摘要中标明。
+
+#### 问题 2：部分 GitHub 查询失败不会进入运行摘要
+
+位置：
+
+```text
+src/collector.py:83-90
+```
+
+说明：
+
+当前逻辑只有在所有查询都失败时才抛出错误。如果部分查询失败、部分成功，错误会被内部收集但不会写入 `data/runs/YYYY-MM-DD.json`。
+
+影响：
+
+1. 周报可能正常生成，但采集结果不完整。
+2. 后续无法从运行摘要中判断是否发生 GitHub API 限流、网络异常或查询语法问题。
+
+建议：
+
+将部分查询失败记录写入 `RunSummary`，例如新增：
+
+```text
+collector_errors
+```
+
+#### 问题 3：只读取 example 配置，不利于自定义兴趣配置
+
+位置：
+
+```text
+src/settings.py:49
+```
+
+说明：
+
+当前 `load_settings` 固定读取：
+
+```text
+config/interests.example.json
+```
+
+这会让示例配置承担真实配置职责，不利于用户长期维护自己的兴趣偏好。
+
+建议：
+
+优先读取：
+
+```text
+config/interests.json
+```
+
+如果不存在，再回退到：
+
+```text
+config/interests.example.json
+```
+
+#### 问题 4：`data/raw` 实际写入的是筛选后项目
+
+位置：
+
+```text
+main.py:41
+```
+
+说明：
+
+当前调用：
+
+```text
+write_raw_repositories(selected, settings)
+```
+
+写入的是最终入选项目，而不是原始采集结果。`raw` 命名容易误导后续调试。
+
+建议：
+
+二选一处理：
+
+1. 如果要保留真正原始采集结果，应写入 `collected`。
+2. 如果只想保留入选项目，应将函数或目录命名调整为 `selected`。
+
+### 4. 下一步建议
+
+下一步优先处理：
+
+1. 修正采集查询，移除或弱化 `created` 查询。
+2. 增强运行摘要，记录部分采集失败。
+3. 增加 `config/interests.json` 用户配置优先级。
+4. 明确 `data/raw` 与入选项目归档的命名和职责。
+
+这些改动属于数据质量和可观测性增强，不需要推翻现有架构。
