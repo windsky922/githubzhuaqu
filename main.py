@@ -14,6 +14,7 @@ from src.collector import collect_repositories, enrich_repositories_with_readmes
 from src.models import RunSummary
 from src.processor import process_repositories
 from src.reporter import generate_report
+from src.security import apply_security_flags
 from src.sender import send_report
 from src.settings import load_settings
 from src.state import (
@@ -40,6 +41,7 @@ def main() -> int:
         unsent_collected = filter_unsent_repositories(collected, sent_names)
         selected = process_repositories(unsent_collected, settings, star_history)
         readme_fetched_count = enrich_repositories_with_readmes(selected, settings)
+        apply_security_flags(selected)
         trend_summary = build_trend_summary(selected)
         report, fallback_used, report_error = generate_report(selected, queries, settings, trend_summary)
 

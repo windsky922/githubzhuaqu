@@ -103,14 +103,17 @@ tests/test_report_checks.py
 1. 新增 `scripts/security_check.py`，扫描源码、配置、workflow、文档和提示词中的疑似硬编码密钥。
 2. GitHub Actions 在测试前运行安全检查。
 3. 检查范围排除 `data/` 和 `reports/`，避免把第三方仓库 README 或生成报告当成项目自身密钥。
+4. 新增 `src/security.py`，为入选仓库生成元数据级风险提示。
+5. `data/selected/YYYY-MM-DD.json` 会保存每个入选仓库的 `security_flags`。
+6. 降级版周报会展示风险提示，Kimi 也会收到该结构化字段。
 
 后续建议任务：
 
 1. 为入选仓库增加安全信号：是否归档、是否 fork、是否有许可证、是否有近期维护、Issue 风险提示。
 2. 检查 README 和简介中是否包含明显诈骗、钓鱼、盗版、恶意软件下载等关键词。
 3. 对新增 Star 异常增长增加提示，不直接判定恶意，但在周报中标记“需人工复核”。
-4. 在 `data/selected/YYYY-MM-DD.json` 中增加 `security_flags` 字段。
-5. 在周报中增加“风险提示”小节，只提示风险，不替用户做安全背书。
+4. 扩展 `security_flags` 的规则来源，例如许可证、维护状态、依赖文件和 Release 信息。
+5. 在 Kimi 周报提示词中更明确要求展示风险提示。
 
 预留位置：
 

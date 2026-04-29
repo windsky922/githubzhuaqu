@@ -85,6 +85,7 @@ def fallback_report(
                 f"- 简介：{repo.description}",
                 f"- README 摘要：{_short_text(repo.readme_excerpt) or '未获取到 README 内容。'}",
                 f"- 技术信息：主要语言 {repo.language}，Star {repo.stargazers_count}，Fork {repo.forks_count}，较上次记录新增 Star {repo.star_growth}。",
+                f"- 风险提示：{_security_text(repo)}",
                 f"- 学习价值：可作为了解 {repo.category} 相关开源实践的参考。",
                 f"- 原链接：[{repo.html_url}]({repo.html_url})",
                 "",
@@ -150,6 +151,12 @@ def _short_text(text: str, limit: int = 320) -> str:
     if len(text) <= limit:
         return text
     return text[:limit].rstrip() + "..."
+
+
+def _security_text(repo: Repository) -> str:
+    if not repo.security_flags:
+        return "未发现明显元数据风险，但仍需自行审查代码和依赖。"
+    return "；".join(repo.security_flags)
 
 
 def _generate_with_kimi(
