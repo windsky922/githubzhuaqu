@@ -1,7 +1,8 @@
 import unittest
+from unittest.mock import patch
 
 from src.models import Repository
-from src.reporter import _extract_content, fallback_report, normalize_report_markdown
+from src.reporter import _extract_content, fallback_report, generate_report, normalize_report_markdown
 from src.settings import Settings
 
 
@@ -82,6 +83,48 @@ class ReporterTest(unittest.TestCase):
         result = normalize_report_markdown(report)
 
         self.assertEqual(result.strip(), "[https://github.com/a/b](https://github.com/a/b)")
+
+    def test_retries_kimi_without_readme_after_content_filter(self):
+        settings = Settings(
+            root=None,
+            run_date="2026-04-27",
+            since_date="2026-04-20",
+            days_back=7,
+            min_stars=20,
+            max_projects=10,
+            github_token="",
+            kimi_api_key="key",
+            kimi_base_url="https://api.example.com/v1",
+            kimi_model="model",
+            telegram_bot_token="",
+            telegram_chat_id="",
+            interests={},
+        )
+        repositories = [
+            Repository(
+                full_name="owner/project",
+                html_url="https://github.com/owner/project",
+                description="Useful agent tool",
+                stargazers_count=120,
+                forks_count=20,
+                language="Python",
+                created_at="2026-04-25T00:00:00Z",
+                updated_at="2026-04-25T00:00:00Z",
+                readme_excerpt="raw readme",
+            )
+        ]
+
+        with patch(
+            "src.reporter._generate_with_kimi",
+            side_effect=[RuntimeError("content_filter high risk"), "Kimi 正文"],
+        ) as generate:
+            report, fallback_used, report_error = generate_report(repositories, [], settings, {})
+
+        self.assertEqual(report.strip(), "Kimi 正文")
+        self.assertFalse(fallback_used)
+        self.assertEqual(report_error, "")
+        self.assertEqual(generate.call_count, 2)
+        self.assertFalse(generate.call_args_list[1].kwargs["include_readme"])
 
 
 if __name__ == "__main__":

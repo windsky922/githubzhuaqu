@@ -1284,3 +1284,43 @@ actions/setup-python@v5 -> actions/setup-python@v6
 ### 4. 预期效果
 
 后续每周周报工作流不再触发 Node.js 20 action 弃用警告。
+
+---
+
+## 2026-04-29 追加：Kimi 内容过滤降级修复
+
+### 1. 问题现象
+
+用户在 GitHub 网页手动触发工作流后，工作流本身运行成功，但生成的是降级版周报。
+
+运行摘要显示：
+
+```text
+"kimi_used": false
+"fallback_used": true
+"report_error": "Kimi API error 400: ... high risk ... content_filter"
+```
+
+### 2. 原因判断
+
+这次不是超时，也不是 Secrets 未配置。Kimi API 返回了内容过滤错误，说明请求中的提示词或项目数据被判定为高风险。
+
+最可能的触发源是某个入选仓库的 README 摘要包含模型安全策略不接受的原文内容。
+
+### 3. 修复动作
+
+已在 `src/reporter.py` 中增加安全重试：
+
+1. 第一次仍使用完整项目数据，包括 README 摘要。
+2. 如果 Kimi 返回 `content_filter` 或 `high risk`，自动重试一次。
+3. 重试时移除 `readme_excerpt`，只保留仓库名称、简介、语言、Star、Fork、链接、分类、趋势摘要等结构化信息。
+4. 如果重试成功，则不再生成降级版周报。
+5. 如果重试仍失败，才保留原有降级逻辑，避免整个工作流中断。
+
+### 4. 说明
+
+外部模型 API 仍可能因为服务不可用、限流或更严格的安全策略失败，因此无法绝对保证永远不出现降级版。但本次修复已经针对当前真实失败原因做了兜底，能显著降低因 README 原文触发内容过滤而降级的概率。
+
+### 5. 测试补充
+
+已增加测试：当第一次 Kimi 调用返回 `content_filter high risk` 时，程序会自动以不包含 README 摘要的 payload 重试，并在重试成功时返回 Kimi 周报。

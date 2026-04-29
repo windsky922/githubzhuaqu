@@ -22,6 +22,19 @@ def generate_report(
                 _generate_with_kimi(repositories, queries, settings, trend_summary or {})
             ), False, ""
         except Exception as error:
+            if _is_content_filter_error(error):
+                try:
+                    return normalize_report_markdown(
+                        _generate_with_kimi(
+                            repositories,
+                            queries,
+                            settings,
+                            trend_summary or {},
+                            include_readme=False,
+                        )
+                    ), False, ""
+                except Exception as retry_error:
+                    error = RuntimeError(f"{error}; retry_without_readme: {retry_error}")
             return normalize_report_markdown(
                 fallback_report(repositories, queries, settings, trend_summary or {})
             ), True, str(error)
@@ -144,6 +157,7 @@ def _generate_with_kimi(
     queries: list[str],
     settings: Settings,
     trend_summary: dict,
+    include_readme: bool = True,
 ) -> str:
     prompt_path = settings.root / "prompts" / "weekly_report.md"
     system_prompt = prompt_path.read_text(encoding="utf-8")
@@ -151,7 +165,7 @@ def _generate_with_kimi(
         "run_date": settings.run_date,
         "since_date": settings.since_date,
         "queries": queries,
-        "repositories": [repo.to_dict() for repo in repositories],
+        "repositories": [_repository_payload(repo, include_readme) for repo in repositories],
         "trend_summary": trend_summary,
         "interests": settings.interests,
     }
@@ -185,6 +199,18 @@ def _generate_with_kimi(
     if not content.strip():
         raise RuntimeError(f"Kimi API 返回空报告，响应结构：{_response_shape(data)}")
     return content.strip() + "\n"
+
+
+def _repository_payload(repo: Repository, include_readme: bool) -> dict:
+    payload = repo.to_dict()
+    if not include_readme:
+        payload["readme_excerpt"] = ""
+    return payload
+
+
+def _is_content_filter_error(error: Exception) -> bool:
+    message = str(error).lower()
+    return "content_filter" in message or "high risk" in message
 
 
 def _kimi_timeout_seconds() -> int:
