@@ -1250,3 +1250,37 @@ KIMI_TIMEOUT_SECONDS
 ```
 
 同时更新 `.env.example` 和 `docs/setup.md`。
+
+---
+
+## 2026-04-29 追加：GitHub Actions Node 24 兼容更新
+
+### 1. 触发原因
+
+GitHub Actions 运行时提示 `actions/checkout@v4` 和 `actions/setup-python@v5` 仍运行在 Node.js 20。GitHub 已提示 Node.js 20 actions 将被弃用。
+
+### 2. 官方版本确认
+
+已确认官方 action 新版本：
+
+1. `actions/checkout@v6`：支持 Node 24。
+2. `actions/setup-python@v6`：支持 Node 24。
+
+### 3. 本次调整
+
+已更新：
+
+```text
+.github/workflows/weekly.yml
+```
+
+调整内容：
+
+```text
+actions/checkout@v4 -> actions/checkout@v6
+actions/setup-python@v5 -> actions/setup-python@v6
+```
+
+### 4. 预期效果
+
+后续每周周报工作流不再触发 Node.js 20 action 弃用警告。
