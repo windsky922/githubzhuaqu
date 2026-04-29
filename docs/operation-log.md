@@ -1583,3 +1583,46 @@ check_report_quality
 1. 检查报告是否包含非入选项目。
 2. 对结构问题增加 Kimi 自动重试，而不是直接回退。
 3. 检查每个项目是否包含入选原因和风险提示。
+
+---
+
+## 2026-04-29 追加：采集分项统计
+
+### 1. 开发目的
+
+继续第四阶段质量与可观测性增强。此前运行摘要只记录 `collector_errors`，无法清楚看到每条 GitHub Search 查询的成功、失败和返回数量。
+
+### 2. 本次实现
+
+`collect_repositories` 现在返回：
+
+```text
+repositories
+queries
+errors
+stats
+```
+
+运行摘要新增字段：
+
+```text
+collector_stats
+```
+
+每条统计包含：
+
+1. `query`：查询条件。
+2. `status`：`success` 或 `failed`。
+3. `count`：返回仓库数量。
+4. `error`：失败原因。
+
+### 3. 价值
+
+后续可以从 `data/runs/YYYY-MM-DD.json` 直接判断：
+
+1. 哪些查询成功。
+2. 哪些查询失败。
+3. 每条查询贡献了多少候选仓库。
+4. 是否存在 GitHub API 限流、网络异常或查询语法问题。
+
+该结构也为后续 GitHub Trending、GraphQL API 等多数据源扩展预留了统计入口。

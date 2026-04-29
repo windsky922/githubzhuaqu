@@ -35,7 +35,7 @@ def main() -> int:
     summary = RunSummary(run_date=settings.run_date)
 
     try:
-        collected, queries, collector_errors = collect_repositories(settings)
+        collected, queries, collector_errors, collector_stats = collect_repositories(settings)
         sent_names = load_sent_repository_names(settings)
         star_history = load_star_history(settings)
         unsent_collected = filter_unsent_repositories(collected, sent_names)
@@ -56,6 +56,7 @@ def main() -> int:
         summary.selected_count = len(selected)
         summary.skipped_sent_count = len({repo.full_name for repo in collected if repo.full_name in sent_names})
         summary.collector_errors = collector_errors
+        summary.collector_stats = collector_stats
         summary.readme_fetched_count = readme_fetched_count
         summary.star_history_updated_count = star_history_updated_count
         summary.report_path = report_path.relative_to(settings.root).as_posix()

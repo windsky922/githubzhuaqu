@@ -55,6 +55,11 @@ tests/test_quality.py
 
 目标：避免只依赖 GitHub Search API。
 
+已经完成：
+
+1. 运行摘要新增 `collector_stats`，记录每条 GitHub Search 查询的成功、失败、返回数量和错误原因。
+2. 保留 `collector_errors`，兼容旧的失败摘要字段。
+
 候选数据源：
 
 1. GitHub Search API：继续作为主数据源。
@@ -73,7 +78,7 @@ tests/test_sources.py
 
 1. 每个数据源返回统一的 `Repository` 结构。
 2. 数据源失败不应阻断其他数据源。
-3. 运行摘要记录每个数据源的成功、失败和返回数量。
+3. 运行摘要记录每个数据源的成功、失败和返回数量。基础版本已完成。
 
 ## 第六阶段：报告质量增强
 
@@ -220,8 +225,7 @@ tests/test_storage.py
 
 近期优先级：
 
-1. 数据源失败分项统计。
-2. GitHub Pages 首页摘要增强。
+1. GitHub Pages 首页摘要增强。
 
 中期优先级：
 

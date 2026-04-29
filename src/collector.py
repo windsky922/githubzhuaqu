@@ -74,20 +74,24 @@ def search_repositories(query: str, settings: Settings) -> list[Repository]:
     return [Repository.from_github_item(item) for item in data.get("items", [])]
 
 
-def collect_repositories(settings: Settings) -> tuple[list[Repository], list[str], list[str]]:
+def collect_repositories(settings: Settings) -> tuple[list[Repository], list[str], list[str], list[dict]]:
     queries = build_queries(settings)
     repositories: list[Repository] = []
     errors: list[str] = []
+    stats: list[dict] = []
 
     for query in queries:
         try:
-            repositories.extend(search_repositories(query, settings))
+            results = search_repositories(query, settings)
+            repositories.extend(results)
+            stats.append({"query": query, "status": "success", "count": len(results), "error": ""})
         except Exception as error:  # Keep later queries useful if one query fails.
             errors.append(f"{query}: {error}")
+            stats.append({"query": query, "status": "failed", "count": 0, "error": str(error)})
 
     if not repositories and errors:
         raise RuntimeError("; ".join(errors))
-    return repositories, queries, errors
+    return repositories, queries, errors, stats
 
 
 def enrich_repositories_with_readmes(repositories: list[Repository], settings: Settings) -> int:

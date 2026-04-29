@@ -60,6 +60,7 @@ class RunSummary:
     selected_count: int = 0
     skipped_sent_count: int = 0
     collector_errors: list[str] = field(default_factory=list)
+    collector_stats: list[dict[str, Any]] = field(default_factory=list)
     readme_fetched_count: int = 0
     star_history_updated_count: int = 0
     report_path: str = ""

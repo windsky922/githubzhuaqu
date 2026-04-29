@@ -71,12 +71,15 @@ class CollectorTest(unittest.TestCase):
             return [repository]
 
         with patch("src.collector.search_repositories", side_effect=fake_search):
-            repositories, queries, errors = collect_repositories(settings)
+            repositories, queries, errors, stats = collect_repositories(settings)
 
         self.assertEqual(repositories, [repository] * (len(queries) - 1))
         self.assertEqual(len(errors), 1)
         self.assertIn("topic:ai", errors[0])
         self.assertIn("rate limited", errors[0])
+        self.assertEqual(len(stats), len(queries))
+        self.assertTrue(any(item["status"] == "failed" for item in stats))
+        self.assertTrue(any(item["status"] == "success" and item["count"] == 1 for item in stats))
 
 
 if __name__ == "__main__":
