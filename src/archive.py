@@ -25,6 +25,15 @@ def write_raw_repositories(repositories: list[Repository], settings: Settings) -
     return path
 
 
+def write_selected_repositories(repositories: list[Repository], settings: Settings) -> Path:
+    selected_dir = settings.root / "data" / "selected"
+    ensure_dir(selected_dir)
+    path = selected_dir / f"{settings.run_date}.json"
+    data = [repo.to_dict() for repo in repositories]
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    return path
+
+
 def write_trend_summary(trend_summary: dict, settings: Settings) -> Path:
     trends_dir = settings.root / "data" / "trends"
     ensure_dir(trends_dir)

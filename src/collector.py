@@ -24,7 +24,6 @@ def build_queries(settings: Settings) -> list[str]:
         f"topic:automation pushed:>={since} stars:>10",
         f"language:Python pushed:>={since} stars:>{min_stars}",
         f"language:TypeScript pushed:>={since} stars:>{min_stars}",
-        f"created:>={since} stars:>10",
     ]
 
 
@@ -75,7 +74,7 @@ def search_repositories(query: str, settings: Settings) -> list[Repository]:
     return [Repository.from_github_item(item) for item in data.get("items", [])]
 
 
-def collect_repositories(settings: Settings) -> tuple[list[Repository], list[str]]:
+def collect_repositories(settings: Settings) -> tuple[list[Repository], list[str], list[str]]:
     queries = build_queries(settings)
     repositories: list[Repository] = []
     errors: list[str] = []
@@ -88,7 +87,7 @@ def collect_repositories(settings: Settings) -> tuple[list[Repository], list[str
 
     if not repositories and errors:
         raise RuntimeError("; ".join(errors))
-    return repositories, queries
+    return repositories, queries, errors
 
 
 def enrich_repositories_with_readmes(repositories: list[Repository], settings: Settings) -> int:

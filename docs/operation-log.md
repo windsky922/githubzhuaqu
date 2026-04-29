@@ -1105,3 +1105,70 @@ write_raw_repositories(selected, settings)
 4. 明确 `data/raw` 与入选项目归档的命名和职责。
 
 这些改动属于数据质量和可观测性增强，不需要推翻现有架构。
+
+---
+
+## 2026-04-29 追加：代码审查问题修复
+
+### 1. 修复范围
+
+根据阶段性代码审查的下一步建议，本次继续处理数据质量和可观测性问题。
+
+### 2. 采集查询修正
+
+已从 `src/collector.py` 中移除：
+
+```text
+created:>=... stars:>10
+```
+
+当前采集查询只围绕最近一周 `pushed` 活跃项目展开，避免候选池继续偏向“本周新创建项目”。
+
+### 3. 部分采集失败记录
+
+`collect_repositories` 现在会返回：
+
+```text
+repositories
+queries
+errors
+```
+
+如果部分 GitHub 查询失败但仍有其他查询成功，程序会继续生成周报，同时把错误写入运行摘要：
+
+```text
+collector_errors
+```
+
+这样后续可以从 `data/runs/YYYY-MM-DD.json` 判断采集是否完整。
+
+### 4. 自定义兴趣配置
+
+`src/settings.py` 新增用户配置优先级：
+
+1. 优先读取 `config/interests.json`。
+2. 如果不存在，再读取 `config/interests.example.json`。
+
+这样用户可以维护自己的兴趣配置，不需要直接修改示例文件。
+
+### 5. 归档职责明确
+
+本次将原始候选数据和最终入选数据拆开：
+
+1. `data/raw/YYYY-MM-DD.json`：保存本次 GitHub API 采集到的原始候选仓库。
+2. `data/selected/YYYY-MM-DD.json`：保存最终入选周报的仓库。
+
+`.github/workflows/weekly.yml` 的自动提交范围也已加入：
+
+```text
+data/selected
+```
+
+### 6. 测试补充
+
+新增和更新测试：
+
+1. 采集查询不再包含 `created` 条件。
+2. 部分采集失败会返回错误列表。
+3. `config/interests.json` 优先于示例配置。
+4. `data/raw` 和 `data/selected` 写入不同路径。

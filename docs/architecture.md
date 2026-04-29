@@ -35,6 +35,7 @@ main.py
 11. 维护 Star 历史状态，并将 Star 增量纳入排序评分。
 12. 生成 GitHub Pages 周报归档页面。
 13. 生成数据驱动的趋势摘要，并归档到 `data/trends/`。
+14. 在运行摘要中记录部分采集失败，便于排查 GitHub API 限流或网络异常。
 
 暂缓实现：
 
@@ -54,6 +55,31 @@ main.py
 3. 本次筛选列表不为空。
 
 如果 Telegram 未配置或发送失败，程序仍然归档周报和运行摘要，但不会把仓库写入已推送状态，避免后续遗漏应推送项目。
+
+## 兴趣配置
+
+程序优先读取用户配置：
+
+```text
+config/interests.json
+```
+
+如果该文件不存在，再回退到示例配置：
+
+```text
+config/interests.example.json
+```
+
+这样可以保留示例文件，同时允许用户维护自己的关注方向、语言偏好、排除关键词和项目数量阈值。
+
+## 数据归档
+
+归档目录职责：
+
+1. `data/raw/YYYY-MM-DD.json`：保存 GitHub API 本次采集到的原始候选仓库。
+2. `data/selected/YYYY-MM-DD.json`：保存经过去重、过滤和排序后的最终入选仓库。
+3. `data/runs/YYYY-MM-DD.json`：保存运行摘要，包括采集数量、入选数量、降级原因、推送结果和部分采集错误。
+4. `data/trends/YYYY-MM-DD.json`：保存趋势摘要。
 
 ## README 摘要
 
@@ -88,7 +114,7 @@ star_growth = 当前 Star - 历史 Star
 
 这种设计把新增 Star 作为本周热度的核心信号，同时保留总 Star、主题匹配和近期活跃度，避免只按历史体量筛出长期热门老项目。
 
-周报候选项目以最近一周 `pushed_at` 或 `updated_at` 活跃为准，不要求仓库必须在最近一周创建。`created` 查询只作为补充，用于捕捉新出现且增长快的项目。
+周报候选项目以最近一周 `pushed_at` 或 `updated_at` 活跃为准，不要求仓库必须在最近一周创建。当前采集查询不再使用 `created` 条件，避免候选池偏向“新建项目”。
 
 ## GitHub Pages 归档页面
 

@@ -57,10 +57,13 @@ class RunSummary:
     collected_count: int = 0
     selected_count: int = 0
     skipped_sent_count: int = 0
+    collector_errors: list[str] = field(default_factory=list)
     readme_fetched_count: int = 0
     star_history_updated_count: int = 0
     report_path: str = ""
     run_summary_path: str = ""
+    raw_repositories_path: str = ""
+    selected_repositories_path: str = ""
     state_path: str = ""
     star_history_path: str = ""
     trend_summary_path: str = ""

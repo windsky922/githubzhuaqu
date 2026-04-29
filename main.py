@@ -1,9 +1,15 @@
 from __future__ import annotations
 
-import sys
 import os
+import sys
 
-from src.archive import write_raw_repositories, write_report, write_run_summary, write_trend_summary
+from src.archive import (
+    write_raw_repositories,
+    write_report,
+    write_run_summary,
+    write_selected_repositories,
+    write_trend_summary,
+)
 from src.collector import collect_repositories, enrich_repositories_with_readmes
 from src.models import RunSummary
 from src.processor import process_repositories
@@ -28,7 +34,7 @@ def main() -> int:
     summary = RunSummary(run_date=settings.run_date)
 
     try:
-        collected, queries = collect_repositories(settings)
+        collected, queries, collector_errors = collect_repositories(settings)
         sent_names = load_sent_repository_names(settings)
         star_history = load_star_history(settings)
         unsent_collected = filter_unsent_repositories(collected, sent_names)
@@ -38,7 +44,8 @@ def main() -> int:
         report, fallback_used, report_error = generate_report(selected, queries, settings, trend_summary)
 
         report_path = write_report(report, settings)
-        write_raw_repositories(selected, settings)
+        raw_path = write_raw_repositories(collected, settings)
+        selected_path = write_selected_repositories(selected, settings)
         trend_summary_path = write_trend_summary(trend_summary, settings)
         star_history_path, star_history_updated_count = write_star_history(collected, settings)
 
@@ -46,9 +53,12 @@ def main() -> int:
         summary.collected_count = len(collected)
         summary.selected_count = len(selected)
         summary.skipped_sent_count = len({repo.full_name for repo in collected if repo.full_name in sent_names})
+        summary.collector_errors = collector_errors
         summary.readme_fetched_count = readme_fetched_count
         summary.star_history_updated_count = star_history_updated_count
         summary.report_path = report_path.relative_to(settings.root).as_posix()
+        summary.raw_repositories_path = raw_path.relative_to(settings.root).as_posix()
+        summary.selected_repositories_path = selected_path.relative_to(settings.root).as_posix()
         summary.trend_summary_path = trend_summary_path.relative_to(settings.root).as_posix()
         summary.star_history_path = star_history_path
         summary.fallback_used = fallback_used

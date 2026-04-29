@@ -45,8 +45,15 @@ def load_interests(path: Path) -> dict:
         return {}
 
 
+def load_project_interests(root: Path = ROOT) -> dict:
+    custom_path = root / "config" / "interests.json"
+    if custom_path.exists():
+        return load_interests(custom_path)
+    return load_interests(root / "config" / "interests.example.json")
+
+
 def load_settings(run_date: str, since_date: str) -> Settings:
-    interests = load_interests(ROOT / "config" / "interests.example.json")
+    interests = load_project_interests(ROOT)
     return Settings(
         root=ROOT,
         run_date=run_date,
