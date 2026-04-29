@@ -21,6 +21,9 @@ def build_pages(root: Path = ROOT) -> list[Path]:
     index = root / "docs" / "index.md"
     index.write_text(_index_content(root, reports), encoding="utf-8")
     written.append(index)
+    projects = root / "docs" / "projects.md"
+    projects.write_text(_projects_content(root), encoding="utf-8")
+    written.append(projects)
     return written
 
 
@@ -62,6 +65,7 @@ def _index_content(root: Path, reports: list[Path]) -> str:
             "",
             "## 项目文档",
             "",
+            "- [历史项目索引](projects.md)",
             "- [架构说明](architecture.md)",
             "- [配置说明](setup.md)",
             "- [开发路线图](roadmap.md)",
@@ -148,6 +152,55 @@ def _report_trend_text(trends: dict) -> str:
     if trends.get("total_star_growth") is not None:
         parts.append(f"新增 Star {trends.get('total_star_growth')}")
     return "，".join(part for part in parts if part)
+
+
+def _projects_content(root: Path) -> str:
+    rows = _selected_project_rows(root)
+    lines = [
+        "# 历史项目索引",
+        "",
+        "这里汇总历次周报入选项目，便于按日期、语言和方向回看。",
+        "",
+        "| 日期 | 项目 | 方向 | 语言 | Star | 新增 Star | 风险提示 | 链接 |",
+        "|---|---|---|---|---:|---:|---:|---|",
+    ]
+    if rows:
+        lines.extend(_project_table_row(row) for row in rows)
+    else:
+        lines.append("| - | 暂无项目 | - | - | 0 | 0 | 0 | - |")
+    lines.extend(["", "## 返回", "", "- [周报归档首页](index.md)", ""])
+    return "\n".join(lines)
+
+
+def _selected_project_rows(root: Path) -> list[dict]:
+    selected_dir = root / "data" / "selected"
+    if not selected_dir.exists():
+        return []
+    rows = []
+    for path in sorted(selected_dir.glob("*.json"), key=lambda item: item.stem, reverse=True):
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(data, list):
+            continue
+        for item in data:
+            if isinstance(item, dict):
+                row = dict(item)
+                row["run_date"] = path.stem
+                rows.append(row)
+    return rows
+
+
+def _project_table_row(row: dict) -> str:
+    url = str(row.get("html_url") or "")
+    link = f"[{url}]({url})" if url else "-"
+    risk_count = len(row.get("security_flags") or [])
+    return (
+        f"| {row.get('run_date', '')} | {row.get('full_name', '')} | {row.get('category', 'Other')} | "
+        f"{row.get('language', 'Unknown')} | {row.get('stargazers_count', 0)} | "
+        f"{row.get('star_growth', 0)} | {risk_count} | {link} |"
+    )
 
 
 if __name__ == "__main__":

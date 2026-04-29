@@ -14,6 +14,7 @@ class BuildPagesTest(unittest.TestCase):
             (root / "reports").mkdir(parents=True)
             (root / "data" / "runs").mkdir(parents=True)
             (root / "data" / "trends").mkdir(parents=True)
+            (root / "data" / "selected").mkdir(parents=True)
             (root / "reports" / "2026-04-28.md").write_text("# 周报", encoding="utf-8")
             (root / "data" / "runs" / "2026-04-28.json").write_text(
                 json.dumps({"selected_count": 10, "collected_count": 100, "kimi_used": True, "telegram_sent": True}),
@@ -31,10 +32,28 @@ class BuildPagesTest(unittest.TestCase):
                 ),
                 encoding="utf-8",
             )
+            (root / "data" / "selected" / "2026-04-28.json").write_text(
+                json.dumps(
+                    [
+                        {
+                            "full_name": "owner/project",
+                            "html_url": "https://github.com/owner/project",
+                            "category": "AI Agent",
+                            "language": "Python",
+                            "stargazers_count": 100,
+                            "star_growth": 20,
+                            "security_flags": ["未识别到许可证。"],
+                        }
+                    ],
+                    ensure_ascii=False,
+                ),
+                encoding="utf-8",
+            )
 
             written = build_pages(root)
 
             self.assertIn(root / "docs" / "index.md", written)
+            self.assertIn(root / "docs" / "projects.md", written)
             self.assertEqual((root / "docs" / "weekly" / "2026-04-28.md").read_text(encoding="utf-8"), "# 周报")
             index = (root / "docs" / "index.md").read_text(encoding="utf-8")
             self.assertIn("[2026-04-28](weekly/2026-04-28.md)", index)
@@ -45,7 +64,12 @@ class BuildPagesTest(unittest.TestCase):
             self.assertIn("主语言 Python", index)
             self.assertIn("主方向 AI Agent", index)
             self.assertIn("新增 Star 20", index)
+            self.assertIn("[历史项目索引](projects.md)", index)
             self.assertIn("[未来更新规划](future-plan.md)", index)
+            projects = (root / "docs" / "projects.md").read_text(encoding="utf-8")
+            self.assertIn("owner/project", projects)
+            self.assertIn("AI Agent", projects)
+            self.assertIn("[https://github.com/owner/project](https://github.com/owner/project)", projects)
         finally:
             shutil.rmtree(root, ignore_errors=True)
 

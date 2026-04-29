@@ -28,6 +28,7 @@
 
 ## 项目文档
 
+- [历史项目索引](projects.md)
 - [架构说明](architecture.md)
 - [配置说明](setup.md)
 - [开发路线图](roadmap.md)
