@@ -24,6 +24,8 @@
 - 保留所有 GitHub 原链接
 - 不虚构 Star、Fork、作者、发布时间或 License
 - 如果项目数据包含 `star_growth`，必须优先结合新增 Star 判断近期热度，但不要夸大增长意义
+- 如果项目数据包含 `trending_rank` 且数值大于 0，必须把 GitHub Trending 周榜排名作为第一热度信号解释
+- 如果项目数据包含 `sources`，需要说明项目来自 GitHub Trending、GitHub Search 或多个来源
 - 如果项目数据包含 `selection_reasons`，必须优先使用这些入选原因解释为什么该项目值得关注
 - 如果项目数据包含 `security_flags`，必须用谨慎语气提示风险，不要把项目描述为“安全”
 - 每个重点项目分析控制在 100 到 200 字左右

@@ -151,6 +151,8 @@ def _report_trend_text(trends: dict) -> str:
         parts.append(f"主方向 {top_categories[0].get('name')}")
     if trends.get("total_star_growth") is not None:
         parts.append(f"新增 Star {trends.get('total_star_growth')}")
+    if trends.get("trending_project_count") is not None:
+        parts.append(f"Trending 项目 {trends.get('trending_project_count')}")
     return "，".join(part for part in parts if part)
 
 
@@ -161,8 +163,8 @@ def _projects_content(root: Path) -> str:
         "",
         "这里汇总历次周报入选项目，便于按日期、语言和方向回看。",
         "",
-        "| 日期 | 项目 | 方向 | 语言 | Star | 新增 Star | 风险提示 | 链接 |",
-        "|---|---|---|---|---:|---:|---:|---|",
+        "| 日期 | 项目 | 来源 | Trending 排名 | 方向 | 语言 | Star | 新增 Star | 风险提示 | 链接 |",
+        "|---|---|---|---:|---|---|---:|---:|---:|---|",
     ]
     if rows:
         lines.extend(_project_table_row(row) for row in rows)
@@ -196,11 +198,22 @@ def _project_table_row(row: dict) -> str:
     url = str(row.get("html_url") or "")
     link = f"[{url}]({url})" if url else "-"
     risk_count = len(row.get("security_flags") or [])
+    sources = _source_text(row.get("sources") or [])
+    trending_rank = row.get("trending_rank") or "-"
     return (
-        f"| {row.get('run_date', '')} | {row.get('full_name', '')} | {row.get('category', 'Other')} | "
-        f"{row.get('language', 'Unknown')} | {row.get('stargazers_count', 0)} | "
+        f"| {row.get('run_date', '')} | {row.get('full_name', '')} | {sources} | {trending_rank} | "
+        f"{row.get('category', 'Other')} | {row.get('language', 'Unknown')} | {row.get('stargazers_count', 0)} | "
         f"{row.get('star_growth', 0)} | {risk_count} | {link} |"
     )
+
+
+def _source_text(sources: list[str]) -> str:
+    labels = {
+        "github_trending": "GitHub Trending",
+        "github_search": "GitHub Search",
+    }
+    values = [labels.get(source, source) for source in sources if source]
+    return " + ".join(values) if values else "-"
 
 
 if __name__ == "__main__":

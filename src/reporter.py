@@ -69,13 +69,13 @@ def fallback_report(
             "",
             "## 二、热点项目总览",
             "",
-            "| 序号 | 项目 | 方向 | Star | 新增 Star | Fork | 语言 | 链接 |",
-            "|---:|---|---|---:|---:|---:|---|---|",
+            "| 序号 | 项目 | 来源 | Trending 排名 | 方向 | Star | 新增 Star | Fork | 语言 | 链接 |",
+            "|---:|---|---|---:|---|---:|---:|---:|---|---|",
         ]
     )
     for index, repo in enumerate(repositories, start=1):
         lines.append(
-            f"| {index} | {repo.full_name} | {repo.category} | {repo.stargazers_count} | {repo.star_growth} | {repo.forks_count} | {repo.language} | [{repo.html_url}]({repo.html_url}) |"
+            f"| {index} | {repo.full_name} | {_source_text(repo)} | {_trending_rank_text(repo)} | {repo.category} | {repo.stargazers_count} | {repo.star_growth} | {repo.forks_count} | {repo.language} | [{repo.html_url}]({repo.html_url}) |"
         )
 
     lines.extend(["", "## 三、重点项目分析", ""])
@@ -88,6 +88,7 @@ def fallback_report(
                 f"- 简介：{repo.description}",
                 f"- README 摘要：{_short_text(repo.readme_excerpt) or '未获取到 README 内容。'}",
                 f"- 技术信息：主要语言 {repo.language}，Star {repo.stargazers_count}，Fork {repo.forks_count}，较上次记录新增 Star {repo.star_growth}。",
+                f"- 热度来源：{_source_text(repo)}，Trending 排名 {_trending_rank_text(repo)}。",
                 f"- 入选原因：{_selection_reason_text(repo)}",
                 f"- 风险提示：{_security_text(repo)}",
                 f"- 学习价值：可作为了解 {repo.category} 相关开源实践的参考。",
@@ -175,6 +176,19 @@ def _selection_reason_text(repo: Repository) -> str:
     if not repo.selection_reasons:
         return "综合 Star、活跃度和主题匹配度入选。"
     return "；".join(repo.selection_reasons)
+
+
+def _source_text(repo: Repository) -> str:
+    labels = {
+        "github_trending": "GitHub Trending",
+        "github_search": "GitHub Search",
+    }
+    values = [labels.get(source, source) for source in repo.sources if source]
+    return " + ".join(values) if values else "GitHub Search"
+
+
+def _trending_rank_text(repo: Repository) -> str:
+    return str(repo.trending_rank) if repo.trending_rank > 0 else "-"
 
 
 def _generate_with_kimi(

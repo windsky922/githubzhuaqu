@@ -27,6 +27,7 @@ class BuildPagesTest(unittest.TestCase):
                         "top_languages": [{"name": "Python", "count": 8}],
                         "top_categories": [{"name": "AI Agent", "count": 4}],
                         "total_star_growth": 20,
+                        "trending_project_count": 1,
                     },
                     ensure_ascii=False,
                 ),
@@ -42,6 +43,8 @@ class BuildPagesTest(unittest.TestCase):
                             "language": "Python",
                             "stargazers_count": 100,
                             "star_growth": 20,
+                            "sources": ["github_trending", "github_search"],
+                            "trending_rank": 2,
                             "security_flags": ["未识别到许可证。"],
                         }
                     ],
@@ -64,10 +67,13 @@ class BuildPagesTest(unittest.TestCase):
             self.assertIn("主语言 Python", index)
             self.assertIn("主方向 AI Agent", index)
             self.assertIn("新增 Star 20", index)
+            self.assertIn("Trending 项目 1", index)
             self.assertIn("[历史项目索引](projects.md)", index)
             self.assertIn("[未来更新规划](future-plan.md)", index)
             projects = (root / "docs" / "projects.md").read_text(encoding="utf-8")
             self.assertIn("owner/project", projects)
+            self.assertIn("GitHub Trending + GitHub Search", projects)
+            self.assertIn("| 2 |", projects)
             self.assertIn("AI Agent", projects)
             self.assertIn("[https://github.com/owner/project](https://github.com/owner/project)", projects)
         finally:

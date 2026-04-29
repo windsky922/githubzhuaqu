@@ -10,19 +10,23 @@ def build_trend_summary(repositories: list[Repository]) -> dict[str, Any]:
     language_counts = Counter(repo.language or "Unknown" for repo in repositories)
     category_counts = Counter(repo.category or "Other" for repo in repositories)
     total_star_growth = sum(max(0, repo.star_growth) for repo in repositories)
+    trending_repositories = [repo for repo in repositories if repo.trending_rank > 0]
     top_growth = sorted(
         [repo for repo in repositories if repo.star_growth > 0],
         key=lambda repo: repo.star_growth,
         reverse=True,
     )[:5]
+    top_trending = sorted(trending_repositories, key=lambda repo: repo.trending_rank)[:5]
 
     return {
         "total_projects": len(repositories),
+        "trending_project_count": len(trending_repositories),
         "total_star_growth": total_star_growth,
         "top_languages": _counter_items(language_counts),
         "top_categories": _counter_items(category_counts),
+        "top_trending": [_repo_trending_item(repo) for repo in top_trending],
         "top_star_growth": [_repo_growth_item(repo) for repo in top_growth],
-        "summary_points": _summary_points(language_counts, category_counts, total_star_growth, top_growth),
+        "summary_points": _summary_points(language_counts, category_counts, total_star_growth, top_growth, top_trending),
     }
 
 
@@ -41,11 +45,23 @@ def _repo_growth_item(repo: Repository) -> dict[str, Any]:
     }
 
 
+def _repo_trending_item(repo: Repository) -> dict[str, Any]:
+    return {
+        "full_name": repo.full_name,
+        "html_url": repo.html_url,
+        "trending_rank": repo.trending_rank,
+        "stargazers_count": repo.stargazers_count,
+        "language": repo.language,
+        "category": repo.category,
+    }
+
+
 def _summary_points(
     language_counts: Counter,
     category_counts: Counter,
     total_star_growth: int,
     top_growth: list[Repository],
+    top_trending: list[Repository],
 ) -> list[str]:
     points = []
     if category_counts:
@@ -55,6 +71,9 @@ def _summary_points(
         language, count = language_counts.most_common(1)[0]
         points.append(f"{language} 是本期出现最多的主要语言，共 {count} 个项目。")
     points.append(f"本期入选项目累计新增 Star {total_star_growth}。")
+    if top_trending:
+        leader = top_trending[0]
+        points.append(f"{leader.full_name} 是本期 GitHub Trending 排名最高的项目，周榜排名 {leader.trending_rank}。")
     if top_growth:
         leader = top_growth[0]
         points.append(f"{leader.full_name} 是本期新增 Star 最高的项目，新增 {leader.star_growth}。")

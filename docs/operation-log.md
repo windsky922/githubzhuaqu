@@ -1820,3 +1820,37 @@ GitHub Trending weekly
 6. `score_weights`：综合评分权重。
 
 后续用户可以通过 `config/interests.json` 调整这些字段，不需要改主流程代码。
+
+---
+
+## 2026-04-29 追加：Trending 信号展示增强
+
+### 1. 开发目的
+
+上一轮已经把 GitHub Trending 周榜作为第一优先级候选来源。本轮继续补齐可见性：让周报、趋势摘要和 GitHub Pages 历史项目索引都能直接看到项目来源与 Trending 排名，方便判断排序是否符合“Trending 优先”的设计。
+
+### 2. 本次实现
+
+更新：
+
+```text
+prompts/weekly_report.md
+src/reporter.py
+src/trends.py
+scripts/build_pages.py
+tests/test_reporter.py
+tests/test_trends.py
+tests/test_build_pages.py
+```
+
+具体变化：
+
+1. Kimi 提示词要求优先解释 `trending_rank`，并说明 `sources` 来源。
+2. 降级周报的项目总览新增“来源”和“Trending 排名”。
+3. 重点项目分析新增“热度来源”。
+4. 趋势摘要新增 `trending_project_count` 和 `top_trending`。
+5. GitHub Pages 历史项目索引新增“来源”和“Trending 排名”列。
+
+### 3. 设计边界
+
+本次只增强展示与摘要，不改变采集排序逻辑。排序逻辑仍由上一轮的 `score_weights` 控制，后续可以通过 `config/interests.json` 调整权重。
