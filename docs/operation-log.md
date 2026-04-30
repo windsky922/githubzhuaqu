@@ -2602,3 +2602,39 @@ docs/future-plan.md
 ### 3. 判断结论
 
 当前前端和数据库还不适合立即完整开发。更合理的路径是先稳定数据结构和周报质量，再做 GitHub Pages 轻量筛选，等历史数据足够后再引入 SQLite 和更完整的前端。个性化分析已经有 `config/interests.json` 基础，可以优先推进 profile 配置设计。
+
+---
+
+## 2026-04-30 追加：个性化 profile 最小版本
+
+### 1. 开发目的
+
+用户希望后续可以通过选择 Java、Python、Agent 开发等选项，精准推送符合当前需求的项目。本次先实现配置层的最小版本，避免提前引入复杂前端或数据库。
+
+### 2. 本次实现
+
+更新：
+
+```text
+config/profiles.example.json
+src/personalization.py
+src/settings.py
+tests/test_personalization.py
+tests/test_settings.py
+README.md
+docs/setup.md
+.github/workflows/weekly.yml
+```
+
+调整内容：
+
+1. 新增 `config/profiles.example.json`，提供 `java`、`python`、`agent_development`、`learning`、`developer_tools` 五类示例方向。
+2. 新增 `src/personalization.py`，支持把多个 profile 叠加到基础兴趣配置中。
+3. 支持 `INTEREST_PROFILE=java,agent_development` 这种多选形式，为后续前端选择器预留入口。
+4. `src/settings.py` 在加载 `config/interests.json` 或 example 后自动应用 profile。
+5. GitHub Actions 支持从仓库变量读取 `INTEREST_PROFILE`。
+6. README 更新为当前真实项目能力说明。
+
+### 3. 设计边界
+
+本次只做个性化配置入口，不新增数据库、不新增登录系统、不新增复杂前端。profile 中只允许保存兴趣方向、语言、主题、搜索补充项和评分权重，不应写入任何密钥。

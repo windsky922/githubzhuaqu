@@ -140,3 +140,41 @@ Folder: /docs
 ```
 
 启用后，后续每次 GitHub Actions 生成周报，都会同步刷新归档页面。
+
+## 个性化 profile 配置
+
+如果希望按 Java、Python、Agent 开发等方向精准推荐，可以使用个性化 profile。
+
+示例 profile 文件：
+
+```text
+config/profiles.example.json
+```
+
+如需自定义，可以新建：
+
+```text
+config/profiles.json
+```
+
+本地或 GitHub Actions 中通过 `INTEREST_PROFILE` 选择方向，多个方向用英文逗号分隔：
+
+```text
+INTEREST_PROFILE=java,agent_development
+```
+
+当前示例 profile 包括：
+
+1. `java`：Java 后端与工程实践。
+2. `python`：Python 工具与应用开发。
+3. `agent_development`：Agent 框架、工具调用和自动化工作流。
+4. `learning`：更适合学习和跟练的项目。
+5. `developer_tools`：开发者工具和 CLI 自动化。
+
+在 GitHub Actions 中，建议把 `INTEREST_PROFILE` 配置为仓库变量：
+
+```text
+Settings -> Secrets and variables -> Actions -> Variables
+```
+
+profile 配置只保存兴趣方向、语言、主题和权重，不要写入 API Key、Token、Chat ID 或其他密钥。

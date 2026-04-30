@@ -42,6 +42,7 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           REPORT_BASE_URL: ${{ vars.REPORT_BASE_URL || secrets.REPORT_BASE_URL }}
+          INTEREST_PROFILE: ${{ vars.INTEREST_PROFILE }}
           SKIP_TELEGRAM_SEND: "true"
         run: python main.py
 

@@ -49,8 +49,15 @@ def load_interests(path: Path) -> dict:
 def load_project_interests(root: Path = ROOT) -> dict:
     custom_path = root / "config" / "interests.json"
     if custom_path.exists():
-        return load_interests(custom_path)
-    return load_interests(root / "config" / "interests.example.json")
+        interests = load_interests(custom_path)
+    else:
+        interests = load_interests(root / "config" / "interests.example.json")
+
+    from .personalization import apply_interest_profiles, load_project_profiles, selected_profile_names
+
+    profiles = load_project_profiles(root)
+    profile_names = selected_profile_names(interests, os.getenv("INTEREST_PROFILE", ""))
+    return apply_interest_profiles(interests, profiles, profile_names)
 
 
 def load_settings(run_date: str, since_date: str) -> Settings:
