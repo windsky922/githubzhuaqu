@@ -21,6 +21,7 @@ class Repository:
     open_issues_count: int = 0
     license_name: str = ""
     readme_excerpt: str = ""
+    readme_summary: str = ""
     security_flags: list[str] = field(default_factory=list)
     selection_reasons: list[str] = field(default_factory=list)
     sources: list[str] = field(default_factory=list)
@@ -63,6 +64,7 @@ class RunSummary:
     collected_count: int = 0
     selected_count: int = 0
     skipped_sent_count: int = 0
+    previously_sent_selected_count: int = 0
     collector_errors: list[str] = field(default_factory=list)
     collector_stats: list[dict[str, Any]] = field(default_factory=list)
     readme_fetched_count: int = 0

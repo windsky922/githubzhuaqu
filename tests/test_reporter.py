@@ -5,7 +5,15 @@ import urllib.error
 from unittest.mock import patch
 
 from src.models import Repository
-from src.reporter import _extract_content, _post_kimi_with_retries, _repository_payload, fallback_report, generate_report, normalize_report_markdown
+from src.reporter import (
+    _checked_kimi_report,
+    _extract_content,
+    _post_kimi_with_retries,
+    _repository_payload,
+    fallback_report,
+    generate_report,
+    normalize_report_markdown,
+)
 from src.settings import Settings
 
 
@@ -88,6 +96,33 @@ class ReporterTest(unittest.TestCase):
         self.assertIn("Trending 排名 3", report)
         self.assertIn("created:>=2026-04-20 stars:>20", report)
         self.assertIn("Python 是本期出现最多的主要语言", report)
+
+    def test_checked_kimi_report_repairs_missing_metadata_appendix(self):
+        repository = Repository(
+            full_name="owner/project",
+            html_url="https://github.com/owner/project",
+            description="Useful agent tool",
+            stargazers_count=120,
+            forks_count=20,
+            language="Python",
+            created_at="2026-04-25T00:00:00Z",
+            updated_at="2026-04-25T00:00:00Z",
+            sources=["github_search"],
+        )
+        report = (
+            "## 本周总体趋势\n"
+            "## 热点项目总览\n"
+            "## 重点项目分析\n"
+            "## 最适合用户学习的项目\n"
+            "## 本周结论\n"
+            "owner/project\n"
+        )
+
+        result = _checked_kimi_report(report, [repository])
+
+        self.assertIn("## 附录：项目链接与来源补全", result)
+        self.assertIn("[https://github.com/owner/project](https://github.com/owner/project)", result)
+        self.assertIn("GitHub Search", result)
 
     def test_extracts_content_from_openai_style_response(self):
         data = {"choices": [{"message": {"content": "正文"}}]}
@@ -280,14 +315,17 @@ class ReporterTest(unittest.TestCase):
             created_at="2026-04-25T00:00:00Z",
             updated_at="2026-04-25T00:00:00Z",
             readme_excerpt="readme ghp_" + "C" * 36,
+            readme_summary="summary ghp_" + "D" * 36,
         )
 
         payload = _repository_payload(repository, include_readme=True)
 
         self.assertNotIn("ghp_", payload["description"])
         self.assertNotIn("ghp_", payload["readme_excerpt"])
+        self.assertNotIn("ghp_", payload["readme_summary"])
         self.assertIn("[已脱敏疑似密钥]", payload["description"])
         self.assertIn("[已脱敏疑似密钥]", payload["readme_excerpt"])
+        self.assertIn("[已脱敏疑似密钥]", payload["readme_summary"])
 
 class _FakeResponse:
     def __init__(self, data):

@@ -18,7 +18,6 @@ from src.security import apply_security_flags
 from src.sender import report_url, send_report
 from src.settings import load_settings
 from src.state import (
-    filter_unsent_repositories,
     load_sent_repository_names,
     load_star_history,
     write_sent_repositories,
@@ -38,8 +37,7 @@ def main() -> int:
         collected, queries, collector_errors, collector_stats = collect_repositories(settings)
         sent_names = load_sent_repository_names(settings)
         star_history = load_star_history(settings)
-        unsent_collected = filter_unsent_repositories(collected, sent_names)
-        selected = process_repositories(unsent_collected, settings, star_history)
+        selected = process_repositories(collected, settings, star_history)
         readme_fetched_count = enrich_repositories_with_readmes(selected, settings)
         apply_security_flags(selected)
         trend_summary = build_trend_summary(selected)
@@ -54,7 +52,8 @@ def main() -> int:
         summary.queries = queries
         summary.collected_count = len(collected)
         summary.selected_count = len(selected)
-        summary.skipped_sent_count = len({repo.full_name for repo in collected if repo.full_name in sent_names})
+        summary.skipped_sent_count = 0
+        summary.previously_sent_selected_count = len({repo.full_name for repo in selected if repo.full_name in sent_names})
         summary.collector_errors = collector_errors
         summary.collector_stats = collector_stats
         summary.readme_fetched_count = readme_fetched_count

@@ -7,7 +7,6 @@ from pathlib import Path
 from src.models import Repository
 from src.settings import Settings
 from src.state import (
-    filter_unsent_repositories,
     load_sent_repository_names,
     load_star_history,
     write_sent_repositories,
@@ -61,22 +60,6 @@ class StateTest(unittest.TestCase):
             self.assertEqual(names, {"owner/one"})
         finally:
             shutil.rmtree(root, ignore_errors=True)
-
-    def test_filters_unsent_repositories(self):
-        repositories = [repo("owner/one"), repo("owner/two")]
-
-        result = filter_unsent_repositories(repositories, {"owner/one"})
-
-        self.assertEqual([item.full_name for item in result], ["owner/two"])
-
-    def test_keeps_sent_top_trending_repositories(self):
-        trending = repo("owner/trending")
-        trending.trending_rank = 3
-        repositories = [repo("owner/one"), trending]
-
-        result = filter_unsent_repositories(repositories, {"owner/one", "owner/trending"})
-
-        self.assertEqual([item.full_name for item in result], ["owner/trending"])
 
     def test_loads_legacy_string_state(self):
         root = Path.cwd() / f".tmp-state-test-{uuid.uuid4().hex}"

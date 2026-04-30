@@ -189,21 +189,21 @@ github-weekly-agent/
 
 ## 8. 搜索策略
 
-第一阶段使用 GitHub Search API，采用多查询合并：
+当前实现以 GitHub Trending 周榜为第一优先级，GitHub Search API 作为垂直方向补充。早期文档中的 `created:>=...` 查询示例已废弃，现阶段不再用“新建时间”定义热点。
 
 ```text
-created:>=YYYY-MM-DD stars:>20
-topic:ai created:>=YYYY-MM-DD stars:>20
-topic:agent created:>=YYYY-MM-DD stars:>10
-topic:llm created:>=YYYY-MM-DD stars:>10
-language:Python created:>=YYYY-MM-DD stars:>20
-language:TypeScript created:>=YYYY-MM-DD stars:>20
-pushed:>=YYYY-MM-DD stars:>100
+GitHub Trending weekly
+pushed:>=YYYY-MM-DD stars:>20
+topic:ai pushed:>=YYYY-MM-DD stars:>10
+topic:agent pushed:>=YYYY-MM-DD stars:>10
+topic:llm pushed:>=YYYY-MM-DD stars:>10
+language:Python pushed:>=YYYY-MM-DD stars:>20
+language:TypeScript pushed:>=YYYY-MM-DD stars:>20
 ```
 
 说明：
 
-1. `created` 捕捉新项目。
+1. `GitHub Trending weekly` 捕捉本周社区热度最高的项目。
 2. `pushed` 捕捉近期活跃的已有项目。
 3. 多查询结果按 `full_name` 去重。
 4. 第一阶段不承诺精准 Star 增量，只做热点近似。
@@ -351,4 +351,3 @@ data/runs/YYYY-MM-DD.json
 6. 实现 archive。
 7. 添加 GitHub Actions。
 8. 本地测试后再启用定时运行。
-

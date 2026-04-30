@@ -2733,3 +2733,39 @@ README.md
 ### 3. 设计边界
 
 当前摘要是规则型提取，不调用额外模型，避免增加成本和失败点。后续如果 Kimi 稳定，可再让模型基于该精炼摘要做更自然的中文改写。
+
+---
+
+## 2026-04-30 追加：代码审查问题修复
+
+### 1. 开发目的
+
+根据最新代码审查结果，修复四类问题：已推送状态影响热点完整性、Kimi 格式小错误导致整份降级、README 摘要字段不清晰、旧架构文档仍保留 `created` 查询示例。
+
+### 2. 本次实现
+
+更新：
+
+```text
+main.py
+src/models.py
+src/collector.py
+src/reporter.py
+tests/test_collector.py
+tests/test_reporter.py
+docs/project-architecture.md
+```
+
+调整内容：
+
+1. 周报候选池不再因 `sent_repos.json` 过滤历史已推送项目，避免遗漏持续热门项目。
+2. 运行摘要新增 `previously_sent_selected_count`，记录本期入选项目中有多少曾经推送过。
+3. 删除不再使用的 `filter_unsent_repositories`，避免后续误以为主流程仍会过滤已推送仓库。
+4. Kimi 输出进入质量检查前，会自动补齐项目完整链接、来源、Trending 排名和风险提示，减少可修复格式问题导致的降级。
+5. `Repository` 新增 `readme_summary` 字段，继续保留 `readme_excerpt` 兼容历史数据。
+6. README 规则摘要增加 bullet-only README 的兜底提取。
+7. `docs/project-architecture.md` 将旧 `created:>=...` 示例改为当前 `Trending + pushed` 策略。
+
+### 3. 设计边界
+
+本次没有引入数据库或新框架。`sent_repos.json` 仍用于记录推送状态，但不再影响周报候选池；Kimi 修复器只做结构化元数据补齐，不改写模型正文。

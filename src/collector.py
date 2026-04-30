@@ -280,8 +280,9 @@ def enrich_repositories_with_readmes(repositories: list[Repository], settings: S
             readme = fetch_readme(repo.full_name, settings)
         except Exception:
             continue
-        repo.readme_excerpt = _readme_excerpt(readme)
-        if repo.readme_excerpt:
+        repo.readme_summary = _readme_excerpt(readme)
+        repo.readme_excerpt = repo.readme_summary
+        if repo.readme_summary:
             fetched_count += 1
     return fetched_count
 
@@ -304,6 +305,8 @@ def _readme_excerpt(readme: str, limit: int = README_EXCERPT_LIMIT) -> str:
 def summarize_readme(readme: str, max_length: int = README_SUMMARY_MAX_LENGTH) -> str:
     cleaned = _clean_readme_for_summary(redact_sensitive_text(readme))
     sentences = _readme_sentences(cleaned)
+    if not sentences:
+        sentences = _readme_fragments(cleaned)
     if not sentences:
         return ""
     summary = _join_limited_sentences(sentences, max_length)
@@ -380,6 +383,21 @@ def _readme_sentences(text: str) -> list[str]:
         if len(sentences) >= README_SUMMARY_MAX_SENTENCES:
             break
     return sentences
+
+
+def _readme_fragments(text: str) -> list[str]:
+    fragments = []
+    for part in re.split(r"\s{2,}|[;；]", text):
+        fragment = part.strip(" -:;，,。")
+        if _usable_readme_sentence(fragment):
+            fragments.append(_ensure_sentence_end(fragment))
+        if len(fragments) >= README_SUMMARY_MAX_SENTENCES:
+            break
+    return fragments
+
+
+def _ensure_sentence_end(text: str) -> str:
+    return text if re.search(r"[.!?。！？]$", text) else text + "。"
 
 
 def _usable_readme_sentence(sentence: str) -> bool:

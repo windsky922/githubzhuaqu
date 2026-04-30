@@ -40,6 +40,18 @@ class CollectorTest(unittest.TestCase):
         self.assertNotIn("ghp_", result)
         self.assertIn("[已脱敏疑似密钥]", result)
 
+    def test_readme_excerpt_handles_bullet_only_readme(self):
+        readme = """
+        - Build production-ready agent workflows with reusable tools
+        - Connect local automation tasks to hosted model providers
+        - Keep configuration small enough for teams to review
+        """
+
+        result = _readme_excerpt(readme)
+
+        self.assertIn("Build production-ready agent workflows", result)
+        self.assertLessEqual(len(result), 300)
+
     def test_search_repositories_redacts_description_token_like_text(self):
         settings = Settings(
             root=None,

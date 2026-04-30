@@ -125,7 +125,7 @@ def fallback_report(
                 "",
                 f"- 项目定位：仅根据仓库名称和简介判断，属于 {repo.category} 方向。",
                 f"- 简介：{repo.description}",
-                f"- README 摘要：{_short_text(repo.readme_excerpt) or '未获取到 README 内容。'}",
+                f"- README 摘要：{_short_text(_readme_summary_text(repo)) or '未获取到 README 内容。'}",
                 f"- 技术信息：主要语言 {repo.language}，Star {repo.stargazers_count}，Fork {repo.forks_count}，较上次记录新增 Star {repo.star_growth}。",
                 f"- 热度来源：{_source_text(repo)}，Trending 排名 {_trending_rank_text(repo)}。",
                 f"- 入选原因：{_selection_reason_text(repo)}",
@@ -167,10 +167,41 @@ def fallback_report(
 
 def _checked_kimi_report(report: str, repositories: list[Repository]) -> str:
     normalized = normalize_report_markdown(report)
-    quality_errors = check_report_quality(normalized, repositories)
+    repaired = _repair_report_metadata(normalized, repositories)
+    quality_errors = check_report_quality(repaired, repositories)
     if quality_errors:
         raise RuntimeError("Kimi 周报质量检查失败：" + "；".join(quality_errors[:5]))
-    return normalized
+    return repaired
+
+
+def _repair_report_metadata(report: str, repositories: list[Repository]) -> str:
+    appendix_lines = _metadata_appendix_lines(report, repositories)
+    if not appendix_lines:
+        return report
+    return report.rstrip() + "\n\n## 附录：项目链接与来源补全\n\n" + "\n".join(appendix_lines) + "\n"
+
+
+def _metadata_appendix_lines(report: str, repositories: list[Repository]) -> list[str]:
+    lines = []
+    for repo in repositories:
+        required_link = f"[{repo.html_url}]({repo.html_url})" if repo.html_url else ""
+        needs_link = bool(required_link and required_link not in report)
+        needs_source = bool(repo.sources and not all(_source_label(source) in report for source in repo.sources))
+        needs_trending = bool(repo.trending_rank > 0 and ("Trending" not in report or str(repo.trending_rank) not in report))
+        needs_risk = bool(repo.security_flags and "风险" not in report and not any(flag in report for flag in repo.security_flags))
+        if not any([needs_link, needs_source, needs_trending, needs_risk]):
+            continue
+        parts = [repo.full_name]
+        if required_link:
+            parts.append(required_link)
+        if repo.sources:
+            parts.append(f"来源：{_source_text(repo)}")
+        if repo.trending_rank > 0:
+            parts.append(f"Trending 排名：{repo.trending_rank}")
+        if repo.security_flags:
+            parts.append(f"风险提示：{_security_text(repo)}")
+        lines.append("- " + "；".join(parts))
+    return lines
 
 
 def _trend_lines(trend_summary: dict) -> list[str]:
@@ -205,6 +236,10 @@ def _short_text(text: str, limit: int = 320) -> str:
     return text[:limit].rstrip() + "..."
 
 
+def _readme_summary_text(repo: Repository) -> str:
+    return repo.readme_summary or repo.readme_excerpt
+
+
 def _security_text(repo: Repository) -> str:
     if not repo.security_flags:
         return "未发现明显元数据风险，但仍需自行审查代码和依赖。"
@@ -218,12 +253,16 @@ def _selection_reason_text(repo: Repository) -> str:
 
 
 def _source_text(repo: Repository) -> str:
+    values = [_source_label(source) for source in repo.sources if source]
+    return " + ".join(values) if values else "GitHub Search"
+
+
+def _source_label(source: str) -> str:
     labels = {
         "github_trending": "GitHub Trending",
         "github_search": "GitHub Search",
     }
-    values = [labels.get(source, source) for source in repo.sources if source]
-    return " + ".join(values) if values else "GitHub Search"
+    return labels.get(source, source)
 
 
 def _trending_rank_text(repo: Repository) -> str:
@@ -310,8 +349,10 @@ def _repository_payload(repo: Repository, include_readme: bool) -> dict:
     payload = repo.to_dict()
     payload["description"] = redact_sensitive_text(str(payload.get("description") or ""))
     payload["readme_excerpt"] = redact_sensitive_text(str(payload.get("readme_excerpt") or ""))
+    payload["readme_summary"] = redact_sensitive_text(str(payload.get("readme_summary") or payload.get("readme_excerpt") or ""))
     if not include_readme:
         payload["readme_excerpt"] = ""
+        payload["readme_summary"] = ""
     return payload
 
 

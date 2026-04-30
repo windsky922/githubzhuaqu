@@ -8,8 +8,6 @@ from .models import Repository
 from .settings import Settings
 from .utils import ensure_dir
 
-TRENDING_DEDUP_RANK_LIMIT = 10
-
 
 def load_sent_repository_names(settings: Settings) -> set[str]:
     path = _state_path(settings)
@@ -20,14 +18,6 @@ def load_sent_repository_names(settings: Settings) -> set[str]:
     except json.JSONDecodeError:
         return set()
     return _names_from_state(data)
-
-
-def filter_unsent_repositories(repositories: list[Repository], sent_names: set[str]) -> list[Repository]:
-    return [repo for repo in repositories if repo.full_name not in sent_names or _is_top_trending(repo)]
-
-
-def _is_top_trending(repo: Repository) -> bool:
-    return 0 < repo.trending_rank <= TRENDING_DEDUP_RANK_LIMIT
 
 
 def write_sent_repositories(repositories: list[Repository], settings: Settings) -> str:
