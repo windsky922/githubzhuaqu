@@ -6,35 +6,58 @@ import os
 import urllib.error
 import urllib.parse
 import urllib.request
+from dataclasses import dataclass
 
 from .settings import Settings
+
+
+@dataclass(frozen=True)
+class DeliveryMessage:
+    title: str
+    url: str
+    text: str
+    html_text: str
 
 
 def send_report(report: str, settings: Settings) -> tuple[bool, str]:
     if not settings.telegram_bot_token or not settings.telegram_chat_id:
         return False, "Telegram is not configured"
-    message = build_report_message(settings)
+    message = build_delivery_message(settings)
     if not message:
         return False, "Report URL is not configured"
 
     try:
-        _send_message(message, settings)
+        _send_message(message.html_text, settings)
     except Exception as error:
         return False, str(error)
     return True, ""
 
 
 def build_report_message(settings: Settings) -> str:
+    message = build_delivery_message(settings)
+    return message.html_text if message else ""
+
+
+def build_delivery_message(settings: Settings) -> DeliveryMessage | None:
     url = report_url(settings)
     if not url:
-        return ""
-    return "\n".join(
+        return None
+    title = f"GitHub 每周热点项目周报 - {settings.run_date}"
+    text = "\n".join(
         [
-            f"GitHub 每周热点项目周报 - {settings.run_date}",
+            title,
+            "",
+            f"阅读链接：{url}",
+        ]
+    )
+    html_text = "\n".join(
+        [
+            title,
             "",
             f'阅读链接：<a href="{html.escape(url, quote=True)}">打开本周周报</a>',
         ]
     )
+    return DeliveryMessage(title=title, url=url, text=text, html_text=html_text)
 
 
 def report_url(settings: Settings) -> str:

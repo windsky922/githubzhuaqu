@@ -2,7 +2,7 @@ import os
 import unittest
 from unittest.mock import patch
 
-from src.sender import build_report_message, report_url, send_report
+from src.sender import build_delivery_message, build_report_message, report_url, send_report
 from src.settings import Settings
 
 
@@ -42,6 +42,15 @@ class SenderTest(unittest.TestCase):
 
         self.assertIn("GitHub 每周热点项目周报 - 2026-04-29", message)
         self.assertIn('阅读链接：<a href="https://example.com/weekly/2026-04-29.html">打开本周周报</a>', message)
+
+    def test_builds_channel_neutral_delivery_message(self):
+        message = build_delivery_message(settings("https://example.com/weekly"))
+
+        self.assertIsNotNone(message)
+        self.assertEqual(message.title, "GitHub 每周热点项目周报 - 2026-04-29")
+        self.assertEqual(message.url, "https://example.com/weekly/2026-04-29.html")
+        self.assertIn("阅读链接：https://example.com/weekly/2026-04-29.html", message.text)
+        self.assertIn('<a href="https://example.com/weekly/2026-04-29.html">打开本周周报</a>', message.html_text)
 
     def test_send_report_sends_link_message_only(self):
         with patch("src.sender._send_message") as send:

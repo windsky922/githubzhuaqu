@@ -2234,3 +2234,38 @@ tests/test_build_pages.py
 1. 首页是否输出 `.html` 周报链接。
 2. 文档导航是否输出 `.html` 链接。
 3. 暂无项目时，历史项目索引表格是否仍保持完整列数。
+
+---
+
+## 2026-04-30 追加：推送短消息结构预留
+
+### 1. 开发目的
+
+当前只需要 Telegram 推送，但后续可能接入微信、飞书或邮件。为了避免以后把 Telegram 的 HTML 文案复制到其他渠道，本次在不创建复杂 `channels/` 框架的前提下，先抽出统一的短消息结构。
+
+### 2. 本次实现
+
+更新：
+
+```text
+src/sender.py
+tests/test_sender.py
+```
+
+新增：
+
+```text
+DeliveryMessage
+build_delivery_message
+```
+
+字段说明：
+
+1. `title`：周报标题。
+2. `url`：GitHub Pages 周报链接。
+3. `text`：纯文本消息，适合后续微信、飞书或邮件复用。
+4. `html_text`：HTML 消息，当前 Telegram 使用它来发送可点击超链接。
+
+### 3. 架构边界
+
+本次没有提前创建 `src/channels/` 目录，也没有加入微信、飞书或邮件依赖。只有当第二个真实推送渠道接入时，再把各渠道发送函数拆出独立模块。
