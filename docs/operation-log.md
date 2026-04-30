@@ -2269,3 +2269,31 @@ build_delivery_message
 ### 3. 架构边界
 
 本次没有提前创建 `src/channels/` 目录，也没有加入微信、飞书或邮件依赖。只有当第二个真实推送渠道接入时，再把各渠道发送函数拆出独立模块。
+
+---
+
+## 2026-04-30 追加：安全检查 allowlist 收紧
+
+### 1. 开发目的
+
+项目要求不能在代码中硬编码 API Key、Token、Chat ID 或任何密钥。原安全检查会对包含 `os.getenv(` 的整行直接放行，这在正常读取环境变量时没有问题，但如果有人写入带真实密钥的默认值，例如 `os.getenv("TOKEN", "真实 token")`，就可能被漏检。
+
+### 2. 本次实现
+
+更新：
+
+```text
+scripts/security_check.py
+tests/test_security_check.py
+```
+
+调整内容：
+
+1. allowlist 不再整行跳过所有规则。
+2. 对 GitHub token 和 Telegram bot token 这类具有明确格式的密钥，始终执行检测。
+3. 仍然允许 GitHub Actions Secrets 引用和环境变量示例通过通用配置检查，避免误报正常配置。
+4. 新增测试覆盖 `os.getenv` 默认值中藏入 GitHub token 的情况。
+
+### 3. 安全边界
+
+该检查只能发现常见格式和明显硬编码的密钥，不能替代 GitHub Secret Scanning 或人工审查。后续如果接入更多外部服务，需要继续补充对应 token 格式规则。

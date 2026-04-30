@@ -34,6 +34,21 @@ class SecurityCheckTest(unittest.TestCase):
         finally:
             shutil.rmtree(root, ignore_errors=True)
 
+    def test_detects_secret_even_when_line_uses_env_fallback(self):
+        root = Path.cwd() / f".tmp-security-test-{uuid.uuid4().hex}"
+        try:
+            root.mkdir()
+            (root / "settings.py").write_text(
+                "TOKEN = os.getenv('TOKEN', 'ghp_" + "B" * 36 + "')\n",
+                encoding="utf-8",
+            )
+
+            findings = scan_repository(root)
+
+            self.assertTrue(any("github_token" in finding for finding in findings))
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
 
 if __name__ == "__main__":
     unittest.main()

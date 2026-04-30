@@ -34,9 +34,9 @@ def scan_repository(root: Path = ROOT) -> list[str]:
     findings: list[str] = []
     for path in _iter_text_files(root):
         for line_number, line in enumerate(path.read_text(encoding="utf-8", errors="replace").splitlines(), start=1):
-            if _is_allowlisted(line):
-                continue
             for name, pattern in SECRET_PATTERNS.items():
+                if _is_allowlisted(line, name):
+                    continue
                 if pattern.search(line):
                     relative = path.relative_to(root).as_posix()
                     findings.append(f"{relative}:{line_number}: {name}")
@@ -55,7 +55,9 @@ def _iter_text_files(root: Path) -> list[Path]:
     return files
 
 
-def _is_allowlisted(line: str) -> bool:
+def _is_allowlisted(line: str, pattern_name: str) -> bool:
+    if pattern_name in {"github_token", "telegram_bot_token"}:
+        return False
     return any(marker in line for marker in ALLOWLIST_MARKERS)
 
 
