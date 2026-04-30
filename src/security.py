@@ -45,8 +45,16 @@ def security_flags(repo: Repository) -> list[str]:
         flags.append("仓库已归档，维护状态可能不足。")
     if repo.fork:
         flags.append("仓库是 fork，需确认原始项目和当前维护状态。")
+    if _has_high_issue_load(repo):
+        flags.append("Open Issue 数量相对较高，建议复用前人工检查维护响应和问题质量。")
     flags.extend(_keyword_flags(repo))
     return _dedupe(flags)
+
+
+def _has_high_issue_load(repo: Repository) -> bool:
+    if repo.open_issues_count < 100:
+        return False
+    return repo.stargazers_count > 0 and repo.open_issues_count / repo.stargazers_count >= 0.2
 
 
 def _keyword_flags(repo: Repository) -> list[str]:

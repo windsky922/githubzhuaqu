@@ -40,6 +40,16 @@ class RepositorySecurityTest(unittest.TestCase):
 
         self.assertTrue(repositories[0].security_flags)
 
+    def test_flags_high_issue_load(self):
+        flags = security_flags(repo(stargazers_count=500, open_issues_count=120))
+
+        self.assertTrue(any("Open Issue 数量相对较高" in flag for flag in flags))
+
+    def test_does_not_flag_low_issue_load(self):
+        flags = security_flags(repo(stargazers_count=5000, open_issues_count=120))
+
+        self.assertFalse(any("Open Issue 数量相对较高" in flag for flag in flags))
+
     def test_redacts_sensitive_token_like_text(self):
         telegram_token = "123456789:" + "a" * 31
         text = "token ghp_" + "A" * 36 + " bot " + telegram_token

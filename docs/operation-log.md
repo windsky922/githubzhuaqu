@@ -2451,3 +2451,37 @@ tests/test_security.py
 api_key=[已脱敏疑似密钥]
 password: [已脱敏疑似密钥]
 ```
+
+---
+
+## 2026-04-30 追加：Open Issue 风险提示
+
+### 1. 开发目的
+
+未来计划中提到需要为入选仓库增加 Issue 风险提示。当前 GitHub 仓库详情已经包含 `open_issues_count`，可以先做一条保守规则：当 Open Issue 数量明显偏高时，在周报风险提示中标记“需要人工检查维护响应”。
+
+### 2. 本次实现
+
+更新：
+
+```text
+src/security.py
+tests/test_security.py
+```
+
+新增规则：
+
+```text
+open_issues_count >= 100
+并且 open_issues_count / stargazers_count >= 0.2
+```
+
+满足条件时，`security_flags` 会加入：
+
+```text
+Open Issue 数量相对较高，建议复用前人工检查维护响应和问题质量。
+```
+
+### 3. 设计边界
+
+该规则只做风险提示，不把项目判定为不可用，也不影响当前排序。Issue 多可能代表项目活跃，也可能代表维护压力较大，因此周报中只提示人工复核。
