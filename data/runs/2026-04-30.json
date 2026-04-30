@@ -103,14 +103,14 @@
   "run_summary_path": "data/runs/2026-04-30.json",
   "raw_repositories_path": "data/raw/2026-04-30.json",
   "selected_repositories_path": "data/selected/2026-04-30.json",
-  "state_path": "",
+  "state_path": "data/state/sent_repos.json",
   "star_history_path": "data/state/star_history.json",
   "trend_summary_path": "data/trends/2026-04-30.json",
   "kimi_used": true,
   "fallback_used": false,
   "report_error": "",
-  "telegram_sent": false,
-  "telegram_error": "Telegram send skipped",
+  "telegram_sent": true,
+  "telegram_error": "",
   "telegram_report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-04-30.html",
   "error": ""
 }

@@ -230,6 +230,11 @@
     "first_sent_at": "2026-04-29"
   },
   {
+    "full_name": "kestra-io/kestra",
+    "html_url": "https://github.com/kestra-io/kestra",
+    "first_sent_at": "2026-04-30"
+  },
+  {
     "full_name": "labring/FastGPT",
     "html_url": "https://github.com/labring/FastGPT",
     "first_sent_at": "2026-04-30"
@@ -335,6 +340,11 @@
     "first_sent_at": "2026-04-29"
   },
   {
+    "full_name": "PrefectHQ/prefect",
+    "html_url": "https://github.com/PrefectHQ/prefect",
+    "first_sent_at": "2026-04-30"
+  },
+  {
     "full_name": "pytorch/pytorch",
     "html_url": "https://github.com/pytorch/pytorch",
     "first_sent_at": "2026-04-29"
@@ -358,6 +368,11 @@
     "full_name": "Significant-Gravitas/AutoGPT",
     "html_url": "https://github.com/Significant-Gravitas/AutoGPT",
     "first_sent_at": "2026-04-28"
+  },
+  {
+    "full_name": "simstudioai/sim",
+    "html_url": "https://github.com/simstudioai/sim",
+    "first_sent_at": "2026-04-30"
   },
   {
     "full_name": "Skyvern-AI/skyvern",
