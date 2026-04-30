@@ -8,6 +8,7 @@ from .models import Repository
 SENSITIVE_TEXT_PATTERNS = (
     re.compile(r"\bgh[pousr]_[A-Za-z0-9_]{20,}\b"),
     re.compile(r"\b\d{6,12}:[A-Za-z0-9_-]{30,}\b"),
+    re.compile(r"(?i)\b(api[_-]?key|token|secret|password|chat[_-]?id)\b\s*[:=]\s*['\"]?[A-Za-z0-9_./:+-]{12,}"),
 )
 REDACTION_TEXT = "[已脱敏疑似密钥]"
 

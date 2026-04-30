@@ -2389,3 +2389,32 @@ tests/test_reporter.py
 ### 3. 安全边界
 
 该保护是“最后兜底”，不能替代采集层脱敏和仓库密钥扫描。未来如果报告中增加更多来自第三方的文本字段，应继续复用 `redact_sensitive_text`。
+
+---
+
+## 2026-04-30 追加：通用密钥赋值脱敏
+
+### 1. 开发目的
+
+此前运行时脱敏已经覆盖 GitHub token 和 Telegram bot token 的明确格式，但第三方 README 中还可能出现 `api_key=...`、`password: ...`、`chat_id=...` 这类通用密钥赋值。为了和 `scripts/security_check.py` 的扫描策略保持一致，本次扩展运行时脱敏规则。
+
+### 2. 本次实现
+
+更新：
+
+```text
+src/security.py
+tests/test_security.py
+```
+
+新增脱敏匹配范围：
+
+1. `api_key` 或 `api-key`
+2. `token`
+3. `secret`
+4. `password`
+5. `chat_id` 或 `chat-id`
+
+### 3. 设计边界
+
+通用赋值规则只替换疑似密钥值，不阻止周报生成。它用于减少第三方内容归档风险，项目自身源码和手写文档仍由 `scripts/security_check.py` 阻断硬编码密钥。

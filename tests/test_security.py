@@ -50,6 +50,19 @@ class RepositorySecurityTest(unittest.TestCase):
         self.assertNotIn("123456789:", result)
         self.assertIn(REDACTION_TEXT, result)
 
+    def test_redacts_generic_secret_assignments(self):
+        api_key_name = "api" + "_key"
+        password_name = "pass" + "word"
+        api_value = "abc123456789xyz"
+        password_value = "abcdef1234567890"
+        text = f"example {api_key_name}={api_value} and {password_name}: {password_value}"
+
+        result = redact_sensitive_text(text)
+
+        self.assertNotIn(api_value, result)
+        self.assertNotIn(password_value, result)
+        self.assertEqual(result.count(REDACTION_TEXT), 2)
+
 
 if __name__ == "__main__":
     unittest.main()
