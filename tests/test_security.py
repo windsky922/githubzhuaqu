@@ -61,6 +61,8 @@ class RepositorySecurityTest(unittest.TestCase):
 
         self.assertNotIn(api_value, result)
         self.assertNotIn(password_value, result)
+        self.assertIn(f"{api_key_name}={REDACTION_TEXT}", result)
+        self.assertIn(f"{password_name}: {REDACTION_TEXT}", result)
         self.assertEqual(result.count(REDACTION_TEXT), 2)
 
 

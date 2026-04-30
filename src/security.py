@@ -5,10 +5,12 @@ import re
 from .models import Repository
 
 
-SENSITIVE_TEXT_PATTERNS = (
+TOKEN_TEXT_PATTERNS = (
     re.compile(r"\bgh[pousr]_[A-Za-z0-9_]{20,}\b"),
     re.compile(r"\b\d{6,12}:[A-Za-z0-9_-]{30,}\b"),
-    re.compile(r"(?i)\b(api[_-]?key|token|secret|password|chat[_-]?id)\b\s*[:=]\s*['\"]?[A-Za-z0-9_./:+-]{12,}"),
+)
+SECRET_ASSIGNMENT_PATTERN = re.compile(
+    r"(?i)(\b(?:api[_-]?key|token|secret|password|chat[_-]?id)\b\s*[:=]\s*['\"]?)([A-Za-z0-9_./:+-]{12,})"
 )
 REDACTION_TEXT = "[已脱敏疑似密钥]"
 
@@ -24,8 +26,9 @@ RISK_KEYWORDS = {
 
 def redact_sensitive_text(text: str) -> str:
     redacted = text
-    for pattern in SENSITIVE_TEXT_PATTERNS:
+    for pattern in TOKEN_TEXT_PATTERNS:
         redacted = pattern.sub(REDACTION_TEXT, redacted)
+    redacted = SECRET_ASSIGNMENT_PATTERN.sub(lambda match: f"{match.group(1)}{REDACTION_TEXT}", redacted)
     return redacted
 
 
