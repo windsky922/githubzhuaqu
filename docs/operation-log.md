@@ -2638,3 +2638,35 @@ docs/setup.md
 ### 3. 设计边界
 
 本次只做个性化配置入口，不新增数据库、不新增登录系统、不新增复杂前端。profile 中只允许保存兴趣方向、语言、主题、搜索补充项和评分权重，不应写入任何密钥。
+
+---
+
+## 2026-04-30 追加：个性化匹配原因
+
+### 1. 开发目的
+
+用户希望后续不仅能选择 Java、Python、Agent 开发等方向，还能精准推送符合当前需求的项目。本次在已有 profile 选择能力上增加“匹配原因”，让推荐结果可以解释为什么某个项目适合当前选择。
+
+### 2. 本次实现
+
+更新：
+
+```text
+src/personalization.py
+src/processor.py
+tests/test_personalization.py
+tests/test_processor.py
+README.md
+docs/setup.md
+```
+
+调整内容：
+
+1. profile 应用后会生成轻量的 `profile_match_rules`。
+2. 评分阶段根据仓库语言、topic、名称和简介判断命中哪些个性化方向。
+3. 入选项目的 `selection_reasons` 会追加类似“匹配当前个性化方向：Java 后端与工程实践、Agent 开发。”的说明。
+4. 该字段会进入 `data/selected/YYYY-MM-DD.json`，可供 Kimi 周报、规则版周报和后续前端筛选复用。
+
+### 3. 设计边界
+
+本次仍不新增前端或数据库。匹配逻辑保持轻量，先以 profile 的语言和主题关键词为依据，后续如果真实周报中误判较多，再扩展更细的规则。

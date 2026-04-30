@@ -108,6 +108,7 @@ def _score(repositories: list[Repository], settings: Settings, star_history: dic
         growth_score = repo.star_growth / max_growth if max_growth else 0
         trending_score = _trending_score(repo, max_trending_rank)
         topic_score = _topic_score(repo, settings)
+        profile_matches = _profile_matches(repo, settings)
         freshness_score = _freshness_score(repo.pushed_at or repo.updated_at, settings.days_back)
         community_score = (star_score + fork_score) / 2
         repo.category = _category(repo)
@@ -119,7 +120,7 @@ def _score(repositories: list[Repository], settings: Settings, star_history: dic
             + weights["community"] * community_score,
             4,
         )
-        repo.selection_reasons = _selection_reasons(repo, topic_score)
+        repo.selection_reasons = _selection_reasons(repo, topic_score, profile_matches)
 
 
 def _star_growth(repo: Repository, star_history: dict[str, int]) -> int:
@@ -173,12 +174,34 @@ def _topic_score(repo: Repository, settings: Settings) -> float:
     return min(1.0, hits / 3)
 
 
-def _selection_reasons(repo: Repository, topic_score: float) -> list[str]:
+def _profile_matches(repo: Repository, settings: Settings) -> list[str]:
+    rules = settings.interests.get("profile_match_rules") or []
+    text = " ".join([repo.full_name, repo.description, repo.language, *repo.topics]).lower()
+    language = repo.language.lower()
+    matches = []
+    for rule in rules:
+        if not isinstance(rule, dict):
+            continue
+        label = str(rule.get("label") or rule.get("name") or "").strip()
+        if not label:
+            continue
+        preferred_languages = {str(item).lower() for item in rule.get("preferred_languages", [])}
+        preferred_topics = [str(item).lower() for item in rule.get("preferred_topics", [])]
+        language_matched = language in preferred_languages
+        topic_matched = any(topic and topic in text for topic in preferred_topics)
+        if (language_matched or topic_matched) and label not in matches:
+            matches.append(label)
+    return matches
+
+
+def _selection_reasons(repo: Repository, topic_score: float, profile_matches: list[str]) -> list[str]:
     reasons = []
     if repo.trending_rank > 0:
         reasons.append(f"进入 GitHub Trending 周榜第 {repo.trending_rank} 位，是本期最重要的热度信号。")
     if repo.star_growth > 0:
         reasons.append(f"较上次记录新增 Star {repo.star_growth}，近期热度上升。")
+    if profile_matches:
+        reasons.append(f"匹配当前个性化方向：{'、'.join(profile_matches)}。")
     if repo.stargazers_count > 0:
         reasons.append(f"当前累计 Star {repo.stargazers_count}，具备一定社区关注度。")
     if topic_score > 0:

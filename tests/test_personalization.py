@@ -25,6 +25,23 @@ class PersonalizationTest(unittest.TestCase):
         self.assertEqual(result["preferred_topics"], ["agent", "automation", "spring", "workflow"])
         self.assertEqual(result["preferred_languages"], ["Python", "Java", "TypeScript"])
         self.assertEqual(result["active_profiles"], ["java", "agent_development"])
+        self.assertEqual(
+            result["profile_match_rules"],
+            [
+                {
+                    "name": "java",
+                    "label": "java",
+                    "preferred_topics": ["agent", "spring"],
+                    "preferred_languages": ["Java"],
+                },
+                {
+                    "name": "agent_development",
+                    "label": "agent_development",
+                    "preferred_topics": ["workflow"],
+                    "preferred_languages": ["TypeScript"],
+                },
+            ],
+        )
 
     def test_apply_interest_profiles_merges_score_weights(self):
         interests = {"score_weights": {"trending": 0.45, "topic": 0.15}}

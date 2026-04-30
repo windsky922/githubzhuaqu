@@ -178,3 +178,11 @@ Settings -> Secrets and variables -> Actions -> Variables
 ```
 
 profile 配置只保存兴趣方向、语言、主题和权重，不要写入 API Key、Token、Chat ID 或其他密钥。
+
+启用 profile 后，入选项目会在推荐理由中记录匹配到的方向，例如：
+
+```text
+匹配当前个性化方向：Java 后端与工程实践、Agent 开发。
+```
+
+这部分信息会进入 `data/selected/YYYY-MM-DD.json`，并可被 Kimi 周报、规则版周报和后续前端筛选复用。

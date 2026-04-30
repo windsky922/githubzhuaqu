@@ -57,6 +57,11 @@ def apply_interest_profiles(interests: dict, profiles: dict, profile_names: list
             for name in applied
             if isinstance(profiles.get(name), dict)
         ]
+        merged["profile_match_rules"] = [
+            _profile_match_rule(name, profiles[name])
+            for name in applied
+            if isinstance(profiles.get(name), dict)
+        ]
     if errors:
         merged["profile_errors"] = errors
     return merged
@@ -90,6 +95,15 @@ def _merge_lists(base: object, extra: object) -> list:
 
 def _as_list(value: object) -> list:
     return value if isinstance(value, list) else []
+
+
+def _profile_match_rule(name: str, profile: dict) -> dict:
+    return {
+        "name": name,
+        "label": str(profile.get("profile_label") or name),
+        "preferred_topics": _as_list(profile.get("preferred_topics")),
+        "preferred_languages": _as_list(profile.get("preferred_languages")),
+    }
 
 
 def _profile_names_from_value(value: Any) -> list[str]:

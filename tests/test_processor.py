@@ -200,6 +200,49 @@ class ProcessorTest(unittest.TestCase):
         self.assertTrue(result[0].selection_reasons)
         self.assertTrue(any("新增 Star 20" in reason for reason in result[0].selection_reasons))
 
+    def test_adds_personalized_profile_match_reason(self):
+        settings = Settings(
+            root=None,
+            run_date="2026-04-27",
+            since_date="2026-04-20",
+            days_back=7,
+            min_stars=20,
+            max_projects=1,
+            github_token="",
+            kimi_api_key="",
+            kimi_base_url="",
+            kimi_model="",
+            telegram_bot_token="",
+            telegram_chat_id="",
+            interests={
+                "preferred_topics": ["spring", "agent"],
+                "preferred_languages": ["Java"],
+                "exclude_keywords": [],
+                "profile_match_rules": [
+                    {
+                        "name": "java",
+                        "label": "Java 后端与工程实践",
+                        "preferred_topics": ["spring", "backend"],
+                        "preferred_languages": ["Java"],
+                    },
+                    {
+                        "name": "agent_development",
+                        "label": "Agent 开发",
+                        "preferred_topics": ["agent", "workflow"],
+                        "preferred_languages": ["Python", "TypeScript"],
+                    },
+                ],
+            },
+        )
+        item = repo("a/java-agent", 100, description="Spring agent workflow toolkit", topics=["spring"])
+        item.language = "Java"
+
+        result = process_repositories([item], settings)
+
+        self.assertTrue(
+            any("匹配当前个性化方向：Java 后端与工程实践、Agent 开发" in reason for reason in result[0].selection_reasons)
+        )
+
     def test_keeps_old_project_when_active_this_week(self):
         settings = Settings(
             root=None,
