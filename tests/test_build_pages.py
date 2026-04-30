@@ -59,7 +59,7 @@ class BuildPagesTest(unittest.TestCase):
             self.assertIn(root / "docs" / "projects.md", written)
             self.assertEqual((root / "docs" / "weekly" / "2026-04-28.md").read_text(encoding="utf-8"), "# 周报")
             index = (root / "docs" / "index.md").read_text(encoding="utf-8")
-            self.assertIn("[2026-04-28](weekly/2026-04-28.md)", index)
+            self.assertIn("[2026-04-28](weekly/2026-04-28.html)", index)
             self.assertIn("10 个项目", index)
             self.assertIn("最新运行摘要", index)
             self.assertIn("采集候选：100 个", index)
@@ -68,14 +68,27 @@ class BuildPagesTest(unittest.TestCase):
             self.assertIn("主方向 AI Agent", index)
             self.assertIn("新增 Star 20", index)
             self.assertIn("Trending 项目 1", index)
-            self.assertIn("[历史项目索引](projects.md)", index)
-            self.assertIn("[未来更新规划](future-plan.md)", index)
+            self.assertIn("[历史项目索引](projects.html)", index)
+            self.assertIn("[未来更新规划](future-plan.html)", index)
             projects = (root / "docs" / "projects.md").read_text(encoding="utf-8")
             self.assertIn("owner/project", projects)
             self.assertIn("GitHub Trending + GitHub Search", projects)
             self.assertIn("| 2 |", projects)
             self.assertIn("AI Agent", projects)
             self.assertIn("[https://github.com/owner/project](https://github.com/owner/project)", projects)
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
+    def test_builds_empty_projects_table_with_complete_columns(self):
+        root = Path.cwd() / f".tmp-pages-empty-test-{uuid.uuid4().hex}"
+        try:
+            (root / "reports").mkdir(parents=True)
+
+            build_pages(root)
+
+            projects = (root / "docs" / "projects.md").read_text(encoding="utf-8")
+            self.assertIn("| - | 暂无项目 | - | - | - | - | 0 | 0 | 0 | - |", projects)
+            self.assertIn("[周报归档首页](index.html)", projects)
         finally:
             shutil.rmtree(root, ignore_errors=True)
 

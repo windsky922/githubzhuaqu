@@ -2201,3 +2201,36 @@ https://windsky922.github.io/githubzhuaqu/weekly/YYYY-MM-DD.html
 1. `telegram_sent` 是否为 `true`。
 2. `telegram_error` 是否为空。
 3. `telegram_report_url` 是否是预期的周报页面。
+
+---
+
+## 2026-04-30 追加：GitHub Pages 内部链接修复
+
+### 1. 开发目的
+
+Telegram 已改为推送 GitHub Pages 的 `.html` 周报页面，但归档首页中仍使用 `weekly/YYYY-MM-DD.md` 作为周报入口。为了让手机端和 Pages 页面内的跳转路径保持一致，本次将页面导航链接统一改为最终网页地址。
+
+### 2. 本次实现
+
+更新：
+
+```text
+scripts/build_pages.py
+tests/test_build_pages.py
+```
+
+调整内容：
+
+1. 周报归档首页中的最新周报链接改为 `weekly/YYYY-MM-DD.html`。
+2. 全部周报列表中的历史周报链接改为 `weekly/YYYY-MM-DD.html`。
+3. 首页中的项目文档导航改为 `.html` 链接，适配 GitHub Pages 最终渲染页面。
+4. 历史项目索引的返回链接改为 `index.html`。
+5. 修复历史项目索引在暂无项目时的表格列数，避免表格结构不完整。
+
+### 3. 验证方式
+
+新增单元测试覆盖：
+
+1. 首页是否输出 `.html` 周报链接。
+2. 文档导航是否输出 `.html` 链接。
+3. 暂无项目时，历史项目索引表格是否仍保持完整列数。

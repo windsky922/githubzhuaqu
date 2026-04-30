@@ -4,7 +4,7 @@
 
 ## 最新周报
 
-- [2026-04-29](weekly/2026-04-29.md)
+- [2026-04-29](weekly/2026-04-29.html)
 
 ## 最新运行摘要
 
@@ -24,14 +24,14 @@
 
 ## 全部周报
 
-- [2026-04-29](weekly/2026-04-29.md)：10 个项目，降级模板，Telegram 已推送，主语言 Python，主方向 AI Agent，新增 Star 107，Trending 项目 9
-- [2026-04-28](weekly/2026-04-28.md)：10 个项目，降级模板，Telegram 未推送，主语言 Python，主方向 AI Agent，新增 Star 32
+- [2026-04-29](weekly/2026-04-29.html)：10 个项目，降级模板，Telegram 已推送，主语言 Python，主方向 AI Agent，新增 Star 107，Trending 项目 9
+- [2026-04-28](weekly/2026-04-28.html)：10 个项目，降级模板，Telegram 未推送，主语言 Python，主方向 AI Agent，新增 Star 32
 
 ## 项目文档
 
-- [历史项目索引](projects.md)
-- [架构说明](architecture.md)
-- [配置说明](setup.md)
-- [开发路线图](roadmap.md)
-- [未来更新规划](future-plan.md)
-- [操作日志](operation-log.md)
+- [历史项目索引](projects.html)
+- [架构说明](architecture.html)
+- [配置说明](setup.html)
+- [开发路线图](roadmap.html)
+- [未来更新规划](future-plan.html)
+- [操作日志](operation-log.html)

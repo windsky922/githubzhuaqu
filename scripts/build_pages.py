@@ -49,7 +49,7 @@ def _index_content(root: Path, reports: list[Path]) -> str:
     ]
     if reports:
         latest = reports[0]
-        lines.append(f"- [{latest.stem}](weekly/{latest.name})")
+        lines.append(f"- [{latest.stem}](weekly/{_page_name(latest)})")
         lines.extend(_latest_summary_lines(root, latest.stem))
     else:
         lines.append("- 暂无周报。")
@@ -65,12 +65,12 @@ def _index_content(root: Path, reports: list[Path]) -> str:
             "",
             "## 项目文档",
             "",
-            "- [历史项目索引](projects.md)",
-            "- [架构说明](architecture.md)",
-            "- [配置说明](setup.md)",
-            "- [开发路线图](roadmap.md)",
-            "- [未来更新规划](future-plan.md)",
-            "- [操作日志](operation-log.md)",
+            "- [历史项目索引](projects.html)",
+            "- [架构说明](architecture.html)",
+            "- [配置说明](setup.html)",
+            "- [开发路线图](roadmap.html)",
+            "- [未来更新规划](future-plan.html)",
+            "- [操作日志](operation-log.html)",
             "",
         ]
     )
@@ -81,13 +81,17 @@ def _report_line(root: Path, report: Path) -> str:
     summary = _run_summary(root, report.stem)
     trends = _trend_summary(root, report.stem)
     if not summary:
-        return f"- [{report.stem}](weekly/{report.name})"
+        return f"- [{report.stem}](weekly/{_page_name(report)})"
     selected_count = summary.get("selected_count", 0)
     kimi = "Kimi" if summary.get("kimi_used") else "降级模板"
     telegram = "已推送" if summary.get("telegram_sent") else "未推送"
     trend_text = _report_trend_text(trends)
     suffix = f"，{trend_text}" if trend_text else ""
-    return f"- [{report.stem}](weekly/{report.name})：{selected_count} 个项目，{kimi}，Telegram {telegram}{suffix}"
+    return f"- [{report.stem}](weekly/{_page_name(report)})：{selected_count} 个项目，{kimi}，Telegram {telegram}{suffix}"
+
+
+def _page_name(markdown_path: Path) -> str:
+    return markdown_path.with_suffix(".html").name
 
 
 def _run_summary(root: Path, run_date: str) -> dict:
@@ -169,8 +173,8 @@ def _projects_content(root: Path) -> str:
     if rows:
         lines.extend(_project_table_row(row) for row in rows)
     else:
-        lines.append("| - | 暂无项目 | - | - | 0 | 0 | 0 | - |")
-    lines.extend(["", "## 返回", "", "- [周报归档首页](index.md)", ""])
+        lines.append("| - | 暂无项目 | - | - | - | - | 0 | 0 | 0 | - |")
+    lines.extend(["", "## 返回", "", "- [周报归档首页](index.html)", ""])
     return "\n".join(lines)
 
 
