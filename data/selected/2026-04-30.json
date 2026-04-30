@@ -3,11 +3,11 @@
     "full_name": "Alishahryar1/free-claude-code",
     "html_url": "https://github.com/Alishahryar1/free-claude-code",
     "description": "Use claude-code for free in the terminal, VSCode extension or discord like OpenClaw (voice supported)",
-    "stargazers_count": 18936,
-    "forks_count": 2690,
+    "stargazers_count": 18943,
+    "forks_count": 2692,
     "language": "Python",
     "created_at": "2026-01-28T19:02:30Z",
-    "updated_at": "2026-04-30T14:30:56Z",
+    "updated_at": "2026-04-30T14:41:22Z",
     "pushed_at": "2026-04-30T09:20:26Z",
     "topics": [],
     "archived": false,
@@ -15,12 +15,13 @@
     "open_issues_count": 63,
     "license_name": "MIT",
     "readme_excerpt": "Use Claude Code CLI, VS Code, JetBrains ACP, or chat bots through your own Anthropic-compatible proxy. Free Claude Code routes Anthropic Messages API traffic from Claude Code to NVIDIA NIM, OpenRouter, DeepSeek, LM Studio, llama.cpp, or Ollama.",
+    "readme_summary": "Use Claude Code CLI, VS Code, JetBrains ACP, or chat bots through your own Anthropic-compatible proxy. Free Claude Code routes Anthropic Messages API traffic from Claude Code to NVIDIA NIM, OpenRouter, DeepSeek, LM Studio, llama.cpp, or Ollama.",
     "security_flags": [],
     "selection_reasons": [
       "进入 GitHub Trending 周榜第 1 位，是本期最重要的热度信号。",
-      "较上次记录新增 Star 13，近期热度上升。",
+      "较上次记录新增 Star 7，近期热度上升。",
       "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
-      "当前累计 Star 18936，具备一定社区关注度。"
+      "当前累计 Star 18943，具备一定社区关注度。"
     ],
     "sources": [
       "github_trending"
@@ -28,19 +29,19 @@
     "trending_rank": 1,
     "trending_period": "weekly",
     "source_priority": 100,
-    "star_growth": 13,
-    "score": 0.6255,
+    "star_growth": 7,
+    "score": 0.6075,
     "category": "LLM Tooling"
   },
   {
     "full_name": "mattpocock/skills",
     "html_url": "https://github.com/mattpocock/skills",
     "description": "Skills for Real Engineers. Straight from my .claude directory.",
-    "stargazers_count": 47925,
-    "forks_count": 3900,
+    "stargazers_count": 47980,
+    "forks_count": 3904,
     "language": "Shell",
     "created_at": "2026-02-03T11:15:53Z",
-    "updated_at": "2026-04-30T14:31:16Z",
+    "updated_at": "2026-04-30T14:42:37Z",
     "pushed_at": "2026-04-30T11:38:13Z",
     "topics": [],
     "archived": false,
@@ -48,11 +49,12 @@
     "open_issues_count": 5,
     "license_name": "MIT",
     "readme_excerpt": "My agent skills that I use every day to do real engineering - not vibe coding. Developing real applications is hard. Approaches like GSD, BMAD, and Spec-Kit try to help by owning the process.",
+    "readme_summary": "My agent skills that I use every day to do real engineering - not vibe coding. Developing real applications is hard. Approaches like GSD, BMAD, and Spec-Kit try to help by owning the process.",
     "security_flags": [],
     "selection_reasons": [
       "进入 GitHub Trending 周榜第 2 位，是本期最重要的热度信号。",
-      "较上次记录新增 Star 66，近期热度上升。",
-      "当前累计 Star 47925，具备一定社区关注度。",
+      "较上次记录新增 Star 55，近期热度上升。",
+      "当前累计 Star 47980，具备一定社区关注度。",
       "仓库主题、语言或名称与关注方向匹配。"
     ],
     "sources": [
@@ -61,8 +63,8 @@
     "trending_rank": 2,
     "trending_period": "weekly",
     "source_priority": 100,
-    "star_growth": 66,
-    "score": 0.7762,
+    "star_growth": 55,
+    "score": 0.7789,
     "category": "LLM Tooling"
   },
   {
@@ -81,14 +83,15 @@
     "open_issues_count": 67,
     "license_name": "",
     "readme_excerpt": "An ML intern that autonomously researches, writes, and ships good quality ML related code using the Hugging Face ecosystem — with deep access to docs, papers, datasets, and cloud compute.",
+    "readme_summary": "An ML intern that autonomously researches, writes, and ships good quality ML related code using the Hugging Face ecosystem — with deep access to docs, papers, datasets, and cloud compute.",
     "security_flags": [
       "未识别到许可证，复用代码前需要人工确认授权。"
     ],
     "selection_reasons": [
       "进入 GitHub Trending 周榜第 3 位，是本期最重要的热度信号。",
-      "较上次记录新增 Star 3，近期热度上升。",
       "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
-      "当前累计 Star 7623，具备一定社区关注度。"
+      "当前累计 Star 7623，具备一定社区关注度。",
+      "仓库主题、语言或名称与关注方向匹配。"
     ],
     "sources": [
       "github_trending"
@@ -96,19 +99,19 @@
     "trending_rank": 3,
     "trending_period": "weekly",
     "source_priority": 100,
-    "star_growth": 3,
-    "score": 0.5064,
+    "star_growth": 0,
+    "score": 0.5087,
     "category": "Machine Learning"
   },
   {
     "full_name": "CJackHwang/ds2api",
     "html_url": "https://github.com/CJackHwang/ds2api",
     "description": "Deepseek to API: A lightweight, high-performance full-stack middleware converting client protocols to universal APIs. Supports multi-account rotation, compiled binaries, Vercel Serverless, and Docker. Compatible with Google, Claude, and OpenAI API formats.",
-    "stargazers_count": 2903,
-    "forks_count": 759,
+    "stargazers_count": 2904,
+    "forks_count": 761,
     "language": "Go",
     "created_at": "2026-01-21T15:14:40Z",
-    "updated_at": "2026-04-30T14:13:59Z",
+    "updated_at": "2026-04-30T14:39:52Z",
     "pushed_at": "2026-04-29T18:41:16Z",
     "topics": [
       "api",
@@ -131,12 +134,13 @@
     "open_issues_count": 19,
     "license_name": "AGPL-3.0",
     "readme_excerpt": "语言 / Language: 中文 | English 将 DeepSeek Web 对话能力转换为 OpenAI、Claude 与 Gemini 兼容 API。后端为 **Go 全量实现**，前端为 React WebUI 管理台（源码在 webui/，部署时自动构建到 static/admin）。 文档入口：文档导航 / 架构说明 / 接口文档 【感谢Linux.do社区及GitHub社区各位开发者对项目的支持与贡献】 重要免责声明** 本仓库仅供学习、研究、个人实验和内部验证使用，不提供任何形式的商业授权、适用性保证或结果保证。",
+    "readme_summary": "语言 / Language: 中文 | English 将 DeepSeek Web 对话能力转换为 OpenAI、Claude 与 Gemini 兼容 API。后端为 **Go 全量实现**，前端为 React WebUI 管理台（源码在 webui/，部署时自动构建到 static/admin）。 文档入口：文档导航 / 架构说明 / 接口文档 【感谢Linux.do社区及GitHub社区各位开发者对项目的支持与贡献】 重要免责声明** 本仓库仅供学习、研究、个人实验和内部验证使用，不提供任何形式的商业授权、适用性保证或结果保证。",
     "security_flags": [],
     "selection_reasons": [
       "进入 GitHub Trending 周榜第 5 位，是本期最重要的热度信号。",
       "较上次记录新增 Star 1，近期热度上升。",
       "匹配当前个性化方向：开发者工具。",
-      "当前累计 Star 2903，具备一定社区关注度。"
+      "当前累计 Star 2904，具备一定社区关注度。"
     ],
     "sources": [
       "github_trending"
@@ -145,18 +149,18 @@
     "trending_period": "weekly",
     "source_priority": 100,
     "star_growth": 1,
-    "score": 0.346,
+    "score": 0.3736,
     "category": "LLM Tooling"
   },
   {
     "full_name": "trycua/cua",
     "html_url": "https://github.com/trycua/cua",
     "description": "Open-source infrastructure for Computer-Use Agents. Sandboxes, SDKs, and benchmarks to train and evaluate AI agents that can control full desktops (macOS, Linux, Windows).",
-    "stargazers_count": 15351,
+    "stargazers_count": 15352,
     "forks_count": 951,
     "language": "HTML",
     "created_at": "2025-01-31T15:02:49Z",
-    "updated_at": "2026-04-30T13:47:15Z",
+    "updated_at": "2026-04-30T14:40:47Z",
     "pushed_at": "2026-04-27T19:21:01Z",
     "topics": [
       "agent",
@@ -183,12 +187,13 @@
     "open_issues_count": 227,
     "license_name": "MIT",
     "readme_excerpt": "Drive any native macOS app **in the background** — agents click, type, and verify without stealing the cursor, focus, or Space, even on non-AX surfaces like Chromium web content and canvas-based tools (Blender, Figma, DAWs, game engines).",
+    "readme_summary": "Drive any native macOS app **in the background** — agents click, type, and verify without stealing the cursor, focus, or Space, even on non-AX surfaces like Chromium web content and canvas-based tools (Blender, Figma, DAWs, game engines).",
     "security_flags": [],
     "selection_reasons": [
       "进入 GitHub Trending 周榜第 8 位，是本期最重要的热度信号。",
+      "较上次记录新增 Star 1，近期热度上升。",
       "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
-      "当前累计 Star 15351，具备一定社区关注度。",
-      "仓库主题、语言或名称与关注方向匹配。"
+      "当前累计 Star 15352，具备一定社区关注度。"
     ],
     "sources": [
       "github_trending"
@@ -196,19 +201,19 @@
     "trending_rank": 8,
     "trending_period": "weekly",
     "source_priority": 100,
-    "star_growth": 0,
-    "score": 0.2653,
+    "star_growth": 1,
+    "score": 0.3158,
     "category": "AI Agent"
   },
   {
     "full_name": "Anil-matcha/Open-Generative-AI",
     "html_url": "https://github.com/Anil-matcha/Open-Generative-AI",
     "description": "Uncensored, open-source alternative to Higgsfield AI, Freepik AI, Krea AI, Openart AI — Free, unrestricted AI image & video generation studio with 200+ models (Flux, Midjourney, Kling, Sora, Veo). No content filters. Self-hosted, MIT licensed.",
-    "stargazers_count": 10312,
+    "stargazers_count": 10316,
     "forks_count": 1805,
     "language": "JavaScript",
     "created_at": "2023-05-09T14:12:37Z",
-    "updated_at": "2026-04-30T14:19:44Z",
+    "updated_at": "2026-04-30T14:40:59Z",
     "pushed_at": "2026-04-30T07:38:29Z",
     "topics": [
       "ai-art-generator",
@@ -237,14 +242,15 @@
     "open_issues_count": 5,
     "license_name": "",
     "readme_excerpt": "The free, open-source, unrestricted alternative to Higgsfield AI, Freepik, Krea, Openart AI.** Generate AI images and videos using 200+ state-of-the-art models — no content filters, no closed ecosystem, no subscription fees. 🐎 **Early access to Happy Horse 1.0** — Alibaba's #1 ranked AI video model.",
+    "readme_summary": "The free, open-source, unrestricted alternative to Higgsfield AI, Freepik, Krea, Openart AI.** Generate AI images and videos using 200+ state-of-the-art models — no content filters, no closed ecosystem, no subscription fees. 🐎 **Early access to Happy Horse 1.0** — Alibaba's #1 ranked AI video model.",
     "security_flags": [
       "未识别到许可证，复用代码前需要人工确认授权。"
     ],
     "selection_reasons": [
       "进入 GitHub Trending 周榜第 9 位，是本期最重要的热度信号。",
-      "较上次记录新增 Star 2，近期热度上升。",
+      "较上次记录新增 Star 4，近期热度上升。",
       "匹配当前个性化方向：Python 工具与应用开发。",
-      "当前累计 Star 10312，具备一定社区关注度。"
+      "当前累计 Star 10316，具备一定社区关注度。"
     ],
     "sources": [
       "github_trending"
@@ -252,19 +258,19 @@
     "trending_rank": 9,
     "trending_period": "weekly",
     "source_priority": 100,
-    "star_growth": 2,
-    "score": 0.1878,
+    "star_growth": 4,
+    "score": 0.2511,
     "category": "Other"
   },
   {
     "full_name": "Fincept-Corporation/FinceptTerminal",
     "html_url": "https://github.com/Fincept-Corporation/FinceptTerminal",
     "description": "FinceptTerminal is a modern finance application offering advanced market analytics, investment research, and economic data tools, designed for interactive exploration and data-driven decision-making in a user-friendly environment.",
-    "stargazers_count": 18119,
+    "stargazers_count": 18122,
     "forks_count": 2442,
     "language": "Python",
     "created_at": "2024-08-29T14:38:08Z",
-    "updated_at": "2026-04-30T14:30:02Z",
+    "updated_at": "2026-04-30T14:42:42Z",
     "pushed_at": "2026-04-30T09:36:07Z",
     "topics": [
       "ai-agents",
@@ -290,12 +296,13 @@
     "open_issues_count": 22,
     "license_name": "NOASSERTION",
     "readme_excerpt": "State-of-the-art financial intelligence platform with CFA-level analytics, AI automation, and unlimited data connectivity. 📥 Download · ⚖️ License · 💬 Discussions · 💬 Discord · 🤝 Partner Equity Research Portfolio News Node Editor Fincept Terminal v4** is a pure native C++20 desktop application.",
+    "readme_summary": "State-of-the-art financial intelligence platform with CFA-level analytics, AI automation, and unlimited data connectivity. 📥 Download · ⚖️ License · 💬 Discussions · 💬 Discord · 🤝 Partner Equity Research Portfolio News Node Editor Fincept Terminal v4** is a pure native C++20 desktop application.",
     "security_flags": [],
     "selection_reasons": [
       "进入 GitHub Trending 周榜第 10 位，是本期最重要的热度信号。",
-      "较上次记录新增 Star 14，近期热度上升。",
+      "较上次记录新增 Star 3，近期热度上升。",
       "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
-      "当前累计 Star 18119，具备一定社区关注度。"
+      "当前累计 Star 18122，具备一定社区关注度。"
     ],
     "sources": [
       "github_trending"
@@ -303,50 +310,104 @@
     "trending_rank": 10,
     "trending_period": "weekly",
     "source_priority": 100,
-    "star_growth": 14,
-    "score": 0.3331,
+    "star_growth": 3,
+    "score": 0.3558,
     "category": "AI Agent"
   },
   {
-    "full_name": "simstudioai/sim",
-    "html_url": "https://github.com/simstudioai/sim",
-    "description": "Build, deploy, and orchestrate AI agents. Sim is the central intelligence layer for your AI workforce.",
-    "stargazers_count": 27958,
-    "forks_count": 3539,
-    "language": "TypeScript",
-    "created_at": "2025-01-05T22:47:49Z",
-    "updated_at": "2026-04-30T14:27:49Z",
-    "pushed_at": "2026-04-30T08:46:00Z",
+    "full_name": "NousResearch/hermes-agent",
+    "html_url": "https://github.com/NousResearch/hermes-agent",
+    "description": "The agent that grows with you",
+    "stargazers_count": 126242,
+    "forks_count": 18878,
+    "language": "Python",
+    "created_at": "2025-07-22T22:22:28Z",
+    "updated_at": "2026-04-30T14:42:09Z",
+    "pushed_at": "2026-04-30T12:14:41Z",
     "topics": [
-      "agent-workflow",
-      "agentic-workflow",
-      "agents",
       "ai",
-      "aiagents",
+      "ai-agent",
+      "ai-agents",
       "anthropic",
-      "artificial-intelligence",
-      "automation",
-      "chatbot",
-      "deepseek",
-      "gemini",
-      "low-code",
-      "nextjs",
-      "no-code",
+      "chatgpt",
+      "claude",
+      "claude-code",
+      "clawdbot",
+      "codex",
+      "hermes",
+      "hermes-agent",
+      "llm",
+      "moltbot",
+      "nous-research",
       "openai",
-      "rag",
-      "react",
-      "typescript"
+      "openclaw"
     ],
     "archived": false,
     "fork": false,
-    "open_issues_count": 202,
-    "license_name": "Apache-2.0",
-    "readme_excerpt": "Design agent workflows visually on a canvas—connect agents, tools, and blocks, then run them instantly. Leverage Copilot to generate nodes, fix errors, and iterate on flows directly from natural language.",
+    "open_issues_count": 7308,
+    "license_name": "MIT",
+    "readme_excerpt": "The self-improving AI agent built by Nous Research.** It's the only agent with a built-in learning loop — it creates skills from experience, improves them during use, nudges itself to persist knowledge, searches its own past conversations, and builds a deepening model of who you are across sessions.",
+    "readme_summary": "The self-improving AI agent built by Nous Research.** It's the only agent with a built-in learning loop — it creates skills from experience, improves them during use, nudges itself to persist knowledge, searches its own past conversations, and builds a deepening model of who you are across sessions.",
+    "security_flags": [],
+    "selection_reasons": [
+      "较上次记录新增 Star 15，近期热度上升。",
+      "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+      "当前累计 Star 126242，具备一定社区关注度。",
+      "仓库主题、语言或名称与关注方向匹配。"
+    ],
+    "sources": [
+      "github_search"
+    ],
+    "trending_rank": 0,
+    "trending_period": "",
+    "source_priority": 10,
+    "star_growth": 15,
+    "score": 0.3867,
+    "category": "AI Agent"
+  },
+  {
+    "full_name": "n8n-io/n8n",
+    "html_url": "https://github.com/n8n-io/n8n",
+    "description": "Fair-code workflow automation platform with native AI capabilities. Combine visual building with custom code, self-host or cloud, 400+ integrations.",
+    "stargazers_count": 186229,
+    "forks_count": 57255,
+    "language": "TypeScript",
+    "created_at": "2019-06-22T09:24:21Z",
+    "updated_at": "2026-04-30T14:40:34Z",
+    "pushed_at": "2026-04-30T14:39:08Z",
+    "topics": [
+      "ai",
+      "apis",
+      "automation",
+      "cli",
+      "data-flow",
+      "development",
+      "integration-framework",
+      "integrations",
+      "ipaas",
+      "low-code",
+      "low-code-platform",
+      "mcp",
+      "mcp-client",
+      "mcp-server",
+      "n8n",
+      "no-code",
+      "self-hosted",
+      "typescript",
+      "workflow",
+      "workflow-automation"
+    ],
+    "archived": false,
+    "fork": false,
+    "open_issues_count": 1557,
+    "license_name": "NOASSERTION",
+    "readme_excerpt": "n8n is a workflow automation platform that gives technical teams the flexibility of code with the speed of no-code. With 400+ integrations, native AI capabilities, and a fair-code license, n8n lets you build powerful automations while maintaining full control over your data and deployments.",
+    "readme_summary": "n8n is a workflow automation platform that gives technical teams the flexibility of code with the speed of no-code. With 400+ integrations, native AI capabilities, and a fair-code license, n8n lets you build powerful automations while maintaining full control over your data and deployments.",
     "security_flags": [],
     "selection_reasons": [
       "较上次记录新增 Star 2，近期热度上升。",
       "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
-      "当前累计 Star 27958，具备一定社区关注度。",
+      "当前累计 Star 186229，具备一定社区关注度。",
       "仓库主题、语言或名称与关注方向匹配。"
     ],
     "sources": [
@@ -356,93 +417,44 @@
     "trending_period": "",
     "source_priority": 10,
     "star_growth": 2,
-    "score": 0.3229,
+    "score": 0.3462,
     "category": "AI Agent"
   },
   {
-    "full_name": "kestra-io/kestra",
-    "html_url": "https://github.com/kestra-io/kestra",
-    "description": "Event Driven Orchestration & Scheduling Platform for Mission Critical Applications",
-    "stargazers_count": 26775,
-    "forks_count": 2564,
-    "language": "Java",
-    "created_at": "2019-08-24T13:56:15Z",
-    "updated_at": "2026-04-30T13:33:22Z",
-    "pushed_at": "2026-04-30T14:25:55Z",
-    "topics": [
-      "automation",
-      "data-orchestration",
-      "devops",
-      "hacktoberfest",
-      "high-availability",
-      "infrastructure-as-code",
-      "java",
-      "low-code",
-      "lowcode",
-      "orchestration",
-      "pipeline",
-      "pipeline-as-code",
-      "workflow"
-    ],
-    "archived": false,
-    "fork": false,
-    "open_issues_count": 499,
-    "license_name": "Apache-2.0",
-    "readme_excerpt": "Event-Driven Declarative Orchestration Platform Kestra is an open-source, event-driven orchestration platform that makes both **scheduled** and **event-driven** workflows easy.",
-    "security_flags": [],
-    "selection_reasons": [
-      "匹配当前个性化方向：Java 后端与工程实践、Python 工具与应用开发、Agent 开发、开发者工具。",
-      "当前累计 Star 26775，具备一定社区关注度。",
-      "仓库主题、语言或名称与关注方向匹配。",
-      "最近一周仍有更新或维护活动。"
-    ],
-    "sources": [
-      "github_search"
-    ],
-    "trending_rank": 0,
-    "trending_period": "",
-    "source_priority": 10,
-    "star_growth": 0,
-    "score": 0.3153,
-    "category": "AI Agent"
-  },
-  {
-    "full_name": "PrefectHQ/prefect",
-    "html_url": "https://github.com/PrefectHQ/prefect",
-    "description": "Prefect is a workflow orchestration framework for building resilient data pipelines in Python.",
-    "stargazers_count": 22281,
-    "forks_count": 2288,
+    "full_name": "Significant-Gravitas/AutoGPT",
+    "html_url": "https://github.com/Significant-Gravitas/AutoGPT",
+    "description": "AutoGPT is the vision of accessible AI for everyone, to use and to build on. Our mission is to provide the tools, so that you can focus on what matters.",
+    "stargazers_count": 183899,
+    "forks_count": 46238,
     "language": "Python",
-    "created_at": "2018-06-29T21:59:26Z",
-    "updated_at": "2026-04-30T13:54:42Z",
-    "pushed_at": "2026-04-30T14:06:16Z",
+    "created_at": "2023-03-16T09:21:07Z",
+    "updated_at": "2026-04-30T14:36:35Z",
+    "pushed_at": "2026-04-30T14:38:43Z",
     "topics": [
-      "automation",
-      "data",
-      "data-engineering",
-      "data-ops",
-      "data-science",
-      "infrastructure",
-      "ml-ops",
-      "observability",
-      "orchestration",
-      "pipeline",
-      "prefect",
-      "python",
-      "workflow",
-      "workflow-engine"
+      "agentic-ai",
+      "agents",
+      "ai",
+      "artificial-intelligence",
+      "autonomous-agents",
+      "claude",
+      "gpt",
+      "llama-api",
+      "llm",
+      "openai",
+      "python"
     ],
     "archived": false,
     "fork": false,
-    "open_issues_count": 891,
-    "license_name": "Apache-2.0",
-    "readme_excerpt": "· Quickstart · Build workflows · Deploy workflows · Prefect Cloud Prefect is a workflow orchestration framework for building data pipelines in Python. It's the simplest way to elevate a script into a production workflow.",
+    "open_issues_count": 400,
+    "license_name": "NOASSERTION",
+    "readme_excerpt": "Deutsch | Español | français | 日本語 | 한국어 | Português | Русский | 中文 AutoGPT** is a powerful platform that allows you to create, deploy, and manage continuous AI agents that automate complex workflows.",
+    "readme_summary": "Deutsch | Español | français | 日本語 | 한국어 | Português | Русский | 中文 AutoGPT** is a powerful platform that allows you to create, deploy, and manage continuous AI agents that automate complex workflows.",
     "security_flags": [],
     "selection_reasons": [
+      "较上次记录新增 Star 1，近期热度上升。",
       "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
-      "当前累计 Star 22281，具备一定社区关注度。",
-      "仓库主题、语言或名称与关注方向匹配。",
-      "最近一周仍有更新或维护活动。"
+      "当前累计 Star 183899，具备一定社区关注度。",
+      "仓库主题、语言或名称与关注方向匹配。"
     ],
     "sources": [
       "github_search"
@@ -450,8 +462,8 @@
     "trending_rank": 0,
     "trending_period": "",
     "source_priority": 10,
-    "star_growth": 0,
-    "score": 0.3146,
+    "star_growth": 1,
+    "score": 0.3386,
     "category": "AI Agent"
   }
 ]
