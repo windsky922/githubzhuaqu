@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 INCLUDED_SUFFIXES = {".py", ".yml", ".yaml", ".md", ".json", ".example", ".txt"}
 EXCLUDED_DIRS = {".git", "__pycache__", ".pytest_cache", ".mypy_cache", "data", "reports"}
+EXCLUDED_PATH_PREFIXES = {("docs", "weekly")}
 
 SECRET_PATTERNS = {
     "github_token": re.compile(r"\bgh[pousr]_[A-Za-z0-9_]{20,}\b"),
@@ -48,11 +49,18 @@ def _iter_text_files(root: Path) -> list[Path]:
     for path in root.rglob("*"):
         if not path.is_file():
             continue
-        if any(part in EXCLUDED_DIRS for part in path.relative_to(root).parts):
+        relative_parts = path.relative_to(root).parts
+        if _is_excluded_path(relative_parts):
             continue
         if path.suffix in INCLUDED_SUFFIXES or path.name == ".env.example":
             files.append(path)
     return files
+
+
+def _is_excluded_path(relative_parts: tuple[str, ...]) -> bool:
+    if any(part in EXCLUDED_DIRS for part in relative_parts):
+        return True
+    return any(relative_parts[: len(prefix)] == prefix for prefix in EXCLUDED_PATH_PREFIXES)
 
 
 def _is_allowlisted(line: str, pattern_name: str) -> bool:

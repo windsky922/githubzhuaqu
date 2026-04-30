@@ -49,6 +49,32 @@ class SecurityCheckTest(unittest.TestCase):
         finally:
             shutil.rmtree(root, ignore_errors=True)
 
+    def test_ignores_generated_weekly_pages(self):
+        root = Path.cwd() / f".tmp-security-test-{uuid.uuid4().hex}"
+        try:
+            weekly = root / "docs" / "weekly"
+            weekly.mkdir(parents=True)
+            (weekly / "2026-04-29.md").write_text("token: ghp_" + "C" * 36 + "\n", encoding="utf-8")
+
+            findings = scan_repository(root)
+
+            self.assertEqual(findings, [])
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
+    def test_still_scans_regular_docs(self):
+        root = Path.cwd() / f".tmp-security-test-{uuid.uuid4().hex}"
+        try:
+            docs = root / "docs"
+            docs.mkdir(parents=True)
+            (docs / "setup.md").write_text("token: ghp_" + "D" * 36 + "\n", encoding="utf-8")
+
+            findings = scan_repository(root)
+
+            self.assertTrue(any("docs/setup.md" in finding for finding in findings))
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
 
 if __name__ == "__main__":
     unittest.main()

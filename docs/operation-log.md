@@ -2297,3 +2297,31 @@ tests/test_security_check.py
 ### 3. 安全边界
 
 该检查只能发现常见格式和明显硬编码的密钥，不能替代 GitHub Secret Scanning 或人工审查。后续如果接入更多外部服务，需要继续补充对应 token 格式规则。
+
+---
+
+## 2026-04-30 追加：排除生成周报目录的密钥误报
+
+### 1. 开发目的
+
+`docs/weekly/` 是由 `reports/` 同步生成的 GitHub Pages 周报目录，里面可能包含第三方仓库 README 摘要。安全检查的目标是保护本项目源码、配置和手写文档中不要硬编码密钥，不应把第三方生成内容误判为本项目自身泄漏。
+
+### 2. 本次实现
+
+更新：
+
+```text
+scripts/security_check.py
+tests/test_security_check.py
+```
+
+调整内容：
+
+1. 新增 `EXCLUDED_PATH_PREFIXES`，当前只排除 `docs/weekly/`。
+2. 保留 `docs/setup.md`、`docs/operation-log.md` 等手写文档扫描。
+3. 新增测试确认 `docs/weekly/` 中的疑似 token 会被跳过。
+4. 新增测试确认普通 `docs/` 文档仍会被扫描。
+
+### 3. 安全边界
+
+该调整只处理误报来源，不降低对项目源码、workflow、配置、提示词和手写文档的检查强度。生成周报仍然会长期归档，因此后续可以考虑在报告生成阶段对 README 摘要做更保守的脱敏处理。
