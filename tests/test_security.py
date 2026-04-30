@@ -1,7 +1,7 @@
 import unittest
 
 from src.models import Repository
-from src.security import apply_security_flags, security_flags
+from src.security import REDACTION_TEXT, apply_security_flags, redact_sensitive_text, security_flags
 
 
 def repo(**kwargs):
@@ -39,6 +39,16 @@ class RepositorySecurityTest(unittest.TestCase):
         apply_security_flags(repositories)
 
         self.assertTrue(repositories[0].security_flags)
+
+    def test_redacts_sensitive_token_like_text(self):
+        telegram_token = "123456789:" + "a" * 31
+        text = "token ghp_" + "A" * 36 + " bot " + telegram_token
+
+        result = redact_sensitive_text(text)
+
+        self.assertNotIn("ghp_", result)
+        self.assertNotIn("123456789:", result)
+        self.assertIn(REDACTION_TEXT, result)
 
 
 if __name__ == "__main__":

@@ -1,7 +1,15 @@
 from __future__ import annotations
 
+import re
+
 from .models import Repository
 
+
+SENSITIVE_TEXT_PATTERNS = (
+    re.compile(r"\bgh[pousr]_[A-Za-z0-9_]{20,}\b"),
+    re.compile(r"\b\d{6,12}:[A-Za-z0-9_-]{30,}\b"),
+)
+REDACTION_TEXT = "[已脱敏疑似密钥]"
 
 RISK_KEYWORDS = {
     "airdrop": "包含空投相关表述，需人工确认是否存在营销或钓鱼风险。",
@@ -11,6 +19,13 @@ RISK_KEYWORDS = {
     "malware": "包含恶意软件相关表述，需人工确认项目用途。",
     "phishing": "包含钓鱼相关表述，需人工确认项目用途。",
 }
+
+
+def redact_sensitive_text(text: str) -> str:
+    redacted = text
+    for pattern in SENSITIVE_TEXT_PATTERNS:
+        redacted = pattern.sub(REDACTION_TEXT, redacted)
+    return redacted
 
 
 def apply_security_flags(repositories: list[Repository]) -> None:

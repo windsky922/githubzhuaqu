@@ -7,6 +7,7 @@ import urllib.request
 from html.parser import HTMLParser
 
 from .models import Repository
+from .security import redact_sensitive_text
 from .settings import Settings
 
 
@@ -120,7 +121,7 @@ def search_repositories(query: str, settings: Settings) -> list[Repository]:
         }
     )
     data = _request_json(f"{GITHUB_SEARCH_URL}?{params}", settings.github_token)
-    repositories = [Repository.from_github_item(item) for item in data.get("items", [])]
+    repositories = [_sanitize_repository(Repository.from_github_item(item)) for item in data.get("items", [])]
     for repo in repositories:
         repo.sources = ["github_search"]
         repo.source_priority = max(repo.source_priority, 10)
@@ -134,7 +135,7 @@ def fetch_repository(full_name: str, settings: Settings) -> Repository:
     owner = urllib.parse.quote(parts[0], safe="")
     repo = urllib.parse.quote(parts[1], safe="")
     data = _request_json(f"{GITHUB_REPO_URL}/{owner}/{repo}", settings.github_token)
-    return Repository.from_github_item(data)
+    return _sanitize_repository(Repository.from_github_item(data))
 
 
 def collect_trending_repositories(settings: Settings) -> tuple[list[Repository], list[str], list[str], list[dict]]:
@@ -293,5 +294,10 @@ def fetch_readme(full_name: str, settings: Settings) -> str:
 
 
 def _readme_excerpt(readme: str, limit: int = README_EXCERPT_LIMIT) -> str:
-    normalized = " ".join(readme.split())
+    normalized = " ".join(redact_sensitive_text(readme).split())
     return normalized[:limit]
+
+
+def _sanitize_repository(repo: Repository) -> Repository:
+    repo.description = redact_sensitive_text(repo.description)
+    return repo

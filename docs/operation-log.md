@@ -2325,3 +2325,39 @@ tests/test_security_check.py
 ### 3. 安全边界
 
 该调整只处理误报来源，不降低对项目源码、workflow、配置、提示词和手写文档的检查强度。生成周报仍然会长期归档，因此后续可以考虑在报告生成阶段对 README 摘要做更保守的脱敏处理。
+
+---
+
+## 2026-04-30 追加：第三方内容入库前脱敏
+
+### 1. 开发目的
+
+周报会保存第三方仓库简介和 README 摘要。即使这些内容不是本项目自己的密钥，也不应该把疑似 token 原样写入 `reports/`、`data/selected/` 或 GitHub Pages 周报中。本次在采集边界增加脱敏，降低归档第三方敏感字符串的风险。
+
+### 2. 本次实现
+
+更新：
+
+```text
+src/security.py
+src/collector.py
+tests/test_security.py
+tests/test_collector.py
+```
+
+新增：
+
+```text
+redact_sensitive_text
+```
+
+处理范围：
+
+1. GitHub token 形态字符串。
+2. Telegram bot token 形态字符串。
+3. GitHub 仓库简介进入系统时脱敏。
+4. README 摘要进入系统时脱敏。
+
+### 3. 设计边界
+
+该能力用于减少第三方内容归档风险，不改变安全扫描脚本的职责。后续如果接入更多服务，可以继续扩展 `redact_sensitive_text` 的模式列表。

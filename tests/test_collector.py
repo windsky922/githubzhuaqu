@@ -6,6 +6,7 @@ from src.collector import (
     _readme_excerpt,
     build_queries,
     collect_repositories,
+    search_repositories,
 )
 from src.models import Repository
 from src.settings import Settings
@@ -19,6 +20,47 @@ class CollectorTest(unittest.TestCase):
 
         self.assertEqual(result, "# Title word word ")
         self.assertLessEqual(len(result), 18)
+
+    def test_readme_excerpt_redacts_token_like_text(self):
+        readme = "# Title\n\nghp_" + "A" * 36
+
+        result = _readme_excerpt(readme)
+
+        self.assertNotIn("ghp_", result)
+        self.assertIn("[已脱敏疑似密钥]", result)
+
+    def test_search_repositories_redacts_description_token_like_text(self):
+        settings = Settings(
+            root=None,
+            run_date="2026-04-28",
+            since_date="2026-04-21",
+            days_back=7,
+            min_stars=20,
+            max_projects=10,
+            github_token="",
+            kimi_api_key="",
+            kimi_base_url="",
+            kimi_model="",
+            telegram_bot_token="",
+            telegram_chat_id="",
+            interests={},
+        )
+        item = {
+            "full_name": "owner/project",
+            "html_url": "https://github.com/owner/project",
+            "description": "leaked ghp_" + "B" * 36,
+            "stargazers_count": 100,
+            "forks_count": 10,
+            "language": "Python",
+            "created_at": "2026-04-20T00:00:00Z",
+            "updated_at": "2026-04-28T00:00:00Z",
+        }
+
+        with patch("src.collector._request_json", return_value={"items": [item]}):
+            repositories = search_repositories("stars:>20", settings)
+
+        self.assertNotIn("ghp_", repositories[0].description)
+        self.assertIn("[已脱敏疑似密钥]", repositories[0].description)
 
     def test_queries_focus_on_weekly_activity(self):
         settings = Settings(
