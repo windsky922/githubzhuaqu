@@ -18,9 +18,9 @@
     "security_flags": [],
     "selection_reasons": [
       "进入 GitHub Trending 周榜第 1 位，是本期最重要的热度信号。",
-      "较上次记录新增 Star 627，近期热度上升。",
       "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
-      "当前累计 Star 18923，具备一定社区关注度。"
+      "当前累计 Star 18923，具备一定社区关注度。",
+      "仓库主题、语言或名称与关注方向匹配。"
     ],
     "sources": [
       "github_trending"
@@ -28,19 +28,19 @@
     "trending_rank": 1,
     "trending_period": "weekly",
     "source_priority": 100,
-    "star_growth": 627,
-    "score": 0.6061,
+    "star_growth": 0,
+    "score": 0.5793,
     "category": "LLM Tooling"
   },
   {
     "full_name": "mattpocock/skills",
     "html_url": "https://github.com/mattpocock/skills",
     "description": "Skills for Real Engineers. Straight from my .claude directory.",
-    "stargazers_count": 47848,
-    "forks_count": 3891,
+    "stargazers_count": 47859,
+    "forks_count": 3892,
     "language": "Shell",
     "created_at": "2026-02-03T11:15:53Z",
-    "updated_at": "2026-04-30T14:04:30Z",
+    "updated_at": "2026-04-30T14:09:21Z",
     "pushed_at": "2026-04-30T11:38:13Z",
     "topics": [],
     "archived": false,
@@ -51,9 +51,9 @@
     "security_flags": [],
     "selection_reasons": [
       "进入 GitHub Trending 周榜第 2 位，是本期最重要的热度信号。",
-      "较上次记录新增 Star 5459，近期热度上升。",
-      "匹配当前个性化方向：Python 工具与应用开发。",
-      "当前累计 Star 47848，具备一定社区关注度。"
+      "较上次记录新增 Star 11，近期热度上升。",
+      "当前累计 Star 47859，具备一定社区关注度。",
+      "仓库主题、语言或名称与关注方向匹配。"
     ],
     "sources": [
       "github_trending"
@@ -61,7 +61,7 @@
     "trending_rank": 2,
     "trending_period": "weekly",
     "source_priority": 100,
-    "star_growth": 5459,
+    "star_growth": 11,
     "score": 0.7757,
     "category": "LLM Tooling"
   },
@@ -86,9 +86,9 @@
     ],
     "selection_reasons": [
       "进入 GitHub Trending 周榜第 3 位，是本期最重要的热度信号。",
-      "较上次记录新增 Star 243，近期热度上升。",
       "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
-      "当前累计 Star 7620，具备一定社区关注度。"
+      "当前累计 Star 7620，具备一定社区关注度。",
+      "仓库主题、语言或名称与关注方向匹配。"
     ],
     "sources": [
       "github_trending"
@@ -96,19 +96,19 @@
     "trending_rank": 3,
     "trending_period": "weekly",
     "source_priority": 100,
-    "star_growth": 243,
-    "score": 0.5061,
+    "star_growth": 0,
+    "score": 0.4957,
     "category": "Machine Learning"
   },
   {
     "full_name": "CJackHwang/ds2api",
     "html_url": "https://github.com/CJackHwang/ds2api",
     "description": "Deepseek to API: A lightweight, high-performance full-stack middleware converting client protocols to universal APIs. Supports multi-account rotation, compiled binaries, Vercel Serverless, and Docker. Compatible with Google, Claude, and OpenAI API formats.",
-    "stargazers_count": 2901,
+    "stargazers_count": 2902,
     "forks_count": 758,
     "language": "Go",
     "created_at": "2026-01-21T15:14:40Z",
-    "updated_at": "2026-04-30T14:04:58Z",
+    "updated_at": "2026-04-30T14:09:49Z",
     "pushed_at": "2026-04-29T18:41:16Z",
     "topics": [
       "api",
@@ -134,9 +134,9 @@
     "security_flags": [],
     "selection_reasons": [
       "进入 GitHub Trending 周榜第 5 位，是本期最重要的热度信号。",
-      "较上次记录新增 Star 276，近期热度上升。",
-      "匹配当前个性化方向：Python 工具与应用开发、开发者工具。",
-      "当前累计 Star 2901，具备一定社区关注度。"
+      "较上次记录新增 Star 1，近期热度上升。",
+      "匹配当前个性化方向：开发者工具。",
+      "当前累计 Star 2902，具备一定社区关注度。"
     ],
     "sources": [
       "github_trending"
@@ -144,8 +144,8 @@
     "trending_rank": 5,
     "trending_period": "weekly",
     "source_priority": 100,
-    "star_growth": 276,
-    "score": 0.3541,
+    "star_growth": 1,
+    "score": 0.3635,
     "category": "LLM Tooling"
   },
   {
@@ -186,9 +186,9 @@
     "security_flags": [],
     "selection_reasons": [
       "进入 GitHub Trending 周榜第 8 位，是本期最重要的热度信号。",
-      "较上次记录新增 Star 187，近期热度上升。",
       "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
-      "当前累计 Star 15351，具备一定社区关注度。"
+      "当前累计 Star 15351，具备一定社区关注度。",
+      "仓库主题、语言或名称与关注方向匹配。"
     ],
     "sources": [
       "github_trending"
@@ -196,19 +196,19 @@
     "trending_rank": 8,
     "trending_period": "weekly",
     "source_priority": 100,
-    "star_growth": 187,
-    "score": 0.2731,
+    "star_growth": 0,
+    "score": 0.2652,
     "category": "AI Agent"
   },
   {
     "full_name": "Anil-matcha/Open-Generative-AI",
     "html_url": "https://github.com/Anil-matcha/Open-Generative-AI",
     "description": "Uncensored, open-source alternative to Higgsfield AI, Freepik AI, Krea AI, Openart AI — Free, unrestricted AI image & video generation studio with 200+ models (Flux, Midjourney, Kling, Sora, Veo). No content filters. Self-hosted, MIT licensed.",
-    "stargazers_count": 10307,
+    "stargazers_count": 10310,
     "forks_count": 1804,
     "language": "JavaScript",
     "created_at": "2023-05-09T14:12:37Z",
-    "updated_at": "2026-04-30T14:01:41Z",
+    "updated_at": "2026-04-30T14:09:34Z",
     "pushed_at": "2026-04-30T07:38:29Z",
     "topics": [
       "ai-art-generator",
@@ -242,9 +242,9 @@
     ],
     "selection_reasons": [
       "进入 GitHub Trending 周榜第 9 位，是本期最重要的热度信号。",
-      "较上次记录新增 Star 281，近期热度上升。",
-      "匹配当前个性化方向：Java 后端与工程实践、Python 工具与应用开发。",
-      "当前累计 Star 10307，具备一定社区关注度。"
+      "较上次记录新增 Star 3，近期热度上升。",
+      "匹配当前个性化方向：Python 工具与应用开发。",
+      "当前累计 Star 10310，具备一定社区关注度。"
     ],
     "sources": [
       "github_trending"
@@ -252,19 +252,19 @@
     "trending_rank": 9,
     "trending_period": "weekly",
     "source_priority": 100,
-    "star_growth": 281,
-    "score": 0.1925,
+    "star_growth": 3,
+    "score": 0.2441,
     "category": "Other"
   },
   {
     "full_name": "Fincept-Corporation/FinceptTerminal",
     "html_url": "https://github.com/Fincept-Corporation/FinceptTerminal",
     "description": "FinceptTerminal is a modern finance application offering advanced market analytics, investment research, and economic data tools, designed for interactive exploration and data-driven decision-making in a user-friendly environment.",
-    "stargazers_count": 18104,
+    "stargazers_count": 18105,
     "forks_count": 2441,
     "language": "Python",
     "created_at": "2024-08-29T14:38:08Z",
-    "updated_at": "2026-04-30T14:02:51Z",
+    "updated_at": "2026-04-30T14:06:56Z",
     "pushed_at": "2026-04-30T09:36:07Z",
     "topics": [
       "ai-agents",
@@ -293,9 +293,9 @@
     "security_flags": [],
     "selection_reasons": [
       "进入 GitHub Trending 周榜第 10 位，是本期最重要的热度信号。",
-      "较上次记录新增 Star 432，近期热度上升。",
+      "较上次记录新增 Star 1，近期热度上升。",
       "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
-      "当前累计 Star 18104，具备一定社区关注度。"
+      "当前累计 Star 18105，具备一定社区关注度。"
     ],
     "sources": [
       "github_trending"
@@ -303,35 +303,40 @@
     "trending_rank": 10,
     "trending_period": "weekly",
     "source_priority": 100,
-    "star_growth": 432,
-    "score": 0.3018,
+    "star_growth": 1,
+    "score": 0.3045,
     "category": "AI Agent"
   },
   {
-    "full_name": "spring-projects/spring-boot",
-    "html_url": "https://github.com/spring-projects/spring-boot",
-    "description": "Spring Boot helps you to create Spring-powered, production-grade applications and services with absolute minimum fuss.",
-    "stargazers_count": 80537,
-    "forks_count": 41899,
+    "full_name": "alibaba/arthas",
+    "html_url": "https://github.com/alibaba/arthas",
+    "description": "Alibaba Java Diagnostic Tool Arthas/Alibaba Java诊断利器Arthas",
+    "stargazers_count": 37289,
+    "forks_count": 7630,
     "language": "Java",
-    "created_at": "2012-10-19T15:02:57Z",
-    "updated_at": "2026-04-30T12:48:14Z",
-    "pushed_at": "2026-04-30T12:45:41Z",
+    "created_at": "2018-08-29T17:15:57Z",
+    "updated_at": "2026-04-30T07:19:33Z",
+    "pushed_at": "2026-04-30T02:16:10Z",
     "topics": [
-      "framework",
+      "agent",
+      "alibaba",
+      "arthas",
+      "classloader",
+      "diagnosis",
       "java",
-      "spring",
-      "spring-boot"
+      "jvm",
+      "trace",
+      "trouble-shooting"
     ],
     "archived": false,
     "fork": false,
-    "open_issues_count": 471,
+    "open_issues_count": 470,
     "license_name": "Apache-2.0",
-    "readme_excerpt": "= Spring Boot image:https://github.com/spring-projects/spring-boot/actions/workflows/build-and-deploy-snapshot.yml/badge.svg?branch=main[\"Build Status\", link=\"https://github.com/spring-projects/spring-boot/actions/workflows/build-and-deploy-snapshot.yml?query=branch%3Amain\"] image:https://img.shields.io/badge/Revved%20up%20by-Develocity-06A0CE?logo=Gradle&labelColor=02303A[\"Revved up by Develocity\", link=\"https://ge.spring.io/scans?&search.rootProjectNames=Spring%20Boot%20Build&search.rootProjectNames=spring-boot-build\"] :docs: https://docs.spring.io/spring-boot :github: https://github.com/spring-projects/spring-boot Spring Boot helps you to create Spring-powered, production-grade applications and services with absolute minimum fuss. It takes an opinionated view of the Spring platform so that new and existing users can quickly get to the bits they need. You can use Spring Boot to create stand-alone Java applications that can be started using `java -jar` or more traditional WAR deployments. We also provide a command-line tool that runs Spring scripts. Our primary goals are: * Provide a radically faster and widely accessible getting started experience for all Spring development. * Be opinionated, but get out of the way quickly as requirements start to diverge from the defaults. * Provide a range of non-functional features common to large classes of projects (for example, embedded servers, security, metrics, health checks, externalized configuration). * Absolutely no code generation and no requirement for XML configuration. == Installation and Getting Started The {docs}[reference documentation] includes detailed {docs}/installing.html[installation instructions] as well as a comprehensive {docs}/tutorial/first-application/index.html[``getting started``] guide. Here is a quick teaser of a complete Spring Boot application in Java: [source,java] ---- import org.springframework.boot.*; import org.springframework.boot.autoconfigure.*; import org.springframework.web.bind.anno",
+    "readme_excerpt": "## Arthas ![arthas](site/docs/.vuepress/public/images/arthas.png) [![Build Status](https://github.com/alibaba/arthas/workflows/JavaCI/badge.svg)](https://github.com/alibaba/arthas/actions) [![download](https://img.shields.io/github/downloads/alibaba/arthas/total?label=Downloads)](https://github.com/alibaba/arthas/releases/latest) [![maven](https://img.shields.io/maven-central/v/com.taobao.arthas/arthas-packaging.svg)](https://search.maven.org/search?q=g:com.taobao.arthas) ![license](https://img.shields.io/github/license/alibaba/arthas.svg) [![Average time to resolve an issue](https://isitmaintained.com/badge/resolution/alibaba/arthas.svg)](https://isitmaintained.com/project/alibaba/arthas \"Average time to resolve an issue\") [![Percentage of issues still open](https://isitmaintained.com/badge/open/alibaba/arthas.svg)](https://isitmaintained.com/project/alibaba/arthas \"Percentage of issues still open\") [![Leaderboard](https://img.shields.io/badge/Arthas-Check%20Your%20Contribution-orange)](https://opensource.alibaba.com/contribution_leaderboard/details?projectValue=arthas) `Arthas` is a Java Diagnostic tool open sourced by Alibaba. Arthas allows developers to troubleshoot production issues for Java applications without modifying code or restarting servers. [中文说明/Chinese Documentation](README_CN.md) ### Background Often times, the production system network is inaccessible from the local development environment. If issues are encountered in production systems, it is impossible to use IDEs to debug the application remotely. More importantly, debugging in production environment is unacceptable, as it will suspend all the threads, resulting in the suspension of business services. Developers could always try to reproduce the same issue on the test/staging environment. However, this is tricky as some issues cannot be reproduced easily on a different environment, or even disappear once restarted. And if you're thinking of adding some logs to your code to help troubleshoot the",
     "security_flags": [],
     "selection_reasons": [
-      "匹配当前个性化方向：Java 后端与工程实践。",
-      "当前累计 Star 80537，具备一定社区关注度。",
+      "匹配当前个性化方向：Java 后端与工程实践、Agent 开发。",
+      "当前累计 Star 37289，具备一定社区关注度。",
       "仓库主题、语言或名称与关注方向匹配。",
       "最近一周仍有更新或维护活动。"
     ],
@@ -342,46 +347,50 @@
     "trending_period": "",
     "source_priority": 10,
     "star_growth": 0,
-    "score": 0.334,
-    "category": "Other"
+    "score": 0.3179,
+    "category": "AI Agent"
   },
   {
-    "full_name": "sansan0/TrendRadar",
-    "html_url": "https://github.com/sansan0/TrendRadar",
-    "description": "⭐AI-driven public opinion & trend monitor with multi-platform aggregation, RSS, and smart alerts.🎯 告别信息过载，你的 AI 舆情监控助手与热点筛选工具！聚合多平台热点 +  RSS 订阅，支持关键词精准筛选。AI 智能筛选新闻 + AI 翻译 +  AI 分析简报直推手机，也支持接入 MCP 架构，赋能 AI 自然语言对话分析、情感洞察与趋势预测等。支持 Docker ，数据本地/云端自持。集成微信/飞书/钉钉/Telegram/邮件/ntfy/bark/slack 等渠道智能推送。",
-    "stargazers_count": 55888,
-    "forks_count": 23936,
-    "language": "Python",
-    "created_at": "2025-04-28T11:42:16Z",
-    "updated_at": "2026-04-30T14:01:54Z",
-    "pushed_at": "2026-04-30T02:09:11Z",
+    "full_name": "appsmithorg/appsmith",
+    "html_url": "https://github.com/appsmithorg/appsmith",
+    "description": "Platform to build admin panels, internal tools, and dashboards. Integrates with 25+ databases and any API.",
+    "stargazers_count": 39715,
+    "forks_count": 4547,
+    "language": "TypeScript",
+    "created_at": "2020-06-30T04:07:36Z",
+    "updated_at": "2026-04-30T12:26:28Z",
+    "pushed_at": "2026-04-30T13:29:33Z",
     "topics": [
-      "ai",
-      "bark",
-      "data-analysis",
-      "docker",
-      "hot-news",
-      "llm",
-      "mail",
-      "mcp",
-      "mcp-server",
-      "news",
-      "ntfy",
-      "python",
-      "rss",
-      "trending-topics",
-      "wechat",
-      "wework"
+      "admin-dashboard",
+      "admin-panels",
+      "app-builder",
+      "automation",
+      "crud",
+      "custom-internal",
+      "developer-tools",
+      "gui",
+      "gui-application",
+      "hacktoberfest",
+      "internal-tools",
+      "java",
+      "javascript",
+      "low-code",
+      "low-code-framework",
+      "react",
+      "self-hosted",
+      "typescript",
+      "webdevelopment",
+      "workflows"
     ],
     "archived": false,
     "fork": false,
-    "open_issues_count": 32,
-    "license_name": "GPL-3.0",
-    "readme_excerpt": "<div align=\"center\" id=\"trendradar\"> <a href=\"https://github.com/sansan0/TrendRadar\" title=\"TrendRadar\"> <img src=\"/_image/banner.webp\" alt=\"TrendRadar Banner\" width=\"80%\"> </a> 最快<strong>30秒</strong>部署的热点助手 —— 告别无效刷屏，只看真正关心的新闻资讯 <a href=\"https://trendshift.io/repositories/14726\" target=\"_blank\"><img src=\"https://trendshift.io/api/badge/repositories/14726\" alt=\"sansan0%2FTrendRadar | Trendshift\" style=\"width: 250px; height: 55px;\" width=\"250\" height=\"55\"/></a> [![GitHub Stars](https://img.shields.io/github/stars/sansan0/TrendRadar?style=flat-square&logo=github&color=yellow)](https://github.com/sansan0/TrendRadar/stargazers) [![GitHub Forks](https://img.shields.io/github/forks/sansan0/TrendRadar?style=flat-square&logo=github&color=blue)](https://github.com/sansan0/TrendRadar/network/members) [![License](https://img.shields.io/badge/license-GPL--3.0-blue.svg?style=flat-square)](LICENSE) [![Version](https://img.shields.io/badge/version-v6.6.2-blue.svg)](https://github.com/sansan0/TrendRadar) [![MCP](https://img.shields.io/badge/MCP-v4.0.2-green.svg)](https://github.com/sansan0/TrendRadar) [![RSS](https://img.shields.io/badge/RSS-订阅源支持-orange.svg?style=flat-square&logo=rss&logoColor=white)](https://github.com/sansan0/TrendRadar) [![AI翻译](https://img.shields.io/badge/AI-多语言推送-purple.svg?style=flat-square)](https://github.com/sansan0/TrendRadar) [![企业微信通知](https://img.shields.io/badge/企业微信-通知-00D4AA?style=flat-square)](https://work.weixin.qq.com/) [![个人微信通知](https://img.shields.io/badge/个人微信-通知-00D4AA?style=flat-square)](https://weixin.qq.com/) [![Telegram通知](https://img.shields.io/badge/Telegram-通知-00D4AA?style=flat-square)](https://telegram.org/) [![dingtalk通知](https://img.shields.io/badge/钉钉-通知-00D4AA?style=flat-square)](#) [![飞书通知](https://img.shields.io/badge/飞书-通知-00D4AA?style=flat-square)](https://www.feishu.cn/) [![邮件通知](https://img.shields.io/badge/Email-通知-00D4AA?style=flat-square)](#) [![ntfy通知](https://img.shields.io/badge/ntfy-通知-00D4AA?style=flat-square)](ht",
+    "open_issues_count": 4457,
+    "license_name": "Apache-2.0",
+    "readme_excerpt": "<p align=\"center\"> <a href=\"https://www.appsmith.com?utm_source=github&utm_medium=organic&utm_campaign=readme\"> <img src=\"static/appsmith_logo_white.png\" alt=\"Appsmith Logo\" width=\"350\"> </a> </p> <p align=\"center\"> <a href=\"https://discord.gg/rBTTVJp\"> <img alt=\"Discord\" src=\"https://img.shields.io/discord/725602949748752515?color=5865F2&label=Discord&style=for-the-badge\" /> </a> <a href=\"https://github.com/appsmithorg/appsmith/releases\"> <img alt=\"GitHub commit activity\" src=\"https://img.shields.io/github/commit-activity/m/appsmithorg/appsmith?color=00FF0&style=for-the-badge\"> </a> <a href=\"https://docs.appsmith.com/getting-started/setup/installation-guides/docker?utm_source=github&utm_medium=organic&utm_campaign=readme&utm_content=badge\"> <img src=\"https://img.shields.io/docker/pulls/appsmith/appsmith-ce?color=4591df&style=for-the-badge\"> </a> <a href=\"https://www.youtube.com/@appsmith/?sub_confirmation=1\" target=\"_blank\"> <img alt=\"YouTube Channel Subscribers\" src=\"https://img.shields.io/youtube/channel/subscribers/UCMYwzPG2txS8nR5ZbNY6T5g?color=00FF0&style=for-the-badge\"> </a> <a href=\"https://www.youtube.com/@appsmith/?sub_confirmation=1\" target=\"_blank\"> <img alt=\"YouTube Channel Views\" src=\"https://img.shields.io/youtube/channel/views/UCMYwzPG2txS8nR5ZbNY6T5g?color=00FF0&style=for-the-badge\"> </a> </p> --- Organizations build custom applications like dashboards, admin panels, customer 360, IT automation, and service management tools to help their teams work more efficiently and effectively. Appsmith is an open-source low-code platform that streamlines custom application development, deployment, and maintenance. Learn more on our [website](https://www.appsmith.com?utm_source=github&utm_medium=organic&utm_campaign=readme). [![Appsmith in 100 secs](/static/images/appsmith-introduction-video-tile.png)](https://www.youtube.com/watch?v=jhyDI0e1o08?v=Dxe_NzdGzL4&utm_source=github&utm_medium=organic&utm_campaign=readme/?target=_blank) ## Installation There are two w",
     "security_flags": [],
     "selection_reasons": [
-      "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
-      "当前累计 Star 55888，具备一定社区关注度。",
+      "匹配当前个性化方向：Java 后端与工程实践、Python 工具与应用开发、Agent 开发、开发者工具。",
+      "当前累计 Star 39715，具备一定社区关注度。",
       "仓库主题、语言或名称与关注方向匹配。",
       "最近一周仍有更新或维护活动。"
     ],
@@ -392,50 +401,42 @@
     "trending_period": "",
     "source_priority": 10,
     "star_growth": 0,
-    "score": 0.3253,
-    "category": "LLM Tooling"
+    "score": 0.3172,
+    "category": "AI Agent"
   },
   {
-    "full_name": "mudler/LocalAI",
-    "html_url": "https://github.com/mudler/LocalAI",
-    "description": "LocalAI is the open-source AI engine. Run any model - LLMs, vision, voice, image, video - on any hardware. No GPU required.",
-    "stargazers_count": 45946,
-    "forks_count": 4036,
-    "language": "Go",
-    "created_at": "2023-03-18T22:58:02Z",
-    "updated_at": "2026-04-30T13:46:55Z",
-    "pushed_at": "2026-04-30T06:44:45Z",
+    "full_name": "labring/FastGPT",
+    "html_url": "https://github.com/labring/FastGPT",
+    "description": "FastGPT is a knowledge-based platform built on the LLMs, offers a comprehensive suite of out-of-the-box capabilities such as data processing, RAG retrieval, and visual AI workflow orchestration, letting you easily develop and deploy complex question-answering systems without the need for extensive setup or configuration.",
+    "stargazers_count": 27887,
+    "forks_count": 7066,
+    "language": "TypeScript",
+    "created_at": "2023-02-23T16:53:25Z",
+    "updated_at": "2026-04-30T13:14:32Z",
+    "pushed_at": "2026-04-30T06:44:00Z",
     "topics": [
-      "agents",
-      "ai",
-      "api",
-      "audio-generation",
-      "decentralized",
-      "distributed",
-      "image-generation",
-      "libp2p",
-      "llama",
+      "agent",
+      "claude",
+      "deepseek",
       "llm",
-      "mamba",
       "mcp",
-      "musicgen",
-      "object-detection",
-      "rerank",
-      "stable-diffusion",
-      "text-generation",
-      "tts"
+      "nextjs",
+      "openai",
+      "qwen",
+      "rag",
+      "workflow"
     ],
     "archived": false,
     "fork": false,
-    "open_issues_count": 154,
-    "license_name": "MIT",
-    "readme_excerpt": "<h1 align=\"center\"> <br> <img width=\"300\" src=\"./core/http/static/logo.png\"> <br> <br> </h1> <p align=\"center\"> <a href=\"https://github.com/go-skynet/LocalAI/stargazers\" target=\"blank\"> <img src=\"https://img.shields.io/github/stars/go-skynet/LocalAI?style=for-the-badge\" alt=\"LocalAI stars\"/> </a> <a href='https://github.com/go-skynet/LocalAI/releases'> <img src='https://img.shields.io/github/release/go-skynet/LocalAI?&label=Latest&style=for-the-badge'> </a> <a href=\"LICENSE\" target=\"blank\"> <img src=\"https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge\" alt=\"LocalAI License\"/> </a> </p> <p align=\"center\"> <a href=\"https://twitter.com/LocalAI_API\" target=\"blank\"> <img src=\"https://img.shields.io/badge/X-%23000000.svg?style=for-the-badge&logo=X&logoColor=white&label=LocalAI_API\" alt=\"Follow LocalAI_API\"/> </a> <a href=\"https://discord.gg/uJAeKSAGDy\" target=\"blank\"> <img src=\"https://img.shields.io/badge/dynamic/json?color=blue&label=Discord&style=for-the-badge&query=approximate_member_count&url=https%3A%2F%2Fdiscordapp.com%2Fapi%2Finvites%2FuJAeKSAGDy%3Fwith_counts%3Dtrue&logo=discord\" alt=\"Join LocalAI Discord Community\"/> </a> </p> <p align=\"center\"> <a href=\"https://trendshift.io/repositories/5539\" target=\"_blank\"><img src=\"https://trendshift.io/api/badge/repositories/5539\" alt=\"mudler%2FLocalAI | Trendshift\" style=\"width: 250px; height: 55px;\" width=\"250\" height=\"55\"/></a> </p> **LocalAI** is the open-source AI engine. Run any model - LLMs, vision, voice, image, video - on any hardware. No GPU required. - **Drop-in API compatibility** — OpenAI, Anthropic, ElevenLabs APIs - **36+ backends** — llama.cpp, vLLM, transformers, whisper, diffusers, MLX... - **Any hardware** — NVIDIA, AMD, Intel, Apple Silicon, Vulkan, or CPU-only - **Multi-user ready** — API key auth, user quotas, role-based access - **Built-in AI agents** — autonomous agents with tool use, RAG, MCP, and skills - **Privacy-first** — your data never leaves your infrastructure Created an",
+    "open_issues_count": 178,
+    "license_name": "NOASSERTION",
+    "readme_excerpt": "<div align=\"center\"> <a href=\"https://fastgpt.io/\"><img src=\"/.github/imgs/logo.svg\" width=\"120\" height=\"120\" alt=\"fastgpt logo\"></a> # FastGPT <p align=\"center\"> <a href=\"./README_en.md\">English</a> | <a href=\"./README.md\">简体中文</a> | <a href=\"./README_id.md\">Bahasa Indonesia</a> | <a href=\"./README_th.md\">ไทย</a> | <a href=\"./README_vi.md\">Tiếng Việt</a> | <a href=\"./README_ja.md\">日本語</a> </p> FastGPT 是一个 AI Agent 构建平台，提供开箱即用的数据处理、模型调用等能力，同时可以通过 Flow 可视化进行工作流编排，从而实现复杂的应用场景！ </div> <p align=\"center\"> <a href=\"https://fastgpt.io/\"> <img height=\"21\" src=\"https://img.shields.io/badge/在线使用-d4eaf7?style=flat-square&logo=spoj&logoColor=7d09f1\" alt=\"cloud\"> </a> <a href=\"https://doc.fastgpt.io/introduction\"> <img height=\"21\" src=\"https://img.shields.io/badge/相关文档-7d09f1?style=flat-square\" alt=\"document\"> </a> <a href=\"https://doc.fastgpt.io/self-host/dev\"> <img height=\"21\" src=\"https://img.shields.io/badge/本地开发-%23d4eaf7?style=flat-square&logo=xcode&logoColor=7d09f1\" alt=\"development\"> </a> <a href=\"/#-%E7%9B%B8%E5%85%B3%E9%A1%B9%E7%9B%AE\"> <img height=\"21\" src=\"https://img.shields.io/badge/相关项目-7d09f1?style=flat-square\" alt=\"project\"> </a> </p> https://github.com/labring/FastGPT/assets/15308462/7d3a38df-eb0e-4388-9250-2409bd33f6d4 ## 快速开始 可以通过 Docker 快速启动 FastGPT，在终端输入以下命令，根据引导完成输入即可拉取配置。 ```bash # 输入命令拉取配置文件 bash <(curl -fsSL https://doc.fastgpt.cn/deploy/install.sh) # 启动 docker compose up -d ``` 完全启动后，可通过`http://localhost:3000`访问 FastGPT，默认账号为`root`，密码为`1234`。 如果你遇到问题，可以[查看完整 Docker 部署教程](https://doc.fastgpt.io/self-host/deploy/docker) ## 🛸 使用方式 - **云服务版本** 如果你不需要私有化部署，可以直接使用我们提供的云服务版本，地址为：[fastgpt.io](https://fastgpt.io/) - **社区自托管版本** 可以使用[Docker](https://doc.fastgpt.io/self-host/deploy/docker)快速部署，也可以使用[Sealos Cloud](https://doc.fastgpt.io/self-host/deploy/sealos) 来一键部署FastGPT。 - **商业版** 如果你需要更完整的功能，或深度的服务支持，可以选择我们的[商业版](https://doc.fastgpt.io/introduction/commercial)。我们除了提供完整的软件外，还提供相应的场景落地辅导，具体可提交[商业咨询](https://fael3z0zfze.feishu.cn/share/base/form/shrcnjJWtKqjOI9N",
     "security_flags": [],
     "selection_reasons": [
-      "较上次记录新增 Star 27，近期热度上升。",
       "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
-      "当前累计 Star 45946，具备一定社区关注度。",
-      "仓库主题、语言或名称与关注方向匹配。"
+      "当前累计 Star 27887，具备一定社区关注度。",
+      "仓库主题、语言或名称与关注方向匹配。",
+      "最近一周仍有更新或维护活动。"
     ],
     "sources": [
       "github_search"
@@ -443,8 +444,8 @@
     "trending_rank": 0,
     "trending_period": "",
     "source_priority": 10,
-    "star_growth": 27,
-    "score": 0.319,
+    "star_growth": 0,
+    "score": 0.3165,
     "category": "AI Agent"
   }
 ]

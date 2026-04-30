@@ -16,7 +16,7 @@
   ],
   "collected_count": 312,
   "selected_count": 10,
-  "skipped_sent_count": 81,
+  "skipped_sent_count": 84,
   "collector_errors": [],
   "collector_stats": [
     {
@@ -103,14 +103,14 @@
   "run_summary_path": "data/runs/2026-04-30.json",
   "raw_repositories_path": "data/raw/2026-04-30.json",
   "selected_repositories_path": "data/selected/2026-04-30.json",
-  "state_path": "data/state/sent_repos.json",
+  "state_path": "",
   "star_history_path": "data/state/star_history.json",
   "trend_summary_path": "data/trends/2026-04-30.json",
   "kimi_used": false,
   "fallback_used": true,
-  "report_error": "Kimi API error 429: {\"error\":{\"message\":\"The engine is currently overloaded, please try again later\",\"type\":\"engine_overloaded_error\"}}",
-  "telegram_sent": true,
-  "telegram_error": "",
+  "report_error": "Kimi 周报质量检查失败：报告缺少项目来源：alibaba/arthas GitHub Search；报告缺少项目来源：appsmithorg/appsmith GitHub Search；报告缺少项目来源：labring/FastGPT GitHub Search; retry_with_quality_feedback: Kimi 周报质量检查失败：报告缺少完整 Markdown 链接：https://github.com/Alishahryar1/free-claude-code；报告缺少完整 Markdown 链接：https://github.com/mattpocock/skills；报告缺少完整 Markdown 链接：https://github.com/huggingface/ml-intern；报告缺少完整 Markdown 链接：https://github.com/CJackHwang/ds2api；报告缺少完整 Markdown 链接：https://github.com/trycua/cua",
+  "telegram_sent": false,
+  "telegram_error": "Telegram send skipped",
   "telegram_report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-04-30.html",
   "error": ""
 }
