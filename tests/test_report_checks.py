@@ -46,6 +46,17 @@ class ReportChecksTest(unittest.TestCase):
 
         self.assertTrue(any("蟒蛇" in error for error in errors))
 
+    def test_reports_unexpected_repository_links(self):
+        report = (
+            "owner/project [https://github.com/owner/project](https://github.com/owner/project) "
+            "extra [https://github.com/other/project](https://github.com/other/project)"
+        )
+
+        errors = check_report_quality(report, [repo()])
+
+        self.assertTrue(any("非入选项目链接" in error for error in errors))
+        self.assertTrue(any("other/project" in error for error in errors))
+
     def test_requires_trending_source_rank_and_risk_when_present(self):
         report = "owner/project [https://github.com/owner/project](https://github.com/owner/project)"
 

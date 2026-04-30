@@ -1,6 +1,11 @@
 from __future__ import annotations
 
+import re
+
 from .models import Repository
+
+
+GITHUB_REPOSITORY_LINK_PATTERN = re.compile(r"https://github\.com/([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)")
 
 
 def check_report_quality(report: str, repositories: list[Repository]) -> list[str]:
@@ -16,7 +21,15 @@ def check_report_quality(report: str, repositories: list[Repository]) -> list[st
         errors.extend(_source_errors(report, repo))
         errors.extend(_trending_errors(report, repo))
         errors.extend(_security_errors(report, repo))
+    errors.extend(_unexpected_repository_errors(report, repositories))
     return errors
+
+
+def _unexpected_repository_errors(report: str, repositories: list[Repository]) -> list[str]:
+    expected = {repo.full_name.lower() for repo in repositories if repo.full_name}
+    found = {match.group(1).lower() for match in GITHUB_REPOSITORY_LINK_PATTERN.finditer(report)}
+    unexpected = sorted(found - expected)
+    return [f"报告包含非入选项目链接：{name}" for name in unexpected]
 
 
 def _source_errors(report: str, repo: Repository) -> list[str]:
