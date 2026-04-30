@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from datetime import UTC, datetime
 
 from .models import Repository
@@ -176,7 +177,7 @@ def _topic_score(repo: Repository, settings: Settings) -> float:
 
 def _profile_matches(repo: Repository, settings: Settings) -> list[str]:
     rules = settings.interests.get("profile_match_rules") or []
-    text = " ".join([repo.full_name, repo.description, repo.language, *repo.topics]).lower()
+    repo_terms = _repo_match_terms(repo)
     language = repo.language.lower()
     matches = []
     for rule in rules:
@@ -188,10 +189,27 @@ def _profile_matches(repo: Repository, settings: Settings) -> list[str]:
         preferred_languages = {str(item).lower() for item in rule.get("preferred_languages", [])}
         preferred_topics = [str(item).lower() for item in rule.get("preferred_topics", [])]
         language_matched = language in preferred_languages
-        topic_matched = any(topic and topic in text for topic in preferred_topics)
+        topic_matched = any(_topic_matches_terms(topic, repo_terms) for topic in preferred_topics)
         if (language_matched or topic_matched) and label not in matches:
             matches.append(label)
     return matches
+
+
+def _repo_match_terms(repo: Repository) -> set[str]:
+    values = [repo.full_name, repo.description, repo.language, *repo.topics]
+    terms = {str(value).lower() for value in values if str(value).strip()}
+    text = " ".join(values).lower()
+    terms.update(re.findall(r"[a-z0-9]+", text))
+    return terms
+
+
+def _topic_matches_terms(topic: str, repo_terms: set[str]) -> bool:
+    if not topic:
+        return False
+    if topic in repo_terms:
+        return True
+    tokens = re.findall(r"[a-z0-9]+", topic)
+    return bool(tokens) and all(token in repo_terms for token in tokens)
 
 
 def _selection_reasons(repo: Repository, topic_score: float, profile_matches: list[str]) -> list[str]:

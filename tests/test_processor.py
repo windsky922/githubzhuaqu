@@ -243,6 +243,41 @@ class ProcessorTest(unittest.TestCase):
             any("匹配当前个性化方向：Java 后端与工程实践、Agent 开发" in reason for reason in result[0].selection_reasons)
         )
 
+    def test_profile_match_does_not_treat_javascript_as_java(self):
+        settings = Settings(
+            root=None,
+            run_date="2026-04-27",
+            since_date="2026-04-20",
+            days_back=7,
+            min_stars=20,
+            max_projects=1,
+            github_token="",
+            kimi_api_key="",
+            kimi_base_url="",
+            kimi_model="",
+            telegram_bot_token="",
+            telegram_chat_id="",
+            interests={
+                "preferred_topics": ["java"],
+                "preferred_languages": ["Java"],
+                "exclude_keywords": [],
+                "profile_match_rules": [
+                    {
+                        "name": "java",
+                        "label": "Java 后端与工程实践",
+                        "preferred_topics": ["java", "spring"],
+                        "preferred_languages": ["Java"],
+                    }
+                ],
+            },
+        )
+        item = repo("a/javascript-tool", 100, description="Useful browser tool", topics=["frontend"])
+        item.language = "JavaScript"
+
+        result = process_repositories([item], settings)
+
+        self.assertFalse(any("Java 后端与工程实践" in reason for reason in result[0].selection_reasons))
+
     def test_keeps_old_project_when_active_this_week(self):
         settings = Settings(
             root=None,
