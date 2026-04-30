@@ -1,0 +1,140 @@
+{
+  "total_projects": 10,
+  "trending_project_count": 7,
+  "total_star_growth": 7532,
+  "top_languages": [
+    {
+      "name": "Python",
+      "count": 4
+    },
+    {
+      "name": "Go",
+      "count": 2
+    },
+    {
+      "name": "Shell",
+      "count": 1
+    },
+    {
+      "name": "HTML",
+      "count": 1
+    },
+    {
+      "name": "JavaScript",
+      "count": 1
+    },
+    {
+      "name": "Java",
+      "count": 1
+    }
+  ],
+  "top_categories": [
+    {
+      "name": "LLM Tooling",
+      "count": 4
+    },
+    {
+      "name": "AI Agent",
+      "count": 3
+    },
+    {
+      "name": "Other",
+      "count": 2
+    },
+    {
+      "name": "Machine Learning",
+      "count": 1
+    }
+  ],
+  "top_trending": [
+    {
+      "full_name": "Alishahryar1/free-claude-code",
+      "html_url": "https://github.com/Alishahryar1/free-claude-code",
+      "trending_rank": 1,
+      "stargazers_count": 18923,
+      "language": "Python",
+      "category": "LLM Tooling"
+    },
+    {
+      "full_name": "mattpocock/skills",
+      "html_url": "https://github.com/mattpocock/skills",
+      "trending_rank": 2,
+      "stargazers_count": 47848,
+      "language": "Shell",
+      "category": "LLM Tooling"
+    },
+    {
+      "full_name": "huggingface/ml-intern",
+      "html_url": "https://github.com/huggingface/ml-intern",
+      "trending_rank": 3,
+      "stargazers_count": 7620,
+      "language": "Python",
+      "category": "Machine Learning"
+    },
+    {
+      "full_name": "CJackHwang/ds2api",
+      "html_url": "https://github.com/CJackHwang/ds2api",
+      "trending_rank": 5,
+      "stargazers_count": 2901,
+      "language": "Go",
+      "category": "LLM Tooling"
+    },
+    {
+      "full_name": "trycua/cua",
+      "html_url": "https://github.com/trycua/cua",
+      "trending_rank": 8,
+      "stargazers_count": 15351,
+      "language": "HTML",
+      "category": "AI Agent"
+    }
+  ],
+  "top_star_growth": [
+    {
+      "full_name": "mattpocock/skills",
+      "html_url": "https://github.com/mattpocock/skills",
+      "star_growth": 5459,
+      "stargazers_count": 47848,
+      "language": "Shell",
+      "category": "LLM Tooling"
+    },
+    {
+      "full_name": "Alishahryar1/free-claude-code",
+      "html_url": "https://github.com/Alishahryar1/free-claude-code",
+      "star_growth": 627,
+      "stargazers_count": 18923,
+      "language": "Python",
+      "category": "LLM Tooling"
+    },
+    {
+      "full_name": "Fincept-Corporation/FinceptTerminal",
+      "html_url": "https://github.com/Fincept-Corporation/FinceptTerminal",
+      "star_growth": 432,
+      "stargazers_count": 18104,
+      "language": "Python",
+      "category": "AI Agent"
+    },
+    {
+      "full_name": "Anil-matcha/Open-Generative-AI",
+      "html_url": "https://github.com/Anil-matcha/Open-Generative-AI",
+      "star_growth": 281,
+      "stargazers_count": 10307,
+      "language": "JavaScript",
+      "category": "Other"
+    },
+    {
+      "full_name": "CJackHwang/ds2api",
+      "html_url": "https://github.com/CJackHwang/ds2api",
+      "star_growth": 276,
+      "stargazers_count": 2901,
+      "language": "Go",
+      "category": "LLM Tooling"
+    }
+  ],
+  "summary_points": [
+    "LLM Tooling 是本期最集中的方向，共 4 个项目。",
+    "Python 是本期出现最多的主要语言，共 4 个项目。",
+    "本期入选项目累计新增 Star 7532。",
+    "Alishahryar1/free-claude-code 是本期 GitHub Trending 排名最高的项目，周榜排名 1。",
+    "mattpocock/skills 是本期新增 Star 最高的项目，新增 5459。"
+  ]
+}

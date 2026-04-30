@@ -4,26 +4,27 @@
 
 ## 最新周报
 
-- [2026-04-29](weekly/2026-04-29.html)
+- [2026-04-30](weekly/2026-04-30.html)
 
 ## 最新运行摘要
 
 - 入选项目：10 个
-- 采集候选：223 个
+- 采集候选：312 个
 - 生成方式：降级模板
-- Telegram：已推送
+- Telegram：未推送
 - 采集错误：0 条
 
 ## 最新趋势要点
 
-- AI Agent 是本期最集中的方向，共 4 个项目。
+- LLM Tooling 是本期最集中的方向，共 4 个项目。
 - Python 是本期出现最多的主要语言，共 4 个项目。
-- 本期入选项目累计新增 Star 107。
+- 本期入选项目累计新增 Star 7532。
 - Alishahryar1/free-claude-code 是本期 GitHub Trending 排名最高的项目，周榜排名 1。
-- mattpocock/skills 是本期新增 Star 最高的项目，新增 73。
+- mattpocock/skills 是本期新增 Star 最高的项目，新增 5459。
 
 ## 全部周报
 
+- [2026-04-30](weekly/2026-04-30.html)：10 个项目，降级模板，Telegram 未推送，主语言 Python，主方向 LLM Tooling，新增 Star 7532，Trending 项目 7
 - [2026-04-29](weekly/2026-04-29.html)：10 个项目，降级模板，Telegram 已推送，主语言 Python，主方向 AI Agent，新增 Star 107，Trending 项目 9
 - [2026-04-28](weekly/2026-04-28.html)：10 个项目，降级模板，Telegram 未推送，主语言 Python，主方向 AI Agent，新增 Star 32
 
