@@ -57,11 +57,19 @@ class SendReportLinkScriptTest(unittest.TestCase):
             path = runs / "2026-04-29.json"
             path.write_text(json.dumps({"telegram_sent": False}), encoding="utf-8")
 
-            _update_run_summary(root, "2026-04-29", True, "", "data/state/sent_repos.json")
+            _update_run_summary(
+                root,
+                "2026-04-29",
+                True,
+                "",
+                "data/state/sent_repos.json",
+                "https://example.com/weekly/2026-04-29.html",
+            )
 
             data = json.loads(path.read_text(encoding="utf-8"))
             self.assertTrue(data["telegram_sent"])
             self.assertEqual(data["telegram_error"], "")
+            self.assertEqual(data["telegram_report_url"], "https://example.com/weekly/2026-04-29.html")
             self.assertEqual(data["state_path"], "data/state/sent_repos.json")
         finally:
             shutil.rmtree(root, ignore_errors=True)

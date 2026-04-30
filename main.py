@@ -15,7 +15,7 @@ from src.models import RunSummary
 from src.processor import process_repositories
 from src.reporter import generate_report
 from src.security import apply_security_flags
-from src.sender import send_report
+from src.sender import report_url, send_report
 from src.settings import load_settings
 from src.state import (
     filter_unsent_repositories,
@@ -67,6 +67,7 @@ def main() -> int:
         summary.fallback_used = fallback_used
         summary.kimi_used = not fallback_used
         summary.report_error = report_error
+        summary.telegram_report_url = report_url(settings)
 
         if _skip_telegram_send():
             summary.telegram_sent = False

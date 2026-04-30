@@ -2162,3 +2162,42 @@ python scripts/send_report_link.py（发送 Pages 链接）
 1. 本地运行 `python main.py` 默认仍可直接尝试发送 Telegram，保持兼容。
 2. GitHub Actions 中通过 `SKIP_TELEGRAM_SEND=true` 跳过主流程内发送，改由归档提交后的独立脚本发送。
 3. 如果 Telegram 未配置或发送失败，脚本会记录状态，但不阻断已经完成的周报归档。
+
+---
+
+## 2026-04-30 追加：运行摘要记录 Telegram 周报链接
+
+### 1. 开发目的
+
+Telegram 改为推送 GitHub Pages 周报链接后，需要在运行摘要中记录实际发送的链接，方便从 GitHub 仓库直接排查本次推送是否指向正确页面。
+
+### 2. 本次实现
+
+更新：
+
+```text
+src/models.py
+main.py
+scripts/send_report_link.py
+tests/test_send_report_link.py
+```
+
+新增运行摘要字段：
+
+```text
+telegram_report_url
+```
+
+该字段记录本次发送到 Telegram 的 GitHub Pages 周报页面地址，例如：
+
+```text
+https://windsky922.github.io/githubzhuaqu/weekly/YYYY-MM-DD.html
+```
+
+### 3. 使用价值
+
+后续排查 Telegram 推送时，可以直接打开 `data/runs/YYYY-MM-DD.json`，确认：
+
+1. `telegram_sent` 是否为 `true`。
+2. `telegram_error` 是否为空。
+3. `telegram_report_url` 是否是预期的周报页面。

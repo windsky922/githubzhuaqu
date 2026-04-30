@@ -31,6 +31,18 @@ https://<owner>.github.io/<repo>/weekly/YYYY-MM-DD.html
 REPORT_BASE_URL=https://example.com/weekly
 ```
 
+每次运行后，实际推送链接会写入：
+
+```text
+data/runs/YYYY-MM-DD.json
+```
+
+字段名为：
+
+```text
+telegram_report_url
+```
+
 ## 本地运行
 
 ```bash

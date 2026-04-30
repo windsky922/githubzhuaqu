@@ -79,6 +79,7 @@ class RunSummary:
     report_error: str = ""
     telegram_sent: bool = False
     telegram_error: str = ""
+    telegram_report_url: str = ""
     error: str = ""
 
     def to_dict(self) -> dict[str, Any]:
