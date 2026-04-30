@@ -43,6 +43,16 @@ data/runs/YYYY-MM-DD.json
 telegram_report_url
 ```
 
+默认情况下，如果 Kimi 不可用、过载或生成失败，系统仍会归档规则版周报，但不会把规则版周报链接推送到 Telegram。这样可以避免手机端收到“降级版本”。
+
+如果某次确实希望推送规则版周报，需要显式配置变量：
+
+```text
+ALLOW_FALLBACK_TELEGRAM_SEND=true
+```
+
+不建议长期开启该变量。
+
 ## 本地运行
 
 ```bash

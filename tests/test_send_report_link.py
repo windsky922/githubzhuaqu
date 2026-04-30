@@ -4,7 +4,7 @@ import unittest
 import uuid
 from pathlib import Path
 
-from scripts.send_report_link import _latest_run_date, _selected_repositories, _update_run_summary
+from scripts.send_report_link import _latest_run_date, _run_summary, _selected_repositories, _update_run_summary
 
 
 class SendReportLinkScriptTest(unittest.TestCase):
@@ -71,6 +71,23 @@ class SendReportLinkScriptTest(unittest.TestCase):
             self.assertEqual(data["telegram_error"], "")
             self.assertEqual(data["telegram_report_url"], "https://example.com/weekly/2026-04-29.html")
             self.assertEqual(data["state_path"], "data/state/sent_repos.json")
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
+    def test_loads_run_summary(self):
+        root = Path.cwd() / f".tmp-send-link-test-{uuid.uuid4().hex}"
+        try:
+            runs = root / "data" / "runs"
+            runs.mkdir(parents=True)
+            (runs / "2026-04-29.json").write_text(
+                json.dumps({"fallback_used": True, "report_error": "Kimi API error 429"}),
+                encoding="utf-8",
+            )
+
+            data = _run_summary(root, "2026-04-29")
+
+            self.assertTrue(data["fallback_used"])
+            self.assertEqual(data["report_error"], "Kimi API error 429")
         finally:
             shutil.rmtree(root, ignore_errors=True)
 

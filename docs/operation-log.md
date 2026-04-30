@@ -2674,3 +2674,36 @@ docs/setup.md
 ### 4. 追加修正
 
 运行真实周报后发现，子串匹配可能让 `java` 误命中 `JavaScript`。已将 profile 主题匹配调整为词项匹配，并新增测试覆盖，避免语言和主题出现明显误判。
+---
+
+## 2026-04-30 追加：阻止推送降级版周报
+
+### 1. 问题原因
+
+真实运行时 Kimi 返回 `429 engine_overloaded_error`，表示模型服务过载。旧策略会在 Kimi 失败后生成规则版周报，并继续把 GitHub Pages 链接推送到 Telegram，因此手机端仍会收到降级版本。
+
+### 2. 本次实现
+
+更新：
+
+```text
+src/delivery_policy.py
+main.py
+scripts/send_report_link.py
+tests/test_delivery_policy.py
+tests/test_send_report_link.py
+README.md
+docs/setup.md
+```
+
+调整内容：
+
+1. 新增发送策略：`fallback_used=true` 时，默认阻止 Telegram 推送。
+2. 规则版周报仍会归档到 `reports/` 和 GitHub Pages，方便排查和保留运行记录。
+3. 运行摘要会写入 `telegram_sent=false` 和阻止推送原因。
+4. 不会把规则版周报对应的项目写入已推送状态，避免后续正式周报被错误跳过。
+5. 如需临时允许推送规则版周报，必须显式设置 `ALLOW_FALLBACK_TELEGRAM_SEND=true`。
+
+### 3. 设计结论
+
+以后默认不会再向 Telegram 推送降级版周报。系统仍保留降级归档能力，因为外部 API 失败时需要有运行记录和排查依据。
