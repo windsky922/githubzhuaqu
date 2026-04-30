@@ -20,22 +20,22 @@ def generate_report(
 ) -> tuple[str, bool, str]:
     if settings.kimi_api_key and settings.kimi_model:
         try:
-            return _checked_kimi_report(
-                _generate_with_kimi(repositories, queries, settings, trend_summary or {}),
+            return _generate_checked_kimi_report(
                 repositories,
+                queries,
+                settings,
+                trend_summary or {},
+                include_readme=True,
             ), False, ""
         except Exception as error:
             if _is_content_filter_error(error):
                 try:
-                    return _checked_kimi_report(
-                        _generate_with_kimi(
-                            repositories,
-                            queries,
-                            settings,
-                            trend_summary or {},
-                            include_readme=False,
-                        ),
+                    return _generate_checked_kimi_report(
                         repositories,
+                        queries,
+                        settings,
+                        trend_summary or {},
+                        include_readme=False,
                     ), False, ""
                 except Exception as retry_error:
                     error = RuntimeError(f"{error}; retry_without_readme: {retry_error}")
@@ -45,6 +45,43 @@ def generate_report(
     return normalize_report_markdown(
         fallback_report(repositories, queries, settings, trend_summary or {})
     ), True, "Kimi API 未配置"
+
+
+def _generate_checked_kimi_report(
+    repositories: list[Repository],
+    queries: list[str],
+    settings: Settings,
+    trend_summary: dict,
+    include_readme: bool,
+) -> str:
+    try:
+        return _checked_kimi_report(
+            _generate_with_kimi(
+                repositories,
+                queries,
+                settings,
+                trend_summary,
+                include_readme=include_readme,
+            ),
+            repositories,
+        )
+    except Exception as error:
+        if not _is_quality_check_error(error):
+            raise
+        try:
+            return _checked_kimi_report(
+                _generate_with_kimi(
+                    repositories,
+                    queries,
+                    settings,
+                    trend_summary,
+                    include_readme=include_readme,
+                    quality_feedback=str(error),
+                ),
+                repositories,
+            )
+        except Exception as retry_error:
+            raise RuntimeError(f"{error}; retry_with_quality_feedback: {retry_error}") from retry_error
 
 
 def fallback_report(
@@ -198,6 +235,7 @@ def _generate_with_kimi(
     settings: Settings,
     trend_summary: dict,
     include_readme: bool = True,
+    quality_feedback: str = "",
 ) -> str:
     prompt_path = settings.root / "prompts" / "weekly_report.md"
     system_prompt = prompt_path.read_text(encoding="utf-8")
@@ -209,6 +247,11 @@ def _generate_with_kimi(
         "trend_summary": trend_summary,
         "interests": settings.interests,
     }
+    if quality_feedback:
+        user_payload["quality_retry_feedback"] = {
+            "message": quality_feedback,
+            "instruction": "上一次周报未通过质量检查。请只使用本次输入项目，修复上述问题，并保留固定五段结构。",
+        }
     payload = {
         "model": settings.kimi_model,
         "messages": [
@@ -253,6 +296,10 @@ def _repository_payload(repo: Repository, include_readme: bool) -> dict:
 def _is_content_filter_error(error: Exception) -> bool:
     message = str(error).lower()
     return "content_filter" in message or "high risk" in message
+
+
+def _is_quality_check_error(error: Exception) -> bool:
+    return "Kimi 周报质量检查失败" in str(error)
 
 
 def _kimi_timeout_seconds() -> int:

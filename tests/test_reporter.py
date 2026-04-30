@@ -186,6 +186,52 @@ class ReporterTest(unittest.TestCase):
         self.assertIn("Kimi 周报质量检查失败", report_error)
         self.assertIn("owner/project", report)
 
+    def test_retries_kimi_once_after_quality_check_failure(self):
+        settings = Settings(
+            root=None,
+            run_date="2026-04-27",
+            since_date="2026-04-20",
+            days_back=7,
+            min_stars=20,
+            max_projects=10,
+            github_token="",
+            kimi_api_key="key",
+            kimi_base_url="https://api.example.com/v1",
+            kimi_model="model",
+            telegram_bot_token="",
+            telegram_chat_id="",
+            interests={},
+        )
+        repositories = [
+            Repository(
+                full_name="owner/project",
+                html_url="https://github.com/owner/project",
+                description="Useful agent tool",
+                stargazers_count=120,
+                forks_count=20,
+                language="Python",
+                created_at="2026-04-25T00:00:00Z",
+                updated_at="2026-04-25T00:00:00Z",
+            )
+        ]
+        fixed_report = (
+            "## 本周总体趋势\n"
+            "## 热点项目总览\n"
+            "## 重点项目分析\n"
+            "## 最适合用户学习的项目\n"
+            "## 本周结论\n"
+            "owner/project [https://github.com/owner/project](https://github.com/owner/project)"
+        )
+
+        with patch("src.reporter._generate_with_kimi", side_effect=["缺少项目和链接", fixed_report]) as generate:
+            report, fallback_used, report_error = generate_report(repositories, [], settings, {})
+
+        self.assertFalse(fallback_used)
+        self.assertEqual(report_error, "")
+        self.assertIn("owner/project", report)
+        self.assertEqual(generate.call_count, 2)
+        self.assertIn("quality_feedback", generate.call_args_list[1].kwargs)
+
     def test_repository_payload_redacts_text_before_kimi(self):
         repository = Repository(
             full_name="owner/project",
