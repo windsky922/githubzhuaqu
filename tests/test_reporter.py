@@ -1,12 +1,49 @@
+import io
+import json
 import unittest
+import urllib.error
 from unittest.mock import patch
 
 from src.models import Repository
-from src.reporter import _extract_content, _repository_payload, fallback_report, generate_report, normalize_report_markdown
+from src.reporter import _extract_content, _post_kimi_with_retries, _repository_payload, fallback_report, generate_report, normalize_report_markdown
 from src.settings import Settings
 
 
 class ReporterTest(unittest.TestCase):
+    def test_retries_transient_kimi_overload_error(self):
+        settings = Settings(
+            root=None,
+            run_date="2026-04-27",
+            since_date="2026-04-20",
+            days_back=7,
+            min_stars=20,
+            max_projects=10,
+            github_token="",
+            kimi_api_key="key",
+            kimi_base_url="https://api.example.com/v1",
+            kimi_model="model",
+            telegram_bot_token="",
+            telegram_chat_id="",
+            interests={},
+        )
+        overload = urllib.error.HTTPError(
+            "https://api.example.com/v1/chat/completions",
+            429,
+            "Too Many Requests",
+            {},
+            io.BytesIO(b'{"error":{"type":"engine_overloaded_error"}}'),
+        )
+        response = _FakeResponse({"choices": [{"message": {"content": "正文"}}]})
+
+        with patch("src.reporter.urllib.request.urlopen", side_effect=[overload, response]) as urlopen:
+            with patch("src.reporter.time.sleep") as sleep:
+                with patch.dict("os.environ", {"KIMI_MAX_RETRIES": "1", "KIMI_RETRY_SECONDS": "0"}):
+                    data = _post_kimi_with_retries("https://api.example.com/v1/chat/completions", {"model": "model"}, settings)
+
+        self.assertEqual(data["choices"][0]["message"]["content"], "正文")
+        self.assertEqual(urlopen.call_count, 2)
+        sleep.assert_called_once_with(0)
+
     def test_fallback_report_contains_core_fields(self):
         settings = Settings(
             root=None,
@@ -251,6 +288,19 @@ class ReporterTest(unittest.TestCase):
         self.assertNotIn("ghp_", payload["readme_excerpt"])
         self.assertIn("[已脱敏疑似密钥]", payload["description"])
         self.assertIn("[已脱敏疑似密钥]", payload["readme_excerpt"])
+
+class _FakeResponse:
+    def __init__(self, data):
+        self.data = data
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc, traceback):
+        return False
+
+    def read(self):
+        return json.dumps(self.data).encode("utf-8")
 
 
 if __name__ == "__main__":

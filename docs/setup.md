@@ -10,7 +10,6 @@
 | `KIMI_API_KEY` | 可选 | 启用模型生成周报 |
 | `KIMI_BASE_URL` | 可选 | 默认值为 `https://api.moonshot.cn/v1` |
 | `KIMI_MODEL` | 可选 | 配合 `KIMI_API_KEY` 使用，指定 Kimi 模型 |
-| `KIMI_TIMEOUT_SECONDS` | 可选 | Kimi 请求超时时间，默认 `120` 秒 |
 | `TELEGRAM_BOT_TOKEN` | 可选 | 启用 Telegram 推送 |
 | `TELEGRAM_CHAT_ID` | 可选 | Telegram 接收方 Chat ID |
 | `REPORT_BASE_URL` | 可选 | 周报公开访问目录，留空时 GitHub Actions 会根据仓库名推导 GitHub Pages 地址 |
@@ -18,6 +17,16 @@
 如果未配置 Kimi，程序会生成降级版周报。
 
 如果未配置 Telegram，程序仍会归档周报和运行摘要。
+
+以下配置建议放在 Variables 中：
+
+| 变量名 | 用途 |
+|---|---|
+| `INTEREST_PROFILE` | 个性化方向，例如 `java,agent_development` |
+| `REPORT_BASE_URL` | 周报公开访问目录；如果不想放在 Secret 中，可以作为普通变量配置 |
+| `KIMI_TIMEOUT_SECONDS` | Kimi 请求超时时间，默认 `120` 秒 |
+| `KIMI_MAX_RETRIES` | Kimi 临时错误重试次数，默认 `2` |
+| `KIMI_RETRY_SECONDS` | Kimi 临时错误重试等待秒数，默认 `20` |
 
 Telegram 当前只推送周报链接，不推送完整 Markdown 正文。这个链接指向 GitHub Pages 上的周报页面，也就是 GitHub Actions 运行后由 Kimi 生成并归档的那份周报。默认链接格式为：
 
@@ -43,15 +52,7 @@ data/runs/YYYY-MM-DD.json
 telegram_report_url
 ```
 
-默认情况下，如果 Kimi 不可用、过载或生成失败，系统仍会归档规则版周报，但不会把规则版周报链接推送到 Telegram。这样可以避免手机端收到“降级版本”。
-
-如果某次确实希望推送规则版周报，需要显式配置变量：
-
-```text
-ALLOW_FALLBACK_TELEGRAM_SEND=true
-```
-
-不建议长期开启该变量。
+如果 Kimi 返回 `429`、过载或临时网关错误，程序会先按 `KIMI_MAX_RETRIES` 和 `KIMI_RETRY_SECONDS` 自动重试。多次重试仍失败时，才会生成规则版周报并继续推送 Telegram 链接，同时把失败原因写入 `data/runs/YYYY-MM-DD.json`。
 
 ## 本地运行
 

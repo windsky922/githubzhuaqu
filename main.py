@@ -11,7 +11,6 @@ from src.archive import (
     write_trend_summary,
 )
 from src.collector import collect_repositories, enrich_repositories_with_readmes
-from src.delivery_policy import fallback_delivery_block_reason
 from src.models import RunSummary
 from src.processor import process_repositories
 from src.reporter import generate_report
@@ -73,9 +72,6 @@ def main() -> int:
         if _skip_telegram_send():
             summary.telegram_sent = False
             summary.telegram_error = "Telegram send skipped"
-        elif block_reason := fallback_delivery_block_reason(summary.fallback_used, summary.report_error):
-            summary.telegram_sent = False
-            summary.telegram_error = block_reason
         else:
             sent, send_error = send_report(report, settings)
             summary.telegram_sent = sent

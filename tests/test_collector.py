@@ -13,16 +13,27 @@ from src.settings import Settings
 
 
 class CollectorTest(unittest.TestCase):
-    def test_readme_excerpt_normalizes_whitespace_and_limits_length(self):
-        readme = "# Title\n\n" + "word " * 20
+    def test_readme_excerpt_summarizes_readme_into_short_sentences(self):
+        readme = """
+        # Demo Project
 
-        result = _readme_excerpt(readme, limit=18)
+        Demo Project is a toolkit for building agent workflows with practical automation support.
+        It focuses on readable configuration, small integrations, and deployment-friendly defaults.
+        The repository also includes examples for local development and production usage.
 
-        self.assertEqual(result, "# Title word word ")
-        self.assertLessEqual(len(result), 18)
+        ## Installation
+        pip install demo-project
+        """
+
+        result = _readme_excerpt(readme, limit=220)
+
+        self.assertIn("Demo Project is a toolkit", result)
+        self.assertIn("It focuses on readable configuration", result)
+        self.assertNotIn("pip install", result)
+        self.assertLessEqual(len(result), 220)
 
     def test_readme_excerpt_redacts_token_like_text(self):
-        readme = "# Title\n\nghp_" + "A" * 36
+        readme = "This README describes a useful automation tool, but contains ghp_" + "A" * 36 + " in text."
 
         result = _readme_excerpt(readme)
 

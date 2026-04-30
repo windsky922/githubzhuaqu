@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -15,6 +16,8 @@ GITHUB_SEARCH_URL = "https://api.github.com/search/repositories"
 GITHUB_REPO_URL = "https://api.github.com/repos"
 GITHUB_TRENDING_URL = "https://github.com/trending"
 README_EXCERPT_LIMIT = 2000
+README_SUMMARY_MAX_SENTENCES = 3
+README_SUMMARY_MAX_LENGTH = 300
 DEFAULT_SEARCH_TOPICS = ["ai", "agent", "llm", "automation"]
 DEFAULT_SEARCH_LANGUAGES = ["Python", "TypeScript"]
 
@@ -294,8 +297,112 @@ def fetch_readme(full_name: str, settings: Settings) -> str:
 
 
 def _readme_excerpt(readme: str, limit: int = README_EXCERPT_LIMIT) -> str:
-    normalized = " ".join(redact_sensitive_text(readme).split())
-    return normalized[:limit]
+    summary = summarize_readme(readme, max_length=min(limit, README_SUMMARY_MAX_LENGTH))
+    return summary[:limit]
+
+
+def summarize_readme(readme: str, max_length: int = README_SUMMARY_MAX_LENGTH) -> str:
+    cleaned = _clean_readme_for_summary(redact_sensitive_text(readme))
+    sentences = _readme_sentences(cleaned)
+    if not sentences:
+        return ""
+    summary = _join_limited_sentences(sentences, max_length)
+    return summary if summary else sentences[0][:max_length].rstrip()
+
+
+def _clean_readme_for_summary(readme: str) -> str:
+    lines = []
+    in_code_block = False
+    for raw_line in readme.splitlines():
+        line = raw_line.strip()
+        if line.startswith("```") or line.startswith("~~~"):
+            in_code_block = not in_code_block
+            continue
+        if in_code_block or not line:
+            continue
+        if _skip_readme_line(line):
+            continue
+        lines.append(_clean_readme_line(line))
+    text = " ".join(line for line in lines if line)
+    text = re.sub(r"<[^>]+>", " ", text)
+    text = re.sub(r"\s+", " ", text)
+    return text.strip()
+
+
+def _skip_readme_line(line: str) -> bool:
+    lowered = line.lower()
+    heading_text = re.sub(r"^#{1,6}\s*", "", lowered).strip()
+    if re.match(r"^#{1,6}\s+", line):
+        return True
+    if line.startswith(("!", "[!", "<p ", "<div ", "<img ", "<a ")):
+        return True
+    if line.startswith("|") and line.endswith("|"):
+        return True
+    if re.fullmatch(r"[-*_=\s]{3,}", line):
+        return True
+    if lowered.startswith(("[toc]", "table of contents", "contents")):
+        return True
+    if heading_text in {
+        "installation",
+        "install",
+        "usage",
+        "quick start",
+        "getting started",
+        "documentation",
+        "docs",
+        "license",
+        "contributing",
+        "contributors",
+        "sponsors",
+        "support",
+        "acknowledgements",
+    }:
+        return True
+    return False
+
+
+def _clean_readme_line(line: str) -> str:
+    line = re.sub(r"^#{1,6}\s*", "", line)
+    line = re.sub(r"!\[[^\]]*]\([^)]*\)", "", line)
+    line = re.sub(r"\[([^\]]+)]\([^)]*\)", r"\1", line)
+    line = re.sub(r"`([^`]+)`", r"\1", line)
+    line = re.sub(r"^[>*\-\d.)\s]+", "", line)
+    return line.strip()
+
+
+def _readme_sentences(text: str) -> list[str]:
+    parts = re.split(r"(?<=[.!?。！？])\s+", text)
+    sentences = []
+    for part in parts:
+        sentence = part.strip(" -:;，,")
+        if _usable_readme_sentence(sentence):
+            sentences.append(sentence)
+        if len(sentences) >= README_SUMMARY_MAX_SENTENCES:
+            break
+    return sentences
+
+
+def _usable_readme_sentence(sentence: str) -> bool:
+    if len(sentence) < 18:
+        return False
+    lowered = sentence.lower()
+    noisy_markers = ("http://", "https://", "npm install", "pip install", "docker run", "git clone")
+    if any(marker in lowered for marker in noisy_markers):
+        return False
+    letters = re.findall(r"[A-Za-z\u4e00-\u9fff]", sentence)
+    return len(letters) >= 12
+
+
+def _join_limited_sentences(sentences: list[str], max_length: int) -> str:
+    selected = []
+    total = 0
+    for sentence in sentences:
+        next_total = total + len(sentence) + (1 if selected else 0)
+        if selected and next_total > max_length:
+            break
+        selected.append(sentence)
+        total = next_total
+    return " ".join(selected).strip()
 
 
 def _sanitize_repository(repo: Repository) -> Repository:

@@ -2676,34 +2676,60 @@ docs/setup.md
 运行真实周报后发现，子串匹配可能让 `java` 误命中 `JavaScript`。已将 profile 主题匹配调整为词项匹配，并新增测试覆盖，避免语言和主题出现明显误判。
 ---
 
-## 2026-04-30 追加：阻止推送降级版周报
+## 2026-04-30 追加：Kimi 过载重试与降级原因修正
 
 ### 1. 问题原因
 
-真实运行时 Kimi 返回 `429 engine_overloaded_error`，表示模型服务过载。旧策略会在 Kimi 失败后生成规则版周报，并继续把 GitHub Pages 链接推送到 Telegram，因此手机端仍会收到降级版本。
+真实运行时 Kimi 返回 `429 engine_overloaded_error`，表示模型服务过载。旧代码没有针对这类临时错误等待重试，而是第一次请求失败后直接回退到规则版周报。
 
 ### 2. 本次实现
 
 更新：
 
 ```text
-src/delivery_policy.py
-main.py
-scripts/send_report_link.py
-tests/test_delivery_policy.py
-tests/test_send_report_link.py
+src/reporter.py
+tests/test_reporter.py
 README.md
 docs/setup.md
 ```
 
 调整内容：
 
-1. 新增发送策略：`fallback_used=true` 时，默认阻止 Telegram 推送。
-2. 规则版周报仍会归档到 `reports/` 和 GitHub Pages，方便排查和保留运行记录。
-3. 运行摘要会写入 `telegram_sent=false` 和阻止推送原因。
-4. 不会把规则版周报对应的项目写入已推送状态，避免后续正式周报被错误跳过。
-5. 如需临时允许推送规则版周报，必须显式设置 `ALLOW_FALLBACK_TELEGRAM_SEND=true`。
+1. Telegram 允许继续推送规则版周报链接，保证用户能收到兜底结果。
+2. Kimi 返回 `429`、`500`、`502`、`503`、`504`、`engine_overloaded` 或网络临时错误时，会先自动重试。
+3. 新增 `KIMI_MAX_RETRIES`，默认重试 `2` 次。
+4. 新增 `KIMI_RETRY_SECONDS`，默认每次等待 `20` 秒。
+5. 多次重试仍失败时，才会生成规则版周报，并在运行摘要的 `report_error` 中记录完整失败原因。
 
 ### 3. 设计结论
 
-以后默认不会再向 Telegram 推送降级版周报。系统仍保留降级归档能力，因为外部 API 失败时需要有运行记录和排查依据。
+本次问题的直接原因不是配置错误，而是 Kimi 服务端过载。后续通过自动重试减少偶发过载导致的降级；如果多次重试后仍失败，说明外部模型服务持续不可用，系统仍会保留规则版周报作为兜底。
+
+---
+
+## 2026-04-30 追加：外部项目 README 精炼摘要
+
+### 1. 开发目的
+
+用户说明需要保留本仓库 README 的完整状态，真正需要精简的是周报中来自外部项目的 README 内容。此前系统会截取外部项目 README 前段文本，容易把过长说明复制进周报页面。
+
+### 2. 本次实现
+
+更新：
+
+```text
+src/collector.py
+tests/test_collector.py
+README.md
+```
+
+调整内容：
+
+1. 恢复本仓库 README 的完整版本。
+2. 外部项目 README 进入周报前先清理徽章、图片、代码块、表格、安装命令和目录噪声。
+3. `readme_excerpt` 改为保存 2-3 句、约 300 字以内的精炼摘要。
+4. 规则版周报中原来的“README 摘要”位置会直接使用该精炼摘要，不再展示长篇 README 原文。
+
+### 3. 设计边界
+
+当前摘要是规则型提取，不调用额外模型，避免增加成本和失败点。后续如果 Kimi 稳定，可再让模型基于该精炼摘要做更自然的中文改写。

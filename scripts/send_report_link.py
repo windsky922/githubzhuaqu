@@ -12,7 +12,6 @@ from src.sender import report_url, send_report
 from src.settings import ROOT, load_settings
 from src.state import write_sent_repositories
 from src.models import Repository
-from src.delivery_policy import fallback_delivery_block_reason
 
 
 def main() -> int:
@@ -22,19 +21,8 @@ def main() -> int:
         return 1
 
     settings = load_settings(run_date=run_date, since_date="")
-    run_summary = _run_summary(ROOT, run_date)
-    block_reason = fallback_delivery_block_reason(
-        bool(run_summary.get("fallback_used")),
-        str(run_summary.get("report_error") or ""),
-    )
-    url = report_url(settings)
-    if block_reason:
-        _update_run_summary(ROOT, run_date, False, block_reason, "", url)
-        print("telegram_sent=False")
-        print(f"telegram_error={block_reason}")
-        return 0
-
     sent, error = send_report("", settings)
+    url = report_url(settings)
     selected = _selected_repositories(ROOT, run_date)
     state_path = ""
     if sent and selected:
@@ -70,17 +58,6 @@ def _selected_repositories(root: Path, run_date: str) -> list[Repository]:
         if isinstance(item, dict):
             repositories.append(Repository(**item))
     return repositories
-
-
-def _run_summary(root: Path, run_date: str) -> dict:
-    path = root / "data" / "runs" / f"{run_date}.json"
-    if not path.exists():
-        return {}
-    try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError:
-        return {}
-    return data if isinstance(data, dict) else {}
 
 
 def _update_run_summary(root: Path, run_date: str, sent: bool, error: str, state_path: str, report_url: str = "") -> None:

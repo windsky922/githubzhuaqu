@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import time
 import urllib.error
 import urllib.request
 
@@ -262,7 +263,39 @@ def _generate_with_kimi(
     }
     base_url = settings.kimi_base_url.rstrip("/")
     url = base_url if base_url.endswith("/chat/completions") else base_url + "/chat/completions"
-    request = urllib.request.Request(
+    data = _post_kimi_with_retries(url, payload, settings)
+
+    content = _extract_content(data)
+    if not content.strip():
+        raise RuntimeError(f"Kimi API 返回空报告，响应结构：{_response_shape(data)}")
+    return content.strip() + "\n"
+
+
+def _post_kimi_with_retries(url: str, payload: dict, settings: Settings) -> dict:
+    errors = []
+    max_retries = _kimi_max_retries()
+    for attempt in range(max_retries + 1):
+        try:
+            with urllib.request.urlopen(_kimi_request(url, payload, settings), timeout=_kimi_timeout_seconds()) as response:
+                return json.loads(response.read().decode("utf-8"))
+        except urllib.error.HTTPError as error:
+            body = error.read().decode("utf-8", errors="replace")
+            message = f"Kimi API error {error.code}: {body}"
+            if not _is_transient_kimi_error(error.code, body) or attempt >= max_retries:
+                raise RuntimeError("; ".join(errors + [message])) from error
+            errors.append(f"{message}; retry_after={_kimi_retry_seconds()}s")
+            time.sleep(_kimi_retry_seconds())
+        except (TimeoutError, urllib.error.URLError) as error:
+            message = f"Kimi API transient request error: {error}"
+            if attempt >= max_retries:
+                raise RuntimeError("; ".join(errors + [message])) from error
+            errors.append(f"{message}; retry_after={_kimi_retry_seconds()}s")
+            time.sleep(_kimi_retry_seconds())
+    raise RuntimeError("; ".join(errors) or "Kimi API request failed")
+
+
+def _kimi_request(url: str, payload: dict, settings: Settings) -> urllib.request.Request:
+    return urllib.request.Request(
         url,
         data=json.dumps(payload).encode("utf-8"),
         headers={
@@ -271,17 +304,6 @@ def _generate_with_kimi(
         },
         method="POST",
     )
-    try:
-        with urllib.request.urlopen(request, timeout=_kimi_timeout_seconds()) as response:
-            data = json.loads(response.read().decode("utf-8"))
-    except urllib.error.HTTPError as error:
-        body = error.read().decode("utf-8", errors="replace")
-        raise RuntimeError(f"Kimi API error {error.code}: {body}") from error
-
-    content = _extract_content(data)
-    if not content.strip():
-        raise RuntimeError(f"Kimi API 返回空报告，响应结构：{_response_shape(data)}")
-    return content.strip() + "\n"
 
 
 def _repository_payload(repo: Repository, include_readme: bool) -> dict:
@@ -300,6 +322,25 @@ def _is_content_filter_error(error: Exception) -> bool:
 
 def _is_quality_check_error(error: Exception) -> bool:
     return "Kimi 周报质量检查失败" in str(error)
+
+
+def _is_transient_kimi_error(status_code: int, body: str) -> bool:
+    body_lower = body.lower()
+    return status_code in {429, 500, 502, 503, 504} or "engine_overloaded" in body_lower or "rate limit" in body_lower
+
+
+def _kimi_max_retries() -> int:
+    try:
+        return max(0, int(os.getenv("KIMI_MAX_RETRIES", "2")))
+    except ValueError:
+        return 2
+
+
+def _kimi_retry_seconds() -> int:
+    try:
+        return max(0, int(os.getenv("KIMI_RETRY_SECONDS", "20")))
+    except ValueError:
+        return 20
 
 
 def _kimi_timeout_seconds() -> int:
