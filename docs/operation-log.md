@@ -2361,3 +2361,31 @@ redact_sensitive_text
 ### 3. 设计边界
 
 该能力用于减少第三方内容归档风险，不改变安全扫描脚本的职责。后续如果接入更多服务，可以继续扩展 `redact_sensitive_text` 的模式列表。
+
+---
+
+## 2026-04-30 追加：报告生成层最终脱敏
+
+### 1. 开发目的
+
+采集层已经会对第三方仓库简介和 README 摘要做脱敏，但报告生成层仍需要最后一道保护，防止手工构造的数据、测试数据或模型输出绕过采集边界，把疑似密钥写入 Markdown 周报。
+
+### 2. 本次实现
+
+更新：
+
+```text
+src/reporter.py
+tests/test_reporter.py
+```
+
+调整内容：
+
+1. `normalize_report_markdown` 会先执行 `redact_sensitive_text`，再做链接和语言规范化。
+2. `fallback_report` 返回前会做最终脱敏。
+3. `_repository_payload` 会在发给 Kimi 前对 `description` 和 `readme_excerpt` 再次脱敏。
+4. 新增测试覆盖报告归一化脱敏和 Kimi payload 脱敏。
+
+### 3. 安全边界
+
+该保护是“最后兜底”，不能替代采集层脱敏和仓库密钥扫描。未来如果报告中增加更多来自第三方的文本字段，应继续复用 `redact_sensitive_text`。

@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import patch
 
 from src.models import Repository
-from src.reporter import _extract_content, fallback_report, generate_report, normalize_report_markdown
+from src.reporter import _extract_content, _repository_payload, fallback_report, generate_report, normalize_report_markdown
 from src.settings import Settings
 
 
@@ -68,6 +68,14 @@ class ReporterTest(unittest.TestCase):
         result = normalize_report_markdown(report)
 
         self.assertIn("| demo | Python | [https://github.com/a/b](https://github.com/a/b) |", result)
+
+    def test_normalizes_report_by_redacting_token_like_text(self):
+        token = "ghp_" + "A" * 36
+
+        result = normalize_report_markdown(f"owner/project {token} [https://github.com/a/b](https://github.com/a/b)")
+
+        self.assertNotIn("ghp_", result)
+        self.assertIn("[已脱敏疑似密钥]", result)
 
     def test_normalizes_standalone_github_links(self):
         report = "https://github.com/a/b"
@@ -170,6 +178,26 @@ class ReporterTest(unittest.TestCase):
         self.assertTrue(fallback_used)
         self.assertIn("Kimi 周报质量检查失败", report_error)
         self.assertIn("owner/project", report)
+
+    def test_repository_payload_redacts_text_before_kimi(self):
+        repository = Repository(
+            full_name="owner/project",
+            html_url="https://github.com/owner/project",
+            description="desc ghp_" + "B" * 36,
+            stargazers_count=120,
+            forks_count=20,
+            language="Python",
+            created_at="2026-04-25T00:00:00Z",
+            updated_at="2026-04-25T00:00:00Z",
+            readme_excerpt="readme ghp_" + "C" * 36,
+        )
+
+        payload = _repository_payload(repository, include_readme=True)
+
+        self.assertNotIn("ghp_", payload["description"])
+        self.assertNotIn("ghp_", payload["readme_excerpt"])
+        self.assertIn("[已脱敏疑似密钥]", payload["description"])
+        self.assertIn("[已脱敏疑似密钥]", payload["readme_excerpt"])
 
 
 if __name__ == "__main__":

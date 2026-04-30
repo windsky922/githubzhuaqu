@@ -8,6 +8,7 @@ import urllib.request
 
 from .models import Repository
 from .report_checks import check_report_quality
+from .security import redact_sensitive_text
 from .settings import Settings
 
 
@@ -123,7 +124,7 @@ def fallback_report(
         ]
     )
     lines.extend(f"  - `{query}`" for query in queries)
-    return "\n".join(lines).strip() + "\n"
+    return redact_sensitive_text("\n".join(lines).strip()) + "\n"
 
 
 def _checked_kimi_report(report: str, repositories: list[Repository]) -> str:
@@ -140,7 +141,7 @@ def _trend_lines(trend_summary: dict) -> list[str]:
 
 
 def normalize_report_markdown(report: str) -> str:
-    normalized = report.replace("蟒蛇", "Python")
+    normalized = redact_sensitive_text(report).replace("蟒蛇", "Python")
     lines = [_link_github_urls(line) for line in normalized.splitlines()]
     return "\n".join(lines).strip() + "\n"
 
@@ -242,6 +243,8 @@ def _generate_with_kimi(
 
 def _repository_payload(repo: Repository, include_readme: bool) -> dict:
     payload = repo.to_dict()
+    payload["description"] = redact_sensitive_text(str(payload.get("description") or ""))
+    payload["readme_excerpt"] = redact_sensitive_text(str(payload.get("readme_excerpt") or ""))
     if not include_readme:
         payload["readme_excerpt"] = ""
     return payload
