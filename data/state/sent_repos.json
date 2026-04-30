@@ -20,6 +20,11 @@
     "first_sent_at": "2026-04-29"
   },
   {
+    "full_name": "alibaba/arthas",
+    "html_url": "https://github.com/alibaba/arthas",
+    "first_sent_at": "2026-04-30"
+  },
+  {
     "full_name": "alibaba/nacos",
     "html_url": "https://github.com/alibaba/nacos",
     "first_sent_at": "2026-04-29"
@@ -48,6 +53,11 @@
     "full_name": "apache/airflow",
     "html_url": "https://github.com/apache/airflow",
     "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "appsmithorg/appsmith",
+    "html_url": "https://github.com/appsmithorg/appsmith",
+    "first_sent_at": "2026-04-30"
   },
   {
     "full_name": "AstrBotDevs/AstrBot",
@@ -218,6 +228,11 @@
     "full_name": "jeecgboot/JeecgBoot",
     "html_url": "https://github.com/jeecgboot/JeecgBoot",
     "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "labring/FastGPT",
+    "html_url": "https://github.com/labring/FastGPT",
+    "first_sent_at": "2026-04-30"
   },
   {
     "full_name": "langchain-ai/langchain",
