@@ -132,7 +132,14 @@ class ReporterTest(unittest.TestCase):
             "src.reporter._generate_with_kimi",
             side_effect=[
                 RuntimeError("content_filter high risk"),
-                "owner/project [https://github.com/owner/project](https://github.com/owner/project)",
+                (
+                    "## 本周总体趋势\n"
+                    "## 热点项目总览\n"
+                    "## 重点项目分析\n"
+                    "## 最适合用户学习的项目\n"
+                    "## 本周结论\n"
+                    "owner/project [https://github.com/owner/project](https://github.com/owner/project)"
+                ),
             ],
         ) as generate:
             report, fallback_used, report_error = generate_report(repositories, [], settings, {})

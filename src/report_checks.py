@@ -6,12 +6,20 @@ from .models import Repository
 
 
 GITHUB_REPOSITORY_LINK_PATTERN = re.compile(r"https://github\.com/([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)")
+REQUIRED_SECTION_GROUPS = (
+    ("本周总体趋势", "本周趋势"),
+    ("热点项目总览", "热门项目总览"),
+    ("重点项目分析",),
+    ("最适合用户学习的项目", "最适合学习的项目", "最适合关注的项目"),
+    ("本周结论",),
+)
 
 
 def check_report_quality(report: str, repositories: list[Repository]) -> list[str]:
     errors = []
     if "蟒蛇" in report:
         errors.append("报告中仍包含不合适的技术语言翻译：蟒蛇")
+    errors.extend(_section_errors(report))
     for repo in repositories:
         if repo.full_name and repo.full_name not in report:
             errors.append(f"报告缺少项目名称：{repo.full_name}")
@@ -22,6 +30,14 @@ def check_report_quality(report: str, repositories: list[Repository]) -> list[st
         errors.extend(_trending_errors(report, repo))
         errors.extend(_security_errors(report, repo))
     errors.extend(_unexpected_repository_errors(report, repositories))
+    return errors
+
+
+def _section_errors(report: str) -> list[str]:
+    errors = []
+    for section_names in REQUIRED_SECTION_GROUPS:
+        if not any(name in report for name in section_names):
+            errors.append(f"报告缺少固定结构章节：{section_names[0]}")
     return errors
 
 

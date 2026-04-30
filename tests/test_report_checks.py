@@ -25,9 +25,21 @@ def trending_repo():
     return item
 
 
+def complete_report(extra: str = ""):
+    return (
+        "## 本周总体趋势\n"
+        "## 热点项目总览\n"
+        "## 重点项目分析\n"
+        "## 最适合用户学习的项目\n"
+        "## 本周结论\n"
+        "owner/project [https://github.com/owner/project](https://github.com/owner/project)\n"
+        f"{extra}"
+    )
+
+
 class ReportChecksTest(unittest.TestCase):
     def test_accepts_complete_report(self):
-        report = "owner/project [https://github.com/owner/project](https://github.com/owner/project)"
+        report = complete_report()
 
         errors = check_report_quality(report, [repo()])
 
@@ -40,17 +52,22 @@ class ReportChecksTest(unittest.TestCase):
         self.assertTrue(any("完整 Markdown 链接" in error for error in errors))
 
     def test_reports_bad_language_translation(self):
-        report = "owner/project 蟒蛇 [https://github.com/owner/project](https://github.com/owner/project)"
+        report = complete_report("蟒蛇")
 
         errors = check_report_quality(report, [repo()])
 
         self.assertTrue(any("蟒蛇" in error for error in errors))
 
+    def test_reports_missing_required_sections(self):
+        report = "owner/project [https://github.com/owner/project](https://github.com/owner/project)"
+
+        errors = check_report_quality(report, [repo()])
+
+        self.assertTrue(any("固定结构章节" in error for error in errors))
+        self.assertTrue(any("本周总体趋势" in error for error in errors))
+
     def test_reports_unexpected_repository_links(self):
-        report = (
-            "owner/project [https://github.com/owner/project](https://github.com/owner/project) "
-            "extra [https://github.com/other/project](https://github.com/other/project)"
-        )
+        report = complete_report("extra [https://github.com/other/project](https://github.com/other/project)")
 
         errors = check_report_quality(report, [repo()])
 
@@ -67,10 +84,7 @@ class ReportChecksTest(unittest.TestCase):
         self.assertTrue(any("风险提示" in error for error in errors))
 
     def test_accepts_trending_source_rank_and_risk(self):
-        report = (
-            "owner/project GitHub Trending Trending 排名 3 风险提示：未识别到许可证。"
-            " [https://github.com/owner/project](https://github.com/owner/project)"
-        )
+        report = complete_report("GitHub Trending Trending 排名 3 风险提示：未识别到许可证。")
 
         errors = check_report_quality(report, [trending_repo()])
 
