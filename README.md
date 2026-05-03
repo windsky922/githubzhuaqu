@@ -45,6 +45,8 @@ GitHub Actions
 | `src/personalization.py` | 个性化 profile 合并逻辑 |
 | `src/sender.py` | Telegram 推送 |
 | `scripts/build_pages.py` | 生成 GitHub Pages 归档页面 |
+| `scripts/migrate_json_to_sqlite.py` | 将历史 JSON 归档导入 SQLite 派生索引 |
+| `scripts/verify_migration.py` | 校验 SQLite 派生索引和 JSON 归档计数 |
 | `scripts/send_report_link.py` | 推送 GitHub Pages 周报链接 |
 | `scripts/security_check.py` | 本仓库疑似密钥扫描 |
 | `config/interests.example.json` | 默认兴趣和评分配置示例 |
@@ -179,6 +181,30 @@ python main.py
 ```
 
 本地运行时，程序不会自动读取 `.env` 文件。需要测试真实 API 时，请先在当前终端手动设置环境变量。
+
+## SQLite 派生索引
+
+当前事实来源仍然是 `data/` 下的 JSON 归档。SQLite 只作为后续前端筛选、历史查询和趋势分析的派生索引。
+
+导入现有 JSON：
+
+```bash
+python scripts/migrate_json_to_sqlite.py
+```
+
+校验迁移结果：
+
+```bash
+python scripts/verify_migration.py
+```
+
+默认数据库路径：
+
+```text
+data/github_weekly.sqlite
+```
+
+该数据库文件不提交到 GitHub；如需重建，重新运行迁移脚本即可。
 
 ## 安全约束
 

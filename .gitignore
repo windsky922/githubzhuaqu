@@ -10,4 +10,6 @@ htmlcov/
 dist/
 build/
 *.egg-info/
-
+data/*.sqlite
+data/*.sqlite-shm
+data/*.sqlite-wal

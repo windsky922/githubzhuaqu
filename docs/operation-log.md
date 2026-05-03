@@ -2876,3 +2876,51 @@ docs/runs.json
 ### 3. 设计边界
 
 公共 JSON 只导出适合公开展示的摘要字段，不导出密钥、用户隐私、原始错误堆栈或未脱敏配置。SQLite 仍未引入，后续数据库可以从这些公开 JSON 和原始 `data/` 工件继续演进。
+
+---
+
+## 2026-05-03 追加：SQLite 派生索引基础版本
+
+### 1. 开发目的
+
+后续前端筛选、历史趋势查询和个性化反馈都需要更稳定的数据底座。当前 JSON 归档仍然适合作为可读事实来源，但跨周查询和一致性校验会逐步变复杂。因此本次先建立 SQLite 派生索引的最小基础，不改变主流程读取路径。
+
+### 2. 本次实现
+
+更新：
+
+```text
+.gitignore
+README.md
+docs/roadmap.md
+docs/future-plan.md
+src/storage/schema.sql
+src/storage/sqlite_store.py
+scripts/migrate_json_to_sqlite.py
+scripts/verify_migration.py
+tests/test_storage_sqlite.py
+```
+
+新增表：
+
+```text
+runs
+repositories
+selections
+trend_summaries
+sent_repositories
+star_history
+migration_meta
+```
+
+调整内容：
+
+1. 新增 SQLite schema，覆盖运行摘要、仓库、入选记录、趋势摘要、已推送状态和 Star 历史。
+2. 新增 `scripts/migrate_json_to_sqlite.py`，可将现有 `data/` JSON 归档导入 `data/github_weekly.sqlite`。
+3. 新增 `scripts/verify_migration.py`，校验 SQLite 表计数和 JSON 归档基础计数是否一致。
+4. 新增测试验证导入、幂等性、计数一致性和表名保护。
+5. `.gitignore` 排除 `data/*.sqlite`、`data/*.sqlite-shm`、`data/*.sqlite-wal`，避免提交派生数据库。
+
+### 3. 设计边界
+
+SQLite 当前只是可重建的派生索引，JSON 仍然是事实来源。主流程尚未接入双写，也没有从 SQLite 读取数据。后续可以在本基础上小步加入主流程双写，再逐步让前端或分析脚本消费 SQLite。
