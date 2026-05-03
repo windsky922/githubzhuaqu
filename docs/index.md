@@ -34,6 +34,7 @@
 - [历史项目索引](projects.html)
 - [公共项目 JSON](projects.json)
 - [公共运行 JSON](runs.json)
+- [数据契约说明](data-contracts.html)
 - [架构说明](architecture.html)
 - [配置说明](setup.html)
 - [开发路线图](roadmap.html)

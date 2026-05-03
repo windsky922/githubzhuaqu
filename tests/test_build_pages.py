@@ -73,6 +73,7 @@ class BuildPagesTest(unittest.TestCase):
             self.assertIn("[历史项目索引](projects.html)", index)
             self.assertIn("[公共项目 JSON](projects.json)", index)
             self.assertIn("[公共运行 JSON](runs.json)", index)
+            self.assertIn("[数据契约说明](data-contracts.html)", index)
             self.assertIn("[未来更新规划](future-plan.html)", index)
             projects = (root / "docs" / "projects.md").read_text(encoding="utf-8")
             self.assertIn("owner/project", projects)

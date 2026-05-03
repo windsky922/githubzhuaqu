@@ -2962,3 +2962,36 @@ docs/future-plan.md
 ### 3. 设计边界
 
 SQLite 仍是可重建派生索引，不是唯一事实来源。主流程不从 SQLite 读取数据；即使 SQLite 同步失败，报告、归档、Pages 和 Telegram 链路仍继续工作。
+
+---
+
+## 2026-05-03 追加：公共数据契约测试
+
+### 1. 开发目的
+
+公共 JSON 和 SQLite 已经成为后续前端、多渠道推送、订阅和趋势分析的基础。如果字段被无意删除或重命名，下游功能会出现隐蔽问题。本次补充数据契约测试和中文说明文档。
+
+### 2. 本次实现
+
+更新：
+
+```text
+scripts/build_pages.py
+tests/test_build_pages.py
+tests/test_data_contracts.py
+docs/data-contracts.md
+docs/roadmap.md
+docs/future-plan.md
+```
+
+调整内容：
+
+1. 新增 `tests/test_data_contracts.py`，固定 `docs/projects.json` 的项目字段集合。
+2. 固定 `docs/runs.json` 的运行摘要字段集合。
+3. 固定 SQLite 关键表字段集合。
+4. 新增 `docs/data-contracts.md`，用中文说明公共 JSON、SQLite 表和修改字段时的要求。
+5. GitHub Pages 首页文档入口新增“数据契约说明”。
+
+### 3. 设计边界
+
+契约测试只锁定当前对外稳定字段，不阻止后续新增能力。未来如果确实要新增、删除或重命名字段，应同步更新契约测试、中文文档和所有下游消费逻辑。
