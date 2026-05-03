@@ -1,0 +1,128 @@
+{
+  "total_projects": 10,
+  "trending_project_count": 6,
+  "total_star_growth": 24177,
+  "top_languages": [
+    {
+      "name": "Python",
+      "count": 6
+    },
+    {
+      "name": "TypeScript",
+      "count": 2
+    },
+    {
+      "name": "Shell",
+      "count": 1
+    },
+    {
+      "name": "Go",
+      "count": 1
+    }
+  ],
+  "top_categories": [
+    {
+      "name": "AI Agent",
+      "count": 5
+    },
+    {
+      "name": "LLM Tooling",
+      "count": 3
+    },
+    {
+      "name": "Developer Tools",
+      "count": 2
+    }
+  ],
+  "top_trending": [
+    {
+      "full_name": "mattpocock/skills",
+      "html_url": "https://github.com/mattpocock/skills",
+      "trending_rank": 1,
+      "stargazers_count": 55870,
+      "language": "Shell",
+      "category": "LLM Tooling"
+    },
+    {
+      "full_name": "Alishahryar1/free-claude-code",
+      "html_url": "https://github.com/Alishahryar1/free-claude-code",
+      "trending_rank": 2,
+      "stargazers_count": 20430,
+      "language": "Python",
+      "category": "LLM Tooling"
+    },
+    {
+      "full_name": "TauricResearch/TradingAgents",
+      "html_url": "https://github.com/TauricResearch/TradingAgents",
+      "trending_rank": 3,
+      "stargazers_count": 63950,
+      "language": "Python",
+      "category": "AI Agent"
+    },
+    {
+      "full_name": "CJackHwang/ds2api",
+      "html_url": "https://github.com/CJackHwang/ds2api",
+      "trending_rank": 5,
+      "stargazers_count": 3207,
+      "language": "Go",
+      "category": "LLM Tooling"
+    },
+    {
+      "full_name": "soxoj/maigret",
+      "html_url": "https://github.com/soxoj/maigret",
+      "trending_rank": 7,
+      "stargazers_count": 23163,
+      "language": "Python",
+      "category": "Developer Tools"
+    }
+  ],
+  "top_star_growth": [
+    {
+      "full_name": "mattpocock/skills",
+      "html_url": "https://github.com/mattpocock/skills",
+      "star_growth": 7890,
+      "stargazers_count": 55870,
+      "language": "Shell",
+      "category": "LLM Tooling"
+    },
+    {
+      "full_name": "TauricResearch/TradingAgents",
+      "html_url": "https://github.com/TauricResearch/TradingAgents",
+      "star_growth": 7179,
+      "stargazers_count": 63950,
+      "language": "Python",
+      "category": "AI Agent"
+    },
+    {
+      "full_name": "NousResearch/hermes-agent",
+      "html_url": "https://github.com/NousResearch/hermes-agent",
+      "star_growth": 4128,
+      "stargazers_count": 130371,
+      "language": "Python",
+      "category": "AI Agent"
+    },
+    {
+      "full_name": "D4Vinci/Scrapling",
+      "html_url": "https://github.com/D4Vinci/Scrapling",
+      "star_growth": 2852,
+      "stargazers_count": 42187,
+      "language": "Python",
+      "category": "Developer Tools"
+    },
+    {
+      "full_name": "Alishahryar1/free-claude-code",
+      "html_url": "https://github.com/Alishahryar1/free-claude-code",
+      "star_growth": 1487,
+      "stargazers_count": 20430,
+      "language": "Python",
+      "category": "LLM Tooling"
+    }
+  ],
+  "summary_points": [
+    "AI Agent 是本期最集中的方向，共 5 个项目。",
+    "Python 是本期出现最多的主要语言，共 6 个项目。",
+    "本期入选项目累计新增 Star 24177。",
+    "mattpocock/skills 是本期 GitHub Trending 排名最高的项目，周榜排名 1。",
+    "mattpocock/skills 是本期新增 Star 最高的项目，新增 7890。"
+  ]
+}

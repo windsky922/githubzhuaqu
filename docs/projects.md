@@ -4,6 +4,16 @@
 
 | 日期 | 项目 | 来源 | Trending 排名 | 方向 | 语言 | Star | 新增 Star | 风险提示 | 链接 |
 |---|---|---|---:|---|---|---:|---:|---:|---|
+| 2026-05-03 | mattpocock/skills | GitHub Trending | 1 | LLM Tooling | Shell | 55870 | 7890 | 0 | [https://github.com/mattpocock/skills](https://github.com/mattpocock/skills) |
+| 2026-05-03 | Alishahryar1/free-claude-code | GitHub Trending | 2 | LLM Tooling | Python | 20430 | 1487 | 0 | [https://github.com/Alishahryar1/free-claude-code](https://github.com/Alishahryar1/free-claude-code) |
+| 2026-05-03 | TauricResearch/TradingAgents | GitHub Search + GitHub Trending | 3 | AI Agent | Python | 63950 | 7179 | 0 | [https://github.com/TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents) |
+| 2026-05-03 | CJackHwang/ds2api | GitHub Trending | 5 | LLM Tooling | Go | 3207 | 303 | 0 | [https://github.com/CJackHwang/ds2api](https://github.com/CJackHwang/ds2api) |
+| 2026-05-03 | soxoj/maigret | GitHub Trending | 7 | Developer Tools | Python | 23163 | 0 | 0 | [https://github.com/soxoj/maigret](https://github.com/soxoj/maigret) |
+| 2026-05-03 | abhigyanpatwari/GitNexus | GitHub Trending | 8 | AI Agent | TypeScript | 34957 | 0 | 0 | [https://github.com/abhigyanpatwari/GitNexus](https://github.com/abhigyanpatwari/GitNexus) |
+| 2026-05-03 | NousResearch/hermes-agent | GitHub Search | - | AI Agent | Python | 130371 | 4128 | 0 | [https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) |
+| 2026-05-03 | D4Vinci/Scrapling | GitHub Search | - | Developer Tools | Python | 42187 | 2852 | 0 | [https://github.com/D4Vinci/Scrapling](https://github.com/D4Vinci/Scrapling) |
+| 2026-05-03 | n8n-io/n8n | GitHub Search | - | AI Agent | TypeScript | 186518 | 289 | 0 | [https://github.com/n8n-io/n8n](https://github.com/n8n-io/n8n) |
+| 2026-05-03 | Significant-Gravitas/AutoGPT | GitHub Search | - | AI Agent | Python | 183948 | 49 | 0 | [https://github.com/Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT) |
 | 2026-04-30 | Alishahryar1/free-claude-code | GitHub Trending | 1 | LLM Tooling | Python | 18943 | 7 | 0 | [https://github.com/Alishahryar1/free-claude-code](https://github.com/Alishahryar1/free-claude-code) |
 | 2026-04-30 | mattpocock/skills | GitHub Trending | 2 | LLM Tooling | Shell | 47980 | 55 | 0 | [https://github.com/mattpocock/skills](https://github.com/mattpocock/skills) |
 | 2026-04-30 | huggingface/ml-intern | GitHub Trending | 3 | Machine Learning | Python | 7623 | 0 | 1 | [https://github.com/huggingface/ml-intern](https://github.com/huggingface/ml-intern) |
