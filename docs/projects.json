@@ -1,0 +1,734 @@
+{
+  "schema_version": 1,
+  "count": 30,
+  "projects": [
+    {
+      "run_date": "2026-05-03",
+      "full_name": "mattpocock/skills",
+      "html_url": "https://github.com/mattpocock/skills",
+      "description": "Skills for Real Engineers. Straight from my .claude directory.",
+      "category": "LLM Tooling",
+      "language": "Shell",
+      "stargazers_count": 55870,
+      "forks_count": 4746,
+      "star_growth": 7890,
+      "score": 0.7857,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 1,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 1 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 7890，近期热度上升。",
+        "当前累计 Star 55870，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "report_url": "weekly/2026-05-03.html"
+    },
+    {
+      "run_date": "2026-05-03",
+      "full_name": "Alishahryar1/free-claude-code",
+      "html_url": "https://github.com/Alishahryar1/free-claude-code",
+      "description": "Use claude-code for free in the terminal, VSCode extension or discord like OpenClaw (voice supported)",
+      "category": "LLM Tooling",
+      "language": "Python",
+      "stargazers_count": 20430,
+      "forks_count": 2926,
+      "star_growth": 1487,
+      "score": 0.5571,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 2,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 2 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 1487，近期热度上升。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 20430，具备一定社区关注度。"
+      ],
+      "security_flags": [],
+      "report_url": "weekly/2026-05-03.html"
+    },
+    {
+      "run_date": "2026-05-03",
+      "full_name": "TauricResearch/TradingAgents",
+      "html_url": "https://github.com/TauricResearch/TradingAgents",
+      "description": "TradingAgents: Multi-Agents LLM Financial Trading Framework",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 63950,
+      "forks_count": 12381,
+      "star_growth": 7179,
+      "score": 0.8216,
+      "sources": [
+        "github_search",
+        "github_trending"
+      ],
+      "trending_rank": 3,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 3 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 7179，近期热度上升。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 63950，具备一定社区关注度。"
+      ],
+      "security_flags": [],
+      "report_url": "weekly/2026-05-03.html"
+    },
+    {
+      "run_date": "2026-05-03",
+      "full_name": "CJackHwang/ds2api",
+      "html_url": "https://github.com/CJackHwang/ds2api",
+      "description": "DeepSeek-Compatible Middleware Interface: A technical exploration project in Go, focusing on high-concurrency protocol adaptation. It serves as a reference implementation for converting diverse web protocols into standardized formats.",
+      "category": "LLM Tooling",
+      "language": "Go",
+      "stargazers_count": 3207,
+      "forks_count": 842,
+      "star_growth": 303,
+      "score": 0.3103,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 5,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 5 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 303，近期热度上升。",
+        "匹配当前个性化方向：开发者工具。",
+        "当前累计 Star 3207，具备一定社区关注度。"
+      ],
+      "security_flags": [],
+      "report_url": "weekly/2026-05-03.html"
+    },
+    {
+      "run_date": "2026-05-03",
+      "full_name": "soxoj/maigret",
+      "html_url": "https://github.com/soxoj/maigret",
+      "description": "🕵️‍♂️ Collect a dossier on a person by username from 3000+ sites",
+      "category": "Developer Tools",
+      "language": "Python",
+      "stargazers_count": 23163,
+      "forks_count": 1630,
+      "star_growth": 0,
+      "score": 0.3431,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 7,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 7 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 23163，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "report_url": "weekly/2026-05-03.html"
+    },
+    {
+      "run_date": "2026-05-03",
+      "full_name": "abhigyanpatwari/GitNexus",
+      "html_url": "https://github.com/abhigyanpatwari/GitNexus",
+      "description": "GitNexus: The Zero-Server Code Intelligence Engine -       GitNexus is a client-side knowledge graph creator that runs entirely in your browser. Drop in a GitHub repo or ZIP file, and get an interactive knowledge graph wit a built in Graph RAG Agent. Perfect for code exploration",
+      "category": "AI Agent",
+      "language": "TypeScript",
+      "stargazers_count": 34957,
+      "forks_count": 3969,
+      "star_growth": 0,
+      "score": 0.1511,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 8,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 8 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Agent 开发、开发者工具。",
+        "当前累计 Star 34957，具备一定社区关注度。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "report_url": "weekly/2026-05-03.html"
+    },
+    {
+      "run_date": "2026-05-03",
+      "full_name": "NousResearch/hermes-agent",
+      "html_url": "https://github.com/NousResearch/hermes-agent",
+      "description": "The agent that grows with you",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 130371,
+      "forks_count": 19731,
+      "star_growth": 4128,
+      "score": 0.4452,
+      "sources": [
+        "github_search"
+      ],
+      "trending_rank": 0,
+      "selection_reasons": [
+        "较上次记录新增 Star 4128，近期热度上升。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 130371，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "report_url": "weekly/2026-05-03.html"
+    },
+    {
+      "run_date": "2026-05-03",
+      "full_name": "D4Vinci/Scrapling",
+      "html_url": "https://github.com/D4Vinci/Scrapling",
+      "description": "🕷️ An adaptive Web Scraping framework that handles everything from a single request to a full-scale crawl!",
+      "category": "Developer Tools",
+      "language": "Python",
+      "stargazers_count": 42187,
+      "forks_count": 3825,
+      "star_growth": 2852,
+      "score": 0.3982,
+      "sources": [
+        "github_search"
+      ],
+      "trending_rank": 0,
+      "selection_reasons": [
+        "较上次记录新增 Star 2852，近期热度上升。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 42187，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "report_url": "weekly/2026-05-03.html"
+    },
+    {
+      "run_date": "2026-05-03",
+      "full_name": "n8n-io/n8n",
+      "html_url": "https://github.com/n8n-io/n8n",
+      "description": "Fair-code workflow automation platform with native AI capabilities. Combine visual building with custom code, self-host or cloud, 400+ integrations.",
+      "category": "AI Agent",
+      "language": "TypeScript",
+      "stargazers_count": 186518,
+      "forks_count": 57301,
+      "star_growth": 289,
+      "score": 0.3459,
+      "sources": [
+        "github_search"
+      ],
+      "trending_rank": 0,
+      "selection_reasons": [
+        "较上次记录新增 Star 289，近期热度上升。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 186518，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "report_url": "weekly/2026-05-03.html"
+    },
+    {
+      "run_date": "2026-05-03",
+      "full_name": "Significant-Gravitas/AutoGPT",
+      "html_url": "https://github.com/Significant-Gravitas/AutoGPT",
+      "description": "AutoGPT is the vision of accessible AI for everyone, to use and to build on. Our mission is to provide the tools, so that you can focus on what matters.",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 183948,
+      "forks_count": 46242,
+      "star_growth": 49,
+      "score": 0.3354,
+      "sources": [
+        "github_search"
+      ],
+      "trending_rank": 0,
+      "selection_reasons": [
+        "较上次记录新增 Star 49，近期热度上升。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 183948，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "report_url": "weekly/2026-05-03.html"
+    },
+    {
+      "run_date": "2026-04-30",
+      "full_name": "Alishahryar1/free-claude-code",
+      "html_url": "https://github.com/Alishahryar1/free-claude-code",
+      "description": "Use claude-code for free in the terminal, VSCode extension or discord like OpenClaw (voice supported)",
+      "category": "LLM Tooling",
+      "language": "Python",
+      "stargazers_count": 18943,
+      "forks_count": 2692,
+      "star_growth": 7,
+      "score": 0.6075,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 1,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 1 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 7，近期热度上升。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 18943，具备一定社区关注度。"
+      ],
+      "security_flags": [],
+      "report_url": "weekly/2026-04-30.html"
+    },
+    {
+      "run_date": "2026-04-30",
+      "full_name": "mattpocock/skills",
+      "html_url": "https://github.com/mattpocock/skills",
+      "description": "Skills for Real Engineers. Straight from my .claude directory.",
+      "category": "LLM Tooling",
+      "language": "Shell",
+      "stargazers_count": 47980,
+      "forks_count": 3904,
+      "star_growth": 55,
+      "score": 0.7789,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 2,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 2 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 55，近期热度上升。",
+        "当前累计 Star 47980，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "report_url": "weekly/2026-04-30.html"
+    },
+    {
+      "run_date": "2026-04-30",
+      "full_name": "huggingface/ml-intern",
+      "html_url": "https://github.com/huggingface/ml-intern",
+      "description": "🤗 ml-intern: an open-source ML engineer that reads papers, trains models, and ships ML models",
+      "category": "Machine Learning",
+      "language": "Python",
+      "stargazers_count": 7623,
+      "forks_count": 737,
+      "star_growth": 0,
+      "score": 0.5087,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 3,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 3 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 7623，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [
+        "未识别到许可证，复用代码前需要人工确认授权。"
+      ],
+      "report_url": "weekly/2026-04-30.html"
+    },
+    {
+      "run_date": "2026-04-30",
+      "full_name": "CJackHwang/ds2api",
+      "html_url": "https://github.com/CJackHwang/ds2api",
+      "description": "Deepseek to API: A lightweight, high-performance full-stack middleware converting client protocols to universal APIs. Supports multi-account rotation, compiled binaries, Vercel Serverless, and Docker. Compatible with Google, Claude, and OpenAI API formats.",
+      "category": "LLM Tooling",
+      "language": "Go",
+      "stargazers_count": 2904,
+      "forks_count": 761,
+      "star_growth": 1,
+      "score": 0.3736,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 5,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 5 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 1，近期热度上升。",
+        "匹配当前个性化方向：开发者工具。",
+        "当前累计 Star 2904，具备一定社区关注度。"
+      ],
+      "security_flags": [],
+      "report_url": "weekly/2026-04-30.html"
+    },
+    {
+      "run_date": "2026-04-30",
+      "full_name": "trycua/cua",
+      "html_url": "https://github.com/trycua/cua",
+      "description": "Open-source infrastructure for Computer-Use Agents. Sandboxes, SDKs, and benchmarks to train and evaluate AI agents that can control full desktops (macOS, Linux, Windows).",
+      "category": "AI Agent",
+      "language": "HTML",
+      "stargazers_count": 15352,
+      "forks_count": 951,
+      "star_growth": 1,
+      "score": 0.3158,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 8,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 8 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 1，近期热度上升。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 15352，具备一定社区关注度。"
+      ],
+      "security_flags": [],
+      "report_url": "weekly/2026-04-30.html"
+    },
+    {
+      "run_date": "2026-04-30",
+      "full_name": "Anil-matcha/Open-Generative-AI",
+      "html_url": "https://github.com/Anil-matcha/Open-Generative-AI",
+      "description": "Uncensored, open-source alternative to Higgsfield AI, Freepik AI, Krea AI, Openart AI — Free, unrestricted AI image & video generation studio with 200+ models (Flux, Midjourney, Kling, Sora, Veo). No content filters. Self-hosted, MIT licensed.",
+      "category": "Other",
+      "language": "JavaScript",
+      "stargazers_count": 10316,
+      "forks_count": 1805,
+      "star_growth": 4,
+      "score": 0.2511,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 9,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 9 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 4，近期热度上升。",
+        "匹配当前个性化方向：Python 工具与应用开发。",
+        "当前累计 Star 10316，具备一定社区关注度。"
+      ],
+      "security_flags": [
+        "未识别到许可证，复用代码前需要人工确认授权。"
+      ],
+      "report_url": "weekly/2026-04-30.html"
+    },
+    {
+      "run_date": "2026-04-30",
+      "full_name": "Fincept-Corporation/FinceptTerminal",
+      "html_url": "https://github.com/Fincept-Corporation/FinceptTerminal",
+      "description": "FinceptTerminal is a modern finance application offering advanced market analytics, investment research, and economic data tools, designed for interactive exploration and data-driven decision-making in a user-friendly environment.",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 18122,
+      "forks_count": 2442,
+      "star_growth": 3,
+      "score": 0.3558,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 10,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 10 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 3，近期热度上升。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 18122，具备一定社区关注度。"
+      ],
+      "security_flags": [],
+      "report_url": "weekly/2026-04-30.html"
+    },
+    {
+      "run_date": "2026-04-30",
+      "full_name": "NousResearch/hermes-agent",
+      "html_url": "https://github.com/NousResearch/hermes-agent",
+      "description": "The agent that grows with you",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 126242,
+      "forks_count": 18878,
+      "star_growth": 15,
+      "score": 0.3867,
+      "sources": [
+        "github_search"
+      ],
+      "trending_rank": 0,
+      "selection_reasons": [
+        "较上次记录新增 Star 15，近期热度上升。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 126242，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "report_url": "weekly/2026-04-30.html"
+    },
+    {
+      "run_date": "2026-04-30",
+      "full_name": "n8n-io/n8n",
+      "html_url": "https://github.com/n8n-io/n8n",
+      "description": "Fair-code workflow automation platform with native AI capabilities. Combine visual building with custom code, self-host or cloud, 400+ integrations.",
+      "category": "AI Agent",
+      "language": "TypeScript",
+      "stargazers_count": 186229,
+      "forks_count": 57255,
+      "star_growth": 2,
+      "score": 0.3462,
+      "sources": [
+        "github_search"
+      ],
+      "trending_rank": 0,
+      "selection_reasons": [
+        "较上次记录新增 Star 2，近期热度上升。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 186229，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "report_url": "weekly/2026-04-30.html"
+    },
+    {
+      "run_date": "2026-04-30",
+      "full_name": "Significant-Gravitas/AutoGPT",
+      "html_url": "https://github.com/Significant-Gravitas/AutoGPT",
+      "description": "AutoGPT is the vision of accessible AI for everyone, to use and to build on. Our mission is to provide the tools, so that you can focus on what matters.",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 183899,
+      "forks_count": 46238,
+      "star_growth": 1,
+      "score": 0.3386,
+      "sources": [
+        "github_search"
+      ],
+      "trending_rank": 0,
+      "selection_reasons": [
+        "较上次记录新增 Star 1，近期热度上升。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 183899，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "report_url": "weekly/2026-04-30.html"
+    },
+    {
+      "run_date": "2026-04-29",
+      "full_name": "Alishahryar1/free-claude-code",
+      "html_url": "https://github.com/Alishahryar1/free-claude-code",
+      "description": "Use claude-code for free in the terminal, VSCode extension or discord like openclaw",
+      "category": "LLM Tooling",
+      "language": "Python",
+      "stargazers_count": 18296,
+      "forks_count": 2599,
+      "star_growth": 14,
+      "score": 0.6512,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 1,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 1 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 14，近期热度上升。",
+        "当前累计 Star 18296，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "report_url": "weekly/2026-04-29.html"
+    },
+    {
+      "run_date": "2026-04-29",
+      "full_name": "huggingface/ml-intern",
+      "html_url": "https://github.com/huggingface/ml-intern",
+      "description": "🤗 ml-intern: an open-source ML engineer that reads papers, trains models, and ships ML models",
+      "category": "Machine Learning",
+      "language": "Python",
+      "stargazers_count": 7377,
+      "forks_count": 709,
+      "star_growth": 3,
+      "score": 0.5769,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 2,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 2 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 3，近期热度上升。",
+        "当前累计 Star 7377，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [
+        "未识别到许可证，复用代码前需要人工确认授权。"
+      ],
+      "report_url": "weekly/2026-04-29.html"
+    },
+    {
+      "run_date": "2026-04-29",
+      "full_name": "mattpocock/skills",
+      "html_url": "https://github.com/mattpocock/skills",
+      "description": "Skills for Real Engineers. Straight from my .claude directory.",
+      "category": "LLM Tooling",
+      "language": "Shell",
+      "stargazers_count": 42389,
+      "forks_count": 3335,
+      "star_growth": 73,
+      "score": 0.7875,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 3,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 3 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 73，近期热度上升。",
+        "当前累计 Star 42389，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "report_url": "weekly/2026-04-29.html"
+    },
+    {
+      "run_date": "2026-04-29",
+      "full_name": "zilliztech/claude-context",
+      "html_url": "https://github.com/zilliztech/claude-context",
+      "description": "Code search MCP for Claude Code. Make entire codebase the context for any coding agent.",
+      "category": "AI Agent",
+      "language": "TypeScript",
+      "stargazers_count": 10227,
+      "forks_count": 758,
+      "star_growth": 0,
+      "score": 0.4285,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 6,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 6 位，是本期最重要的热度信号。",
+        "当前累计 Star 10227，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "report_url": "weekly/2026-04-29.html"
+    },
+    {
+      "run_date": "2026-04-29",
+      "full_name": "Fincept-Corporation/FinceptTerminal",
+      "html_url": "https://github.com/Fincept-Corporation/FinceptTerminal",
+      "description": "FinceptTerminal is a modern finance application offering advanced market analytics, investment research, and economic data tools, designed for interactive exploration and data-driven decision-making in a user-friendly environment.",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 17672,
+      "forks_count": 2399,
+      "star_growth": 4,
+      "score": 0.4591,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 7,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 7 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 4，近期热度上升。",
+        "当前累计 Star 17672，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "report_url": "weekly/2026-04-29.html"
+    },
+    {
+      "run_date": "2026-04-29",
+      "full_name": "CJackHwang/ds2api",
+      "html_url": "https://github.com/CJackHwang/ds2api",
+      "description": "Deepseek to API: A lightweight, high-performance full-stack middleware converting client protocols to universal APIs. Supports multi-account rotation, compiled binaries, Vercel Serverless, and Docker. Compatible with Google, Claude, and OpenAI API formats.",
+      "category": "LLM Tooling",
+      "language": "Go",
+      "stargazers_count": 2625,
+      "forks_count": 707,
+      "star_growth": 5,
+      "score": 0.3254,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 8,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 8 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 5，近期热度上升。",
+        "当前累计 Star 2625，具备一定社区关注度。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "report_url": "weekly/2026-04-29.html"
+    },
+    {
+      "run_date": "2026-04-29",
+      "full_name": "Anil-matcha/Open-Generative-AI",
+      "html_url": "https://github.com/Anil-matcha/Open-Generative-AI",
+      "description": "Uncensored, open-source alternative to Higgsfield AI, Freepik AI, Krea AI, Openart AI — Free, unrestricted AI image & video generation studio with 200+ models (Flux, Midjourney, Kling, Sora, Veo). No content filters. Self-hosted, MIT licensed.",
+      "category": "Other",
+      "language": "JavaScript",
+      "stargazers_count": 10026,
+      "forks_count": 1759,
+      "star_growth": 3,
+      "score": 0.2506,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 10,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 10 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 3，近期热度上升。",
+        "当前累计 Star 10026，具备一定社区关注度。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [
+        "未识别到许可证，复用代码前需要人工确认授权。"
+      ],
+      "report_url": "weekly/2026-04-29.html"
+    },
+    {
+      "run_date": "2026-04-29",
+      "full_name": "trycua/cua",
+      "html_url": "https://github.com/trycua/cua",
+      "description": "Open-source infrastructure for Computer-Use Agents. Sandboxes, SDKs, and benchmarks to train and evaluate AI agents that can control full desktops (macOS, Linux, Windows).",
+      "category": "AI Agent",
+      "language": "HTML",
+      "stargazers_count": 15164,
+      "forks_count": 947,
+      "star_growth": 5,
+      "score": 0.259,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 11,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 11 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 5，近期热度上升。",
+        "当前累计 Star 15164，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "report_url": "weekly/2026-04-29.html"
+    },
+    {
+      "run_date": "2026-04-29",
+      "full_name": "mksglu/context-mode",
+      "html_url": "https://github.com/mksglu/context-mode",
+      "description": "Context window optimization for AI coding agents. Sandboxes tool output, 98% reduction. 14 platforms",
+      "category": "AI Agent",
+      "language": "TypeScript",
+      "stargazers_count": 11087,
+      "forks_count": 763,
+      "star_growth": 0,
+      "score": 0.2363,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 13,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 13 位，是本期最重要的热度信号。",
+        "当前累计 Star 11087，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "report_url": "weekly/2026-04-29.html"
+    },
+    {
+      "run_date": "2026-04-29",
+      "full_name": "pytorch/pytorch",
+      "html_url": "https://github.com/pytorch/pytorch",
+      "description": "Tensors and Dynamic neural networks in Python with strong GPU acceleration",
+      "category": "Machine Learning",
+      "language": "Python",
+      "stargazers_count": 99527,
+      "forks_count": 27619,
+      "star_growth": 0,
+      "score": 0.2221,
+      "sources": [
+        "github_search"
+      ],
+      "trending_rank": 0,
+      "selection_reasons": [
+        "当前累计 Star 99527，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "report_url": "weekly/2026-04-29.html"
+    }
+  ]
+}

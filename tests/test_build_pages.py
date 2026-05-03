@@ -57,6 +57,8 @@ class BuildPagesTest(unittest.TestCase):
 
             self.assertIn(root / "docs" / "index.md", written)
             self.assertIn(root / "docs" / "projects.md", written)
+            self.assertIn(root / "docs" / "projects.json", written)
+            self.assertIn(root / "docs" / "runs.json", written)
             self.assertEqual((root / "docs" / "weekly" / "2026-04-28.md").read_text(encoding="utf-8"), "# 周报")
             index = (root / "docs" / "index.md").read_text(encoding="utf-8")
             self.assertIn("[2026-04-28](weekly/2026-04-28.html)", index)
@@ -69,6 +71,8 @@ class BuildPagesTest(unittest.TestCase):
             self.assertIn("新增 Star 20", index)
             self.assertIn("Trending 项目 1", index)
             self.assertIn("[历史项目索引](projects.html)", index)
+            self.assertIn("[公共项目 JSON](projects.json)", index)
+            self.assertIn("[公共运行 JSON](runs.json)", index)
             self.assertIn("[未来更新规划](future-plan.html)", index)
             projects = (root / "docs" / "projects.md").read_text(encoding="utf-8")
             self.assertIn("owner/project", projects)
@@ -76,6 +80,18 @@ class BuildPagesTest(unittest.TestCase):
             self.assertIn("| 2 |", projects)
             self.assertIn("AI Agent", projects)
             self.assertIn("[https://github.com/owner/project](https://github.com/owner/project)", projects)
+            projects_json = json.loads((root / "docs" / "projects.json").read_text(encoding="utf-8"))
+            self.assertEqual(projects_json["schema_version"], 1)
+            self.assertEqual(projects_json["count"], 1)
+            self.assertEqual(projects_json["projects"][0]["full_name"], "owner/project")
+            self.assertEqual(projects_json["projects"][0]["report_url"], "weekly/2026-04-28.html")
+            self.assertIn("security_flags", projects_json["projects"][0])
+            runs_json = json.loads((root / "docs" / "runs.json").read_text(encoding="utf-8"))
+            self.assertEqual(runs_json["schema_version"], 1)
+            self.assertEqual(runs_json["count"], 1)
+            self.assertEqual(runs_json["runs"][0]["run_date"], "2026-04-28")
+            self.assertTrue(runs_json["runs"][0]["telegram_sent"])
+            self.assertEqual(runs_json["runs"][0]["top_languages"][0]["name"], "Python")
         finally:
             shutil.rmtree(root, ignore_errors=True)
 
@@ -89,6 +105,10 @@ class BuildPagesTest(unittest.TestCase):
             projects = (root / "docs" / "projects.md").read_text(encoding="utf-8")
             self.assertIn("| - | 暂无项目 | - | - | - | - | 0 | 0 | 0 | - |", projects)
             self.assertIn("[周报归档首页](index.html)", projects)
+            projects_json = json.loads((root / "docs" / "projects.json").read_text(encoding="utf-8"))
+            runs_json = json.loads((root / "docs" / "runs.json").read_text(encoding="utf-8"))
+            self.assertEqual(projects_json["projects"], [])
+            self.assertEqual(runs_json["runs"], [])
         finally:
             shutil.rmtree(root, ignore_errors=True)
 

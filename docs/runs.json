@@ -1,0 +1,253 @@
+{
+  "schema_version": 1,
+  "count": 4,
+  "runs": [
+    {
+      "run_date": "2026-05-03",
+      "status": "success",
+      "report_url": "weekly/2026-05-03.html",
+      "selected_count": 10,
+      "collected_count": 309,
+      "previously_sent_selected_count": 8,
+      "readme_fetched_count": 10,
+      "star_history_updated_count": 220,
+      "kimi_used": true,
+      "fallback_used": false,
+      "telegram_sent": true,
+      "telegram_report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-03.html",
+      "collector_error_count": 0,
+      "top_languages": [
+        {
+          "name": "Python",
+          "count": 6
+        },
+        {
+          "name": "TypeScript",
+          "count": 2
+        },
+        {
+          "name": "Shell",
+          "count": 1
+        },
+        {
+          "name": "Go",
+          "count": 1
+        }
+      ],
+      "top_categories": [
+        {
+          "name": "AI Agent",
+          "count": 5
+        },
+        {
+          "name": "LLM Tooling",
+          "count": 3
+        },
+        {
+          "name": "Developer Tools",
+          "count": 2
+        }
+      ],
+      "total_star_growth": 24177,
+      "trending_project_count": 6,
+      "summary_points": [
+        "AI Agent 是本期最集中的方向，共 5 个项目。",
+        "Python 是本期出现最多的主要语言，共 6 个项目。",
+        "本期入选项目累计新增 Star 24177。",
+        "mattpocock/skills 是本期 GitHub Trending 排名最高的项目，周榜排名 1。",
+        "mattpocock/skills 是本期新增 Star 最高的项目，新增 7890。"
+      ]
+    },
+    {
+      "run_date": "2026-04-30",
+      "status": "success",
+      "report_url": "weekly/2026-04-30.html",
+      "selected_count": 10,
+      "collected_count": 312,
+      "previously_sent_selected_count": 10,
+      "readme_fetched_count": 10,
+      "star_history_updated_count": 224,
+      "kimi_used": true,
+      "fallback_used": false,
+      "telegram_sent": true,
+      "telegram_report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-04-30.html",
+      "collector_error_count": 0,
+      "top_languages": [
+        {
+          "name": "Python",
+          "count": 5
+        },
+        {
+          "name": "Shell",
+          "count": 1
+        },
+        {
+          "name": "Go",
+          "count": 1
+        },
+        {
+          "name": "HTML",
+          "count": 1
+        },
+        {
+          "name": "JavaScript",
+          "count": 1
+        },
+        {
+          "name": "TypeScript",
+          "count": 1
+        }
+      ],
+      "top_categories": [
+        {
+          "name": "AI Agent",
+          "count": 5
+        },
+        {
+          "name": "LLM Tooling",
+          "count": 3
+        },
+        {
+          "name": "Machine Learning",
+          "count": 1
+        },
+        {
+          "name": "Other",
+          "count": 1
+        }
+      ],
+      "total_star_growth": 89,
+      "trending_project_count": 7,
+      "summary_points": [
+        "AI Agent 是本期最集中的方向，共 5 个项目。",
+        "Python 是本期出现最多的主要语言，共 5 个项目。",
+        "本期入选项目累计新增 Star 89。",
+        "Alishahryar1/free-claude-code 是本期 GitHub Trending 排名最高的项目，周榜排名 1。",
+        "mattpocock/skills 是本期新增 Star 最高的项目，新增 55。"
+      ]
+    },
+    {
+      "run_date": "2026-04-29",
+      "status": "success",
+      "report_url": "weekly/2026-04-29.html",
+      "selected_count": 10,
+      "collected_count": 223,
+      "previously_sent_selected_count": 0,
+      "readme_fetched_count": 10,
+      "star_history_updated_count": 163,
+      "kimi_used": false,
+      "fallback_used": true,
+      "telegram_sent": true,
+      "telegram_report_url": "",
+      "collector_error_count": 0,
+      "top_languages": [
+        {
+          "name": "Python",
+          "count": 4
+        },
+        {
+          "name": "TypeScript",
+          "count": 2
+        },
+        {
+          "name": "Shell",
+          "count": 1
+        },
+        {
+          "name": "Go",
+          "count": 1
+        },
+        {
+          "name": "JavaScript",
+          "count": 1
+        },
+        {
+          "name": "HTML",
+          "count": 1
+        }
+      ],
+      "top_categories": [
+        {
+          "name": "AI Agent",
+          "count": 4
+        },
+        {
+          "name": "LLM Tooling",
+          "count": 3
+        },
+        {
+          "name": "Machine Learning",
+          "count": 2
+        },
+        {
+          "name": "Other",
+          "count": 1
+        }
+      ],
+      "total_star_growth": 107,
+      "trending_project_count": 9,
+      "summary_points": [
+        "AI Agent 是本期最集中的方向，共 4 个项目。",
+        "Python 是本期出现最多的主要语言，共 4 个项目。",
+        "本期入选项目累计新增 Star 107。",
+        "Alishahryar1/free-claude-code 是本期 GitHub Trending 排名最高的项目，周榜排名 1。",
+        "mattpocock/skills 是本期新增 Star 最高的项目，新增 73。"
+      ]
+    },
+    {
+      "run_date": "2026-04-28",
+      "status": "success",
+      "report_url": "weekly/2026-04-28.html",
+      "selected_count": 10,
+      "collected_count": 240,
+      "previously_sent_selected_count": 0,
+      "readme_fetched_count": 10,
+      "star_history_updated_count": 180,
+      "kimi_used": false,
+      "fallback_used": true,
+      "telegram_sent": false,
+      "telegram_report_url": "",
+      "collector_error_count": 0,
+      "top_languages": [
+        {
+          "name": "Python",
+          "count": 6
+        },
+        {
+          "name": "TypeScript",
+          "count": 2
+        },
+        {
+          "name": "Shell",
+          "count": 1
+        },
+        {
+          "name": "JavaScript",
+          "count": 1
+        }
+      ],
+      "top_categories": [
+        {
+          "name": "AI Agent",
+          "count": 8
+        },
+        {
+          "name": "LLM Tooling",
+          "count": 1
+        },
+        {
+          "name": "Other",
+          "count": 1
+        }
+      ],
+      "total_star_growth": 32,
+      "trending_project_count": 0,
+      "summary_points": [
+        "AI Agent 是本期最集中的方向，共 8 个项目。",
+        "Python 是本期出现最多的主要语言，共 6 个项目。",
+        "本期入选项目累计新增 Star 32。",
+        "TauricResearch/TradingAgents 是本期新增 Star 最高的项目，新增 6。"
+      ]
+    }
+  ]
+}

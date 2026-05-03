@@ -24,6 +24,12 @@ def build_pages(root: Path = ROOT) -> list[Path]:
     projects = root / "docs" / "projects.md"
     projects.write_text(_projects_content(root), encoding="utf-8")
     written.append(projects)
+    projects_json = root / "docs" / "projects.json"
+    projects_json.write_text(_json_text(_public_projects(root)), encoding="utf-8")
+    written.append(projects_json)
+    runs_json = root / "docs" / "runs.json"
+    runs_json.write_text(_json_text(_public_runs(root, reports)), encoding="utf-8")
+    written.append(runs_json)
     return written
 
 
@@ -66,6 +72,8 @@ def _index_content(root: Path, reports: list[Path]) -> str:
             "## 项目文档",
             "",
             "- [历史项目索引](projects.html)",
+            "- [公共项目 JSON](projects.json)",
+            "- [公共运行 JSON](runs.json)",
             "- [架构说明](architecture.html)",
             "- [配置说明](setup.html)",
             "- [开发路线图](roadmap.html)",
@@ -198,6 +206,71 @@ def _selected_project_rows(root: Path) -> list[dict]:
     return rows
 
 
+def _public_projects(root: Path) -> dict:
+    projects = []
+    for row in _selected_project_rows(root):
+        projects.append(
+            {
+                "run_date": row.get("run_date", ""),
+                "full_name": row.get("full_name", ""),
+                "html_url": row.get("html_url", ""),
+                "description": row.get("description", ""),
+                "category": row.get("category", "Other"),
+                "language": row.get("language", "Unknown"),
+                "stargazers_count": _int_value(row.get("stargazers_count")),
+                "forks_count": _int_value(row.get("forks_count")),
+                "star_growth": _int_value(row.get("star_growth")),
+                "score": _float_value(row.get("score")),
+                "sources": [str(source) for source in row.get("sources") or [] if source],
+                "trending_rank": _int_value(row.get("trending_rank")),
+                "selection_reasons": [str(reason) for reason in row.get("selection_reasons") or [] if reason],
+                "security_flags": [str(flag) for flag in row.get("security_flags") or [] if flag],
+                "report_url": f"weekly/{row.get('run_date', '')}.html" if row.get("run_date") else "",
+            }
+        )
+    return {
+        "schema_version": 1,
+        "count": len(projects),
+        "projects": projects,
+    }
+
+
+def _public_runs(root: Path, reports: list[Path]) -> dict:
+    runs = []
+    for report in reports:
+        summary = _run_summary(root, report.stem)
+        trends = _trend_summary(root, report.stem)
+        if not summary:
+            continue
+        runs.append(
+            {
+                "run_date": report.stem,
+                "status": summary.get("status", ""),
+                "report_url": f"weekly/{_page_name(report)}",
+                "selected_count": _int_value(summary.get("selected_count")),
+                "collected_count": _int_value(summary.get("collected_count")),
+                "previously_sent_selected_count": _int_value(summary.get("previously_sent_selected_count")),
+                "readme_fetched_count": _int_value(summary.get("readme_fetched_count")),
+                "star_history_updated_count": _int_value(summary.get("star_history_updated_count")),
+                "kimi_used": bool(summary.get("kimi_used")),
+                "fallback_used": bool(summary.get("fallback_used")),
+                "telegram_sent": bool(summary.get("telegram_sent")),
+                "telegram_report_url": summary.get("telegram_report_url", ""),
+                "collector_error_count": len(summary.get("collector_errors") or []),
+                "top_languages": trends.get("top_languages") or [],
+                "top_categories": trends.get("top_categories") or [],
+                "total_star_growth": _int_value(trends.get("total_star_growth")),
+                "trending_project_count": _int_value(trends.get("trending_project_count")),
+                "summary_points": [str(point) for point in trends.get("summary_points") or [] if point],
+            }
+        )
+    return {
+        "schema_version": 1,
+        "count": len(runs),
+        "runs": runs,
+    }
+
+
 def _project_table_row(row: dict) -> str:
     url = str(row.get("html_url") or "")
     link = f"[{url}]({url})" if url else "-"
@@ -218,6 +291,24 @@ def _source_text(sources: list[str]) -> str:
     }
     values = [labels.get(source, source) for source in sources if source]
     return " + ".join(values) if values else "-"
+
+
+def _json_text(data: dict) -> str:
+    return json.dumps(data, ensure_ascii=False, indent=2) + "\n"
+
+
+def _int_value(value: object) -> int:
+    try:
+        return int(value or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+def _float_value(value: object) -> float:
+    try:
+        return float(value or 0)
+    except (TypeError, ValueError):
+        return 0.0
 
 
 if __name__ == "__main__":

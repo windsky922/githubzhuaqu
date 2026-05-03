@@ -2836,3 +2836,43 @@ docs/future-plan.md
 ### 3. 设计边界
 
 本次没有引入按日期窗口的复杂去重，也不删除历史推送状态。后续如果需要更精细的长期体验，可基于 `first_sent_at`、最近推送日期和反馈数据做动态惩罚。
+
+---
+
+## 2026-05-03 追加：公共 JSON 导出
+
+### 1. 开发目的
+
+根据路线图，后续前端、RSS、微信、飞书和外部订阅都需要稳定的数据入口。如果直接读取 Markdown 页面，后续会增加解析成本。因此本次先在现有 Pages 构建流程中导出公开 JSON。
+
+### 2. 本次实现
+
+更新：
+
+```text
+.github/workflows/weekly.yml
+scripts/build_pages.py
+tests/test_build_pages.py
+README.md
+docs/roadmap.md
+docs/future-plan.md
+```
+
+新增产物：
+
+```text
+docs/projects.json
+docs/runs.json
+```
+
+调整内容：
+
+1. `scripts/build_pages.py` 会在生成 `docs/index.md` 和 `docs/projects.md` 的同时生成公共 JSON。
+2. `projects.json` 汇总历次入选项目的公开摘要字段，包括项目名、链接、语言、方向、来源、Trending 排名、新增 Star、推荐理由和风险提示。
+3. `runs.json` 汇总历次运行摘要的公开字段，包括运行日期、入选数量、采集数量、Kimi/降级状态、Telegram 状态和趋势要点。
+4. workflow 的两处归档提交都加入 `docs/projects.json` 和 `docs/runs.json`。
+5. 新增测试验证公共 JSON 的 schema 版本、数量、项目链接、运行状态和空数据兜底。
+
+### 3. 设计边界
+
+公共 JSON 只导出适合公开展示的摘要字段，不导出密钥、用户隐私、原始错误堆栈或未脱敏配置。SQLite 仍未引入，后续数据库可以从这些公开 JSON 和原始 `data/` 工件继续演进。

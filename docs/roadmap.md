@@ -44,7 +44,7 @@ GitHub Weekly Agent 当前已经完成从“脚本验证”到“自动化周报
 2. 增加 SQLite 双写，不直接替代 JSON。
 3. 编写历史 JSON 到 SQLite 的迁移脚本。
 4. 增加迁移一致性测试，确保 SQLite 可由 JSON 重建。
-5. 输出公共 JSON，例如 `docs/projects.json`、`docs/runs.json`，为前端和第三方订阅做准备。
+5. 输出公共 JSON，例如 `docs/projects.json`、`docs/runs.json`，为前端和第三方订阅做准备。已完成基础版本。
 
 暂不建议：
 
@@ -153,4 +153,4 @@ tests/test_feedback.py
 2. 补充发布链路契约测试。
 3. 设计重复入选项目的新颖度策略。
 4. 设计 SQLite 双写的最小表结构。
-5. 导出公共 JSON，为后续前端和多渠道入口打底。
+5. 基于公共 JSON 设计前端筛选和多渠道入口。公共 JSON 基础版本已完成。

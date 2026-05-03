@@ -388,12 +388,12 @@ codex/personalization-profiles
 2. 观察 GitHub Trending 页面解析在 GitHub Actions 中的稳定性。
 3. 持续观察重复入选项目的新颖度策略，不硬性排除持续热门项目。基础版本已完成。
 4. 个性化 profile 配置设计。
-5. 导出公共 JSON，为后续前端和多渠道入口打底。
+5. 基于已导出的公共 JSON，继续设计后续前端和多渠道入口。
 
 中期优先级：
 
 1. SQLite 双写和历史 JSON 迁移校验。
-2. GitHub Pages 历史项目筛选。
+2. GitHub Pages 历史项目筛选，优先消费 `docs/projects.json` 和 `docs/runs.json`。
 3. 报告结构校验和自动重试。
 4. GitHub GraphQL 细粒度热度补充。
 5. 多推送渠道抽象。
