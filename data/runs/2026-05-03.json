@@ -14,17 +14,17 @@
     "language:TypeScript pushed:>=2026-04-26 stars:>20",
     "language:Java pushed:>=2026-04-26 stars:>20"
   ],
-  "collected_count": 309,
+  "collected_count": 311,
   "selected_count": 10,
   "skipped_sent_count": 0,
-  "previously_sent_selected_count": 8,
+  "previously_sent_selected_count": 7,
   "collector_errors": [],
   "collector_stats": [
     {
       "source": "github_trending",
       "query": "GitHub Trending weekly",
       "status": "success",
-      "count": 9,
+      "count": 11,
       "error": ""
     },
     {
@@ -99,19 +99,21 @@
     }
   ],
   "readme_fetched_count": 10,
-  "star_history_updated_count": 220,
+  "star_history_updated_count": 222,
   "report_path": "reports/2026-05-03.md",
   "run_summary_path": "data/runs/2026-05-03.json",
   "raw_repositories_path": "data/raw/2026-05-03.json",
   "selected_repositories_path": "data/selected/2026-05-03.json",
-  "state_path": "data/state/sent_repos.json",
+  "state_path": "",
   "star_history_path": "data/state/star_history.json",
   "trend_summary_path": "data/trends/2026-05-03.json",
   "kimi_used": true,
   "fallback_used": false,
   "report_error": "",
-  "telegram_sent": true,
-  "telegram_error": "",
+  "telegram_sent": false,
+  "telegram_error": "Telegram send skipped",
   "telegram_report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-03.html",
+  "sqlite_index_path": "data/github_weekly.sqlite",
+  "sqlite_error": "",
   "error": ""
 }
