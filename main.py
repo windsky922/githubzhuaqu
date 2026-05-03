@@ -4,6 +4,8 @@ import os
 import sys
 
 from src.archive import (
+    sqlite_index_summary_path,
+    sync_sqlite_index,
     write_raw_repositories,
     write_report,
     write_run_summary,
@@ -90,10 +92,18 @@ def main() -> int:
         summary.report_path = report_path.relative_to(settings.root).as_posix()
         summary.fallback_used = True
     finally:
+        summary.sqlite_index_path = summary.sqlite_index_path or sqlite_index_summary_path(settings)
         write_run_summary(summary, settings)
+        sqlite_path, sqlite_error = sync_sqlite_index(settings)
+        if sqlite_path or sqlite_error:
+            summary.sqlite_index_path = sqlite_path
+            summary.sqlite_error = sqlite_error
+            write_run_summary(summary, settings)
 
     print(f"status={summary.status}")
     print(f"report={summary.report_path}")
+    if summary.sqlite_error:
+        print(f"sqlite={summary.sqlite_error}")
     if summary.telegram_error:
         print(f"telegram={summary.telegram_error}")
     if summary.error:

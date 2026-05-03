@@ -2924,3 +2924,41 @@ migration_meta
 ### 3. 设计边界
 
 SQLite 当前只是可重建的派生索引，JSON 仍然是事实来源。主流程尚未接入双写，也没有从 SQLite 读取数据。后续可以在本基础上小步加入主流程双写，再逐步让前端或分析脚本消费 SQLite。
+
+---
+
+## 2026-05-03 追加：主流程 SQLite 同步
+
+### 1. 开发目的
+
+上一阶段已经建立 SQLite schema、迁移脚本和校验脚本。本次继续把 SQLite 作为派生索引接入主流程，让每次运行在写入 JSON 归档后自动更新数据库，同时仍保持 JSON 为事实来源。
+
+### 2. 本次实现
+
+更新：
+
+```text
+main.py
+scripts/send_report_link.py
+src/archive.py
+src/models.py
+tests/test_archive.py
+tests/test_send_report_link.py
+README.md
+docs/roadmap.md
+docs/future-plan.md
+```
+
+调整内容：
+
+1. `RunSummary` 新增 `sqlite_index_path` 和 `sqlite_error` 字段。
+2. `src/archive.py` 新增 `sync_sqlite_index`，会从现有 JSON 归档同步到 SQLite。
+3. 主流程在 `write_run_summary` 后自动同步 SQLite；同步失败不会阻断周报生成。
+4. `scripts/send_report_link.py` 在 Telegram 状态写回后再次同步 SQLite，保证数据库中的发送状态和最终 JSON 一致。
+5. 新增 `SQLITE_INDEX_PATH` 环境变量，用于自定义 SQLite 路径。
+6. 新增 `SKIP_SQLITE_INDEX` 环境变量，用于跳过 SQLite 同步。
+7. 新增测试覆盖归档同步和发送脚本写回 SQLite 状态字段。
+
+### 3. 设计边界
+
+SQLite 仍是可重建派生索引，不是唯一事实来源。主流程不从 SQLite 读取数据；即使 SQLite 同步失败，报告、归档、Pages 和 Telegram 链路仍继续工作。

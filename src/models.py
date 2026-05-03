@@ -82,6 +82,8 @@ class RunSummary:
     telegram_sent: bool = False
     telegram_error: str = ""
     telegram_report_url: str = ""
+    sqlite_index_path: str = ""
+    sqlite_error: str = ""
     error: str = ""
 
     def to_dict(self) -> dict[str, Any]:

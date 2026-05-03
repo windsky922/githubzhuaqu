@@ -23,7 +23,8 @@ class SqliteStorageTest(unittest.TestCase):
             self.assertEqual(counts["trend_summaries"], 1)
             self.assertEqual(counts["sent_repositories"], 1)
             self.assertEqual(counts["star_history"], 2)
-            with connect(db_path) as connection:
+            connection = connect(db_path)
+            try:
                 self.assertEqual(table_count(connection, "runs"), 1)
                 self.assertEqual(table_count(connection, "selections"), 2)
                 self.assertEqual(table_count(connection, "repositories"), 2)
@@ -33,6 +34,8 @@ class SqliteStorageTest(unittest.TestCase):
                 ).fetchone()
                 self.assertEqual(row["language"], "Python")
                 self.assertEqual(row["stargazers_count"], 100)
+            finally:
+                connection.close()
         finally:
             shutil.rmtree(root, ignore_errors=True)
 
@@ -45,10 +48,13 @@ class SqliteStorageTest(unittest.TestCase):
             import_json_archive(root, db_path)
             import_json_archive(root, db_path)
 
-            with connect(db_path) as connection:
+            connection = connect(db_path)
+            try:
                 self.assertEqual(table_count(connection, "runs"), 1)
                 self.assertEqual(table_count(connection, "selections"), 2)
                 self.assertEqual(table_count(connection, "star_history"), 2)
+            finally:
+                connection.close()
         finally:
             shutil.rmtree(root, ignore_errors=True)
 
@@ -60,8 +66,11 @@ class SqliteStorageTest(unittest.TestCase):
             import_json_archive(root, db_path)
 
             expected = _json_counts(root)
-            with connect(db_path) as connection:
+            connection = connect(db_path)
+            try:
                 actual = {table: table_count(connection, table) for table in expected}
+            finally:
+                connection.close()
 
             self.assertEqual(actual, expected)
         finally:

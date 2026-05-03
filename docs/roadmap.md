@@ -41,7 +41,7 @@ GitHub Weekly Agent 当前已经完成从“脚本验证”到“自动化周报
 推荐方案：
 
 1. 保留 JSON 作为可读归档和公开工件。
-2. 增加 SQLite 双写，不直接替代 JSON。第一步已完成 schema、迁移脚本和校验脚本。
+2. 增加 SQLite 双写，不直接替代 JSON。已完成基础版本。
 3. 编写历史 JSON 到 SQLite 的迁移脚本。已完成基础版本。
 4. 增加迁移一致性测试，确保 SQLite 可由 JSON 重建。已完成基础版本。
 5. 输出公共 JSON，例如 `docs/projects.json`、`docs/runs.json`，为前端和第三方订阅做准备。已完成基础版本。

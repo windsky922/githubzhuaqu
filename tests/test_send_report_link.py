@@ -4,7 +4,13 @@ import unittest
 import uuid
 from pathlib import Path
 
-from scripts.send_report_link import _latest_run_date, _rebuild_pages, _selected_repositories, _update_run_summary
+from scripts.send_report_link import (
+    _latest_run_date,
+    _rebuild_pages,
+    _selected_repositories,
+    _update_run_summary,
+    _update_run_summary_sqlite,
+)
 
 
 class SendReportLinkScriptTest(unittest.TestCase):
@@ -92,6 +98,22 @@ class SendReportLinkScriptTest(unittest.TestCase):
             index = (root / "docs" / "index.md").read_text(encoding="utf-8")
             self.assertIn("Telegram：已推送", index)
             self.assertIn("Telegram 已推送", index)
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
+    def test_updates_run_summary_sqlite_status(self):
+        root = Path.cwd() / f".tmp-send-link-test-{uuid.uuid4().hex}"
+        try:
+            runs = root / "data" / "runs"
+            runs.mkdir(parents=True)
+            path = runs / "2026-04-29.json"
+            path.write_text(json.dumps({"sqlite_error": "old"}), encoding="utf-8")
+
+            _update_run_summary_sqlite(root, "2026-04-29", "data/github_weekly.sqlite", "")
+
+            data = json.loads(path.read_text(encoding="utf-8"))
+            self.assertEqual(data["sqlite_index_path"], "data/github_weekly.sqlite")
+            self.assertEqual(data["sqlite_error"], "")
         finally:
             shutil.rmtree(root, ignore_errors=True)
 

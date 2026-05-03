@@ -22,7 +22,8 @@ def initialize(connection: sqlite3.Connection) -> None:
 
 
 def import_json_archive(root: Path, db_path: Path) -> dict[str, int]:
-    with connect(db_path) as connection:
+    connection = connect(db_path)
+    try:
         initialize(connection)
         counts = {
             "runs": import_runs(connection, root),
@@ -41,6 +42,8 @@ def import_json_archive(root: Path, db_path: Path) -> dict[str, int]:
         )
         connection.commit()
         return counts
+    finally:
+        connection.close()
 
 
 def import_runs(connection: sqlite3.Connection, root: Path) -> int:

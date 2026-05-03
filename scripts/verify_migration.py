@@ -25,13 +25,17 @@ def main() -> int:
     args = parser.parse_args()
 
     expected = _json_counts(args.root)
+    connection = None
     try:
-        with connect(args.db) as connection:
-            initialize(connection)
-            actual = {table: table_count(connection, table) for table in expected}
+        connection = connect(args.db)
+        initialize(connection)
+        actual = {table: table_count(connection, table) for table in expected}
     except sqlite3.Error as error:
         print(f"SQLite 校验失败：{error}", file=sys.stderr)
         return 1
+    finally:
+        if connection is not None:
+            connection.close()
 
     failures = []
     for table, expected_count in expected.items():

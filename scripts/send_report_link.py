@@ -12,6 +12,7 @@ from src.sender import report_url, send_report
 from src.settings import ROOT, load_settings
 from src.state import write_sent_repositories
 from src.models import Repository
+from src.archive import sqlite_index_summary_path, sync_sqlite_index
 from scripts.build_pages import build_pages
 
 
@@ -29,11 +30,17 @@ def main() -> int:
     if sent and selected:
         state_path = write_sent_repositories(selected, settings)
     _update_run_summary(ROOT, run_date, sent, error, state_path, url)
+    _update_run_summary_sqlite(ROOT, run_date, sqlite_index_summary_path(settings), "")
+    sqlite_path, sqlite_error = sync_sqlite_index(settings)
+    if sqlite_error:
+        _update_run_summary_sqlite(ROOT, run_date, sqlite_path, sqlite_error)
     _rebuild_pages(ROOT)
 
     print(f"telegram_sent={sent}")
     if error:
         print(f"telegram_error={error}")
+    if sqlite_error:
+        print(f"sqlite_error={sqlite_error}")
     return 0
 
 
@@ -83,6 +90,22 @@ def _update_run_summary(root: Path, run_date: str, sent: bool, error: str, state
 
 def _rebuild_pages(root: Path) -> list[Path]:
     return build_pages(root)
+
+
+def _update_run_summary_sqlite(root: Path, run_date: str, sqlite_path: str, sqlite_error: str) -> None:
+    path = root / "data" / "runs" / f"{run_date}.json"
+    if not path.exists():
+        return
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return
+    if not isinstance(data, dict):
+        return
+    if sqlite_path:
+        data["sqlite_index_path"] = sqlite_path
+    data["sqlite_error"] = sqlite_error
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
 if __name__ == "__main__":

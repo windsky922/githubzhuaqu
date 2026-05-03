@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 from .models import Repository, RunSummary
 from .settings import Settings
-from .utils import ensure_dir
+from .storage.sqlite_store import import_json_archive
+from .utils import clean_error, ensure_dir
 
 
 def write_report(report: str, settings: Settings) -> Path:
@@ -51,5 +53,39 @@ def write_run_summary(summary: RunSummary, settings: Settings) -> Path:
     return path
 
 
+def sync_sqlite_index(settings: Settings) -> tuple[str, str]:
+    if _skip_sqlite_index():
+        return "", ""
+    path = sqlite_index_path(settings)
+    try:
+        import_json_archive(settings.root, path)
+    except Exception as error:
+        return _relative_or_absolute(path, settings.root), clean_error(error)
+    return _relative_or_absolute(path, settings.root), ""
+
+
+def sqlite_index_summary_path(settings: Settings) -> str:
+    return _relative_or_absolute(sqlite_index_path(settings), settings.root)
+
+
+def sqlite_index_path(settings: Settings) -> Path:
+    configured = os.getenv("SQLITE_INDEX_PATH", "").strip()
+    if configured:
+        path = Path(configured)
+        return path if path.is_absolute() else settings.root / path
+    return settings.root / "data" / "github_weekly.sqlite"
+
+
 def _relative(path: Path, root: Path) -> str:
     return path.relative_to(root).as_posix()
+
+
+def _relative_or_absolute(path: Path, root: Path) -> str:
+    try:
+        return path.relative_to(root).as_posix()
+    except ValueError:
+        return path.as_posix()
+
+
+def _skip_sqlite_index() -> bool:
+    return os.getenv("SKIP_SQLITE_INDEX", "").lower() in {"1", "true", "yes"}

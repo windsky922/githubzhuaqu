@@ -186,6 +186,8 @@ python main.py
 
 当前事实来源仍然是 `data/` 下的 JSON 归档。SQLite 只作为后续前端筛选、历史查询和趋势分析的派生索引。
 
+每次运行主流程后，程序会自动把 JSON 归档同步到 SQLite；如果同步失败，不会阻断周报生成和 Telegram 推送，错误会记录在运行摘要的 `sqlite_error` 字段中。
+
 导入现有 JSON：
 
 ```bash
@@ -205,6 +207,13 @@ data/github_weekly.sqlite
 ```
 
 该数据库文件不提交到 GitHub；如需重建，重新运行迁移脚本即可。
+
+可选环境变量：
+
+| 名称 | 说明 |
+|---|---|
+| `SQLITE_INDEX_PATH` | 自定义 SQLite 派生索引路径 |
+| `SKIP_SQLITE_INDEX` | 设置为 `true` 时跳过 SQLite 同步 |
 
 ## 安全约束
 

@@ -4,9 +4,10 @@ import unittest
 import uuid
 from pathlib import Path
 
-from src.archive import write_raw_repositories, write_selected_repositories
-from src.models import Repository
+from src.archive import sync_sqlite_index, write_raw_repositories, write_run_summary, write_selected_repositories, write_trend_summary
+from src.models import Repository, RunSummary
 from src.settings import Settings
+from src.storage.sqlite_store import connect, table_count
 
 
 def settings(root):
@@ -56,6 +57,36 @@ class ArchiveTest(unittest.TestCase):
             selected_data = json.loads(selected_path.read_text(encoding="utf-8"))
             self.assertEqual(raw_data[0]["full_name"], "owner/raw")
             self.assertEqual(selected_data[0]["full_name"], "owner/selected")
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
+    def test_sync_sqlite_index_from_written_json_archive(self):
+        root = Path.cwd() / f".tmp-archive-test-{uuid.uuid4().hex}"
+        try:
+            current_settings = settings(root)
+            write_selected_repositories([repo("owner/selected")], current_settings)
+            write_trend_summary({"total_projects": 1, "trending_project_count": 0, "total_star_growth": 0}, current_settings)
+            write_run_summary(
+                RunSummary(
+                    run_date=current_settings.run_date,
+                    status="success",
+                    collected_count=1,
+                    selected_count=1,
+                    sqlite_index_path="data/github_weekly.sqlite",
+                ),
+                current_settings,
+            )
+
+            sqlite_path, sqlite_error = sync_sqlite_index(current_settings)
+
+            self.assertEqual(sqlite_path, "data/github_weekly.sqlite")
+            self.assertEqual(sqlite_error, "")
+            connection = connect(root / "data" / "github_weekly.sqlite")
+            try:
+                self.assertEqual(table_count(connection, "runs"), 1)
+                self.assertEqual(table_count(connection, "selections"), 1)
+            finally:
+                connection.close()
         finally:
             shutil.rmtree(root, ignore_errors=True)
 
