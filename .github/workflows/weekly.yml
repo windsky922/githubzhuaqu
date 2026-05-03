@@ -56,7 +56,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add reports data/runs data/raw data/selected data/state data/trends docs/index.md docs/projects.md docs/projects.json docs/runs.json docs/weekly
+          git add reports data/runs data/raw data/selected data/state data/trends docs/index.md docs/projects.md docs/explorer.html docs/projects.json docs/runs.json docs/weekly
           if git diff --cached --quiet; then
             echo "没有需要提交的归档变更。"
           else
@@ -75,7 +75,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/runs data/state docs/index.md docs/projects.md docs/projects.json docs/runs.json docs/weekly
+          git add data/runs data/state docs/index.md docs/projects.md docs/explorer.html docs/projects.json docs/runs.json docs/weekly
           if git diff --cached --quiet; then
             echo "没有需要提交的推送状态变更。"
           else

@@ -57,6 +57,7 @@ class BuildPagesTest(unittest.TestCase):
 
             self.assertIn(root / "docs" / "index.md", written)
             self.assertIn(root / "docs" / "projects.md", written)
+            self.assertIn(root / "docs" / "explorer.html", written)
             self.assertIn(root / "docs" / "projects.json", written)
             self.assertIn(root / "docs" / "runs.json", written)
             self.assertEqual((root / "docs" / "weekly" / "2026-04-28.md").read_text(encoding="utf-8"), "# 周报")
@@ -70,6 +71,7 @@ class BuildPagesTest(unittest.TestCase):
             self.assertIn("主方向 AI Agent", index)
             self.assertIn("新增 Star 20", index)
             self.assertIn("Trending 项目 1", index)
+            self.assertIn("[项目筛选页](explorer.html)", index)
             self.assertIn("[历史项目索引](projects.html)", index)
             self.assertIn("[公共项目 JSON](projects.json)", index)
             self.assertIn("[公共运行 JSON](runs.json)", index)
@@ -93,6 +95,11 @@ class BuildPagesTest(unittest.TestCase):
             self.assertEqual(runs_json["runs"][0]["run_date"], "2026-04-28")
             self.assertTrue(runs_json["runs"][0]["telegram_sent"])
             self.assertEqual(runs_json["runs"][0]["top_languages"][0]["name"], "Python")
+            explorer = (root / "docs" / "explorer.html").read_text(encoding="utf-8")
+            self.assertIn("GitHub 热点项目筛选", explorer)
+            self.assertIn('fetch("projects.json"', explorer)
+            self.assertIn('id="language"', explorer)
+            self.assertIn('id="category"', explorer)
         finally:
             shutil.rmtree(root, ignore_errors=True)
 

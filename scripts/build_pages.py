@@ -24,6 +24,9 @@ def build_pages(root: Path = ROOT) -> list[Path]:
     projects = root / "docs" / "projects.md"
     projects.write_text(_projects_content(root), encoding="utf-8")
     written.append(projects)
+    explorer = root / "docs" / "explorer.html"
+    explorer.write_text(_explorer_content(), encoding="utf-8")
+    written.append(explorer)
     projects_json = root / "docs" / "projects.json"
     projects_json.write_text(_json_text(_public_projects(root)), encoding="utf-8")
     written.append(projects_json)
@@ -71,6 +74,7 @@ def _index_content(root: Path, reports: list[Path]) -> str:
             "",
             "## 项目文档",
             "",
+            "- [项目筛选页](explorer.html)",
             "- [历史项目索引](projects.html)",
             "- [公共项目 JSON](projects.json)",
             "- [公共运行 JSON](runs.json)",
@@ -185,6 +189,391 @@ def _projects_content(root: Path) -> str:
         lines.append("| - | 暂无项目 | - | - | - | - | 0 | 0 | 0 | - |")
     lines.extend(["", "## 返回", "", "- [周报归档首页](index.html)", ""])
     return "\n".join(lines)
+
+
+def _explorer_content() -> str:
+    return """<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GitHub 热点项目筛选</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f8fa;
+      --panel: #ffffff;
+      --text: #20242a;
+      --muted: #5f6b7a;
+      --line: #d9dee7;
+      --accent: #2563eb;
+      --accent-2: #0f766e;
+      --risk: #b42318;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+    header {
+      border-bottom: 1px solid var(--line);
+      background: var(--panel);
+    }
+    .wrap {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      min-height: 68px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+    nav {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    nav a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    main {
+      padding: 20px 0 32px;
+    }
+    .filters {
+      display: grid;
+      grid-template-columns: minmax(220px, 2fr) repeat(5, minmax(130px, 1fr));
+      gap: 10px;
+      align-items: end;
+      margin-bottom: 14px;
+    }
+    label {
+      display: grid;
+      gap: 5px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+    }
+    input, select, button {
+      width: 100%;
+      height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--panel);
+      color: var(--text);
+      font: inherit;
+      padding: 0 10px;
+    }
+    button {
+      cursor: pointer;
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+      font-weight: 700;
+    }
+    .meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      margin: 8px 0 12px;
+      min-height: 24px;
+    }
+    .table-shell {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      background: var(--panel);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 980px;
+    }
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+      text-align: left;
+    }
+    th {
+      position: sticky;
+      top: 0;
+      background: #eef2f7;
+      color: #344054;
+      font-size: 13px;
+      z-index: 1;
+    }
+    tbody tr:hover {
+      background: #f8fbff;
+    }
+    .repo a {
+      color: var(--accent);
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .desc {
+      color: var(--muted);
+      margin-top: 4px;
+      max-width: 420px;
+    }
+    .tag {
+      display: inline-block;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 2px 8px;
+      margin: 0 4px 4px 0;
+      font-size: 12px;
+      white-space: nowrap;
+      background: #f9fafb;
+    }
+    .tag.source {
+      border-color: #bfdbfe;
+      color: #1d4ed8;
+      background: #eff6ff;
+    }
+    .tag.risk {
+      border-color: #fecaca;
+      color: var(--risk);
+      background: #fff1f2;
+    }
+    .num {
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+    .empty {
+      padding: 28px 12px;
+      color: var(--muted);
+      text-align: center;
+    }
+    @media (max-width: 900px) {
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 16px 0;
+      }
+      .filters {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    @media (max-width: 560px) {
+      .wrap {
+        width: min(100% - 20px, 1180px);
+      }
+      .filters {
+        grid-template-columns: 1fr;
+      }
+      h1 {
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap topbar">
+      <h1>GitHub 热点项目筛选</h1>
+      <nav>
+        <a href="index.html">周报归档</a>
+        <a href="projects.html">项目索引</a>
+        <a href="projects.json">projects.json</a>
+      </nav>
+    </div>
+  </header>
+  <main class="wrap">
+    <section class="filters" aria-label="筛选条件">
+      <label>关键词
+        <input id="query" type="search" autocomplete="off">
+      </label>
+      <label>语言
+        <select id="language"></select>
+      </label>
+      <label>方向
+        <select id="category"></select>
+      </label>
+      <label>来源
+        <select id="source">
+          <option value="">全部</option>
+          <option value="github_trending">GitHub Trending</option>
+          <option value="github_search">GitHub Search</option>
+        </select>
+      </label>
+      <label>风险
+        <select id="risk">
+          <option value="">全部</option>
+          <option value="none">无风险提示</option>
+          <option value="has">有风险提示</option>
+        </select>
+      </label>
+      <label>排序
+        <select id="sort">
+          <option value="run_date">最新入选</option>
+          <option value="star_growth">新增 Star</option>
+          <option value="trending_rank">Trending 排名</option>
+          <option value="score">综合分</option>
+          <option value="stars">累计 Star</option>
+        </select>
+      </label>
+      <button id="reset" type="button">重置</button>
+    </section>
+    <div class="meta">
+      <span id="count">0 个项目</span>
+      <span id="updated"></span>
+    </div>
+    <div class="table-shell">
+      <table>
+        <thead>
+          <tr>
+            <th>项目</th>
+            <th>日期</th>
+            <th>语言</th>
+            <th>方向</th>
+            <th>来源</th>
+            <th>Trending</th>
+            <th>新增 Star</th>
+            <th>风险</th>
+            <th>周报</th>
+          </tr>
+        </thead>
+        <tbody id="rows">
+          <tr><td class="empty" colspan="9">加载中</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+  <script>
+    const state = { projects: [] };
+    const controls = {
+      query: document.getElementById("query"),
+      language: document.getElementById("language"),
+      category: document.getElementById("category"),
+      source: document.getElementById("source"),
+      risk: document.getElementById("risk"),
+      sort: document.getElementById("sort")
+    };
+    const rows = document.getElementById("rows");
+    const count = document.getElementById("count");
+    const updated = document.getElementById("updated");
+
+    fetch("projects.json", { cache: "no-store" })
+      .then(response => response.json())
+      .then(data => {
+        state.projects = Array.isArray(data.projects) ? data.projects : [];
+        hydrateOptions();
+        render();
+      })
+      .catch(() => {
+        rows.innerHTML = '<tr><td class="empty" colspan="9">无法读取 projects.json</td></tr>';
+      });
+
+    Object.values(controls).forEach(control => control.addEventListener("input", render));
+    document.getElementById("reset").addEventListener("click", () => {
+      controls.query.value = "";
+      controls.language.value = "";
+      controls.category.value = "";
+      controls.source.value = "";
+      controls.risk.value = "";
+      controls.sort.value = "run_date";
+      render();
+    });
+
+    function hydrateOptions() {
+      fillSelect(controls.language, values("language"));
+      fillSelect(controls.category, values("category"));
+      const dates = state.projects.map(project => project.run_date).filter(Boolean).sort().reverse();
+      updated.textContent = dates.length ? `最新数据：${dates[0]}` : "";
+    }
+
+    function values(key) {
+      return [...new Set(state.projects.map(project => project[key]).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+    }
+
+    function fillSelect(select, values) {
+      select.innerHTML = '<option value="">全部</option>' + values.map(value => `<option value="${escapeAttribute(value)}">${escapeHtml(value)}</option>`).join("");
+    }
+
+    function render() {
+      const query = controls.query.value.trim().toLowerCase();
+      let filtered = state.projects.filter(project => {
+        const text = [project.full_name, project.description, project.language, project.category, ...(project.selection_reasons || [])].join(" ").toLowerCase();
+        const riskCount = (project.security_flags || []).length;
+        return (!query || text.includes(query))
+          && (!controls.language.value || project.language === controls.language.value)
+          && (!controls.category.value || project.category === controls.category.value)
+          && (!controls.source.value || (project.sources || []).includes(controls.source.value))
+          && (!controls.risk.value || (controls.risk.value === "has" ? riskCount > 0 : riskCount === 0));
+      });
+      filtered = filtered.sort(compareProjects);
+      count.textContent = `${filtered.length} 个项目`;
+      rows.innerHTML = filtered.length ? filtered.map(rowHtml).join("") : '<tr><td class="empty" colspan="9">没有匹配项目</td></tr>';
+    }
+
+    function compareProjects(a, b) {
+      const sort = controls.sort.value;
+      if (sort === "star_growth") return number(b.star_growth) - number(a.star_growth);
+      if (sort === "trending_rank") return rank(a.trending_rank) - rank(b.trending_rank);
+      if (sort === "score") return number(b.score) - number(a.score);
+      if (sort === "stars") return number(b.stargazers_count) - number(a.stargazers_count);
+      return String(b.run_date || "").localeCompare(String(a.run_date || ""));
+    }
+
+    function rowHtml(project) {
+      const risks = project.security_flags || [];
+      const sourceTags = (project.sources || []).map(source => `<span class="tag source">${escapeHtml(sourceLabel(source))}</span>`).join("");
+      const riskText = risks.length ? risks.map(flag => `<span class="tag risk">${escapeHtml(flag)}</span>`).join("") : "0";
+      return `<tr>
+        <td class="repo"><a href="${escapeAttribute(project.html_url)}" target="_blank" rel="noreferrer">${escapeHtml(project.full_name)}</a><div class="desc">${escapeHtml(project.description || "")}</div></td>
+        <td>${escapeHtml(project.run_date || "")}</td>
+        <td>${escapeHtml(project.language || "Unknown")}</td>
+        <td>${escapeHtml(project.category || "Other")}</td>
+        <td>${sourceTags || "-"}</td>
+        <td class="num">${project.trending_rank ? project.trending_rank : "-"}</td>
+        <td class="num">${number(project.star_growth)}</td>
+        <td>${riskText}</td>
+        <td><a href="${escapeAttribute(project.report_url || "#")}">查看</a></td>
+      </tr>`;
+    }
+
+    function sourceLabel(source) {
+      if (source === "github_trending") return "GitHub Trending";
+      if (source === "github_search") return "GitHub Search";
+      return source;
+    }
+
+    function number(value) {
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : 0;
+    }
+
+    function rank(value) {
+      const parsed = number(value);
+      return parsed > 0 ? parsed : 9999;
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
+    }
+
+    function escapeAttribute(value) {
+      return escapeHtml(value).replace(/`/g, "&#96;");
+    }
+  </script>
+</body>
+</html>
+"""
 
 
 def _selected_project_rows(root: Path) -> list[dict]:

@@ -393,7 +393,7 @@ codex/personalization-profiles
 中期优先级：
 
 1. SQLite 双写和历史 JSON 迁移校验。schema、迁移脚本、校验脚本和主流程同步已完成基础版本。
-2. GitHub Pages 历史项目筛选，优先消费 `docs/projects.json` 和 `docs/runs.json`，并遵守 `docs/data-contracts.md` 中的数据契约。
+2. GitHub Pages 历史项目筛选，优先消费 `docs/projects.json` 和 `docs/runs.json`，并遵守 `docs/data-contracts.md` 中的数据契约。轻量筛选页基础版本已完成。
 3. 报告结构校验和自动重试。
 4. GitHub GraphQL 细粒度热度补充。
 5. 多推送渠道抽象。

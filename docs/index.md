@@ -31,6 +31,7 @@
 
 ## 项目文档
 
+- [项目筛选页](explorer.html)
 - [历史项目索引](projects.html)
 - [公共项目 JSON](projects.json)
 - [公共运行 JSON](runs.json)

@@ -2995,3 +2995,45 @@ docs/future-plan.md
 ### 3. 设计边界
 
 契约测试只锁定当前对外稳定字段，不阻止后续新增能力。未来如果确实要新增、删除或重命名字段，应同步更新契约测试、中文文档和所有下游消费逻辑。
+
+---
+
+## 2026-05-03 追加：轻量项目筛选页
+
+### 1. 开发目的
+
+公共 JSON 已经具备稳定字段，下一步需要给未来前端和用户浏览提供一个最小可用入口。本次不引入前端框架，只在现有 GitHub Pages 构建流程中生成静态 HTML 页面。
+
+### 2. 本次实现
+
+更新：
+
+```text
+scripts/build_pages.py
+tests/test_build_pages.py
+.github/workflows/weekly.yml
+README.md
+docs/data-contracts.md
+docs/roadmap.md
+docs/future-plan.md
+```
+
+新增产物：
+
+```text
+docs/explorer.html
+```
+
+调整内容：
+
+1. `scripts/build_pages.py` 新增 `docs/explorer.html` 生成逻辑。
+2. 筛选页直接读取 `docs/projects.json`。
+3. 支持关键词、语言、方向、来源、风险提示筛选。
+4. 支持按最新入选、新增 Star、Trending 排名、综合分和累计 Star 排序。
+5. GitHub Pages 首页新增“项目筛选页”入口。
+6. workflow 归档提交范围加入 `docs/explorer.html`。
+7. 测试验证筛选页会生成，并包含核心控件和 `projects.json` 数据入口。
+
+### 3. 设计边界
+
+本次没有引入 Astro、React、Vue 或 SSR。页面只是最小可用的静态筛选入口，后续如果交互需求继续增加，再基于公共 JSON 和数据契约评估前端工程化。

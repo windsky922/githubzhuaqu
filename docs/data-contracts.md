@@ -46,6 +46,8 @@ report_url
 2. 多渠道推送摘要生成。
 3. 外部脚本按语言、方向、来源、风险提示做二次分析。
 
+当前 `docs/explorer.html` 已经直接消费该文件。
+
 ## 三、`docs/runs.json`
 
 顶层字段：
