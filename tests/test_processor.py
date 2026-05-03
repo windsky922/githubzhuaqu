@@ -300,6 +300,67 @@ class ProcessorTest(unittest.TestCase):
 
         self.assertEqual([item.full_name for item in result], ["a/old-active"])
 
+    def test_previous_sent_project_gets_novelty_penalty_without_filtering(self):
+        settings = Settings(
+            root=None,
+            run_date="2026-04-27",
+            since_date="2026-04-20",
+            days_back=7,
+            min_stars=20,
+            max_projects=2,
+            github_token="",
+            kimi_api_key="",
+            kimi_base_url="",
+            kimi_model="",
+            telegram_bot_token="",
+            telegram_chat_id="",
+            interests={
+                "preferred_topics": [],
+                "preferred_languages": [],
+                "exclude_keywords": [],
+                "novelty_penalty_weight": 0.2,
+            },
+        )
+        old_hot = repo("a/old-hot", 100, topics=[])
+        new_hot = repo("b/new-hot", 100, topics=[])
+
+        result = process_repositories([old_hot, new_hot], settings, previously_sent_names={"a/old-hot"})
+
+        self.assertEqual([item.full_name for item in result], ["b/new-hot", "a/old-hot"])
+        self.assertTrue(any("此前已经推送过" in reason for reason in result[1].selection_reasons))
+
+    def test_trending_top_ten_is_not_penalized_by_previous_sent_status(self):
+        settings = Settings(
+            root=None,
+            run_date="2026-04-27",
+            since_date="2026-04-20",
+            days_back=7,
+            min_stars=20,
+            max_projects=2,
+            github_token="",
+            kimi_api_key="",
+            kimi_base_url="",
+            kimi_model="",
+            telegram_bot_token="",
+            telegram_chat_id="",
+            interests={
+                "preferred_topics": [],
+                "preferred_languages": [],
+                "exclude_keywords": [],
+                "novelty_penalty_weight": 0.9,
+            },
+        )
+        trending = repo("a/repeated-trending", 100, topics=[])
+        trending.trending_rank = 1
+        trending.sources = ["github_trending"]
+        trending.source_priority = 100
+        normal = repo("b/new-normal", 100, topics=[])
+
+        result = process_repositories([normal, trending], settings, previously_sent_names={"a/repeated-trending"})
+
+        self.assertEqual(result[0].full_name, "a/repeated-trending")
+        self.assertTrue(any("此前已经推送过" in reason for reason in result[0].selection_reasons))
+
 
 if __name__ == "__main__":
     unittest.main()

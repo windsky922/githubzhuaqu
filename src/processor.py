@@ -21,6 +21,7 @@ DEFAULT_SCORE_WEIGHTS = {
     "freshness": 0.10,
     "community": 0.05,
 }
+DEFAULT_NOVELTY_PENALTY_WEIGHT = 0.08
 TRENDING_TOP_RANK_LIMIT = 10
 DEFAULT_MIN_TRENDING_TOP_PROJECTS = 7
 
@@ -29,10 +30,11 @@ def process_repositories(
     repositories: list[Repository],
     settings: Settings,
     star_history: dict[str, int] | None = None,
+    previously_sent_names: set[str] | None = None,
 ) -> list[Repository]:
     unique = _dedupe(repositories)
     filtered = [repo for repo in unique if _is_usable(repo, settings)]
-    _score(filtered, settings, star_history or {})
+    _score(filtered, settings, star_history or {}, previously_sent_names or set())
     ranked = sorted(
         filtered,
         key=lambda repo: (repo.score, repo.source_priority, -repo.trending_rank, repo.star_growth, repo.stargazers_count),
@@ -94,7 +96,12 @@ def _is_usable(repo: Repository, settings: Settings) -> bool:
     return not any(keyword.lower() in text for keyword in excluded)
 
 
-def _score(repositories: list[Repository], settings: Settings, star_history: dict[str, int]) -> None:
+def _score(
+    repositories: list[Repository],
+    settings: Settings,
+    star_history: dict[str, int],
+    previously_sent_names: set[str],
+) -> None:
     max_stars = max((repo.stargazers_count for repo in repositories), default=1)
     max_forks = max((repo.forks_count for repo in repositories), default=1)
     for repo in repositories:
@@ -112,16 +119,18 @@ def _score(repositories: list[Repository], settings: Settings, star_history: dic
         profile_matches = _profile_matches(repo, settings)
         freshness_score = _freshness_score(repo.pushed_at or repo.updated_at, settings.days_back)
         community_score = (star_score + fork_score) / 2
+        was_sent = repo.full_name in previously_sent_names
+        novelty_penalty = _novelty_penalty(settings) if was_sent and not _protected_trending(repo) else 0
         repo.category = _category(repo)
-        repo.score = round(
+        base_score = (
             weights["trending"] * trending_score
             + weights["star_growth"] * growth_score
             + weights["topic"] * topic_score
             + weights["freshness"] * freshness_score
-            + weights["community"] * community_score,
-            4,
+            + weights["community"] * community_score
         )
-        repo.selection_reasons = _selection_reasons(repo, topic_score, profile_matches)
+        repo.score = round(max(0.0, base_score - novelty_penalty), 4)
+        repo.selection_reasons = _selection_reasons(repo, topic_score, profile_matches, was_sent)
 
 
 def _star_growth(repo: Repository, star_history: dict[str, int]) -> int:
@@ -159,6 +168,22 @@ def _int_interest(settings: Settings, key: str, default: int) -> int:
     except (TypeError, ValueError):
         return default
     return max(0, value)
+
+
+def _float_interest(settings: Settings, key: str, default: float) -> float:
+    try:
+        value = float(settings.interests.get(key, default))
+    except (TypeError, ValueError):
+        return default
+    return max(0.0, value)
+
+
+def _novelty_penalty(settings: Settings) -> float:
+    return min(1.0, _float_interest(settings, "novelty_penalty_weight", DEFAULT_NOVELTY_PENALTY_WEIGHT))
+
+
+def _protected_trending(repo: Repository) -> bool:
+    return 0 < repo.trending_rank <= TRENDING_TOP_RANK_LIMIT
 
 
 def _topic_score(repo: Repository, settings: Settings) -> float:
@@ -212,12 +237,14 @@ def _topic_matches_terms(topic: str, repo_terms: set[str]) -> bool:
     return bool(tokens) and all(token in repo_terms for token in tokens)
 
 
-def _selection_reasons(repo: Repository, topic_score: float, profile_matches: list[str]) -> list[str]:
+def _selection_reasons(repo: Repository, topic_score: float, profile_matches: list[str], was_sent: bool = False) -> list[str]:
     reasons = []
     if repo.trending_rank > 0:
         reasons.append(f"进入 GitHub Trending 周榜第 {repo.trending_rank} 位，是本期最重要的热度信号。")
     if repo.star_growth > 0:
         reasons.append(f"较上次记录新增 Star {repo.star_growth}，近期热度上升。")
+    if was_sent:
+        reasons.append("此前已经推送过，本次因仍然具备热点信号继续保留观察。")
     if profile_matches:
         reasons.append(f"匹配当前个性化方向：{'、'.join(profile_matches)}。")
     if repo.stargazers_count > 0:

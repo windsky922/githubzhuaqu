@@ -32,6 +32,7 @@
   "trending_languages": [],
   "trending_max_repositories": 25,
   "min_trending_top10_projects": 7,
+  "novelty_penalty_weight": 0.08,
   "score_weights": {
     "trending": 0.45,
     "star_growth": 0.25,

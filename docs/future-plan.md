@@ -386,7 +386,7 @@ codex/personalization-profiles
 
 1. 修复 GitHub Pages 与 Telegram 推送状态的一致性。
 2. 观察 GitHub Trending 页面解析在 GitHub Actions 中的稳定性。
-3. 设计重复入选项目的新颖度策略，不硬性排除持续热门项目。
+3. 持续观察重复入选项目的新颖度策略，不硬性排除持续热门项目。基础版本已完成。
 4. 个性化 profile 配置设计。
 5. 导出公共 JSON，为后续前端和多渠道入口打底。
 

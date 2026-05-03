@@ -2801,3 +2801,38 @@ docs/future-plan.md
 ### 3. 设计边界
 
 本次没有直接引入数据库、前端框架或新外部服务。SQLite、GraphQL、公共 JSON 和前端增强只进入路线图，后续按小步提交逐项实现。
+
+---
+
+## 2026-05-03 追加：重复入选项目的新颖度策略
+
+### 1. 开发目的
+
+用户要求周报必须保持“每周最火爆项目”的完整性，因此不能简单过滤已经推送过的仓库。但如果同一批项目连续多周入选，周报会降低新鲜感。本次实现轻量的新颖度惩罚和说明机制。
+
+### 2. 本次实现
+
+更新：
+
+```text
+main.py
+src/processor.py
+config/interests.example.json
+tests/test_processor.py
+README.md
+docs/roadmap.md
+docs/future-plan.md
+```
+
+调整内容：
+
+1. `process_repositories` 新增可选参数 `previously_sent_names`，旧调用保持兼容。
+2. 主流程把 `sent_repos.json` 中的已推送仓库集合传入排序阶段。
+3. 新增 `novelty_penalty_weight` 配置，默认 `0.08`，用于轻微降低非 Trending 前十的重复项目分数。
+4. GitHub Trending 前十项目不受该惩罚，避免破坏 Trending 优先级和前十保护策略。
+5. 重复入选项目会增加推荐理由：“此前已经推送过，本次因仍然具备热点信号继续保留观察。”
+6. 新增测试覆盖重复项目不被过滤、非 Trending 重复项目被轻量降权、Trending 前十重复项目仍保持优先。
+
+### 3. 设计边界
+
+本次没有引入按日期窗口的复杂去重，也不删除历史推送状态。后续如果需要更精细的长期体验，可基于 `first_sent_at`、最近推送日期和反馈数据做动态惩罚。

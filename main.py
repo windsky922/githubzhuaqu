@@ -37,7 +37,7 @@ def main() -> int:
         collected, queries, collector_errors, collector_stats = collect_repositories(settings)
         sent_names = load_sent_repository_names(settings)
         star_history = load_star_history(settings)
-        selected = process_repositories(collected, settings, star_history)
+        selected = process_repositories(collected, settings, star_history, previously_sent_names=sent_names)
         readme_fetched_count = enrich_repositories_with_readmes(selected, settings)
         apply_security_flags(selected)
         trend_summary = build_trend_summary(selected)
