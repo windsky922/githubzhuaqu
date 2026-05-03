@@ -384,28 +384,30 @@ codex/personalization-profiles
 
 近期优先级：
 
-1. 观察 GitHub Trending 页面解析在 GitHub Actions 中的稳定性。
-2. 根据真实周报结果微调 `score_weights`。
-3. 个性化 profile 配置设计。
-4. GitHub Pages 历史项目筛选。
+1. 修复 GitHub Pages 与 Telegram 推送状态的一致性。
+2. 观察 GitHub Trending 页面解析在 GitHub Actions 中的稳定性。
+3. 设计重复入选项目的新颖度策略，不硬性排除持续热门项目。
+4. 个性化 profile 配置设计。
+5. 导出公共 JSON，为后续前端和多渠道入口打底。
 
 中期优先级：
 
-1. GitHub Pages 历史项目筛选。
-2. 报告结构校验和自动重试。
-3. GitHub GraphQL 细粒度热度补充。
-4. 多推送渠道抽象。
+1. SQLite 双写和历史 JSON 迁移校验。
+2. GitHub Pages 历史项目筛选。
+3. 报告结构校验和自动重试。
+4. GitHub GraphQL 细粒度热度补充。
+5. 多推送渠道抽象。
 
 长期优先级：
 
-1. SQLite 历史库。
-2. 趋势可视化。
-3. 团队订阅和交互式机器人。
+1. 趋势可视化。
+2. 团队订阅和交互式机器人。
+3. 需要在线多用户能力后，再评估 Postgres 或独立服务。
 
 ## 暂不建议做的事
 
 1. 暂不重构为大型框架。
 2. 暂不引入复杂前端工程。
 3. 暂不把所有模块提前拆成目录。
-4. 暂不添加数据库，除非 JSON 状态已经成为实际问题。
+4. 暂不直接替换 JSON；数据库只按 SQLite 双写和可重建索引的方式逐步引入。
 5. 暂不追求完全消除降级报告；外部 API 不可用时仍需要降级兜底，但应持续减少可避免的降级原因。

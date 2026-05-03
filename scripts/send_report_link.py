@@ -12,6 +12,7 @@ from src.sender import report_url, send_report
 from src.settings import ROOT, load_settings
 from src.state import write_sent_repositories
 from src.models import Repository
+from scripts.build_pages import build_pages
 
 
 def main() -> int:
@@ -28,6 +29,7 @@ def main() -> int:
     if sent and selected:
         state_path = write_sent_repositories(selected, settings)
     _update_run_summary(ROOT, run_date, sent, error, state_path, url)
+    _rebuild_pages(ROOT)
 
     print(f"telegram_sent={sent}")
     if error:
@@ -77,6 +79,10 @@ def _update_run_summary(root: Path, run_date: str, sent: bool, error: str, state
     if state_path:
         data["state_path"] = state_path
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def _rebuild_pages(root: Path) -> list[Path]:
+    return build_pages(root)
 
 
 if __name__ == "__main__":

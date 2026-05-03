@@ -2769,3 +2769,35 @@ docs/project-architecture.md
 ### 3. 设计边界
 
 本次没有引入数据库或新框架。`sent_repos.json` 仍用于记录推送状态，但不再影响周报候选池；Kimi 修复器只做结构化元数据补齐，不改写模型正文。
+
+---
+
+## 2026-05-03 追加：吸收研究报告并修复发布状态一致性
+
+### 1. 开发目的
+
+用户提供 `deep-research-report.md` 后，确认后续方向应从“更复杂的抓取器”转向“可复盘、可订阅、可个性化的开源情报系统”。本次先吸收其中适合当前阶段的路线建议，并修复 Pages 页面可能显示旧 Telegram 状态的问题。
+
+### 2. 本次实现
+
+更新：
+
+```text
+.github/workflows/weekly.yml
+scripts/send_report_link.py
+tests/test_send_report_link.py
+docs/roadmap.md
+docs/future-plan.md
+```
+
+调整内容：
+
+1. `scripts/send_report_link.py` 在写回 `data/runs/YYYY-MM-DD.json` 的 Telegram 状态后，会重新构建 GitHub Pages 页面。
+2. workflow 的“提交推送状态”步骤同时提交 `docs/index.md`、`docs/projects.md` 和 `docs/weekly`，避免页面状态停留在推送前。
+3. 新增测试，验证 Telegram 状态写回后重建页面时，首页会展示“已推送”。
+4. 重写 `docs/roadmap.md`，将路线明确为“模块化单体 + SQLite 双写 + 公共 JSON + 中期轻量前端 + 个性化反馈”。
+5. 更新 `docs/future-plan.md` 的优先级，把 Pages 状态一致性、重复入选新颖度、SQLite 双写和公共 JSON 提到更靠前的位置。
+
+### 3. 设计边界
+
+本次没有直接引入数据库、前端框架或新外部服务。SQLite、GraphQL、公共 JSON 和前端增强只进入路线图，后续按小步提交逐项实现。

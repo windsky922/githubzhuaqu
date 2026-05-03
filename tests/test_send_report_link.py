@@ -4,7 +4,7 @@ import unittest
 import uuid
 from pathlib import Path
 
-from scripts.send_report_link import _latest_run_date, _selected_repositories, _update_run_summary
+from scripts.send_report_link import _latest_run_date, _rebuild_pages, _selected_repositories, _update_run_summary
 
 
 class SendReportLinkScriptTest(unittest.TestCase):
@@ -71,6 +71,27 @@ class SendReportLinkScriptTest(unittest.TestCase):
             self.assertEqual(data["telegram_error"], "")
             self.assertEqual(data["telegram_report_url"], "https://example.com/weekly/2026-04-29.html")
             self.assertEqual(data["state_path"], "data/state/sent_repos.json")
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
+    def test_rebuild_pages_after_delivery_uses_updated_summary(self):
+        root = Path.cwd() / f".tmp-send-link-test-{uuid.uuid4().hex}"
+        try:
+            (root / "reports").mkdir(parents=True)
+            (root / "data" / "runs").mkdir(parents=True)
+            (root / "data" / "selected").mkdir(parents=True)
+            (root / "reports" / "2026-04-29.md").write_text("# 周报", encoding="utf-8")
+            (root / "data" / "runs" / "2026-04-29.json").write_text(
+                json.dumps({"selected_count": 1, "collected_count": 2, "kimi_used": True, "telegram_sent": False}),
+                encoding="utf-8",
+            )
+
+            _update_run_summary(root, "2026-04-29", True, "", "", "https://example.com/weekly/2026-04-29.html")
+            _rebuild_pages(root)
+
+            index = (root / "docs" / "index.md").read_text(encoding="utf-8")
+            self.assertIn("Telegram：已推送", index)
+            self.assertIn("Telegram 已推送", index)
         finally:
             shutil.rmtree(root, ignore_errors=True)
 
