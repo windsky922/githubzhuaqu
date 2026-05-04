@@ -4,26 +4,27 @@
 
 ## 最新周报
 
-- [2026-05-03](weekly/2026-05-03.html)
+- [2026-05-04](weekly/2026-05-04.html)
 
 ## 最新运行摘要
 
 - 入选项目：10 个
-- 采集候选：311 个
+- 采集候选：312 个
 - 生成方式：Kimi
-- Telegram：已推送
+- Telegram：未推送
 - 采集错误：0 条
 
 ## 最新趋势要点
 
-- LLM Tooling 是本期最集中的方向，共 4 个项目。
-- Python 是本期出现最多的主要语言，共 7 个项目。
-- 本期入选项目累计新增 Star 657。
+- AI Agent 是本期最集中的方向，共 4 个项目。
+- Python 是本期出现最多的主要语言，共 6 个项目。
+- 本期入选项目累计新增 Star 7483。
 - mattpocock/skills 是本期 GitHub Trending 排名最高的项目，周榜排名 1。
-- TauricResearch/TradingAgents 是本期新增 Star 最高的项目，新增 163。
+- ruvnet/ruflo 是本期新增 Star 最高的项目，新增 1674。
 
 ## 全部周报
 
+- [2026-05-04](weekly/2026-05-04.html)：10 个项目，Kimi，Telegram 未推送，主语言 Python，主方向 AI Agent，新增 Star 7483，Trending 项目 8
 - [2026-05-03](weekly/2026-05-03.html)：10 个项目，Kimi，Telegram 已推送，主语言 Python，主方向 LLM Tooling，新增 Star 657，Trending 项目 7
 - [2026-04-30](weekly/2026-04-30.html)：10 个项目，Kimi，Telegram 已推送，主语言 Python，主方向 AI Agent，新增 Star 89，Trending 项目 7
 - [2026-04-29](weekly/2026-04-29.html)：10 个项目，降级模板，Telegram 已推送，主语言 Python，主方向 AI Agent，新增 Star 107，Trending 项目 9

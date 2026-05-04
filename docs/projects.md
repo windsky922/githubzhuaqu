@@ -4,6 +4,16 @@
 
 | 日期 | 项目 | 来源 | Trending 排名 | 方向 | 语言 | Star | 新增 Star | 风险提示 | 链接 |
 |---|---|---|---:|---|---|---:|---:|---:|---|
+| 2026-05-04 | mattpocock/skills | GitHub Trending | 1 | LLM Tooling | Shell | 57250 | 1236 | 0 | [https://github.com/mattpocock/skills](https://github.com/mattpocock/skills) |
+| 2026-05-04 | TauricResearch/TradingAgents | GitHub Search + GitHub Trending | 2 | AI Agent | Python | 65538 | 1425 | 0 | [https://github.com/TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents) |
+| 2026-05-04 | ComposioHQ/awesome-codex-skills | GitHub Trending | 3 | AI Agent | Python | 6213 | 226 | 1 | [https://github.com/ComposioHQ/awesome-codex-skills](https://github.com/ComposioHQ/awesome-codex-skills) |
+| 2026-05-04 | Alishahryar1/free-claude-code | GitHub Trending | 4 | LLM Tooling | Python | 20771 | 299 | 0 | [https://github.com/Alishahryar1/free-claude-code](https://github.com/Alishahryar1/free-claude-code) |
+| 2026-05-04 | refactoringhq/tolaria | GitHub Trending | 5 | Other | TypeScript | 9261 | 0 | 0 | [https://github.com/refactoringhq/tolaria](https://github.com/refactoringhq/tolaria) |
+| 2026-05-04 | soxoj/maigret | GitHub Trending | 6 | Developer Tools | Python | 23937 | 692 | 0 | [https://github.com/soxoj/maigret](https://github.com/soxoj/maigret) |
+| 2026-05-04 | CJackHwang/ds2api | GitHub Trending | 8 | LLM Tooling | Go | 3255 | 39 | 0 | [https://github.com/CJackHwang/ds2api](https://github.com/CJackHwang/ds2api) |
+| 2026-05-04 | ruvnet/ruflo | GitHub Trending | 9 | AI Agent | TypeScript | 39262 | 1674 | 0 | [https://github.com/ruvnet/ruflo](https://github.com/ruvnet/ruflo) |
+| 2026-05-04 | NousResearch/hermes-agent | GitHub Search | - | AI Agent | Python | 131396 | 942 | 0 | [https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) |
+| 2026-05-04 | D4Vinci/Scrapling | GitHub Search | - | Developer Tools | Python | 43224 | 950 | 0 | [https://github.com/D4Vinci/Scrapling](https://github.com/D4Vinci/Scrapling) |
 | 2026-05-03 | mattpocock/skills | GitHub Trending | 1 | LLM Tooling | Shell | 56014 | 144 | 0 | [https://github.com/mattpocock/skills](https://github.com/mattpocock/skills) |
 | 2026-05-03 | TauricResearch/TradingAgents | GitHub Search + GitHub Trending | 2 | AI Agent | Python | 64113 | 163 | 0 | [https://github.com/TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents) |
 | 2026-05-03 | ComposioHQ/awesome-codex-skills | GitHub Trending | 3 | AI Agent | Python | 5987 | 0 | 1 | [https://github.com/ComposioHQ/awesome-codex-skills](https://github.com/ComposioHQ/awesome-codex-skills) |
