@@ -4,6 +4,16 @@
 
 | 日期 | 项目 | 来源 | Trending 排名 | 方向 | 语言 | Star | 新增 Star | 风险提示 | 链接 |
 |---|---|---|---:|---|---|---:|---:|---:|---|
+| 2026-05-05 | mattpocock/skills | GitHub Trending | 1 | LLM Tooling | Shell | 59808 | 2558 | 0 | [https://github.com/mattpocock/skills](https://github.com/mattpocock/skills) |
+| 2026-05-05 | TauricResearch/TradingAgents | GitHub Search + GitHub Trending | 2 | AI Agent | Python | 68446 | 2908 | 0 | [https://github.com/TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents) |
+| 2026-05-05 | soxoj/maigret | GitHub Trending | 3 | Developer Tools | Python | 25248 | 1311 | 0 | [https://github.com/soxoj/maigret](https://github.com/soxoj/maigret) |
+| 2026-05-05 | ComposioHQ/awesome-codex-skills | GitHub Trending | 4 | AI Agent | Python | 6667 | 454 | 1 | [https://github.com/ComposioHQ/awesome-codex-skills](https://github.com/ComposioHQ/awesome-codex-skills) |
+| 2026-05-05 | ruvnet/ruflo | GitHub Trending | 5 | AI Agent | TypeScript | 42293 | 3031 | 0 | [https://github.com/ruvnet/ruflo](https://github.com/ruvnet/ruflo) |
+| 2026-05-05 | Alishahryar1/free-claude-code | GitHub Trending | 6 | LLM Tooling | Python | 21373 | 602 | 0 | [https://github.com/Alishahryar1/free-claude-code](https://github.com/Alishahryar1/free-claude-code) |
+| 2026-05-05 | CJackHwang/ds2api | GitHub Trending | 7 | LLM Tooling | Go | 3435 | 180 | 0 | [https://github.com/CJackHwang/ds2api](https://github.com/CJackHwang/ds2api) |
+| 2026-05-05 | NousResearch/hermes-agent | GitHub Search | - | AI Agent | Python | 133305 | 1909 | 0 | [https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) |
+| 2026-05-05 | run-llama/llama_index | GitHub Search | - | AI Agent | Python | 49132 | 14 | 0 | [https://github.com/run-llama/llama_index](https://github.com/run-llama/llama_index) |
+| 2026-05-05 | codecentric/spring-boot-admin | GitHub Search | - | Other | Java | 12832 | 1 | 0 | [https://github.com/codecentric/spring-boot-admin](https://github.com/codecentric/spring-boot-admin) |
 | 2026-05-04 | mattpocock/skills | GitHub Trending | 1 | LLM Tooling | Shell | 57250 | 1236 | 0 | [https://github.com/mattpocock/skills](https://github.com/mattpocock/skills) |
 | 2026-05-04 | TauricResearch/TradingAgents | GitHub Search + GitHub Trending | 2 | AI Agent | Python | 65538 | 1425 | 0 | [https://github.com/TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents) |
 | 2026-05-04 | ComposioHQ/awesome-codex-skills | GitHub Trending | 3 | AI Agent | Python | 6213 | 226 | 1 | [https://github.com/ComposioHQ/awesome-codex-skills](https://github.com/ComposioHQ/awesome-codex-skills) |
