@@ -48,6 +48,7 @@ GitHub Actions
 | `scripts/migrate_json_to_sqlite.py` | 将历史 JSON 归档导入 SQLite 派生索引 |
 | `scripts/verify_migration.py` | 校验 SQLite 派生索引和 JSON 归档计数 |
 | `scripts/send_report_link.py` | 推送 GitHub Pages 周报链接 |
+| `scripts/check_delivery_channels.py` | 检查 Telegram、飞书、企业微信推送通道配置 |
 | `scripts/security_check.py` | 本仓库疑似密钥扫描 |
 | `config/interests.example.json` | 默认兴趣和评分配置示例 |
 | `config/profiles.example.json` | 个性化方向配置示例 |
@@ -185,6 +186,18 @@ DELIVERY_CHANNELS=telegram,feishu,wechat
 ```
 
 需要同时在 Secrets 中配置 `FEISHU_WEBHOOK_URL` 和 `WECHAT_WEBHOOK_URL` 或 `WECOM_WEBHOOK_URL`。未配置的通道会被记录为跳过，不会导致周报生成失败。飞书和企业微信当前都只推送 GitHub Pages 周报链接，不推送完整 Markdown 正文。
+
+本地检查通道配置：
+
+```bash
+python scripts/check_delivery_channels.py
+```
+
+严格检查模式会在启用通道缺少配置时返回失败，适合 GitHub Actions：
+
+```bash
+python scripts/check_delivery_channels.py --strict
+```
 
 ## GitHub Pages
 

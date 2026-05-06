@@ -3187,3 +3187,36 @@ tests/test_sender.py
 ### 3. 安全边界
 
 Webhook 地址只从环境变量或 GitHub Actions Secrets 读取，不写入代码和示例值。错误摘要会做字段收敛，只记录平台返回的状态码和简短消息，不记录完整 Webhook 地址。
+
+---
+
+## 2026-05-06 追加：推送通道配置检查
+
+### 1. 开发目的
+
+飞书和企业微信 Webhook 已经支持真实发送，但如果 `DELIVERY_CHANNELS` 启用了通道却没有配置对应 Secret，用户只能在运行后从日志里发现跳过。本次新增独立检查脚本，让配置问题可以提前暴露。
+
+### 2. 本次实现
+
+更新：
+
+```text
+.github/workflows/secrets-check.yml
+README.md
+docs/operation-log.md
+docs/setup.md
+scripts/check_delivery_channels.py
+tests/test_delivery_channel_check.py
+```
+
+调整内容：
+
+1. 新增 `scripts/check_delivery_channels.py`。
+2. 默认模式只打印 Telegram、飞书、企业微信通道配置状态，不发送真实消息。
+3. `--strict` 模式会在启用通道缺少配置或出现不支持通道时返回失败。
+4. Secrets 配置检查 workflow 新增推送通道配置检查步骤。
+5. 测试覆盖 Telegram 完整配置、飞书缺失 Webhook、企业微信双变量名和不支持通道。
+
+### 3. 安全边界
+
+检查脚本只判断环境变量是否存在，不打印变量值，不发送消息，也不访问外部 Webhook。真实连通性仍由后续发送流程负责。

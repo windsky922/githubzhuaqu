@@ -70,6 +70,18 @@ DELIVERY_CHANNELS=telegram,feishu,wechat
 
 则需要在 Secrets 中补充 `FEISHU_WEBHOOK_URL` 和 `WECHAT_WEBHOOK_URL` 或 `WECOM_WEBHOOK_URL`。没有配置 Webhook 的通道会被记录为跳过，不会阻断周报归档。
 
+可以在本地检查通道配置：
+
+```bash
+python scripts/check_delivery_channels.py
+```
+
+如果希望缺少配置时直接失败，可以使用：
+
+```bash
+python scripts/check_delivery_channels.py --strict
+```
+
 如果 Kimi 返回 `429`、过载或临时网关错误，程序会先按 `KIMI_MAX_RETRIES` 和 `KIMI_RETRY_SECONDS` 自动重试。多次重试仍失败时，才会生成规则版周报并继续推送 Telegram 链接，同时把失败原因写入 `data/runs/YYYY-MM-DD.json`。
 
 ## 本地运行
@@ -134,6 +146,7 @@ Actions -> Secrets 配置检查 -> Run workflow
 1. `GH_SEARCH_TOKEN` 是否可以访问 GitHub API。
 2. `KIMI_API_KEY`、`KIMI_BASE_URL`、`KIMI_MODEL` 是否可以访问 Kimi API。
 3. `TELEGRAM_BOT_TOKEN` 和 `TELEGRAM_CHAT_ID` 是否可以发送 Telegram 测试消息。
+4. `DELIVERY_CHANNELS` 启用的通道是否具备对应配置。
 
 ## 状态文件说明
 
