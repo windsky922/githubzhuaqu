@@ -342,7 +342,7 @@ def _explorer_content() -> str:
     }
     .summary {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: 10px;
       margin-bottom: 14px;
     }
@@ -419,6 +419,22 @@ def _explorer_content() -> str:
       background: #eff6ff;
     }
     .tag.risk {
+      border-color: #fecaca;
+      color: var(--risk);
+      background: #fff1f2;
+    }
+    .tag.quality-high {
+      border-color: #bbf7d0;
+      color: #15803d;
+      background: #f0fdf4;
+    }
+    .tag.quality-medium {
+      border-color: #fde68a;
+      color: #a16207;
+      background: #fffbeb;
+    }
+    .tag.quality-low,
+    .tag.quality-unknown {
       border-color: #fecaca;
       color: var(--risk);
       background: #fff1f2;
@@ -570,12 +586,22 @@ def _explorer_content() -> str:
           <option value="has">有风险提示</option>
         </select>
       </label>
+      <label>质量
+        <select id="qualityLevel">
+          <option value="">全部</option>
+          <option value="high">高质量</option>
+          <option value="medium">中等质量</option>
+          <option value="low">低质量</option>
+          <option value="unknown">未知</option>
+        </select>
+      </label>
       <label>排序
         <select id="sort">
           <option value="run_date">最新入选</option>
           <option value="star_growth">新增 Star</option>
           <option value="trending_rank">Trending 排名</option>
           <option value="score">综合分</option>
+          <option value="quality_score">质量分</option>
           <option value="stars">累计 Star</option>
         </select>
       </label>
@@ -601,12 +627,13 @@ def _explorer_content() -> str:
             <th>来源</th>
             <th>Trending</th>
             <th>新增 Star</th>
+            <th>质量</th>
             <th>风险</th>
             <th>周报</th>
           </tr>
         </thead>
         <tbody id="rows">
-          <tr><td class="empty" colspan="9">加载中</td></tr>
+          <tr><td class="empty" colspan="10">加载中</td></tr>
         </tbody>
       </table>
     </div>
@@ -621,6 +648,7 @@ def _explorer_content() -> str:
       category: document.getElementById("category"),
       source: document.getElementById("source"),
       risk: document.getElementById("risk"),
+      qualityLevel: document.getElementById("qualityLevel"),
       sort: document.getElementById("sort")
     };
     const rows = document.getElementById("rows");
@@ -642,7 +670,7 @@ def _explorer_content() -> str:
         render();
       })
       .catch(() => {
-        rows.innerHTML = '<tr><td class="empty" colspan="9">无法读取 projects.json</td></tr>';
+        rows.innerHTML = '<tr><td class="empty" colspan="10">无法读取 projects.json</td></tr>';
       });
 
     Object.values(controls).forEach(control => control.addEventListener("input", render));
@@ -664,6 +692,7 @@ def _explorer_content() -> str:
       controls.category.value = "";
       controls.source.value = "";
       controls.risk.value = "";
+      controls.qualityLevel.value = "";
       controls.sort.value = "run_date";
       render();
     });
@@ -727,13 +756,14 @@ def _explorer_content() -> str:
           && (!selectedProfile || matchesProfile(project, selectedProfile))
           && (!controls.category.value || project.category === controls.category.value)
           && (!controls.source.value || (project.sources || []).includes(controls.source.value))
-          && (!controls.risk.value || (controls.risk.value === "has" ? riskCount > 0 : riskCount === 0));
+          && (!controls.risk.value || (controls.risk.value === "has" ? riskCount > 0 : riskCount === 0))
+          && (!controls.qualityLevel.value || qualityLevel(project) === controls.qualityLevel.value);
       });
       filtered = filtered.sort(compareProjects);
       count.textContent = `${filtered.length} 个项目`;
       renderProfileShortcuts();
       summary.innerHTML = summaryHtml(filtered);
-      rows.innerHTML = filtered.length ? filtered.map(rowHtml).join("") : '<tr><td class="empty" colspan="9">没有匹配项目</td></tr>';
+      rows.innerHTML = filtered.length ? filtered.map(rowHtml).join("") : '<tr><td class="empty" colspan="10">没有匹配项目</td></tr>';
       updateUrl();
     }
 
@@ -741,11 +771,13 @@ def _explorer_content() -> str:
       const starGrowth = projects.reduce((total, project) => total + number(project.star_growth), 0);
       const trendingCount = projects.filter(project => number(project.trending_rank) > 0).length;
       const riskCount = projects.filter(project => (project.security_flags || []).length > 0).length;
+      const averageQuality = projects.length ? Math.round(projects.reduce((total, project) => total + number(project.quality_score), 0) / projects.length) : 0;
       const language = topValue(projects, "language");
       const category = topValue(projects, "category");
       return [
         metric("新增 Star", starGrowth),
         metric("Trending 项目", trendingCount),
+        metric("平均质量分", averageQuality),
         metric("风险提示", riskCount),
         metric("主语言 / 方向", `${language || "-"} / ${category || "-"}`)
       ].join("");
@@ -766,7 +798,7 @@ def _explorer_content() -> str:
 
     function restoreFiltersFromUrl() {
       const params = new URLSearchParams(window.location.search);
-      const keys = { q: "query", date: "runDate", lang: "language", profile: "profile", category: "category", source: "source", risk: "risk", sort: "sort" };
+      const keys = { q: "query", date: "runDate", lang: "language", profile: "profile", category: "category", source: "source", risk: "risk", quality: "qualityLevel", sort: "sort" };
       Object.entries(keys).forEach(([param, key]) => {
       if (params.has(param)) controls[key].value = params.get(param) || "";
       });
@@ -781,6 +813,7 @@ def _explorer_content() -> str:
       if (controls.category.value) params.set("category", controls.category.value);
       if (controls.source.value) params.set("source", controls.source.value);
       if (controls.risk.value) params.set("risk", controls.risk.value);
+      if (controls.qualityLevel.value) params.set("quality", controls.qualityLevel.value);
       if (controls.sort.value && controls.sort.value !== "run_date") params.set("sort", controls.sort.value);
       const query = params.toString();
       const next = `${window.location.pathname}${query ? "?" + query : ""}`;
@@ -800,6 +833,7 @@ def _explorer_content() -> str:
       if (sort === "star_growth") return number(b.star_growth) - number(a.star_growth);
       if (sort === "trending_rank") return rank(a.trending_rank) - rank(b.trending_rank);
       if (sort === "score") return number(b.score) - number(a.score);
+      if (sort === "quality_score") return number(b.quality_score) - number(a.quality_score);
       if (sort === "stars") return number(b.stargazers_count) - number(a.stargazers_count);
       return String(b.run_date || "").localeCompare(String(a.run_date || ""));
     }
@@ -817,6 +851,7 @@ def _explorer_content() -> str:
       const risks = project.security_flags || [];
       const sourceTags = (project.sources || []).map(source => `<span class="tag source">${escapeHtml(sourceLabel(source))}</span>`).join("");
       const riskText = securityText(project, risks);
+      const quality = qualityText(project);
       const detailId = `detail-${index}`;
       return `<tr>
         <td class="repo"><a href="${escapeAttribute(project.html_url)}" target="_blank" rel="noreferrer">${escapeHtml(project.full_name)}</a><div class="desc">${escapeHtml(project.description || "")}</div></td>
@@ -826,21 +861,23 @@ def _explorer_content() -> str:
         <td>${sourceTags || "-"}</td>
         <td class="num">${project.trending_rank ? project.trending_rank : "-"}</td>
         <td class="num">${number(project.star_growth)}</td>
+        <td>${quality}</td>
         <td>${riskText}</td>
         <td><a href="${escapeAttribute(project.report_url || "#")}">查看</a><button class="detail-toggle" type="button" data-detail="${escapeAttribute(detailId)}">详情</button></td>
       </tr>
-      <tr class="detail-row"><td colspan="9">${detailPanel(project, detailId)}</td></tr>`;
+      <tr class="detail-row"><td colspan="10">${detailPanel(project, detailId)}</td></tr>`;
     }
 
     function detailPanel(project, detailId) {
       const reasons = listHtml(project.selection_reasons || [], "暂无推荐理由。");
       const risks = listHtml(project.security_flags || [], "暂无风险提示。");
+      const qualityFlags = listHtml(project.quality_flags || [], "暂无质量扣分项。");
       const summary = project.readme_summary || project.description || "暂无 README 摘要。";
       return `<div id="${escapeAttribute(detailId)}" class="detail-panel">
         <div class="detail-grid">
           <div class="detail-block"><h3>README 摘要</h3><p>${escapeHtml(summary)}</p></div>
           <div class="detail-block"><h3>推荐理由</h3>${reasons}</div>
-          <div class="detail-block"><h3>风险提示</h3>${risks}</div>
+          <div class="detail-block"><h3>质量信号</h3><p>${qualityText(project)}</p>${qualityFlags}</div>
         </div>
         <div class="detail-grid">
           <div class="detail-block"><h3>项目指标</h3><p>综合分 ${escapeHtml(number(project.score).toFixed(3))}；质量分 ${escapeHtml(project.quality_score || 0)}；安全分 ${escapeHtml(project.security_score || 100)}；累计 Star ${escapeHtml(project.stargazers_count || 0)}；Fork ${escapeHtml(project.forks_count || 0)}</p></div>
@@ -848,6 +885,7 @@ def _explorer_content() -> str:
           <div class="detail-block"><h3>完整链接</h3><p><a class="detail-link" href="${escapeAttribute(project.html_url)}" target="_blank" rel="noreferrer">${escapeHtml(project.html_url)}</a></p></div>
         </div>
         <div class="detail-grid">
+          <div class="detail-block"><h3>风险提示</h3>${risks}</div>
           <div class="detail-block similar-block"><h3>相似项目</h3>${similarProjectsHtml(project)}</div>
         </div>
       </div>`;
@@ -913,6 +951,18 @@ def _explorer_content() -> str:
       const label = level === "high" ? "高风险" : level === "medium" ? "中风险" : "低风险";
       const tags = risks.length ? risks.map(flag => `<span class="tag risk">${escapeHtml(flag)}</span>`).join("") : "";
       return `<span class="tag risk">${escapeHtml(label)} ${score}</span>${tags}`;
+    }
+
+    function qualityText(project) {
+      const level = qualityLevel(project);
+      const score = Number.isFinite(Number(project.quality_score)) ? Number(project.quality_score) : 0;
+      const label = level === "high" ? "高质量" : level === "medium" ? "中等质量" : level === "low" ? "低质量" : "未知质量";
+      return `<span class="tag quality-${escapeAttribute(level)}">${escapeHtml(label)} ${score}</span>`;
+    }
+
+    function qualityLevel(project) {
+      const level = String(project.quality_level || "unknown").toLowerCase();
+      return ["high", "medium", "low"].includes(level) ? level : "unknown";
     }
 
     function sourceLabel(source) {
