@@ -1,6 +1,6 @@
 import os
 import unittest
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from src.sender import (
     build_delivery_message,
@@ -73,19 +73,48 @@ class SenderTest(unittest.TestCase):
         with patch.dict(os.environ, {}, clear=True):
             self.assertEqual(configured_delivery_channels(), ["telegram"])
 
-    def test_configured_delivery_channels_removes_duplicates(self):
-        with patch.dict(os.environ, {"DELIVERY_CHANNELS": "telegram, feishu, telegram, wechat"}):
+    def test_configured_delivery_channels_removes_duplicates_and_normalizes_aliases(self):
+        with patch.dict(os.environ, {"DELIVERY_CHANNELS": "telegram, lark, feishu, wecom, wechat"}):
             self.assertEqual(configured_delivery_channels(), ["telegram", "feishu", "wechat"])
 
-    def test_send_report_to_channels_records_future_channels_without_failing(self):
-        with patch.dict(os.environ, {"DELIVERY_CHANNELS": "telegram,feishu,wechat"}), patch("src.sender._send_message"):
+    def test_send_report_to_channels_sends_configured_webhooks(self):
+        env = {
+            "DELIVERY_CHANNELS": "telegram,feishu,wechat",
+            "FEISHU_WEBHOOK_URL": "https://example.com/feishu",
+            "WECHAT_WEBHOOK_URL": "https://example.com/wechat",
+        }
+        with patch.dict(os.environ, env), patch("src.sender._send_message"), patch("src.sender._post_json") as post_json:
             results = send_report_to_channels("# long markdown", settings("https://example.com/weekly"))
 
         self.assertEqual([result.channel for result in results], ["telegram", "feishu", "wechat"])
         self.assertTrue(results[0].sent)
+        self.assertTrue(results[1].sent)
+        self.assertTrue(results[2].sent)
+        self.assertEqual(post_json.call_count, 2)
+        feishu_payload = post_json.call_args_list[0].args[1]
+        wechat_payload = post_json.call_args_list[1].args[1]
+        self.assertEqual(feishu_payload["msg_type"], "interactive")
+        self.assertIn("打开本周周报", feishu_payload["card"]["elements"][0]["content"])
+        self.assertEqual(wechat_payload["msgtype"], "markdown")
+        self.assertIn("打开本周周报", wechat_payload["markdown"]["content"])
+
+    def test_send_report_to_channels_skips_unconfigured_webhooks(self):
+        with patch.dict(os.environ, {"DELIVERY_CHANNELS": "feishu,wechat"}, clear=True):
+            results = send_report_to_channels("# long markdown", settings("https://example.com/weekly"))
+
+        self.assertEqual([result.channel for result in results], ["feishu", "wechat"])
+        self.assertTrue(results[0].skipped)
+        self.assertEqual(results[0].error, "Feishu webhook is not configured")
         self.assertTrue(results[1].skipped)
-        self.assertEqual(results[1].error, "Delivery channel is not implemented")
-        self.assertTrue(results[2].skipped)
+        self.assertEqual(results[1].error, "WeChat webhook is not configured")
+
+    def test_post_json_accepts_success_response(self):
+        response = MagicMock()
+        response.__enter__.return_value.read.return_value = b'{"errcode":0,"errmsg":"ok"}'
+        with patch("urllib.request.urlopen", return_value=response):
+            from src.sender import _post_json
+
+            _post_json("https://example.com/webhook", {"msgtype": "markdown"}, "WeChat")
 
 
 if __name__ == "__main__":

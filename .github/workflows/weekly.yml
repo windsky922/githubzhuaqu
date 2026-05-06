@@ -44,6 +44,9 @@ jobs:
           KIMI_RETRY_SECONDS: ${{ vars.KIMI_RETRY_SECONDS }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          FEISHU_WEBHOOK_URL: ${{ secrets.FEISHU_WEBHOOK_URL }}
+          WECHAT_WEBHOOK_URL: ${{ secrets.WECHAT_WEBHOOK_URL }}
+          WECOM_WEBHOOK_URL: ${{ secrets.WECOM_WEBHOOK_URL }}
           REPORT_BASE_URL: ${{ vars.REPORT_BASE_URL || secrets.REPORT_BASE_URL }}
           DELIVERY_CHANNELS: ${{ vars.DELIVERY_CHANNELS }}
           INTEREST_PROFILE: ${{ vars.INTEREST_PROFILE }}
@@ -69,6 +72,9 @@ jobs:
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          FEISHU_WEBHOOK_URL: ${{ secrets.FEISHU_WEBHOOK_URL }}
+          WECHAT_WEBHOOK_URL: ${{ secrets.WECHAT_WEBHOOK_URL }}
+          WECOM_WEBHOOK_URL: ${{ secrets.WECOM_WEBHOOK_URL }}
           REPORT_BASE_URL: ${{ vars.REPORT_BASE_URL || secrets.REPORT_BASE_URL }}
           DELIVERY_CHANNELS: ${{ vars.DELIVERY_CHANNELS }}
         run: python scripts/send_report_link.py

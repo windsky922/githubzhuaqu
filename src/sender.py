@@ -51,8 +51,12 @@ def send_report_to_channels(report: str, settings: Settings) -> list[DeliveryRes
     for channel in configured_delivery_channels():
         if channel == "telegram":
             results.append(_send_telegram(message, settings))
+        elif channel == "feishu":
+            results.append(_send_feishu(message))
+        elif channel == "wechat":
+            results.append(_send_wechat(message))
         else:
-            results.append(DeliveryResult(channel=channel, sent=False, error="Delivery channel is not implemented", skipped=True))
+            results.append(DeliveryResult(channel=channel, sent=False, error="Delivery channel is not supported", skipped=True))
     return results
 
 
@@ -60,7 +64,7 @@ def configured_delivery_channels() -> list[str]:
     raw = os.getenv("DELIVERY_CHANNELS", "telegram")
     channels = []
     for item in raw.split(","):
-        channel = item.strip().lower()
+        channel = _normalize_channel(item)
         if channel and channel not in channels:
             channels.append(channel)
     return channels or ["telegram"]
@@ -116,6 +120,60 @@ def _send_telegram(message: DeliveryMessage | None, settings: Settings) -> Deliv
     return DeliveryResult(channel="telegram", sent=True)
 
 
+def _send_feishu(message: DeliveryMessage | None) -> DeliveryResult:
+    webhook_url = os.getenv("FEISHU_WEBHOOK_URL", "").strip()
+    if not webhook_url:
+        return DeliveryResult(channel="feishu", sent=False, error="Feishu webhook is not configured", skipped=True)
+    if not message:
+        return DeliveryResult(channel="feishu", sent=False, error="Report URL is not configured", skipped=True)
+    payload = {
+        "msg_type": "interactive",
+        "card": {
+            "header": {
+                "title": {"tag": "plain_text", "content": message.title},
+                "template": "blue",
+            },
+            "elements": [
+                {"tag": "markdown", "content": f"阅读链接：[打开本周周报]({message.url})"},
+            ],
+        },
+    }
+    try:
+        _post_json(webhook_url, payload, "Feishu")
+    except Exception as error:
+        return DeliveryResult(channel="feishu", sent=False, error=str(error))
+    return DeliveryResult(channel="feishu", sent=True)
+
+
+def _send_wechat(message: DeliveryMessage | None) -> DeliveryResult:
+    webhook_url = os.getenv("WECHAT_WEBHOOK_URL", "").strip() or os.getenv("WECOM_WEBHOOK_URL", "").strip()
+    if not webhook_url:
+        return DeliveryResult(channel="wechat", sent=False, error="WeChat webhook is not configured", skipped=True)
+    if not message:
+        return DeliveryResult(channel="wechat", sent=False, error="Report URL is not configured", skipped=True)
+    payload = {
+        "msgtype": "markdown",
+        "markdown": {
+            "content": f"**{message.title}**\n\n[打开本周周报]({message.url})",
+        },
+    }
+    try:
+        _post_json(webhook_url, payload, "WeChat")
+    except Exception as error:
+        return DeliveryResult(channel="wechat", sent=False, error=str(error))
+    return DeliveryResult(channel="wechat", sent=True)
+
+
+def _normalize_channel(value: str) -> str:
+    channel = value.strip().lower()
+    aliases = {
+        "lark": "feishu",
+        "wecom": "wechat",
+        "weixin": "wechat",
+    }
+    return aliases.get(channel, channel)
+
+
 def _send_message(text: str, settings: Settings) -> None:
     url = f"https://api.telegram.org/bot{settings.telegram_bot_token}/sendMessage"
     payload = urllib.parse.urlencode(
@@ -134,3 +192,46 @@ def _send_message(text: str, settings: Settings) -> None:
         raise RuntimeError(f"Telegram API error {error.code}: {body}") from error
     if not data.get("ok"):
         raise RuntimeError(f"Telegram API returned failure: {data}")
+
+
+def _post_json(url: str, payload: dict, service_name: str) -> None:
+    data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+    request = urllib.request.Request(
+        url,
+        data=data,
+        method="POST",
+        headers={"Content-Type": "application/json"},
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=20) as response:
+            body = response.read().decode("utf-8")
+    except urllib.error.HTTPError as error:
+        body = error.read().decode("utf-8", errors="replace")
+        raise RuntimeError(f"{service_name} webhook error {error.code}: {body}") from error
+
+    try:
+        response_data = json.loads(body)
+    except json.JSONDecodeError as error:
+        raise RuntimeError(f"{service_name} webhook returned non-JSON response") from error
+
+    if _webhook_response_ok(response_data):
+        return
+    raise RuntimeError(f"{service_name} webhook returned failure: {_safe_response_summary(response_data)}")
+
+
+def _webhook_response_ok(data: dict) -> bool:
+    for key in ("errcode", "code", "StatusCode"):
+        if key in data:
+            try:
+                return int(data.get(key) or 0) == 0
+            except (TypeError, ValueError):
+                return False
+    return bool(data.get("ok"))
+
+
+def _safe_response_summary(data: dict) -> str:
+    safe = {}
+    for key in ("errcode", "errmsg", "code", "msg", "StatusCode", "StatusMessage"):
+        if key in data:
+            safe[key] = data[key]
+    return json.dumps(safe or {"response": "unexpected"}, ensure_ascii=False)

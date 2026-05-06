@@ -3151,3 +3151,39 @@ docs/operation-log.md
 ### 3. 设计边界
 
 本次不提前实现微信、飞书具体 API，也不新增密钥字段。后续接入时再按实际平台要求增加环境变量和发送函数，仍然不能把 Webhook、Token 或 Chat ID 写入代码和文档示例。
+
+---
+
+## 2026-05-06 追加：飞书与企业微信 Webhook 推送
+
+### 1. 开发目的
+
+上一阶段已经把推送状态抽象为多通道结果。本次继续补齐飞书和企业微信 Webhook 发送能力，让周报链接可以直接推送到更多移动端协作工具。
+
+### 2. 本次实现
+
+更新：
+
+```text
+.env.example
+.github/workflows/weekly.yml
+README.md
+docs/data-contracts.md
+docs/operation-log.md
+docs/setup.md
+src/sender.py
+tests/test_sender.py
+```
+
+调整内容：
+
+1. `DELIVERY_CHANNELS` 支持 `telegram`、`feishu`、`wechat`。
+2. `lark` 会归一为 `feishu`，`wecom`、`weixin` 会归一为 `wechat`。
+3. 新增 `FEISHU_WEBHOOK_URL`，用于飞书机器人 Webhook。
+4. 新增 `WECHAT_WEBHOOK_URL` 和 `WECOM_WEBHOOK_URL`，用于企业微信机器人 Webhook。
+5. 飞书发送交互卡片，企业微信发送 Markdown 消息，内容都只包含周报标题和 GitHub Pages 阅读链接。
+6. 未配置 Webhook 的通道会记录为跳过，不影响周报生成、归档和其他通道发送。
+
+### 3. 安全边界
+
+Webhook 地址只从环境变量或 GitHub Actions Secrets 读取，不写入代码和示例值。错误摘要会做字段收敛，只记录平台返回的状态码和简短消息，不记录完整 Webhook 地址。

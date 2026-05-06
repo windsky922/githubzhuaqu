@@ -12,6 +12,9 @@
 | `KIMI_MODEL` | 可选 | 配合 `KIMI_API_KEY` 使用，指定 Kimi 模型 |
 | `TELEGRAM_BOT_TOKEN` | 可选 | 启用 Telegram 推送 |
 | `TELEGRAM_CHAT_ID` | 可选 | Telegram 接收方 Chat ID |
+| `FEISHU_WEBHOOK_URL` | 可选 | 启用飞书机器人 Webhook 推送 |
+| `WECHAT_WEBHOOK_URL` | 可选 | 启用企业微信机器人 Webhook 推送 |
+| `WECOM_WEBHOOK_URL` | 可选 | 企业微信 Webhook 备用变量名 |
 | `REPORT_BASE_URL` | 可选 | 周报公开访问目录，留空时 GitHub Actions 会根据仓库名推导 GitHub Pages 地址 |
 
 如果未配置 Kimi，程序会生成降级版周报。
@@ -24,7 +27,7 @@
 |---|---|
 | `INTEREST_PROFILE` | 个性化方向，例如 `java,agent_development` |
 | `REPORT_BASE_URL` | 周报公开访问目录；如果不想放在 Secret 中，可以作为普通变量配置 |
-| `DELIVERY_CHANNELS` | 推送通道列表，当前建议使用 `telegram` |
+| `DELIVERY_CHANNELS` | 推送通道列表，例如 `telegram,feishu,wechat` |
 | `KIMI_TIMEOUT_SECONDS` | Kimi 请求超时时间，默认 `120` 秒 |
 | `KIMI_MAX_RETRIES` | Kimi 临时错误重试次数，默认 `2` |
 | `KIMI_RETRY_SECONDS` | Kimi 临时错误重试等待秒数，默认 `20` |
@@ -53,13 +56,19 @@ data/runs/YYYY-MM-DD.json
 telegram_report_url
 ```
 
-当前实际发送通道是 Telegram。可以显式配置：
+当前支持 Telegram、飞书和企业微信 Webhook。可以显式配置：
 
 ```text
 DELIVERY_CHANNELS=telegram
 ```
 
-如果提前配置 `telegram,feishu,wechat`，当前版本只会发送 Telegram；飞书和微信会被记录为预留通道未实现，不会请求外部 API，也不会阻断周报归档。
+如果配置：
+
+```text
+DELIVERY_CHANNELS=telegram,feishu,wechat
+```
+
+则需要在 Secrets 中补充 `FEISHU_WEBHOOK_URL` 和 `WECHAT_WEBHOOK_URL` 或 `WECOM_WEBHOOK_URL`。没有配置 Webhook 的通道会被记录为跳过，不会阻断周报归档。
 
 如果 Kimi 返回 `429`、过载或临时网关错误，程序会先按 `KIMI_MAX_RETRIES` 和 `KIMI_RETRY_SECONDS` 自动重试。多次重试仍失败时，才会生成规则版周报并继续推送 Telegram 链接，同时把失败原因写入 `data/runs/YYYY-MM-DD.json`。
 
