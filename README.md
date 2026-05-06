@@ -264,6 +264,8 @@ python scripts/query_archive.py --refresh --language Python --source github_tren
 python scripts/query_archive.py --profile agent_development --query workflow --format json
 ```
 
+更多命令示例见 `docs/archive-query.md`。
+
 默认数据库路径：
 
 ```text

@@ -3416,3 +3416,35 @@ tests/test_query_archive.py
 ### 3. 设计边界
 
 该脚本只读取 JSON 归档、SQLite 派生索引和公开 profile 配置，不读取密钥，不发送外部请求，也不改变主流程。未来如果建设后端 API，可以直接复用其中的筛选条件和输出字段。
+
+---
+
+## 2026-05-06 追加：历史归档查询说明页
+
+### 1. 开发目的
+
+历史查询 CLI 已经可用，但入口主要面向开发者。为了让后续前端、数据库和个性化能力有更清楚的文档入口，本次补充 GitHub Pages 可访问的查询说明页。
+
+### 2. 本次实现
+
+更新：
+
+```text
+README.md
+docs/archive-query.md
+docs/operation-log.md
+scripts/build_pages.py
+tests/test_build_pages.py
+```
+
+调整内容：
+
+1. 新增 `docs/archive-query.md`。
+2. 说明历史查询的使用场景、常用命令、安全边界和后续扩展方向。
+3. GitHub Pages 首页增加“历史归档查询说明”入口。
+4. README 的 SQLite 派生索引部分补充说明页引用。
+5. 页面构建测试覆盖新增入口。
+
+### 3. 设计边界
+
+该页面是静态说明文档，不引入新的运行依赖。后续如果建设数据库页面或前端后台，可以把这里的命令示例演进为页面筛选项和 API 查询参数。

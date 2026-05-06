@@ -89,6 +89,7 @@ def _index_content(root: Path, reports: list[Path]) -> str:
             "- [公共运行 JSON](runs.json)",
             "- [个性化方向 JSON](profiles.json)",
             "- [RSS 订阅](feed.xml)",
+            "- [历史归档查询说明](archive-query.html)",
             "- [数据契约说明](data-contracts.html)",
             "- [架构说明](architecture.html)",
             "- [配置说明](setup.html)",
