@@ -3254,3 +3254,40 @@ tests/test_data_contracts.py
 ### 3. 安全边界
 
 `profiles.json` 只公开 profile 名称、显示标签、学习目标、偏好语言和主题关键词，不公开评分权重、私有配置、密钥或用户身份信息。
+
+---
+
+## 2026-05-06 追加：安全分与风险等级
+
+### 1. 开发目的
+
+此前项目只保存风险提示文本，前端和后续个性化推荐难以排序或筛选风险强弱。本次新增基础安全分和风险等级，为后续安全检查功能、前端筛选和推送摘要提供结构化字段。
+
+### 2. 本次实现
+
+更新：
+
+```text
+README.md
+docs/data-contracts.md
+docs/operation-log.md
+scripts/build_pages.py
+src/models.py
+src/security.py
+tests/test_build_pages.py
+tests/test_data_contracts.py
+tests/test_security.py
+```
+
+调整内容：
+
+1. `Repository` 新增 `security_score` 和 `security_level`。
+2. `apply_security_flags` 会同步计算安全分和风险等级。
+3. 风险等级分为 `low`、`medium`、`high`。
+4. 不同风险提示按严重程度扣分，例如恶意软件、钓鱼、窃取类风险扣分更高。
+5. `docs/projects.json` 输出安全分和风险等级。
+6. `docs/explorer.html` 在风险列展示风险等级和安全分。
+
+### 3. 设计边界
+
+该评分是启发式基础检查，不代表完整安全审计。它用于排序、提醒和后续筛选，不应作为是否可以直接运行外部项目的唯一依据。

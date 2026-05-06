@@ -1,7 +1,7 @@
 import unittest
 
 from src.models import Repository
-from src.security import REDACTION_TEXT, apply_security_flags, redact_sensitive_text, security_flags
+from src.security import REDACTION_TEXT, apply_security_flags, redact_sensitive_text, security_flags, security_level, security_score
 
 
 def repo(**kwargs):
@@ -39,6 +39,8 @@ class RepositorySecurityTest(unittest.TestCase):
         apply_security_flags(repositories)
 
         self.assertTrue(repositories[0].security_flags)
+        self.assertLess(repositories[0].security_score, 100)
+        self.assertEqual(repositories[0].security_level, "low")
 
     def test_flags_high_issue_load(self):
         flags = security_flags(repo(stargazers_count=500, open_issues_count=120))
@@ -74,6 +76,19 @@ class RepositorySecurityTest(unittest.TestCase):
         self.assertIn(f"{api_key_name}={REDACTION_TEXT}", result)
         self.assertIn(f"{password_name}: {REDACTION_TEXT}", result)
         self.assertEqual(result.count(REDACTION_TEXT), 2)
+
+    def test_security_score_and_level(self):
+        flags = [
+            "未识别到许可证，复用代码前需要人工确认授权。",
+            "包含恶意软件相关表述，需人工确认项目用途。",
+        ]
+
+        score = security_score(flags)
+
+        self.assertEqual(score, 50)
+        self.assertEqual(security_level(score), "high")
+        self.assertEqual(security_level(85), "low")
+        self.assertEqual(security_level(65), "medium")
 
 
 if __name__ == "__main__":

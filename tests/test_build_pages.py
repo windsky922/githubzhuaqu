@@ -46,6 +46,8 @@ class BuildPagesTest(unittest.TestCase):
                             "sources": ["github_trending", "github_search"],
                             "trending_rank": 2,
                             "security_flags": ["未识别到许可证。"],
+                            "security_score": 85,
+                            "security_level": "medium",
                         }
                     ],
                     ensure_ascii=False,
@@ -93,6 +95,8 @@ class BuildPagesTest(unittest.TestCase):
             self.assertEqual(projects_json["projects"][0]["full_name"], "owner/project")
             self.assertEqual(projects_json["projects"][0]["report_url"], "weekly/2026-04-28.html")
             self.assertIn("security_flags", projects_json["projects"][0])
+            self.assertEqual(projects_json["projects"][0]["security_score"], 85)
+            self.assertEqual(projects_json["projects"][0]["security_level"], "medium")
             runs_json = json.loads((root / "docs" / "runs.json").read_text(encoding="utf-8"))
             self.assertEqual(runs_json["schema_version"], 1)
             self.assertEqual(runs_json["count"], 1)
@@ -116,6 +120,7 @@ class BuildPagesTest(unittest.TestCase):
             self.assertIn("updateUrl", explorer)
             self.assertIn("summaryHtml", explorer)
             self.assertIn("matchesProfile", explorer)
+            self.assertIn("securityText", explorer)
             feed = (root / "docs" / "feed.xml").read_text(encoding="utf-8")
             self.assertIn("<rss version=\"2.0\">", feed)
             self.assertIn("GitHub 每周热点项目周报 - 2026-04-28", feed)

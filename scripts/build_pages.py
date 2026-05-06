@@ -700,7 +700,7 @@ def _explorer_content() -> str:
     function rowHtml(project) {
       const risks = project.security_flags || [];
       const sourceTags = (project.sources || []).map(source => `<span class="tag source">${escapeHtml(sourceLabel(source))}</span>`).join("");
-      const riskText = risks.length ? risks.map(flag => `<span class="tag risk">${escapeHtml(flag)}</span>`).join("") : "0";
+      const riskText = securityText(project, risks);
       return `<tr>
         <td class="repo"><a href="${escapeAttribute(project.html_url)}" target="_blank" rel="noreferrer">${escapeHtml(project.full_name)}</a><div class="desc">${escapeHtml(project.description || "")}</div></td>
         <td>${escapeHtml(project.run_date || "")}</td>
@@ -712,6 +712,14 @@ def _explorer_content() -> str:
         <td>${riskText}</td>
         <td><a href="${escapeAttribute(project.report_url || "#")}">查看</a></td>
       </tr>`;
+    }
+
+    function securityText(project, risks) {
+      const level = project.security_level || "low";
+      const score = Number.isFinite(Number(project.security_score)) ? Number(project.security_score) : 100;
+      const label = level === "high" ? "高风险" : level === "medium" ? "中风险" : "低风险";
+      const tags = risks.length ? risks.map(flag => `<span class="tag risk">${escapeHtml(flag)}</span>`).join("") : "";
+      return `<span class="tag risk">${escapeHtml(label)} ${score}</span>${tags}`;
     }
 
     function sourceLabel(source) {
@@ -782,6 +790,8 @@ def _public_projects(root: Path) -> dict:
                 "trending_rank": _int_value(row.get("trending_rank")),
                 "selection_reasons": [str(reason) for reason in row.get("selection_reasons") or [] if reason],
                 "security_flags": [str(flag) for flag in row.get("security_flags") or [] if flag],
+                "security_score": _int_value(row.get("security_score"), 100),
+                "security_level": str(row.get("security_level") or "low"),
                 "report_url": f"weekly/{row.get('run_date', '')}.html" if row.get("run_date") else "",
             }
         )
@@ -986,11 +996,11 @@ def _json_text(data: dict) -> str:
     return json.dumps(data, ensure_ascii=False, indent=2) + "\n"
 
 
-def _int_value(value: object) -> int:
+def _int_value(value: object, default: int = 0) -> int:
     try:
-        return int(value or 0)
+        return int(value if value is not None else default)
     except (TypeError, ValueError):
-        return 0
+        return default
 
 
 def _float_value(value: object) -> float:

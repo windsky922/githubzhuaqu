@@ -35,6 +35,8 @@ def redact_sensitive_text(text: str) -> str:
 def apply_security_flags(repositories: list[Repository]) -> None:
     for repo in repositories:
         repo.security_flags = security_flags(repo)
+        repo.security_score = security_score(repo.security_flags)
+        repo.security_level = security_level(repo.security_score)
 
 
 def security_flags(repo: Repository) -> list[str]:
@@ -49,6 +51,39 @@ def security_flags(repo: Repository) -> list[str]:
         flags.append("Open Issue 数量相对较高，建议复用前人工检查维护响应和问题质量。")
     flags.extend(_keyword_flags(repo))
     return _dedupe(flags)
+
+
+def security_score(flags: list[str]) -> int:
+    score = 100
+    for flag in flags:
+        score -= _flag_penalty(flag)
+    return max(0, min(100, score))
+
+
+def security_level(score: int) -> str:
+    if score >= 85:
+        return "low"
+    if score >= 65:
+        return "medium"
+    return "high"
+
+
+def _flag_penalty(flag: str) -> int:
+    if "恶意软件" in flag or "钓鱼" in flag or "窃取" in flag:
+        return 35
+    if "破解" in flag:
+        return 30
+    if "空投" in flag or "赠送" in flag:
+        return 20
+    if "未识别到许可证" in flag:
+        return 15
+    if "已归档" in flag:
+        return 20
+    if "fork" in flag:
+        return 10
+    if "Open Issue" in flag:
+        return 10
+    return 10
 
 
 def _has_high_issue_load(repo: Repository) -> bool:

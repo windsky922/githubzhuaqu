@@ -37,6 +37,8 @@ sources
 trending_rank
 selection_reasons
 security_flags
+security_score
+security_level
 report_url
 ```
 
@@ -45,6 +47,7 @@ report_url
 1. 前端历史项目筛选。
 2. 多渠道推送摘要生成。
 3. 外部脚本按语言、方向、来源、风险提示做二次分析。
+4. `security_score` 为 0 到 100 的基础安全分，`security_level` 为 `low`、`medium` 或 `high`。
 
 当前 `docs/explorer.html` 已经直接消费该文件，并将筛选状态同步到 URL 查询参数。
 

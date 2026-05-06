@@ -23,6 +23,8 @@ PROJECT_KEYS = {
     "trending_rank",
     "selection_reasons",
     "security_flags",
+    "security_score",
+    "security_level",
     "report_url",
 }
 
@@ -224,6 +226,8 @@ def _write_public_json_fixture(root: Path) -> None:
                     "trending_rank": 1,
                     "selection_reasons": ["进入 GitHub Trending 周榜第 1 位。"],
                     "security_flags": [],
+                    "security_score": 100,
+                    "security_level": "low",
                 }
             ],
             ensure_ascii=False,

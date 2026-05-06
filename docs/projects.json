@@ -1,251 +1,7 @@
 {
   "schema_version": 1,
-  "count": 60,
+  "count": 50,
   "projects": [
-    {
-      "run_date": "2026-05-06",
-      "full_name": "warpdotdev/warp",
-      "html_url": "https://github.com/warpdotdev/warp",
-      "description": "Warp is an agentic development environment, born out of the terminal.",
-      "category": "AI Agent",
-      "language": "Rust",
-      "stargazers_count": 55373,
-      "forks_count": 4023,
-      "star_growth": 0,
-      "score": 0.509,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 1,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 1 位，是本期最重要的热度信号。",
-        "匹配当前个性化方向：开发者工具。",
-        "当前累计 Star 55373，具备一定社区关注度。",
-        "最近一周仍有更新或维护活动。"
-      ],
-      "security_flags": [],
-      "report_url": "weekly/2026-05-06.html"
-    },
-    {
-      "run_date": "2026-05-06",
-      "full_name": "mattpocock/skills",
-      "html_url": "https://github.com/mattpocock/skills",
-      "description": "Skills for Real Engineers. Straight from my .claude directory.",
-      "category": "LLM Tooling",
-      "language": "Shell",
-      "stargazers_count": 61918,
-      "forks_count": 5340,
-      "star_growth": 2110,
-      "score": 0.7742,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 2,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 2 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 2110，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "当前累计 Star 61918，具备一定社区关注度。"
-      ],
-      "security_flags": [],
-      "report_url": "weekly/2026-05-06.html"
-    },
-    {
-      "run_date": "2026-05-06",
-      "full_name": "TauricResearch/TradingAgents",
-      "html_url": "https://github.com/TauricResearch/TradingAgents",
-      "description": "TradingAgents: Multi-Agents LLM Financial Trading Framework",
-      "category": "AI Agent",
-      "language": "Python",
-      "stargazers_count": 69810,
-      "forks_count": 13472,
-      "star_growth": 1363,
-      "score": 0.7562,
-      "sources": [
-        "github_search",
-        "github_trending"
-      ],
-      "trending_rank": 3,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 3 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 1363，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
-      ],
-      "security_flags": [],
-      "report_url": "weekly/2026-05-06.html"
-    },
-    {
-      "run_date": "2026-05-06",
-      "full_name": "soxoj/maigret",
-      "html_url": "https://github.com/soxoj/maigret",
-      "description": "🕵️‍♂️ Collect a dossier on a person by username from 3000+ sites",
-      "category": "Developer Tools",
-      "language": "Python",
-      "stargazers_count": 25761,
-      "forks_count": 1788,
-      "star_growth": 513,
-      "score": 0.6158,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 4,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 4 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 513，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
-      ],
-      "security_flags": [],
-      "report_url": "weekly/2026-05-06.html"
-    },
-    {
-      "run_date": "2026-05-06",
-      "full_name": "ruvnet/ruflo",
-      "html_url": "https://github.com/ruvnet/ruflo",
-      "description": "🌊 The leading agent orchestration platform for Claude. Deploy intelligent multi-agent swarms, coordinate autonomous workflows, and build conversational AI systems. Features    enterprise-grade architecture, self-learning swarm intelligence, RAG integration, and native Claude Code / Codex Integration",
-      "category": "AI Agent",
-      "language": "TypeScript",
-      "stargazers_count": 44504,
-      "forks_count": 4932,
-      "star_growth": 2211,
-      "score": 0.7676,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 5,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 5 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 2211，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
-      ],
-      "security_flags": [],
-      "report_url": "weekly/2026-05-06.html"
-    },
-    {
-      "run_date": "2026-05-06",
-      "full_name": "ComposioHQ/awesome-codex-skills",
-      "html_url": "https://github.com/ComposioHQ/awesome-codex-skills",
-      "description": "A curated list of practical Codex skills for automating workflows across the Codex CLI and API.",
-      "category": "AI Agent",
-      "language": "Python",
-      "stargazers_count": 6996,
-      "forks_count": 457,
-      "star_growth": 329,
-      "score": 0.565,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 7,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 7 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 329，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
-      ],
-      "security_flags": [
-        "未识别到许可证，复用代码前需要人工确认授权。"
-      ],
-      "report_url": "weekly/2026-05-06.html"
-    },
-    {
-      "run_date": "2026-05-06",
-      "full_name": "AIDC-AI/Pixelle-Video",
-      "html_url": "https://github.com/AIDC-AI/Pixelle-Video",
-      "description": "🚀 AI 全自动短视频引擎 | AI Fully Automated Short Video Engine",
-      "category": "Other",
-      "language": "Python",
-      "stargazers_count": 12423,
-      "forks_count": 1886,
-      "star_growth": 1256,
-      "score": 0.5058,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 8,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 8 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 1256，近期热度上升。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
-        "当前累计 Star 12423，具备一定社区关注度。"
-      ],
-      "security_flags": [],
-      "report_url": "weekly/2026-05-06.html"
-    },
-    {
-      "run_date": "2026-05-06",
-      "full_name": "D4Vinci/Scrapling",
-      "html_url": "https://github.com/D4Vinci/Scrapling",
-      "description": "🕷️ An adaptive Web Scraping framework that handles everything from a single request to a full-scale crawl!",
-      "category": "Developer Tools",
-      "language": "Python",
-      "stargazers_count": 45568,
-      "forks_count": 4216,
-      "star_growth": 1033,
-      "score": 0.4306,
-      "sources": [
-        "github_search",
-        "github_trending"
-      ],
-      "trending_rank": 12,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 12 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 1033，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
-      ],
-      "security_flags": [],
-      "report_url": "weekly/2026-05-06.html"
-    },
-    {
-      "run_date": "2026-05-06",
-      "full_name": "NousResearch/hermes-agent",
-      "html_url": "https://github.com/NousResearch/hermes-agent",
-      "description": "The agent that grows with you",
-      "category": "AI Agent",
-      "language": "Python",
-      "stargazers_count": 134995,
-      "forks_count": 20625,
-      "star_growth": 1690,
-      "score": 0.4222,
-      "sources": [
-        "github_search"
-      ],
-      "trending_rank": 0,
-      "selection_reasons": [
-        "较上次记录新增 Star 1690，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
-        "当前累计 Star 134995，具备一定社区关注度。"
-      ],
-      "security_flags": [],
-      "report_url": "weekly/2026-05-06.html"
-    },
-    {
-      "run_date": "2026-05-06",
-      "full_name": "Alishahryar1/free-claude-code",
-      "html_url": "https://github.com/Alishahryar1/free-claude-code",
-      "description": "Use claude-code for free in the terminal, VSCode extension or discord like OpenClaw (voice supported)",
-      "category": "LLM Tooling",
-      "language": "Python",
-      "stargazers_count": 21788,
-      "forks_count": 3159,
-      "star_growth": 415,
-      "score": 0.3889,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 9,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 9 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 415，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
-      ],
-      "security_flags": [],
-      "report_url": "weekly/2026-05-06.html"
-    },
     {
       "run_date": "2026-05-05",
       "full_name": "mattpocock/skills",
@@ -268,6 +24,8 @@
         "当前累计 Star 59808，具备一定社区关注度。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-05-05.html"
     },
     {
@@ -293,6 +51,8 @@
         "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-05-05.html"
     },
     {
@@ -317,6 +77,8 @@
         "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-05-05.html"
     },
     {
@@ -343,6 +105,8 @@
       "security_flags": [
         "未识别到许可证，复用代码前需要人工确认授权。"
       ],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-05-05.html"
     },
     {
@@ -367,6 +131,8 @@
         "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-05-05.html"
     },
     {
@@ -391,6 +157,8 @@
         "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-05-05.html"
     },
     {
@@ -415,6 +183,8 @@
         "匹配当前个性化方向：开发者工具。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-05-05.html"
     },
     {
@@ -439,6 +209,8 @@
         "当前累计 Star 133305，具备一定社区关注度。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-05-05.html"
     },
     {
@@ -463,6 +235,8 @@
         "仓库主题、语言或名称与关注方向匹配。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-05-05.html"
     },
     {
@@ -487,6 +261,8 @@
         "仓库主题、语言或名称与关注方向匹配。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-05-05.html"
     },
     {
@@ -511,6 +287,8 @@
         "当前累计 Star 57250，具备一定社区关注度。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-05-04.html"
     },
     {
@@ -536,6 +314,8 @@
         "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-05-04.html"
     },
     {
@@ -562,6 +342,8 @@
       "security_flags": [
         "未识别到许可证，复用代码前需要人工确认授权。"
       ],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-05-04.html"
     },
     {
@@ -586,6 +368,8 @@
         "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-05-04.html"
     },
     {
@@ -610,6 +394,8 @@
         "最近一周仍有更新或维护活动。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-05-04.html"
     },
     {
@@ -634,6 +420,8 @@
         "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-05-04.html"
     },
     {
@@ -658,6 +446,8 @@
         "匹配当前个性化方向：开发者工具。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-05-04.html"
     },
     {
@@ -682,6 +472,8 @@
         "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-05-04.html"
     },
     {
@@ -706,6 +498,8 @@
         "当前累计 Star 131396，具备一定社区关注度。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-05-04.html"
     },
     {
@@ -730,6 +524,8 @@
         "当前累计 Star 43224，具备一定社区关注度。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-05-04.html"
     },
     {
@@ -754,6 +550,8 @@
         "当前累计 Star 56014，具备一定社区关注度。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-05-03.html"
     },
     {
@@ -779,6 +577,8 @@
         "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-05-03.html"
     },
     {
@@ -805,6 +605,8 @@
       "security_flags": [
         "未识别到许可证，复用代码前需要人工确认授权。"
       ],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-05-03.html"
     },
     {
@@ -829,6 +631,8 @@
         "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-05-03.html"
     },
     {
@@ -853,6 +657,8 @@
         "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-05-03.html"
     },
     {
@@ -877,6 +683,8 @@
         "匹配当前个性化方向：开发者工具。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-05-03.html"
     },
     {
@@ -901,6 +709,8 @@
         "仓库主题、语言或名称与关注方向匹配。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-05-03.html"
     },
     {
@@ -925,6 +735,8 @@
         "当前累计 Star 130453，具备一定社区关注度。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-05-03.html"
     },
     {
@@ -949,6 +761,8 @@
         "当前累计 Star 42274，具备一定社区关注度。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-05-03.html"
     },
     {
@@ -973,6 +787,8 @@
         "仓库主题、语言或名称与关注方向匹配。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-05-03.html"
     },
     {
@@ -997,6 +813,8 @@
         "当前累计 Star 18943，具备一定社区关注度。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-04-30.html"
     },
     {
@@ -1021,6 +839,8 @@
         "仓库主题、语言或名称与关注方向匹配。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-04-30.html"
     },
     {
@@ -1047,6 +867,8 @@
       "security_flags": [
         "未识别到许可证，复用代码前需要人工确认授权。"
       ],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-04-30.html"
     },
     {
@@ -1071,6 +893,8 @@
         "当前累计 Star 2904，具备一定社区关注度。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-04-30.html"
     },
     {
@@ -1095,6 +919,8 @@
         "当前累计 Star 15352，具备一定社区关注度。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-04-30.html"
     },
     {
@@ -1121,6 +947,8 @@
       "security_flags": [
         "未识别到许可证，复用代码前需要人工确认授权。"
       ],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-04-30.html"
     },
     {
@@ -1145,6 +973,8 @@
         "当前累计 Star 18122，具备一定社区关注度。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-04-30.html"
     },
     {
@@ -1169,6 +999,8 @@
         "仓库主题、语言或名称与关注方向匹配。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-04-30.html"
     },
     {
@@ -1193,6 +1025,8 @@
         "仓库主题、语言或名称与关注方向匹配。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-04-30.html"
     },
     {
@@ -1217,6 +1051,8 @@
         "仓库主题、语言或名称与关注方向匹配。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-04-30.html"
     },
     {
@@ -1241,6 +1077,8 @@
         "仓库主题、语言或名称与关注方向匹配。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-04-29.html"
     },
     {
@@ -1267,6 +1105,8 @@
       "security_flags": [
         "未识别到许可证，复用代码前需要人工确认授权。"
       ],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-04-29.html"
     },
     {
@@ -1291,6 +1131,8 @@
         "仓库主题、语言或名称与关注方向匹配。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-04-29.html"
     },
     {
@@ -1315,6 +1157,8 @@
         "最近一周仍有更新或维护活动。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-04-29.html"
     },
     {
@@ -1339,6 +1183,8 @@
         "仓库主题、语言或名称与关注方向匹配。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-04-29.html"
     },
     {
@@ -1363,6 +1209,8 @@
         "最近一周仍有更新或维护活动。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-04-29.html"
     },
     {
@@ -1389,6 +1237,8 @@
       "security_flags": [
         "未识别到许可证，复用代码前需要人工确认授权。"
       ],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-04-29.html"
     },
     {
@@ -1413,6 +1263,8 @@
         "仓库主题、语言或名称与关注方向匹配。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-04-29.html"
     },
     {
@@ -1437,6 +1289,8 @@
         "最近一周仍有更新或维护活动。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-04-29.html"
     },
     {
@@ -1460,6 +1314,8 @@
         "最近一周仍有更新或维护活动。"
       ],
       "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
       "report_url": "weekly/2026-04-29.html"
     }
   ]
