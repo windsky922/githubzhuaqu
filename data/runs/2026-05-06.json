@@ -17,7 +17,7 @@
   "collected_count": 315,
   "selected_count": 10,
   "skipped_sent_count": 0,
-  "previously_sent_selected_count": 9,
+  "previously_sent_selected_count": 10,
   "collector_errors": [],
   "collector_stats": [
     {
@@ -104,21 +104,21 @@
   "run_summary_path": "data/runs/2026-05-06.json",
   "raw_repositories_path": "data/raw/2026-05-06.json",
   "selected_repositories_path": "data/selected/2026-05-06.json",
-  "state_path": "data/state/sent_repos.json",
+  "state_path": "",
   "star_history_path": "data/state/star_history.json",
   "trend_summary_path": "data/trends/2026-05-06.json",
-  "kimi_used": false,
-  "fallback_used": true,
-  "report_error": "Kimi API error 429: {\"error\":{\"message\":\"The engine is currently overloaded, please try again later\",\"type\":\"engine_overloaded_error\"}}; retry_after=20s; Kimi API error 429: {\"error\":{\"message\":\"The engine is currently overloaded, please try again later\",\"type\":\"engine_overloaded_error\"}}; retry_after=20s; Kimi API transient request error: The read operation timed out",
-  "telegram_sent": true,
-  "telegram_error": "",
+  "kimi_used": true,
+  "fallback_used": false,
+  "report_error": "",
+  "telegram_sent": false,
+  "telegram_error": "Telegram send skipped",
   "telegram_report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-06.html",
   "delivery_results": [
     {
       "channel": "telegram",
-      "sent": true,
-      "error": "",
-      "skipped": false
+      "sent": false,
+      "error": "Telegram send skipped",
+      "skipped": true
     }
   ],
   "sqlite_index_path": "data/github_weekly.sqlite",

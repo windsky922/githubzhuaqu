@@ -8,19 +8,19 @@
       "report_url": "weekly/2026-05-06.html",
       "selected_count": 10,
       "collected_count": 315,
-      "previously_sent_selected_count": 9,
+      "previously_sent_selected_count": 10,
       "readme_fetched_count": 10,
       "star_history_updated_count": 222,
-      "kimi_used": false,
-      "fallback_used": true,
-      "telegram_sent": true,
+      "kimi_used": true,
+      "fallback_used": false,
+      "telegram_sent": false,
       "telegram_report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-06.html",
       "delivery_results": [
         {
           "channel": "telegram",
-          "sent": true,
-          "error": "",
-          "skipped": false
+          "sent": false,
+          "error": "Telegram send skipped",
+          "skipped": true
         }
       ],
       "collector_error_count": 0,
@@ -60,14 +60,14 @@
           "count": 1
         }
       ],
-      "total_star_growth": 2713,
+      "total_star_growth": 138,
       "trending_project_count": 9,
       "summary_points": [
         "AI Agent 是本期最集中的方向，共 6 个项目。",
         "Python 是本期出现最多的主要语言，共 6 个项目。",
-        "本期入选项目累计新增 Star 2713。",
+        "本期入选项目累计新增 Star 138。",
         "warpdotdev/warp 是本期 GitHub Trending 排名最高的项目，周榜排名 1。",
-        "mattpocock/skills 是本期新增 Star 最高的项目，新增 623。"
+        "NousResearch/hermes-agent 是本期新增 Star 最高的项目，新增 28。"
       ]
     },
     {

@@ -10,17 +10,17 @@
       "readme_summary": "&nbsp; &nbsp; · · · · · · [!NOTE] OpenAI is the founding sponsor of the new, open-source Warp repository, and the new agentic management workflows are powered by GPT models. Warp is an agentic development environment, born out of the terminal.",
       "category": "AI Agent",
       "language": "Rust",
-      "stargazers_count": 55568,
-      "forks_count": 4055,
-      "star_growth": 195,
-      "score": 0.5887,
+      "stargazers_count": 55576,
+      "forks_count": 4056,
+      "star_growth": 8,
+      "score": 0.5825,
       "sources": [
         "github_trending"
       ],
       "trending_rank": 1,
       "selection_reasons": [
         "进入 GitHub Trending 周榜第 1 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 195，近期热度上升。",
+        "较上次记录新增 Star 8，近期热度上升。",
         "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
         "匹配当前个性化方向：开发者工具。"
       ],
@@ -40,10 +40,10 @@
       "readme_summary": "[2026-04] **TradingAgents v0.2.4** released with structured-output agents (Research Manager, Trader, Portfolio Manager), LangGraph checkpoint resume, persistent decision log, DeepSeek/Qwen/GLM/Azure provider support, Docker, and a Windows UTF-8 encoding fix. See CHANGELOG.md for the full list.",
       "category": "AI Agent",
       "language": "Python",
-      "stargazers_count": 70050,
-      "forks_count": 13520,
-      "star_growth": 240,
-      "score": 0.7339,
+      "stargazers_count": 70073,
+      "forks_count": 13525,
+      "star_growth": 22,
+      "score": 0.8246,
       "sources": [
         "github_search",
         "github_trending"
@@ -51,7 +51,7 @@
       "trending_rank": 2,
       "selection_reasons": [
         "进入 GitHub Trending 周榜第 2 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 240，近期热度上升。",
+        "较上次记录新增 Star 22，近期热度上升。",
         "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
         "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
       ],
@@ -71,19 +71,19 @@
       "readme_summary": "My agent skills that I use every day to do real engineering - not vibe coding. Developing real applications is hard. Approaches like GSD, BMAD, and Spec-Kit try to help by owning the process.",
       "category": "LLM Tooling",
       "language": "Shell",
-      "stargazers_count": 62541,
-      "forks_count": 5405,
-      "star_growth": 623,
-      "score": 0.7553,
+      "stargazers_count": 62567,
+      "forks_count": 5406,
+      "star_growth": 26,
+      "score": 0.7391,
       "sources": [
         "github_trending"
       ],
       "trending_rank": 3,
       "selection_reasons": [
         "进入 GitHub Trending 周榜第 3 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 623，近期热度上升。",
+        "较上次记录新增 Star 26，近期热度上升。",
         "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "当前累计 Star 62541，具备一定社区关注度。"
+        "当前累计 Star 62567，具备一定社区关注度。"
       ],
       "security_flags": [],
       "security_score": 100,
@@ -103,17 +103,17 @@
       "readme_summary": "Multi-agent AI orchestration for Claude Code** Orchestrate 100+ specialized AI agents across machines, teams, and trust boundaries. Ruflo adds coordinated swarms, self-learning memory, federated comms, and enterprise security to Claude Code — so agents don't just run, they collaborate.",
       "category": "AI Agent",
       "language": "TypeScript",
-      "stargazers_count": 44890,
-      "forks_count": 4977,
-      "star_growth": 386,
-      "score": 0.7113,
+      "stargazers_count": 44910,
+      "forks_count": 4978,
+      "star_growth": 20,
+      "score": 0.7327,
       "sources": [
         "github_trending"
       ],
       "trending_rank": 4,
       "selection_reasons": [
         "进入 GitHub Trending 周榜第 4 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 386，近期热度上升。",
+        "较上次记录新增 Star 20，近期热度上升。",
         "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
         "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
       ],
@@ -133,17 +133,17 @@
       "readme_summary": "English · 简体中文 Maigret** collects a dossier on a person **by username only**, checking for accounts on a huge number of sites and gathering all the available information from web pages. No API keys required.",
       "category": "Developer Tools",
       "language": "Python",
-      "stargazers_count": 25864,
+      "stargazers_count": 25867,
       "forks_count": 1800,
-      "star_growth": 103,
-      "score": 0.5782,
+      "star_growth": 3,
+      "score": 0.565,
       "sources": [
         "github_trending"
       ],
       "trending_rank": 5,
       "selection_reasons": [
         "进入 GitHub Trending 周榜第 5 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 103，近期热度上升。",
+        "较上次记录新增 Star 3，近期热度上升。",
         "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
         "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
       ],
@@ -163,19 +163,19 @@
       "readme_summary": "The next generation coding agent harness to raise the skill ceiling. Built for multi-session workflows, infinite customizability, and performance.",
       "category": "AI Agent",
       "language": "Rust",
-      "stargazers_count": 4414,
-      "forks_count": 421,
-      "star_growth": 0,
-      "score": 0.5779,
+      "stargazers_count": 4419,
+      "forks_count": 420,
+      "star_growth": 5,
+      "score": 0.6183,
       "sources": [
         "github_trending"
       ],
       "trending_rank": 6,
       "selection_reasons": [
         "进入 GitHub Trending 周榜第 6 位，是本期最重要的热度信号。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
-        "当前累计 Star 4414，具备一定社区关注度。",
-        "仓库主题、语言或名称与关注方向匹配。"
+        "较上次记录新增 Star 5，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
       ],
       "security_flags": [],
       "security_score": 100,
@@ -195,17 +195,17 @@
       "readme_summary": "✅ **2026-01-26**: 新增「动作迁移」模块，上传参考视频和图片进行动作迁移 ✅ **2026-01-14**: 新增「数字人口播」和「图生视频」流水线，新增多语言 TTS 音色支持 ✅ **2026-01-06**: 新增 RunningHub 48G 显存机器调用支持 ✅ **2025-12-28**: 支持 RunningHub 并发限制可配置，优化 LLM 返回结构化数据的逻辑 ✅ **2025-12-17**: 支持 ComfyUI API Key 配置，支持 Nano Banana 模型调用，API 接口支持模板自定义参数 ✅ **2025-12-10**: 侧边栏内置 FAQ，锁定 edge-tts 版本修复 TTS 服务不稳定问题 ✅ **2025-12-08**: 支持固定脚本多种分割方式(段落/行/句子)，优化模板选择交互逻辑支持直接预览选择 ✅ **2025-12-06**: 修复视频生成 API 返回 URL 路径处理，支持跨平台兼容 ✅ **2025-12-05**: 新增 Windows 整合包下载，优化图片与视频反推工作流 ✅ **2025-12-04**: 新增「自定义素材」功能，支持用户上传自己的照片和视频，AI 智能分析生成脚本 ✅ **2025-11-18**: 优化 RunningHub 服务调用支持并行处理，新增历史记录页面，支持批量创建视频任务 ✅ **全自动生成** - 输入主题，自动生成完整视频 ✅ **AI 智能文案** - 根据主题智能创作解说词，无需自己写脚本 ✅ **AI 生成配图** - 每句话都配上精美的 AI 插图 ✅ **AI 生成视频** - 支持使用 AI 视频生成模型（如 WAN 2.1）创建动态视频内容 ✅ **AI 生成语音** - 支持 Edge-TTS、Index-TTS 等众多主流 TTS 方案 ✅ **背景音乐** - 支持添加 BGM，让视频更有氛围 ✅ **视觉风格** - 多种模板可选，打造独特视频风格 ✅ **灵活尺寸** - 支持竖屏、横屏等多种视频尺寸 ✅ **多种 AI 模型** - 支持 GPT、通义千问、DeepSeek、Ollama 等 ✅ **原子能力灵活组合** - 基于 ComfyUI 架构，可使用预置工作流，也可自定义任意能力（如替换生图模型为 FLUX、替换 TTS 为 ChatTTS 等） Pixelle-Video 采用模块化设计，整个视频生成流程清晰简洁： 从输入文本到最终视频输出，整个流程简洁清晰：**文案生成 → 配图规划 → 逐帧处理 → 视频合成** 每个环节都支持灵活定制，可选择不同的 AI 模型、音频引擎、视觉风格等，满足个性化创作需求。",
       "category": "Other",
       "language": "Python",
-      "stargazers_count": 12639,
-      "forks_count": 1919,
-      "star_growth": 216,
-      "score": 0.4929,
+      "stargazers_count": 12649,
+      "forks_count": 1920,
+      "star_growth": 10,
+      "score": 0.4952,
       "sources": [
         "github_trending"
       ],
       "trending_rank": 7,
       "selection_reasons": [
         "进入 GitHub Trending 周榜第 7 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 216，近期热度上升。",
+        "较上次记录新增 Star 10，近期热度上升。",
         "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
         "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
       ],
@@ -225,10 +225,10 @@
       "readme_summary": "Effortless Web Scraping for the Modern Web &middot; &middot; &middot; &middot; &middot; Scrapling is an adaptive Web Scraping framework that handles everything from a single request to a full-scale crawl.",
       "category": "Developer Tools",
       "language": "Python",
-      "stargazers_count": 45933,
-      "forks_count": 4253,
-      "star_growth": 365,
-      "score": 0.6029,
+      "stargazers_count": 45948,
+      "forks_count": 4255,
+      "star_growth": 15,
+      "score": 0.5915,
       "sources": [
         "github_search",
         "github_trending"
@@ -236,7 +236,7 @@
       "trending_rank": 10,
       "selection_reasons": [
         "进入 GitHub Trending 周榜第 10 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 365，近期热度上升。",
+        "较上次记录新增 Star 15，近期热度上升。",
         "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
         "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
       ],
@@ -256,17 +256,17 @@
       "readme_summary": "Awesome Codex Skills A curated list of practical Codex skills for automating workflows across the Codex CLI and API. Want skills that do more than generate text?** Codex can send emails, create issues, post to Slack, and take actions across 1000+ apps.",
       "category": "AI Agent",
       "language": "Python",
-      "stargazers_count": 7074,
+      "stargazers_count": 7075,
       "forks_count": 465,
-      "star_growth": 78,
-      "score": 0.5069,
+      "star_growth": 1,
+      "score": 0.4866,
       "sources": [
         "github_trending"
       ],
       "trending_rank": 9,
       "selection_reasons": [
         "进入 GitHub Trending 周榜第 9 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 78，近期热度上升。",
+        "较上次记录新增 Star 1，近期热度上升。",
         "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
         "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
       ],
@@ -290,19 +290,19 @@
       "readme_summary": "The self-improving AI agent built by Nous Research.** It's the only agent with a built-in learning loop — it creates skills from experience, improves them during use, nudges itself to persist knowledge, searches its own past conversations, and builds a deepening model of who you are across sessions.",
       "category": "AI Agent",
       "language": "Python",
-      "stargazers_count": 135502,
-      "forks_count": 20744,
-      "star_growth": 507,
-      "score": 0.4402,
+      "stargazers_count": 135530,
+      "forks_count": 20749,
+      "star_growth": 28,
+      "score": 0.4823,
       "sources": [
         "github_search"
       ],
       "trending_rank": 0,
       "selection_reasons": [
-        "较上次记录新增 Star 507，近期热度上升。",
+        "较上次记录新增 Star 28，近期热度上升。",
         "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
         "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
-        "当前累计 Star 135502，具备一定社区关注度。"
+        "当前累计 Star 135530，具备一定社区关注度。"
       ],
       "security_flags": [],
       "security_score": 100,
