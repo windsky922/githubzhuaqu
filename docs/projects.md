@@ -4,16 +4,16 @@
 
 | 日期 | 项目 | 来源 | Trending 排名 | 方向 | 语言 | Star | 新增 Star | 风险提示 | 链接 |
 |---|---|---|---:|---|---|---:|---:|---:|---|
-| 2026-05-06 | warpdotdev/warp | GitHub Trending | 1 | AI Agent | Rust | 55373 | 0 | 0 | [https://github.com/warpdotdev/warp](https://github.com/warpdotdev/warp) |
-| 2026-05-06 | mattpocock/skills | GitHub Trending | 2 | LLM Tooling | Shell | 61918 | 2110 | 0 | [https://github.com/mattpocock/skills](https://github.com/mattpocock/skills) |
-| 2026-05-06 | TauricResearch/TradingAgents | GitHub Search + GitHub Trending | 3 | AI Agent | Python | 69810 | 1363 | 0 | [https://github.com/TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents) |
-| 2026-05-06 | soxoj/maigret | GitHub Trending | 4 | Developer Tools | Python | 25761 | 513 | 0 | [https://github.com/soxoj/maigret](https://github.com/soxoj/maigret) |
-| 2026-05-06 | ruvnet/ruflo | GitHub Trending | 5 | AI Agent | TypeScript | 44504 | 2211 | 0 | [https://github.com/ruvnet/ruflo](https://github.com/ruvnet/ruflo) |
-| 2026-05-06 | ComposioHQ/awesome-codex-skills | GitHub Trending | 7 | AI Agent | Python | 6996 | 329 | 1 | [https://github.com/ComposioHQ/awesome-codex-skills](https://github.com/ComposioHQ/awesome-codex-skills) |
-| 2026-05-06 | AIDC-AI/Pixelle-Video | GitHub Trending | 8 | Other | Python | 12423 | 1256 | 0 | [https://github.com/AIDC-AI/Pixelle-Video](https://github.com/AIDC-AI/Pixelle-Video) |
-| 2026-05-06 | D4Vinci/Scrapling | GitHub Search + GitHub Trending | 12 | Developer Tools | Python | 45568 | 1033 | 0 | [https://github.com/D4Vinci/Scrapling](https://github.com/D4Vinci/Scrapling) |
-| 2026-05-06 | NousResearch/hermes-agent | GitHub Search | - | AI Agent | Python | 134995 | 1690 | 0 | [https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) |
-| 2026-05-06 | Alishahryar1/free-claude-code | GitHub Trending | 9 | LLM Tooling | Python | 21788 | 415 | 0 | [https://github.com/Alishahryar1/free-claude-code](https://github.com/Alishahryar1/free-claude-code) |
+| 2026-05-06 | warpdotdev/warp | GitHub Trending | 1 | AI Agent | Rust | 55568 | 195 | 0 | [https://github.com/warpdotdev/warp](https://github.com/warpdotdev/warp) |
+| 2026-05-06 | TauricResearch/TradingAgents | GitHub Search + GitHub Trending | 2 | AI Agent | Python | 70050 | 240 | 0 | [https://github.com/TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents) |
+| 2026-05-06 | mattpocock/skills | GitHub Trending | 3 | LLM Tooling | Shell | 62541 | 623 | 0 | [https://github.com/mattpocock/skills](https://github.com/mattpocock/skills) |
+| 2026-05-06 | ruvnet/ruflo | GitHub Trending | 4 | AI Agent | TypeScript | 44890 | 386 | 0 | [https://github.com/ruvnet/ruflo](https://github.com/ruvnet/ruflo) |
+| 2026-05-06 | soxoj/maigret | GitHub Trending | 5 | Developer Tools | Python | 25864 | 103 | 0 | [https://github.com/soxoj/maigret](https://github.com/soxoj/maigret) |
+| 2026-05-06 | 1jehuang/jcode | GitHub Trending | 6 | AI Agent | Rust | 4414 | 0 | 0 | [https://github.com/1jehuang/jcode](https://github.com/1jehuang/jcode) |
+| 2026-05-06 | AIDC-AI/Pixelle-Video | GitHub Trending | 7 | Other | Python | 12639 | 216 | 0 | [https://github.com/AIDC-AI/Pixelle-Video](https://github.com/AIDC-AI/Pixelle-Video) |
+| 2026-05-06 | D4Vinci/Scrapling | GitHub Search + GitHub Trending | 10 | Developer Tools | Python | 45933 | 365 | 0 | [https://github.com/D4Vinci/Scrapling](https://github.com/D4Vinci/Scrapling) |
+| 2026-05-06 | ComposioHQ/awesome-codex-skills | GitHub Trending | 9 | AI Agent | Python | 7074 | 78 | 1 | [https://github.com/ComposioHQ/awesome-codex-skills](https://github.com/ComposioHQ/awesome-codex-skills) |
+| 2026-05-06 | NousResearch/hermes-agent | GitHub Search | - | AI Agent | Python | 135502 | 507 | 0 | [https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) |
 | 2026-05-05 | mattpocock/skills | GitHub Trending | 1 | LLM Tooling | Shell | 59808 | 2558 | 0 | [https://github.com/mattpocock/skills](https://github.com/mattpocock/skills) |
 | 2026-05-05 | TauricResearch/TradingAgents | GitHub Search + GitHub Trending | 2 | AI Agent | Python | 68446 | 2908 | 0 | [https://github.com/TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents) |
 | 2026-05-05 | soxoj/maigret | GitHub Trending | 3 | Developer Tools | Python | 25248 | 1311 | 0 | [https://github.com/soxoj/maigret](https://github.com/soxoj/maigret) |
