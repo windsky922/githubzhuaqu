@@ -149,6 +149,14 @@ migration_meta
 6. `star_history` 保存 Star 历史。
 7. `migration_meta` 保存迁移元数据。
 
+当前只读查询入口位于：
+
+```text
+scripts/query_archive.py
+```
+
+该脚本只消费 SQLite 派生索引和公开归档字段，支持按语言、方向、profile、来源、风险提示和关键词查询历史项目。它不改变 JSON 事实来源，也不会写入密钥或私有配置。
+
 ## 六、契约测试
 
 契约测试位于：

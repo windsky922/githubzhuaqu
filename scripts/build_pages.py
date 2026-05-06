@@ -461,6 +461,25 @@ def _explorer_content() -> str:
       color: var(--accent);
       overflow-wrap: anywhere;
     }
+    .similar-block {
+      grid-column: 1 / -1;
+    }
+    .similar-list {
+      display: grid;
+      gap: 6px;
+      padding-left: 0;
+      list-style: none;
+    }
+    .similar-list li {
+      display: grid;
+      gap: 2px;
+    }
+    .similar-list a {
+      color: var(--accent);
+      font-weight: 700;
+      text-decoration: none;
+      overflow-wrap: anywhere;
+    }
     .num {
       font-variant-numeric: tabular-nums;
       white-space: nowrap;
@@ -822,7 +841,52 @@ def _explorer_content() -> str:
           <div class="detail-block"><h3>来源</h3><p>${escapeHtml((project.sources || []).map(sourceLabel).join(" + ") || "-")}</p></div>
           <div class="detail-block"><h3>完整链接</h3><p><a class="detail-link" href="${escapeAttribute(project.html_url)}" target="_blank" rel="noreferrer">${escapeHtml(project.html_url)}</a></p></div>
         </div>
+        <div class="detail-grid">
+          <div class="detail-block similar-block"><h3>相似项目</h3>${similarProjectsHtml(project)}</div>
+        </div>
       </div>`;
+    }
+
+    function similarProjectsHtml(project) {
+      const matches = similarProjects(project);
+      if (!matches.length) return "<p>暂无相似历史项目。</p>";
+      return `<ul class="similar-list">${matches.map(match => {
+        const description = match.description ? `<span>${escapeHtml(match.description)}</span>` : "";
+        const meta = [match.language || "Unknown", match.category || "Other", `新增 Star ${number(match.star_growth)}`].join(" / ");
+        return `<li><a href="${escapeAttribute(match.html_url)}" target="_blank" rel="noreferrer">${escapeHtml(match.full_name)}</a><span>${escapeHtml(meta)}</span>${description}</li>`;
+      }).join("")}</ul>`;
+    }
+
+    function similarProjects(project) {
+      return state.projects
+        .filter(candidate => candidate.full_name !== project.full_name)
+        .map(candidate => ({ project: candidate, score: similarityScore(project, candidate) }))
+        .filter(item => item.score > 0)
+        .sort((a, b) => b.score - a.score || number(b.project.star_growth) - number(a.project.star_growth) || rank(a.project.trending_rank) - rank(b.project.trending_rank))
+        .slice(0, 3)
+        .map(item => item.project);
+    }
+
+    function similarityScore(base, candidate) {
+      let score = 0;
+      if (base.language && base.language === candidate.language) score += 4;
+      if (base.category && base.category === candidate.category) score += 5;
+      score += overlapCount(base.sources || [], candidate.sources || []);
+      score += Math.min(4, overlapCount(projectKeywords(base), projectKeywords(candidate)));
+      return score;
+    }
+
+    function projectKeywords(project) {
+      return [project.full_name, project.description, project.category, ...(project.selection_reasons || [])]
+        .join(" ")
+        .toLowerCase()
+        .split(/[^a-z0-9\u4e00-\u9fa5]+/)
+        .filter(token => token.length >= 2);
+    }
+
+    function overlapCount(left, right) {
+      const rightSet = new Set(right);
+      return [...new Set(left)].filter(value => rightSet.has(value)).length;
     }
 
     function listHtml(items, emptyText) {

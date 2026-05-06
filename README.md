@@ -47,6 +47,7 @@ GitHub Actions
 | `scripts/build_pages.py` | 生成 GitHub Pages 归档页面 |
 | `scripts/migrate_json_to_sqlite.py` | 将历史 JSON 归档导入 SQLite 派生索引 |
 | `scripts/verify_migration.py` | 校验 SQLite 派生索引和 JSON 归档计数 |
+| `scripts/query_archive.py` | 按语言、方向、profile、来源、风险和关键词查询历史项目 |
 | `scripts/send_report_link.py` | 推送 GitHub Pages 周报链接 |
 | `scripts/check_delivery_channels.py` | 检查 Telegram、飞书、企业微信推送通道配置 |
 | `scripts/security_check.py` | 本仓库疑似密钥扫描 |
@@ -76,7 +77,7 @@ docs/feed.xml
 docs/weekly/YYYY-MM-DD.md
 ```
 
-其中 `explorer.html` 是轻量项目筛选页，直接读取 `projects.json` 和 `profiles.json`，支持按关键词、日期、语言、个性化方向、来源、风险提示和排序方式筛选历史入选项目。页面会根据 profile 自动生成快捷视图按钮，筛选状态会同步到 URL，便于后续在 Telegram、微信、飞书或浏览器中分享同一个筛选视图。项目行支持展开详情，查看 README 精简摘要、推荐理由、风险提示、项目指标和完整链接。
+其中 `explorer.html` 是轻量项目筛选页，直接读取 `projects.json` 和 `profiles.json`，支持按关键词、日期、语言、个性化方向、来源、风险提示和排序方式筛选历史入选项目。页面会根据 profile 自动生成快捷视图按钮，筛选状态会同步到 URL，便于后续在 Telegram、微信、飞书或浏览器中分享同一个筛选视图。项目行支持展开详情，查看 README 精简摘要、推荐理由、风险提示、项目指标、完整链接和相似历史项目。
 
 `profiles.json` 是个性化方向公开配置，包含 Java、Python、Agent 开发、学习型项目、开发者工具等方向的公开标签、语言和主题关键词。筛选页会读取该文件生成“个性化方向”下拉框，后续前端也可以直接复用。
 
@@ -254,6 +255,13 @@ python scripts/migrate_json_to_sqlite.py
 
 ```bash
 python scripts/verify_migration.py
+```
+
+查询历史项目：
+
+```bash
+python scripts/query_archive.py --refresh --language Python --source github_trending --limit 10
+python scripts/query_archive.py --profile agent_development --query workflow --format json
 ```
 
 默认数据库路径：
