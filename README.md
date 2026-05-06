@@ -47,6 +47,7 @@ GitHub Actions
 | `scripts/build_pages.py` | 生成 GitHub Pages 归档页面 |
 | `scripts/migrate_json_to_sqlite.py` | 将历史 JSON 归档导入 SQLite 派生索引 |
 | `scripts/verify_migration.py` | 校验 SQLite 派生索引和 JSON 归档计数 |
+| `scripts/query_archive.py` | 按语言、方向、profile、来源、风险和关键词查询历史项目 |
 | `scripts/send_report_link.py` | 推送 GitHub Pages 周报链接 |
 | `scripts/check_delivery_channels.py` | 检查 Telegram、飞书、企业微信推送通道配置 |
 | `scripts/security_check.py` | 本仓库疑似密钥扫描 |
@@ -255,6 +256,15 @@ python scripts/migrate_json_to_sqlite.py
 ```bash
 python scripts/verify_migration.py
 ```
+
+查询历史项目：
+
+```bash
+python scripts/query_archive.py --refresh --language Python --source github_trending --limit 10
+python scripts/query_archive.py --profile agent_development --query workflow --format json
+```
+
+更多命令示例见 `docs/archive-query.md`。
 
 默认数据库路径：
 
