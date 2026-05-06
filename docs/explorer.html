@@ -191,6 +191,50 @@
       color: var(--risk);
       background: #fff1f2;
     }
+    .detail-toggle {
+      height: 30px;
+      margin-top: 6px;
+      padding: 0 8px;
+      font-size: 13px;
+    }
+    .detail-row td {
+      background: #fbfcfe;
+      padding: 0;
+    }
+    .detail-panel {
+      display: none;
+      padding: 14px 16px 16px;
+      border-top: 1px solid var(--line);
+    }
+    .detail-panel.open {
+      display: grid;
+      gap: 10px;
+    }
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .detail-block {
+      min-width: 0;
+    }
+    .detail-block h3 {
+      margin: 0 0 4px;
+      font-size: 13px;
+      color: #344054;
+    }
+    .detail-block p,
+    .detail-block ul {
+      margin: 0;
+      color: var(--muted);
+    }
+    .detail-block ul {
+      padding-left: 18px;
+    }
+    .detail-link {
+      color: var(--accent);
+      overflow-wrap: anywhere;
+    }
     .num {
       font-variant-numeric: tabular-nums;
       white-space: nowrap;
@@ -211,6 +255,9 @@
       }
       .summary {
         grid-template-columns: 1fr 1fr;
+      }
+      .detail-grid {
+        grid-template-columns: 1fr;
       }
     }
     @media (max-width: 560px) {
@@ -346,6 +393,10 @@
       });
 
     Object.values(controls).forEach(control => control.addEventListener("input", render));
+    rows.addEventListener("click", event => {
+      const button = event.target.closest("[data-detail]");
+      if (button) toggleDetails(button);
+    });
     document.getElementById("reset").addEventListener("click", () => {
       controls.query.value = "";
       controls.runDate.value = "";
@@ -492,10 +543,11 @@
       return keywords.some(keyword => keyword && text.includes(keyword));
     }
 
-    function rowHtml(project) {
+    function rowHtml(project, index) {
       const risks = project.security_flags || [];
       const sourceTags = (project.sources || []).map(source => `<span class="tag source">${escapeHtml(sourceLabel(source))}</span>`).join("");
       const riskText = securityText(project, risks);
+      const detailId = `detail-${index}`;
       return `<tr>
         <td class="repo"><a href="${escapeAttribute(project.html_url)}" target="_blank" rel="noreferrer">${escapeHtml(project.full_name)}</a><div class="desc">${escapeHtml(project.description || "")}</div></td>
         <td>${escapeHtml(project.run_date || "")}</td>
@@ -505,8 +557,39 @@
         <td class="num">${project.trending_rank ? project.trending_rank : "-"}</td>
         <td class="num">${number(project.star_growth)}</td>
         <td>${riskText}</td>
-        <td><a href="${escapeAttribute(project.report_url || "#")}">查看</a></td>
-      </tr>`;
+        <td><a href="${escapeAttribute(project.report_url || "#")}">查看</a><button class="detail-toggle" type="button" data-detail="${escapeAttribute(detailId)}">详情</button></td>
+      </tr>
+      <tr class="detail-row"><td colspan="9">${detailPanel(project, detailId)}</td></tr>`;
+    }
+
+    function detailPanel(project, detailId) {
+      const reasons = listHtml(project.selection_reasons || [], "暂无推荐理由。");
+      const risks = listHtml(project.security_flags || [], "暂无风险提示。");
+      const summary = project.readme_summary || project.description || "暂无 README 摘要。";
+      return `<div id="${escapeAttribute(detailId)}" class="detail-panel">
+        <div class="detail-grid">
+          <div class="detail-block"><h3>README 摘要</h3><p>${escapeHtml(summary)}</p></div>
+          <div class="detail-block"><h3>推荐理由</h3>${reasons}</div>
+          <div class="detail-block"><h3>风险提示</h3>${risks}</div>
+        </div>
+        <div class="detail-grid">
+          <div class="detail-block"><h3>项目指标</h3><p>综合分 ${escapeHtml(number(project.score).toFixed(3))}；安全分 ${escapeHtml(project.security_score || 100)}；累计 Star ${escapeHtml(project.stargazers_count || 0)}；Fork ${escapeHtml(project.forks_count || 0)}</p></div>
+          <div class="detail-block"><h3>来源</h3><p>${escapeHtml((project.sources || []).map(sourceLabel).join(" + ") || "-")}</p></div>
+          <div class="detail-block"><h3>完整链接</h3><p><a class="detail-link" href="${escapeAttribute(project.html_url)}" target="_blank" rel="noreferrer">${escapeHtml(project.html_url)}</a></p></div>
+        </div>
+      </div>`;
+    }
+
+    function listHtml(items, emptyText) {
+      if (!items.length) return `<p>${escapeHtml(emptyText)}</p>`;
+      return `<ul>${items.map(item => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
+    }
+
+    function toggleDetails(button) {
+      const panel = document.getElementById(button.dataset.detail);
+      if (!panel) return;
+      const open = panel.classList.toggle("open");
+      button.textContent = open ? "收起" : "详情";
     }
 
     function securityText(project, risks) {

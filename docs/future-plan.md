@@ -399,6 +399,18 @@ codex/personalization-profiles
 4. GitHub GraphQL 细粒度热度补充。
 5. 多推送渠道抽象。
 
+## 前端扩展边界
+
+当前前端继续保持无构建步骤的静态页面，优先保障 GitHub Pages 稳定可用。未来如果筛选、详情、图表和用户偏好继续复杂化，可以再升级为 Astro、React、Vue 或其他前端框架。
+
+升级前应保持以下边界：
+
+1. `docs/projects.json`、`docs/runs.json`、`docs/profiles.json` 作为前端数据契约，不在页面里硬编码业务数据。
+2. 当前 `explorer.html` 的筛选参数继续保持 URL 化，未来框架版本也应兼容 `q`、`date`、`lang`、`profile`、`category`、`source`、`risk`、`sort`。
+3. 复杂框架只负责展示和交互，不直接读取密钥、不直接调用 Kimi、Telegram、飞书或企业微信。
+4. 如果引入前端构建，应把生成物输出到 `docs/`，保持 GitHub Pages 部署路径不变。
+5. 在数据契约稳定前，不引入登录、多用户状态或后端服务。
+
 长期优先级：
 
 1. 趋势可视化。

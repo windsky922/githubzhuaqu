@@ -39,6 +39,8 @@ class BuildPagesTest(unittest.TestCase):
                         {
                             "full_name": "owner/project",
                             "html_url": "https://github.com/owner/project",
+                            "description": "desc",
+                            "readme_summary": "这是一个简短 README 摘要。",
                             "category": "AI Agent",
                             "language": "Python",
                             "stargazers_count": 100,
@@ -94,6 +96,7 @@ class BuildPagesTest(unittest.TestCase):
             self.assertEqual(projects_json["count"], 1)
             self.assertEqual(projects_json["projects"][0]["full_name"], "owner/project")
             self.assertEqual(projects_json["projects"][0]["report_url"], "weekly/2026-04-28.html")
+            self.assertEqual(projects_json["projects"][0]["readme_summary"], "这是一个简短 README 摘要。")
             self.assertIn("security_flags", projects_json["projects"][0])
             self.assertEqual(projects_json["projects"][0]["security_score"], 85)
             self.assertEqual(projects_json["projects"][0]["security_level"], "medium")
@@ -121,6 +124,9 @@ class BuildPagesTest(unittest.TestCase):
             self.assertIn("summaryHtml", explorer)
             self.assertIn("matchesProfile", explorer)
             self.assertIn("securityText", explorer)
+            self.assertIn("detailPanel", explorer)
+            self.assertIn("toggleDetails", explorer)
+            self.assertIn("README 摘要", explorer)
             feed = (root / "docs" / "feed.xml").read_text(encoding="utf-8")
             self.assertIn("<rss version=\"2.0\">", feed)
             self.assertIn("GitHub 每周热点项目周报 - 2026-04-28", feed)

@@ -3291,3 +3291,36 @@ tests/test_security.py
 ### 3. 设计边界
 
 该评分是启发式基础检查，不代表完整安全审计。它用于排序、提醒和后续筛选，不应作为是否可以直接运行外部项目的唯一依据。
+
+---
+
+## 2026-05-06 追加：历史项目详情展开
+
+### 1. 开发目的
+
+当前历史项目筛选页已经能按语言、profile、来源和风险筛选，但用户仍需要打开周报或仓库才能理解项目价值。本次在静态筛选页中加入详情展开能力，提升浏览效率，同时继续保留未来升级复杂前端框架的空间。
+
+### 2. 本次实现
+
+更新：
+
+```text
+README.md
+docs/data-contracts.md
+docs/future-plan.md
+docs/operation-log.md
+scripts/build_pages.py
+tests/test_build_pages.py
+tests/test_data_contracts.py
+```
+
+调整内容：
+
+1. `docs/projects.json` 新增 `readme_summary` 字段。
+2. `docs/explorer.html` 每个项目新增“详情”按钮。
+3. 展开详情后展示 README 精简摘要、推荐理由、风险提示、项目指标、来源和完整链接。
+4. `docs/future-plan.md` 新增前端扩展边界，明确未来可升级到复杂框架，但当前仍以公共 JSON 契约为核心。
+
+### 3. 设计边界
+
+本次没有引入前端构建工具。所有交互仍在静态页面内完成，数据继续来自 `projects.json`、`profiles.json` 和 `runs.json`，为后续框架化迁移保留清晰接口。
