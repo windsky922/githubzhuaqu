@@ -26,6 +26,9 @@ PROJECT_KEYS = {
     "security_flags",
     "security_score",
     "security_level",
+    "quality_flags",
+    "quality_score",
+    "quality_level",
     "report_url",
 }
 
@@ -147,6 +150,7 @@ class DataContractsTest(unittest.TestCase):
             self.assertEqual(set(profiles["profiles"][0]), PROFILE_KEYS)
             self.assertIsInstance(projects["projects"][0]["selection_reasons"], list)
             self.assertIsInstance(projects["projects"][0]["security_flags"], list)
+            self.assertIsInstance(projects["projects"][0]["quality_flags"], list)
             self.assertIsInstance(runs["runs"][0]["summary_points"], list)
             self.assertIsInstance(profiles["profiles"][0]["preferred_topics"], list)
         finally:
@@ -230,6 +234,9 @@ def _write_public_json_fixture(root: Path) -> None:
                     "security_flags": [],
                     "security_score": 100,
                     "security_level": "low",
+                    "quality_flags": [],
+                    "quality_score": 92,
+                    "quality_level": "high",
                 }
             ],
             ensure_ascii=False,

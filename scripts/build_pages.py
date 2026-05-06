@@ -1,13 +1,18 @@
 from __future__ import annotations
 
 import json
+import sys
 from datetime import UTC, datetime
 from email.utils import format_datetime
 from pathlib import Path
 from xml.sax.saxutils import escape as xml_escape
 
-
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from src.models import Repository
+from src.quality import apply_quality_signals
 
 
 def build_pages(root: Path = ROOT) -> list[Path]:
@@ -838,7 +843,7 @@ def _explorer_content() -> str:
           <div class="detail-block"><h3>风险提示</h3>${risks}</div>
         </div>
         <div class="detail-grid">
-          <div class="detail-block"><h3>项目指标</h3><p>综合分 ${escapeHtml(number(project.score).toFixed(3))}；安全分 ${escapeHtml(project.security_score || 100)}；累计 Star ${escapeHtml(project.stargazers_count || 0)}；Fork ${escapeHtml(project.forks_count || 0)}</p></div>
+          <div class="detail-block"><h3>项目指标</h3><p>综合分 ${escapeHtml(number(project.score).toFixed(3))}；质量分 ${escapeHtml(project.quality_score || 0)}；安全分 ${escapeHtml(project.security_score || 100)}；累计 Star ${escapeHtml(project.stargazers_count || 0)}；Fork ${escapeHtml(project.forks_count || 0)}</p></div>
           <div class="detail-block"><h3>来源</h3><p>${escapeHtml((project.sources || []).map(sourceLabel).join(" + ") || "-")}</p></div>
           <div class="detail-block"><h3>完整链接</h3><p><a class="detail-link" href="${escapeAttribute(project.html_url)}" target="_blank" rel="noreferrer">${escapeHtml(project.html_url)}</a></p></div>
         </div>
@@ -962,6 +967,7 @@ def _selected_project_rows(root: Path) -> list[dict]:
 def _public_projects(root: Path) -> dict:
     projects = []
     for row in _selected_project_rows(root):
+        quality = _quality_fields(row)
         projects.append(
             {
                 "run_date": row.get("run_date", ""),
@@ -981,6 +987,9 @@ def _public_projects(root: Path) -> dict:
                 "security_flags": [str(flag) for flag in row.get("security_flags") or [] if flag],
                 "security_score": _int_value(row.get("security_score"), 100),
                 "security_level": str(row.get("security_level") or "low"),
+                "quality_flags": quality["quality_flags"],
+                "quality_score": quality["quality_score"],
+                "quality_level": quality["quality_level"],
                 "report_url": f"weekly/{row.get('run_date', '')}.html" if row.get("run_date") else "",
             }
         )
@@ -988,6 +997,40 @@ def _public_projects(root: Path) -> dict:
         "schema_version": 1,
         "count": len(projects),
         "projects": projects,
+    }
+
+
+def _quality_fields(row: dict) -> dict:
+    if row.get("quality_score") or row.get("quality_level") or row.get("quality_flags"):
+        return {
+            "quality_flags": [str(flag) for flag in row.get("quality_flags") or [] if flag],
+            "quality_score": _int_value(row.get("quality_score")),
+            "quality_level": str(row.get("quality_level") or "unknown"),
+        }
+    repo = Repository(
+        full_name=str(row.get("full_name") or ""),
+        html_url=str(row.get("html_url") or ""),
+        description=str(row.get("description") or ""),
+        stargazers_count=_int_value(row.get("stargazers_count")),
+        forks_count=_int_value(row.get("forks_count")),
+        language=str(row.get("language") or "Unknown"),
+        created_at=str(row.get("created_at") or ""),
+        updated_at=str(row.get("updated_at") or ""),
+        pushed_at=str(row.get("pushed_at") or row.get("updated_at") or ""),
+        topics=[str(topic) for topic in row.get("topics") or [] if topic],
+        archived=bool(row.get("archived")),
+        fork=bool(row.get("fork")),
+        open_issues_count=_int_value(row.get("open_issues_count")),
+        license_name=str(row.get("license_name") or ""),
+        readme_excerpt=str(row.get("readme_excerpt") or ""),
+        readme_summary=str(row.get("readme_summary") or ""),
+        trending_rank=_int_value(row.get("trending_rank")),
+    )
+    apply_quality_signals([repo])
+    return {
+        "quality_flags": repo.quality_flags,
+        "quality_score": repo.quality_score,
+        "quality_level": repo.quality_level,
     }
 
 

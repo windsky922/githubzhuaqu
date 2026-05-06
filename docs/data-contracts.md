@@ -40,6 +40,9 @@ selection_reasons
 security_flags
 security_score
 security_level
+quality_flags
+quality_score
+quality_level
 report_url
 ```
 
@@ -49,7 +52,8 @@ report_url
 2. 多渠道推送摘要生成。
 3. 外部脚本按语言、方向、来源、风险提示做二次分析。
 4. `security_score` 为 0 到 100 的基础安全分，`security_level` 为 `low`、`medium` 或 `high`。
-5. `readme_summary` 是公开精简摘要，用于项目详情展开和后续前端详情面板。
+5. `quality_score` 为 0 到 100 的基础质量分，`quality_level` 为 `high`、`medium`、`low` 或 `unknown`，`quality_flags` 记录信息完整度、维护活跃度和社区复用信号等提示。
+6. `readme_summary` 是公开精简摘要，用于项目详情展开和后续前端详情面板。
 
 当前 `docs/explorer.html` 已经直接消费该文件，并将筛选状态同步到 URL 查询参数。
 

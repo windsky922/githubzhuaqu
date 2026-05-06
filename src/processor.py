@@ -4,6 +4,7 @@ import re
 from datetime import UTC, datetime
 
 from .models import Repository
+from .quality import apply_quality_signals
 from .settings import Settings
 
 
@@ -15,11 +16,12 @@ CATEGORIES = {
     "Automation": {"github-actions", "telegram", "bot", "automation"},
 }
 DEFAULT_SCORE_WEIGHTS = {
-    "trending": 0.45,
-    "star_growth": 0.25,
+    "trending": 0.43,
+    "star_growth": 0.24,
     "topic": 0.15,
     "freshness": 0.10,
     "community": 0.05,
+    "quality": 0.03,
 }
 DEFAULT_NOVELTY_PENALTY_WEIGHT = 0.08
 TRENDING_TOP_RANK_LIMIT = 10
@@ -34,6 +36,7 @@ def process_repositories(
 ) -> list[Repository]:
     unique = _dedupe(repositories)
     filtered = [repo for repo in unique if _is_usable(repo, settings)]
+    apply_quality_signals(filtered)
     _score(filtered, settings, star_history or {}, previously_sent_names or set())
     ranked = sorted(
         filtered,
@@ -119,6 +122,7 @@ def _score(
         profile_matches = _profile_matches(repo, settings)
         freshness_score = _freshness_score(repo.pushed_at or repo.updated_at, settings.days_back)
         community_score = (star_score + fork_score) / 2
+        quality_score = repo.quality_score / 100 if repo.quality_score > 0 else 0
         was_sent = repo.full_name in previously_sent_names
         novelty_penalty = _novelty_penalty(settings) if was_sent and not _protected_trending(repo) else 0
         repo.category = _category(repo)
@@ -128,6 +132,7 @@ def _score(
             + weights["topic"] * topic_score
             + weights["freshness"] * freshness_score
             + weights["community"] * community_score
+            + weights["quality"] * quality_score
         )
         repo.score = round(max(0.0, base_score - novelty_penalty), 4)
         repo.selection_reasons = _selection_reasons(repo, topic_score, profile_matches, was_sent)

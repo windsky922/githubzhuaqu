@@ -34,9 +34,17 @@ presentation 展示页面
 
 目标：让“本周最火爆”判断更可靠。
 
-建议任务：
+已完成：
 
-1. 增加仓库质量评分：README 完整度、最近提交频率、Issue 活跃度、Release 活跃度。
+1. 新增 `src/quality.py`，为入选仓库生成 `quality_score`、`quality_level` 和 `quality_flags`。
+2. 质量信号覆盖 README 摘要、简介完整度、许可证、主题标签、社区复用信号和近期维护时间。
+3. 质量分以轻量权重接入排序，不改变 Trending 第一优先级。
+4. 质量字段写入 `data/selected/YYYY-MM-DD.json`，并发布到 `docs/projects.json`。
+5. 规则版周报和 Kimi 输入都会包含质量信号，便于解释项目成熟度和信息完整度。
+
+后续建议任务：
+
+1. 扩展仓库质量评分：最近提交频率、Issue 活跃度、Release 活跃度。
 2. 增加异常过滤：刷 Star 嫌疑、空壳项目、广告项目、镜像仓库。
 3. 增加语言和主题的可配置权重。
 4. 记录每个入选项目的入选原因，写入 `data/selected/YYYY-MM-DD.json`。

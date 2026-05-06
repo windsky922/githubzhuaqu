@@ -199,6 +199,8 @@ class ProcessorTest(unittest.TestCase):
 
         self.assertTrue(result[0].selection_reasons)
         self.assertTrue(any("新增 Star 20" in reason for reason in result[0].selection_reasons))
+        self.assertGreater(result[0].quality_score, 0)
+        self.assertIn(result[0].quality_level, {"low", "medium", "high"})
 
     def test_adds_personalized_profile_match_reason(self):
         settings = Settings(

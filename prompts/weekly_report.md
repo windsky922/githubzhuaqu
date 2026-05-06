@@ -28,5 +28,6 @@
 - 如果项目数据包含 `trending_rank` 且数值大于 0，必须把 GitHub Trending 周榜排名作为第一热度信号解释
 - 如果项目数据包含 `sources`，需要说明项目来自 GitHub Trending、GitHub Search 或多个来源
 - 如果项目数据包含 `selection_reasons`，必须优先使用这些入选原因解释为什么该项目值得关注
+- 如果项目数据包含 `quality_score`、`quality_level` 或 `quality_flags`，需要用它们说明项目成熟度和信息完整度，不要只看 Star
 - 如果项目数据包含 `security_flags`，必须用谨慎语气提示风险，不要把项目描述为“安全”
 - 每个重点项目分析控制在 100 到 200 字左右

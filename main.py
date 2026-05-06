@@ -15,6 +15,7 @@ from src.archive import (
 from src.collector import collect_repositories, enrich_repositories_with_readmes
 from src.models import RunSummary
 from src.processor import process_repositories
+from src.quality import apply_quality_signals
 from src.reporter import generate_report
 from src.security import apply_security_flags
 from src.sender import report_url, send_report_to_channels
@@ -41,6 +42,7 @@ def main() -> int:
         star_history = load_star_history(settings)
         selected = process_repositories(collected, settings, star_history, previously_sent_names=sent_names)
         readme_fetched_count = enrich_repositories_with_readmes(selected, settings)
+        apply_quality_signals(selected)
         apply_security_flags(selected)
         trend_summary = build_trend_summary(selected)
         report, fallback_used, report_error = generate_report(selected, queries, settings, trend_summary)

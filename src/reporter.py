@@ -129,6 +129,7 @@ def fallback_report(
                 f"- 技术信息：主要语言 {repo.language}，Star {repo.stargazers_count}，Fork {repo.forks_count}，较上次记录新增 Star {repo.star_growth}。",
                 f"- 热度来源：{_source_text(repo)}，Trending 排名 {_trending_rank_text(repo)}。",
                 f"- 入选原因：{_selection_reason_text(repo)}",
+                f"- 质量信号：{_quality_text(repo)}",
                 f"- 风险提示：{_security_text(repo)}",
                 f"- 学习价值：可作为了解 {repo.category} 相关开源实践的参考。",
                 f"- 原链接：[{repo.html_url}]({repo.html_url})",
@@ -244,6 +245,14 @@ def _security_text(repo: Repository) -> str:
     if not repo.security_flags:
         return "未发现明显元数据风险，但仍需自行审查代码和依赖。"
     return "；".join(repo.security_flags)
+
+
+def _quality_text(repo: Repository) -> str:
+    level = {"high": "高", "medium": "中", "low": "低"}.get(repo.quality_level, "未知")
+    prefix = f"{level}质量，质量分 {repo.quality_score}"
+    if not repo.quality_flags:
+        return f"{prefix}，暂未发现明显质量短板。"
+    return f"{prefix}；" + "；".join(repo.quality_flags)
 
 
 def _selection_reason_text(repo: Repository) -> str:

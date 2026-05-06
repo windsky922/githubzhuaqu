@@ -50,6 +50,9 @@ class BuildPagesTest(unittest.TestCase):
                             "security_flags": ["未识别到许可证。"],
                             "security_score": 85,
                             "security_level": "medium",
+                            "quality_flags": ["README 摘要不足"],
+                            "quality_score": 82,
+                            "quality_level": "high",
                         }
                     ],
                     ensure_ascii=False,
@@ -101,6 +104,9 @@ class BuildPagesTest(unittest.TestCase):
             self.assertIn("security_flags", projects_json["projects"][0])
             self.assertEqual(projects_json["projects"][0]["security_score"], 85)
             self.assertEqual(projects_json["projects"][0]["security_level"], "medium")
+            self.assertEqual(projects_json["projects"][0]["quality_flags"], ["README 摘要不足"])
+            self.assertEqual(projects_json["projects"][0]["quality_score"], 82)
+            self.assertEqual(projects_json["projects"][0]["quality_level"], "high")
             runs_json = json.loads((root / "docs" / "runs.json").read_text(encoding="utf-8"))
             self.assertEqual(runs_json["schema_version"], 1)
             self.assertEqual(runs_json["count"], 1)
@@ -191,6 +197,41 @@ class BuildPagesTest(unittest.TestCase):
             self.assertEqual(profiles["profiles"][0]["label"], "Agent 开发")
             self.assertEqual(profiles["profiles"][0]["preferred_languages"], ["Python"])
             self.assertNotIn("secret_note", profiles["profiles"][0])
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
+    def test_builds_quality_fields_for_legacy_selected_projects(self):
+        root = Path.cwd() / f".tmp-pages-quality-test-{uuid.uuid4().hex}"
+        try:
+            (root / "reports").mkdir(parents=True)
+            (root / "data" / "selected").mkdir(parents=True)
+            (root / "reports" / "2026-05-06.md").write_text("# 周报", encoding="utf-8")
+            (root / "data" / "selected" / "2026-05-06.json").write_text(
+                json.dumps(
+                    [
+                        {
+                            "full_name": "owner/project",
+                            "html_url": "https://github.com/owner/project",
+                            "description": "short",
+                            "language": "Python",
+                            "stargazers_count": 50,
+                            "forks_count": 0,
+                            "pushed_at": "2026-05-05T00:00:00Z",
+                            "readme_summary": "",
+                        }
+                    ],
+                    ensure_ascii=False,
+                ),
+                encoding="utf-8",
+            )
+
+            build_pages(root)
+
+            projects = json.loads((root / "docs" / "projects.json").read_text(encoding="utf-8"))
+            item = projects["projects"][0]
+            self.assertGreater(item["quality_score"], 0)
+            self.assertNotEqual(item["quality_level"], "unknown")
+            self.assertTrue(item["quality_flags"])
         finally:
             shutil.rmtree(root, ignore_errors=True)
 

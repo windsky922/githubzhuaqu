@@ -3448,3 +3448,48 @@ tests/test_build_pages.py
 ### 3. 设计边界
 
 该页面是静态说明文档，不引入新的运行依赖。后续如果建设数据库页面或前端后台，可以把这里的命令示例演进为页面筛选项和 API 查询参数。
+
+---
+
+## 2026-05-06 追加：仓库质量信号
+
+### 1. 开发目的
+
+当前热点筛选已经以 Trending 和新增 Star 为核心，但仍需要区分“热度高”和“信息完整、便于学习或复用”的差异。本次新增轻量质量信号，用于补充判断 README、简介、许可证、主题标签、社区复用和维护连续性等维度。
+
+### 2. 本次实现
+
+更新：
+
+```text
+README.md
+docs/data-contracts.md
+docs/future-plan.md
+docs/operation-log.md
+main.py
+prompts/weekly_report.md
+scripts/build_pages.py
+src/models.py
+src/processor.py
+src/quality.py
+src/reporter.py
+tests/test_build_pages.py
+tests/test_data_contracts.py
+tests/test_processor.py
+tests/test_quality.py
+```
+
+调整内容：
+
+1. 新增 `src/quality.py`。
+2. `Repository` 新增 `quality_flags`、`quality_score` 和 `quality_level`。
+3. 质量信号覆盖 README 摘要、仓库简介、许可证、主题标签、社区复用信号和近期维护时间。
+4. 质量分以小权重接入综合评分，不改变 GitHub Trending 第一优先级。
+5. 规则版周报新增“质量信号”字段。
+6. Kimi 提示词要求参考质量字段解释项目成熟度和信息完整度。
+7. `docs/projects.json` 公开输出质量字段，供后续前端、数据库和个性化推荐复用。
+8. 探索页详情的项目指标新增质量分展示。
+
+### 3. 设计边界
+
+质量信号是启发式判断，不代表项目一定成熟或可靠。它只用于排序辅助、周报解释和前端展示。后续如果需要更准确的质量判断，可以继续接入 Release 活跃度、提交频率、Issue 响应时间、依赖文件完整度和异常 Star 增长提示。

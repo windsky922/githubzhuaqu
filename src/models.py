@@ -25,6 +25,9 @@ class Repository:
     security_flags: list[str] = field(default_factory=list)
     security_score: int = 100
     security_level: str = "low"
+    quality_flags: list[str] = field(default_factory=list)
+    quality_score: int = 0
+    quality_level: str = "unknown"
     selection_reasons: list[str] = field(default_factory=list)
     sources: list[str] = field(default_factory=list)
     trending_rank: int = 0

@@ -632,7 +632,7 @@
           <div class="detail-block"><h3>风险提示</h3>${risks}</div>
         </div>
         <div class="detail-grid">
-          <div class="detail-block"><h3>项目指标</h3><p>综合分 ${escapeHtml(number(project.score).toFixed(3))}；安全分 ${escapeHtml(project.security_score || 100)}；累计 Star ${escapeHtml(project.stargazers_count || 0)}；Fork ${escapeHtml(project.forks_count || 0)}</p></div>
+          <div class="detail-block"><h3>项目指标</h3><p>综合分 ${escapeHtml(number(project.score).toFixed(3))}；质量分 ${escapeHtml(project.quality_score || 0)}；安全分 ${escapeHtml(project.security_score || 100)}；累计 Star ${escapeHtml(project.stargazers_count || 0)}；Fork ${escapeHtml(project.forks_count || 0)}</p></div>
           <div class="detail-block"><h3>来源</h3><p>${escapeHtml((project.sources || []).map(sourceLabel).join(" + ") || "-")}</p></div>
           <div class="detail-block"><h3>完整链接</h3><p><a class="detail-link" href="${escapeAttribute(project.html_url)}" target="_blank" rel="noreferrer">${escapeHtml(project.html_url)}</a></p></div>
         </div>
@@ -675,7 +675,7 @@
       return [project.full_name, project.description, project.category, ...(project.selection_reasons || [])]
         .join(" ")
         .toLowerCase()
-        .split(/[^a-z0-9\u4e00-\u9fa5]+/)
+        .split(/[^a-z0-9一-龥]+/)
         .filter(token => token.length >= 2);
     }
 
