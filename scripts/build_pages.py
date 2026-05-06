@@ -313,6 +313,27 @@ def _explorer_content() -> str:
       margin: 8px 0 12px;
       min-height: 24px;
     }
+    .profile-shortcuts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 0 0 14px;
+    }
+    .profile-chip {
+      width: auto;
+      height: 32px;
+      padding: 0 12px;
+      background: var(--panel);
+      border-color: var(--line);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .profile-chip.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
     .summary {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -542,6 +563,7 @@ def _explorer_content() -> str:
       <span id="count">0 个项目</span>
       <span id="updated"></span>
     </div>
+    <section id="profileShortcuts" class="profile-shortcuts" aria-label="个性化方向快捷视图"></section>
     <section id="summary" class="summary" aria-label="筛选结果概览"></section>
     <div class="table-shell">
       <table>
@@ -580,6 +602,7 @@ def _explorer_content() -> str:
     const count = document.getElementById("count");
     const updated = document.getElementById("updated");
     const summary = document.getElementById("summary");
+    const profileShortcuts = document.getElementById("profileShortcuts");
     const share = document.getElementById("share");
 
     Promise.all([
@@ -601,6 +624,12 @@ def _explorer_content() -> str:
     rows.addEventListener("click", event => {
       const button = event.target.closest("[data-detail]");
       if (button) toggleDetails(button);
+    });
+    profileShortcuts.addEventListener("click", event => {
+      const button = event.target.closest("[data-profile]");
+      if (!button) return;
+      controls.profile.value = button.dataset.profile || "";
+      render();
     });
     document.getElementById("reset").addEventListener("click", () => {
       controls.query.value = "";
@@ -626,6 +655,7 @@ def _explorer_content() -> str:
       fillSelect(controls.runDate, dates());
       fillSelect(controls.language, values("language"));
       fillProfileSelect();
+      renderProfileShortcuts();
       fillSelect(controls.category, values("category"));
       const runDates = dates();
       updated.textContent = runDates.length ? `最新数据：${runDates[0]}` : "";
@@ -651,6 +681,15 @@ def _explorer_content() -> str:
       }).join("");
     }
 
+    function renderProfileShortcuts() {
+      const chips = [{ name: "", label: "全部方向" }, ...state.profiles];
+      profileShortcuts.innerHTML = chips.map(profile => {
+        const value = profile.name || "";
+        const active = value === controls.profile.value ? " active" : "";
+        return `<button class="profile-chip${active}" type="button" data-profile="${escapeAttribute(value)}">${escapeHtml(profile.label || value)}</button>`;
+      }).join("");
+    }
+
     function render() {
       const query = controls.query.value.trim().toLowerCase();
       const selectedProfile = state.profiles.find(profile => profile.name === controls.profile.value);
@@ -667,6 +706,7 @@ def _explorer_content() -> str:
       });
       filtered = filtered.sort(compareProjects);
       count.textContent = `${filtered.length} 个项目`;
+      renderProfileShortcuts();
       summary.innerHTML = summaryHtml(filtered);
       rows.innerHTML = filtered.length ? filtered.map(rowHtml).join("") : '<tr><td class="empty" colspan="9">没有匹配项目</td></tr>';
       updateUrl();

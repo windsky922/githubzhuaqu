@@ -3324,3 +3324,33 @@ tests/test_data_contracts.py
 ### 3. 设计边界
 
 本次没有引入前端构建工具。所有交互仍在静态页面内完成，数据继续来自 `projects.json`、`profiles.json` 和 `runs.json`，为后续框架化迁移保留清晰接口。
+
+---
+
+## 2026-05-06 追加：个性化方向快捷视图
+
+### 1. 开发目的
+
+筛选页已有 profile 下拉框，但移动端和频繁切换场景下不够直观。本次增加快捷视图按钮，让用户可以一键切换 Java、Python、Agent 开发等方向，同时继续复用公开 `profiles.json`。
+
+### 2. 本次实现
+
+更新：
+
+```text
+README.md
+docs/operation-log.md
+scripts/build_pages.py
+tests/test_build_pages.py
+```
+
+调整内容：
+
+1. `docs/explorer.html` 新增 `profileShortcuts` 区域。
+2. 页面根据 `profiles.json` 自动生成“全部方向”和各 profile 快捷按钮。
+3. 点击快捷按钮会同步更新 profile 筛选条件、表格结果和 URL 查询参数。
+4. 当前仍为静态页面实现，不新增前端构建步骤。
+
+### 3. 设计边界
+
+快捷按钮只消费公开 profile 数据，不硬编码业务方向。未来升级到复杂前端框架时，可以直接复用 `profiles.json` 和当前 URL 参数约定。
