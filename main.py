@@ -17,7 +17,7 @@ from src.models import RunSummary
 from src.processor import process_repositories
 from src.reporter import generate_report
 from src.security import apply_security_flags
-from src.sender import report_url, send_report
+from src.sender import report_url, send_report_to_channels
 from src.settings import load_settings
 from src.state import (
     load_sent_repository_names,
@@ -73,11 +73,16 @@ def main() -> int:
         if _skip_telegram_send():
             summary.telegram_sent = False
             summary.telegram_error = "Telegram send skipped"
+            summary.delivery_results = [
+                {"channel": "telegram", "sent": False, "error": "Telegram send skipped", "skipped": True}
+            ]
         else:
-            sent, send_error = send_report(report, settings)
-            summary.telegram_sent = sent
-            summary.telegram_error = send_error
-            if sent and selected:
+            delivery_results = send_report_to_channels(report, settings)
+            summary.delivery_results = [result.to_dict() for result in delivery_results]
+            telegram_result = next((result for result in delivery_results if result.channel == "telegram"), None)
+            summary.telegram_sent = bool(telegram_result and telegram_result.sent)
+            summary.telegram_error = telegram_result.error if telegram_result else "Telegram channel is disabled"
+            if summary.telegram_sent and selected:
                 summary.state_path = write_sent_repositories(selected, settings)
         summary.status = "success" if selected else "empty"
     except Exception as error:

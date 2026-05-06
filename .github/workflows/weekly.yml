@@ -45,6 +45,7 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           REPORT_BASE_URL: ${{ vars.REPORT_BASE_URL || secrets.REPORT_BASE_URL }}
+          DELIVERY_CHANNELS: ${{ vars.DELIVERY_CHANNELS }}
           INTEREST_PROFILE: ${{ vars.INTEREST_PROFILE }}
           SKIP_TELEGRAM_SEND: "true"
         run: python main.py
@@ -69,6 +70,7 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           REPORT_BASE_URL: ${{ vars.REPORT_BASE_URL || secrets.REPORT_BASE_URL }}
+          DELIVERY_CHANNELS: ${{ vars.DELIVERY_CHANNELS }}
         run: python scripts/send_report_link.py
 
       - name: 提交推送状态

@@ -73,6 +73,7 @@ kimi_used
 fallback_used
 telegram_sent
 telegram_report_url
+delivery_results
 collector_error_count
 top_languages
 top_categories
@@ -86,6 +87,8 @@ summary_points
 1. 首页运行状态展示。
 2. 趋势概览和历史运行对比。
 3. 监控周报是否降级、是否推送、采集是否异常。
+
+`delivery_results` 记录多推送通道状态。当前 `telegram` 是已实现通道；`feishu`、`wechat` 是预留通道，当前只记录为未实现，不发送请求。该字段只记录通道名称、是否发送成功、错误摘要和是否跳过，不记录 Token、Chat ID、Webhook 或任何密钥。
 
 ## 四、SQLite 表
 

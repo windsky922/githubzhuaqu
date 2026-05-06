@@ -43,7 +43,7 @@ GitHub Actions
 | `src/report_checks.py` | 周报质量检查 |
 | `src/security.py` | 脱敏和外部项目风险提示 |
 | `src/personalization.py` | 个性化 profile 合并逻辑 |
-| `src/sender.py` | Telegram 推送 |
+| `src/sender.py` | 推送消息构造和通道发送，当前实现 Telegram，预留微信、飞书入口 |
 | `scripts/build_pages.py` | 生成 GitHub Pages 归档页面 |
 | `scripts/migrate_json_to_sqlite.py` | 将历史 JSON 归档导入 SQLite 派生索引 |
 | `scripts/verify_migration.py` | 校验 SQLite 派生索引和 JSON 归档计数 |
@@ -152,6 +152,7 @@ Settings -> Secrets and variables -> Actions
 |---|---|
 | `INTEREST_PROFILE` | 个性化方向，例如 `java,agent_development` |
 | `REPORT_BASE_URL` | 如果不想放在 Secret 中，也可以作为普通变量配置 |
+| `DELIVERY_CHANNELS` | 推送通道列表，当前建议保持 `telegram`；`wechat`、`feishu` 会作为预留通道记录但不会发送 |
 | `KIMI_TIMEOUT_SECONDS` | Kimi 请求超时时间，可选 |
 | `KIMI_MAX_RETRIES` | Kimi 临时错误重试次数，可选 |
 | `KIMI_RETRY_SECONDS` | Kimi 临时错误重试等待秒数，可选 |
@@ -165,6 +166,16 @@ Settings -> Secrets and variables -> Actions
 | `score_weights` | Trending、新增 Star、主题、活跃度和社区基础信号的评分权重 |
 
 Kimi 返回 `429`、过载或临时网关错误时会自动重试；多次重试仍失败时会生成规则版周报并继续推送。没有 Telegram 时仍会归档周报和运行摘要。
+
+## 推送通道
+
+当前实际发送通道是 Telegram。程序内部已经把“消息构造”和“通道发送”分开，`DELIVERY_CHANNELS` 可以声明后续要接入的通道：
+
+```text
+DELIVERY_CHANNELS=telegram
+```
+
+如果配置为 `telegram,feishu,wechat`，当前版本只会发送 Telegram；飞书和微信会以“预留通道未实现”的状态写入运行摘要，不会导致周报生成失败。后续接入飞书或微信时，只需要补充对应通道的发送实现，不需要重写报告生成、归档和 Pages 展示流程。
 
 ## GitHub Pages
 

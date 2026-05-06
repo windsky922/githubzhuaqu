@@ -3110,3 +3110,44 @@ docs/feed.xml
 ### 3. 设计边界
 
 RSS 只发布公开摘要，不包含密钥、用户隐私、原始错误堆栈或未脱敏配置。它是订阅入口，不替代 Telegram 推送和 GitHub Pages 阅读页。
+
+---
+
+## 2026-05-06 追加：多推送通道入口
+
+### 1. 开发目的
+
+当前实际推送通道是 Telegram。为了后续接入微信、飞书或邮件，本次先把推送结果抽象为通道状态列表，保持现有 Telegram 行为不变，同时让运行摘要和公共 JSON 能记录多通道状态。
+
+### 2. 本次实现
+
+更新：
+
+```text
+main.py
+src/models.py
+src/sender.py
+scripts/send_report_link.py
+scripts/build_pages.py
+tests/test_sender.py
+tests/test_send_report_link.py
+tests/test_build_pages.py
+tests/test_data_contracts.py
+.env.example
+README.md
+docs/data-contracts.md
+docs/operation-log.md
+```
+
+调整内容：
+
+1. 新增 `DeliveryResult`，记录通道名称、发送状态、错误摘要和是否跳过。
+2. 新增 `DELIVERY_CHANNELS` 配置入口，默认 `telegram`。
+3. 当前仅 Telegram 会真实发送；`feishu`、`wechat` 会记录为预留通道未实现，不会发送请求。
+4. 运行摘要新增 `delivery_results` 字段。
+5. `docs/runs.json` 公开输出 `delivery_results`，方便后续前端和外部自动化读取。
+6. 保留 `telegram_sent`、`telegram_error`、`telegram_report_url` 旧字段，避免破坏现有 workflow 和页面逻辑。
+
+### 3. 设计边界
+
+本次不提前实现微信、飞书具体 API，也不新增密钥字段。后续接入时再按实际平台要求增加环境变量和发送函数，仍然不能把 Webhook、Token 或 Chat ID 写入代码和文档示例。

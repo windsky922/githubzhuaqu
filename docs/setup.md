@@ -24,6 +24,7 @@
 |---|---|
 | `INTEREST_PROFILE` | 个性化方向，例如 `java,agent_development` |
 | `REPORT_BASE_URL` | 周报公开访问目录；如果不想放在 Secret 中，可以作为普通变量配置 |
+| `DELIVERY_CHANNELS` | 推送通道列表，当前建议使用 `telegram` |
 | `KIMI_TIMEOUT_SECONDS` | Kimi 请求超时时间，默认 `120` 秒 |
 | `KIMI_MAX_RETRIES` | Kimi 临时错误重试次数，默认 `2` |
 | `KIMI_RETRY_SECONDS` | Kimi 临时错误重试等待秒数，默认 `20` |
@@ -51,6 +52,14 @@ data/runs/YYYY-MM-DD.json
 ```text
 telegram_report_url
 ```
+
+当前实际发送通道是 Telegram。可以显式配置：
+
+```text
+DELIVERY_CHANNELS=telegram
+```
+
+如果提前配置 `telegram,feishu,wechat`，当前版本只会发送 Telegram；飞书和微信会被记录为预留通道未实现，不会请求外部 API，也不会阻断周报归档。
 
 如果 Kimi 返回 `429`、过载或临时网关错误，程序会先按 `KIMI_MAX_RETRIES` 和 `KIMI_RETRY_SECONDS` 自动重试。多次重试仍失败时，才会生成规则版周报并继续推送 Telegram 链接，同时把失败原因写入 `data/runs/YYYY-MM-DD.json`。
 

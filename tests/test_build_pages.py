@@ -96,6 +96,7 @@ class BuildPagesTest(unittest.TestCase):
             self.assertEqual(runs_json["count"], 1)
             self.assertEqual(runs_json["runs"][0]["run_date"], "2026-04-28")
             self.assertTrue(runs_json["runs"][0]["telegram_sent"])
+            self.assertEqual(runs_json["runs"][0]["delivery_results"], [])
             self.assertEqual(runs_json["runs"][0]["top_languages"][0]["name"], "Python")
             explorer = (root / "docs" / "explorer.html").read_text(encoding="utf-8")
             self.assertIn("GitHub 热点项目筛选", explorer)

@@ -19,23 +19,51 @@ class DeliveryMessage:
     html_text: str
 
 
-def send_report(report: str, settings: Settings) -> tuple[bool, str]:
-    if not settings.telegram_bot_token or not settings.telegram_chat_id:
-        return False, "Telegram is not configured"
-    message = build_delivery_message(settings)
-    if not message:
-        return False, "Report URL is not configured"
+@dataclass(frozen=True)
+class DeliveryResult:
+    channel: str
+    sent: bool
+    error: str = ""
+    skipped: bool = False
 
-    try:
-        _send_message(message.html_text, settings)
-    except Exception as error:
-        return False, str(error)
-    return True, ""
+    def to_dict(self) -> dict[str, str | bool]:
+        return {
+            "channel": self.channel,
+            "sent": self.sent,
+            "error": self.error,
+            "skipped": self.skipped,
+        }
+
+
+def send_report(report: str, settings: Settings) -> tuple[bool, str]:
+    result = _send_telegram(build_delivery_message(settings), settings)
+    return result.sent, result.error
 
 
 def build_report_message(settings: Settings) -> str:
     message = build_delivery_message(settings)
     return message.html_text if message else ""
+
+
+def send_report_to_channels(report: str, settings: Settings) -> list[DeliveryResult]:
+    message = build_delivery_message(settings)
+    results = []
+    for channel in configured_delivery_channels():
+        if channel == "telegram":
+            results.append(_send_telegram(message, settings))
+        else:
+            results.append(DeliveryResult(channel=channel, sent=False, error="Delivery channel is not implemented", skipped=True))
+    return results
+
+
+def configured_delivery_channels() -> list[str]:
+    raw = os.getenv("DELIVERY_CHANNELS", "telegram")
+    channels = []
+    for item in raw.split(","):
+        channel = item.strip().lower()
+        if channel and channel not in channels:
+            channels.append(channel)
+    return channels or ["telegram"]
 
 
 def build_delivery_message(settings: Settings) -> DeliveryMessage | None:
@@ -74,6 +102,18 @@ def report_url(settings: Settings) -> str:
 def _github_repository() -> str:
     value = os.getenv("GITHUB_REPOSITORY", "")
     return value if "/" in value else ""
+
+
+def _send_telegram(message: DeliveryMessage | None, settings: Settings) -> DeliveryResult:
+    if not settings.telegram_bot_token or not settings.telegram_chat_id:
+        return DeliveryResult(channel="telegram", sent=False, error="Telegram is not configured", skipped=True)
+    if not message:
+        return DeliveryResult(channel="telegram", sent=False, error="Report URL is not configured", skipped=True)
+    try:
+        _send_message(message.html_text, settings)
+    except Exception as error:
+        return DeliveryResult(channel="telegram", sent=False, error=str(error))
+    return DeliveryResult(channel="telegram", sent=True)
 
 
 def _send_message(text: str, settings: Settings) -> None:

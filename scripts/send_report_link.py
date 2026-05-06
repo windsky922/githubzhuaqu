@@ -8,7 +8,7 @@ ROOT_PATH = Path(__file__).resolve().parents[1]
 if str(ROOT_PATH) not in sys.path:
     sys.path.insert(0, str(ROOT_PATH))
 
-from src.sender import report_url, send_report
+from src.sender import report_url, send_report_to_channels
 from src.settings import ROOT, load_settings
 from src.state import write_sent_repositories
 from src.models import Repository
@@ -23,13 +23,24 @@ def main() -> int:
         return 1
 
     settings = load_settings(run_date=run_date, since_date="")
-    sent, error = send_report("", settings)
+    delivery_results = send_report_to_channels("", settings)
+    telegram_result = next((result for result in delivery_results if result.channel == "telegram"), None)
+    sent = bool(telegram_result and telegram_result.sent)
+    error = telegram_result.error if telegram_result else "Telegram channel is disabled"
     url = report_url(settings)
     selected = _selected_repositories(ROOT, run_date)
     state_path = ""
     if sent and selected:
         state_path = write_sent_repositories(selected, settings)
-    _update_run_summary(ROOT, run_date, sent, error, state_path, url)
+    _update_run_summary(
+        ROOT,
+        run_date,
+        sent,
+        error,
+        state_path,
+        url,
+        [result.to_dict() for result in delivery_results],
+    )
     _update_run_summary_sqlite(ROOT, run_date, sqlite_index_summary_path(settings), "")
     sqlite_path, sqlite_error = sync_sqlite_index(settings)
     if sqlite_error:
@@ -69,7 +80,15 @@ def _selected_repositories(root: Path, run_date: str) -> list[Repository]:
     return repositories
 
 
-def _update_run_summary(root: Path, run_date: str, sent: bool, error: str, state_path: str, report_url: str = "") -> None:
+def _update_run_summary(
+    root: Path,
+    run_date: str,
+    sent: bool,
+    error: str,
+    state_path: str,
+    report_url: str = "",
+    delivery_results: list[dict[str, str | bool]] | None = None,
+) -> None:
     path = root / "data" / "runs" / f"{run_date}.json"
     if not path.exists():
         return
@@ -81,6 +100,9 @@ def _update_run_summary(root: Path, run_date: str, sent: bool, error: str, state
         return
     data["telegram_sent"] = sent
     data["telegram_error"] = error
+    data["delivery_results"] = delivery_results or [
+        {"channel": "telegram", "sent": sent, "error": error, "skipped": bool(error and not sent)}
+    ]
     if report_url:
         data["telegram_report_url"] = report_url
     if state_path:

@@ -2,7 +2,14 @@ import os
 import unittest
 from unittest.mock import patch
 
-from src.sender import build_delivery_message, build_report_message, report_url, send_report
+from src.sender import (
+    build_delivery_message,
+    build_report_message,
+    configured_delivery_channels,
+    report_url,
+    send_report,
+    send_report_to_channels,
+)
 from src.settings import Settings
 
 
@@ -61,6 +68,24 @@ class SenderTest(unittest.TestCase):
         self.assertEqual(send.call_count, 1)
         self.assertIn('<a href="https://example.com/weekly/2026-04-29.html">打开本周周报</a>', send.call_args.args[0])
         self.assertNotIn("# long markdown", send.call_args.args[0])
+
+    def test_configured_delivery_channels_defaults_to_telegram(self):
+        with patch.dict(os.environ, {}, clear=True):
+            self.assertEqual(configured_delivery_channels(), ["telegram"])
+
+    def test_configured_delivery_channels_removes_duplicates(self):
+        with patch.dict(os.environ, {"DELIVERY_CHANNELS": "telegram, feishu, telegram, wechat"}):
+            self.assertEqual(configured_delivery_channels(), ["telegram", "feishu", "wechat"])
+
+    def test_send_report_to_channels_records_future_channels_without_failing(self):
+        with patch.dict(os.environ, {"DELIVERY_CHANNELS": "telegram,feishu,wechat"}), patch("src.sender._send_message"):
+            results = send_report_to_channels("# long markdown", settings("https://example.com/weekly"))
+
+        self.assertEqual([result.channel for result in results], ["telegram", "feishu", "wechat"])
+        self.assertTrue(results[0].sent)
+        self.assertTrue(results[1].skipped)
+        self.assertEqual(results[1].error, "Delivery channel is not implemented")
+        self.assertTrue(results[2].skipped)
 
 
 if __name__ == "__main__":

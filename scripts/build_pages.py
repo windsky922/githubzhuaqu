@@ -779,6 +779,7 @@ def _public_runs(root: Path, reports: list[Path]) -> dict:
                 "fallback_used": bool(summary.get("fallback_used")),
                 "telegram_sent": bool(summary.get("telegram_sent")),
                 "telegram_report_url": summary.get("telegram_report_url", ""),
+                "delivery_results": _public_delivery_results(summary.get("delivery_results")),
                 "collector_error_count": len(summary.get("collector_errors") or []),
                 "top_languages": trends.get("top_languages") or [],
                 "top_categories": trends.get("top_categories") or [],
@@ -887,6 +888,24 @@ def _project_table_row(row: dict) -> str:
         f"{row.get('category', 'Other')} | {row.get('language', 'Unknown')} | {row.get('stargazers_count', 0)} | "
         f"{row.get('star_growth', 0)} | {risk_count} | {link} |"
     )
+
+
+def _public_delivery_results(value: object) -> list[dict[str, str | bool]]:
+    if not isinstance(value, list):
+        return []
+    results = []
+    for item in value:
+        if not isinstance(item, dict):
+            continue
+        results.append(
+            {
+                "channel": str(item.get("channel") or ""),
+                "sent": bool(item.get("sent")),
+                "error": str(item.get("error") or ""),
+                "skipped": bool(item.get("skipped")),
+            }
+        )
+    return results
 
 
 def _source_text(sources: list[str]) -> str:

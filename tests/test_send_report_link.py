@@ -76,6 +76,8 @@ class SendReportLinkScriptTest(unittest.TestCase):
             self.assertTrue(data["telegram_sent"])
             self.assertEqual(data["telegram_error"], "")
             self.assertEqual(data["telegram_report_url"], "https://example.com/weekly/2026-04-29.html")
+            self.assertEqual(data["delivery_results"][0]["channel"], "telegram")
+            self.assertTrue(data["delivery_results"][0]["sent"])
             self.assertEqual(data["state_path"], "data/state/sent_repos.json")
         finally:
             shutil.rmtree(root, ignore_errors=True)
