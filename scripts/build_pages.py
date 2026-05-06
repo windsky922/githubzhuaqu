@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import json
+from datetime import UTC, datetime
+from email.utils import format_datetime
 from pathlib import Path
+from xml.sax.saxutils import escape as xml_escape
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -33,6 +36,9 @@ def build_pages(root: Path = ROOT) -> list[Path]:
     runs_json = root / "docs" / "runs.json"
     runs_json.write_text(_json_text(_public_runs(root, reports)), encoding="utf-8")
     written.append(runs_json)
+    feed = root / "docs" / "feed.xml"
+    feed.write_text(_feed_content(root, reports), encoding="utf-8")
+    written.append(feed)
     return written
 
 
@@ -78,6 +84,7 @@ def _index_content(root: Path, reports: list[Path]) -> str:
             "- [历史项目索引](projects.html)",
             "- [公共项目 JSON](projects.json)",
             "- [公共运行 JSON](runs.json)",
+            "- [RSS 订阅](feed.xml)",
             "- [数据契约说明](data-contracts.html)",
             "- [架构说明](architecture.html)",
             "- [配置说明](setup.html)",
@@ -255,7 +262,7 @@ def _explorer_content() -> str:
     }
     .filters {
       display: grid;
-      grid-template-columns: minmax(220px, 2fr) repeat(5, minmax(130px, 1fr));
+      grid-template-columns: minmax(220px, 2fr) repeat(6, minmax(120px, 1fr)) minmax(170px, 1.2fr);
       gap: 10px;
       align-items: end;
       margin-bottom: 14px;
@@ -284,6 +291,15 @@ def _explorer_content() -> str:
       color: white;
       font-weight: 700;
     }
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .actions button:last-child {
+      background: var(--accent-2);
+      border-color: var(--accent-2);
+    }
     .meta {
       display: flex;
       align-items: center;
@@ -292,6 +308,32 @@ def _explorer_content() -> str:
       color: var(--muted);
       margin: 8px 0 12px;
       min-height: 24px;
+    }
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .metric {
+      min-height: 72px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 6px;
+    }
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .metric strong {
+      display: block;
+      margin-top: 6px;
+      font-size: 18px;
+      line-height: 1.2;
+      overflow-wrap: anywhere;
     }
     .table-shell {
       overflow-x: auto;
@@ -368,12 +410,18 @@ def _explorer_content() -> str:
       .filters {
         grid-template-columns: 1fr 1fr;
       }
+      .summary {
+        grid-template-columns: 1fr 1fr;
+      }
     }
     @media (max-width: 560px) {
       .wrap {
         width: min(100% - 20px, 1180px);
       }
       .filters {
+        grid-template-columns: 1fr;
+      }
+      .summary {
         grid-template-columns: 1fr;
       }
       h1 {
@@ -397,6 +445,9 @@ def _explorer_content() -> str:
     <section class="filters" aria-label="筛选条件">
       <label>关键词
         <input id="query" type="search" autocomplete="off">
+      </label>
+      <label>日期
+        <select id="runDate"></select>
       </label>
       <label>语言
         <select id="language"></select>
@@ -427,12 +478,16 @@ def _explorer_content() -> str:
           <option value="stars">累计 Star</option>
         </select>
       </label>
-      <button id="reset" type="button">重置</button>
+      <div class="actions">
+        <button id="reset" type="button">重置</button>
+        <button id="share" type="button">复制链接</button>
+      </div>
     </section>
     <div class="meta">
       <span id="count">0 个项目</span>
       <span id="updated"></span>
     </div>
+    <section id="summary" class="summary" aria-label="筛选结果概览"></section>
     <div class="table-shell">
       <table>
         <thead>
@@ -458,6 +513,7 @@ def _explorer_content() -> str:
     const state = { projects: [] };
     const controls = {
       query: document.getElementById("query"),
+      runDate: document.getElementById("runDate"),
       language: document.getElementById("language"),
       category: document.getElementById("category"),
       source: document.getElementById("source"),
@@ -467,12 +523,15 @@ def _explorer_content() -> str:
     const rows = document.getElementById("rows");
     const count = document.getElementById("count");
     const updated = document.getElementById("updated");
+    const summary = document.getElementById("summary");
+    const share = document.getElementById("share");
 
     fetch("projects.json", { cache: "no-store" })
       .then(response => response.json())
       .then(data => {
         state.projects = Array.isArray(data.projects) ? data.projects : [];
         hydrateOptions();
+        restoreFiltersFromUrl();
         render();
       })
       .catch(() => {
@@ -482,6 +541,7 @@ def _explorer_content() -> str:
     Object.values(controls).forEach(control => control.addEventListener("input", render));
     document.getElementById("reset").addEventListener("click", () => {
       controls.query.value = "";
+      controls.runDate.value = "";
       controls.language.value = "";
       controls.category.value = "";
       controls.source.value = "";
@@ -489,12 +549,25 @@ def _explorer_content() -> str:
       controls.sort.value = "run_date";
       render();
     });
+    share.addEventListener("click", () => {
+      const link = window.location.href;
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(link).then(() => setShareLabel("已复制"));
+      } else {
+        setShareLabel("链接已更新");
+      }
+    });
 
     function hydrateOptions() {
+      fillSelect(controls.runDate, dates());
       fillSelect(controls.language, values("language"));
       fillSelect(controls.category, values("category"));
-      const dates = state.projects.map(project => project.run_date).filter(Boolean).sort().reverse();
-      updated.textContent = dates.length ? `最新数据：${dates[0]}` : "";
+      const runDates = dates();
+      updated.textContent = runDates.length ? `最新数据：${runDates[0]}` : "";
+    }
+
+    function dates() {
+      return [...new Set(state.projects.map(project => project.run_date).filter(Boolean))].sort().reverse();
     }
 
     function values(key) {
@@ -511,6 +584,7 @@ def _explorer_content() -> str:
         const text = [project.full_name, project.description, project.language, project.category, ...(project.selection_reasons || [])].join(" ").toLowerCase();
         const riskCount = (project.security_flags || []).length;
         return (!query || text.includes(query))
+          && (!controls.runDate.value || project.run_date === controls.runDate.value)
           && (!controls.language.value || project.language === controls.language.value)
           && (!controls.category.value || project.category === controls.category.value)
           && (!controls.source.value || (project.sources || []).includes(controls.source.value))
@@ -518,7 +592,66 @@ def _explorer_content() -> str:
       });
       filtered = filtered.sort(compareProjects);
       count.textContent = `${filtered.length} 个项目`;
+      summary.innerHTML = summaryHtml(filtered);
       rows.innerHTML = filtered.length ? filtered.map(rowHtml).join("") : '<tr><td class="empty" colspan="9">没有匹配项目</td></tr>';
+      updateUrl();
+    }
+
+    function summaryHtml(projects) {
+      const starGrowth = projects.reduce((total, project) => total + number(project.star_growth), 0);
+      const trendingCount = projects.filter(project => number(project.trending_rank) > 0).length;
+      const riskCount = projects.filter(project => (project.security_flags || []).length > 0).length;
+      const language = topValue(projects, "language");
+      const category = topValue(projects, "category");
+      return [
+        metric("新增 Star", starGrowth),
+        metric("Trending 项目", trendingCount),
+        metric("风险提示", riskCount),
+        metric("主语言 / 方向", `${language || "-"} / ${category || "-"}`)
+      ].join("");
+    }
+
+    function metric(label, value) {
+      return `<div class="metric"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`;
+    }
+
+    function topValue(projects, key) {
+      const counts = new Map();
+      projects.forEach(project => {
+        const value = project[key];
+        if (value) counts.set(value, (counts.get(value) || 0) + 1);
+      });
+      return [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]?.[0] || "";
+    }
+
+    function restoreFiltersFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const keys = { q: "query", date: "runDate", lang: "language", category: "category", source: "source", risk: "risk", sort: "sort" };
+      Object.entries(keys).forEach(([param, key]) => {
+        if (params.has(param)) controls[key].value = params.get(param) || "";
+      });
+    }
+
+    function updateUrl() {
+      const params = new URLSearchParams();
+      if (controls.query.value.trim()) params.set("q", controls.query.value.trim());
+      if (controls.runDate.value) params.set("date", controls.runDate.value);
+      if (controls.language.value) params.set("lang", controls.language.value);
+      if (controls.category.value) params.set("category", controls.category.value);
+      if (controls.source.value) params.set("source", controls.source.value);
+      if (controls.risk.value) params.set("risk", controls.risk.value);
+      if (controls.sort.value && controls.sort.value !== "run_date") params.set("sort", controls.sort.value);
+      const query = params.toString();
+      const next = `${window.location.pathname}${query ? "?" + query : ""}`;
+      window.history.replaceState(null, "", next);
+      setShareLabel("复制链接", false);
+    }
+
+    function setShareLabel(text, temporary = true) {
+      share.textContent = text;
+      if (temporary) {
+        window.setTimeout(() => { share.textContent = "复制链接"; }, 1600);
+      }
     }
 
     function compareProjects(a, b) {
@@ -659,6 +792,88 @@ def _public_runs(root: Path, reports: list[Path]) -> dict:
         "count": len(runs),
         "runs": runs,
     }
+
+
+def _feed_content(root: Path, reports: list[Path]) -> str:
+    base_url = _site_base_url(root, reports)
+    site_link = _absolute_url(base_url, "index.html")
+    items = []
+    for report in reports[:20]:
+        summary = _run_summary(root, report.stem)
+        trends = _trend_summary(root, report.stem)
+        report_link = _absolute_url(base_url, f"weekly/{_page_name(report)}")
+        title = f"GitHub 每周热点项目周报 - {report.stem}"
+        description = _feed_description(summary, trends)
+        items.append(
+            "\n".join(
+                [
+                    "    <item>",
+                    f"      <title>{_xml(title)}</title>",
+                    f"      <link>{_xml(report_link)}</link>",
+                    f"      <guid isPermaLink=\"true\">{_xml(report_link)}</guid>",
+                    f"      <pubDate>{_xml(_rss_date(report.stem))}</pubDate>",
+                    f"      <description>{_xml(description)}</description>",
+                    "    </item>",
+                ]
+            )
+        )
+    body = "\n".join(items)
+    return "\n".join(
+        [
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
+            "<rss version=\"2.0\">",
+            "  <channel>",
+            "    <title>GitHub 每周热点项目周报</title>",
+            f"    <link>{_xml(site_link)}</link>",
+            "    <description>GitHub Weekly Agent 自动生成的中文开源项目情报周报。</description>",
+            f"    <lastBuildDate>{_xml(format_datetime(datetime.now(UTC)))}</lastBuildDate>",
+            "    <language>zh-CN</language>",
+            body,
+            "  </channel>",
+            "</rss>",
+            "",
+        ]
+    )
+
+
+def _feed_description(summary: dict, trends: dict) -> str:
+    parts = []
+    if summary:
+        parts.append(f"入选项目 {summary.get('selected_count', 0)} 个")
+        parts.append(f"采集候选 {summary.get('collected_count', 0)} 个")
+        parts.append("生成方式：" + ("Kimi" if summary.get("kimi_used") else "降级模板"))
+        parts.append("Telegram：" + ("已推送" if summary.get("telegram_sent") else "未推送"))
+    trend_text = _report_trend_text(trends)
+    if trend_text:
+        parts.append(trend_text)
+    points = trends.get("summary_points") or []
+    parts.extend(str(point) for point in points[:2])
+    return "；".join(parts) if parts else "本期周报已生成。"
+
+
+def _site_base_url(root: Path, reports: list[Path]) -> str:
+    for report in reports:
+        url = str(_run_summary(root, report.stem).get("telegram_report_url") or "")
+        marker = "/weekly/"
+        if marker in url:
+            return url.split(marker, 1)[0].rstrip("/") + "/"
+    return ""
+
+
+def _absolute_url(base_url: str, path: str) -> str:
+    return f"{base_url}{path}" if base_url else path
+
+
+def _rss_date(run_date: str) -> str:
+    try:
+        value = datetime.fromisoformat(run_date).replace(tzinfo=UTC)
+    except ValueError:
+        value = datetime.now(UTC)
+    return format_datetime(value)
+
+
+def _xml(value: object) -> str:
+    return xml_escape(str(value), {'"': "&quot;"})
 
 
 def _project_table_row(row: dict) -> str:

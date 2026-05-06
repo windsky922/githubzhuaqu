@@ -70,10 +70,13 @@ docs/projects.md
 docs/explorer.html
 docs/projects.json
 docs/runs.json
+docs/feed.xml
 docs/weekly/YYYY-MM-DD.md
 ```
 
-其中 `explorer.html` 是轻量项目筛选页，直接读取 `projects.json`，支持按关键词、语言、方向、来源、风险提示和排序方式筛选历史入选项目。
+其中 `explorer.html` 是轻量项目筛选页，直接读取 `projects.json`，支持按关键词、日期、语言、方向、来源、风险提示和排序方式筛选历史入选项目。筛选状态会同步到 URL，便于后续在 Telegram、微信、飞书或浏览器中分享同一个筛选视图。
+
+`feed.xml` 是 RSS 订阅入口，适合在 RSS 阅读器或后续自动化工具中订阅每周周报更新。
 
 ## 公共 JSON
 

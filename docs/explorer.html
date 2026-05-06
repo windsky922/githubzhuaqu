@@ -61,7 +61,7 @@
     }
     .filters {
       display: grid;
-      grid-template-columns: minmax(220px, 2fr) repeat(5, minmax(130px, 1fr));
+      grid-template-columns: minmax(220px, 2fr) repeat(6, minmax(120px, 1fr)) minmax(170px, 1.2fr);
       gap: 10px;
       align-items: end;
       margin-bottom: 14px;
@@ -90,6 +90,15 @@
       color: white;
       font-weight: 700;
     }
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .actions button:last-child {
+      background: var(--accent-2);
+      border-color: var(--accent-2);
+    }
     .meta {
       display: flex;
       align-items: center;
@@ -98,6 +107,32 @@
       color: var(--muted);
       margin: 8px 0 12px;
       min-height: 24px;
+    }
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .metric {
+      min-height: 72px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 6px;
+    }
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .metric strong {
+      display: block;
+      margin-top: 6px;
+      font-size: 18px;
+      line-height: 1.2;
+      overflow-wrap: anywhere;
     }
     .table-shell {
       overflow-x: auto;
@@ -174,12 +209,18 @@
       .filters {
         grid-template-columns: 1fr 1fr;
       }
+      .summary {
+        grid-template-columns: 1fr 1fr;
+      }
     }
     @media (max-width: 560px) {
       .wrap {
         width: min(100% - 20px, 1180px);
       }
       .filters {
+        grid-template-columns: 1fr;
+      }
+      .summary {
         grid-template-columns: 1fr;
       }
       h1 {
@@ -203,6 +244,9 @@
     <section class="filters" aria-label="筛选条件">
       <label>关键词
         <input id="query" type="search" autocomplete="off">
+      </label>
+      <label>日期
+        <select id="runDate"></select>
       </label>
       <label>语言
         <select id="language"></select>
@@ -233,12 +277,16 @@
           <option value="stars">累计 Star</option>
         </select>
       </label>
-      <button id="reset" type="button">重置</button>
+      <div class="actions">
+        <button id="reset" type="button">重置</button>
+        <button id="share" type="button">复制链接</button>
+      </div>
     </section>
     <div class="meta">
       <span id="count">0 个项目</span>
       <span id="updated"></span>
     </div>
+    <section id="summary" class="summary" aria-label="筛选结果概览"></section>
     <div class="table-shell">
       <table>
         <thead>
@@ -264,6 +312,7 @@
     const state = { projects: [] };
     const controls = {
       query: document.getElementById("query"),
+      runDate: document.getElementById("runDate"),
       language: document.getElementById("language"),
       category: document.getElementById("category"),
       source: document.getElementById("source"),
@@ -273,12 +322,15 @@
     const rows = document.getElementById("rows");
     const count = document.getElementById("count");
     const updated = document.getElementById("updated");
+    const summary = document.getElementById("summary");
+    const share = document.getElementById("share");
 
     fetch("projects.json", { cache: "no-store" })
       .then(response => response.json())
       .then(data => {
         state.projects = Array.isArray(data.projects) ? data.projects : [];
         hydrateOptions();
+        restoreFiltersFromUrl();
         render();
       })
       .catch(() => {
@@ -288,6 +340,7 @@
     Object.values(controls).forEach(control => control.addEventListener("input", render));
     document.getElementById("reset").addEventListener("click", () => {
       controls.query.value = "";
+      controls.runDate.value = "";
       controls.language.value = "";
       controls.category.value = "";
       controls.source.value = "";
@@ -295,12 +348,25 @@
       controls.sort.value = "run_date";
       render();
     });
+    share.addEventListener("click", () => {
+      const link = window.location.href;
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(link).then(() => setShareLabel("已复制"));
+      } else {
+        setShareLabel("链接已更新");
+      }
+    });
 
     function hydrateOptions() {
+      fillSelect(controls.runDate, dates());
       fillSelect(controls.language, values("language"));
       fillSelect(controls.category, values("category"));
-      const dates = state.projects.map(project => project.run_date).filter(Boolean).sort().reverse();
-      updated.textContent = dates.length ? `最新数据：${dates[0]}` : "";
+      const runDates = dates();
+      updated.textContent = runDates.length ? `最新数据：${runDates[0]}` : "";
+    }
+
+    function dates() {
+      return [...new Set(state.projects.map(project => project.run_date).filter(Boolean))].sort().reverse();
     }
 
     function values(key) {
@@ -317,6 +383,7 @@
         const text = [project.full_name, project.description, project.language, project.category, ...(project.selection_reasons || [])].join(" ").toLowerCase();
         const riskCount = (project.security_flags || []).length;
         return (!query || text.includes(query))
+          && (!controls.runDate.value || project.run_date === controls.runDate.value)
           && (!controls.language.value || project.language === controls.language.value)
           && (!controls.category.value || project.category === controls.category.value)
           && (!controls.source.value || (project.sources || []).includes(controls.source.value))
@@ -324,7 +391,66 @@
       });
       filtered = filtered.sort(compareProjects);
       count.textContent = `${filtered.length} 个项目`;
+      summary.innerHTML = summaryHtml(filtered);
       rows.innerHTML = filtered.length ? filtered.map(rowHtml).join("") : '<tr><td class="empty" colspan="9">没有匹配项目</td></tr>';
+      updateUrl();
+    }
+
+    function summaryHtml(projects) {
+      const starGrowth = projects.reduce((total, project) => total + number(project.star_growth), 0);
+      const trendingCount = projects.filter(project => number(project.trending_rank) > 0).length;
+      const riskCount = projects.filter(project => (project.security_flags || []).length > 0).length;
+      const language = topValue(projects, "language");
+      const category = topValue(projects, "category");
+      return [
+        metric("新增 Star", starGrowth),
+        metric("Trending 项目", trendingCount),
+        metric("风险提示", riskCount),
+        metric("主语言 / 方向", `${language || "-"} / ${category || "-"}`)
+      ].join("");
+    }
+
+    function metric(label, value) {
+      return `<div class="metric"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`;
+    }
+
+    function topValue(projects, key) {
+      const counts = new Map();
+      projects.forEach(project => {
+        const value = project[key];
+        if (value) counts.set(value, (counts.get(value) || 0) + 1);
+      });
+      return [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0]?.[0] || "";
+    }
+
+    function restoreFiltersFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const keys = { q: "query", date: "runDate", lang: "language", category: "category", source: "source", risk: "risk", sort: "sort" };
+      Object.entries(keys).forEach(([param, key]) => {
+        if (params.has(param)) controls[key].value = params.get(param) || "";
+      });
+    }
+
+    function updateUrl() {
+      const params = new URLSearchParams();
+      if (controls.query.value.trim()) params.set("q", controls.query.value.trim());
+      if (controls.runDate.value) params.set("date", controls.runDate.value);
+      if (controls.language.value) params.set("lang", controls.language.value);
+      if (controls.category.value) params.set("category", controls.category.value);
+      if (controls.source.value) params.set("source", controls.source.value);
+      if (controls.risk.value) params.set("risk", controls.risk.value);
+      if (controls.sort.value && controls.sort.value !== "run_date") params.set("sort", controls.sort.value);
+      const query = params.toString();
+      const next = `${window.location.pathname}${query ? "?" + query : ""}`;
+      window.history.replaceState(null, "", next);
+      setShareLabel("复制链接", false);
+    }
+
+    function setShareLabel(text, temporary = true) {
+      share.textContent = text;
+      if (temporary) {
+        window.setTimeout(() => { share.textContent = "复制链接"; }, 1600);
+      }
     }
 
     function compareProjects(a, b) {

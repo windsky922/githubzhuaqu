@@ -3037,3 +3037,76 @@ docs/explorer.html
 ### 3. 设计边界
 
 本次没有引入 Astro、React、Vue 或 SSR。页面只是最小可用的静态筛选入口，后续如果交互需求继续增加，再基于公共 JSON 和数据契约评估前端工程化。
+
+---
+
+## 2026-05-06 追加：可分享筛选视图
+
+### 1. 开发目的
+
+项目筛选页已经可以读取 `projects.json` 做基础筛选，但筛选状态不能复现。为了让后续 Telegram、微信、飞书和浏览器书签能够指向同一个筛选视图，本次补充 URL 状态同步和结果概览。
+
+### 2. 本次实现
+
+更新：
+
+```text
+scripts/build_pages.py
+tests/test_build_pages.py
+README.md
+docs/data-contracts.md
+docs/operation-log.md
+```
+
+调整内容：
+
+1. `docs/explorer.html` 新增日期筛选。
+2. 新增筛选结果概览，展示新增 Star、Trending 项目数、风险提示数和主语言/方向。
+3. 筛选条件会同步到 URL 查询参数。
+4. 打开带查询参数的链接时会自动恢复筛选状态。
+5. 新增“复制链接”按钮，方便分享当前筛选视图。
+6. 测试覆盖日期控件、分享按钮、URL 状态恢复、URL 更新和结果概览函数存在性。
+
+### 3. 设计边界
+
+本次仍保持无框架静态页面。URL 参数只保存公开筛选条件，不写入隐私信息或密钥。
+
+---
+
+## 2026-05-06 追加：RSS 订阅输出
+
+### 1. 开发目的
+
+项目已经支持 Telegram 推送和 GitHub Pages 阅读，但还缺少面向阅读器和自动化工具的订阅入口。本次新增 RSS 输出，让用户可以订阅每周周报更新，也为后续微信、飞书、邮件等渠道提供轻量监听来源。
+
+### 2. 本次实现
+
+更新：
+
+```text
+.github/workflows/weekly.yml
+scripts/build_pages.py
+tests/test_build_pages.py
+README.md
+docs/data-contracts.md
+docs/operation-log.md
+```
+
+新增产物：
+
+```text
+docs/feed.xml
+```
+
+调整内容：
+
+1. `scripts/build_pages.py` 在生成 Pages 时同步生成 RSS 2.0 文件。
+2. RSS 条目按周报日期倒序生成，最多保留最近 20 篇。
+3. 条目链接优先使用运行摘要中的公开 Pages 基础地址。
+4. RSS 描述包含入选数量、采集数量、生成方式、Telegram 状态和趋势摘要。
+5. workflow 归档提交范围加入 `docs/feed.xml`。
+6. 测试验证 RSS 文件生成、标题、周报链接和摘要内容。
+
+### 3. 设计边界
+
+RSS 只发布公开摘要，不包含密钥、用户隐私、原始错误堆栈或未脱敏配置。它是订阅入口，不替代 Telegram 推送和 GitHub Pages 阅读页。
