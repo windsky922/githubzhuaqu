@@ -1,0 +1,140 @@
+{
+  "schema_version": 1,
+  "count": 5,
+  "profiles": [
+    {
+      "name": "java",
+      "label": "Java 后端与工程实践",
+      "learning_goals": [
+        "Java 后端框架",
+        "高质量工程实践",
+        "服务端工具链"
+      ],
+      "preferred_languages": [
+        "Java",
+        "Kotlin"
+      ],
+      "preferred_topics": [
+        "java",
+        "spring",
+        "spring-boot",
+        "backend",
+        "microservices",
+        "jvm"
+      ],
+      "search_languages": [
+        "Java"
+      ],
+      "search_topics": [
+        "java",
+        "spring-boot",
+        "backend"
+      ]
+    },
+    {
+      "name": "python",
+      "label": "Python 工具与应用开发",
+      "learning_goals": [
+        "Python 自动化",
+        "数据处理",
+        "AI 工具开发"
+      ],
+      "preferred_languages": [
+        "Python"
+      ],
+      "preferred_topics": [
+        "python",
+        "automation",
+        "data",
+        "cli",
+        "ai"
+      ],
+      "search_languages": [
+        "Python"
+      ],
+      "search_topics": [
+        "python",
+        "automation",
+        "ai"
+      ]
+    },
+    {
+      "name": "agent_development",
+      "label": "Agent 开发",
+      "learning_goals": [
+        "Agent 框架",
+        "工具调用",
+        "自动化工作流"
+      ],
+      "preferred_languages": [
+        "Python",
+        "TypeScript"
+      ],
+      "preferred_topics": [
+        "agent",
+        "agents",
+        "llm",
+        "tool-use",
+        "workflow",
+        "automation",
+        "coding-agent"
+      ],
+      "search_languages": [
+        "Python",
+        "TypeScript"
+      ],
+      "search_topics": [
+        "agent",
+        "llm",
+        "workflow"
+      ]
+    },
+    {
+      "name": "learning",
+      "label": "学习型项目",
+      "learning_goals": [
+        "系统学习新技术",
+        "选择适合跟练的项目",
+        "避开过重或过散的项目"
+      ],
+      "preferred_languages": [],
+      "preferred_topics": [
+        "tutorial",
+        "example",
+        "course",
+        "learning",
+        "awesome"
+      ],
+      "search_languages": [],
+      "search_topics": []
+    },
+    {
+      "name": "developer_tools",
+      "label": "开发者工具",
+      "learning_goals": [
+        "提升开发效率",
+        "关注 CLI 与自动化工具",
+        "寻找可落地的工程工具"
+      ],
+      "preferred_languages": [
+        "Go",
+        "Rust",
+        "Python",
+        "TypeScript"
+      ],
+      "preferred_topics": [
+        "cli",
+        "developer-tools",
+        "devtools",
+        "automation",
+        "github-actions"
+      ],
+      "search_languages": [],
+      "search_topics": [
+        "cli",
+        "developer-tools",
+        "automation"
+      ]
+    }
+  ]
+}

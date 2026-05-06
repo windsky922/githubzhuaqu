@@ -60,6 +60,7 @@ class BuildPagesTest(unittest.TestCase):
             self.assertIn(root / "docs" / "explorer.html", written)
             self.assertIn(root / "docs" / "projects.json", written)
             self.assertIn(root / "docs" / "runs.json", written)
+            self.assertIn(root / "docs" / "profiles.json", written)
             self.assertIn(root / "docs" / "feed.xml", written)
             self.assertEqual((root / "docs" / "weekly" / "2026-04-28.md").read_text(encoding="utf-8"), "# 周报")
             index = (root / "docs" / "index.md").read_text(encoding="utf-8")
@@ -76,6 +77,7 @@ class BuildPagesTest(unittest.TestCase):
             self.assertIn("[历史项目索引](projects.html)", index)
             self.assertIn("[公共项目 JSON](projects.json)", index)
             self.assertIn("[公共运行 JSON](runs.json)", index)
+            self.assertIn("[个性化方向 JSON](profiles.json)", index)
             self.assertIn("[RSS 订阅](feed.xml)", index)
             self.assertIn("[数据契约说明](data-contracts.html)", index)
             self.assertIn("[未来更新规划](future-plan.html)", index)
@@ -98,16 +100,22 @@ class BuildPagesTest(unittest.TestCase):
             self.assertTrue(runs_json["runs"][0]["telegram_sent"])
             self.assertEqual(runs_json["runs"][0]["delivery_results"], [])
             self.assertEqual(runs_json["runs"][0]["top_languages"][0]["name"], "Python")
+            profiles_json = json.loads((root / "docs" / "profiles.json").read_text(encoding="utf-8"))
+            self.assertEqual(profiles_json["schema_version"], 1)
+            self.assertEqual(profiles_json["count"], 0)
             explorer = (root / "docs" / "explorer.html").read_text(encoding="utf-8")
             self.assertIn("GitHub 热点项目筛选", explorer)
             self.assertIn('fetch("projects.json"', explorer)
+            self.assertIn('fetch("profiles.json"', explorer)
             self.assertIn('id="runDate"', explorer)
             self.assertIn('id="language"', explorer)
+            self.assertIn('id="profile"', explorer)
             self.assertIn('id="category"', explorer)
             self.assertIn('id="share"', explorer)
             self.assertIn("restoreFiltersFromUrl", explorer)
             self.assertIn("updateUrl", explorer)
             self.assertIn("summaryHtml", explorer)
+            self.assertIn("matchesProfile", explorer)
             feed = (root / "docs" / "feed.xml").read_text(encoding="utf-8")
             self.assertIn("<rss version=\"2.0\">", feed)
             self.assertIn("GitHub 每周热点项目周报 - 2026-04-28", feed)
@@ -128,8 +136,42 @@ class BuildPagesTest(unittest.TestCase):
             self.assertIn("[周报归档首页](index.html)", projects)
             projects_json = json.loads((root / "docs" / "projects.json").read_text(encoding="utf-8"))
             runs_json = json.loads((root / "docs" / "runs.json").read_text(encoding="utf-8"))
+            profiles_json = json.loads((root / "docs" / "profiles.json").read_text(encoding="utf-8"))
             self.assertEqual(projects_json["projects"], [])
             self.assertEqual(runs_json["runs"], [])
+            self.assertEqual(profiles_json["profiles"], [])
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
+    def test_builds_public_profiles_json_from_config(self):
+        root = Path.cwd() / f".tmp-pages-profile-test-{uuid.uuid4().hex}"
+        try:
+            (root / "reports").mkdir(parents=True)
+            (root / "config").mkdir(parents=True)
+            (root / "config" / "profiles.example.json").write_text(
+                json.dumps(
+                    {
+                        "agent_development": {
+                            "profile_label": "Agent 开发",
+                            "learning_goals": ["工具调用"],
+                            "preferred_languages": ["Python"],
+                            "preferred_topics": ["agent"],
+                            "search_topics": ["llm"],
+                            "secret_note": "不应公开",
+                        }
+                    },
+                    ensure_ascii=False,
+                ),
+                encoding="utf-8",
+            )
+
+            build_pages(root)
+
+            profiles = json.loads((root / "docs" / "profiles.json").read_text(encoding="utf-8"))
+            self.assertEqual(profiles["profiles"][0]["name"], "agent_development")
+            self.assertEqual(profiles["profiles"][0]["label"], "Agent 开发")
+            self.assertEqual(profiles["profiles"][0]["preferred_languages"], ["Python"])
+            self.assertNotIn("secret_note", profiles["profiles"][0])
         finally:
             shutil.rmtree(root, ignore_errors=True)
 

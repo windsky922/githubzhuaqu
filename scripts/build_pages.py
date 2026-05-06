@@ -36,6 +36,9 @@ def build_pages(root: Path = ROOT) -> list[Path]:
     runs_json = root / "docs" / "runs.json"
     runs_json.write_text(_json_text(_public_runs(root, reports)), encoding="utf-8")
     written.append(runs_json)
+    profiles_json = root / "docs" / "profiles.json"
+    profiles_json.write_text(_json_text(_public_profiles(root)), encoding="utf-8")
+    written.append(profiles_json)
     feed = root / "docs" / "feed.xml"
     feed.write_text(_feed_content(root, reports), encoding="utf-8")
     written.append(feed)
@@ -84,6 +87,7 @@ def _index_content(root: Path, reports: list[Path]) -> str:
             "- [历史项目索引](projects.html)",
             "- [公共项目 JSON](projects.json)",
             "- [公共运行 JSON](runs.json)",
+            "- [个性化方向 JSON](profiles.json)",
             "- [RSS 订阅](feed.xml)",
             "- [数据契约说明](data-contracts.html)",
             "- [架构说明](architecture.html)",
@@ -262,7 +266,7 @@ def _explorer_content() -> str:
     }
     .filters {
       display: grid;
-      grid-template-columns: minmax(220px, 2fr) repeat(6, minmax(120px, 1fr)) minmax(170px, 1.2fr);
+      grid-template-columns: minmax(220px, 2fr) repeat(7, minmax(120px, 1fr)) minmax(170px, 1.2fr);
       gap: 10px;
       align-items: end;
       margin-bottom: 14px;
@@ -438,6 +442,7 @@ def _explorer_content() -> str:
         <a href="index.html">周报归档</a>
         <a href="projects.html">项目索引</a>
         <a href="projects.json">projects.json</a>
+        <a href="profiles.json">profiles.json</a>
       </nav>
     </div>
   </header>
@@ -451,6 +456,9 @@ def _explorer_content() -> str:
       </label>
       <label>语言
         <select id="language"></select>
+      </label>
+      <label>个性化方向
+        <select id="profile"></select>
       </label>
       <label>方向
         <select id="category"></select>
@@ -510,11 +518,12 @@ def _explorer_content() -> str:
     </div>
   </main>
   <script>
-    const state = { projects: [] };
+    const state = { projects: [], profiles: [] };
     const controls = {
       query: document.getElementById("query"),
       runDate: document.getElementById("runDate"),
       language: document.getElementById("language"),
+      profile: document.getElementById("profile"),
       category: document.getElementById("category"),
       source: document.getElementById("source"),
       risk: document.getElementById("risk"),
@@ -526,10 +535,13 @@ def _explorer_content() -> str:
     const summary = document.getElementById("summary");
     const share = document.getElementById("share");
 
-    fetch("projects.json", { cache: "no-store" })
-      .then(response => response.json())
-      .then(data => {
-        state.projects = Array.isArray(data.projects) ? data.projects : [];
+    Promise.all([
+      fetch("projects.json", { cache: "no-store" }).then(response => response.json()),
+      fetch("profiles.json", { cache: "no-store" }).then(response => response.json()).catch(() => ({ profiles: [] }))
+    ])
+      .then(([projectsData, profilesData]) => {
+        state.projects = Array.isArray(projectsData.projects) ? projectsData.projects : [];
+        state.profiles = Array.isArray(profilesData.profiles) ? profilesData.profiles : [];
         hydrateOptions();
         restoreFiltersFromUrl();
         render();
@@ -543,6 +555,7 @@ def _explorer_content() -> str:
       controls.query.value = "";
       controls.runDate.value = "";
       controls.language.value = "";
+      controls.profile.value = "";
       controls.category.value = "";
       controls.source.value = "";
       controls.risk.value = "";
@@ -561,6 +574,7 @@ def _explorer_content() -> str:
     function hydrateOptions() {
       fillSelect(controls.runDate, dates());
       fillSelect(controls.language, values("language"));
+      fillProfileSelect();
       fillSelect(controls.category, values("category"));
       const runDates = dates();
       updated.textContent = runDates.length ? `最新数据：${runDates[0]}` : "";
@@ -578,14 +592,24 @@ def _explorer_content() -> str:
       select.innerHTML = '<option value="">全部</option>' + values.map(value => `<option value="${escapeAttribute(value)}">${escapeHtml(value)}</option>`).join("");
     }
 
+    function fillProfileSelect() {
+      controls.profile.innerHTML = '<option value="">全部</option>' + state.profiles.map(profile => {
+        const value = profile.name || "";
+        const label = profile.label || value;
+        return `<option value="${escapeAttribute(value)}">${escapeHtml(label)}</option>`;
+      }).join("");
+    }
+
     function render() {
       const query = controls.query.value.trim().toLowerCase();
+      const selectedProfile = state.profiles.find(profile => profile.name === controls.profile.value);
       let filtered = state.projects.filter(project => {
         const text = [project.full_name, project.description, project.language, project.category, ...(project.selection_reasons || [])].join(" ").toLowerCase();
         const riskCount = (project.security_flags || []).length;
         return (!query || text.includes(query))
           && (!controls.runDate.value || project.run_date === controls.runDate.value)
           && (!controls.language.value || project.language === controls.language.value)
+          && (!selectedProfile || matchesProfile(project, selectedProfile))
           && (!controls.category.value || project.category === controls.category.value)
           && (!controls.source.value || (project.sources || []).includes(controls.source.value))
           && (!controls.risk.value || (controls.risk.value === "has" ? riskCount > 0 : riskCount === 0));
@@ -626,9 +650,9 @@ def _explorer_content() -> str:
 
     function restoreFiltersFromUrl() {
       const params = new URLSearchParams(window.location.search);
-      const keys = { q: "query", date: "runDate", lang: "language", category: "category", source: "source", risk: "risk", sort: "sort" };
+      const keys = { q: "query", date: "runDate", lang: "language", profile: "profile", category: "category", source: "source", risk: "risk", sort: "sort" };
       Object.entries(keys).forEach(([param, key]) => {
-        if (params.has(param)) controls[key].value = params.get(param) || "";
+      if (params.has(param)) controls[key].value = params.get(param) || "";
       });
     }
 
@@ -637,6 +661,7 @@ def _explorer_content() -> str:
       if (controls.query.value.trim()) params.set("q", controls.query.value.trim());
       if (controls.runDate.value) params.set("date", controls.runDate.value);
       if (controls.language.value) params.set("lang", controls.language.value);
+      if (controls.profile.value) params.set("profile", controls.profile.value);
       if (controls.category.value) params.set("category", controls.category.value);
       if (controls.source.value) params.set("source", controls.source.value);
       if (controls.risk.value) params.set("risk", controls.risk.value);
@@ -661,6 +686,15 @@ def _explorer_content() -> str:
       if (sort === "score") return number(b.score) - number(a.score);
       if (sort === "stars") return number(b.stargazers_count) - number(a.stargazers_count);
       return String(b.run_date || "").localeCompare(String(a.run_date || ""));
+    }
+
+    function matchesProfile(project, profile) {
+      const languages = profile.preferred_languages || [];
+      if (languages.includes(project.language)) return true;
+      const keywords = [...(profile.preferred_topics || []), ...(profile.search_topics || [])].map(value => String(value).toLowerCase());
+      if (!keywords.length) return false;
+      const text = [project.full_name, project.description, project.category, ...(project.selection_reasons || [])].join(" ").toLowerCase();
+      return keywords.some(keyword => keyword && text.includes(keyword));
     }
 
     function rowHtml(project) {
@@ -755,6 +789,37 @@ def _public_projects(root: Path) -> dict:
         "schema_version": 1,
         "count": len(projects),
         "projects": projects,
+    }
+
+
+def _public_profiles(root: Path) -> dict:
+    path = root / "config" / "profiles.json"
+    if not path.exists():
+        path = root / "config" / "profiles.example.json"
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (FileNotFoundError, json.JSONDecodeError):
+        data = {}
+    profiles = []
+    if isinstance(data, dict):
+        for name, profile in data.items():
+            if not isinstance(profile, dict):
+                continue
+            profiles.append(
+                {
+                    "name": str(name),
+                    "label": str(profile.get("profile_label") or name),
+                    "learning_goals": _string_list(profile.get("learning_goals")),
+                    "preferred_languages": _string_list(profile.get("preferred_languages")),
+                    "preferred_topics": _string_list(profile.get("preferred_topics")),
+                    "search_languages": _string_list(profile.get("search_languages")),
+                    "search_topics": _string_list(profile.get("search_topics")),
+                }
+            )
+    return {
+        "schema_version": 1,
+        "count": len(profiles),
+        "profiles": profiles,
     }
 
 
@@ -933,6 +998,12 @@ def _float_value(value: object) -> float:
         return float(value or 0)
     except (TypeError, ValueError):
         return 0.0
+
+
+def _string_list(value: object) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    return [str(item) for item in value if str(item)]
 
 
 if __name__ == "__main__":

@@ -37,6 +37,7 @@
 - [历史项目索引](projects.html)
 - [公共项目 JSON](projects.json)
 - [公共运行 JSON](runs.json)
+- [个性化方向 JSON](profiles.json)
 - [RSS 订阅](feed.xml)
 - [数据契约说明](data-contracts.html)
 - [架构说明](architecture.html)

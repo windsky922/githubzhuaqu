@@ -3220,3 +3220,37 @@ tests/test_delivery_channel_check.py
 ### 3. 安全边界
 
 检查脚本只判断环境变量是否存在，不打印变量值，不发送消息，也不访问外部 Webhook。真实连通性仍由后续发送流程负责。
+
+---
+
+## 2026-05-06 追加：公开个性化方向数据
+
+### 1. 开发目的
+
+用户希望后续可以通过 Java、Python、Agent 开发等选项精准推送项目。当前 profile 已经能影响采集和评分，但前端缺少稳定公开数据入口。本次新增 `profiles.json`，让 GitHub Pages 和后续前端可以直接读取个性化方向。
+
+### 2. 本次实现
+
+更新：
+
+```text
+README.md
+docs/data-contracts.md
+docs/operation-log.md
+scripts/build_pages.py
+tests/test_build_pages.py
+tests/test_data_contracts.py
+```
+
+调整内容：
+
+1. `scripts/build_pages.py` 生成 `docs/profiles.json`。
+2. GitHub Pages 首页新增 `profiles.json` 入口。
+3. `docs/explorer.html` 新增“个性化方向”筛选项。
+4. 筛选页会读取 `profiles.json`，按 profile 的偏好语言和主题关键词过滤历史项目。
+5. URL 参数新增 `profile`，方便分享某个个性化方向视图。
+6. 契约测试覆盖 `profiles.json` 的公开字段集合。
+
+### 3. 安全边界
+
+`profiles.json` 只公开 profile 名称、显示标签、学习目标、偏好语言和主题关键词，不公开评分权重、私有配置、密钥或用户身份信息。

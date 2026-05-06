@@ -48,6 +48,16 @@ RUN_KEYS = {
     "summary_points",
 }
 
+PROFILE_KEYS = {
+    "name",
+    "label",
+    "learning_goals",
+    "preferred_languages",
+    "preferred_topics",
+    "search_languages",
+    "search_topics",
+}
+
 SQLITE_COLUMNS = {
     "runs": {
         "run_date",
@@ -125,13 +135,17 @@ class DataContractsTest(unittest.TestCase):
 
             projects = json.loads((root / "docs" / "projects.json").read_text(encoding="utf-8"))
             runs = json.loads((root / "docs" / "runs.json").read_text(encoding="utf-8"))
+            profiles = json.loads((root / "docs" / "profiles.json").read_text(encoding="utf-8"))
             self.assertEqual(projects["schema_version"], 1)
             self.assertEqual(runs["schema_version"], 1)
+            self.assertEqual(profiles["schema_version"], 1)
             self.assertEqual(set(projects["projects"][0]), PROJECT_KEYS)
             self.assertEqual(set(runs["runs"][0]), RUN_KEYS)
+            self.assertEqual(set(profiles["profiles"][0]), PROFILE_KEYS)
             self.assertIsInstance(projects["projects"][0]["selection_reasons"], list)
             self.assertIsInstance(projects["projects"][0]["security_flags"], list)
             self.assertIsInstance(runs["runs"][0]["summary_points"], list)
+            self.assertIsInstance(profiles["profiles"][0]["preferred_topics"], list)
         finally:
             shutil.rmtree(root, ignore_errors=True)
 
@@ -157,6 +171,7 @@ def _write_public_json_fixture(root: Path) -> None:
     (root / "data" / "runs").mkdir(parents=True)
     (root / "data" / "trends").mkdir(parents=True)
     (root / "data" / "selected").mkdir(parents=True)
+    (root / "config").mkdir(parents=True)
     (root / "reports" / "2026-05-03.md").write_text("# 周报", encoding="utf-8")
     (root / "data" / "runs" / "2026-05-03.json").write_text(
         json.dumps(
@@ -211,6 +226,22 @@ def _write_public_json_fixture(root: Path) -> None:
                     "security_flags": [],
                 }
             ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    (root / "config" / "profiles.example.json").write_text(
+        json.dumps(
+            {
+                "python": {
+                    "profile_label": "Python 工具与应用开发",
+                    "learning_goals": ["Python 自动化"],
+                    "preferred_languages": ["Python"],
+                    "preferred_topics": ["python"],
+                    "search_languages": ["Python"],
+                    "search_topics": ["automation"],
+                }
+            },
             ensure_ascii=False,
         ),
         encoding="utf-8",

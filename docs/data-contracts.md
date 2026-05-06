@@ -5,7 +5,7 @@
 ## 一、设计原则
 
 1. JSON 归档仍是事实来源。
-2. `docs/projects.json` 和 `docs/runs.json` 是公开展示与订阅入口。
+2. `docs/projects.json`、`docs/runs.json` 和 `docs/profiles.json` 是公开展示与订阅入口。
 3. SQLite 是可重建派生索引，不提交数据库文件。
 4. 公共数据不能包含密钥、用户隐私、未脱敏配置或原始错误堆栈。
 5. 修改字段时必须同步更新测试、文档和下游消费逻辑。
@@ -48,7 +48,37 @@ report_url
 
 当前 `docs/explorer.html` 已经直接消费该文件，并将筛选状态同步到 URL 查询参数。
 
-## 三、`docs/runs.json`
+## 三、`docs/profiles.json`
+
+顶层字段：
+
+```text
+schema_version
+count
+profiles
+```
+
+每个 profile 字段：
+
+```text
+name
+label
+learning_goals
+preferred_languages
+preferred_topics
+search_languages
+search_topics
+```
+
+用途：
+
+1. 前端展示 Java、Python、Agent 开发等个性化方向选项。
+2. 项目筛选页按 profile 快速过滤历史项目。
+3. 后续用户画像、订阅偏好和多渠道推送复用。
+
+该文件只发布兴趣方向、语言和主题关键词，不发布权重、内部调参字段、密钥或用户私有配置。
+
+## 四、`docs/runs.json`
 
 顶层字段：
 
@@ -90,7 +120,7 @@ summary_points
 
 `delivery_results` 记录多推送通道状态。当前支持 `telegram`、`feishu`、`wechat`。该字段只记录通道名称、是否发送成功、错误摘要和是否跳过，不记录 Token、Chat ID、Webhook 或任何密钥。
 
-## 四、SQLite 表
+## 五、SQLite 表
 
 当前 SQLite 表：
 
@@ -114,7 +144,7 @@ migration_meta
 6. `star_history` 保存 Star 历史。
 7. `migration_meta` 保存迁移元数据。
 
-## 五、契约测试
+## 六、契约测试
 
 契约测试位于：
 
@@ -130,7 +160,7 @@ tests/test_data_contracts.py
 
 如果未来确实需要新增、删除或重命名字段，应先确认下游影响，再同步更新契约测试和本文档。
 
-## 六、RSS 输出
+## 七、RSS 输出
 
 RSS 文件位于：
 
