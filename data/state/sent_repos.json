@@ -25,6 +25,11 @@
     "first_sent_at": "2026-04-29"
   },
   {
+    "full_name": "AIDC-AI/Pixelle-Video",
+    "html_url": "https://github.com/AIDC-AI/Pixelle-Video",
+    "first_sent_at": "2026-05-06"
+  },
+  {
     "full_name": "alibaba/arthas",
     "html_url": "https://github.com/alibaba/arthas",
     "first_sent_at": "2026-04-30"
@@ -478,6 +483,11 @@
     "full_name": "volcengine/OpenViking",
     "html_url": "https://github.com/volcengine/OpenViking",
     "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "warpdotdev/warp",
+    "html_url": "https://github.com/warpdotdev/warp",
+    "first_sent_at": "2026-05-06"
   },
   {
     "full_name": "Yeachan-Heo/oh-my-claudecode",
