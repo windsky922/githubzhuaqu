@@ -3,11 +3,11 @@
     "full_name": "warpdotdev/warp",
     "html_url": "https://github.com/warpdotdev/warp",
     "description": "Warp is an agentic development environment, born out of the terminal.",
-    "stargazers_count": 55576,
-    "forks_count": 4056,
+    "stargazers_count": 55579,
+    "forks_count": 4058,
     "language": "Rust",
     "created_at": "2021-07-08T18:48:08Z",
-    "updated_at": "2026-05-06T16:18:06Z",
+    "updated_at": "2026-05-06T16:24:06Z",
     "pushed_at": "2026-05-06T16:07:04Z",
     "topics": [
       "bash",
@@ -33,7 +33,7 @@
     "quality_level": "high",
     "selection_reasons": [
       "进入 GitHub Trending 周榜第 1 位，是本期最重要的热度信号。",
-      "较上次记录新增 Star 8，近期热度上升。",
+      "较上次记录新增 Star 3，近期热度上升。",
       "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
       "匹配当前个性化方向：开发者工具。"
     ],
@@ -43,19 +43,19 @@
     "trending_rank": 1,
     "trending_period": "weekly",
     "source_priority": 100,
-    "star_growth": 8,
-    "score": 0.5825,
+    "star_growth": 3,
+    "score": 0.5857,
     "category": "AI Agent"
   },
   {
     "full_name": "TauricResearch/TradingAgents",
     "html_url": "https://github.com/TauricResearch/TradingAgents",
     "description": "TradingAgents: Multi-Agents LLM Financial Trading Framework",
-    "stargazers_count": 70073,
-    "forks_count": 13525,
+    "stargazers_count": 70083,
+    "forks_count": 13527,
     "language": "Python",
     "created_at": "2024-12-28T03:31:08Z",
-    "updated_at": "2026-05-06T16:19:51Z",
+    "updated_at": "2026-05-06T16:25:42Z",
     "pushed_at": "2026-05-01T19:23:24Z",
     "topics": [
       "agent",
@@ -78,7 +78,7 @@
     "quality_level": "high",
     "selection_reasons": [
       "进入 GitHub Trending 周榜第 2 位，是本期最重要的热度信号。",
-      "较上次记录新增 Star 22，近期热度上升。",
+      "较上次记录新增 Star 10，近期热度上升。",
       "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
       "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
     ],
@@ -89,19 +89,19 @@
     "trending_rank": 2,
     "trending_period": "weekly",
     "source_priority": 100,
-    "star_growth": 22,
-    "score": 0.8246,
+    "star_growth": 10,
+    "score": 0.8731,
     "category": "AI Agent"
   },
   {
     "full_name": "mattpocock/skills",
     "html_url": "https://github.com/mattpocock/skills",
     "description": "Skills for Real Engineers. Straight from my .claude directory.",
-    "stargazers_count": 62567,
-    "forks_count": 5406,
+    "stargazers_count": 62576,
+    "forks_count": 5407,
     "language": "Shell",
     "created_at": "2026-02-03T11:15:53Z",
-    "updated_at": "2026-05-06T16:20:03Z",
+    "updated_at": "2026-05-06T16:27:04Z",
     "pushed_at": "2026-05-06T15:08:00Z",
     "topics": [],
     "archived": false,
@@ -120,9 +120,9 @@
     "quality_level": "high",
     "selection_reasons": [
       "进入 GitHub Trending 周榜第 3 位，是本期最重要的热度信号。",
-      "较上次记录新增 Star 26，近期热度上升。",
+      "较上次记录新增 Star 9，近期热度上升。",
       "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-      "当前累计 Star 62567，具备一定社区关注度。"
+      "当前累计 Star 62576，具备一定社区关注度。"
     ],
     "sources": [
       "github_trending"
@@ -130,19 +130,19 @@
     "trending_rank": 3,
     "trending_period": "weekly",
     "source_priority": 100,
-    "star_growth": 26,
-    "score": 0.7391,
+    "star_growth": 9,
+    "score": 0.7327,
     "category": "LLM Tooling"
   },
   {
     "full_name": "ruvnet/ruflo",
     "html_url": "https://github.com/ruvnet/ruflo",
     "description": "🌊 The leading agent orchestration platform for Claude. Deploy intelligent multi-agent swarms, coordinate autonomous workflows, and build conversational AI systems. Features    enterprise-grade architecture, self-learning swarm intelligence, RAG integration, and native Claude Code / Codex Integration",
-    "stargazers_count": 44910,
-    "forks_count": 4978,
+    "stargazers_count": 44918,
+    "forks_count": 4980,
     "language": "TypeScript",
     "created_at": "2025-06-02T21:24:20Z",
-    "updated_at": "2026-05-06T16:19:41Z",
+    "updated_at": "2026-05-06T16:27:02Z",
     "pushed_at": "2026-05-06T15:20:52Z",
     "topics": [
       "agentic-ai",
@@ -180,7 +180,7 @@
     "quality_level": "high",
     "selection_reasons": [
       "进入 GitHub Trending 周榜第 4 位，是本期最重要的热度信号。",
-      "较上次记录新增 Star 20，近期热度上升。",
+      "较上次记录新增 Star 8，近期热度上升。",
       "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
       "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
     ],
@@ -190,8 +190,8 @@
     "trending_rank": 4,
     "trending_period": "weekly",
     "source_priority": 100,
-    "star_growth": 20,
-    "score": 0.7327,
+    "star_growth": 8,
+    "score": 0.7521,
     "category": "AI Agent"
   },
   {
@@ -240,9 +240,9 @@
     "quality_level": "high",
     "selection_reasons": [
       "进入 GitHub Trending 周榜第 5 位，是本期最重要的热度信号。",
-      "较上次记录新增 Star 3，近期热度上升。",
       "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-      "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
+      "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+      "当前累计 Star 25867，具备一定社区关注度。"
     ],
     "sources": [
       "github_trending"
@@ -250,19 +250,19 @@
     "trending_rank": 5,
     "trending_period": "weekly",
     "source_priority": 100,
-    "star_growth": 3,
-    "score": 0.565,
+    "star_growth": 0,
+    "score": 0.5408,
     "category": "Developer Tools"
   },
   {
     "full_name": "1jehuang/jcode",
     "html_url": "https://github.com/1jehuang/jcode",
     "description": "Coding Agent Harness",
-    "stargazers_count": 4419,
+    "stargazers_count": 4421,
     "forks_count": 420,
     "language": "Rust",
     "created_at": "2026-01-05T09:43:36Z",
-    "updated_at": "2026-05-06T16:19:17Z",
+    "updated_at": "2026-05-06T16:26:18Z",
     "pushed_at": "2026-05-06T03:28:01Z",
     "topics": [
       "ai",
@@ -292,7 +292,7 @@
     "quality_level": "high",
     "selection_reasons": [
       "进入 GitHub Trending 周榜第 6 位，是本期最重要的热度信号。",
-      "较上次记录新增 Star 5，近期热度上升。",
+      "较上次记录新增 Star 2，近期热度上升。",
       "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
       "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
     ],
@@ -302,19 +302,19 @@
     "trending_rank": 6,
     "trending_period": "weekly",
     "source_priority": 100,
-    "star_growth": 5,
-    "score": 0.6183,
+    "star_growth": 2,
+    "score": 0.6232,
     "category": "AI Agent"
   },
   {
     "full_name": "AIDC-AI/Pixelle-Video",
     "html_url": "https://github.com/AIDC-AI/Pixelle-Video",
     "description": "🚀 AI 全自动短视频引擎 | AI Fully Automated Short Video Engine",
-    "stargazers_count": 12649,
+    "stargazers_count": 12651,
     "forks_count": 1920,
     "language": "Python",
     "created_at": "2025-11-07T06:34:27Z",
-    "updated_at": "2026-05-06T16:12:50Z",
+    "updated_at": "2026-05-06T16:24:40Z",
     "pushed_at": "2026-05-06T03:40:39Z",
     "topics": [
       "aigc",
@@ -337,7 +337,7 @@
     "quality_level": "high",
     "selection_reasons": [
       "进入 GitHub Trending 周榜第 7 位，是本期最重要的热度信号。",
-      "较上次记录新增 Star 10，近期热度上升。",
+      "较上次记录新增 Star 2，近期热度上升。",
       "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
       "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
     ],
@@ -347,19 +347,19 @@
     "trending_rank": 7,
     "trending_period": "weekly",
     "source_priority": 100,
-    "star_growth": 10,
-    "score": 0.4952,
+    "star_growth": 2,
+    "score": 0.4596,
     "category": "Other"
   },
   {
     "full_name": "D4Vinci/Scrapling",
     "html_url": "https://github.com/D4Vinci/Scrapling",
     "description": "🕷️ An adaptive Web Scraping framework that handles everything from a single request to a full-scale crawl!",
-    "stargazers_count": 45948,
-    "forks_count": 4255,
+    "stargazers_count": 45953,
+    "forks_count": 4256,
     "language": "Python",
     "created_at": "2024-10-13T20:29:53Z",
-    "updated_at": "2026-05-06T16:18:13Z",
+    "updated_at": "2026-05-06T16:27:07Z",
     "pushed_at": "2026-05-06T14:37:52Z",
     "topics": [
       "ai",
@@ -397,7 +397,7 @@
     "quality_level": "high",
     "selection_reasons": [
       "进入 GitHub Trending 周榜第 10 位，是本期最重要的热度信号。",
-      "较上次记录新增 Star 15，近期热度上升。",
+      "较上次记录新增 Star 5，近期热度上升。",
       "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
       "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
     ],
@@ -408,19 +408,19 @@
     "trending_rank": 10,
     "trending_period": "weekly",
     "source_priority": 100,
-    "star_growth": 15,
-    "score": 0.5915,
+    "star_growth": 5,
+    "score": 0.5834,
     "category": "Developer Tools"
   },
   {
     "full_name": "ComposioHQ/awesome-codex-skills",
     "html_url": "https://github.com/ComposioHQ/awesome-codex-skills",
     "description": "A curated list of practical Codex skills for automating workflows across the Codex CLI and API.",
-    "stargazers_count": 7075,
+    "stargazers_count": 7076,
     "forks_count": 465,
     "language": "Python",
     "created_at": "2026-01-12T11:58:21Z",
-    "updated_at": "2026-05-06T16:03:37Z",
+    "updated_at": "2026-05-06T16:23:13Z",
     "pushed_at": "2026-05-05T06:21:36Z",
     "topics": [
       "awesome",
@@ -465,19 +465,19 @@
     "trending_period": "weekly",
     "source_priority": 100,
     "star_growth": 1,
-    "score": 0.4866,
+    "score": 0.5012,
     "category": "AI Agent"
   },
   {
     "full_name": "NousResearch/hermes-agent",
     "html_url": "https://github.com/NousResearch/hermes-agent",
     "description": "The agent that grows with you",
-    "stargazers_count": 135530,
-    "forks_count": 20749,
+    "stargazers_count": 135537,
+    "forks_count": 20751,
     "language": "Python",
     "created_at": "2025-07-22T22:22:28Z",
-    "updated_at": "2026-05-06T16:20:51Z",
-    "pushed_at": "2026-05-06T16:16:28Z",
+    "updated_at": "2026-05-06T16:27:10Z",
+    "pushed_at": "2026-05-06T16:25:04Z",
     "topics": [
       "ai",
       "ai-agent",
@@ -498,7 +498,7 @@
     ],
     "archived": false,
     "fork": false,
-    "open_issues_count": 8545,
+    "open_issues_count": 8549,
     "license_name": "MIT",
     "readme_excerpt": "The self-improving AI agent built by Nous Research.** It's the only agent with a built-in learning loop — it creates skills from experience, improves them during use, nudges itself to persist knowledge, searches its own past conversations, and builds a deepening model of who you are across sessions.",
     "readme_summary": "The self-improving AI agent built by Nous Research.** It's the only agent with a built-in learning loop — it creates skills from experience, improves them during use, nudges itself to persist knowledge, searches its own past conversations, and builds a deepening model of who you are across sessions.",
@@ -511,10 +511,10 @@
     "quality_score": 92,
     "quality_level": "high",
     "selection_reasons": [
-      "较上次记录新增 Star 28，近期热度上升。",
+      "较上次记录新增 Star 7，近期热度上升。",
       "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
       "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
-      "当前累计 Star 135530，具备一定社区关注度。"
+      "当前累计 Star 135537，具备一定社区关注度。"
     ],
     "sources": [
       "github_search"
@@ -522,8 +522,8 @@
     "trending_rank": 0,
     "trending_period": "",
     "source_priority": 10,
-    "star_growth": 28,
-    "score": 0.4823,
+    "star_growth": 7,
+    "score": 0.4144,
     "category": "AI Agent"
   }
 ]
