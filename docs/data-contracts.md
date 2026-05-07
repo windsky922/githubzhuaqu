@@ -112,6 +112,7 @@ kimi_used
 fallback_used
 telegram_sent
 telegram_report_url
+telegram_explorer_url
 delivery_results
 collector_error_count
 top_languages
@@ -126,6 +127,8 @@ summary_points
 1. 首页运行状态展示。
 2. 趋势概览和历史运行对比。
 3. 监控周报是否降级、是否推送、采集是否异常。
+
+`telegram_report_url` 记录本期周报正文页面。`telegram_explorer_url` 记录同一运行日期对应的项目筛选页面，例如 `explorer.html?date=YYYY-MM-DD`。
 
 `delivery_results` 记录多推送通道状态。当前支持 `telegram`、`feishu`、`wechat`。该字段只记录通道名称、是否发送成功、错误摘要和是否跳过，不记录 Token、Chat ID、Webhook 或任何密钥。
 

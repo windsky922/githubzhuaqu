@@ -1136,6 +1136,7 @@ def _public_runs(root: Path, reports: list[Path]) -> dict:
                 "fallback_used": bool(summary.get("fallback_used")),
                 "telegram_sent": bool(summary.get("telegram_sent")),
                 "telegram_report_url": summary.get("telegram_report_url", ""),
+                "telegram_explorer_url": summary.get("telegram_explorer_url", ""),
                 "delivery_results": _public_delivery_results(summary.get("delivery_results")),
                 "collector_error_count": len(summary.get("collector_errors") or []),
                 "top_languages": trends.get("top_languages") or [],

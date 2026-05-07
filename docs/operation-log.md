@@ -3524,3 +3524,43 @@ tests/test_build_pages.py
 ### 3. 设计边界
 
 本次只增强静态 Pages 前端展示，不改变主采集、评分、报告生成和 Telegram 推送逻辑。质量判断仍来自归档数据中的 `quality_score`、`quality_level` 和 `quality_flags`。
+
+---
+
+## 2026-05-07 追加：推送消息增加项目筛选入口
+
+### 1. 问题来源
+
+前端质量信号改动落在 `explorer.html`，但 Telegram 推送仍只发送 `weekly/YYYY-MM-DD.html` 周报正文链接。用户从手机端打开推送后只能看到周报正文，看不到项目筛选页新增的质量筛选、质量排序和质量信号详情。
+
+### 2. 本次实现
+
+更新：
+
+```text
+README.md
+docs/data-contracts.md
+docs/operation-log.md
+docs/setup.md
+main.py
+scripts/build_pages.py
+scripts/send_report_link.py
+src/models.py
+src/sender.py
+tests/test_data_contracts.py
+tests/test_send_report_link.py
+tests/test_sender.py
+```
+
+调整内容：
+
+1. 推送消息同时包含“周报正文”和“项目筛选”两个入口。
+2. 周报正文继续指向 `weekly/YYYY-MM-DD.html`。
+3. 项目筛选指向 `explorer.html?date=YYYY-MM-DD`。
+4. Telegram 使用 HTML 超链接；飞书和企业微信 Webhook 消息同步使用双入口。
+5. 运行摘要新增 `telegram_explorer_url`，公开 `docs/runs.json` 也输出该字段。
+6. 测试覆盖双链接消息、运行摘要写回和公共 JSON 数据契约。
+
+### 3. 设计边界
+
+本次不改变周报生成内容，也不把完整 Markdown 推送到手机端。推送消息保持短链接形式，只增加一个筛选页入口，方便用户在阅读周报之外继续按方向、语言、质量和风险查看项目。

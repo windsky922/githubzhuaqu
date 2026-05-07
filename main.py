@@ -18,7 +18,7 @@ from src.processor import process_repositories
 from src.quality import apply_quality_signals
 from src.reporter import generate_report
 from src.security import apply_security_flags
-from src.sender import report_url, send_report_to_channels
+from src.sender import explorer_url, report_url, send_report_to_channels
 from src.settings import load_settings
 from src.state import (
     load_sent_repository_names,
@@ -71,6 +71,7 @@ def main() -> int:
         summary.kimi_used = not fallback_used
         summary.report_error = report_error
         summary.telegram_report_url = report_url(settings)
+        summary.telegram_explorer_url = explorer_url(settings)
 
         if _skip_telegram_send():
             summary.telegram_sent = False

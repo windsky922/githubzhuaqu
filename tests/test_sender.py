@@ -6,6 +6,7 @@ from src.sender import (
     build_delivery_message,
     build_report_message,
     configured_delivery_channels,
+    explorer_url,
     report_url,
     send_report,
     send_report_to_channels,
@@ -44,11 +45,23 @@ class SenderTest(unittest.TestCase):
 
         self.assertEqual(result, "https://windsky922.github.io/githubzhuaqu/weekly/2026-04-29.html")
 
+    def test_builds_explorer_url_from_report_base_url(self):
+        result = explorer_url(settings("https://example.com/weekly/"))
+
+        self.assertEqual(result, "https://example.com/explorer.html?date=2026-04-29")
+
+    def test_builds_explorer_url_from_github_repository(self):
+        with patch.dict(os.environ, {"GITHUB_REPOSITORY": "windsky922/githubzhuaqu"}):
+            result = explorer_url(settings())
+
+        self.assertEqual(result, "https://windsky922.github.io/githubzhuaqu/explorer.html?date=2026-04-29")
+
     def test_builds_short_report_message(self):
         message = build_report_message(settings("https://example.com/weekly"))
 
         self.assertIn("GitHub 每周热点项目周报 - 2026-04-29", message)
-        self.assertIn('阅读链接：<a href="https://example.com/weekly/2026-04-29.html">打开本周周报</a>', message)
+        self.assertIn('周报正文：<a href="https://example.com/weekly/2026-04-29.html">打开周报正文</a>', message)
+        self.assertIn('项目筛选：<a href="https://example.com/explorer.html?date=2026-04-29">打开项目筛选</a>', message)
 
     def test_builds_channel_neutral_delivery_message(self):
         message = build_delivery_message(settings("https://example.com/weekly"))
@@ -56,8 +69,11 @@ class SenderTest(unittest.TestCase):
         self.assertIsNotNone(message)
         self.assertEqual(message.title, "GitHub 每周热点项目周报 - 2026-04-29")
         self.assertEqual(message.url, "https://example.com/weekly/2026-04-29.html")
-        self.assertIn("阅读链接：https://example.com/weekly/2026-04-29.html", message.text)
-        self.assertIn('<a href="https://example.com/weekly/2026-04-29.html">打开本周周报</a>', message.html_text)
+        self.assertEqual(message.explorer_url, "https://example.com/explorer.html?date=2026-04-29")
+        self.assertIn("周报正文：https://example.com/weekly/2026-04-29.html", message.text)
+        self.assertIn("项目筛选：https://example.com/explorer.html?date=2026-04-29", message.text)
+        self.assertIn('<a href="https://example.com/weekly/2026-04-29.html">打开周报正文</a>', message.html_text)
+        self.assertIn('<a href="https://example.com/explorer.html?date=2026-04-29">打开项目筛选</a>', message.html_text)
 
     def test_send_report_sends_link_message_only(self):
         with patch("src.sender._send_message") as send:
@@ -66,7 +82,8 @@ class SenderTest(unittest.TestCase):
         self.assertTrue(sent)
         self.assertEqual(error, "")
         self.assertEqual(send.call_count, 1)
-        self.assertIn('<a href="https://example.com/weekly/2026-04-29.html">打开本周周报</a>', send.call_args.args[0])
+        self.assertIn('<a href="https://example.com/weekly/2026-04-29.html">打开周报正文</a>', send.call_args.args[0])
+        self.assertIn('<a href="https://example.com/explorer.html?date=2026-04-29">打开项目筛选</a>', send.call_args.args[0])
         self.assertNotIn("# long markdown", send.call_args.args[0])
 
     def test_configured_delivery_channels_defaults_to_telegram(self):
@@ -94,9 +111,11 @@ class SenderTest(unittest.TestCase):
         feishu_payload = post_json.call_args_list[0].args[1]
         wechat_payload = post_json.call_args_list[1].args[1]
         self.assertEqual(feishu_payload["msg_type"], "interactive")
-        self.assertIn("打开本周周报", feishu_payload["card"]["elements"][0]["content"])
+        self.assertIn("打开周报正文", feishu_payload["card"]["elements"][0]["content"])
+        self.assertIn("打开项目筛选", feishu_payload["card"]["elements"][0]["content"])
         self.assertEqual(wechat_payload["msgtype"], "markdown")
-        self.assertIn("打开本周周报", wechat_payload["markdown"]["content"])
+        self.assertIn("打开周报正文", wechat_payload["markdown"]["content"])
+        self.assertIn("打开项目筛选", wechat_payload["markdown"]["content"])
 
     def test_send_report_to_channels_skips_unconfigured_webhooks(self):
         with patch.dict(os.environ, {"DELIVERY_CHANNELS": "feishu,wechat"}, clear=True):

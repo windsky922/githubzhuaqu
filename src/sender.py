@@ -15,6 +15,7 @@ from .settings import Settings
 class DeliveryMessage:
     title: str
     url: str
+    explorer_url: str
     text: str
     html_text: str
 
@@ -74,22 +75,25 @@ def build_delivery_message(settings: Settings) -> DeliveryMessage | None:
     url = report_url(settings)
     if not url:
         return None
+    project_url = explorer_url(settings)
     title = f"GitHub 每周热点项目周报 - {settings.run_date}"
     text = "\n".join(
         [
             title,
             "",
-            f"阅读链接：{url}",
+            f"周报正文：{url}",
+            f"项目筛选：{project_url}",
         ]
     )
     html_text = "\n".join(
         [
             title,
             "",
-            f'阅读链接：<a href="{html.escape(url, quote=True)}">打开本周周报</a>',
+            f'周报正文：<a href="{html.escape(url, quote=True)}">打开周报正文</a>',
+            f'项目筛选：<a href="{html.escape(project_url, quote=True)}">打开项目筛选</a>',
         ]
     )
-    return DeliveryMessage(title=title, url=url, text=text, html_text=html_text)
+    return DeliveryMessage(title=title, url=url, explorer_url=project_url, text=text, html_text=html_text)
 
 
 def report_url(settings: Settings) -> str:
@@ -101,6 +105,27 @@ def report_url(settings: Settings) -> str:
         owner, name = repository.split("/", 1)
         base_url = f"https://{owner}.github.io/{name}/weekly"
     return f"{base_url}/{settings.run_date}.html"
+
+
+def explorer_url(settings: Settings) -> str:
+    base_url = _site_base_url(settings)
+    if not base_url:
+        return ""
+    date = urllib.parse.quote(settings.run_date)
+    return f"{base_url}/explorer.html?date={date}"
+
+
+def _site_base_url(settings: Settings) -> str:
+    base_url = settings.report_base_url.strip().rstrip("/")
+    if base_url.endswith("/weekly"):
+        return base_url[: -len("/weekly")]
+    if base_url:
+        return base_url
+    repository = _github_repository()
+    if not repository:
+        return ""
+    owner, name = repository.split("/", 1)
+    return f"https://{owner}.github.io/{name}"
 
 
 def _github_repository() -> str:
@@ -134,7 +159,7 @@ def _send_feishu(message: DeliveryMessage | None) -> DeliveryResult:
                 "template": "blue",
             },
             "elements": [
-                {"tag": "markdown", "content": f"阅读链接：[打开本周周报]({message.url})"},
+                {"tag": "markdown", "content": f"周报正文：[打开周报正文]({message.url})\n\n项目筛选：[打开项目筛选]({message.explorer_url})"},
             ],
         },
     }
@@ -154,7 +179,7 @@ def _send_wechat(message: DeliveryMessage | None) -> DeliveryResult:
     payload = {
         "msgtype": "markdown",
         "markdown": {
-            "content": f"**{message.title}**\n\n[打开本周周报]({message.url})",
+            "content": f"**{message.title}**\n\n周报正文：[打开周报正文]({message.url})\n\n项目筛选：[打开项目筛选]({message.explorer_url})",
         },
     }
     try:

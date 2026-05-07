@@ -32,10 +32,16 @@
 | `KIMI_MAX_RETRIES` | Kimi 临时错误重试次数，默认 `2` |
 | `KIMI_RETRY_SECONDS` | Kimi 临时错误重试等待秒数，默认 `20` |
 
-Telegram 当前只推送周报链接，不推送完整 Markdown 正文。这个链接指向 GitHub Pages 上的周报页面，也就是 GitHub Actions 运行后由 Kimi 生成并归档的那份周报。默认链接格式为：
+Telegram、飞书和企业微信当前只推送链接，不推送完整 Markdown 正文。消息包含两个入口：
+
+1. 周报正文：指向 GitHub Actions 运行后由 Kimi 生成并归档的周报页面。
+2. 项目筛选：指向同一运行日期的项目筛选页面，便于在手机端按语言、方向、质量和风险继续筛选。
+
+默认链接格式为：
 
 ```text
 https://<owner>.github.io/<repo>/weekly/YYYY-MM-DD.html
+https://<owner>.github.io/<repo>/explorer.html?date=YYYY-MM-DD
 ```
 
 如果你的 Pages 域名或路径不同，可以配置 `REPORT_BASE_URL`，例如：
@@ -54,6 +60,7 @@ data/runs/YYYY-MM-DD.json
 
 ```text
 telegram_report_url
+telegram_explorer_url
 ```
 
 当前支持 Telegram、飞书和企业微信 Webhook。可以显式配置：

@@ -70,12 +70,14 @@ class SendReportLinkScriptTest(unittest.TestCase):
                 "",
                 "data/state/sent_repos.json",
                 "https://example.com/weekly/2026-04-29.html",
+                "https://example.com/explorer.html?date=2026-04-29",
             )
 
             data = json.loads(path.read_text(encoding="utf-8"))
             self.assertTrue(data["telegram_sent"])
             self.assertEqual(data["telegram_error"], "")
             self.assertEqual(data["telegram_report_url"], "https://example.com/weekly/2026-04-29.html")
+            self.assertEqual(data["telegram_explorer_url"], "https://example.com/explorer.html?date=2026-04-29")
             self.assertEqual(data["delivery_results"][0]["channel"], "telegram")
             self.assertTrue(data["delivery_results"][0]["sent"])
             self.assertEqual(data["state_path"], "data/state/sent_repos.json")
@@ -94,7 +96,15 @@ class SendReportLinkScriptTest(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            _update_run_summary(root, "2026-04-29", True, "", "", "https://example.com/weekly/2026-04-29.html")
+            _update_run_summary(
+                root,
+                "2026-04-29",
+                True,
+                "",
+                "",
+                "https://example.com/weekly/2026-04-29.html",
+                "https://example.com/explorer.html?date=2026-04-29",
+            )
             _rebuild_pages(root)
 
             index = (root / "docs" / "index.md").read_text(encoding="utf-8")
