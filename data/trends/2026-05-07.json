@@ -1,11 +1,18 @@
 {
+  "schema_version": 1,
   "total_projects": 10,
   "trending_project_count": 9,
-  "total_star_growth": 2087,
+  "trending_top10_selected_count": 9,
+  "trending_selected_rate": 0.9,
+  "total_star_growth": 5012,
   "top_languages": [
     {
       "name": "Python",
-      "count": 6
+      "count": 5
+    },
+    {
+      "name": "TypeScript",
+      "count": 2
     },
     {
       "name": "Rust",
@@ -13,10 +20,6 @@
     },
     {
       "name": "Shell",
-      "count": 1
-    },
-    {
-      "name": "TypeScript",
       "count": 1
     }
   ],
@@ -40,93 +43,93 @@
   ],
   "top_trending": [
     {
-      "full_name": "warpdotdev/warp",
-      "html_url": "https://github.com/warpdotdev/warp",
+      "full_name": "TauricResearch/TradingAgents",
+      "html_url": "https://github.com/TauricResearch/TradingAgents",
       "trending_rank": 1,
-      "stargazers_count": 55716,
-      "language": "Rust",
+      "stargazers_count": 70782,
+      "language": "Python",
       "category": "AI Agent"
     },
     {
-      "full_name": "TauricResearch/TradingAgents",
-      "html_url": "https://github.com/TauricResearch/TradingAgents",
+      "full_name": "ruvnet/ruflo",
+      "html_url": "https://github.com/ruvnet/ruflo",
       "trending_rank": 2,
-      "stargazers_count": 70318,
-      "language": "Python",
+      "stargazers_count": 45746,
+      "language": "TypeScript",
       "category": "AI Agent"
     },
     {
       "full_name": "mattpocock/skills",
       "html_url": "https://github.com/mattpocock/skills",
       "trending_rank": 3,
-      "stargazers_count": 62997,
+      "stargazers_count": 64037,
       "language": "Shell",
       "category": "LLM Tooling"
     },
     {
-      "full_name": "ruvnet/ruflo",
-      "html_url": "https://github.com/ruvnet/ruflo",
-      "trending_rank": 4,
-      "stargazers_count": 45249,
-      "language": "TypeScript",
-      "category": "AI Agent"
-    },
-    {
       "full_name": "soxoj/maigret",
       "html_url": "https://github.com/soxoj/maigret",
-      "trending_rank": 5,
-      "stargazers_count": 25921,
+      "trending_rank": 4,
+      "stargazers_count": 26106,
       "language": "Python",
       "category": "Developer Tools"
+    },
+    {
+      "full_name": "warpdotdev/warp",
+      "html_url": "https://github.com/warpdotdev/warp",
+      "trending_rank": 5,
+      "stargazers_count": 56112,
+      "language": "Rust",
+      "category": "AI Agent"
     }
   ],
   "top_star_growth": [
     {
       "full_name": "mattpocock/skills",
       "html_url": "https://github.com/mattpocock/skills",
-      "star_growth": 421,
-      "stargazers_count": 62997,
+      "star_growth": 1040,
+      "stargazers_count": 64037,
       "language": "Shell",
       "category": "LLM Tooling"
     },
     {
       "full_name": "NousResearch/hermes-agent",
       "html_url": "https://github.com/NousResearch/hermes-agent",
-      "star_growth": 354,
-      "stargazers_count": 135891,
+      "star_growth": 965,
+      "stargazers_count": 136856,
       "language": "Python",
-      "category": "AI Agent"
-    },
-    {
-      "full_name": "ruvnet/ruflo",
-      "html_url": "https://github.com/ruvnet/ruflo",
-      "star_growth": 331,
-      "stargazers_count": 45249,
-      "language": "TypeScript",
       "category": "AI Agent"
     },
     {
       "full_name": "D4Vinci/Scrapling",
       "html_url": "https://github.com/D4Vinci/Scrapling",
-      "star_growth": 312,
-      "stargazers_count": 46265,
+      "star_growth": 611,
+      "stargazers_count": 46877,
       "language": "Python",
       "category": "Developer Tools"
     },
     {
+      "full_name": "ruvnet/ruflo",
+      "html_url": "https://github.com/ruvnet/ruflo",
+      "star_growth": 497,
+      "stargazers_count": 45746,
+      "language": "TypeScript",
+      "category": "AI Agent"
+    },
+    {
       "full_name": "TauricResearch/TradingAgents",
       "html_url": "https://github.com/TauricResearch/TradingAgents",
-      "star_growth": 234,
-      "stargazers_count": 70318,
+      "star_growth": 464,
+      "stargazers_count": 70782,
       "language": "Python",
       "category": "AI Agent"
     }
   ],
   "summary_points": [
     "AI Agent 是本期最集中的方向，共 6 个项目。",
-    "Python 是本期出现最多的主要语言，共 6 个项目。",
-    "本期入选项目累计新增 Star 2087。",
-    "warpdotdev/warp 是本期 GitHub Trending 排名最高的项目，周榜排名 1。",
-    "mattpocock/skills 是本期新增 Star 最高的项目，新增 421。"
+    "Python 是本期出现最多的主要语言，共 5 个项目。",
+    "本期入选项目累计新增 Star 5012。",
+    "TauricResearch/TradingAgents 是本期 GitHub Trending 排名最高的项目，周榜排名 1。",
+    "mattpocock/skills 是本期新增 Star 最高的项目，新增 1040。"
   ]
 }

@@ -4,16 +4,16 @@
 
 | 日期 | 项目 | 来源 | Trending 排名 | 方向 | 语言 | Star | 新增 Star | 风险提示 | 链接 |
 |---|---|---|---:|---|---|---:|---:|---:|---|
-| 2026-05-07 | warpdotdev/warp | GitHub Trending | 1 | AI Agent | Rust | 55716 | 137 | 0 | [https://github.com/warpdotdev/warp](https://github.com/warpdotdev/warp) |
-| 2026-05-07 | TauricResearch/TradingAgents | GitHub Search + GitHub Trending | 2 | AI Agent | Python | 70318 | 234 | 0 | [https://github.com/TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents) |
-| 2026-05-07 | mattpocock/skills | GitHub Trending | 3 | LLM Tooling | Shell | 62997 | 421 | 0 | [https://github.com/mattpocock/skills](https://github.com/mattpocock/skills) |
-| 2026-05-07 | ruvnet/ruflo | GitHub Trending | 4 | AI Agent | TypeScript | 45249 | 331 | 0 | [https://github.com/ruvnet/ruflo](https://github.com/ruvnet/ruflo) |
-| 2026-05-07 | soxoj/maigret | GitHub Trending | 5 | Developer Tools | Python | 25921 | 54 | 0 | [https://github.com/soxoj/maigret](https://github.com/soxoj/maigret) |
-| 2026-05-07 | 1jehuang/jcode | GitHub Trending | 6 | AI Agent | Rust | 4508 | 87 | 0 | [https://github.com/1jehuang/jcode](https://github.com/1jehuang/jcode) |
-| 2026-05-07 | AIDC-AI/Pixelle-Video | GitHub Trending | 7 | Other | Python | 12731 | 80 | 0 | [https://github.com/AIDC-AI/Pixelle-Video](https://github.com/AIDC-AI/Pixelle-Video) |
-| 2026-05-07 | D4Vinci/Scrapling | GitHub Search + GitHub Trending | 10 | Developer Tools | Python | 46265 | 312 | 0 | [https://github.com/D4Vinci/Scrapling](https://github.com/D4Vinci/Scrapling) |
-| 2026-05-07 | ComposioHQ/awesome-codex-skills | GitHub Trending | 9 | AI Agent | Python | 7153 | 77 | 1 | [https://github.com/ComposioHQ/awesome-codex-skills](https://github.com/ComposioHQ/awesome-codex-skills) |
-| 2026-05-07 | NousResearch/hermes-agent | GitHub Search | - | AI Agent | Python | 135891 | 354 | 0 | [https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) |
+| 2026-05-07 | TauricResearch/TradingAgents | GitHub Search + GitHub Trending | 1 | AI Agent | Python | 70782 | 464 | 0 | [https://github.com/TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents) |
+| 2026-05-07 | ruvnet/ruflo | GitHub Trending | 2 | AI Agent | TypeScript | 45746 | 497 | 0 | [https://github.com/ruvnet/ruflo](https://github.com/ruvnet/ruflo) |
+| 2026-05-07 | mattpocock/skills | GitHub Trending | 3 | LLM Tooling | Shell | 64037 | 1040 | 0 | [https://github.com/mattpocock/skills](https://github.com/mattpocock/skills) |
+| 2026-05-07 | soxoj/maigret | GitHub Trending | 4 | Developer Tools | Python | 26106 | 185 | 0 | [https://github.com/soxoj/maigret](https://github.com/soxoj/maigret) |
+| 2026-05-07 | warpdotdev/warp | GitHub Trending | 5 | AI Agent | Rust | 56112 | 396 | 0 | [https://github.com/warpdotdev/warp](https://github.com/warpdotdev/warp) |
+| 2026-05-07 | 1jehuang/jcode | GitHub Trending | 6 | AI Agent | Rust | 4687 | 179 | 0 | [https://github.com/1jehuang/jcode](https://github.com/1jehuang/jcode) |
+| 2026-05-07 | virattt/dexter | GitHub Trending | 7 | AI Agent | TypeScript | 24602 | 258 | 1 | [https://github.com/virattt/dexter](https://github.com/virattt/dexter) |
+| 2026-05-07 | D4Vinci/Scrapling | GitHub Search + GitHub Trending | 10 | Developer Tools | Python | 46877 | 611 | 0 | [https://github.com/D4Vinci/Scrapling](https://github.com/D4Vinci/Scrapling) |
+| 2026-05-07 | NousResearch/hermes-agent | GitHub Search | - | AI Agent | Python | 136856 | 965 | 0 | [https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) |
+| 2026-05-07 | AIDC-AI/Pixelle-Video | GitHub Trending | 9 | Other | Python | 13148 | 417 | 0 | [https://github.com/AIDC-AI/Pixelle-Video](https://github.com/AIDC-AI/Pixelle-Video) |
 | 2026-05-06 | warpdotdev/warp | GitHub Trending | 1 | AI Agent | Rust | 55579 | 3 | 0 | [https://github.com/warpdotdev/warp](https://github.com/warpdotdev/warp) |
 | 2026-05-06 | TauricResearch/TradingAgents | GitHub Search + GitHub Trending | 2 | AI Agent | Python | 70083 | 10 | 0 | [https://github.com/TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents) |
 | 2026-05-06 | mattpocock/skills | GitHub Trending | 3 | LLM Tooling | Shell | 62576 | 9 | 0 | [https://github.com/mattpocock/skills](https://github.com/mattpocock/skills) |

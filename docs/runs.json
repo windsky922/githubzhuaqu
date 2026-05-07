@@ -9,23 +9,23 @@
       "report_url": "weekly/2026-05-07.html",
       "selected_count": 10,
       "collected_count": 315,
-      "previously_sent_selected_count": 10,
-      "previously_sent_selected_rate": 1.0,
+      "previously_sent_selected_count": 9,
+      "previously_sent_selected_rate": 0.9,
       "readme_fetched_count": 10,
       "readme_fetch_rate": 1.0,
       "star_history_updated_count": 221,
       "kimi_used": true,
       "fallback_used": false,
-      "telegram_sent": true,
+      "telegram_sent": false,
       "telegram_report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-07.html",
       "telegram_explorer_url": "https://windsky922.github.io/githubzhuaqu/explorer.html?date=2026-05-07",
       "telegram_runs_url": "https://windsky922.github.io/githubzhuaqu/runs.html",
       "delivery_results": [
         {
           "channel": "telegram",
-          "sent": true,
-          "error": "",
-          "skipped": false
+          "sent": false,
+          "error": "Telegram send skipped",
+          "skipped": true
         }
       ],
       "collector_error_count": 0,
@@ -38,7 +38,11 @@
       "top_languages": [
         {
           "name": "Python",
-          "count": 6
+          "count": 5
+        },
+        {
+          "name": "TypeScript",
+          "count": 2
         },
         {
           "name": "Rust",
@@ -46,10 +50,6 @@
         },
         {
           "name": "Shell",
-          "count": 1
-        },
-        {
-          "name": "TypeScript",
           "count": 1
         }
       ],
@@ -71,18 +71,18 @@
           "count": 1
         }
       ],
-      "total_star_growth": 2087,
+      "total_star_growth": 5012,
       "trending_project_count": 9,
-      "trending_top10_available_count": 0,
-      "trending_top10_selected_count": 0,
-      "trending_top10_fulfillment_rate": 0.0,
+      "trending_top10_available_count": 10,
+      "trending_top10_selected_count": 9,
+      "trending_top10_fulfillment_rate": 1.2857,
       "trending_selected_rate": 0.9,
       "summary_points": [
         "AI Agent 是本期最集中的方向，共 6 个项目。",
-        "Python 是本期出现最多的主要语言，共 6 个项目。",
-        "本期入选项目累计新增 Star 2087。",
-        "warpdotdev/warp 是本期 GitHub Trending 排名最高的项目，周榜排名 1。",
-        "mattpocock/skills 是本期新增 Star 最高的项目，新增 421。"
+        "Python 是本期出现最多的主要语言，共 5 个项目。",
+        "本期入选项目累计新增 Star 5012。",
+        "TauricResearch/TradingAgents 是本期 GitHub Trending 排名最高的项目，周榜排名 1。",
+        "mattpocock/skills 是本期新增 Star 最高的项目，新增 1040。"
       ]
     },
     {
