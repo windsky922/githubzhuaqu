@@ -35,6 +35,9 @@ def build_pages(root: Path = ROOT) -> list[Path]:
     explorer = root / "docs" / "explorer.html"
     explorer.write_text(_explorer_content(), encoding="utf-8")
     written.append(explorer)
+    runs_page = root / "docs" / "runs.html"
+    runs_page.write_text(_runs_dashboard_content(), encoding="utf-8")
+    written.append(runs_page)
     projects_json = root / "docs" / "projects.json"
     projects_json.write_text(_json_text(_public_projects(root)), encoding="utf-8")
     written.append(projects_json)
@@ -89,6 +92,7 @@ def _index_content(root: Path, reports: list[Path]) -> str:
             "## 项目文档",
             "",
             "- [项目筛选页](explorer.html)",
+            "- [运行状态面板](runs.html)",
             "- [历史项目索引](projects.html)",
             "- [公共项目 JSON](projects.json)",
             "- [公共运行 JSON](runs.json)",
@@ -979,6 +983,423 @@ def _explorer_content() -> str:
     function rank(value) {
       const parsed = number(value);
       return parsed > 0 ? parsed : 9999;
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
+    }
+
+    function escapeAttribute(value) {
+      return escapeHtml(value).replace(/`/g, "&#96;");
+    }
+  </script>
+</body>
+</html>
+"""
+
+
+def _runs_dashboard_content() -> str:
+    return """<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>运行状态面板</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f8fa;
+      --panel: #ffffff;
+      --text: #20242a;
+      --muted: #5f6b7a;
+      --line: #d9dee7;
+      --accent: #2563eb;
+      --ok: #15803d;
+      --warn: #a16207;
+      --bad: #b42318;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+    header {
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+    }
+    .wrap {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      min-height: 68px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: 0;
+    }
+    nav {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-size: 14px;
+    }
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    a:hover { text-decoration: underline; }
+    main {
+      padding: 20px 0 36px;
+    }
+    .filters {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(140px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    label {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    input,
+    select {
+      width: 100%;
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 7px 10px;
+      background: var(--panel);
+      color: var(--text);
+      font: inherit;
+    }
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(130px, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .metric {
+      min-height: 72px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 8px;
+      padding: 12px;
+      display: grid;
+      align-content: center;
+      gap: 4px;
+    }
+    .metric span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .metric strong {
+      font-size: 20px;
+    }
+    .table-shell {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 8px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 980px;
+    }
+    th,
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+      white-space: nowrap;
+    }
+    th {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+      background: #fbfcfe;
+    }
+    td.num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      padding: 2px 8px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .ok {
+      color: var(--ok);
+      background: #f0fdf4;
+      border-color: #bbf7d0;
+    }
+    .warn {
+      color: var(--warn);
+      background: #fffbeb;
+      border-color: #fde68a;
+    }
+    .bad {
+      color: var(--bad);
+      background: #fff1f2;
+      border-color: #fecaca;
+    }
+    .links {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .empty {
+      padding: 28px;
+      text-align: center;
+      color: var(--muted);
+    }
+    @media (max-width: 900px) {
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 14px 0;
+      }
+      .filters,
+      .summary {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    @media (max-width: 560px) {
+      .wrap { width: min(100% - 20px, 1180px); }
+      .filters,
+      .summary {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap topbar">
+      <h1>运行状态面板</h1>
+      <nav>
+        <a href="index.html">周报归档</a>
+        <a href="explorer.html">项目筛选</a>
+        <a href="runs.json">runs.json</a>
+      </nav>
+    </div>
+  </header>
+  <main class="wrap">
+    <section class="filters" aria-label="筛选条件">
+      <label>关键词
+        <input id="query" type="search" autocomplete="off">
+      </label>
+      <label>状态
+        <select id="status">
+          <option value="">全部</option>
+          <option value="success">成功</option>
+          <option value="empty">空结果</option>
+          <option value="failed">失败</option>
+        </select>
+      </label>
+      <label>生成方式
+        <select id="fallback">
+          <option value="">全部</option>
+          <option value="kimi">Kimi</option>
+          <option value="fallback">规则版</option>
+        </select>
+      </label>
+      <label>Telegram
+        <select id="telegram">
+          <option value="">全部</option>
+          <option value="sent">已推送</option>
+          <option value="not_sent">未推送</option>
+        </select>
+      </label>
+      <label>排序
+        <select id="sort">
+          <option value="date">最新运行</option>
+          <option value="collector">采集成功率</option>
+          <option value="trending">Trending Top10 命中率</option>
+          <option value="readme">README 抓取率</option>
+          <option value="selected">入选项目数</option>
+        </select>
+      </label>
+    </section>
+    <section id="summary" class="summary" aria-label="运行概览"></section>
+    <div class="table-shell">
+      <table>
+        <thead>
+          <tr>
+            <th>日期</th>
+            <th>状态</th>
+            <th>入选</th>
+            <th>采集</th>
+            <th>采集成功率</th>
+            <th>Trending Top10</th>
+            <th>README</th>
+            <th>Kimi</th>
+            <th>Telegram</th>
+            <th>链接</th>
+          </tr>
+        </thead>
+        <tbody id="rows">
+          <tr><td class="empty" colspan="10">正在读取运行数据</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+  <script>
+    const state = { runs: [] };
+    const controls = {
+      query: document.getElementById("query"),
+      status: document.getElementById("status"),
+      fallback: document.getElementById("fallback"),
+      telegram: document.getElementById("telegram"),
+      sort: document.getElementById("sort")
+    };
+    const rows = document.getElementById("rows");
+    const summary = document.getElementById("summary");
+
+    fetch("runs.json", { cache: "no-store" })
+      .then(response => response.json())
+      .then(data => {
+        state.runs = Array.isArray(data.runs) ? data.runs : [];
+        restoreFiltersFromUrl();
+        render();
+      })
+      .catch(() => {
+        rows.innerHTML = '<tr><td class="empty" colspan="10">无法读取 runs.json</td></tr>';
+      });
+
+    Object.values(controls).forEach(control => control.addEventListener("input", render));
+
+    function render() {
+      const query = controls.query.value.trim().toLowerCase();
+      let filtered = state.runs.filter(run => {
+        const text = [run.run_date, run.status, run.report_url, run.telegram_report_url, run.telegram_explorer_url].join(" ").toLowerCase();
+        return (!query || text.includes(query))
+          && (!controls.status.value || run.status === controls.status.value)
+          && (!controls.fallback.value || (controls.fallback.value === "fallback" ? run.fallback_used : run.kimi_used))
+          && (!controls.telegram.value || (controls.telegram.value === "sent" ? run.telegram_sent : !run.telegram_sent));
+      });
+      filtered = filtered.sort(compareRuns);
+      summary.innerHTML = summaryHtml(filtered);
+      rows.innerHTML = filtered.length ? filtered.map(rowHtml).join("") : '<tr><td class="empty" colspan="10">没有匹配的运行记录</td></tr>';
+      updateUrl();
+    }
+
+    function summaryHtml(runs) {
+      const latest = runs.map(run => run.run_date || "").sort().reverse()[0] || "-";
+      const fallbackCount = runs.filter(run => run.fallback_used).length;
+      const telegramCount = runs.filter(run => run.telegram_sent).length;
+      const averageCollector = average(runs, "collector_success_rate");
+      const averageTrending = average(runs, "trending_top10_fulfillment_rate");
+      return [
+        metric("运行次数", runs.length),
+        metric("最新日期", latest),
+        metric("规则版次数", fallbackCount),
+        metric("Telegram 成功", telegramCount),
+        metric("平均采集成功率", percent(averageCollector)),
+        metric("平均 Trending 命中", percent(averageTrending))
+      ].join("");
+    }
+
+    function rowHtml(run) {
+      const report = run.telegram_report_url || run.report_url || "";
+      const explorer = run.telegram_explorer_url || "";
+      return `<tr>
+        <td>${escapeHtml(run.run_date || "")}</td>
+        <td>${statusBadge(run)}</td>
+        <td class="num">${number(run.selected_count)}</td>
+        <td class="num">${number(run.collected_count)}</td>
+        <td>${rateBadge(run.collector_success_rate)}</td>
+        <td>${rateBadge(run.trending_top10_fulfillment_rate)} <span>${number(run.trending_top10_selected_count)}/${number(run.trending_top10_available_count)}</span></td>
+        <td>${rateBadge(run.readme_fetch_rate)}</td>
+        <td>${run.kimi_used ? badge("Kimi", "ok") : badge("规则版", run.fallback_used ? "warn" : "bad")}</td>
+        <td>${run.telegram_sent ? badge("已推送", "ok") : badge("未推送", "warn")}</td>
+        <td><span class="links">${link("周报", report)}${link("筛选", explorer)}</span></td>
+      </tr>`;
+    }
+
+    function statusBadge(run) {
+      if (run.status === "success") return badge("成功", "ok");
+      if (run.status === "empty") return badge("空结果", "warn");
+      return badge(run.status || "未知", "bad");
+    }
+
+    function rateBadge(value) {
+      const rate = number(value);
+      const level = rate >= 0.9 ? "ok" : rate >= 0.6 ? "warn" : "bad";
+      return badge(percent(rate), level);
+    }
+
+    function badge(text, level) {
+      return `<span class="badge ${level}">${escapeHtml(text)}</span>`;
+    }
+
+    function link(label, href) {
+      if (!href) return "";
+      return `<a href="${escapeAttribute(href)}">${escapeHtml(label)}</a>`;
+    }
+
+    function metric(label, value) {
+      return `<div class="metric"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`;
+    }
+
+    function compareRuns(a, b) {
+      const sort = controls.sort.value;
+      if (sort === "collector") return number(b.collector_success_rate) - number(a.collector_success_rate);
+      if (sort === "trending") return number(b.trending_top10_fulfillment_rate) - number(a.trending_top10_fulfillment_rate);
+      if (sort === "readme") return number(b.readme_fetch_rate) - number(a.readme_fetch_rate);
+      if (sort === "selected") return number(b.selected_count) - number(a.selected_count);
+      return String(b.run_date || "").localeCompare(String(a.run_date || ""));
+    }
+
+    function restoreFiltersFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const keys = { q: "query", status: "status", fallback: "fallback", telegram: "telegram", sort: "sort" };
+      Object.entries(keys).forEach(([param, key]) => {
+        if (params.has(param)) controls[key].value = params.get(param) || "";
+      });
+    }
+
+    function updateUrl() {
+      const params = new URLSearchParams();
+      if (controls.query.value.trim()) params.set("q", controls.query.value.trim());
+      if (controls.status.value) params.set("status", controls.status.value);
+      if (controls.fallback.value) params.set("fallback", controls.fallback.value);
+      if (controls.telegram.value) params.set("telegram", controls.telegram.value);
+      if (controls.sort.value && controls.sort.value !== "date") params.set("sort", controls.sort.value);
+      const query = params.toString();
+      const next = `${window.location.pathname}${query ? "?" + query : ""}`;
+      window.history.replaceState({}, "", next);
+    }
+
+    function average(items, key) {
+      return items.length ? items.reduce((total, item) => total + number(item[key]), 0) / items.length : 0;
+    }
+
+    function percent(value) {
+      return `${Math.round(number(value) * 100)}%`;
+    }
+
+    function number(value) {
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : 0;
     }
 
     function escapeHtml(value) {

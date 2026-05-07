@@ -69,6 +69,37 @@ docs/project-architecture.md
 
 ---
 
+## 2026-05-07 追加：运行状态面板
+
+### 1. 开发目的
+
+项目已经把运行指标写入 `runs.json`，但目前只能直接阅读 JSON，不方便在手机或 Pages 页面中快速判断本周是否降级、是否推送成功、采集是否完整。为了补齐前端可观测入口，本次新增静态运行状态面板。
+
+### 2. 本次实现
+
+更新：
+
+```text
+README.md
+docs/operation-log.md
+scripts/build_pages.py
+tests/test_build_pages.py
+```
+
+调整内容：
+
+1. `scripts/build_pages.py` 新增 `docs/runs.html` 生成逻辑。
+2. `runs.html` 直接读取 `runs.json`，不请求任何密钥或私有接口。
+3. 页面支持按关键词、运行状态、Kimi/规则版、Telegram 状态和排序方式筛选。
+4. 页面展示采集成功率、Trending Top10 命中率、README 抓取率、Kimi 状态、Telegram 状态和周报/筛选入口。
+5. 首页和 README 增加运行状态面板入口。
+
+### 3. 设计边界
+
+本次只增加静态前端展示，不改变主流程、采集策略、推送策略和数据契约。后续如果引入真正数据库后台或 API，可以让该页面继续复用 `runs.json`，也可以平滑切换到只读接口。
+
+---
+
 ## 2026-05-07 追加：历史归档查询增强
 
 ### 1. 开发目的
