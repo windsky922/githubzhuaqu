@@ -17,7 +17,29 @@ class BuildPagesTest(unittest.TestCase):
             (root / "data" / "selected").mkdir(parents=True)
             (root / "reports" / "2026-04-28.md").write_text("# 周报", encoding="utf-8")
             (root / "data" / "runs" / "2026-04-28.json").write_text(
-                json.dumps({"selected_count": 10, "collected_count": 100, "kimi_used": True, "telegram_sent": True}),
+                json.dumps(
+                    {
+                        "selected_count": 10,
+                        "collected_count": 100,
+                        "kimi_used": True,
+                        "telegram_sent": True,
+                        "collector_stats": [
+                            {
+                                "source": "github_search",
+                                "query": "topic:ai",
+                                "stage": "github_search",
+                                "status": "failed",
+                                "count": 0,
+                                "error": "GitHub API error 403: API rate limit exceeded",
+                                "error_kind": "rate_limited",
+                                "status_code": 403,
+                                "rate_limit_remaining": "0",
+                                "rate_limit_reset": "1777777777",
+                            }
+                        ],
+                    },
+                    ensure_ascii=False,
+                ),
                 encoding="utf-8",
             )
             (root / "data" / "trends" / "2026-04-28.json").write_text(
@@ -115,6 +137,9 @@ class BuildPagesTest(unittest.TestCase):
             self.assertEqual(runs_json["runs"][0]["run_date"], "2026-04-28")
             self.assertTrue(runs_json["runs"][0]["telegram_sent"])
             self.assertEqual(runs_json["runs"][0]["delivery_results"], [])
+            self.assertEqual(runs_json["runs"][0]["collector_failed_count"], 1)
+            self.assertEqual(runs_json["runs"][0]["collector_error_kinds"], ["rate_limited"])
+            self.assertEqual(runs_json["runs"][0]["collector_error_summary"][0]["status_code"], 403)
             self.assertEqual(runs_json["runs"][0]["top_languages"][0]["name"], "Python")
             profiles_json = json.loads((root / "docs" / "profiles.json").read_text(encoding="utf-8"))
             self.assertEqual(profiles_json["schema_version"], 1)
@@ -155,6 +180,9 @@ class BuildPagesTest(unittest.TestCase):
             self.assertIn("trending_top10_fulfillment_rate", runs_page)
             self.assertIn("collector_success_rate", runs_page)
             self.assertIn("telegram_explorer_url", runs_page)
+            self.assertIn('id="errorKind"', runs_page)
+            self.assertIn("collector_error_summary", runs_page)
+            self.assertIn("errorKindLabel", runs_page)
             feed = (root / "docs" / "feed.xml").read_text(encoding="utf-8")
             self.assertIn("<rss version=\"2.0\">", feed)
             self.assertIn("GitHub 每周热点项目周报 - 2026-04-28", feed)

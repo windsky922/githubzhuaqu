@@ -51,6 +51,9 @@ RUN_KEYS = {
     "telegram_explorer_url",
     "delivery_results",
     "collector_error_count",
+    "collector_failed_count",
+    "collector_error_kinds",
+    "collector_error_summary",
     "collector_query_count",
     "collector_success_count",
     "collector_success_rate",
@@ -163,6 +166,8 @@ class DataContractsTest(unittest.TestCase):
             self.assertIsInstance(projects["projects"][0]["security_flags"], list)
             self.assertIsInstance(projects["projects"][0]["quality_flags"], list)
             self.assertIsInstance(runs["runs"][0]["summary_points"], list)
+            self.assertIsInstance(runs["runs"][0]["collector_error_kinds"], list)
+            self.assertIsInstance(runs["runs"][0]["collector_error_summary"], list)
             self.assertIsInstance(profiles["profiles"][0]["preferred_topics"], list)
         finally:
             shutil.rmtree(root, ignore_errors=True)
@@ -205,8 +210,12 @@ def _write_public_json_fixture(root: Path) -> None:
                 "readme_fetch_rate": 1.0,
                 "star_history_updated_count": 2,
                 "collector_query_count": 2,
-                "collector_success_count": 2,
-                "collector_success_rate": 1.0,
+                "collector_success_count": 1,
+                "collector_success_rate": 0.5,
+                "collector_stats": [
+                    {"source": "github_trending", "query": "GitHub Trending weekly", "stage": "repository_detail", "status": "success", "count": 1, "error": "", "error_kind": "", "status_code": 0},
+                    {"source": "github_search", "query": "topic:ai", "stage": "github_search", "status": "failed", "count": 0, "error": "GitHub API error 403: API rate limit exceeded", "error_kind": "rate_limited", "status_code": 403, "rate_limit_remaining": "0", "rate_limit_reset": "1777777777"},
+                ],
                 "trending_top10_available_count": 1,
                 "trending_top10_selected_count": 1,
                 "trending_top10_fulfillment_rate": 1.0,

@@ -1063,7 +1063,7 @@ def _runs_dashboard_content() -> str:
     }
     .filters {
       display: grid;
-      grid-template-columns: repeat(5, minmax(140px, 1fr));
+      grid-template-columns: repeat(6, minmax(140px, 1fr));
       gap: 12px;
       margin-bottom: 16px;
     }
@@ -1116,7 +1116,7 @@ def _runs_dashboard_content() -> str:
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 980px;
+      min-width: 1120px;
     }
     th,
     td {
@@ -1229,6 +1229,11 @@ def _runs_dashboard_content() -> str:
           <option value="not_sent">未推送</option>
         </select>
       </label>
+      <label>采集异常
+        <select id="errorKind">
+          <option value="">全部</option>
+        </select>
+      </label>
       <label>排序
         <select id="sort">
           <option value="date">最新运行</option>
@@ -1251,13 +1256,14 @@ def _runs_dashboard_content() -> str:
             <th>采集成功率</th>
             <th>Trending Top10</th>
             <th>README</th>
+            <th>采集异常</th>
             <th>Kimi</th>
             <th>Telegram</th>
             <th>链接</th>
           </tr>
         </thead>
         <tbody id="rows">
-          <tr><td class="empty" colspan="10">正在读取运行数据</td></tr>
+          <tr><td class="empty" colspan="11">正在读取运行数据</td></tr>
         </tbody>
       </table>
     </div>
@@ -1269,6 +1275,7 @@ def _runs_dashboard_content() -> str:
       status: document.getElementById("status"),
       fallback: document.getElementById("fallback"),
       telegram: document.getElementById("telegram"),
+      errorKind: document.getElementById("errorKind"),
       sort: document.getElementById("sort")
     };
     const rows = document.getElementById("rows");
@@ -1278,11 +1285,12 @@ def _runs_dashboard_content() -> str:
       .then(response => response.json())
       .then(data => {
         state.runs = Array.isArray(data.runs) ? data.runs : [];
+        hydrateErrorKinds();
         restoreFiltersFromUrl();
         render();
       })
       .catch(() => {
-        rows.innerHTML = '<tr><td class="empty" colspan="10">无法读取 runs.json</td></tr>';
+        rows.innerHTML = '<tr><td class="empty" colspan="11">无法读取 runs.json</td></tr>';
       });
 
     Object.values(controls).forEach(control => control.addEventListener("input", render));
@@ -1290,28 +1298,35 @@ def _runs_dashboard_content() -> str:
     function render() {
       const query = controls.query.value.trim().toLowerCase();
       let filtered = state.runs.filter(run => {
-        const text = [run.run_date, run.status, run.report_url, run.telegram_report_url, run.telegram_explorer_url].join(" ").toLowerCase();
+        const errorKinds = collectorErrorKinds(run);
+        const text = [run.run_date, run.status, run.report_url, run.telegram_report_url, run.telegram_explorer_url, ...errorKinds].join(" ").toLowerCase();
         return (!query || text.includes(query))
           && (!controls.status.value || run.status === controls.status.value)
           && (!controls.fallback.value || (controls.fallback.value === "fallback" ? run.fallback_used : run.kimi_used))
-          && (!controls.telegram.value || (controls.telegram.value === "sent" ? run.telegram_sent : !run.telegram_sent));
+          && (!controls.telegram.value || (controls.telegram.value === "sent" ? run.telegram_sent : !run.telegram_sent))
+          && (!controls.errorKind.value || errorKinds.includes(controls.errorKind.value));
       });
       filtered = filtered.sort(compareRuns);
       summary.innerHTML = summaryHtml(filtered);
-      rows.innerHTML = filtered.length ? filtered.map(rowHtml).join("") : '<tr><td class="empty" colspan="10">没有匹配的运行记录</td></tr>';
+      rows.innerHTML = filtered.length ? filtered.map(rowHtml).join("") : '<tr><td class="empty" colspan="11">没有匹配的运行记录</td></tr>';
       updateUrl();
+    }
+
+    function hydrateErrorKinds() {
+      const kinds = [...new Set(state.runs.flatMap(collectorErrorKinds).filter(Boolean))].sort();
+      controls.errorKind.innerHTML = '<option value="">全部</option>' + kinds.map(kind => `<option value="${escapeAttribute(kind)}">${escapeHtml(errorKindLabel(kind))}</option>`).join("");
     }
 
     function summaryHtml(runs) {
       const latest = runs.map(run => run.run_date || "").sort().reverse()[0] || "-";
-      const fallbackCount = runs.filter(run => run.fallback_used).length;
       const telegramCount = runs.filter(run => run.telegram_sent).length;
       const averageCollector = average(runs, "collector_success_rate");
       const averageTrending = average(runs, "trending_top10_fulfillment_rate");
+      const errorCount = runs.reduce((total, run) => total + number(run.collector_failed_count), 0);
       return [
         metric("运行次数", runs.length),
         metric("最新日期", latest),
-        metric("规则版次数", fallbackCount),
+        metric("采集异常", errorCount),
         metric("Telegram 成功", telegramCount),
         metric("平均采集成功率", percent(averageCollector)),
         metric("平均 Trending 命中", percent(averageTrending))
@@ -1329,6 +1344,7 @@ def _runs_dashboard_content() -> str:
         <td>${rateBadge(run.collector_success_rate)}</td>
         <td>${rateBadge(run.trending_top10_fulfillment_rate)} <span>${number(run.trending_top10_selected_count)}/${number(run.trending_top10_available_count)}</span></td>
         <td>${rateBadge(run.readme_fetch_rate)}</td>
+        <td>${collectorErrorText(run)}</td>
         <td>${run.kimi_used ? badge("Kimi", "ok") : badge("规则版", run.fallback_used ? "warn" : "bad")}</td>
         <td>${run.telegram_sent ? badge("已推送", "ok") : badge("未推送", "warn")}</td>
         <td><span class="links">${link("周报", report)}${link("筛选", explorer)}</span></td>
@@ -1356,6 +1372,37 @@ def _runs_dashboard_content() -> str:
       return `<a href="${escapeAttribute(href)}">${escapeHtml(label)}</a>`;
     }
 
+    function collectorErrorKinds(run) {
+      if (Array.isArray(run.collector_error_kinds)) return run.collector_error_kinds.map(value => String(value)).filter(Boolean);
+      if (!Array.isArray(run.collector_error_summary)) return [];
+      return [...new Set(run.collector_error_summary.map(error => String(error.error_kind || "")).filter(Boolean))];
+    }
+
+    function collectorErrorText(run) {
+      const errors = Array.isArray(run.collector_error_summary) ? run.collector_error_summary : [];
+      if (!errors.length) return badge("无异常", "ok");
+      return errors.slice(0, 3).map(error => {
+        const kind = String(error.error_kind || "unknown");
+        const statusCode = number(error.status_code);
+        const label = `${errorKindLabel(kind)}${statusCode ? " " + statusCode : ""}`;
+        return badge(label, kind.includes("rate") ? "warn" : "bad");
+      }).join("");
+    }
+
+    function errorKindLabel(kind) {
+      const labels = {
+        rate_limited: "主限流",
+        secondary_rate_limited: "二级限流",
+        authentication_failed: "认证失败",
+        not_found: "仓库不存在",
+        server_error: "GitHub 服务错误",
+        http_error: "HTTP 错误",
+        runtime_error: "运行错误",
+        unknown: "未知异常"
+      };
+      return labels[kind] || kind;
+    }
+
     function metric(label, value) {
       return `<div class="metric"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`;
     }
@@ -1371,7 +1418,7 @@ def _runs_dashboard_content() -> str:
 
     function restoreFiltersFromUrl() {
       const params = new URLSearchParams(window.location.search);
-      const keys = { q: "query", status: "status", fallback: "fallback", telegram: "telegram", sort: "sort" };
+      const keys = { q: "query", status: "status", fallback: "fallback", telegram: "telegram", error: "errorKind", sort: "sort" };
       Object.entries(keys).forEach(([param, key]) => {
         if (params.has(param)) controls[key].value = params.get(param) || "";
       });
@@ -1383,6 +1430,7 @@ def _runs_dashboard_content() -> str:
       if (controls.status.value) params.set("status", controls.status.value);
       if (controls.fallback.value) params.set("fallback", controls.fallback.value);
       if (controls.telegram.value) params.set("telegram", controls.telegram.value);
+      if (controls.errorKind.value) params.set("error", controls.errorKind.value);
       if (controls.sort.value && controls.sort.value !== "date") params.set("sort", controls.sort.value);
       const query = params.toString();
       const next = `${window.location.pathname}${query ? "?" + query : ""}`;
@@ -1545,6 +1593,7 @@ def _public_runs(root: Path, reports: list[Path]) -> dict:
             continue
         selected_count = _int_value(summary.get("selected_count"))
         collector_stats = summary.get("collector_stats") if isinstance(summary.get("collector_stats"), list) else []
+        collector_errors = _public_collector_errors(collector_stats)
         collector_query_count = _int_value(summary.get("collector_query_count")) or len(collector_stats)
         collector_success_count = _int_value(summary.get("collector_success_count")) or sum(
             1 for item in collector_stats if isinstance(item, dict) and item.get("status") == "success"
@@ -1577,6 +1626,13 @@ def _public_runs(root: Path, reports: list[Path]) -> dict:
                 "telegram_explorer_url": summary.get("telegram_explorer_url", ""),
                 "delivery_results": _public_delivery_results(summary.get("delivery_results")),
                 "collector_error_count": len(summary.get("collector_errors") or []),
+                "collector_failed_count": sum(
+                    1 for item in collector_stats if isinstance(item, dict) and item.get("status") in {"failed", "partial"}
+                ),
+                "collector_error_kinds": sorted(
+                    {error["error_kind"] for error in collector_errors if error.get("error_kind")}
+                ),
+                "collector_error_summary": collector_errors,
                 "collector_query_count": collector_query_count,
                 "collector_success_count": collector_success_count,
                 "collector_success_rate": _metric_rate(summary.get("collector_success_rate"), collector_success_count, collector_query_count),
@@ -1596,6 +1652,31 @@ def _public_runs(root: Path, reports: list[Path]) -> dict:
         "count": len(runs),
         "runs": runs,
     }
+
+
+def _public_collector_errors(collector_stats: list) -> list[dict]:
+    errors = []
+    for item in collector_stats:
+        if not isinstance(item, dict):
+            continue
+        if item.get("status") not in {"failed", "partial"} and not item.get("error_kind"):
+            continue
+        error_kind = str(item.get("error_kind") or "unknown")
+        message = str(item.get("error") or "")
+        errors.append(
+            {
+                "source": str(item.get("source") or ""),
+                "stage": str(item.get("stage") or ""),
+                "status": str(item.get("status") or ""),
+                "error_kind": error_kind,
+                "status_code": _int_value(item.get("status_code")),
+                "retry_after": str(item.get("retry_after") or ""),
+                "rate_limit_remaining": str(item.get("rate_limit_remaining") or ""),
+                "rate_limit_reset": str(item.get("rate_limit_reset") or ""),
+                "message": message[:240],
+            }
+        )
+    return errors[:10]
 
 
 def _feed_content(root: Path, reports: list[Path]) -> str:

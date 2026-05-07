@@ -69,6 +69,38 @@ docs/project-architecture.md
 
 ---
 
+## 2026-05-07 追加：运行状态面板接入采集异常摘要
+
+### 1. 开发目的
+
+采集器已经能识别 GitHub 主限流、二级限流、认证失败、仓库不存在和服务端错误，但此前这些信息主要留在原始运行摘要中。为了让手机端和 Pages 页面可以直接判断采集不完整的原因，本次把脱敏后的采集异常摘要接入公开运行数据和运行状态面板。
+
+### 2. 本次实现
+
+更新：
+
+```text
+docs/data-contracts.md
+docs/operation-log.md
+scripts/build_pages.py
+tests/test_build_pages.py
+tests/test_data_contracts.py
+```
+
+调整内容：
+
+1. `docs/runs.json` 新增 `collector_failed_count`、`collector_error_kinds` 和 `collector_error_summary`。
+2. `collector_error_summary` 只保留公开可展示的摘要字段，不输出密钥、请求头或原始堆栈。
+3. `runs.html` 新增采集异常筛选项和采集异常列。
+4. 运行状态概览新增采集异常次数，便于判断近期是否经常触发 GitHub 限流。
+5. 测试同步覆盖公开 JSON 字段、运行状态面板脚本和限流错误摘要。
+
+### 3. 设计边界
+
+本次只展示异常原因，不新增自动重试和等待策略。后续如果运行数据表明 `rate_limited` 或 `secondary_rate_limited` 频繁出现，再基于统计结果调整查询数量、引入退避重试或拆分采集任务。
+
+---
+
 ## 2026-05-07 追加：运行状态面板
 
 ### 1. 开发目的
