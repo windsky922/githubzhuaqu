@@ -51,6 +51,7 @@ class QueryArchiveTest(unittest.TestCase):
                 "full_name": "owner/agent",
                 "language": "Python",
                 "category": "AI Agent",
+                "quality_score": 92,
                 "star_growth": 20,
                 "trending_rank": 1,
                 "html_url": "https://github.com/owner/agent",
@@ -61,6 +62,28 @@ class QueryArchiveTest(unittest.TestCase):
 
         self.assertIn("owner/agent", output)
         self.assertIn("https://github.com/owner/agent", output)
+        self.assertIn("92", output)
+
+    def test_queries_history_by_quality_trending_and_sort(self):
+        root = Path.cwd() / f".tmp-query-archive-test-{uuid.uuid4().hex}"
+        try:
+            _write_archive(root)
+            db_path = root / "data" / "github_weekly.sqlite"
+            import_json_archive(root, db_path)
+
+            rows = query_archive(
+                db_path=db_path,
+                root=root,
+                min_quality=80,
+                trending_top=3,
+                sort="quality",
+            )
+
+            self.assertEqual([row["full_name"] for row in rows], ["owner/agent"])
+            self.assertEqual(rows[0]["quality_score"], 92)
+            self.assertEqual(rows[0]["quality_level"], "high")
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
 
 
 def _write_archive(root: Path) -> None:
@@ -90,6 +113,9 @@ def _write_archive(root: Path) -> None:
                     "sources": ["github_trending"],
                     "selection_reasons": ["进入 GitHub Trending 周榜第 1 位。"],
                     "security_flags": [],
+                    "quality_score": 92,
+                    "quality_level": "high",
+                    "quality_flags": [],
                 },
                 {
                     "full_name": "owner/tool",
@@ -105,6 +131,9 @@ def _write_archive(root: Path) -> None:
                     "sources": ["github_search"],
                     "selection_reasons": ["匹配开发者工具方向。"],
                     "security_flags": ["未识别到许可证。"],
+                    "quality_score": 55,
+                    "quality_level": "medium",
+                    "quality_flags": ["社区信号较弱。"],
                 },
             ],
             ensure_ascii=False,

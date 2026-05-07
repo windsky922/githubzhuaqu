@@ -10,6 +10,7 @@
 4. 按来源查看项目，例如 `github_trending` 或 `github_search`。
 5. 按风险提示查看项目，例如只查看存在风险提示的仓库。
 6. 用关键词搜索项目名、简介、方向和推荐理由。
+7. 按质量等级、最低质量分和 Trending TopN 回看更可靠的历史项目。
 
 ## 常用命令
 
@@ -37,12 +38,26 @@ python scripts/query_archive.py --profile agent_development --query workflow --f
 python scripts/query_archive.py --risk has --limit 20
 ```
 
+查看 Trending Top10 中质量分不低于 80 的项目：
+
+```bash
+python scripts/query_archive.py --trending-top 10 --min-quality 80 --sort quality --limit 20
+```
+
+按新增 Star 或综合评分排序：
+
+```bash
+python scripts/query_archive.py --sort star-growth --limit 20
+python scripts/query_archive.py --sort score --limit 20
+```
+
 ## 设计边界
 
 1. 查询脚本只读取 JSON 归档、SQLite 派生索引和公开 profile 配置。
 2. 查询脚本不读取 API Key、Token、Chat ID 或 Webhook。
 3. SQLite 文件不提交到 GitHub，需要时可以从 JSON 重新生成。
 4. 当前查询能力是后续前端后台、数据库页面和个性化推荐的基础，不替代主流程。
+5. 质量分、质量等级和 Trending TopN 查询来自已归档的入选项目，不会重新请求 GitHub，也不会改变历史周报。
 
 ## 后续扩展
 

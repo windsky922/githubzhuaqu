@@ -69,6 +69,37 @@ docs/project-architecture.md
 
 ---
 
+## 2026-05-07 追加：历史归档查询增强
+
+### 1. 开发目的
+
+项目已经具备 SQLite 派生索引和基础历史查询能力。为了给后续前端数据库页、个性化推荐和项目回看留接口，本次把近期新增的质量信号和 Trending 信号接入归档查询。
+
+### 2. 本次实现
+
+更新：
+
+```text
+docs/archive-query.md
+docs/operation-log.md
+scripts/query_archive.py
+tests/test_query_archive.py
+```
+
+调整内容：
+
+1. `scripts/query_archive.py` 新增 `--quality-level`、`--min-quality` 和 `--trending-top`。
+2. 查询结果新增 `quality_score`、`quality_level` 和 `quality_flags`。
+3. 新增 `--sort` 参数，支持按最新、评分、新增 Star、Trending 排名和质量分排序。
+4. 表格输出新增质量分列，方便在终端直接筛选高质量项目。
+5. 测试覆盖质量分、Trending TopN 和质量排序。
+
+### 3. 设计边界
+
+本次只增强本地归档查询，不改变采集、评分、周报生成和推送逻辑。质量字段来自已经归档的 `data/selected/*.json`，SQLite 仍然是可重建索引，后续前端或 API 可以复用同一套查询参数。
+
+---
+
 ## 2026-05-07 追加：GitHub 采集错误分类与限流可观测性
 
 ### 1. 开发目的
