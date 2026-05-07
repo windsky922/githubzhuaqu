@@ -29,6 +29,8 @@ from src.state import (
 from src.trends import build_trend_summary
 from src.utils import clean_error, date_range
 
+TRENDING_TOP_RANK_LIMIT = 10
+
 
 def main() -> int:
     days_back = _days_back()
@@ -60,6 +62,7 @@ def main() -> int:
         summary.previously_sent_selected_count = len({repo.full_name for repo in selected if repo.full_name in sent_names})
         summary.collector_errors = collector_errors
         summary.collector_stats = collector_stats
+        _apply_observability_metrics(summary, collected, selected, collector_stats, readme_fetched_count, sent_names)
         summary.readme_fetched_count = readme_fetched_count
         summary.star_history_updated_count = star_history_updated_count
         summary.report_path = report_path.relative_to(settings.root).as_posix()
@@ -129,6 +132,32 @@ def _days_back() -> int:
 
 def _skip_telegram_send() -> bool:
     return os.getenv("SKIP_TELEGRAM_SEND", "").lower() in {"1", "true", "yes"}
+
+
+def _apply_observability_metrics(
+    summary: RunSummary,
+    collected,
+    selected,
+    collector_stats: list[dict],
+    readme_fetched_count: int,
+    sent_names: set[str],
+) -> None:
+    summary.collector_query_count = len(collector_stats)
+    summary.collector_success_count = sum(1 for item in collector_stats if item.get("status") == "success")
+    summary.collector_success_rate = _rate(summary.collector_success_count, summary.collector_query_count)
+    summary.readme_fetch_rate = _rate(readme_fetched_count, len(selected))
+    summary.previously_sent_selected_rate = _rate(summary.previously_sent_selected_count, len(selected))
+
+    available_top10 = {repo.full_name for repo in collected if 0 < repo.trending_rank <= TRENDING_TOP_RANK_LIMIT}
+    selected_top10 = {repo.full_name for repo in selected if 0 < repo.trending_rank <= TRENDING_TOP_RANK_LIMIT}
+    summary.trending_top10_available_count = len(available_top10)
+    summary.trending_top10_selected_count = len(selected_top10)
+    target = min(len(available_top10), 7, len(selected) or 7)
+    summary.trending_top10_fulfillment_rate = _rate(len(selected_top10), target)
+
+
+def _rate(numerator: int, denominator: int) -> float:
+    return round(numerator / denominator, 4) if denominator else 0.0
 
 
 if __name__ == "__main__":

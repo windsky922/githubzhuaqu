@@ -3564,3 +3564,41 @@ tests/test_sender.py
 ### 3. 设计边界
 
 本次不改变周报生成内容，也不把完整 Markdown 推送到手机端。推送消息保持短链接形式，只增加一个筛选页入口，方便用户在阅读周报之外继续按方向、语言、质量和风险查看项目。
+
+---
+
+## 2026-05-07 追加：运行指标与数据契约稳定化
+
+### 1. 开发目的
+
+外部研究文档建议下一阶段优先提升一致性、可验证性和可观测性。当前项目已经能生成周报、Pages 和推送链接，但运行摘要中缺少标准化指标，后续很难持续判断 Trending 保底、README 摘要、GitHub 查询和持续热门项目占比是否健康。
+
+### 2. 本次实现
+
+更新：
+
+```text
+docs/data-contracts.md
+docs/operation-log.md
+main.py
+scripts/build_pages.py
+src/models.py
+src/trends.py
+tests/test_data_contracts.py
+tests/test_trends.py
+```
+
+调整内容：
+
+1. `RunSummary` 新增 `schema_version`。
+2. 运行摘要新增采集查询数量、成功数量和成功率。
+3. 运行摘要新增 README 抓取率。
+4. 运行摘要新增 Trending Top10 可用数量、入选数量和命中率。
+5. 运行摘要新增已推送项目入选占比，用于观察持续热门项目。
+6. 趋势摘要新增 `schema_version`、Trending Top10 入选数量和 Trending 入选比例。
+7. `docs/runs.json` 公开输出这些指标，方便前端、SQLite 和外部脚本复用。
+8. 测试覆盖趋势摘要和公共运行 JSON 的数据契约。
+
+### 3. 设计边界
+
+本次只增加可观测指标，不改变推荐逻辑。已推送项目仍然不会被硬过滤，只在评分中降权；这样可以避免把本周仍然热门的项目从周报中错误排除。

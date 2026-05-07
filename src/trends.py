@@ -5,6 +5,8 @@ from typing import Any
 
 from .models import Repository
 
+TREND_SCHEMA_VERSION = 1
+
 
 def build_trend_summary(repositories: list[Repository]) -> dict[str, Any]:
     language_counts = Counter(repo.language or "Unknown" for repo in repositories)
@@ -17,10 +19,14 @@ def build_trend_summary(repositories: list[Repository]) -> dict[str, Any]:
         reverse=True,
     )[:5]
     top_trending = sorted(trending_repositories, key=lambda repo: repo.trending_rank)[:5]
+    trending_top10 = [repo for repo in trending_repositories if repo.trending_rank <= 10]
 
     return {
+        "schema_version": TREND_SCHEMA_VERSION,
         "total_projects": len(repositories),
         "trending_project_count": len(trending_repositories),
+        "trending_top10_selected_count": len(trending_top10),
+        "trending_selected_rate": _rate(len(trending_repositories), len(repositories)),
         "total_star_growth": total_star_growth,
         "top_languages": _counter_items(language_counts),
         "top_categories": _counter_items(category_counts),
@@ -28,6 +34,10 @@ def build_trend_summary(repositories: list[Repository]) -> dict[str, Any]:
         "top_star_growth": [_repo_growth_item(repo) for repo in top_growth],
         "summary_points": _summary_points(language_counts, category_counts, total_star_growth, top_growth, top_trending),
     }
+
+
+def _rate(numerator: int, denominator: int) -> float:
+    return round(numerator / denominator, 4) if denominator else 0.0
 
 
 def _counter_items(counter: Counter) -> list[dict[str, Any]]:

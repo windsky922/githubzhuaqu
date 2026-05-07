@@ -1122,15 +1122,32 @@ def _public_runs(root: Path, reports: list[Path]) -> dict:
         trends = _trend_summary(root, report.stem)
         if not summary:
             continue
+        selected_count = _int_value(summary.get("selected_count"))
+        collector_stats = summary.get("collector_stats") if isinstance(summary.get("collector_stats"), list) else []
+        collector_query_count = _int_value(summary.get("collector_query_count")) or len(collector_stats)
+        collector_success_count = _int_value(summary.get("collector_success_count")) or sum(
+            1 for item in collector_stats if isinstance(item, dict) and item.get("status") == "success"
+        )
+        readme_fetched_count = _int_value(summary.get("readme_fetched_count"))
+        previously_sent_count = _int_value(summary.get("previously_sent_selected_count"))
+        trending_project_count = _int_value(trends.get("trending_project_count"))
+        trending_top10_selected_count = _int_value(
+            summary.get("trending_top10_selected_count") or trends.get("trending_top10_selected_count")
+        )
         runs.append(
             {
                 "run_date": report.stem,
                 "status": summary.get("status", ""),
+                "run_schema_version": _int_value(summary.get("schema_version"), 1),
                 "report_url": f"weekly/{_page_name(report)}",
-                "selected_count": _int_value(summary.get("selected_count")),
+                "selected_count": selected_count,
                 "collected_count": _int_value(summary.get("collected_count")),
-                "previously_sent_selected_count": _int_value(summary.get("previously_sent_selected_count")),
-                "readme_fetched_count": _int_value(summary.get("readme_fetched_count")),
+                "previously_sent_selected_count": previously_sent_count,
+                "previously_sent_selected_rate": _metric_rate(
+                    summary.get("previously_sent_selected_rate"), previously_sent_count, selected_count
+                ),
+                "readme_fetched_count": readme_fetched_count,
+                "readme_fetch_rate": _metric_rate(summary.get("readme_fetch_rate"), readme_fetched_count, selected_count),
                 "star_history_updated_count": _int_value(summary.get("star_history_updated_count")),
                 "kimi_used": bool(summary.get("kimi_used")),
                 "fallback_used": bool(summary.get("fallback_used")),
@@ -1139,10 +1156,17 @@ def _public_runs(root: Path, reports: list[Path]) -> dict:
                 "telegram_explorer_url": summary.get("telegram_explorer_url", ""),
                 "delivery_results": _public_delivery_results(summary.get("delivery_results")),
                 "collector_error_count": len(summary.get("collector_errors") or []),
+                "collector_query_count": collector_query_count,
+                "collector_success_count": collector_success_count,
+                "collector_success_rate": _metric_rate(summary.get("collector_success_rate"), collector_success_count, collector_query_count),
                 "top_languages": trends.get("top_languages") or [],
                 "top_categories": trends.get("top_categories") or [],
                 "total_star_growth": _int_value(trends.get("total_star_growth")),
-                "trending_project_count": _int_value(trends.get("trending_project_count")),
+                "trending_project_count": trending_project_count,
+                "trending_top10_available_count": _int_value(summary.get("trending_top10_available_count")),
+                "trending_top10_selected_count": trending_top10_selected_count,
+                "trending_top10_fulfillment_rate": _float_value(summary.get("trending_top10_fulfillment_rate")),
+                "trending_selected_rate": _metric_rate(trends.get("trending_selected_rate"), trending_project_count, selected_count),
                 "summary_points": [str(point) for point in trends.get("summary_points") or [] if point],
             }
         )
@@ -1291,6 +1315,13 @@ def _float_value(value: object) -> float:
         return float(value or 0)
     except (TypeError, ValueError):
         return 0.0
+
+
+def _metric_rate(value: object, numerator: int, denominator: int) -> float:
+    explicit = _float_value(value)
+    if explicit:
+        return explicit
+    return round(numerator / denominator, 4) if denominator else 0.0
 
 
 def _string_list(value: object) -> list[str]:

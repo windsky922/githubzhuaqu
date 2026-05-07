@@ -64,6 +64,7 @@ class Repository:
 @dataclass
 class RunSummary:
     run_date: str
+    schema_version: int = 1
     status: str = "started"
     queries: list[str] = field(default_factory=list)
     collected_count: int = 0
@@ -72,7 +73,15 @@ class RunSummary:
     previously_sent_selected_count: int = 0
     collector_errors: list[str] = field(default_factory=list)
     collector_stats: list[dict[str, Any]] = field(default_factory=list)
+    collector_query_count: int = 0
+    collector_success_count: int = 0
+    collector_success_rate: float = 0.0
     readme_fetched_count: int = 0
+    readme_fetch_rate: float = 0.0
+    trending_top10_available_count: int = 0
+    trending_top10_selected_count: int = 0
+    trending_top10_fulfillment_rate: float = 0.0
+    previously_sent_selected_rate: float = 0.0
     star_history_updated_count: int = 0
     report_path: str = ""
     run_summary_path: str = ""

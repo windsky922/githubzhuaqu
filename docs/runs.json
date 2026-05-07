@@ -5,11 +5,14 @@
     {
       "run_date": "2026-05-07",
       "status": "success",
+      "run_schema_version": 1,
       "report_url": "weekly/2026-05-07.html",
       "selected_count": 10,
       "collected_count": 315,
       "previously_sent_selected_count": 10,
+      "previously_sent_selected_rate": 1.0,
       "readme_fetched_count": 10,
+      "readme_fetch_rate": 1.0,
       "star_history_updated_count": 221,
       "kimi_used": true,
       "fallback_used": false,
@@ -25,6 +28,9 @@
         }
       ],
       "collector_error_count": 0,
+      "collector_query_count": 11,
+      "collector_success_count": 11,
+      "collector_success_rate": 1.0,
       "top_languages": [
         {
           "name": "Python",
@@ -63,6 +69,10 @@
       ],
       "total_star_growth": 2087,
       "trending_project_count": 9,
+      "trending_top10_available_count": 0,
+      "trending_top10_selected_count": 0,
+      "trending_top10_fulfillment_rate": 0.0,
+      "trending_selected_rate": 0.9,
       "summary_points": [
         "AI Agent 是本期最集中的方向，共 6 个项目。",
         "Python 是本期出现最多的主要语言，共 6 个项目。",
@@ -74,11 +84,14 @@
     {
       "run_date": "2026-05-06",
       "status": "success",
+      "run_schema_version": 1,
       "report_url": "weekly/2026-05-06.html",
       "selected_count": 10,
       "collected_count": 315,
       "previously_sent_selected_count": 10,
+      "previously_sent_selected_rate": 1.0,
       "readme_fetched_count": 10,
+      "readme_fetch_rate": 1.0,
       "star_history_updated_count": 222,
       "kimi_used": true,
       "fallback_used": false,
@@ -94,6 +107,9 @@
         }
       ],
       "collector_error_count": 0,
+      "collector_query_count": 11,
+      "collector_success_count": 11,
+      "collector_success_rate": 1.0,
       "top_languages": [
         {
           "name": "Python",
@@ -132,6 +148,10 @@
       ],
       "total_star_growth": 47,
       "trending_project_count": 9,
+      "trending_top10_available_count": 0,
+      "trending_top10_selected_count": 0,
+      "trending_top10_fulfillment_rate": 0.0,
+      "trending_selected_rate": 0.9,
       "summary_points": [
         "AI Agent 是本期最集中的方向，共 6 个项目。",
         "Python 是本期出现最多的主要语言，共 6 个项目。",
@@ -143,11 +163,14 @@
     {
       "run_date": "2026-05-05",
       "status": "success",
+      "run_schema_version": 1,
       "report_url": "weekly/2026-05-05.html",
       "selected_count": 10,
       "collected_count": 311,
       "previously_sent_selected_count": 8,
+      "previously_sent_selected_rate": 0.8,
       "readme_fetched_count": 10,
+      "readme_fetch_rate": 1.0,
       "star_history_updated_count": 219,
       "kimi_used": true,
       "fallback_used": false,
@@ -156,6 +179,9 @@
       "telegram_explorer_url": "",
       "delivery_results": [],
       "collector_error_count": 0,
+      "collector_query_count": 11,
+      "collector_success_count": 11,
+      "collector_success_rate": 1.0,
       "top_languages": [
         {
           "name": "Python",
@@ -198,6 +224,10 @@
       ],
       "total_star_growth": 12968,
       "trending_project_count": 7,
+      "trending_top10_available_count": 0,
+      "trending_top10_selected_count": 0,
+      "trending_top10_fulfillment_rate": 0.0,
+      "trending_selected_rate": 0.7,
       "summary_points": [
         "AI Agent 是本期最集中的方向，共 5 个项目。",
         "Python 是本期出现最多的主要语言，共 6 个项目。",
@@ -209,11 +239,14 @@
     {
       "run_date": "2026-05-04",
       "status": "success",
+      "run_schema_version": 1,
       "report_url": "weekly/2026-05-04.html",
       "selected_count": 10,
       "collected_count": 312,
       "previously_sent_selected_count": 9,
+      "previously_sent_selected_rate": 0.9,
       "readme_fetched_count": 10,
+      "readme_fetch_rate": 1.0,
       "star_history_updated_count": 223,
       "kimi_used": true,
       "fallback_used": false,
@@ -222,6 +255,9 @@
       "telegram_explorer_url": "",
       "delivery_results": [],
       "collector_error_count": 0,
+      "collector_query_count": 11,
+      "collector_success_count": 11,
+      "collector_success_rate": 1.0,
       "top_languages": [
         {
           "name": "Python",
@@ -260,6 +296,10 @@
       ],
       "total_star_growth": 7483,
       "trending_project_count": 8,
+      "trending_top10_available_count": 0,
+      "trending_top10_selected_count": 0,
+      "trending_top10_fulfillment_rate": 0.0,
+      "trending_selected_rate": 0.8,
       "summary_points": [
         "AI Agent 是本期最集中的方向，共 4 个项目。",
         "Python 是本期出现最多的主要语言，共 6 个项目。",
@@ -271,11 +311,14 @@
     {
       "run_date": "2026-05-03",
       "status": "success",
+      "run_schema_version": 1,
       "report_url": "weekly/2026-05-03.html",
       "selected_count": 10,
       "collected_count": 311,
       "previously_sent_selected_count": 7,
+      "previously_sent_selected_rate": 0.7,
       "readme_fetched_count": 10,
+      "readme_fetch_rate": 1.0,
       "star_history_updated_count": 222,
       "kimi_used": true,
       "fallback_used": false,
@@ -284,6 +327,9 @@
       "telegram_explorer_url": "",
       "delivery_results": [],
       "collector_error_count": 0,
+      "collector_query_count": 11,
+      "collector_success_count": 11,
+      "collector_success_rate": 1.0,
       "top_languages": [
         {
           "name": "Python",
@@ -318,6 +364,10 @@
       ],
       "total_star_growth": 657,
       "trending_project_count": 7,
+      "trending_top10_available_count": 0,
+      "trending_top10_selected_count": 0,
+      "trending_top10_fulfillment_rate": 0.0,
+      "trending_selected_rate": 0.7,
       "summary_points": [
         "LLM Tooling 是本期最集中的方向，共 4 个项目。",
         "Python 是本期出现最多的主要语言，共 7 个项目。",
@@ -329,11 +379,14 @@
     {
       "run_date": "2026-04-30",
       "status": "success",
+      "run_schema_version": 1,
       "report_url": "weekly/2026-04-30.html",
       "selected_count": 10,
       "collected_count": 312,
       "previously_sent_selected_count": 10,
+      "previously_sent_selected_rate": 1.0,
       "readme_fetched_count": 10,
+      "readme_fetch_rate": 1.0,
       "star_history_updated_count": 224,
       "kimi_used": true,
       "fallback_used": false,
@@ -342,6 +395,9 @@
       "telegram_explorer_url": "",
       "delivery_results": [],
       "collector_error_count": 0,
+      "collector_query_count": 11,
+      "collector_success_count": 11,
+      "collector_success_rate": 1.0,
       "top_languages": [
         {
           "name": "Python",
@@ -388,6 +444,10 @@
       ],
       "total_star_growth": 89,
       "trending_project_count": 7,
+      "trending_top10_available_count": 0,
+      "trending_top10_selected_count": 0,
+      "trending_top10_fulfillment_rate": 0.0,
+      "trending_selected_rate": 0.7,
       "summary_points": [
         "AI Agent 是本期最集中的方向，共 5 个项目。",
         "Python 是本期出现最多的主要语言，共 5 个项目。",
@@ -399,11 +459,14 @@
     {
       "run_date": "2026-04-29",
       "status": "success",
+      "run_schema_version": 1,
       "report_url": "weekly/2026-04-29.html",
       "selected_count": 10,
       "collected_count": 223,
       "previously_sent_selected_count": 0,
+      "previously_sent_selected_rate": 0.0,
       "readme_fetched_count": 10,
+      "readme_fetch_rate": 1.0,
       "star_history_updated_count": 163,
       "kimi_used": false,
       "fallback_used": true,
@@ -412,6 +475,9 @@
       "telegram_explorer_url": "",
       "delivery_results": [],
       "collector_error_count": 0,
+      "collector_query_count": 8,
+      "collector_success_count": 8,
+      "collector_success_rate": 1.0,
       "top_languages": [
         {
           "name": "Python",
@@ -458,6 +524,10 @@
       ],
       "total_star_growth": 107,
       "trending_project_count": 9,
+      "trending_top10_available_count": 0,
+      "trending_top10_selected_count": 0,
+      "trending_top10_fulfillment_rate": 0.0,
+      "trending_selected_rate": 0.9,
       "summary_points": [
         "AI Agent 是本期最集中的方向，共 4 个项目。",
         "Python 是本期出现最多的主要语言，共 4 个项目。",
@@ -469,11 +539,14 @@
     {
       "run_date": "2026-04-28",
       "status": "success",
+      "run_schema_version": 1,
       "report_url": "weekly/2026-04-28.html",
       "selected_count": 10,
       "collected_count": 240,
       "previously_sent_selected_count": 0,
+      "previously_sent_selected_rate": 0.0,
       "readme_fetched_count": 10,
+      "readme_fetch_rate": 1.0,
       "star_history_updated_count": 180,
       "kimi_used": false,
       "fallback_used": true,
@@ -482,6 +555,9 @@
       "telegram_explorer_url": "",
       "delivery_results": [],
       "collector_error_count": 0,
+      "collector_query_count": 0,
+      "collector_success_count": 0,
+      "collector_success_rate": 0.0,
       "top_languages": [
         {
           "name": "Python",
@@ -516,6 +592,10 @@
       ],
       "total_star_growth": 32,
       "trending_project_count": 0,
+      "trending_top10_available_count": 0,
+      "trending_top10_selected_count": 0,
+      "trending_top10_fulfillment_rate": 0.0,
+      "trending_selected_rate": 0.0,
       "summary_points": [
         "AI Agent 是本期最集中的方向，共 8 个项目。",
         "Python 是本期出现最多的主要语言，共 6 个项目。",

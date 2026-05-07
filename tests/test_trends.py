@@ -31,8 +31,11 @@ class TrendsTest(unittest.TestCase):
             ]
         )
 
+        self.assertEqual(summary["schema_version"], 1)
         self.assertEqual(summary["total_projects"], 3)
         self.assertEqual(summary["trending_project_count"], 2)
+        self.assertEqual(summary["trending_top10_selected_count"], 2)
+        self.assertEqual(summary["trending_selected_rate"], 0.6667)
         self.assertEqual(summary["total_star_growth"], 25)
         self.assertEqual(summary["top_languages"][0], {"name": "Python", "count": 2})
         self.assertEqual(summary["top_categories"][0], {"name": "AI Agent", "count": 2})

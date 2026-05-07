@@ -102,11 +102,14 @@ runs
 ```text
 run_date
 status
+run_schema_version
 report_url
 selected_count
 collected_count
 previously_sent_selected_count
+previously_sent_selected_rate
 readme_fetched_count
+readme_fetch_rate
 star_history_updated_count
 kimi_used
 fallback_used
@@ -115,10 +118,17 @@ telegram_report_url
 telegram_explorer_url
 delivery_results
 collector_error_count
+collector_query_count
+collector_success_count
+collector_success_rate
 top_languages
 top_categories
 total_star_growth
 trending_project_count
+trending_top10_available_count
+trending_top10_selected_count
+trending_top10_fulfillment_rate
+trending_selected_rate
 summary_points
 ```
 
@@ -129,6 +139,14 @@ summary_points
 3. 监控周报是否降级、是否推送、采集是否异常。
 
 `telegram_report_url` 记录本期周报正文页面。`telegram_explorer_url` 记录同一运行日期对应的项目筛选页面，例如 `explorer.html?date=YYYY-MM-DD`。
+
+运行指标说明：
+
+1. `collector_query_count`、`collector_success_count`、`collector_success_rate` 用于判断 GitHub Trending 和 Search 查询是否完整。
+2. `readme_fetch_rate` 用于判断入选项目 README 摘要补充是否完整。
+3. `trending_top10_available_count`、`trending_top10_selected_count`、`trending_top10_fulfillment_rate` 用于判断 Trending Top10 保底是否达成。
+4. `previously_sent_selected_rate` 用于观察持续热门项目在本期周报中的占比。已推送项目不会被硬过滤，只会在评分中降权并保留解释。
+5. `trending_selected_rate` 来自趋势摘要，表示入选项目中带有 GitHub Trending 来源的比例。
 
 `delivery_results` 记录多推送通道状态。当前支持 `telegram`、`feishu`、`wechat`。该字段只记录通道名称、是否发送成功、错误摘要和是否跳过，不记录 Token、Chat ID、Webhook 或任何密钥。
 
