@@ -1,8 +1,13 @@
 import unittest
+from email.message import Message
+from io import BytesIO
+from urllib.error import HTTPError
 from unittest.mock import patch
 
 from src.collector import (
+    GitHubRequestError,
     _parse_trending_repository_names,
+    _request_json,
     _readme_excerpt,
     build_queries,
     collect_repositories,
@@ -150,6 +155,129 @@ class CollectorTest(unittest.TestCase):
         self.assertEqual(len(stats), len(queries))
         self.assertTrue(any(item["status"] == "failed" for item in stats))
         self.assertTrue(any(item["status"] == "success" and item["count"] == 1 for item in stats))
+
+    def test_request_json_classifies_primary_rate_limit(self):
+        headers = Message()
+        headers["x-ratelimit-remaining"] = "0"
+        headers["x-ratelimit-reset"] = "1777777777"
+        error = HTTPError(
+            url="https://api.github.com/search/repositories",
+            code=403,
+            msg="Forbidden",
+            hdrs=headers,
+            fp=BytesIO(b'{"message":"API rate limit exceeded"}'),
+        )
+
+        with patch("urllib.request.urlopen", side_effect=error):
+            with self.assertRaises(GitHubRequestError) as context:
+                _request_json("https://api.github.com/search/repositories", "")
+
+        self.assertEqual(context.exception.error_kind, "rate_limited")
+        self.assertEqual(context.exception.status_code, 403)
+        self.assertEqual(context.exception.rate_limit_remaining, "0")
+        self.assertEqual(context.exception.rate_limit_reset, "1777777777")
+
+    def test_request_json_classifies_secondary_rate_limit(self):
+        headers = Message()
+        headers["retry-after"] = "60"
+        error = HTTPError(
+            url="https://api.github.com/search/repositories",
+            code=403,
+            msg="Forbidden",
+            hdrs=headers,
+            fp=BytesIO(b'{"message":"You have exceeded a secondary rate limit"}'),
+        )
+
+        with patch("urllib.request.urlopen", side_effect=error):
+            with self.assertRaises(GitHubRequestError) as context:
+                _request_json("https://api.github.com/search/repositories", "")
+
+        self.assertEqual(context.exception.error_kind, "secondary_rate_limited")
+        self.assertEqual(context.exception.retry_after, "60")
+
+    def test_collect_repositories_records_structured_github_errors(self):
+        settings = Settings(
+            root=None,
+            run_date="2026-04-28",
+            since_date="2026-04-21",
+            days_back=7,
+            min_stars=20,
+            max_projects=10,
+            github_token="",
+            kimi_api_key="",
+            kimi_base_url="",
+            kimi_model="",
+            telegram_bot_token="",
+            telegram_chat_id="",
+            interests={"enable_github_trending": False, "search_topics": [], "search_languages": []},
+        )
+
+        with patch(
+            "src.collector.search_repositories",
+            side_effect=GitHubRequestError(
+                "GitHub API",
+                403,
+                "API rate limit exceeded",
+                error_kind="rate_limited",
+                rate_limit_remaining="0",
+                rate_limit_reset="1777777777",
+            ),
+        ):
+            with self.assertRaises(RuntimeError):
+                collect_repositories(settings)
+
+        settings_with_topic = Settings(
+            root=None,
+            run_date="2026-04-28",
+            since_date="2026-04-21",
+            days_back=7,
+            min_stars=20,
+            max_projects=10,
+            github_token="",
+            kimi_api_key="",
+            kimi_base_url="",
+            kimi_model="",
+            telegram_bot_token="",
+            telegram_chat_id="",
+            interests={"enable_github_trending": False, "search_topics": ["ai"], "search_languages": []},
+        )
+
+        with patch(
+            "src.collector.search_repositories",
+            side_effect=[
+                GitHubRequestError(
+                    "GitHub API",
+                    403,
+                    "API rate limit exceeded",
+                    error_kind="rate_limited",
+                    rate_limit_remaining="0",
+                    rate_limit_reset="1777777777",
+                ),
+                [
+                    Repository(
+                        full_name="owner/project",
+                        html_url="https://github.com/owner/project",
+                        description="desc",
+                        stargazers_count=100,
+                        forks_count=10,
+                        language="Python",
+                        created_at="2026-04-20T00:00:00Z",
+                        updated_at="2026-04-28T00:00:00Z",
+                        pushed_at="2026-04-28T00:00:00Z",
+                    )
+                ],
+            ],
+        ):
+            repositories, queries, errors, stats = collect_repositories(settings_with_topic)
+
+        failed = next(item for item in stats if item["status"] == "failed")
+        self.assertEqual(len(repositories), 1)
+        self.assertIn("rate_limited", failed["error_kind"])
+        self.assertEqual(failed["status_code"], 403)
+        self.assertEqual(failed["rate_limit_remaining"], "0")
+        self.assertEqual(failed["rate_limit_reset"], "1777777777")
+        self.assertEqual(failed["stage"], "github_search")
+        self.assertEqual(len(errors), 1)
 
     def test_parse_trending_repository_names(self):
         html = """

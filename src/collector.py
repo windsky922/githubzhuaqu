@@ -20,6 +20,34 @@ README_SUMMARY_MAX_SENTENCES = 3
 README_SUMMARY_MAX_LENGTH = 300
 DEFAULT_SEARCH_TOPICS = ["ai", "agent", "llm", "automation"]
 DEFAULT_SEARCH_LANGUAGES = ["Python", "TypeScript"]
+GITHUB_ERROR_BODY_LIMIT = 500
+
+
+class GitHubRequestError(RuntimeError):
+    def __init__(
+        self,
+        service: str,
+        status_code: int,
+        message: str,
+        *,
+        error_kind: str,
+        retry_after: str = "",
+        rate_limit_remaining: str = "",
+        rate_limit_reset: str = "",
+    ) -> None:
+        self.service = service
+        self.status_code = status_code
+        self.message = message
+        self.error_kind = error_kind
+        self.retry_after = retry_after
+        self.rate_limit_remaining = rate_limit_remaining
+        self.rate_limit_reset = rate_limit_reset
+        details = [f"{service} error {status_code}", error_kind]
+        if retry_after:
+            details.append(f"retry_after={retry_after}")
+        if rate_limit_remaining:
+            details.append(f"rate_limit_remaining={rate_limit_remaining}")
+        super().__init__(f"{' | '.join(details)}: {message}")
 
 
 def build_queries(settings: Settings) -> list[str]:
@@ -78,7 +106,7 @@ def _request_json(url: str, token: str, timeout: int = 20) -> dict:
             return json.loads(response.read().decode("utf-8"))
     except urllib.error.HTTPError as error:
         body = error.read().decode("utf-8", errors="replace")
-        raise RuntimeError(f"GitHub API error {error.code}: {body}") from error
+        raise _github_request_error("GitHub API", error, body) from error
 
 
 def _request_text(url: str, token: str, timeout: int = 20) -> str:
@@ -95,7 +123,7 @@ def _request_text(url: str, token: str, timeout: int = 20) -> str:
             return response.read().decode("utf-8", errors="replace")
     except urllib.error.HTTPError as error:
         body = error.read().decode("utf-8", errors="replace")
-        raise RuntimeError(f"GitHub README API error {error.code}: {body}") from error
+        raise _github_request_error("GitHub README API", error, body) from error
 
 
 def _request_html(url: str, timeout: int = 20) -> str:
@@ -111,7 +139,62 @@ def _request_html(url: str, timeout: int = 20) -> str:
             return response.read().decode("utf-8", errors="replace")
     except urllib.error.HTTPError as error:
         body = error.read().decode("utf-8", errors="replace")
-        raise RuntimeError(f"GitHub Trending error {error.code}: {body}") from error
+        raise _github_request_error("GitHub Trending", error, body) from error
+
+
+def _github_request_error(service: str, error: urllib.error.HTTPError, body: str) -> GitHubRequestError:
+    headers = error.headers or {}
+    return GitHubRequestError(
+        service,
+        int(error.code or 0),
+        _github_error_message(body),
+        error_kind=_github_error_kind(int(error.code or 0), body, headers),
+        retry_after=_header_value(headers, "retry-after"),
+        rate_limit_remaining=_header_value(headers, "x-ratelimit-remaining"),
+        rate_limit_reset=_header_value(headers, "x-ratelimit-reset"),
+    )
+
+
+def _github_error_message(body: str) -> str:
+    text = body.strip()
+    try:
+        data = json.loads(text)
+    except json.JSONDecodeError:
+        pass
+    else:
+        if isinstance(data, dict) and data.get("message"):
+            text = str(data["message"])
+    text = redact_sensitive_text(text)
+    return text[:GITHUB_ERROR_BODY_LIMIT].rstrip()
+
+
+def _github_error_kind(status_code: int, body: str, headers) -> str:
+    lowered = body.lower()
+    remaining = _header_value(headers, "x-ratelimit-remaining")
+    if status_code == 429:
+        return "rate_limited"
+    if status_code == 403:
+        if remaining == "0" or "rate limit exceeded" in lowered:
+            return "rate_limited"
+        if "secondary rate limit" in lowered or "abuse" in lowered or "too many requests" in lowered:
+            return "secondary_rate_limited"
+    if status_code == 401:
+        return "authentication_failed"
+    if status_code == 404:
+        return "not_found"
+    if status_code >= 500:
+        return "server_error"
+    return "http_error"
+
+
+def _header_value(headers, name: str) -> str:
+    try:
+        value = headers.get(name, "")
+    except AttributeError:
+        value = ""
+    if value is None:
+        return ""
+    return str(value)
 
 
 def search_repositories(query: str, settings: Settings) -> list[Repository]:
@@ -161,7 +244,7 @@ def collect_trending_repositories(settings: Settings) -> tuple[list[Repository],
                 try:
                     repo = fetch_repository(full_name, settings)
                 except Exception as error:
-                    source_errors.append(f"{full_name}: {error}")
+                    source_errors.append(_collector_error_record(error, repository=full_name))
                     continue
                 repo.sources = ["github_trending"]
                 repo.trending_rank = rank
@@ -171,17 +254,33 @@ def collect_trending_repositories(settings: Settings) -> tuple[list[Repository],
                 source_count += 1
         except Exception as error:
             errors.append(f"{label}: {error}")
-            stats.append({"source": "github_trending", "query": label, "status": "failed", "count": 0, "error": str(error)})
+            stats.append(
+                {
+                    "source": "github_trending",
+                    "query": label,
+                    "stage": "trending_html",
+                    "status": "failed",
+                    "count": 0,
+                    **_collector_error_fields(error),
+                }
+            )
             continue
 
-        errors.extend(f"{label} {error}" for error in source_errors)
+        errors.extend(f"{label} {error['error']}" for error in source_errors)
+        partial_error = source_errors[0] if source_errors else {}
         stats.append(
             {
                 "source": "github_trending",
                 "query": label,
+                "stage": "repository_detail",
                 "status": "partial" if source_errors else "success",
                 "count": source_count,
-                "error": "; ".join(source_errors[:3]),
+                "error": "; ".join(str(error["error"]) for error in source_errors[:3]),
+                "error_kind": partial_error.get("error_kind", ""),
+                "status_code": partial_error.get("status_code", 0),
+                "retry_after": partial_error.get("retry_after", ""),
+                "rate_limit_remaining": partial_error.get("rate_limit_remaining", ""),
+                "rate_limit_reset": partial_error.get("rate_limit_reset", ""),
             }
         )
     return repositories, queries, errors, stats
@@ -263,14 +362,64 @@ def collect_repositories(settings: Settings) -> tuple[list[Repository], list[str
         try:
             results = search_repositories(query, settings)
             repositories.extend(results)
-            stats.append({"source": "github_search", "query": query, "status": "success", "count": len(results), "error": ""})
+            stats.append(
+                {
+                    "source": "github_search",
+                    "query": query,
+                    "stage": "github_search",
+                    "status": "success",
+                    "count": len(results),
+                    "error": "",
+                    "error_kind": "",
+                    "status_code": 0,
+                    "retry_after": "",
+                    "rate_limit_remaining": "",
+                    "rate_limit_reset": "",
+                }
+            )
         except Exception as error:  # Keep later queries useful if one query fails.
             errors.append(f"{query}: {error}")
-            stats.append({"source": "github_search", "query": query, "status": "failed", "count": 0, "error": str(error)})
+            stats.append(
+                {
+                    "source": "github_search",
+                    "query": query,
+                    "stage": "github_search",
+                    "status": "failed",
+                    "count": 0,
+                    **_collector_error_fields(error),
+                }
+            )
 
     if not repositories and errors:
         raise RuntimeError("; ".join(errors))
     return repositories, queries, errors, stats
+
+
+def _collector_error_record(error: Exception, repository: str = "") -> dict:
+    fields = _collector_error_fields(error)
+    if repository:
+        fields["error"] = f"{repository}: {fields['error']}"
+    return fields
+
+
+def _collector_error_fields(error: Exception) -> dict:
+    if isinstance(error, GitHubRequestError):
+        return {
+            "error": str(error),
+            "error_kind": error.error_kind,
+            "status_code": error.status_code,
+            "retry_after": error.retry_after,
+            "rate_limit_remaining": error.rate_limit_remaining,
+            "rate_limit_reset": error.rate_limit_reset,
+        }
+    return {
+        "error": redact_sensitive_text(str(error)),
+        "error_kind": "runtime_error",
+        "status_code": 0,
+        "retry_after": "",
+        "rate_limit_remaining": "",
+        "rate_limit_reset": "",
+    }
 
 
 def enrich_repositories_with_readmes(repositories: list[Repository], settings: Settings) -> int:

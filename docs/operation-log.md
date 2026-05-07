@@ -69,6 +69,37 @@ docs/project-architecture.md
 
 ---
 
+## 2026-05-07 追加：GitHub 采集错误分类与限流可观测性
+
+### 1. 开发目的
+
+前一阶段已经补齐运行指标，但 GitHub API 失败仍主要以字符串记录。这样在 Actions 中出现限流、认证失败、仓库不存在或 GitHub 服务异常时，只能靠人工阅读错误文本判断原因，不利于后续稳定运行和告警。
+
+### 2. 本次实现
+
+更新：
+
+```text
+docs/data-contracts.md
+docs/operation-log.md
+src/collector.py
+tests/test_collector.py
+```
+
+调整内容：
+
+1. GitHub JSON、README 和 Trending HTML 请求统一抛出结构化 `GitHubRequestError`。
+2. 采集统计 `collector_stats` 新增 `stage`、`error_kind`、`status_code`、`retry_after`、`rate_limit_remaining` 和 `rate_limit_reset`。
+3. 支持识别主限流、二级限流、认证失败、仓库不存在、GitHub 服务错误和普通运行时错误。
+4. 部分 Trending 仓库详情抓取失败时，仍保留成功项目，同时把部分失败原因写入统计。
+5. 测试覆盖 GitHub 主限流、二级限流和查询失败统计字段。
+
+### 3. 设计边界
+
+本次只增强错误分类和运行可观测性，不新增自动等待重试，也不改变采集排序逻辑。后续如果 Actions 中频繁出现 `rate_limited` 或 `secondary_rate_limited`，再按运行数据决定是否增加退避重试、降低查询数量或拆分采集时间窗口。
+
+---
+
 ## 2026-04-27 追加：基于 pi-mono 的重新架构审查
 
 ### 1. 学习参考项目

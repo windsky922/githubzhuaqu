@@ -121,6 +121,7 @@ collector_error_count
 collector_query_count
 collector_success_count
 collector_success_rate
+collector_stats
 top_languages
 top_categories
 total_star_growth
@@ -147,6 +148,8 @@ summary_points
 3. `trending_top10_available_count`、`trending_top10_selected_count`、`trending_top10_fulfillment_rate` 用于判断 Trending Top10 保底是否达成。
 4. `previously_sent_selected_rate` 用于观察持续热门项目在本期周报中的占比。已推送项目不会被硬过滤，只会在评分中降权并保留解释。
 5. `trending_selected_rate` 来自趋势摘要，表示入选项目中带有 GitHub Trending 来源的比例。
+
+原始运行摘要 `data/runs/YYYY-MM-DD.json` 中的 `collector_stats` 会保留每个 GitHub Trending/Search 查询的采集状态。字段包括 `source`、`query`、`stage`、`status`、`count`、`error`、`error_kind`、`status_code`、`retry_after`、`rate_limit_remaining` 和 `rate_limit_reset`。这些字段用于判断失败来源是主限流、二级限流、认证失败、仓库不存在、GitHub 服务错误还是普通运行时错误。公开展示时只输出必要摘要，不能输出密钥、请求头或原始堆栈。
 
 `delivery_results` 记录多推送通道状态。当前支持 `telegram`、`feishu`、`wechat`。该字段只记录通道名称、是否发送成功、错误摘要和是否跳过，不记录 Token、Chat ID、Webhook 或任何密钥。
 
