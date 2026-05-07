@@ -40,6 +40,7 @@
 - [历史项目索引](projects.html)
 - [公共项目 JSON](projects.json)
 - [公共运行 JSON](runs.json)
+- [个性化方向页](profiles.html)
 - [个性化方向 JSON](profiles.json)
 - [RSS 订阅](feed.xml)
 - [历史归档查询说明](archive-query.html)

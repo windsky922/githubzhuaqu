@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>个性化方向</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f8fa;
+      --panel: #ffffff;
+      --text: #20242a;
+      --muted: #5f6b7a;
+      --line: #d9dee7;
+      --accent: #2563eb;
+      --accent-2: #0f766e;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+    header {
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+    }
+    .wrap {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      min-height: 68px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: 0;
+    }
+    nav {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-size: 14px;
+    }
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    a:hover { text-decoration: underline; }
+    main {
+      padding: 20px 0 36px;
+    }
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    input {
+      width: min(420px, 100%);
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 7px 10px;
+      background: var(--panel);
+      color: var(--text);
+      font: inherit;
+    }
+    .count {
+      color: var(--muted);
+      font-size: 14px;
+      white-space: nowrap;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+    }
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      padding: 16px;
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+    .card h2 {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: 0;
+    }
+    .meta {
+      display: grid;
+      gap: 8px;
+    }
+    .meta strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      border-radius: 999px;
+      border: 1px solid #c7d2fe;
+      padding: 2px 8px;
+      background: #eef2ff;
+      color: #3730a3;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .chip.topic {
+      border-color: #99f6e4;
+      background: #f0fdfa;
+      color: var(--accent-2);
+    }
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding-top: 4px;
+    }
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 34px;
+      border-radius: 6px;
+      border: 1px solid var(--accent);
+      padding: 6px 10px;
+      background: var(--accent);
+      color: #ffffff;
+      font-weight: 600;
+    }
+    .button.secondary {
+      background: var(--panel);
+      color: var(--accent);
+    }
+    .empty {
+      padding: 28px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      color: var(--muted);
+      text-align: center;
+    }
+    @media (max-width: 640px) {
+      .wrap { width: min(100% - 20px, 1180px); }
+      .topbar,
+      .toolbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+      input {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap topbar">
+      <h1>个性化方向</h1>
+      <nav>
+        <a href="index.html">周报归档</a>
+        <a href="explorer.html">项目筛选</a>
+        <a href="profiles.json">profiles.json</a>
+      </nav>
+    </div>
+  </header>
+  <main class="wrap">
+    <section class="toolbar" aria-label="方向筛选">
+      <input id="query" type="search" autocomplete="off" placeholder="搜索方向、语言、主题">
+      <span id="count" class="count">0 个方向</span>
+    </section>
+    <section id="profiles" class="grid" aria-label="个性化方向列表"></section>
+  </main>
+  <script>
+    const state = { profiles: [] };
+    const query = document.getElementById("query");
+    const count = document.getElementById("count");
+    const profiles = document.getElementById("profiles");
+
+    fetch("profiles.json", { cache: "no-store" })
+      .then(response => response.json())
+      .then(data => {
+        state.profiles = Array.isArray(data.profiles) ? data.profiles : [];
+        restoreQuery();
+        render();
+      })
+      .catch(() => {
+        profiles.innerHTML = '<div class="empty">无法读取 profiles.json</div>';
+      });
+
+    query.addEventListener("input", render);
+
+    function render() {
+      const keyword = query.value.trim().toLowerCase();
+      const filtered = state.profiles.filter(profile => {
+        const text = [
+          profile.name,
+          profile.label,
+          ...(profile.learning_goals || []),
+          ...(profile.preferred_languages || []),
+          ...(profile.search_languages || []),
+          ...(profile.preferred_topics || []),
+          ...(profile.search_topics || [])
+        ].join(" ").toLowerCase();
+        return !keyword || text.includes(keyword);
+      });
+      count.textContent = `${filtered.length} 个方向`;
+      profiles.innerHTML = filtered.length ? filtered.map(profileHtml).join("") : '<div class="empty">没有匹配的个性化方向</div>';
+      updateUrl();
+    }
+
+    function profileHtml(profile) {
+      const name = profile.name || "";
+      const label = profile.label || name;
+      const languages = unique([...(profile.preferred_languages || []), ...(profile.search_languages || [])]);
+      const topics = unique([...(profile.preferred_topics || []), ...(profile.search_topics || [])]);
+      const goals = profile.learning_goals || [];
+      const explorer = `explorer.html?profile=${encodeURIComponent(name)}`;
+      const queryLink = topics[0] ? `explorer.html?profile=${encodeURIComponent(name)}&q=${encodeURIComponent(topics[0])}` : explorer;
+      return `<article class="card">
+        <h2>${escapeHtml(label)}</h2>
+        <div class="meta">
+          <div><strong>学习目标</strong>${chips(goals, "暂无目标")}</div>
+          <div><strong>语言</strong>${chips(languages, "不限语言")}</div>
+          <div><strong>主题</strong>${chips(topics, "暂无主题", "topic")}</div>
+        </div>
+        <div class="actions">
+          <a class="button" href="${escapeAttribute(explorer)}">查看匹配项目</a>
+          <a class="button secondary" href="${escapeAttribute(queryLink)}">主题筛选</a>
+        </div>
+      </article>`;
+    }
+
+    function chips(items, emptyText, extraClass = "") {
+      const values = unique(items).filter(Boolean);
+      if (!values.length) return `<span class="count">${escapeHtml(emptyText)}</span>`;
+      return `<div class="chips">${values.map(value => `<span class="chip ${extraClass}">${escapeHtml(value)}</span>`).join("")}</div>`;
+    }
+
+    function unique(items) {
+      return [...new Set((items || []).map(value => String(value)).filter(Boolean))];
+    }
+
+    function restoreQuery() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.has("q")) query.value = params.get("q") || "";
+    }
+
+    function updateUrl() {
+      const params = new URLSearchParams();
+      if (query.value.trim()) params.set("q", query.value.trim());
+      const next = `${window.location.pathname}${params.toString() ? "?" + params.toString() : ""}`;
+      window.history.replaceState({}, "", next);
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
+    }
+
+    function escapeAttribute(value) {
+      return escapeHtml(value).replace(/`/g, "&#96;");
+    }
+  </script>
+</body>
+</html>

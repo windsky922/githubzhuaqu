@@ -69,6 +69,37 @@ docs/project-architecture.md
 
 ---
 
+## 2026-05-07 追加：个性化方向可视化页面
+
+### 1. 开发目的
+
+项目已经支持 `profiles.json` 个性化方向配置，但用户需要直接查看 JSON 才能知道当前有哪些方向。为了让 Java、Python、Agent 开发、学习型项目和开发者工具等方向更容易被使用，本次新增公开的个性化方向页面。
+
+### 2. 本次实现
+
+更新：
+
+```text
+README.md
+docs/operation-log.md
+scripts/build_pages.py
+tests/test_build_pages.py
+```
+
+调整内容：
+
+1. `scripts/build_pages.py` 新增 `docs/profiles.html` 生成逻辑。
+2. `profiles.html` 直接读取公开 `profiles.json`，展示方向名称、学习目标、语言和主题。
+3. 每个方向提供“查看匹配项目”和“主题筛选”入口，跳转到 `explorer.html?profile=...`。
+4. 首页和 README 增加个性化方向页入口。
+5. 测试覆盖页面生成、入口链接和公开 profile 数据读取。
+
+### 3. 设计边界
+
+本次只展示公开 profile 配置，不读取 API Key、Token、Chat ID、Webhook 或任何用户私有配置。后续如果接入真正前端和数据库，该页面可以升级为用户偏好选择入口。
+
+---
+
 ## 2026-05-07 追加：推送消息增加运行状态入口
 
 ### 1. 开发目的

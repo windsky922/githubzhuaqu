@@ -72,6 +72,7 @@ docs/index.md
 docs/projects.md
 docs/explorer.html
 docs/runs.html
+docs/profiles.html
 docs/projects.json
 docs/runs.json
 docs/profiles.json
@@ -82,6 +83,8 @@ docs/weekly/YYYY-MM-DD.md
 其中 `explorer.html` 是轻量项目筛选页，直接读取 `projects.json` 和 `profiles.json`，支持按关键词、日期、语言、个性化方向、来源、风险提示和排序方式筛选历史入选项目。页面会根据 profile 自动生成快捷视图按钮，筛选状态会同步到 URL，便于后续在 Telegram、微信、飞书或浏览器中分享同一个筛选视图。项目行支持展开详情，查看 README 精简摘要、推荐理由、质量信号、风险提示、项目指标、完整链接和相似历史项目。
 
 `runs.html` 是运行状态面板，直接读取 `runs.json`，用于查看 Kimi/规则版生成状态、Telegram 推送状态、采集成功率、Trending Top10 命中率和 README 抓取率。
+
+`profiles.html` 是个性化方向页，直接读取 `profiles.json`，展示 Java、Python、Agent 开发、学习型项目、开发者工具等方向，并提供一键打开对应项目筛选视图的入口。
 
 `profiles.json` 是个性化方向公开配置，包含 Java、Python、Agent 开发、学习型项目、开发者工具等方向的公开标签、语言和主题关键词。筛选页会读取该文件生成“个性化方向”下拉框，后续前端也可以直接复用。
 
