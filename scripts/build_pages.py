@@ -1586,6 +1586,7 @@ def _public_profiles(root: Path) -> dict:
 
 def _public_runs(root: Path, reports: list[Path]) -> dict:
     runs = []
+    site_base_url = _site_base_url(root, reports)
     for report in reports:
         summary = _run_summary(root, report.stem)
         trends = _trend_summary(root, report.stem)
@@ -1624,6 +1625,7 @@ def _public_runs(root: Path, reports: list[Path]) -> dict:
                 "telegram_sent": bool(summary.get("telegram_sent")),
                 "telegram_report_url": summary.get("telegram_report_url", ""),
                 "telegram_explorer_url": summary.get("telegram_explorer_url", ""),
+                "telegram_runs_url": summary.get("telegram_runs_url") or _absolute_url(site_base_url, "runs.html"),
                 "delivery_results": _public_delivery_results(summary.get("delivery_results")),
                 "collector_error_count": len(summary.get("collector_errors") or []),
                 "collector_failed_count": sum(

@@ -69,6 +69,45 @@ docs/project-architecture.md
 
 ---
 
+## 2026-05-07 追加：推送消息增加运行状态入口
+
+### 1. 开发目的
+
+手机端推送已经包含周报正文和项目筛选入口，但运行状态面板上线后，用户仍需要手动打开 Pages 才能判断本次是否降级、是否推送成功、是否遇到 GitHub 限流。为了让手机端直接完成阅读、筛选和诊断，本次把 `runs.html` 加入统一推送消息。
+
+### 2. 本次实现
+
+更新：
+
+```text
+README.md
+docs/data-contracts.md
+docs/operation-log.md
+main.py
+scripts/build_pages.py
+scripts/send_report_link.py
+src/models.py
+src/sender.py
+tests/test_build_pages.py
+tests/test_data_contracts.py
+tests/test_send_report_link.py
+tests/test_sender.py
+```
+
+调整内容：
+
+1. `src/sender.py` 新增 `runs_url(settings)`。
+2. Telegram、飞书和企业微信推送消息统一包含周报正文、项目筛选和运行状态三个入口。
+3. 主流程和补推脚本会把 `telegram_runs_url` 写入运行摘要。
+4. `docs/runs.json` 公开输出 `telegram_runs_url`，方便前端和外部工具复用。
+5. 测试覆盖 URL 生成、三入口消息、补推写回和公开数据契约。
+
+### 3. 设计边界
+
+本次只改变推送消息入口，不改变采集、评分、周报生成和多渠道发送机制。运行状态入口是公开 Pages 页面，不包含 Token、Chat ID、Webhook 或任何密钥。
+
+---
+
 ## 2026-05-07 追加：运行状态面板接入采集异常摘要
 
 ### 1. 开发目的

@@ -19,6 +19,7 @@
       "telegram_sent": true,
       "telegram_report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-07.html",
       "telegram_explorer_url": "https://windsky922.github.io/githubzhuaqu/explorer.html?date=2026-05-07",
+      "telegram_runs_url": "https://windsky922.github.io/githubzhuaqu/runs.html",
       "delivery_results": [
         {
           "channel": "telegram",
@@ -101,6 +102,7 @@
       "telegram_sent": true,
       "telegram_report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-06.html",
       "telegram_explorer_url": "",
+      "telegram_runs_url": "https://windsky922.github.io/githubzhuaqu/runs.html",
       "delivery_results": [
         {
           "channel": "telegram",
@@ -183,6 +185,7 @@
       "telegram_sent": true,
       "telegram_report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-05.html",
       "telegram_explorer_url": "",
+      "telegram_runs_url": "https://windsky922.github.io/githubzhuaqu/runs.html",
       "delivery_results": [],
       "collector_error_count": 0,
       "collector_failed_count": 0,
@@ -262,6 +265,7 @@
       "telegram_sent": true,
       "telegram_report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-04.html",
       "telegram_explorer_url": "",
+      "telegram_runs_url": "https://windsky922.github.io/githubzhuaqu/runs.html",
       "delivery_results": [],
       "collector_error_count": 0,
       "collector_failed_count": 0,
@@ -337,6 +341,7 @@
       "telegram_sent": true,
       "telegram_report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-03.html",
       "telegram_explorer_url": "",
+      "telegram_runs_url": "https://windsky922.github.io/githubzhuaqu/runs.html",
       "delivery_results": [],
       "collector_error_count": 0,
       "collector_failed_count": 0,
@@ -408,6 +413,7 @@
       "telegram_sent": true,
       "telegram_report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-04-30.html",
       "telegram_explorer_url": "",
+      "telegram_runs_url": "https://windsky922.github.io/githubzhuaqu/runs.html",
       "delivery_results": [],
       "collector_error_count": 0,
       "collector_failed_count": 0,
@@ -491,6 +497,7 @@
       "telegram_sent": true,
       "telegram_report_url": "",
       "telegram_explorer_url": "",
+      "telegram_runs_url": "https://windsky922.github.io/githubzhuaqu/runs.html",
       "delivery_results": [],
       "collector_error_count": 0,
       "collector_failed_count": 0,
@@ -574,6 +581,7 @@
       "telegram_sent": false,
       "telegram_report_url": "",
       "telegram_explorer_url": "",
+      "telegram_runs_url": "https://windsky922.github.io/githubzhuaqu/runs.html",
       "delivery_results": [],
       "collector_error_count": 0,
       "collector_failed_count": 0,

@@ -116,6 +116,7 @@ fallback_used
 telegram_sent
 telegram_report_url
 telegram_explorer_url
+telegram_runs_url
 delivery_results
 collector_error_count
 collector_failed_count
@@ -142,7 +143,7 @@ summary_points
 2. 趋势概览和历史运行对比。
 3. 监控周报是否降级、是否推送、采集是否异常。
 
-`telegram_report_url` 记录本期周报正文页面。`telegram_explorer_url` 记录同一运行日期对应的项目筛选页面，例如 `explorer.html?date=YYYY-MM-DD`。
+`telegram_report_url` 记录本期周报正文页面。`telegram_explorer_url` 记录同一运行日期对应的项目筛选页面，例如 `explorer.html?date=YYYY-MM-DD`。`telegram_runs_url` 记录运行状态面板入口，例如 `runs.html`。
 
 运行指标说明：
 

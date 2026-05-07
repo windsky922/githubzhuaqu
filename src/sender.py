@@ -16,6 +16,7 @@ class DeliveryMessage:
     title: str
     url: str
     explorer_url: str
+    runs_url: str
     text: str
     html_text: str
 
@@ -76,6 +77,7 @@ def build_delivery_message(settings: Settings) -> DeliveryMessage | None:
     if not url:
         return None
     project_url = explorer_url(settings)
+    dashboard_url = runs_url(settings)
     title = f"GitHub 每周热点项目周报 - {settings.run_date}"
     text = "\n".join(
         [
@@ -83,6 +85,7 @@ def build_delivery_message(settings: Settings) -> DeliveryMessage | None:
             "",
             f"周报正文：{url}",
             f"项目筛选：{project_url}",
+            f"运行状态：{dashboard_url}",
         ]
     )
     html_text = "\n".join(
@@ -91,9 +94,10 @@ def build_delivery_message(settings: Settings) -> DeliveryMessage | None:
             "",
             f'周报正文：<a href="{html.escape(url, quote=True)}">打开周报正文</a>',
             f'项目筛选：<a href="{html.escape(project_url, quote=True)}">打开项目筛选</a>',
+            f'运行状态：<a href="{html.escape(dashboard_url, quote=True)}">打开运行状态面板</a>',
         ]
     )
-    return DeliveryMessage(title=title, url=url, explorer_url=project_url, text=text, html_text=html_text)
+    return DeliveryMessage(title=title, url=url, explorer_url=project_url, runs_url=dashboard_url, text=text, html_text=html_text)
 
 
 def report_url(settings: Settings) -> str:
@@ -113,6 +117,13 @@ def explorer_url(settings: Settings) -> str:
         return ""
     date = urllib.parse.quote(settings.run_date)
     return f"{base_url}/explorer.html?date={date}"
+
+
+def runs_url(settings: Settings) -> str:
+    base_url = _site_base_url(settings)
+    if not base_url:
+        return ""
+    return f"{base_url}/runs.html"
 
 
 def _site_base_url(settings: Settings) -> str:
@@ -159,7 +170,7 @@ def _send_feishu(message: DeliveryMessage | None) -> DeliveryResult:
                 "template": "blue",
             },
             "elements": [
-                {"tag": "markdown", "content": f"周报正文：[打开周报正文]({message.url})\n\n项目筛选：[打开项目筛选]({message.explorer_url})"},
+                {"tag": "markdown", "content": f"周报正文：[打开周报正文]({message.url})\n\n项目筛选：[打开项目筛选]({message.explorer_url})\n\n运行状态：[打开运行状态面板]({message.runs_url})"},
             ],
         },
     }
@@ -179,7 +190,7 @@ def _send_wechat(message: DeliveryMessage | None) -> DeliveryResult:
     payload = {
         "msgtype": "markdown",
         "markdown": {
-            "content": f"**{message.title}**\n\n周报正文：[打开周报正文]({message.url})\n\n项目筛选：[打开项目筛选]({message.explorer_url})",
+            "content": f"**{message.title}**\n\n周报正文：[打开周报正文]({message.url})\n\n项目筛选：[打开项目筛选]({message.explorer_url})\n\n运行状态：[打开运行状态面板]({message.runs_url})",
         },
     }
     try:

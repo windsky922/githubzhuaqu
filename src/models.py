@@ -97,6 +97,7 @@ class RunSummary:
     telegram_error: str = ""
     telegram_report_url: str = ""
     telegram_explorer_url: str = ""
+    telegram_runs_url: str = ""
     delivery_results: list[dict[str, str | bool]] = field(default_factory=list)
     sqlite_index_path: str = ""
     sqlite_error: str = ""

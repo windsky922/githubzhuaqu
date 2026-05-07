@@ -23,6 +23,7 @@ class BuildPagesTest(unittest.TestCase):
                         "collected_count": 100,
                         "kimi_used": True,
                         "telegram_sent": True,
+                        "telegram_runs_url": "https://example.com/runs.html",
                         "collector_stats": [
                             {
                                 "source": "github_search",
@@ -140,6 +141,7 @@ class BuildPagesTest(unittest.TestCase):
             self.assertEqual(runs_json["runs"][0]["collector_failed_count"], 1)
             self.assertEqual(runs_json["runs"][0]["collector_error_kinds"], ["rate_limited"])
             self.assertEqual(runs_json["runs"][0]["collector_error_summary"][0]["status_code"], 403)
+            self.assertEqual(runs_json["runs"][0]["telegram_runs_url"], "https://example.com/runs.html")
             self.assertEqual(runs_json["runs"][0]["top_languages"][0]["name"], "Python")
             profiles_json = json.loads((root / "docs" / "profiles.json").read_text(encoding="utf-8"))
             self.assertEqual(profiles_json["schema_version"], 1)

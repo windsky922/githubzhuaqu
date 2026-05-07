@@ -8,7 +8,7 @@ ROOT_PATH = Path(__file__).resolve().parents[1]
 if str(ROOT_PATH) not in sys.path:
     sys.path.insert(0, str(ROOT_PATH))
 
-from src.sender import explorer_url, report_url, send_report_to_channels
+from src.sender import explorer_url, report_url, runs_url, send_report_to_channels
 from src.settings import ROOT, load_settings
 from src.state import write_sent_repositories
 from src.models import Repository
@@ -29,6 +29,7 @@ def main() -> int:
     error = telegram_result.error if telegram_result else "Telegram channel is disabled"
     url = report_url(settings)
     project_url = explorer_url(settings)
+    dashboard_url = runs_url(settings)
     selected = _selected_repositories(ROOT, run_date)
     state_path = ""
     if sent and selected:
@@ -41,6 +42,7 @@ def main() -> int:
         state_path,
         url,
         project_url,
+        dashboard_url,
         [result.to_dict() for result in delivery_results],
     )
     _update_run_summary_sqlite(ROOT, run_date, sqlite_index_summary_path(settings), "")
@@ -90,6 +92,7 @@ def _update_run_summary(
     state_path: str,
     report_url: str = "",
     project_url: str = "",
+    dashboard_url: str = "",
     delivery_results: list[dict[str, str | bool]] | None = None,
 ) -> None:
     path = root / "data" / "runs" / f"{run_date}.json"
@@ -110,6 +113,8 @@ def _update_run_summary(
         data["telegram_report_url"] = report_url
     if project_url:
         data["telegram_explorer_url"] = project_url
+    if dashboard_url:
+        data["telegram_runs_url"] = dashboard_url
     if state_path:
         data["state_path"] = state_path
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
