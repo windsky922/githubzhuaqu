@@ -1205,6 +1205,43 @@ def _project_detail_content() -> str:
       color: var(--ok);
       background: #f0fdf4;
     }
+    .trend-list {
+      display: grid;
+      gap: 10px;
+    }
+    .trend-row {
+      display: grid;
+      grid-template-columns: 96px 1fr 72px 72px;
+      gap: 10px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .trend-bars {
+      display: grid;
+      gap: 4px;
+      min-width: 0;
+    }
+    .bar-track {
+      height: 8px;
+      border-radius: 999px;
+      background: #eef2f7;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      min-width: 2px;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+    .bar-fill.quality {
+      background: var(--ok);
+    }
+    .trend-label {
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
     table {
       width: 100%;
       border-collapse: collapse;
@@ -1235,6 +1272,8 @@ def _project_detail_content() -> str:
       .topbar { align-items: flex-start; flex-direction: column; padding: 16px 0; }
       .summary, .grid { grid-template-columns: 1fr; }
       .wrap { width: min(100% - 20px, 1120px); }
+      .trend-row { grid-template-columns: 1fr 1fr; }
+      .trend-bars { grid-column: 1 / -1; }
     }
   </style>
 </head>
@@ -1347,6 +1386,10 @@ def _project_detail_content() -> str:
           <div class="section"><h2>相似项目</h2>${similarHtml(detail.similar_projects || [])}</div>
         </section>
         <section class="section" style="margin-top:12px">
+          <h2>历史趋势</h2>
+          ${trendHtml(detail.history || [])}
+        </section>
+        <section class="section" style="margin-top:12px">
           <h2>历史入选记录</h2>
           <div class="table-shell">${historyTable(detail.history || [])}</div>
         </section>
@@ -1365,6 +1408,27 @@ def _project_detail_content() -> str:
           <td>${number(project.quality_score)} / ${escapeHtml(project.quality_level || "unknown")}</td>
           <td>${project.report_url ? `<a href="${escapeAttribute(project.report_url)}">查看</a>` : "-"}</td>
         </tr>`).join("")}</tbody></table>`;
+    }
+
+    function trendHtml(history) {
+      if (!history.length) return '<div class="empty">暂无趋势数据</div>';
+      const ordered = [...history].sort((a, b) => String(a.run_date || "").localeCompare(String(b.run_date || "")));
+      const maxGrowth = Math.max(1, ...ordered.map(project => number(project.star_growth)));
+      return `<div class="trend-list">${ordered.map(project => {
+        const growth = number(project.star_growth);
+        const quality = number(project.quality_score);
+        const growthWidth = Math.max(2, Math.round((growth / maxGrowth) * 100));
+        const qualityWidth = Math.max(2, Math.min(100, quality));
+        return `<div class="trend-row">
+          <span class="trend-label">${escapeHtml(project.run_date || "")}</span>
+          <span class="trend-bars">
+            <span class="bar-track"><span class="bar-fill" style="width:${growthWidth}%"></span></span>
+            <span class="bar-track"><span class="bar-fill quality" style="width:${qualityWidth}%"></span></span>
+          </span>
+          <span class="trend-label">Star ${growth}</span>
+          <span class="trend-label">质量 ${quality}</span>
+        </div>`;
+      }).join("")}</div>`;
     }
 
     function similarHtml(projects) {
