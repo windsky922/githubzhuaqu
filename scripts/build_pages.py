@@ -1295,7 +1295,8 @@ def _project_detail_content() -> str:
     const content = document.getElementById("content");
     const title = document.getElementById("title");
 
-    loadDetail()
+    Promise.resolve()
+      .then(loadDetail)
       .then(render)
       .catch(error => {
         content.className = "empty";
@@ -1304,7 +1305,7 @@ def _project_detail_content() -> str:
 
     function loadDetail() {
       const repo = repoName();
-      if (!repo) throw new Error("URL 缺少 repo 参数");
+      if (!repo) throw new Error("URL 缺少 repo 参数，请从项目筛选页点击具体项目进入。");
       if (!shouldUseApi()) return loadStaticDetail(repo);
       return fetch(`/api/projects/${encodeURIComponentOwnerRepo(repo)}`, { cache: "no-store" })
         .then(jsonOrThrow)

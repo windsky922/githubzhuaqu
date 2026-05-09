@@ -199,6 +199,8 @@ class BuildPagesTest(unittest.TestCase):
             self.assertIn('fetch(`/api/projects/${encodeURIComponentOwnerRepo(repo)}`', project_page)
             self.assertIn('fetch("projects.json"', project_page)
             self.assertIn("buildStaticDetail", project_page)
+            self.assertIn("Promise.resolve()", project_page)
+            self.assertIn("请从项目筛选页点击具体项目进入", project_page)
             self.assertIn("历史趋势", project_page)
             self.assertIn("trendHtml", project_page)
             self.assertIn("bar-fill quality", project_page)
