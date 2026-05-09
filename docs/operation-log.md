@@ -2,6 +2,21 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-05-09 追加：修复 weekly workflow YAML 语法
+
+### 1. 问题原因
+
+`weekly.yml` 中发布归档分支的 `run:` 单行命令包含提交信息 `chore: ...`。YAML 普通字符串中出现冒号加空格会被解析为键值结构，导致 GitHub Actions 报告 workflow 语法无效。
+
+### 2. 本次修改
+
+1. 将两个发布归档分支的 `run:` 命令改为 YAML 折叠块。
+2. 保留原提交信息，不改变归档分支发布逻辑。
+
+### 3. 影响
+
+修复后 GitHub 才能正确识别 `workflow_dispatch`，页面右上角会恢复 `Run workflow` 按钮。
+
 ## 2026-05-09 追加：将自动归档分离到 weekly-archive 分支
 
 ### 1. 问题原因
