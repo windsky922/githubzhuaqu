@@ -910,7 +910,7 @@ def _explorer_content() -> str:
       const quality = qualityText(project);
       const detailId = `detail-${index}`;
       return `<tr>
-        <td class="repo"><a href="${escapeAttribute(project.html_url)}" target="_blank" rel="noreferrer">${escapeHtml(project.full_name)}</a><div class="desc">${escapeHtml(project.description || "")}</div></td>
+        <td class="repo"><a href="${escapeAttribute(projectDetailUrl(project))}">${escapeHtml(project.full_name)}</a><div class="desc">${escapeHtml(project.description || "")}</div></td>
         <td>${escapeHtml(project.run_date || "")}</td>
         <td>${escapeHtml(project.language || "Unknown")}</td>
         <td>${escapeHtml(project.category || "Other")}</td>

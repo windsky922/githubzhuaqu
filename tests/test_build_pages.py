@@ -194,6 +194,7 @@ class BuildPagesTest(unittest.TestCase):
             self.assertIn("projectKeywords", explorer)
             self.assertIn("projectDetailUrl", explorer)
             self.assertIn('params.set("repo", repo)', explorer)
+            self.assertIn('<td class="repo"><a href="${escapeAttribute(projectDetailUrl(project))}">', explorer)
             project_page = (root / "docs" / "project.html").read_text(encoding="utf-8")
             self.assertIn("GitHub 项目详情", project_page)
             self.assertIn('fetch(`/api/projects/${encodeURIComponentOwnerRepo(repo)}`', project_page)
