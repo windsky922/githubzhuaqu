@@ -102,6 +102,7 @@ def _index_content(root: Path, reports: list[Path]) -> str:
             "- [个性化方向页](profiles.html)",
             "- [个性化方向 JSON](profiles.json)",
             "- [RSS 订阅](feed.xml)",
+            "- [后端 API 说明](api.html)",
             "- [历史归档查询说明](archive-query.html)",
             "- [数据契约说明](data-contracts.html)",
             "- [架构说明](architecture.html)",

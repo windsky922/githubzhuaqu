@@ -159,7 +159,35 @@ summary_points
 
 `delivery_results` 记录多推送通道状态。当前支持 `telegram`、`feishu`、`wechat`。该字段只记录通道名称、是否发送成功、错误摘要和是否跳过，不记录 Token、Chat ID、Webhook 或任何密钥。
 
-## 五、SQLite 表
+## 五、只读后端 API
+
+当前 API 位于：
+
+```text
+src/api/app.py
+```
+
+API 只读取公开归档和 SQLite 派生索引，不写入采集结果，也不读取任何密钥。当前稳定入口包括：
+
+```text
+GET /api/health
+GET /api/projects
+GET /api/runs
+GET /api/profiles
+GET /api/weekly/latest
+```
+
+`/api/projects` 复用历史归档查询能力，支持按语言、方向、profile、来源、风险提示、质量分、Trending 排名和关键词筛选。返回结构保持为：
+
+```text
+schema_version
+count
+projects
+```
+
+其中 `projects` 内部字段与归档查询结果保持一致。后续如需新增字段，应先更新本文档、`docs/api.md` 和对应测试。
+
+## 六、SQLite 表
 
 当前 SQLite 表：
 
@@ -191,7 +219,7 @@ scripts/query_archive.py
 
 该脚本只消费 SQLite 派生索引和公开归档字段，支持按语言、方向、profile、来源、风险提示和关键词查询历史项目。它不改变 JSON 事实来源，也不会写入密钥或私有配置。
 
-## 六、契约测试
+## 七、契约测试
 
 契约测试位于：
 
@@ -207,7 +235,7 @@ tests/test_data_contracts.py
 
 如果未来确实需要新增、删除或重命名字段，应先确认下游影响，再同步更新契约测试和本文档。
 
-## 七、RSS 输出
+## 八、RSS 输出
 
 RSS 文件位于：
 
