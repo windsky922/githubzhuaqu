@@ -695,7 +695,7 @@
         <td class="num">${number(project.star_growth)}</td>
         <td>${quality}</td>
         <td>${riskText}</td>
-        <td><a href="${escapeAttribute(project.report_url || "#")}">查看</a><button class="detail-toggle" type="button" data-detail="${escapeAttribute(detailId)}">详情</button></td>
+        <td><a href="${escapeAttribute(project.report_url || "#")}">周报</a><a href="${escapeAttribute(projectDetailUrl(project))}">详情页</a><button class="detail-toggle" type="button" data-detail="${escapeAttribute(detailId)}">展开</button></td>
       </tr>
       <tr class="detail-row"><td colspan="10">${detailPanel(project, detailId)}</td></tr>`;
     }
@@ -714,7 +714,7 @@
         <div class="detail-grid">
           <div class="detail-block"><h3>项目指标</h3><p>综合分 ${escapeHtml(number(project.score).toFixed(3))}；质量分 ${escapeHtml(project.quality_score || 0)}；安全分 ${escapeHtml(project.security_score || 100)}；累计 Star ${escapeHtml(project.stargazers_count || 0)}；Fork ${escapeHtml(project.forks_count || 0)}</p></div>
           <div class="detail-block"><h3>来源</h3><p>${escapeHtml((project.sources || []).map(sourceLabel).join(" + ") || "-")}</p></div>
-          <div class="detail-block"><h3>完整链接</h3><p><a class="detail-link" href="${escapeAttribute(project.html_url)}" target="_blank" rel="noreferrer">${escapeHtml(project.html_url)}</a></p></div>
+          <div class="detail-block"><h3>完整链接</h3><p><a class="detail-link" href="${escapeAttribute(project.html_url)}" target="_blank" rel="noreferrer">${escapeHtml(project.html_url)}</a></p><p><a class="detail-link" href="${escapeAttribute(projectDetailUrl(project))}">打开项目详情页</a></p></div>
         </div>
         <div class="detail-grid">
           <div class="detail-block"><h3>风险提示</h3>${risks}</div>
@@ -731,6 +731,15 @@
         const meta = [match.language || "Unknown", match.category || "Other", `新增 Star ${number(match.star_growth)}`].join(" / ");
         return `<li><a href="${escapeAttribute(match.html_url)}" target="_blank" rel="noreferrer">${escapeHtml(match.full_name)}</a><span>${escapeHtml(meta)}</span>${description}</li>`;
       }).join("")}</ul>`;
+    }
+
+    function projectDetailUrl(project) {
+      const repo = project.full_name || "";
+      const params = new URLSearchParams();
+      const apiMode = new URLSearchParams(window.location.search).get("api");
+      params.set("repo", repo);
+      if (apiMode === "1" || apiMode === "0") params.set("api", apiMode);
+      return `project.html?${params.toString()}`;
     }
 
     function similarProjects(project) {
@@ -774,7 +783,7 @@
       const panel = document.getElementById(button.dataset.detail);
       if (!panel) return;
       const open = panel.classList.toggle("open");
-      button.textContent = open ? "收起" : "详情";
+      button.textContent = open ? "收起" : "展开";
     }
 
     function securityText(project, risks) {

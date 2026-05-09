@@ -114,11 +114,24 @@ explorer.html?api=1&profile=agent_development
 explorer.html?api=0&profile=python
 ```
 
+`docs/project.html` 使用同样的读取策略：
+
+1. 默认通过 `project.html?repo=owner/name` 读取静态 `projects.json` 并在浏览器中聚合详情。
+2. 在本地后端或 URL 带 `api=1` 时，优先读取 `/api/projects/{owner}/{repo}`。
+3. API 不可用时自动回退到静态 `projects.json`。
+
+示例：
+
+```text
+project.html?repo=owner/agent
+project.html?repo=owner/agent&api=1
+```
+
 ## 五、后续扩展
 
 下一阶段可以在这个 API 层继续扩展：
 
-1. 项目详情页：把 `/api/projects/{owner}/{repo}` 接入前端，展示历史入选、相似项目和质量变化。
+1. 项目详情页增强：增加 Star 增长曲线、质量变化曲线和跨周对比。
 2. 订阅接口：保存用户选择的语言、方向、profile 和推送渠道。
 3. 后台任务接口：触发采集、重建 SQLite、重新生成 Pages。
 4. 数据库演进：从当前派生 SQLite 过渡到持久化服务数据库，但保留 JSON 归档作为可读审计源。
