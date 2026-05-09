@@ -4,16 +4,16 @@
 
 | 日期 | 项目 | 来源 | Trending 排名 | 方向 | 语言 | Star | 新增 Star | 风险提示 | 链接 |
 |---|---|---|---:|---|---|---:|---:|---:|---|
-| 2026-05-09 | ruvnet/ruflo | GitHub Trending | 2 | AI Agent | TypeScript | 47423 | 21 | 0 | [https://github.com/ruvnet/ruflo](https://github.com/ruvnet/ruflo) |
-| 2026-05-09 | docusealco/docuseal | GitHub Trending | 4 | Other | Ruby | 16007 | 5 | 0 | [https://github.com/docusealco/docuseal](https://github.com/docusealco/docuseal) |
-| 2026-05-09 | virattt/dexter | GitHub Trending | 5 | AI Agent | TypeScript | 24985 | 4 | 1 | [https://github.com/virattt/dexter](https://github.com/virattt/dexter) |
-| 2026-05-09 | soxoj/maigret | GitHub Trending | 6 | Developer Tools | Python | 26888 | 14 | 0 | [https://github.com/soxoj/maigret](https://github.com/soxoj/maigret) |
-| 2026-05-09 | 1jehuang/jcode | GitHub Trending | 7 | AI Agent | Rust | 5255 | 6 | 0 | [https://github.com/1jehuang/jcode](https://github.com/1jehuang/jcode) |
-| 2026-05-09 | cocoindex-io/cocoindex | GitHub Trending | 8 | AI Agent | Python | 9260 | 5 | 0 | [https://github.com/cocoindex-io/cocoindex](https://github.com/cocoindex-io/cocoindex) |
-| 2026-05-09 | AIDC-AI/Pixelle-Video | GitHub Trending | 9 | Other | Python | 14061 | 5 | 0 | [https://github.com/AIDC-AI/Pixelle-Video](https://github.com/AIDC-AI/Pixelle-Video) |
-| 2026-05-09 | mattpocock/skills | GitHub Trending | 10 | LLM Tooling | Shell | 67578 | 37 | 0 | [https://github.com/mattpocock/skills](https://github.com/mattpocock/skills) |
-| 2026-05-09 | NousResearch/hermes-agent | GitHub Search | - | AI Agent | Python | 140373 | 42 | 0 | [https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) |
-| 2026-05-09 | decolua/9router | GitHub Trending | 12 | AI Agent | JavaScript | 6199 | 22 | 0 | [https://github.com/decolua/9router](https://github.com/decolua/9router) |
+| 2026-05-09 | ruvnet/ruflo | GitHub Trending | 2 | AI Agent | TypeScript | 47454 | 31 | 0 | [https://github.com/ruvnet/ruflo](https://github.com/ruvnet/ruflo) |
+| 2026-05-09 | docusealco/docuseal | GitHub Trending | 4 | Other | Ruby | 16011 | 4 | 0 | [https://github.com/docusealco/docuseal](https://github.com/docusealco/docuseal) |
+| 2026-05-09 | virattt/dexter | GitHub Trending | 5 | AI Agent | TypeScript | 24988 | 3 | 1 | [https://github.com/virattt/dexter](https://github.com/virattt/dexter) |
+| 2026-05-09 | soxoj/maigret | GitHub Trending | 6 | Developer Tools | Python | 26899 | 11 | 0 | [https://github.com/soxoj/maigret](https://github.com/soxoj/maigret) |
+| 2026-05-09 | 1jehuang/jcode | GitHub Trending | 7 | AI Agent | Rust | 5259 | 4 | 0 | [https://github.com/1jehuang/jcode](https://github.com/1jehuang/jcode) |
+| 2026-05-09 | cocoindex-io/cocoindex | GitHub Trending | 8 | AI Agent | Python | 9260 | 0 | 0 | [https://github.com/cocoindex-io/cocoindex](https://github.com/cocoindex-io/cocoindex) |
+| 2026-05-09 | AIDC-AI/Pixelle-Video | GitHub Trending | 9 | Other | Python | 14071 | 10 | 0 | [https://github.com/AIDC-AI/Pixelle-Video](https://github.com/AIDC-AI/Pixelle-Video) |
+| 2026-05-09 | mattpocock/skills | GitHub Trending | 10 | LLM Tooling | Shell | 67611 | 33 | 0 | [https://github.com/mattpocock/skills](https://github.com/mattpocock/skills) |
+| 2026-05-09 | decolua/9router | GitHub Trending | 12 | AI Agent | JavaScript | 6221 | 22 | 0 | [https://github.com/decolua/9router](https://github.com/decolua/9router) |
+| 2026-05-09 | browserbase/skills | GitHub Trending | 11 | AI Agent | JavaScript | 2891 | 3 | 1 | [https://github.com/browserbase/skills](https://github.com/browserbase/skills) |
 | 2026-05-07 | TauricResearch/TradingAgents | GitHub Search + GitHub Trending | 1 | AI Agent | Python | 70782 | 464 | 0 | [https://github.com/TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents) |
 | 2026-05-07 | ruvnet/ruflo | GitHub Trending | 2 | AI Agent | TypeScript | 45746 | 497 | 0 | [https://github.com/ruvnet/ruflo](https://github.com/ruvnet/ruflo) |
 | 2026-05-07 | mattpocock/skills | GitHub Trending | 3 | LLM Tooling | Shell | 64037 | 1040 | 0 | [https://github.com/mattpocock/skills](https://github.com/mattpocock/skills) |
