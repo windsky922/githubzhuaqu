@@ -8,6 +8,10 @@ from pathlib import Path
 from src.api.repository import ApiRepository
 
 
+def _api_route_dependencies_installed() -> bool:
+    return bool(importlib.util.find_spec("fastapi") and importlib.util.find_spec("httpx"))
+
+
 class ApiRepositoryTest(unittest.TestCase):
     def test_reads_projects_runs_profiles_and_latest_report(self):
         root = Path.cwd() / f".tmp-api-test-{uuid.uuid4().hex}"
@@ -36,7 +40,7 @@ class ApiRepositoryTest(unittest.TestCase):
         finally:
             shutil.rmtree(root, ignore_errors=True)
 
-    @unittest.skipUnless(importlib.util.find_spec("fastapi"), "本地未安装 FastAPI，跳过 API 路由测试")
+    @unittest.skipUnless(_api_route_dependencies_installed(), "本地未安装 FastAPI 或 httpx，跳过 API 路由测试")
     def test_fastapi_routes_return_public_archive_data(self):
         from fastapi.testclient import TestClient
         from src.api.app import create_app

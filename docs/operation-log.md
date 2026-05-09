@@ -2,6 +2,22 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-05-09 追加：修复 API 路由测试依赖
+
+### 1. 问题原因
+
+GitHub Actions 中 `fastapi.testclient.TestClient` 会通过 Starlette 依赖 `httpx`。当前依赖文件只声明了 FastAPI 和 Uvicorn，导致 CI 环境安装 FastAPI 后仍缺少 `httpx`，从而在 `python -m unittest` 阶段报错。
+
+### 2. 本次修改
+
+1. 在 `requirements.txt` 中补充 `httpx`。
+2. API 路由测试的跳过条件同时检查 FastAPI 和 `httpx`。
+3. 保留仓库访问层测试，确保没有完整 API 测试依赖时仍能验证只读归档逻辑。
+
+### 3. 设计边界
+
+本次只修复测试依赖和 CI 稳定性，不改变 API 行为、采集逻辑、数据库结构或推送逻辑。
+
 ## 2026-05-09 追加：项目详情 API
 
 ### 1. 开发目的
