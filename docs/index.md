@@ -9,22 +9,22 @@
 ## 最新运行摘要
 
 - 入选项目：10 个
-- 采集候选：73 个
+- 采集候选：316 个
 - 生成方式：Kimi
-- Telegram：已推送
+- Telegram：未推送
 - 采集错误：0 条
 
 ## 最新趋势要点
 
 - AI Agent 是本期最集中的方向，共 6 个项目。
-- Python 是本期出现最多的主要语言，共 3 个项目。
-- 本期入选项目累计新增 Star 121。
+- Python 是本期出现最多的主要语言，共 5 个项目。
+- 本期入选项目累计新增 Star 166。
 - ruvnet/ruflo 是本期 GitHub Trending 排名最高的项目，周榜排名 2。
-- mattpocock/skills 是本期新增 Star 最高的项目，新增 33。
+- NousResearch/hermes-agent 是本期新增 Star 最高的项目，新增 64。
 
 ## 全部周报
 
-- [2026-05-09](weekly/2026-05-09.html)：10 个项目，Kimi，Telegram 已推送，主语言 Python，主方向 AI Agent，新增 Star 121，Trending 项目 10
+- [2026-05-09](weekly/2026-05-09.html)：10 个项目，Kimi，Telegram 未推送，主语言 Python，主方向 AI Agent，新增 Star 166，Trending 项目 8
 - [2026-05-07](weekly/2026-05-07.html)：10 个项目，Kimi，Telegram 已推送，主语言 Python，主方向 AI Agent，新增 Star 5012，Trending 项目 9
 - [2026-05-06](weekly/2026-05-06.html)：10 个项目，Kimi，Telegram 已推送，主语言 Python，主方向 AI Agent，新增 Star 47，Trending 项目 9
 - [2026-05-05](weekly/2026-05-05.html)：10 个项目，Kimi，Telegram 已推送，主语言 Python，主方向 AI Agent，新增 Star 12968，Trending 项目 7
