@@ -2,6 +2,38 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-05-09 追加：操作日志倒序排列规则
+
+### 1. 调整原因
+
+为了方便阅读和回看最新开发动作，操作日志改为倒序排列，最新操作放在文件最上面。
+
+### 2. 后续规则
+
+以后每次更新 `docs/operation-log.md` 时，新日志都追加到顶部，而不是放到文件末尾。若同一天有多条记录，后发生的操作放在更靠上的位置。
+
+### 3. 影响范围
+
+本次只调整操作日志的排列方式，不改变项目代码、数据契约、采集逻辑或推送逻辑。
+
+## 2026-05-09 追加：项目筛选页接入只读 API
+
+### 1. 开发目的
+
+只读后端 API 已经具备历史项目、运行记录、个性化方向和最新周报接口。本次把项目筛选页改成渐进式接入后端 API，让前端、后端和 SQLite 派生索引开始形成闭环，同时继续保留 GitHub Pages 的纯静态可用性。
+
+### 2. 本次修改
+
+1. `docs/explorer.html` 在本地后端环境下优先读取 `/api/projects` 和 `/api/profiles`。
+2. URL 带 `api=1` 时强制尝试后端 API，带 `api=0` 时强制使用静态 JSON。
+3. API 不可用时自动回退到 `projects.json` 和 `profiles.json`，避免影响 GitHub Pages。
+4. 页面会显示当前数据来源，便于判断正在使用“后端 API”还是“静态 JSON”。
+5. `docs/api.md` 和 README 补充前端读取方式说明。
+
+### 3. 设计边界
+
+本次没有引入前端框架，也没有改变现有静态页面的数据契约。后端 API 作为增强入口存在，静态 JSON 仍然是线上 Pages 的默认稳定读取方式。
+
 ## 2026-05-09 追加：只读后端 API 骨架
 
 ### 1. 开发目的
@@ -20,78 +52,180 @@
 
 API 当前只读，不触发采集、不调用 Kimi、不推送 Telegram，也不读取任何密钥。JSON 归档仍然是事实来源，SQLite 只作为可重建派生索引。这个边界可以避免当前阶段过早引入复杂服务，同时给后续完整前端和数据库演进留出接口空间。
 
-## 2026-04-27
-
-### 1. 读取原始文档
-
-输入文件：
-
-```text
-D:\liulanqixiazai\github-weekly-agent-architecture.md
-```
-
-处理结果：
-
-1. 首次读取时终端中文显示为乱码。
-2. 使用显式 UTF-8 重新读取后，确认文档内容完整可读。
-3. 已完成对项目目标、用户需求、模块设计、技术选型、MVP 和验收标准的审查。
-
-### 2. 审查架构
-
-结论：
-
-1. 原架构总体清晰，不需要推翻重建。
-2. 需要补强热点定义、GitHub Actions 自提交、防循环、Telegram 分段、运行摘要和模块边界。
-3. 推荐采用“原始架构 + 工程化增强”的架构。
-
-输出文件：
-
-```text
-docs/architecture-review.md
-```
-
-### 3. 生成优化后的项目文档
-
-新增完整架构文档，覆盖：
-
-1. 项目定位。
-2. 推荐架构。
-3. 数据流。
-4. MVP 范围。
-5. 推荐目录结构。
-6. 模块职责。
-7. 搜索策略。
-8. 推荐评分。
-9. 周报格式。
-10. Telegram 推送策略。
-11. 运行归档。
-12. GitHub Actions 要求。
-13. 安全要求。
-14. 迭代路线。
-
-输出文件：
-
-```text
-docs/project-architecture.md
-```
-
-### 4. 建立仓库入口文档
-
-新增 `README.md`，用于说明当前仓库状态、文档索引、项目目标、技术路线和第一阶段范围。
-
-### 5. 当前阶段未执行的事项
-
-按照用户要求，本阶段暂不开发项目代码，因此没有创建 Python 源码、GitHub Actions workflow、依赖文件或运行脚本。
-
-后续如果进入开发阶段，再按 `docs/project-architecture.md` 中的开发顺序实施。
-
----
-
-## 2026-05-07 追加：个性化方向可视化页面
+## 2026-05-07 追加：运行指标与数据契约稳定化
 
 ### 1. 开发目的
 
-项目已经支持 `profiles.json` 个性化方向配置，但用户需要直接查看 JSON 才能知道当前有哪些方向。为了让 Java、Python、Agent 开发、学习型项目和开发者工具等方向更容易被使用，本次新增公开的个性化方向页面。
+外部研究文档建议下一阶段优先提升一致性、可验证性和可观测性。当前项目已经能生成周报、Pages 和推送链接，但运行摘要中缺少标准化指标，后续很难持续判断 Trending 保底、README 摘要、GitHub 查询和持续热门项目占比是否健康。
+
+### 2. 本次实现
+
+更新：
+
+```text
+docs/data-contracts.md
+docs/operation-log.md
+main.py
+scripts/build_pages.py
+src/models.py
+src/trends.py
+tests/test_data_contracts.py
+tests/test_trends.py
+```
+
+调整内容：
+
+1. `RunSummary` 新增 `schema_version`。
+2. 运行摘要新增采集查询数量、成功数量和成功率。
+3. 运行摘要新增 README 抓取率。
+4. 运行摘要新增 Trending Top10 可用数量、入选数量和命中率。
+5. 运行摘要新增已推送项目入选占比，用于观察持续热门项目。
+6. 趋势摘要新增 `schema_version`、Trending Top10 入选数量和 Trending 入选比例。
+7. `docs/runs.json` 公开输出这些指标，方便前端、SQLite 和外部脚本复用。
+8. 测试覆盖趋势摘要和公共运行 JSON 的数据契约。
+
+### 3. 设计边界
+
+本次只增加可观测指标，不改变推荐逻辑。已推送项目仍然不会被硬过滤，只在评分中降权；这样可以避免把本周仍然热门的项目从周报中错误排除。
+
+## 2026-05-07 追加：推送消息增加项目筛选入口
+
+### 1. 问题来源
+
+前端质量信号改动落在 `explorer.html`，但 Telegram 推送仍只发送 `weekly/YYYY-MM-DD.html` 周报正文链接。用户从手机端打开推送后只能看到周报正文，看不到项目筛选页新增的质量筛选、质量排序和质量信号详情。
+
+### 2. 本次实现
+
+更新：
+
+```text
+README.md
+docs/data-contracts.md
+docs/operation-log.md
+docs/setup.md
+main.py
+scripts/build_pages.py
+scripts/send_report_link.py
+src/models.py
+src/sender.py
+tests/test_data_contracts.py
+tests/test_send_report_link.py
+tests/test_sender.py
+```
+
+调整内容：
+
+1. 推送消息同时包含“周报正文”和“项目筛选”两个入口。
+2. 周报正文继续指向 `weekly/YYYY-MM-DD.html`。
+3. 项目筛选指向 `explorer.html?date=YYYY-MM-DD`。
+4. Telegram 使用 HTML 超链接；飞书和企业微信 Webhook 消息同步使用双入口。
+5. 运行摘要新增 `telegram_explorer_url`，公开 `docs/runs.json` 也输出该字段。
+6. 测试覆盖双链接消息、运行摘要写回和公共 JSON 数据契约。
+
+### 3. 设计边界
+
+本次不改变周报生成内容，也不把完整 Markdown 推送到手机端。推送消息保持短链接形式，只增加一个筛选页入口，方便用户在阅读周报之外继续按方向、语言、质量和风险查看项目。
+
+---
+
+## 2026-05-07 追加：前端质量信号可视化
+
+### 1. 开发目的
+
+前端此前已经读取质量字段，但主要藏在详情页的项目指标文本中，用户不容易直接感知变化。本次把质量信号提升为筛选、排序、表格列和详情块，方便在 GitHub Pages 中直接查看项目质量状态。
+
+### 2. 本次实现
+
+更新：
+
+```text
+docs/operation-log.md
+scripts/build_pages.py
+tests/test_build_pages.py
+```
+
+调整内容：
+
+1. 项目筛选页新增“质量”筛选项，支持按高质量、中等质量、低质量和未知过滤。
+2. 排序方式新增“质量分”。
+3. 项目表格新增“质量”列，直接展示质量等级和质量分。
+4. 详情面板新增“质量信号”块，展示质量扣分项。
+5. 筛选概览新增平均质量分，便于快速判断当前筛选结果整体质量。
+6. 页面构建测试补充质量筛选、质量信号和质量排序的断言。
+
+### 3. 设计边界
+
+本次只增强静态 Pages 前端展示，不改变主采集、评分、报告生成和 Telegram 推送逻辑。质量判断仍来自归档数据中的 `quality_score`、`quality_level` 和 `quality_flags`。
+
+---
+
+## 2026-05-07 追加：GitHub 采集错误分类与限流可观测性
+
+### 1. 开发目的
+
+前一阶段已经补齐运行指标，但 GitHub API 失败仍主要以字符串记录。这样在 Actions 中出现限流、认证失败、仓库不存在或 GitHub 服务异常时，只能靠人工阅读错误文本判断原因，不利于后续稳定运行和告警。
+
+### 2. 本次实现
+
+更新：
+
+```text
+docs/data-contracts.md
+docs/operation-log.md
+src/collector.py
+tests/test_collector.py
+```
+
+调整内容：
+
+1. GitHub JSON、README 和 Trending HTML 请求统一抛出结构化 `GitHubRequestError`。
+2. 采集统计 `collector_stats` 新增 `stage`、`error_kind`、`status_code`、`retry_after`、`rate_limit_remaining` 和 `rate_limit_reset`。
+3. 支持识别主限流、二级限流、认证失败、仓库不存在、GitHub 服务错误和普通运行时错误。
+4. 部分 Trending 仓库详情抓取失败时，仍保留成功项目，同时把部分失败原因写入统计。
+5. 测试覆盖 GitHub 主限流、二级限流和查询失败统计字段。
+
+### 3. 设计边界
+
+本次只增强错误分类和运行可观测性，不新增自动等待重试，也不改变采集排序逻辑。后续如果 Actions 中频繁出现 `rate_limited` 或 `secondary_rate_limited`，再按运行数据决定是否增加退避重试、降低查询数量或拆分采集时间窗口。
+
+---
+
+## 2026-05-07 追加：历史归档查询增强
+
+### 1. 开发目的
+
+项目已经具备 SQLite 派生索引和基础历史查询能力。为了给后续前端数据库页、个性化推荐和项目回看留接口，本次把近期新增的质量信号和 Trending 信号接入归档查询。
+
+### 2. 本次实现
+
+更新：
+
+```text
+docs/archive-query.md
+docs/operation-log.md
+scripts/query_archive.py
+tests/test_query_archive.py
+```
+
+调整内容：
+
+1. `scripts/query_archive.py` 新增 `--quality-level`、`--min-quality` 和 `--trending-top`。
+2. 查询结果新增 `quality_score`、`quality_level` 和 `quality_flags`。
+3. 新增 `--sort` 参数，支持按最新、评分、新增 Star、Trending 排名和质量分排序。
+4. 表格输出新增质量分列，方便在终端直接筛选高质量项目。
+5. 测试覆盖质量分、Trending TopN 和质量排序。
+
+### 3. 设计边界
+
+本次只增强本地归档查询，不改变采集、评分、周报生成和推送逻辑。质量字段来自已经归档的 `data/selected/*.json`，SQLite 仍然是可重建索引，后续前端或 API 可以复用同一套查询参数。
+
+---
+
+## 2026-05-07 追加：运行状态面板
+
+### 1. 开发目的
+
+项目已经把运行指标写入 `runs.json`，但目前只能直接阅读 JSON，不方便在手机或 Pages 页面中快速判断本周是否降级、是否推送成功、采集是否完整。为了补齐前端可观测入口，本次新增静态运行状态面板。
 
 ### 2. 本次实现
 
@@ -106,15 +240,47 @@ tests/test_build_pages.py
 
 调整内容：
 
-1. `scripts/build_pages.py` 新增 `docs/profiles.html` 生成逻辑。
-2. `profiles.html` 直接读取公开 `profiles.json`，展示方向名称、学习目标、语言和主题。
-3. 每个方向提供“查看匹配项目”和“主题筛选”入口，跳转到 `explorer.html?profile=...`。
-4. 首页和 README 增加个性化方向页入口。
-5. 测试覆盖页面生成、入口链接和公开 profile 数据读取。
+1. `scripts/build_pages.py` 新增 `docs/runs.html` 生成逻辑。
+2. `runs.html` 直接读取 `runs.json`，不请求任何密钥或私有接口。
+3. 页面支持按关键词、运行状态、Kimi/规则版、Telegram 状态和排序方式筛选。
+4. 页面展示采集成功率、Trending Top10 命中率、README 抓取率、Kimi 状态、Telegram 状态和周报/筛选入口。
+5. 首页和 README 增加运行状态面板入口。
 
 ### 3. 设计边界
 
-本次只展示公开 profile 配置，不读取 API Key、Token、Chat ID、Webhook 或任何用户私有配置。后续如果接入真正前端和数据库，该页面可以升级为用户偏好选择入口。
+本次只增加静态前端展示，不改变主流程、采集策略、推送策略和数据契约。后续如果引入真正数据库后台或 API，可以让该页面继续复用 `runs.json`，也可以平滑切换到只读接口。
+
+---
+
+## 2026-05-07 追加：运行状态面板接入采集异常摘要
+
+### 1. 开发目的
+
+采集器已经能识别 GitHub 主限流、二级限流、认证失败、仓库不存在和服务端错误，但此前这些信息主要留在原始运行摘要中。为了让手机端和 Pages 页面可以直接判断采集不完整的原因，本次把脱敏后的采集异常摘要接入公开运行数据和运行状态面板。
+
+### 2. 本次实现
+
+更新：
+
+```text
+docs/data-contracts.md
+docs/operation-log.md
+scripts/build_pages.py
+tests/test_build_pages.py
+tests/test_data_contracts.py
+```
+
+调整内容：
+
+1. `docs/runs.json` 新增 `collector_failed_count`、`collector_error_kinds` 和 `collector_error_summary`。
+2. `collector_error_summary` 只保留公开可展示的摘要字段，不输出密钥、请求头或原始堆栈。
+3. `runs.html` 新增采集异常筛选项和采集异常列。
+4. 运行状态概览新增采集异常次数，便于判断近期是否经常触发 GitHub 限流。
+5. 测试同步覆盖公开 JSON 字段、运行状态面板脚本和限流错误摘要。
+
+### 3. 设计边界
+
+本次只展示异常原因，不新增自动重试和等待策略。后续如果运行数据表明 `rate_limited` 或 `secondary_rate_limited` 频繁出现，再基于统计结果调整查询数量、引入退避重试或拆分采集任务。
 
 ---
 
@@ -157,43 +323,11 @@ tests/test_sender.py
 
 ---
 
-## 2026-05-07 追加：运行状态面板接入采集异常摘要
+## 2026-05-07 追加：个性化方向可视化页面
 
 ### 1. 开发目的
 
-采集器已经能识别 GitHub 主限流、二级限流、认证失败、仓库不存在和服务端错误，但此前这些信息主要留在原始运行摘要中。为了让手机端和 Pages 页面可以直接判断采集不完整的原因，本次把脱敏后的采集异常摘要接入公开运行数据和运行状态面板。
-
-### 2. 本次实现
-
-更新：
-
-```text
-docs/data-contracts.md
-docs/operation-log.md
-scripts/build_pages.py
-tests/test_build_pages.py
-tests/test_data_contracts.py
-```
-
-调整内容：
-
-1. `docs/runs.json` 新增 `collector_failed_count`、`collector_error_kinds` 和 `collector_error_summary`。
-2. `collector_error_summary` 只保留公开可展示的摘要字段，不输出密钥、请求头或原始堆栈。
-3. `runs.html` 新增采集异常筛选项和采集异常列。
-4. 运行状态概览新增采集异常次数，便于判断近期是否经常触发 GitHub 限流。
-5. 测试同步覆盖公开 JSON 字段、运行状态面板脚本和限流错误摘要。
-
-### 3. 设计边界
-
-本次只展示异常原因，不新增自动重试和等待策略。后续如果运行数据表明 `rate_limited` 或 `secondary_rate_limited` 频繁出现，再基于统计结果调整查询数量、引入退避重试或拆分采集任务。
-
----
-
-## 2026-05-07 追加：运行状态面板
-
-### 1. 开发目的
-
-项目已经把运行指标写入 `runs.json`，但目前只能直接阅读 JSON，不方便在手机或 Pages 页面中快速判断本周是否降级、是否推送成功、采集是否完整。为了补齐前端可观测入口，本次新增静态运行状态面板。
+项目已经支持 `profiles.json` 个性化方向配置，但用户需要直接查看 JSON 才能知道当前有哪些方向。为了让 Java、Python、Agent 开发、学习型项目和开发者工具等方向更容易被使用，本次新增公开的个性化方向页面。
 
 ### 2. 本次实现
 
@@ -208,30 +342,108 @@ tests/test_build_pages.py
 
 调整内容：
 
-1. `scripts/build_pages.py` 新增 `docs/runs.html` 生成逻辑。
-2. `runs.html` 直接读取 `runs.json`，不请求任何密钥或私有接口。
-3. 页面支持按关键词、运行状态、Kimi/规则版、Telegram 状态和排序方式筛选。
-4. 页面展示采集成功率、Trending Top10 命中率、README 抓取率、Kimi 状态、Telegram 状态和周报/筛选入口。
-5. 首页和 README 增加运行状态面板入口。
+1. `scripts/build_pages.py` 新增 `docs/profiles.html` 生成逻辑。
+2. `profiles.html` 直接读取公开 `profiles.json`，展示方向名称、学习目标、语言和主题。
+3. 每个方向提供“查看匹配项目”和“主题筛选”入口，跳转到 `explorer.html?profile=...`。
+4. 首页和 README 增加个性化方向页入口。
+5. 测试覆盖页面生成、入口链接和公开 profile 数据读取。
 
 ### 3. 设计边界
 
-本次只增加静态前端展示，不改变主流程、采集策略、推送策略和数据契约。后续如果引入真正数据库后台或 API，可以让该页面继续复用 `runs.json`，也可以平滑切换到只读接口。
+本次只展示公开 profile 配置，不读取 API Key、Token、Chat ID、Webhook 或任何用户私有配置。后续如果接入真正前端和数据库，该页面可以升级为用户偏好选择入口。
 
 ---
 
-## 2026-05-07 追加：历史归档查询增强
+## 2026-05-06 追加：仓库质量信号
 
 ### 1. 开发目的
 
-项目已经具备 SQLite 派生索引和基础历史查询能力。为了给后续前端数据库页、个性化推荐和项目回看留接口，本次把近期新增的质量信号和 Trending 信号接入归档查询。
+当前热点筛选已经以 Trending 和新增 Star 为核心，但仍需要区分“热度高”和“信息完整、便于学习或复用”的差异。本次新增轻量质量信号，用于补充判断 README、简介、许可证、主题标签、社区复用和维护连续性等维度。
 
 ### 2. 本次实现
 
 更新：
 
 ```text
+README.md
+docs/data-contracts.md
+docs/future-plan.md
+docs/operation-log.md
+main.py
+prompts/weekly_report.md
+scripts/build_pages.py
+src/models.py
+src/processor.py
+src/quality.py
+src/reporter.py
+tests/test_build_pages.py
+tests/test_data_contracts.py
+tests/test_processor.py
+tests/test_quality.py
+```
+
+调整内容：
+
+1. 新增 `src/quality.py`。
+2. `Repository` 新增 `quality_flags`、`quality_score` 和 `quality_level`。
+3. 质量信号覆盖 README 摘要、仓库简介、许可证、主题标签、社区复用信号和近期维护时间。
+4. 质量分以小权重接入综合评分，不改变 GitHub Trending 第一优先级。
+5. 规则版周报新增“质量信号”字段。
+6. Kimi 提示词要求参考质量字段解释项目成熟度和信息完整度。
+7. `docs/projects.json` 公开输出质量字段，供后续前端、数据库和个性化推荐复用。
+8. 探索页详情的项目指标新增质量分展示。
+
+### 3. 设计边界
+
+质量信号是启发式判断，不代表项目一定成熟或可靠。它只用于排序辅助、周报解释和前端展示。后续如果需要更准确的质量判断，可以继续接入 Release 活跃度、提交频率、Issue 响应时间、依赖文件完整度和异常 Star 增长提示。
+
+---
+
+## 2026-05-06 追加：历史归档查询说明页
+
+### 1. 开发目的
+
+历史查询 CLI 已经可用，但入口主要面向开发者。为了让后续前端、数据库和个性化能力有更清楚的文档入口，本次补充 GitHub Pages 可访问的查询说明页。
+
+### 2. 本次实现
+
+更新：
+
+```text
+README.md
 docs/archive-query.md
+docs/operation-log.md
+scripts/build_pages.py
+tests/test_build_pages.py
+```
+
+调整内容：
+
+1. 新增 `docs/archive-query.md`。
+2. 说明历史查询的使用场景、常用命令、安全边界和后续扩展方向。
+3. GitHub Pages 首页增加“历史归档查询说明”入口。
+4. README 的 SQLite 派生索引部分补充说明页引用。
+5. 页面构建测试覆盖新增入口。
+
+### 3. 设计边界
+
+该页面是静态说明文档，不引入新的运行依赖。后续如果建设数据库页面或前端后台，可以把这里的命令示例演进为页面筛选项和 API 查询参数。
+
+---
+
+## 2026-05-06 追加：历史归档查询脚本
+
+### 1. 开发目的
+
+前端和数据库已经进入规划阶段，但当前不适合立刻引入完整后台服务。本次先补齐命令行历史查询入口，让 SQLite 派生索引真正可用，为后续后台 API、复杂前端筛选和个性化订阅打基础。
+
+### 2. 本次实现
+
+更新：
+
+```text
+README.md
+docs/data-contracts.md
 docs/operation-log.md
 scripts/query_archive.py
 tests/test_query_archive.py
@@ -239,922 +451,2294 @@ tests/test_query_archive.py
 
 调整内容：
 
-1. `scripts/query_archive.py` 新增 `--quality-level`、`--min-quality` 和 `--trending-top`。
-2. 查询结果新增 `quality_score`、`quality_level` 和 `quality_flags`。
-3. 新增 `--sort` 参数，支持按最新、评分、新增 Star、Trending 排名和质量分排序。
-4. 表格输出新增质量分列，方便在终端直接筛选高质量项目。
-5. 测试覆盖质量分、Trending TopN 和质量排序。
+1. 新增 `scripts/query_archive.py`。
+2. 支持按语言、方向、profile、来源、风险提示和关键词查询历史项目。
+3. 支持 `--refresh` 在查询前从 JSON 归档同步 SQLite。
+4. 支持 `table` 和 `json` 两种输出格式。
+5. 新增测试覆盖语言、来源、关键词、profile、风险和表格输出。
 
 ### 3. 设计边界
 
-本次只增强本地归档查询，不改变采集、评分、周报生成和推送逻辑。质量字段来自已经归档的 `data/selected/*.json`，SQLite 仍然是可重建索引，后续前端或 API 可以复用同一套查询参数。
+该脚本只读取 JSON 归档、SQLite 派生索引和公开 profile 配置，不读取密钥，不发送外部请求，也不改变主流程。未来如果建设后端 API，可以直接复用其中的筛选条件和输出字段。
 
 ---
 
-## 2026-05-07 追加：GitHub 采集错误分类与限流可观测性
+## 2026-05-06 追加：探索页相似项目推荐
 
 ### 1. 开发目的
 
-前一阶段已经补齐运行指标，但 GitHub API 失败仍主要以字符串记录。这样在 Actions 中出现限流、认证失败、仓库不存在或 GitHub 服务异常时，只能靠人工阅读错误文本判断原因，不利于后续稳定运行和告警。
+项目详情已经能展示 README 摘要和推荐理由，但用户还需要在同一方向内横向比较类似仓库。本次在静态探索页中加入相似历史项目推荐，为后续个性化推荐、数据库查询和复杂前端框架迁移预留入口。
 
 ### 2. 本次实现
 
 更新：
 
 ```text
-docs/data-contracts.md
+README.md
+docs/explorer.html
 docs/operation-log.md
-src/collector.py
-tests/test_collector.py
+tests/test_build_pages.py
 ```
 
 调整内容：
 
-1. GitHub JSON、README 和 Trending HTML 请求统一抛出结构化 `GitHubRequestError`。
-2. 采集统计 `collector_stats` 新增 `stage`、`error_kind`、`status_code`、`retry_after`、`rate_limit_remaining` 和 `rate_limit_reset`。
-3. 支持识别主限流、二级限流、认证失败、仓库不存在、GitHub 服务错误和普通运行时错误。
-4. 部分 Trending 仓库详情抓取失败时，仍保留成功项目，同时把部分失败原因写入统计。
-5. 测试覆盖 GitHub 主限流、二级限流和查询失败统计字段。
+1. `docs/explorer.html` 的项目详情新增“相似项目”区域。
+2. 相似度暂按语言、方向、来源和项目关键词重合度计算，不依赖新接口或新数据库。
+3. 每个项目最多展示 3 个相似历史项目，并显示项目链接、语言、方向和新增 Star。
+4. 页面仍然只消费 `projects.json`，后续可把当前相似度函数迁移到前端框架、SQLite 查询或服务端推荐模块。
 
 ### 3. 设计边界
 
-本次只增强错误分类和运行可观测性，不新增自动等待重试，也不改变采集排序逻辑。后续如果 Actions 中频繁出现 `rate_limited` 或 `secondary_rate_limited`，再按运行数据决定是否增加退避重试、降低查询数量或拆分采集时间窗口。
+当前相似项目推荐是轻量启发式匹配，用于提升浏览效率，不作为最终推荐模型。未来接入数据库后，可以把同语言、同主题、同 profile 和用户点击反馈纳入更稳定的相似度计算。
 
 ---
 
-## 2026-04-27 追加：基于 pi-mono 的重新架构审查
+## 2026-05-06 追加：个性化方向快捷视图
 
-### 1. 学习参考项目
+### 1. 开发目的
 
-参考链接：
+筛选页已有 profile 下拉框，但移动端和频繁切换场景下不够直观。本次增加快捷视图按钮，让用户可以一键切换 Java、Python、Agent 开发等方向，同时继续复用公开 `profiles.json`。
 
-```text
-https://github.com/badlogic/pi-mono
-```
+### 2. 本次实现
 
-重点学习内容：
-
-1. `pi-mono` 是围绕 AI Agent 构建的 monorepo，包含统一 LLM API、Agent runtime、coding agent、TUI、Web UI、Slack bot 和 vLLM pods 管理工具。
-2. `pi-coding-agent` 的核心思想是最小核心、工具扩展、Prompt Templates、Skills、AGENTS.md、Sessions 和 Extensions。
-3. 对本项目最有价值的是项目级 Agent 规则、提示词模板外置、运行历史记录、可扩展但不过度复杂的模块边界。
-
-### 2. 审查新版架构文档
-
-输入文件：
+更新：
 
 ```text
-D:\liulanqixiazai\github-weekly-agent-rearchitecture-from-pi-mono.md
+README.md
+docs/operation-log.md
+scripts/build_pages.py
+tests/test_build_pages.py
 ```
 
-结论：
+调整内容：
 
-1. 新版架构方向正确，适合作为原架构的升级版。
-2. `AGENTS.md` 和 `prompts/weekly_report.md` 应纳入第一阶段。
-3. `data/` 历史记录设计应保留，但要区分不可变运行摘要和可变去重状态。
-4. `skills/` 目录只应作为后续预留说明，MVP 阶段不建议创建空 Skill 文件，避免增加无实际用途的维护面。
-5. GitHub Actions 自动提交必须加入防循环、并发控制和变更检测。
+1. `docs/explorer.html` 新增 `profileShortcuts` 区域。
+2. 页面根据 `profiles.json` 自动生成“全部方向”和各 profile 快捷按钮。
+3. 点击快捷按钮会同步更新 profile 筛选条件、表格结果和 URL 查询参数。
+4. 当前仍为静态页面实现，不新增前端构建步骤。
 
-### 3. 本次新增文档
+### 3. 设计边界
 
-输出文件：
-
-```text
-docs/pi-mono-rearchitecture-review.md
-```
-
-该文档记录：
-
-1. 从 `pi-mono` 学到的可采纳设计。
-2. 新版架构中建议保留的部分。
-3. 需要收敛或延后的部分。
-4. 面向“代码简洁完整”的最终开发建议。
+快捷按钮只消费公开 profile 数据，不硬编码业务方向。未来升级到复杂前端框架时，可以直接复用 `profiles.json` 和当前 URL 参数约定。
 
 ---
 
-## 2026-04-27 追加：第一阶段 MVP 开发
+## 2026-05-06 追加：历史项目详情展开
 
-### 1. 开发范围
+### 1. 开发目的
 
-严格按照收敛后的 MVP 架构开发，未创建暂缓的 `skills/`、Web Dashboard、SQLite 或复杂插件系统。
+当前历史项目筛选页已经能按语言、profile、来源和风险筛选，但用户仍需要打开周报或仓库才能理解项目价值。本次在静态筛选页中加入详情展开能力，提升浏览效率，同时继续保留未来升级复杂前端框架的空间。
 
-本次实现内容：
+### 2. 本次实现
 
-1. `AGENTS.md` 项目级 Agent 开发规则。
-2. `prompts/weekly_report.md` 独立周报提示词。
-3. `main.py` 主流程编排。
-4. `src/collector.py` GitHub Search API 采集。
-5. `src/processor.py` 去重、过滤、评分和排序。
-6. `src/reporter.py` Kimi 生成和 fallback 基础报告。
-7. `src/sender.py` Telegram 分段推送。
-8. `src/archive.py` Markdown、原始数据和运行摘要归档。
-9. `src/settings.py` 环境变量和兴趣配置读取。
-10. `src/utils.py` 日期、分段和通用辅助函数。
-11. `.github/workflows/weekly.yml` 定时和手动触发工作流。
-12. `tests/` 最小单元测试。
-
-### 2. 简洁性处理
-
-1. 暂不增加外部依赖，`requirements.txt` 保持标准库实现。
-2. 暂不拆分 HTTP clients，避免 MVP 过度抽象。
-3. 暂不创建 Skill 目录，等工作流稳定后再产品化。
-4. 每个模块只负责一个主要职责。
-
-### 3. 本地验证
-
-已执行：
+更新：
 
 ```text
-py -m unittest discover -v
-py -m compileall main.py src tests
-py main.py
+README.md
+docs/data-contracts.md
+docs/future-plan.md
+docs/operation-log.md
+scripts/build_pages.py
+tests/test_build_pages.py
+tests/test_data_contracts.py
 ```
 
-验证结果：
+调整内容：
 
-1. 3 个单元测试通过。
-2. Python 编译检查通过。
-3. 端到端运行成功生成报告。
-4. 本地未配置 Telegram，程序按设计输出 `Telegram is not configured`，未阻断归档流程。
+1. `docs/projects.json` 新增 `readme_summary` 字段。
+2. `docs/explorer.html` 每个项目新增“详情”按钮。
+3. 展开详情后展示 README 精简摘要、推荐理由、风险提示、项目指标、来源和完整链接。
+4. `docs/future-plan.md` 新增前端扩展边界，明确未来可升级到复杂框架，但当前仍以公共 JSON 契约为核心。
 
-本地验证生成的临时报告和运行数据不作为源码提交。
+### 3. 设计边界
 
----
-
-## 2026-04-27 追加：文档中文化
-
-### 1. 用户要求
-
-用户要求项目中所有文档使用中文书写，将英文写成的部分重新用中文表达。
-
-### 2. 本次处理范围
-
-本次已将以下文档性文件中的英文说明改写为中文：
-
-1. `AGENTS.md`
-2. `docs/architecture.md`
-3. `docs/setup.md`
-4. `docs/roadmap.md`
-5. `prompts/weekly_report.md`
-6. `.env.example`
-7. `requirements.txt`
-8. `.github/workflows/weekly.yml` 中面向用户显示的工作流名称和步骤名称
-
-### 3. 保留内容
-
-以下内容属于技术名词、命令、路径、环境变量名或 GitHub Actions 语法，保持原样：
-
-1. `GitHub Weekly Agent`
-2. `GitHub Actions`
-3. `Telegram`
-4. `Kimi API`
-5. `python main.py`
-6. `GH_SEARCH_TOKEN` 等环境变量名
-7. `.github/workflows/weekly.yml` 中的工作流关键字
+本次没有引入前端构建工具。所有交互仍在静态页面内完成，数据继续来自 `projects.json`、`profiles.json` 和 `runs.json`，为后续框架化迁移保留清晰接口。
 
 ---
 
-## 2026-04-27 追加：GitHub Secrets 配置测试
+## 2026-05-06 追加：安全分与风险等级
 
-### 1. 测试方式
+### 1. 开发目的
 
-新增检查工作流：
+此前项目只保存风险提示文本，前端和后续个性化推荐难以排序或筛选风险强弱。本次新增基础安全分和风险等级，为后续安全检查功能、前端筛选和推送摘要提供结构化字段。
+
+### 2. 本次实现
+
+更新：
+
+```text
+README.md
+docs/data-contracts.md
+docs/operation-log.md
+scripts/build_pages.py
+src/models.py
+src/security.py
+tests/test_build_pages.py
+tests/test_data_contracts.py
+tests/test_security.py
+```
+
+调整内容：
+
+1. `Repository` 新增 `security_score` 和 `security_level`。
+2. `apply_security_flags` 会同步计算安全分和风险等级。
+3. 风险等级分为 `low`、`medium`、`high`。
+4. 不同风险提示按严重程度扣分，例如恶意软件、钓鱼、窃取类风险扣分更高。
+5. `docs/projects.json` 输出安全分和风险等级。
+6. `docs/explorer.html` 在风险列展示风险等级和安全分。
+
+### 3. 设计边界
+
+该评分是启发式基础检查，不代表完整安全审计。它用于排序、提醒和后续筛选，不应作为是否可以直接运行外部项目的唯一依据。
+
+---
+
+## 2026-05-06 追加：公开个性化方向数据
+
+### 1. 开发目的
+
+用户希望后续可以通过 Java、Python、Agent 开发等选项精准推送项目。当前 profile 已经能影响采集和评分，但前端缺少稳定公开数据入口。本次新增 `profiles.json`，让 GitHub Pages 和后续前端可以直接读取个性化方向。
+
+### 2. 本次实现
+
+更新：
+
+```text
+README.md
+docs/data-contracts.md
+docs/operation-log.md
+scripts/build_pages.py
+tests/test_build_pages.py
+tests/test_data_contracts.py
+```
+
+调整内容：
+
+1. `scripts/build_pages.py` 生成 `docs/profiles.json`。
+2. GitHub Pages 首页新增 `profiles.json` 入口。
+3. `docs/explorer.html` 新增“个性化方向”筛选项。
+4. 筛选页会读取 `profiles.json`，按 profile 的偏好语言和主题关键词过滤历史项目。
+5. URL 参数新增 `profile`，方便分享某个个性化方向视图。
+6. 契约测试覆盖 `profiles.json` 的公开字段集合。
+
+### 3. 安全边界
+
+`profiles.json` 只公开 profile 名称、显示标签、学习目标、偏好语言和主题关键词，不公开评分权重、私有配置、密钥或用户身份信息。
+
+---
+
+## 2026-05-06 追加：推送通道配置检查
+
+### 1. 开发目的
+
+飞书和企业微信 Webhook 已经支持真实发送，但如果 `DELIVERY_CHANNELS` 启用了通道却没有配置对应 Secret，用户只能在运行后从日志里发现跳过。本次新增独立检查脚本，让配置问题可以提前暴露。
+
+### 2. 本次实现
+
+更新：
 
 ```text
 .github/workflows/secrets-check.yml
+README.md
+docs/operation-log.md
+docs/setup.md
+scripts/check_delivery_channels.py
+tests/test_delivery_channel_check.py
 ```
 
-该工作流通过 GitHub Actions 读取仓库 Secrets，并验证：
+调整内容：
 
-1. `GH_SEARCH_TOKEN` 是否存在并可访问 GitHub API。
-2. `KIMI_API_KEY`、`KIMI_BASE_URL`、`KIMI_MODEL` 是否存在并可调用 Kimi API。
-3. `TELEGRAM_BOT_TOKEN`、`TELEGRAM_CHAT_ID` 是否存在并可发送 Telegram 测试消息。
+1. 新增 `scripts/check_delivery_channels.py`。
+2. 默认模式只打印 Telegram、飞书、企业微信通道配置状态，不发送真实消息。
+3. `--strict` 模式会在启用通道缺少配置或出现不支持通道时返回失败。
+4. Secrets 配置检查 workflow 新增推送通道配置检查步骤。
+5. 测试覆盖 Telegram 完整配置、飞书缺失 Webhook、企业微信双变量名和不支持通道。
 
-### 2. 初始测试结果
+### 3. 安全边界
 
-运行结论：失败。
-
-已确认：
-
-1. 所有必要 Secrets 都能被 GitHub Actions 读取到。
-2. `GH_SEARCH_TOKEN` 验证通过，GitHub API 剩余额度正常。
-
-失败点：
-
-```text
-Kimi API 返回 HTTP 400。
-```
-
-### 3. 失败原因
-
-GitHub Actions 日志显示：
-
-```text
-invalid temperature: only 1 is allowed for this model
-```
-
-说明当前配置的 Kimi 模型只允许 `temperature=1`。
-
-### 4. 修复动作
-
-已将以下位置的 `temperature` 改为 `1`：
-
-1. `src/reporter.py`
-2. `.github/workflows/secrets-check.yml`
-
-### 5. 最终测试结果
-
-最终运行结果：成功。
-
-已确认：
-
-1. `GH_SEARCH_TOKEN` 已配置，并通过 GitHub API 验证。
-2. `KIMI_API_KEY` 已配置。
-3. `KIMI_BASE_URL` 已配置。
-4. `KIMI_MODEL` 已配置。
-5. Kimi API 可以连通并返回 `choices`。
-6. `TELEGRAM_BOT_TOKEN` 已配置。
-7. `TELEGRAM_CHAT_ID` 已配置。
-8. Telegram 测试消息发送成功。
-
-GitHub Actions 成功运行链接：
-
-```text
-https://github.com/windsky922/githubzhuaqu/actions/runs/24992511910
-```
-
-说明：本次 Kimi 轻量测试请求返回内容为空，但 HTTP 调用成功并返回了有效 `choices` 字段，因此判断为 API 配置可用。正式周报生成流程会使用完整提示词和项目数据调用 Kimi。
+检查脚本只判断环境变量是否存在，不打印变量值，不发送消息，也不访问外部 Webhook。真实连通性仍由后续发送流程负责。
 
 ---
 
-## 2026-04-28 追加：完整周报工作流验证
+## 2026-05-06 追加：飞书与企业微信 Webhook 推送
 
-### 1. 验证目的
+### 1. 开发目的
 
-在用户完成 GitHub Secrets 配置后，对完整自动化链路进行验证，确认从 GitHub Actions 到周报归档、Kimi 生成和 Telegram 推送的流程可以正常运行。
+上一阶段已经把推送状态抽象为多通道结果。本次继续补齐飞书和企业微信 Webhook 发送能力，让周报链接可以直接推送到更多移动端协作工具。
 
-验证链路：
+### 2. 本次实现
+
+更新：
 
 ```text
-GitHub Actions
--> python -m unittest
--> python main.py
--> GitHub 项目采集
--> Kimi 中文周报生成
--> reports/ 与 data/ 归档
--> Telegram 推送
--> Actions 自动提交归档文件
+.env.example
+.github/workflows/weekly.yml
+README.md
+docs/data-contracts.md
+docs/operation-log.md
+docs/setup.md
+src/sender.py
+tests/test_sender.py
 ```
 
-### 2. 临时触发方式
+调整内容：
 
-为避免等待每周定时任务，临时给 `.github/workflows/weekly.yml` 增加了仅用于测试的 `push` 触发器。
+1. `DELIVERY_CHANNELS` 支持 `telegram`、`feishu`、`wechat`。
+2. `lark` 会归一为 `feishu`，`wecom`、`weixin` 会归一为 `wechat`。
+3. 新增 `FEISHU_WEBHOOK_URL`，用于飞书机器人 Webhook。
+4. 新增 `WECHAT_WEBHOOK_URL` 和 `WECOM_WEBHOOK_URL`，用于企业微信机器人 Webhook。
+5. 飞书发送交互卡片，企业微信发送 Markdown 消息，内容都只包含周报标题和 GitHub Pages 阅读链接。
+6. 未配置 Webhook 的通道会记录为跳过，不影响周报生成、归档和其他通道发送。
 
-测试完成后已移除该临时触发器，正式工作流保留：
+### 3. 安全边界
 
-1. `workflow_dispatch` 手动触发。
-2. 每周一 UTC 00:00 的定时触发。
+Webhook 地址只从环境变量或 GitHub Actions Secrets 读取，不写入代码和示例值。错误摘要会做字段收敛，只记录平台返回的状态码和简短消息，不记录完整 Webhook 地址。
 
-### 3. 第一次完整流程测试
+---
 
-运行链接：
+## 2026-05-06 追加：多推送通道入口
+
+### 1. 开发目的
+
+当前实际推送通道是 Telegram。为了后续接入微信、飞书或邮件，本次先把推送结果抽象为通道状态列表，保持现有 Telegram 行为不变，同时让运行摘要和公共 JSON 能记录多通道状态。
+
+### 2. 本次实现
+
+更新：
 
 ```text
-https://github.com/windsky922/githubzhuaqu/actions/runs/25031865017
+main.py
+src/models.py
+src/sender.py
+scripts/send_report_link.py
+scripts/build_pages.py
+tests/test_sender.py
+tests/test_send_report_link.py
+tests/test_build_pages.py
+tests/test_data_contracts.py
+.env.example
+README.md
+docs/data-contracts.md
+docs/operation-log.md
 ```
 
-运行结论：成功。
+调整内容：
 
-归档结果：
+1. 新增 `DeliveryResult`，记录通道名称、发送状态、错误摘要和是否跳过。
+2. 新增 `DELIVERY_CHANNELS` 配置入口，默认 `telegram`。
+3. 当前仅 Telegram 会真实发送；`feishu`、`wechat` 会记录为预留通道未实现，不会发送请求。
+4. 运行摘要新增 `delivery_results` 字段。
+5. `docs/runs.json` 公开输出 `delivery_results`，方便后续前端和外部自动化读取。
+6. 保留 `telegram_sent`、`telegram_error`、`telegram_report_url` 旧字段，避免破坏现有 workflow 和页面逻辑。
 
-1. `reports/2026-04-28.md`
-2. `data/raw/2026-04-28.json`
-3. `data/runs/2026-04-28.json`
+### 3. 设计边界
 
-本次结果显示 Telegram 推送成功，但 Kimi 周报生成使用了降级报告。为便于后续定位，随后在运行摘要中增加了 `report_error` 字段，并增强了 Kimi 响应内容提取逻辑。
+本次不提前实现微信、飞书具体 API，也不新增密钥字段。后续接入时再按实际平台要求增加环境变量和发送函数，仍然不能把 Webhook、Token 或 Chat ID 写入代码和文档示例。
 
-### 4. 第二次完整流程测试
+---
 
-运行链接：
+## 2026-05-06 追加：RSS 订阅输出
+
+### 1. 开发目的
+
+项目已经支持 Telegram 推送和 GitHub Pages 阅读，但还缺少面向阅读器和自动化工具的订阅入口。本次新增 RSS 输出，让用户可以订阅每周周报更新，也为后续微信、飞书、邮件等渠道提供轻量监听来源。
+
+### 2. 本次实现
+
+更新：
 
 ```text
-https://github.com/windsky922/githubzhuaqu/actions/runs/25031996992
+.github/workflows/weekly.yml
+scripts/build_pages.py
+tests/test_build_pages.py
+README.md
+docs/data-contracts.md
+docs/operation-log.md
+```
+
+新增产物：
+
+```text
+docs/feed.xml
+```
+
+调整内容：
+
+1. `scripts/build_pages.py` 在生成 Pages 时同步生成 RSS 2.0 文件。
+2. RSS 条目按周报日期倒序生成，最多保留最近 20 篇。
+3. 条目链接优先使用运行摘要中的公开 Pages 基础地址。
+4. RSS 描述包含入选数量、采集数量、生成方式、Telegram 状态和趋势摘要。
+5. workflow 归档提交范围加入 `docs/feed.xml`。
+6. 测试验证 RSS 文件生成、标题、周报链接和摘要内容。
+
+### 3. 设计边界
+
+RSS 只发布公开摘要，不包含密钥、用户隐私、原始错误堆栈或未脱敏配置。它是订阅入口，不替代 Telegram 推送和 GitHub Pages 阅读页。
+
+---
+
+## 2026-05-06 追加：可分享筛选视图
+
+### 1. 开发目的
+
+项目筛选页已经可以读取 `projects.json` 做基础筛选，但筛选状态不能复现。为了让后续 Telegram、微信、飞书和浏览器书签能够指向同一个筛选视图，本次补充 URL 状态同步和结果概览。
+
+### 2. 本次实现
+
+更新：
+
+```text
+scripts/build_pages.py
+tests/test_build_pages.py
+README.md
+docs/data-contracts.md
+docs/operation-log.md
+```
+
+调整内容：
+
+1. `docs/explorer.html` 新增日期筛选。
+2. 新增筛选结果概览，展示新增 Star、Trending 项目数、风险提示数和主语言/方向。
+3. 筛选条件会同步到 URL 查询参数。
+4. 打开带查询参数的链接时会自动恢复筛选状态。
+5. 新增“复制链接”按钮，方便分享当前筛选视图。
+6. 测试覆盖日期控件、分享按钮、URL 状态恢复、URL 更新和结果概览函数存在性。
+
+### 3. 设计边界
+
+本次仍保持无框架静态页面。URL 参数只保存公开筛选条件，不写入隐私信息或密钥。
+
+---
+
+## 2026-05-03 追加：轻量项目筛选页
+
+### 1. 开发目的
+
+公共 JSON 已经具备稳定字段，下一步需要给未来前端和用户浏览提供一个最小可用入口。本次不引入前端框架，只在现有 GitHub Pages 构建流程中生成静态 HTML 页面。
+
+### 2. 本次实现
+
+更新：
+
+```text
+scripts/build_pages.py
+tests/test_build_pages.py
+.github/workflows/weekly.yml
+README.md
+docs/data-contracts.md
+docs/roadmap.md
+docs/future-plan.md
+```
+
+新增产物：
+
+```text
+docs/explorer.html
+```
+
+调整内容：
+
+1. `scripts/build_pages.py` 新增 `docs/explorer.html` 生成逻辑。
+2. 筛选页直接读取 `docs/projects.json`。
+3. 支持关键词、语言、方向、来源、风险提示筛选。
+4. 支持按最新入选、新增 Star、Trending 排名、综合分和累计 Star 排序。
+5. GitHub Pages 首页新增“项目筛选页”入口。
+6. workflow 归档提交范围加入 `docs/explorer.html`。
+7. 测试验证筛选页会生成，并包含核心控件和 `projects.json` 数据入口。
+
+### 3. 设计边界
+
+本次没有引入 Astro、React、Vue 或 SSR。页面只是最小可用的静态筛选入口，后续如果交互需求继续增加，再基于公共 JSON 和数据契约评估前端工程化。
+
+---
+
+## 2026-05-03 追加：公共数据契约测试
+
+### 1. 开发目的
+
+公共 JSON 和 SQLite 已经成为后续前端、多渠道推送、订阅和趋势分析的基础。如果字段被无意删除或重命名，下游功能会出现隐蔽问题。本次补充数据契约测试和中文说明文档。
+
+### 2. 本次实现
+
+更新：
+
+```text
+scripts/build_pages.py
+tests/test_build_pages.py
+tests/test_data_contracts.py
+docs/data-contracts.md
+docs/roadmap.md
+docs/future-plan.md
+```
+
+调整内容：
+
+1. 新增 `tests/test_data_contracts.py`，固定 `docs/projects.json` 的项目字段集合。
+2. 固定 `docs/runs.json` 的运行摘要字段集合。
+3. 固定 SQLite 关键表字段集合。
+4. 新增 `docs/data-contracts.md`，用中文说明公共 JSON、SQLite 表和修改字段时的要求。
+5. GitHub Pages 首页文档入口新增“数据契约说明”。
+
+### 3. 设计边界
+
+契约测试只锁定当前对外稳定字段，不阻止后续新增能力。未来如果确实要新增、删除或重命名字段，应同步更新契约测试、中文文档和所有下游消费逻辑。
+
+---
+
+## 2026-05-03 追加：主流程 SQLite 同步
+
+### 1. 开发目的
+
+上一阶段已经建立 SQLite schema、迁移脚本和校验脚本。本次继续把 SQLite 作为派生索引接入主流程，让每次运行在写入 JSON 归档后自动更新数据库，同时仍保持 JSON 为事实来源。
+
+### 2. 本次实现
+
+更新：
+
+```text
+main.py
+scripts/send_report_link.py
+src/archive.py
+src/models.py
+tests/test_archive.py
+tests/test_send_report_link.py
+README.md
+docs/roadmap.md
+docs/future-plan.md
+```
+
+调整内容：
+
+1. `RunSummary` 新增 `sqlite_index_path` 和 `sqlite_error` 字段。
+2. `src/archive.py` 新增 `sync_sqlite_index`，会从现有 JSON 归档同步到 SQLite。
+3. 主流程在 `write_run_summary` 后自动同步 SQLite；同步失败不会阻断周报生成。
+4. `scripts/send_report_link.py` 在 Telegram 状态写回后再次同步 SQLite，保证数据库中的发送状态和最终 JSON 一致。
+5. 新增 `SQLITE_INDEX_PATH` 环境变量，用于自定义 SQLite 路径。
+6. 新增 `SKIP_SQLITE_INDEX` 环境变量，用于跳过 SQLite 同步。
+7. 新增测试覆盖归档同步和发送脚本写回 SQLite 状态字段。
+
+### 3. 设计边界
+
+SQLite 仍是可重建派生索引，不是唯一事实来源。主流程不从 SQLite 读取数据；即使 SQLite 同步失败，报告、归档、Pages 和 Telegram 链路仍继续工作。
+
+---
+
+## 2026-05-03 追加：SQLite 派生索引基础版本
+
+### 1. 开发目的
+
+后续前端筛选、历史趋势查询和个性化反馈都需要更稳定的数据底座。当前 JSON 归档仍然适合作为可读事实来源，但跨周查询和一致性校验会逐步变复杂。因此本次先建立 SQLite 派生索引的最小基础，不改变主流程读取路径。
+
+### 2. 本次实现
+
+更新：
+
+```text
+.gitignore
+README.md
+docs/roadmap.md
+docs/future-plan.md
+src/storage/schema.sql
+src/storage/sqlite_store.py
+scripts/migrate_json_to_sqlite.py
+scripts/verify_migration.py
+tests/test_storage_sqlite.py
+```
+
+新增表：
+
+```text
+runs
+repositories
+selections
+trend_summaries
+sent_repositories
+star_history
+migration_meta
+```
+
+调整内容：
+
+1. 新增 SQLite schema，覆盖运行摘要、仓库、入选记录、趋势摘要、已推送状态和 Star 历史。
+2. 新增 `scripts/migrate_json_to_sqlite.py`，可将现有 `data/` JSON 归档导入 `data/github_weekly.sqlite`。
+3. 新增 `scripts/verify_migration.py`，校验 SQLite 表计数和 JSON 归档基础计数是否一致。
+4. 新增测试验证导入、幂等性、计数一致性和表名保护。
+5. `.gitignore` 排除 `data/*.sqlite`、`data/*.sqlite-shm`、`data/*.sqlite-wal`，避免提交派生数据库。
+
+### 3. 设计边界
+
+SQLite 当前只是可重建的派生索引，JSON 仍然是事实来源。主流程尚未接入双写，也没有从 SQLite 读取数据。后续可以在本基础上小步加入主流程双写，再逐步让前端或分析脚本消费 SQLite。
+
+---
+
+## 2026-05-03 追加：公共 JSON 导出
+
+### 1. 开发目的
+
+根据路线图，后续前端、RSS、微信、飞书和外部订阅都需要稳定的数据入口。如果直接读取 Markdown 页面，后续会增加解析成本。因此本次先在现有 Pages 构建流程中导出公开 JSON。
+
+### 2. 本次实现
+
+更新：
+
+```text
+.github/workflows/weekly.yml
+scripts/build_pages.py
+tests/test_build_pages.py
+README.md
+docs/roadmap.md
+docs/future-plan.md
+```
+
+新增产物：
+
+```text
+docs/projects.json
+docs/runs.json
+```
+
+调整内容：
+
+1. `scripts/build_pages.py` 会在生成 `docs/index.md` 和 `docs/projects.md` 的同时生成公共 JSON。
+2. `projects.json` 汇总历次入选项目的公开摘要字段，包括项目名、链接、语言、方向、来源、Trending 排名、新增 Star、推荐理由和风险提示。
+3. `runs.json` 汇总历次运行摘要的公开字段，包括运行日期、入选数量、采集数量、Kimi/降级状态、Telegram 状态和趋势要点。
+4. workflow 的两处归档提交都加入 `docs/projects.json` 和 `docs/runs.json`。
+5. 新增测试验证公共 JSON 的 schema 版本、数量、项目链接、运行状态和空数据兜底。
+
+### 3. 设计边界
+
+公共 JSON 只导出适合公开展示的摘要字段，不导出密钥、用户隐私、原始错误堆栈或未脱敏配置。SQLite 仍未引入，后续数据库可以从这些公开 JSON 和原始 `data/` 工件继续演进。
+
+---
+
+## 2026-05-03 追加：重复入选项目的新颖度策略
+
+### 1. 开发目的
+
+用户要求周报必须保持“每周最火爆项目”的完整性，因此不能简单过滤已经推送过的仓库。但如果同一批项目连续多周入选，周报会降低新鲜感。本次实现轻量的新颖度惩罚和说明机制。
+
+### 2. 本次实现
+
+更新：
+
+```text
+main.py
+src/processor.py
+config/interests.example.json
+tests/test_processor.py
+README.md
+docs/roadmap.md
+docs/future-plan.md
+```
+
+调整内容：
+
+1. `process_repositories` 新增可选参数 `previously_sent_names`，旧调用保持兼容。
+2. 主流程把 `sent_repos.json` 中的已推送仓库集合传入排序阶段。
+3. 新增 `novelty_penalty_weight` 配置，默认 `0.08`，用于轻微降低非 Trending 前十的重复项目分数。
+4. GitHub Trending 前十项目不受该惩罚，避免破坏 Trending 优先级和前十保护策略。
+5. 重复入选项目会增加推荐理由：“此前已经推送过，本次因仍然具备热点信号继续保留观察。”
+6. 新增测试覆盖重复项目不被过滤、非 Trending 重复项目被轻量降权、Trending 前十重复项目仍保持优先。
+
+### 3. 设计边界
+
+本次没有引入按日期窗口的复杂去重，也不删除历史推送状态。后续如果需要更精细的长期体验，可基于 `first_sent_at`、最近推送日期和反馈数据做动态惩罚。
+
+---
+
+## 2026-05-03 追加：吸收研究报告并修复发布状态一致性
+
+### 1. 开发目的
+
+用户提供 `deep-research-report.md` 后，确认后续方向应从“更复杂的抓取器”转向“可复盘、可订阅、可个性化的开源情报系统”。本次先吸收其中适合当前阶段的路线建议，并修复 Pages 页面可能显示旧 Telegram 状态的问题。
+
+### 2. 本次实现
+
+更新：
+
+```text
+.github/workflows/weekly.yml
+scripts/send_report_link.py
+tests/test_send_report_link.py
+docs/roadmap.md
+docs/future-plan.md
+```
+
+调整内容：
+
+1. `scripts/send_report_link.py` 在写回 `data/runs/YYYY-MM-DD.json` 的 Telegram 状态后，会重新构建 GitHub Pages 页面。
+2. workflow 的“提交推送状态”步骤同时提交 `docs/index.md`、`docs/projects.md` 和 `docs/weekly`，避免页面状态停留在推送前。
+3. 新增测试，验证 Telegram 状态写回后重建页面时，首页会展示“已推送”。
+4. 重写 `docs/roadmap.md`，将路线明确为“模块化单体 + SQLite 双写 + 公共 JSON + 中期轻量前端 + 个性化反馈”。
+5. 更新 `docs/future-plan.md` 的优先级，把 Pages 状态一致性、重复入选新颖度、SQLite 双写和公共 JSON 提到更靠前的位置。
+
+### 3. 设计边界
+
+本次没有直接引入数据库、前端框架或新外部服务。SQLite、GraphQL、公共 JSON 和前端增强只进入路线图，后续按小步提交逐项实现。
+
+---
+
+## 2026-04-30 追加：代码审查问题修复
+
+### 1. 开发目的
+
+根据最新代码审查结果，修复四类问题：已推送状态影响热点完整性、Kimi 格式小错误导致整份降级、README 摘要字段不清晰、旧架构文档仍保留 `created` 查询示例。
+
+### 2. 本次实现
+
+更新：
+
+```text
+main.py
+src/models.py
+src/collector.py
+src/reporter.py
+tests/test_collector.py
+tests/test_reporter.py
+docs/project-architecture.md
+```
+
+调整内容：
+
+1. 周报候选池不再因 `sent_repos.json` 过滤历史已推送项目，避免遗漏持续热门项目。
+2. 运行摘要新增 `previously_sent_selected_count`，记录本期入选项目中有多少曾经推送过。
+3. 删除不再使用的 `filter_unsent_repositories`，避免后续误以为主流程仍会过滤已推送仓库。
+4. Kimi 输出进入质量检查前，会自动补齐项目完整链接、来源、Trending 排名和风险提示，减少可修复格式问题导致的降级。
+5. `Repository` 新增 `readme_summary` 字段，继续保留 `readme_excerpt` 兼容历史数据。
+6. README 规则摘要增加 bullet-only README 的兜底提取。
+7. `docs/project-architecture.md` 将旧 `created:>=...` 示例改为当前 `Trending + pushed` 策略。
+
+### 3. 设计边界
+
+本次没有引入数据库或新框架。`sent_repos.json` 仍用于记录推送状态，但不再影响周报候选池；Kimi 修复器只做结构化元数据补齐，不改写模型正文。
+
+---
+
+## 2026-04-30 追加：外部项目 README 精炼摘要
+
+### 1. 开发目的
+
+用户说明需要保留本仓库 README 的完整状态，真正需要精简的是周报中来自外部项目的 README 内容。此前系统会截取外部项目 README 前段文本，容易把过长说明复制进周报页面。
+
+### 2. 本次实现
+
+更新：
+
+```text
+src/collector.py
+tests/test_collector.py
+README.md
+```
+
+调整内容：
+
+1. 恢复本仓库 README 的完整版本。
+2. 外部项目 README 进入周报前先清理徽章、图片、代码块、表格、安装命令和目录噪声。
+3. `readme_excerpt` 改为保存 2-3 句、约 300 字以内的精炼摘要。
+4. 规则版周报中原来的“README 摘要”位置会直接使用该精炼摘要，不再展示长篇 README 原文。
+
+### 3. 设计边界
+
+当前摘要是规则型提取，不调用额外模型，避免增加成本和失败点。后续如果 Kimi 稳定，可再让模型基于该精炼摘要做更自然的中文改写。
+
+---
+
+## 2026-04-30 追加：Kimi 过载重试与降级原因修正
+
+### 1. 问题原因
+
+真实运行时 Kimi 返回 `429 engine_overloaded_error`，表示模型服务过载。旧代码没有针对这类临时错误等待重试，而是第一次请求失败后直接回退到规则版周报。
+
+### 2. 本次实现
+
+更新：
+
+```text
+src/reporter.py
+tests/test_reporter.py
+README.md
+docs/setup.md
+```
+
+调整内容：
+
+1. Telegram 允许继续推送规则版周报链接，保证用户能收到兜底结果。
+2. Kimi 返回 `429`、`500`、`502`、`503`、`504`、`engine_overloaded` 或网络临时错误时，会先自动重试。
+3. 新增 `KIMI_MAX_RETRIES`，默认重试 `2` 次。
+4. 新增 `KIMI_RETRY_SECONDS`，默认每次等待 `20` 秒。
+5. 多次重试仍失败时，才会生成规则版周报，并在运行摘要的 `report_error` 中记录完整失败原因。
+
+### 3. 设计结论
+
+本次问题的直接原因不是配置错误，而是 Kimi 服务端过载。后续通过自动重试减少偶发过载导致的降级；如果多次重试后仍失败，说明外部模型服务持续不可用，系统仍会保留规则版周报作为兜底。
+
+---
+
+## 2026-04-30 追加：个性化匹配原因
+
+### 1. 开发目的
+
+用户希望后续不仅能选择 Java、Python、Agent 开发等方向，还能精准推送符合当前需求的项目。本次在已有 profile 选择能力上增加“匹配原因”，让推荐结果可以解释为什么某个项目适合当前选择。
+
+### 2. 本次实现
+
+更新：
+
+```text
+src/personalization.py
+src/processor.py
+tests/test_personalization.py
+tests/test_processor.py
+README.md
+docs/setup.md
+```
+
+调整内容：
+
+1. profile 应用后会生成轻量的 `profile_match_rules`。
+2. 评分阶段根据仓库语言、topic、名称和简介判断命中哪些个性化方向。
+3. 入选项目的 `selection_reasons` 会追加类似“匹配当前个性化方向：Java 后端与工程实践、Agent 开发。”的说明。
+4. 该字段会进入 `data/selected/YYYY-MM-DD.json`，可供 Kimi 周报、规则版周报和后续前端筛选复用。
+
+### 3. 设计边界
+
+本次仍不新增前端或数据库。匹配逻辑保持轻量，先以 profile 的语言和主题关键词为依据，后续如果真实周报中误判较多，再扩展更细的规则。
+
+### 4. 追加修正
+
+运行真实周报后发现，子串匹配可能让 `java` 误命中 `JavaScript`。已将 profile 主题匹配调整为词项匹配，并新增测试覆盖，避免语言和主题出现明显误判。
+---
+
+## 2026-04-30 追加：个性化 profile 最小版本
+
+### 1. 开发目的
+
+用户希望后续可以通过选择 Java、Python、Agent 开发等选项，精准推送符合当前需求的项目。本次先实现配置层的最小版本，避免提前引入复杂前端或数据库。
+
+### 2. 本次实现
+
+更新：
+
+```text
+config/profiles.example.json
+src/personalization.py
+src/settings.py
+tests/test_personalization.py
+tests/test_settings.py
+README.md
+docs/setup.md
+.github/workflows/weekly.yml
+```
+
+调整内容：
+
+1. 新增 `config/profiles.example.json`，提供 `java`、`python`、`agent_development`、`learning`、`developer_tools` 五类示例方向。
+2. 新增 `src/personalization.py`，支持把多个 profile 叠加到基础兴趣配置中。
+3. 支持 `INTEREST_PROFILE=java,agent_development` 这种多选形式，为后续前端选择器预留入口。
+4. `src/settings.py` 在加载 `config/interests.json` 或 example 后自动应用 profile。
+5. GitHub Actions 支持从仓库变量读取 `INTEREST_PROFILE`。
+6. README 更新为当前真实项目能力说明。
+
+### 3. 设计边界
+
+本次只做个性化配置入口，不新增数据库、不新增登录系统、不新增复杂前端。profile 中只允许保存兴趣方向、语言、主题、搜索补充项和评分权重，不应写入任何密钥。
+
+---
+
+## 2026-04-30 追加：前端、数据库与个性化分析规划提前
+
+### 1. 开发目的
+
+用户希望后期项目可以构建前端和数据库，同时希望个性化分析提上日程。本次先不直接开工复杂工程，而是把成熟度判断、触发条件、预留目录、分支策略和最终成品展望写入未来规划。
+
+### 2. 本次实现
+
+更新：
+
+```text
+docs/future-plan.md
+```
+
+新增规划：
+
+1. 前端建设计划。
+2. 数据库建设计划。
+3. 个性化分析计划。
+4. 多分支开发策略。
+5. 最终成品展望。
+6. 继续推进前需要解决的问题。
+
+### 3. 判断结论
+
+当前前端和数据库还不适合立即完整开发。更合理的路径是先稳定数据结构和周报质量，再做 GitHub Pages 轻量筛选，等历史数据足够后再引入 SQLite 和更完整的前端。个性化分析已经有 `config/interests.json` 基础，可以优先推进 profile 配置设计。
+
+---
+
+## 2026-04-30 追加：Kimi 质量失败自动重试
+
+### 1. 开发目的
+
+此前 Kimi 生成的周报只要未通过质量检查，就会直接回退到规则周报。这样虽然稳定，但会让一些可修复的问题也变成降级版本。本次增加一次自动重试机会，减少可避免的降级周报。
+
+### 2. 本次实现
+
+更新：
+
+```text
+src/reporter.py
+tests/test_reporter.py
+```
+
+调整内容：
+
+1. 首次 Kimi 输出未通过质量检查时，记录质量错误。
+2. 第二次请求 Kimi 时，把质量错误作为 `quality_retry_feedback` 传入。
+3. 重试指令要求 Kimi 只使用本次输入项目，并修复质量检查问题。
+4. 如果第二次仍不合格，才回退到规则周报。
+5. 内容安全过滤失败仍保留原有逻辑：必要时去掉 README 摘要后再试。
+
+### 3. 设计边界
+
+该重试只执行一次，避免外部 API 不稳定时无限重试。所有失败原因仍会写入运行摘要的 `report_error`，便于后续排查。
+
+---
+
+## 2026-04-30 追加：周报固定结构检查
+
+### 1. 开发目的
+
+未来计划中提到需要把周报拆成固定结构，减少模型自由发挥。提示词已经要求 Kimi 输出五个核心部分，但代码层还没有验证这些章节是否真的存在。
+
+### 2. 本次实现
+
+更新：
+
+```text
+src/report_checks.py
+tests/test_report_checks.py
+```
+
+新增检查：
+
+1. 本周总体趋势。
+2. 热点项目总览。
+3. 重点项目分析。
+4. 最适合用户学习的项目。
+5. 本周结论。
+
+为了兼容已有表达，部分章节允许近义标题，例如“本周趋势”“热门项目总览”“最适合关注的项目”。
+
+### 3. 设计边界
+
+该检查只用于 Kimi 周报质量校验。若 Kimi 输出缺少核心结构，主流程会回退到规则周报，避免生成结构混乱的报告。
+
+---
+
+## 2026-04-30 追加：报告非入选项目链接检查
+
+### 1. 开发目的
+
+未来计划中提到需要检查周报是否包含非入选项目。Kimi 生成周报时可能额外推荐未进入本期筛选结果的 GitHub 仓库，这会削弱 Trending 优先和个性化筛选的约束。
+
+### 2. 本次实现
+
+更新：
+
+```text
+src/report_checks.py
+tests/test_report_checks.py
+```
+
+新增检查：
+
+1. 从周报中提取 `https://github.com/owner/repo` 形式的仓库链接。
+2. 与本期入选仓库 `full_name` 对比。
+3. 如果出现非入选仓库链接，返回质量错误。
+4. Kimi 周报质量检查失败时，主流程会回退到规则周报。
+
+### 3. 设计边界
+
+该检查只针对 GitHub 仓库链接，不限制普通网页、文档链接或 GitHub Pages 周报链接。它用于保证本期周报严格围绕筛选后的项目集合展开。
+
+---
+
+## 2026-04-30 追加：Open Issue 风险提示
+
+### 1. 开发目的
+
+未来计划中提到需要为入选仓库增加 Issue 风险提示。当前 GitHub 仓库详情已经包含 `open_issues_count`，可以先做一条保守规则：当 Open Issue 数量明显偏高时，在周报风险提示中标记“需要人工检查维护响应”。
+
+### 2. 本次实现
+
+更新：
+
+```text
+src/security.py
+tests/test_security.py
+```
+
+新增规则：
+
+```text
+open_issues_count >= 100
+并且 open_issues_count / stargazers_count >= 0.2
+```
+
+满足条件时，`security_flags` 会加入：
+
+```text
+Open Issue 数量相对较高，建议复用前人工检查维护响应和问题质量。
+```
+
+### 3. 设计边界
+
+该规则只做风险提示，不把项目判定为不可用，也不影响当前排序。Issue 多可能代表项目活跃，也可能代表维护压力较大，因此周报中只提示人工复核。
+
+---
+
+## 2026-04-30 追加：保留脱敏字段名
+
+### 1. 开发目的
+
+通用密钥赋值脱敏应该保留 `api_key=`、`password:` 等字段名，只替换后面的疑似密钥值。这样既能避免敏感字符串进入归档，也能让报告读者知道原文位置存在一个被脱敏的配置字段。
+
+### 2. 本次实现
+
+更新：
+
+```text
+src/security.py
+tests/test_security.py
+```
+
+调整内容：
+
+1. 将明确 token 形态和通用赋值形态分开处理。
+2. GitHub token、Telegram bot token 仍整体替换为 `[已脱敏疑似密钥]`。
+3. `api_key=...`、`password: ...` 等赋值形态保留键名和分隔符，只替换值。
+4. 测试增加对字段名保留行为的断言。
+
+### 3. 使用效果
+
+示例：
+
+```text
+api_key=[已脱敏疑似密钥]
+password: [已脱敏疑似密钥]
+```
+
+---
+
+## 2026-04-30 追加：通用密钥赋值脱敏
+
+### 1. 开发目的
+
+此前运行时脱敏已经覆盖 GitHub token 和 Telegram bot token 的明确格式，但第三方 README 中还可能出现 `api_key=...`、`password: ...`、`chat_id=...` 这类通用密钥赋值。为了和 `scripts/security_check.py` 的扫描策略保持一致，本次扩展运行时脱敏规则。
+
+### 2. 本次实现
+
+更新：
+
+```text
+src/security.py
+tests/test_security.py
+```
+
+新增脱敏匹配范围：
+
+1. `api_key` 或 `api-key`
+2. `token`
+3. `secret`
+4. `password`
+5. `chat_id` 或 `chat-id`
+
+### 3. 设计边界
+
+通用赋值规则只替换疑似密钥值，不阻止周报生成。它用于减少第三方内容归档风险，项目自身源码和手写文档仍由 `scripts/security_check.py` 阻断硬编码密钥。
+
+---
+
+## 2026-04-30 追加：报告生成层最终脱敏
+
+### 1. 开发目的
+
+采集层已经会对第三方仓库简介和 README 摘要做脱敏，但报告生成层仍需要最后一道保护，防止手工构造的数据、测试数据或模型输出绕过采集边界，把疑似密钥写入 Markdown 周报。
+
+### 2. 本次实现
+
+更新：
+
+```text
+src/reporter.py
+tests/test_reporter.py
+```
+
+调整内容：
+
+1. `normalize_report_markdown` 会先执行 `redact_sensitive_text`，再做链接和语言规范化。
+2. `fallback_report` 返回前会做最终脱敏。
+3. `_repository_payload` 会在发给 Kimi 前对 `description` 和 `readme_excerpt` 再次脱敏。
+4. 新增测试覆盖报告归一化脱敏和 Kimi payload 脱敏。
+
+### 3. 安全边界
+
+该保护是“最后兜底”，不能替代采集层脱敏和仓库密钥扫描。未来如果报告中增加更多来自第三方的文本字段，应继续复用 `redact_sensitive_text`。
+
+---
+
+## 2026-04-30 追加：第三方内容入库前脱敏
+
+### 1. 开发目的
+
+周报会保存第三方仓库简介和 README 摘要。即使这些内容不是本项目自己的密钥，也不应该把疑似 token 原样写入 `reports/`、`data/selected/` 或 GitHub Pages 周报中。本次在采集边界增加脱敏，降低归档第三方敏感字符串的风险。
+
+### 2. 本次实现
+
+更新：
+
+```text
+src/security.py
+src/collector.py
+tests/test_security.py
+tests/test_collector.py
+```
+
+新增：
+
+```text
+redact_sensitive_text
+```
+
+处理范围：
+
+1. GitHub token 形态字符串。
+2. Telegram bot token 形态字符串。
+3. GitHub 仓库简介进入系统时脱敏。
+4. README 摘要进入系统时脱敏。
+
+### 3. 设计边界
+
+该能力用于减少第三方内容归档风险，不改变安全扫描脚本的职责。后续如果接入更多服务，可以继续扩展 `redact_sensitive_text` 的模式列表。
+
+---
+
+## 2026-04-30 追加：排除生成周报目录的密钥误报
+
+### 1. 开发目的
+
+`docs/weekly/` 是由 `reports/` 同步生成的 GitHub Pages 周报目录，里面可能包含第三方仓库 README 摘要。安全检查的目标是保护本项目源码、配置和手写文档中不要硬编码密钥，不应把第三方生成内容误判为本项目自身泄漏。
+
+### 2. 本次实现
+
+更新：
+
+```text
+scripts/security_check.py
+tests/test_security_check.py
+```
+
+调整内容：
+
+1. 新增 `EXCLUDED_PATH_PREFIXES`，当前只排除 `docs/weekly/`。
+2. 保留 `docs/setup.md`、`docs/operation-log.md` 等手写文档扫描。
+3. 新增测试确认 `docs/weekly/` 中的疑似 token 会被跳过。
+4. 新增测试确认普通 `docs/` 文档仍会被扫描。
+
+### 3. 安全边界
+
+该调整只处理误报来源，不降低对项目源码、workflow、配置、提示词和手写文档的检查强度。生成周报仍然会长期归档，因此后续可以考虑在报告生成阶段对 README 摘要做更保守的脱敏处理。
+
+---
+
+## 2026-04-30 追加：安全检查 allowlist 收紧
+
+### 1. 开发目的
+
+项目要求不能在代码中硬编码 API Key、Token、Chat ID 或任何密钥。原安全检查会对包含 `os.getenv(` 的整行直接放行，这在正常读取环境变量时没有问题，但如果有人写入带真实密钥的默认值，例如 `os.getenv("TOKEN", "真实 token")`，就可能被漏检。
+
+### 2. 本次实现
+
+更新：
+
+```text
+scripts/security_check.py
+tests/test_security_check.py
+```
+
+调整内容：
+
+1. allowlist 不再整行跳过所有规则。
+2. 对 GitHub token 和 Telegram bot token 这类具有明确格式的密钥，始终执行检测。
+3. 仍然允许 GitHub Actions Secrets 引用和环境变量示例通过通用配置检查，避免误报正常配置。
+4. 新增测试覆盖 `os.getenv` 默认值中藏入 GitHub token 的情况。
+
+### 3. 安全边界
+
+该检查只能发现常见格式和明显硬编码的密钥，不能替代 GitHub Secret Scanning 或人工审查。后续如果接入更多外部服务，需要继续补充对应 token 格式规则。
+
+---
+
+## 2026-04-30 追加：推送短消息结构预留
+
+### 1. 开发目的
+
+当前只需要 Telegram 推送，但后续可能接入微信、飞书或邮件。为了避免以后把 Telegram 的 HTML 文案复制到其他渠道，本次在不创建复杂 `channels/` 框架的前提下，先抽出统一的短消息结构。
+
+### 2. 本次实现
+
+更新：
+
+```text
+src/sender.py
+tests/test_sender.py
+```
+
+新增：
+
+```text
+DeliveryMessage
+build_delivery_message
+```
+
+字段说明：
+
+1. `title`：周报标题。
+2. `url`：GitHub Pages 周报链接。
+3. `text`：纯文本消息，适合后续微信、飞书或邮件复用。
+4. `html_text`：HTML 消息，当前 Telegram 使用它来发送可点击超链接。
+
+### 3. 架构边界
+
+本次没有提前创建 `src/channels/` 目录，也没有加入微信、飞书或邮件依赖。只有当第二个真实推送渠道接入时，再把各渠道发送函数拆出独立模块。
+
+---
+
+## 2026-04-30 追加：GitHub Pages 内部链接修复
+
+### 1. 开发目的
+
+Telegram 已改为推送 GitHub Pages 的 `.html` 周报页面，但归档首页中仍使用 `weekly/YYYY-MM-DD.md` 作为周报入口。为了让手机端和 Pages 页面内的跳转路径保持一致，本次将页面导航链接统一改为最终网页地址。
+
+### 2. 本次实现
+
+更新：
+
+```text
+scripts/build_pages.py
+tests/test_build_pages.py
+```
+
+调整内容：
+
+1. 周报归档首页中的最新周报链接改为 `weekly/YYYY-MM-DD.html`。
+2. 全部周报列表中的历史周报链接改为 `weekly/YYYY-MM-DD.html`。
+3. 首页中的项目文档导航改为 `.html` 链接，适配 GitHub Pages 最终渲染页面。
+4. 历史项目索引的返回链接改为 `index.html`。
+5. 修复历史项目索引在暂无项目时的表格列数，避免表格结构不完整。
+
+### 3. 验证方式
+
+新增单元测试覆盖：
+
+1. 首页是否输出 `.html` 周报链接。
+2. 文档导航是否输出 `.html` 链接。
+3. 暂无项目时，历史项目索引表格是否仍保持完整列数。
+
+---
+
+## 2026-04-30 追加：运行摘要记录 Telegram 周报链接
+
+### 1. 开发目的
+
+Telegram 改为推送 GitHub Pages 周报链接后，需要在运行摘要中记录实际发送的链接，方便从 GitHub 仓库直接排查本次推送是否指向正确页面。
+
+### 2. 本次实现
+
+更新：
+
+```text
+src/models.py
+main.py
+scripts/send_report_link.py
+tests/test_send_report_link.py
+```
+
+新增运行摘要字段：
+
+```text
+telegram_report_url
+```
+
+该字段记录本次发送到 Telegram 的 GitHub Pages 周报页面地址，例如：
+
+```text
+https://windsky922.github.io/githubzhuaqu/weekly/YYYY-MM-DD.html
+```
+
+### 3. 使用价值
+
+后续排查 Telegram 推送时，可以直接打开 `data/runs/YYYY-MM-DD.json`，确认：
+
+1. `telegram_sent` 是否为 `true`。
+2. `telegram_error` 是否为空。
+3. `telegram_report_url` 是否是预期的周报页面。
+
+---
+
+## 2026-04-29 追加：Telegram 链接发送顺序调整
+
+### 1. 问题来源
+
+Telegram 已经改为推送 GitHub Pages 周报链接，但原流程是在 `main.py` 内生成报告后立即发送 Telegram。此时 `scripts/build_pages.py` 还没有生成 `docs/weekly/YYYY-MM-DD.md`，GitHub Actions 也还没有把页面提交到仓库，因此用户点击链接时可能遇到页面尚未发布的问题。
+
+### 2. 本次调整
+
+更新：
+
+```text
+main.py
+scripts/send_report_link.py
+.github/workflows/weekly.yml
+tests/test_send_report_link.py
+```
+
+新的 Actions 顺序：
+
+```text
+python main.py（跳过 Telegram）
+python scripts/build_pages.py
+提交 reports/data/docs 归档
+python scripts/send_report_link.py（发送 Pages 链接）
+提交 data/runs 和 data/state 中的推送状态
+```
+
+### 3. 设计边界
+
+1. 本地运行 `python main.py` 默认仍可直接尝试发送 Telegram，保持兼容。
+2. GitHub Actions 中通过 `SKIP_TELEGRAM_SEND=true` 跳过主流程内发送，改由归档提交后的独立脚本发送。
+3. 如果 Telegram 未配置或发送失败，脚本会记录状态，但不阻断已经完成的周报归档。
+
+---
+
+## 2026-04-29 追加：Pages 历史项目索引提交范围修复
+
+### 1. 问题来源
+
+复核 workflow 时发现，`scripts/build_pages.py` 会生成：
+
+```text
+docs/projects.md
+```
+
+但 `.github/workflows/weekly.yml` 的自动提交范围只包含 `docs/index.md` 和 `docs/weekly`，没有包含 `docs/projects.md`。这会导致 GitHub Actions 运行后，历史项目索引可能没有随最新数据一起提交。
+
+### 2. 本次修复
+
+更新：
+
+```text
+.github/workflows/weekly.yml
+```
+
+将 `docs/projects.md` 加入自动提交范围，确保每次周报生成后，GitHub Pages 首页、周报页面和历史项目索引都能同步刷新。
+
+---
+
+## 2026-04-29 追加：Trending 入选保底与 Telegram 超链接修复
+
+### 1. 问题现象
+
+用户反馈真实运行后仍然没有把 GitHub Trending 放在足够重要的位置，希望 Trending 周榜前 10 的项目至少有 7 个进入热点项目周报。同时 Telegram 推送中的周报地址不能直接点击，需要以超链接形式发送。
+
+### 2. 原因判断
+
+仅依赖评分权重仍可能让高 Star、高增长的 Search API 项目挤掉 Trending Top 10 项目。另一个隐藏原因是历史去重会在排序前过滤已推送项目，如果某个 Trending Top 10 项目之前发过，它会被挡在周报外。
+
+Telegram 侧的问题是当前消息只发送纯文本地址，而且默认生成的是 `.md` 地址；GitHub Pages 更适合使用 `.html` 页面地址。
+
+### 3. 本次实现
+
+更新：
+
+```text
+src/processor.py
+src/state.py
+src/sender.py
+config/interests.example.json
+tests/test_processor.py
+tests/test_state.py
+tests/test_sender.py
+docs/setup.md
+docs/future-plan.md
+```
+
+具体变化：
+
+1. `process_repositories` 新增 Trending Top 10 保底选择逻辑。
+2. 默认 `min_trending_top10_projects` 为 `7`，即 Trending 前 10 中至少 7 个进入周报；如果可用项目不足 7 个，则保留实际可用数量。
+3. `filter_unsent_repositories` 对 Trending Top 10 项目放行，避免历史去重挡掉本周真正热门项目。
+4. Telegram 消息改为 HTML 超链接：`打开本周周报`。
+5. 周报链接从 GitHub Pages 的 `.md` 地址改为 `.html` 地址，更适合浏览器直接打开。
+
+### 4. 设计边界
+
+该规则只保护 Trending 周榜前 10，不取消其他 Search API 辅助项目。周报剩余名额仍按综合评分补齐，继续保留垂直方向和个性化调整空间。
+
+---
+
+## 2026-04-29 追加：Telegram 改为推送周报链接
+
+### 1. 用户要求
+
+用户希望 Telegram 中直接推送 GitHub Actions 运行后由 Kimi 生成并归档到 GitHub Pages 的周报链接，而不是推送完整 Markdown 正文，方便在手机上阅读。同时需要为后续接入微信、飞书等渠道预留入口。
+
+### 2. 本次实现
+
+更新：
+
+```text
+src/sender.py
+src/settings.py
+tests/test_sender.py
+.env.example
+docs/setup.md
+docs/future-plan.md
+```
+
+具体变化：
+
+1. `send_report` 不再把完整 Markdown 拆分发送到 Telegram。
+2. 新增 `build_report_message`，统一构建短版推送消息。
+3. 新增 `report_url`，用于生成周报公开访问链接。
+4. 新增 `REPORT_BASE_URL` 配置，适配自定义域名、自定义 Pages 路径或未来其他展示入口。
+5. 如果未配置 `REPORT_BASE_URL`，GitHub Actions 中会根据 `GITHUB_REPOSITORY` 自动推导 GitHub Pages 链接。
+
+默认链接格式：
+
+```text
+https://<owner>.github.io/<repo>/weekly/YYYY-MM-DD.md
+```
+
+### 3. 后续渠道预留
+
+当前仍保持 Telegram 单渠道，不提前创建复杂的 `channels` 框架。后续接入微信、飞书时，可以复用 `build_report_message` 和 `report_url`，只新增对应渠道的发送函数即可。
+
+---
+
+## 2026-04-29 追加：报告质量校验增强
+
+### 1. 开发目的
+
+当前采集和排序已经把 GitHub Trending 作为第一热度信号。为了避免 Kimi 周报漏掉关键字段，本轮增强报告质量校验，让模型输出必须体现项目来源、Trending 排名和风险提示。
+
+### 2. 本次实现
+
+更新：
+
+```text
+src/report_checks.py
+src/reporter.py
+tests/test_report_checks.py
+```
+
+校验规则：
+
+1. 如果项目包含 `sources`，报告中需要出现对应来源，例如 `GitHub Trending` 或 `GitHub Search`。
+2. 如果项目包含大于 0 的 `trending_rank`，报告中需要出现 `Trending` 和对应排名数字。
+3. 如果项目包含 `security_flags`，报告中需要出现风险提示相关内容。
+
+这些规则只在对应数据存在时触发，不会要求普通 Search 项目强行展示 Trending 排名。
+
+### 3. 冗余文案修正
+
+降级周报结论文案中仍提到“后续加入 README 深度分析和历史去重”，但这两类能力已经部分实现。本轮改为提醒用户优先查看 Trending 排名靠前、近期增长明显且匹配兴趣的项目，并强调复用前仍需人工审查代码、依赖和许可证。
+
+---
+
+## 2026-04-29 追加：架构、安全与冗余审查
+
+### 1. 审查范围
+
+本次审查了当前主流程和核心模块：
+
+```text
+main.py
+src/collector.py
+src/processor.py
+src/reporter.py
+src/archive.py
+src/security.py
+src/state.py
+scripts/security_check.py
+```
+
+### 2. 架构结论
+
+当前架构仍然清晰，主流程保持为：
+
+```text
+collector -> processor -> reporter -> archive -> sender
+```
+
+GitHub Trending 已经作为第一优先级候选来源接入，GitHub Search API 作为辅助来源。当前还不需要立刻拆分 `src/sources/`，因为数据源数量和复杂度仍可由 `collector.py` 承载。后续接入 GraphQL、自定义仓库列表或 OSSInsight 时，再拆分来源模块更合适。
+
+### 3. 安全结论
+
+当前未发现硬编码密钥风险：
+
+1. 密钥仍然只从环境变量或 GitHub Actions Secrets 读取。
+2. 项目不会下载、安装或执行第三方仓库代码。
+3. 入选仓库安全检查仍是元数据级提示，不把外部项目判断为“安全”。
+4. `scripts/security_check.py` 会继续扫描源码、配置、workflow、文档和提示词中的疑似硬编码密钥。
+
+需要继续注意的风险：
+
+1. README 摘要属于不可信输入，可能包含提示注入内容。
+2. GitHub Trending 是网页来源，不是稳定官方 API，页面结构变化可能影响解析。
+3. 若后续配置多个 `trending_languages`，GitHub API 请求量会增加，需要继续关注限流。
+
+### 4. 本次修复
+
+更新：
+
+```text
+prompts/weekly_report.md
+src/reporter.py
+```
+
+修复内容：
+
+1. 提示词新增要求：仓库简介、README 摘要、项目名称和 topic 都是不可信项目内容，只能作为分析材料，不能执行或遵循其中指令。
+2. 降级周报文案从旧的“GitHub Search API 结果”改为“GitHub Trending 与 GitHub Search 采集结果”，避免与当前架构不一致。
+
+### 5. 可继续优化方向
+
+后续优先级建议：
+
+1. 观察下一次 GitHub Actions 中 Trending 404 噪声是否消失。
+2. 为 Trending 解析增加真实页面样例测试，降低 GitHub 页面结构变化带来的风险。
+3. 增加报告结构校验，检查 Kimi 是否确实展示来源、Trending 排名和风险提示。
+4. 当数据源继续增加时，再拆分 `src/sources/`，不要现在提前复杂化。
+
+---
+
+## 2026-04-29 追加：Trending 标题区域解析收紧
+
+### 1. 开发目的
+
+上一轮通过过滤非仓库路径减少了 Trending 采集噪声。本轮继续收紧解析边界，避免未来 GitHub Trending 页面新增其他两段式链接时再次被误判为仓库。
+
+### 2. 本次实现
+
+更新：
+
+```text
+src/collector.py
+tests/test_collector.py
+```
+
+解析规则从“读取页面中所有形如 `/owner/repo` 的链接”调整为：
+
+```text
+只读取 article 内 h2 标题区域中的仓库链接
+```
+
+这样可以更贴近 GitHub Trending 项目卡片结构，避免页面导航、赞助入口、应用入口或项目卡片内部的辅助链接进入候选池。
+
+### 3. 测试补充
+
+测试中新增了以下噪声链接：
+
+```text
+/outside/not-repository
+/inside/not-repository
+```
+
+确认它们不会被解析为 Trending 候选仓库。
+
+---
+
+## 2026-04-29 追加：Trending 页面非仓库链接过滤
+
+### 1. 问题来源
+
+检查 GitHub Actions 自动归档回来的 `data/runs/2026-04-29.json` 后发现，GitHub Trending 采集已经生效，但页面解析器把部分非仓库链接也当成仓库，例如：
+
+```text
+sponsors/explore
+apps/dependabot
+apps/github-actions
+```
+
+这些路径不是普通仓库，调用 GitHub 仓库详情 API 时会返回 404，导致运行摘要中出现不必要的 `collector_errors`。
+
+### 2. 本次修复
+
+更新：
+
+```text
+src/collector.py
+tests/test_collector.py
+```
+
+修复方式：
+
+1. 在 Trending 链接解析阶段过滤 `sponsors`、`apps`、`users`、`settings` 等非仓库路径前缀。
+2. 保留真实仓库路径解析逻辑，不改变 Trending 优先级和评分逻辑。
+3. 增加单元测试，确保 `sponsors/explore` 和 `apps/dependabot` 不会进入 Trending 仓库候选列表。
+
+### 3. 预期效果
+
+下一次 GitHub Actions 运行时，Trending 来源的 404 噪声应明显减少。若 GitHub 页面结构继续变化，后续再考虑把解析规则收紧到 Trending 项目卡片区域。
+
+---
+
+## 2026-04-29 追加：Trending 信号展示增强
+
+### 1. 开发目的
+
+上一轮已经把 GitHub Trending 周榜作为第一优先级候选来源。本轮继续补齐可见性：让周报、趋势摘要和 GitHub Pages 历史项目索引都能直接看到项目来源与 Trending 排名，方便判断排序是否符合“Trending 优先”的设计。
+
+### 2. 本次实现
+
+更新：
+
+```text
+prompts/weekly_report.md
+src/reporter.py
+src/trends.py
+scripts/build_pages.py
+tests/test_reporter.py
+tests/test_trends.py
+tests/test_build_pages.py
+```
+
+具体变化：
+
+1. Kimi 提示词要求优先解释 `trending_rank`，并说明 `sources` 来源。
+2. 降级周报的项目总览新增“来源”和“Trending 排名”。
+3. 重点项目分析新增“热度来源”。
+4. 趋势摘要新增 `trending_project_count` 和 `top_trending`。
+5. GitHub Pages 历史项目索引新增“来源”和“Trending 排名”列。
+
+### 3. 设计边界
+
+本次只增强展示与摘要，不改变采集排序逻辑。排序逻辑仍由上一轮的 `score_weights` 控制，后续可以通过 `config/interests.json` 调整权重。
+
+---
+
+## 2026-04-29 追加：GitHub Trending 第一优先级采集
+
+### 1. 用户要求
+
+用户明确希望以 GitHub Trending 作为热点考核的第一指标，其余信号作为辅助，同时保留垂直方向配置，方便后续做个性化调整。
+
+### 2. 架构判断
+
+本次没有提前拆出新的 `src/sources/` 目录，而是在现有 `src/collector.py` 中接入 Trending。原因是当前只有两个来源：GitHub Trending 和 GitHub Search API，直接在采集层扩展更简洁；等后续接入 GraphQL、自定义仓库列表或更多来源时，再拆分来源模块。
+
+当前数据源定位：
+
+1. GitHub Trending 周榜：第一优先级候选来源。
+2. GitHub Search API：辅助候选来源，主要用于补充垂直方向和 Trending 遗漏项目。
+3. 后续预留：GraphQL 细粒度热度、用户自定义关注仓库。
+
+### 3. 本次实现
+
+更新：
+
+```text
+src/models.py
+src/collector.py
+src/processor.py
+config/interests.example.json
+tests/test_collector.py
+tests/test_processor.py
+docs/architecture.md
+docs/future-plan.md
+docs/setup.md
+```
+
+新增仓库字段：
+
+1. `sources`：记录项目来自 `github_trending`、`github_search` 或多个来源。
+2. `trending_rank`：记录项目在 GitHub Trending 周榜中的排名。
+3. `trending_period`：当前为 `weekly`。
+4. `source_priority`：用于保留来源优先级，Trending 高于 Search。
+
+采集流程调整为：
+
+```text
+GitHub Trending weekly
+-> GitHub Search API 辅助查询
+-> 去重并合并来源信号
+-> 过滤最近一周活跃项目
+-> 综合评分排序
+```
+
+### 4. 评分调整
+
+当前默认评分权重：
+
+1. `trending`：45%。
+2. `star_growth`：25%。
+3. `topic`：15%。
+4. `freshness`：10%。
+5. `community`：5%。
+
+其中 `community` 由总 Star 和 Fork 共同构成。该设计把 Trending 作为第一指标，同时保留新增 Star、垂直方向匹配、近期活跃和社区基础信号。
+
+### 5. 个性化预留
+
+`config/interests.example.json` 新增：
+
+1. `enable_github_trending`：是否启用 Trending。
+2. `trending_languages`：额外采集指定语言的 Trending 榜。
+3. `trending_max_repositories`：限制每个 Trending 榜补齐详情的项目数。
+4. `search_topics`：Search API 的 topic 补充方向。
+5. `search_languages`：Search API 的语言补充方向。
+6. `score_weights`：综合评分权重。
+
+后续用户可以通过 `config/interests.json` 调整这些字段，不需要改主流程代码。
+
+---
+
+## 2026-04-29 追加：历史项目索引
+
+### 1. 开发目的
+
+继续增强 GitHub Pages 浏览能力，让用户不只按周报日期回看，也能在一个页面中查看历次入选项目。
+
+### 2. 本次实现
+
+`scripts/build_pages.py` 新增生成：
+
+```text
+docs/projects.md
+```
+
+该页面从以下目录读取数据：
+
+```text
+data/selected/
+```
+
+并生成历史项目表格，包含：
+
+1. 日期。
+2. 项目名称。
+3. 方向。
+4. 语言。
+5. Star。
+6. 新增 Star。
+7. 风险提示数量。
+8. 完整 GitHub 链接。
+
+### 3. 首页入口
+
+`docs/index.md` 的项目文档区域新增：
+
+```text
+历史项目索引
+```
+
+### 4. 设计边界
+
+本次仍保持 Markdown 页面，不引入前端框架。后续如果历史项目明显增多，再考虑按语言、方向、日期生成更细的分组页面。
+
+---
+
+## 2026-04-29 追加：历史周报趋势摘要
+
+### 1. 开发目的
+
+继续增强 GitHub Pages 的浏览效率，让“全部周报”列表不仅显示日期和推送状态，也能快速看出每期的主要语言、主要方向和新增 Star。
+
+### 2. 本次实现
+
+更新：
+
+```text
+scripts/build_pages.py
+tests/test_build_pages.py
+```
+
+`docs/index.md` 的每条历史周报记录会在存在趋势数据时追加：
+
+1. 主语言。
+2. 主方向。
+3. 累计新增 Star。
+
+### 3. 数据来源
+
+该信息来自：
+
+```text
+data/trends/YYYY-MM-DD.json
+```
+
+如果历史周报没有趋势数据，则保持原有简洁格式。
+
+---
+
+## 2026-04-29 追加：GitHub Pages 首页摘要增强
+
+### 1. 开发目的
+
+继续第四阶段质量与可观测性增强，让 GitHub Pages 首页不只显示周报列表，也能快速看到最新运行状态和趋势要点。
+
+### 2. 本次实现
+
+更新：
+
+```text
+scripts/build_pages.py
+tests/test_build_pages.py
+```
+
+首页新增：
+
+1. 最新运行摘要。
+2. 入选项目数。
+3. 采集候选数。
+4. 生成方式。
+5. Telegram 推送状态。
+6. 采集错误数量。
+7. 最新趋势要点。
+
+### 3. 数据来源
+
+首页读取：
+
+```text
+data/runs/YYYY-MM-DD.json
+data/trends/YYYY-MM-DD.json
+```
+
+### 4. 设计边界
+
+本次仍保持 GitHub Pages 为轻量 Markdown，不引入前端框架。后续当历史周报数量增加后，再考虑筛选、项目卡片和趋势可视化。
+
+---
+
+## 2026-04-29 追加：采集分项统计
+
+### 1. 开发目的
+
+继续第四阶段质量与可观测性增强。此前运行摘要只记录 `collector_errors`，无法清楚看到每条 GitHub Search 查询的成功、失败和返回数量。
+
+### 2. 本次实现
+
+`collect_repositories` 现在返回：
+
+```text
+repositories
+queries
+errors
+stats
+```
+
+运行摘要新增字段：
+
+```text
+collector_stats
+```
+
+每条统计包含：
+
+1. `query`：查询条件。
+2. `status`：`success` 或 `failed`。
+3. `count`：返回仓库数量。
+4. `error`：失败原因。
+
+### 3. 价值
+
+后续可以从 `data/runs/YYYY-MM-DD.json` 直接判断：
+
+1. 哪些查询成功。
+2. 哪些查询失败。
+3. 每条查询贡献了多少候选仓库。
+4. 是否存在 GitHub API 限流、网络异常或查询语法问题。
+
+该结构也为后续 GitHub Trending、GraphQL API 等多数据源扩展预留了统计入口。
+
+---
+
+## 2026-04-29 追加：报告质量检查
+
+### 1. 开发目的
+
+继续第四阶段质量与可观测性增强，降低 Kimi 输出缺项、链接格式错误或语言翻译不当的概率。
+
+### 2. 本次实现
+
+新增：
+
+```text
+src/report_checks.py
+tests/test_report_checks.py
+```
+
+当前检查范围：
+
+1. 报告中不能出现“蟒蛇”这类不合适的技术语言翻译。
+2. 每个入选项目的完整仓库名必须出现在报告中。
+3. 每个入选项目的 GitHub 链接必须以完整 URL 的 Markdown 链接形式出现。
+
+### 3. 主流程变化
+
+Kimi 输出会先经过：
+
+```text
+normalize_report_markdown
+check_report_quality
+```
+
+如果质量检查失败，程序会记录 `report_error`，并回退到规则周报，避免把结构不完整的模型输出推送给用户。
+
+### 4. 后续空间
+
+后续可以继续增强：
+
+1. 检查报告是否包含非入选项目。
+2. 对结构问题增加 Kimi 自动重试，而不是直接回退。
+3. 检查每个项目是否包含入选原因和风险提示。
+
+---
+
+## 2026-04-29 追加：入选原因记录
+
+### 1. 开发目的
+
+继续第四阶段质量与可观测性增强，增加每个入选项目的解释字段，让用户知道项目为什么进入周报。
+
+### 2. 本次实现
+
+`Repository` 新增字段：
+
+```text
+selection_reasons
+```
+
+`src/processor.py` 会根据以下信号生成入选原因：
+
+1. 新增 Star。
+2. 当前累计 Star。
+3. 主题、语言或名称与关注方向匹配。
+4. 最近一周仍有更新或维护活动。
+
+### 3. 报告变化
+
+降级版周报在重点项目分析中新增：
+
+```text
+入选原因
+```
+
+Kimi 提示词也已更新，要求优先使用 `selection_reasons` 解释项目为什么值得关注，并结合 `security_flags` 保持谨慎表述。
+
+### 4. 归档变化
+
+`data/selected/YYYY-MM-DD.json` 会保存每个项目的 `selection_reasons` 字段，为后续报告质量检查和页面展示提供基础数据。
+
+---
+
+## 2026-04-29 追加：入选仓库安全风险提示
+
+### 1. 开发目的
+
+在项目自身密钥扫描之后，继续增加入选仓库的安全风险提示能力。该能力用于提醒用户关注潜在风险，不对第三方项目做安全背书。
+
+### 2. 本次实现
+
+新增：
+
+```text
+src/security.py
+tests/test_security.py
+```
+
+`Repository` 新增字段：
+
+```text
+security_flags
+```
+
+主流程在抓取 README 后，对最终入选仓库执行：
+
+```text
+apply_security_flags(selected)
+```
+
+### 3. 当前检查范围
+
+当前只做元数据级检查：
+
+1. 缺少许可证。
+2. 仓库已归档。
+3. 仓库是 fork。
+4. 名称、简介、主题或 README 摘要中包含明显风险关键词，例如空投、赠送、破解、窃取、恶意软件、钓鱼。
+
+### 4. 报告变化
+
+降级版周报的重点项目分析中新增：
+
+```text
+风险提示
+```
+
+Kimi 周报生成也会收到 `security_flags` 字段，可用于生成更谨慎的项目说明。
+
+### 5. 安全边界
+
+本功能不会执行第三方仓库代码，不会下载或运行项目依赖，也不会把项目判定为安全。风险提示只作为人工复核线索。
+
+---
+
+## 2026-04-29 追加：安全检查基础版本
+
+### 1. 用户要求
+
+用户要求在未来规划中加入安全性检查功能，用于检查项目是否存在安全风险，同时对当前工作方式做安全保护。
+
+### 2. 当前安全状态检查
+
+已检查：
+
+1. GitHub CLI 当前未登录，本机没有继续保留 CLI 登录态。
+2. 当前进程环境中未发现 `TOKEN`、`KEY`、`SECRET`、`CHAT_ID` 等密钥类环境变量名。
+3. 本次操作不读取、不输出任何真实密钥值。
+
+### 3. 本次实现
+
+新增：
+
+```text
+scripts/security_check.py
+tests/test_security_check.py
+```
+
+能力：
+
+1. 扫描源码、配置、workflow、文档和提示词中的疑似硬编码密钥。
+2. 检测 GitHub token、Telegram Bot Token、通用 key/token/secret/password/chat_id 赋值。
+3. 允许 GitHub Actions Secrets 引用和 `os.getenv` 这类安全读取方式。
+4. 排除 `data/` 和 `reports/`，避免把第三方 README 或生成报告误判为项目自身密钥。
+
+### 4. 工作流接入
+
+`.github/workflows/weekly.yml` 新增步骤：
+
+```text
+python scripts/security_check.py
+```
+
+该步骤在单元测试前运行。如果发现疑似硬编码密钥，工作流会失败，阻止继续生成和提交归档。
+
+### 5. 未来规划更新
+
+`docs/future-plan.md` 新增“安全风险检查”阶段，后续会扩展到入选仓库风险提示，例如可疑关键词、异常 Star 增长、许可证缺失和维护风险。
+
+---
+
+## 2026-04-29 追加：未来更新规划
+
+### 1. 规划目的
+
+当前前三阶段已经完成，项目具备稳定的采集、筛选、Kimi 周报、Telegram 推送、归档、GitHub Pages 和 Codex 技能能力。
+
+为了避免后续开发直接堆到主流程中，本次补充长期更新路线和架构边界。
+
+### 2. 新增文档
+
+新增：
+
+```text
+docs/future-plan.md
+```
+
+该文档规划：
+
+1. 数据质量增强。
+2. 多数据源采集。
+3. 报告质量增强。
+4. 推送渠道扩展。
+5. 展示页面增强。
+6. 长期状态和 SQLite 评估。
+7. 短期、中期、长期优先级。
+8. 暂不建议做的事项。
+
+### 3. 同步更新
+
+已更新：
+
+1. `docs/roadmap.md`：增加第四阶段和第五阶段。
+2. `docs/architecture.md`：增加后续扩展边界。
+3. `docs/index.md`：增加未来更新规划入口。
+
+### 4. 设计结论
+
+后续不应提前重构为复杂框架。当前主流程保持稳定，只有当某类能力开始包含多个实现或明显变复杂时，再拆出 `sources`、`quality`、`report_checks`、`channels`、`storage` 等模块。
+
+---
+
+## 2026-04-29 追加：Codex 技能封装
+
+### 1. 开发目的
+
+路线图第三阶段最后一项是“在项目流程稳定后，再封装真正可用的 Codex 技能”。当前采集、筛选、Kimi 周报、Telegram 推送、归档和 GitHub Actions 已完成多次真实运行验证，因此开始封装技能。
+
+### 2. 本次实现
+
+新增技能目录：
+
+```text
+skills/github-weekly-agent/
+```
+
+核心文件：
+
+```text
+skills/github-weekly-agent/SKILL.md
+```
+
+技能内容覆盖：
+
+1. 项目维护约束。
+2. 主流程。
+3. 目录职责。
+4. 采集与排序修改规范。
+5. 周报生成修改规范。
+6. 归档和 GitHub Pages 修改规范。
+7. GitHub Actions 修改规范。
+8. 本地验证和真实链路验证方式。
+
+### 3. 简洁性处理
+
+本次只创建必要的技能说明，不增加脚本、模板或资产，避免重复维护已有项目代码。
+
+### 4. 路线图更新
+
+`docs/roadmap.md` 中第三阶段 Codex 技能封装标记为已完成。
+
+---
+
+## 2026-04-29 追加：Kimi 内容过滤降级修复
+
+### 1. 问题现象
+
+用户在 GitHub 网页手动触发工作流后，工作流本身运行成功，但生成的是降级版周报。
+
+运行摘要显示：
+
+```text
+"kimi_used": false
+"fallback_used": true
+"report_error": "Kimi API error 400: ... high risk ... content_filter"
+```
+
+### 2. 原因判断
+
+这次不是超时，也不是 Secrets 未配置。Kimi API 返回了内容过滤错误，说明请求中的提示词或项目数据被判定为高风险。
+
+最可能的触发源是某个入选仓库的 README 摘要包含模型安全策略不接受的原文内容。
+
+### 3. 修复动作
+
+已在 `src/reporter.py` 中增加安全重试：
+
+1. 第一次仍使用完整项目数据，包括 README 摘要。
+2. 如果 Kimi 返回 `content_filter` 或 `high risk`，自动重试一次。
+3. 重试时移除 `readme_excerpt`，只保留仓库名称、简介、语言、Star、Fork、链接、分类、趋势摘要等结构化信息。
+4. 如果重试成功，则不再生成降级版周报。
+5. 如果重试仍失败，才保留原有降级逻辑，避免整个工作流中断。
+
+### 4. 说明
+
+外部模型 API 仍可能因为服务不可用、限流或更严格的安全策略失败，因此无法绝对保证永远不出现降级版。但本次修复已经针对当前真实失败原因做了兜底，能显著降低因 README 原文触发内容过滤而降级的概率。
+
+### 5. 测试补充
+
+已增加测试：当第一次 Kimi 调用返回 `content_filter high risk` 时，程序会自动以不包含 README 摘要的 payload 重试，并在重试成功时返回 Kimi 周报。
+
+---
+
+## 2026-04-29 追加：GitHub Actions Node 24 兼容更新
+
+### 1. 触发原因
+
+GitHub Actions 运行时提示 `actions/checkout@v4` 和 `actions/setup-python@v5` 仍运行在 Node.js 20。GitHub 已提示 Node.js 20 actions 将被弃用。
+
+### 2. 官方版本确认
+
+已确认官方 action 新版本：
+
+1. `actions/checkout@v6`：支持 Node 24。
+2. `actions/setup-python@v6`：支持 Node 24。
+
+### 3. 本次调整
+
+已更新：
+
+```text
+.github/workflows/weekly.yml
+```
+
+调整内容：
+
+```text
+actions/checkout@v4 -> actions/checkout@v6
+actions/setup-python@v5 -> actions/setup-python@v6
+```
+
+### 4. 预期效果
+
+后续每周周报工作流不再触发 Node.js 20 action 弃用警告。
+
+---
+
+## 2026-04-29 追加：GitHub Actions 真实运行复测
+
+### 1. 复测结果
+
+已通过 GitHub CLI 手动触发每周周报工作流：
+
+```text
+https://github.com/windsky922/githubzhuaqu/actions/runs/25087537033
 ```
 
 运行结论：成功。
 
 关键结果：
 
-1. `collected_count`: 165
+1. `collected_count`: 210
 2. `selected_count`: 10
-3. `kimi_used`: true
-4. `fallback_used`: false
+3. `collector_errors`: []
+4. `readme_fetched_count`: 10
 5. `telegram_sent`: true
-6. `report_path`: `reports/2026-04-28.md`
-7. `run_summary_path`: `data/runs/2026-04-28.json`
+6. `raw_repositories_path`: `data/raw/2026-04-29.json`
+7. `selected_repositories_path`: `data/selected/2026-04-29.json`
+8. `trend_summary_path`: `data/trends/2026-04-29.json`
 
-说明：第二次完整流程已经确认 Kimi 正常生成中文周报，Telegram 正常推送，Actions 自动归档提交正常执行。
+### 2. 发现的问题
 
-### 5. 本次代码与文档调整
+本次 Kimi 调用超时，运行摘要记录：
 
-1. `src/models.py`：为运行摘要增加 `report_error` 字段。
-2. `src/reporter.py`：让 Kimi 生成失败时返回明确错误原因，并兼容更多响应内容结构。
-3. `main.py`：写入 `report_error`，便于从 `data/runs/` 追踪模型生成问题。
-4. `tests/test_reporter.py`：增加 Kimi 响应内容提取测试。
-5. `.github/workflows/weekly.yml`：移除测试用 `push` 触发器。
-6. `docs/operation-log.md`：记录完整工作流验证过程和结果。
+```text
+"report_error": "The read operation timed out"
+```
 
-### 6. 当前结论
+因此本次周报使用降级模板生成，但主流程、Telegram 推送和归档均成功。
 
-Secrets 配置已经通过完整链路验证。当前项目已具备按周自动抓取 GitHub 热点项目、生成中文周报、推送到 Telegram、归档运行结果并自动提交到 GitHub 的基础能力。
+### 3. 修复动作
+
+已将 Kimi 请求超时时间从固定 60 秒调整为可配置项：
+
+```text
+KIMI_TIMEOUT_SECONDS
+```
+
+默认值为：
+
+```text
+120
+```
+
+同时更新 `.env.example` 和 `docs/setup.md`。
 
 ---
 
-## 2026-04-28 追加：第二阶段已推送仓库状态记录
+## 2026-04-29 追加：配置说明补充
 
-### 1. 开发目的
+### 1. 补充原因
 
-进入第二阶段数据质量增强后，优先实现最小且必要的历史状态能力，避免同一仓库在后续周报中被重复推送。
+代码已经支持优先读取 `config/interests.json`，但配置文档中还没有说明该文件的用途和提交方式。
 
-### 2. 本次实现
+### 2. 本次更新
 
-新增模块：
-
-```text
-src/state.py
-```
-
-该模块负责：
-
-1. 读取 `data/state/sent_repos.json`。
-2. 过滤已经成功推送过的仓库。
-3. Telegram 推送成功后写入新的已推送仓库。
-4. 兼容旧的字符串数组格式和新的对象数组格式。
-
-### 3. 主流程变化
-
-新的处理顺序：
+已更新：
 
 ```text
-collect_repositories
--> load_sent_repository_names
--> filter_unsent_repositories
--> process_repositories
--> generate_report
--> send_report
--> write_sent_repositories
+docs/setup.md
 ```
 
-状态写入条件：
+新增内容：
 
-1. Telegram 推送成功。
-2. 本次筛选出的新仓库列表不为空。
+1. `config/interests.json` 的读取优先级。
+2. `preferred_topics`、`preferred_languages`、`exclude_keywords`、`max_projects`、`min_stars` 的用途。
+3. 如果希望 GitHub Actions 使用自定义兴趣配置，需要将 `config/interests.json` 提交到仓库。
+4. `config/interests.json` 不应包含任何 API Key、Token 或 Chat ID。
 
-如果 Kimi 不可用，仍可使用降级版周报；如果 Telegram 不可用或发送失败，则不会写入已推送状态，避免遗漏后续真实推送。
+### 3. 处理结论
 
-### 4. 运行摘要变化
-
-`data/runs/YYYY-MM-DD.json` 新增字段：
-
-1. `skipped_sent_count`：本次采集结果中被历史推送状态跳过的仓库数。
-2. `state_path`：本次成功写入的状态文件路径。
-
-### 5. 工作流变化
-
-`.github/workflows/weekly.yml` 的自动提交范围增加：
-
-```text
-data/state
-```
-
-这样 GitHub Actions 生成的已推送状态会和周报、原始数据、运行摘要一起提交回仓库。
-
-### 6. 本地验证
-
-已执行：
-
-```text
-py -m unittest
-py -m compileall main.py src tests
-```
-
-验证结果：通过。
-
-### 7. 初始状态写入
-
-由于 `2026-04-28` 的完整工作流已经确认 Telegram 推送成功，本次同步创建：
-
-```text
-data/state/sent_repos.json
-```
-
-该文件使用 `data/raw/2026-04-28.json` 中的 10 个已推送仓库初始化，避免下一次运行重复推送同一批项目。
+本次不把 `config/interests.json` 加入 `.gitignore`。原因是该文件不是密钥文件，并且 GitHub Actions 需要从仓库读取它才能使用自定义偏好。
 
 ---
 
-## 2026-04-28 追加：第二阶段 README 摘要抓取
+## 2026-04-29 追加：代码审查问题修复
 
-### 1. 开发目的
+### 1. 修复范围
 
-提升周报内容质量。仅依赖仓库名称和简介时，Kimi 对项目定位容易过于粗略；加入 README 摘要后，可以让周报更准确地说明项目用途、特性和学习价值。
+根据阶段性代码审查的下一步建议，本次继续处理数据质量和可观测性问题。
 
-### 2. 实现范围
+### 2. 采集查询修正
 
-本次实现保持简洁，不增加新依赖，不引入复杂缓存或数据库。
-
-新增能力：
-
-1. 对最终入选周报的仓库抓取 README。
-2. 清洗 README 中的多余空白。
-3. 每个仓库只保留前 2000 个字符作为摘要。
-4. 单个 README 获取失败时跳过，不影响整体运行。
-5. Kimi 提示词要求优先参考 README 摘要。
-6. 降级版周报也会展示 README 摘要。
-
-### 3. 主流程变化
-
-新的处理顺序：
+已从 `src/collector.py` 中移除：
 
 ```text
-collect_repositories
--> load_sent_repository_names
--> filter_unsent_repositories
--> process_repositories
--> enrich_repositories_with_readmes
--> generate_report
--> send_report
--> write_sent_repositories
+created:>=... stars:>10
 ```
 
-### 4. 运行摘要变化
+当前采集查询只围绕最近一周 `pushed` 活跃项目展开，避免候选池继续偏向“本周新创建项目”。
 
-`data/runs/YYYY-MM-DD.json` 新增字段：
+### 3. 部分采集失败记录
+
+`collect_repositories` 现在会返回：
 
 ```text
-readme_fetched_count
+repositories
+queries
+errors
 ```
 
-该字段记录本次成功获取 README 摘要的入选仓库数量。
-
-### 5. 本地验证
-
-已执行：
+如果部分 GitHub 查询失败但仍有其他查询成功，程序会继续生成周报，同时把错误写入运行摘要：
 
 ```text
-py -m unittest
-py -m compileall main.py src tests
+collector_errors
 ```
 
-验证结果：通过。
+这样后续可以从 `data/runs/YYYY-MM-DD.json` 判断采集是否完整。
 
----
+### 4. 自定义兴趣配置
 
-## 2026-04-28 追加：第二阶段 Star 增量评分
+`src/settings.py` 新增用户配置优先级：
 
-### 1. 开发目的
+1. 优先读取 `config/interests.json`。
+2. 如果不存在，再读取 `config/interests.example.json`。
 
-补齐第二阶段数据质量增强中的历史热度能力。单纯按总 Star 排序容易长期偏向大型老项目；加入 Star 增量后，可以更好发现近期增长明显的项目。
+这样用户可以维护自己的兴趣配置，不需要直接修改示例文件。
 
-### 2. 本次实现
+### 5. 归档职责明确
 
-新增状态文件：
+本次将原始候选数据和最终入选数据拆开：
+
+1. `data/raw/YYYY-MM-DD.json`：保存本次 GitHub API 采集到的原始候选仓库。
+2. `data/selected/YYYY-MM-DD.json`：保存最终入选周报的仓库。
+
+`.github/workflows/weekly.yml` 的自动提交范围也已加入：
 
 ```text
-data/state/star_history.json
+data/selected
 ```
 
-该文件记录：
+### 6. 测试补充
 
-1. 仓库完整名称。
-2. 仓库链接。
-3. 最近一次采集到的 Star 数。
-4. 最近一次采集日期。
+新增和更新测试：
 
-### 3. 评分变化
-
-`Repository` 新增字段：
-
-```text
-star_growth
-```
-
-计算方式：
-
-```text
-star_growth = 当前 Star - 历史 Star
-```
-
-如果没有历史记录，则增长值为 0。
-
-当前评分权重：
-
-1. 总 Star：35%
-2. Fork：15%
-3. 兴趣主题匹配：25%
-4. Star 增量：15%
-5. 创建时间新鲜度：10%
-
-### 4. 主流程变化
-
-主流程会在处理仓库前读取 Star 历史，在完成本次归档时写入最新 Star 历史。
-
-运行摘要新增字段：
-
-1. `star_history_updated_count`
-2. `star_history_path`
-
-### 5. 初始状态写入
-
-由于 `2026-04-28` 已经有一次成功完整运行，本次使用 `data/raw/2026-04-28.json` 初始化 `data/state/star_history.json`，为下一次运行提供增量基线。
-
-### 6. 本地验证
-
-已执行：
-
-```text
-py -m unittest
-py -m compileall main.py src tests
-```
-
-验证结果：通过。
-
----
-
-## 2026-04-28 追加：第三阶段 GitHub Pages 周报归档页面
-
-### 1. 开发目的
-
-进入第三阶段产品化输出后，优先实现轻量的周报归档页面，让生成的周报可以通过 GitHub Pages 直接浏览。
-
-### 2. 本次实现
-
-新增脚本：
-
-```text
-scripts/build_pages.py
-```
-
-该脚本负责：
-
-1. 读取 `reports/` 下的周报。
-2. 读取 `data/runs/` 下的运行摘要。
-3. 生成 `docs/index.md` 周报归档首页。
-4. 将周报同步到 `docs/weekly/YYYY-MM-DD.md`。
-
-### 3. 工作流变化
-
-`.github/workflows/weekly.yml` 新增步骤：
-
-```text
-python scripts/build_pages.py
-```
-
-自动提交范围新增：
-
-```text
-docs/index.md
-docs/weekly
-```
-
-### 4. 本次生成文件
-
-```text
-docs/index.md
-docs/weekly/2026-04-28.md
-```
-
-### 5. GitHub Pages 启用方式
-
-在 GitHub 仓库中进入：
-
-```text
-Settings -> Pages
-```
-
-设置：
-
-```text
-Source: Deploy from a branch
-Branch: main
-Folder: /docs
-```
-
-### 6. 本地验证
-
-已执行：
-
-```text
-py scripts/build_pages.py
-py -m unittest
-py -m compileall main.py src tests scripts
-```
-
-验证结果：通过。
-
----
-
-## 2026-04-28 追加：周报页面内容与链接格式修正
-
-### 1. 用户反馈
-
-用户反馈 GitHub Pages 中生成的周报页面存在以下问题：
-
-1. 需要确保页面内容属于本周范围。
-2. “主要语言”中不能出现“蟒蛇”这类中文直译，应保留 `Python` 等技术语言英文名称。
-3. 热门项目总览中的 GitHub 链接应为可点击超链接。
-4. 修改后需要检查代码是否存在冗余或明显问题。
-
-### 2. 本次修正
-
-采集范围修正：
-
-1. 移除 `pushed:>=...` 查询，避免历史老项目仅因本周更新而进入“本周创建项目”周报。
-2. 在处理阶段增加 `created_at >= since_date` 二次校验，即使 GitHub Search 查询变化，也不会让非本周创建项目进入周报。
-
-报告格式修正：
-
-1. Kimi 输出和降级报告都会经过 `normalize_report_markdown` 清洗。
-2. 将“蟒蛇”统一替换为 `Python`。
-3. 将 GitHub 原始 URL 转为 Markdown 超链接。
-4. 已经是 Markdown 格式的链接不会重复包装。
-5. 降级版周报中的 README 摘要截断展示，避免页面过长影响阅读。
-
-提示词修正：
-
-1. 要求技术语言名称保留官方英文名称。
-2. 要求只分析用户数据提供的本周创建项目。
-3. 要求热点项目总览中的链接列使用 Markdown 超链接格式。
-
-### 3. 当前页面重新生成
-
-已重新执行：
-
-```text
-py main.py
-py scripts/build_pages.py
-```
-
-说明：本地环境没有 Kimi 和 Telegram 密钥，因此本次重新生成的 `2026-04-28` 页面为降级版周报，且不会写入已推送状态。GitHub Actions 后续正式运行时仍会读取仓库 Secrets 并使用 Kimi 与 Telegram。
-
-### 4. 校验结果
-
-已确认：
-
-1. `reports/2026-04-28.md` 和 `docs/weekly/2026-04-28.md` 中没有“蟒蛇”。
-2. 热门项目总览中的 GitHub 链接已为 `[GitHub](...)` Markdown 超链接。
-3. `data/raw/2026-04-28.json` 中所有入选项目的 `created_at` 都不早于 `2026-04-21`。
-
-### 5. 本地验证
-
-已执行：
-
-```text
-py -m unittest
-py -m compileall main.py src tests scripts
-```
-
-验证结果：通过。
-
----
-
-## 2026-04-28 追加：修正“本周最火爆”定义与 Kimi 降级原因
-
-### 1. 用户纠正
-
-用户指出：项目应当是一周内最火爆的项目，而不是生成时间或创建时间在一周之内的项目。
-
-这是正确的。本项目的采集逻辑应以“最近一周活跃且热度高”为主，不能只看 `created_at`。
-
-### 2. 采集逻辑修正
-
-已将主查询从 `created:>=...` 改为 `pushed:>=...`：
-
-```text
-pushed:>=YYYY-MM-DD stars:>N
-topic:ai pushed:>=YYYY-MM-DD stars:>N
-topic:agent pushed:>=YYYY-MM-DD stars:>10
-topic:llm pushed:>=YYYY-MM-DD stars:>10
-topic:automation pushed:>=YYYY-MM-DD stars:>10
-language:Python pushed:>=YYYY-MM-DD stars:>N
-language:TypeScript pushed:>=YYYY-MM-DD stars:>N
-created:>=YYYY-MM-DD stars:>10
-```
-
-其中 `created` 查询只作为补充，用于捕捉本周新出现且增长较快的项目。
-
-### 3. 过滤逻辑修正
-
-`Repository` 新增字段：
-
-```text
-pushed_at
-```
-
-处理阶段不再要求 `created_at >= since_date`，改为要求：
-
-```text
-pushed_at 或 updated_at >= since_date
-```
-
-这样老项目只要本周仍然活跃且热度高，也可以进入周报。
-
-### 4. Kimi 降级原因判断
-
-本次页面显示“ Kimi API 未启用或调用失败”的直接原因是：为了修正页面，我在本地执行了：
-
-```text
-py main.py
-```
-
-当前本地环境没有配置：
-
-```text
-KIMI_API_KEY
-KIMI_MODEL
-```
-
-因此程序按设计生成降级版 Markdown 周报，并在 `data/runs/2026-04-28.json` 中记录：
-
-```text
-"kimi_used": false
-"fallback_used": true
-"report_error": "Kimi API 未配置"
-```
-
-这不是 GitHub Actions Secrets 失效。之前 GitHub Actions 自动归档提交 `3767552` 中的运行摘要显示：
-
-```text
-"kimi_used": true
-"fallback_used": false
-"telegram_sent": true
-```
-
-说明在 GitHub Actions 环境中，Kimi Secrets 曾经正常生效。
-
-### 5. 当前页面重新生成
-
-已重新执行：
-
-```text
-py main.py
-py scripts/build_pages.py
-```
-
-当前 `2026-04-28` 页面已经按最近一周活跃项目重新生成。由于本地未配置 Kimi 和 Telegram，本次页面为降级版，且不会写入已推送状态。
-
-### 6. 校验结果
-
-已确认：
-
-1. `data/raw/2026-04-28.json` 中所有入选项目的 `pushed_at` 或 `updated_at` 都不早于 `2026-04-21`。
-2. 报告中没有“蟒蛇”。
-3. 热门项目总览中的 GitHub 链接为 Markdown 超链接。
-
-### 7. 本地验证
-
-已执行：
-
-```text
-py -m unittest
-py -m compileall main.py src tests scripts
-```
-
-验证结果：通过。
-
----
-
-## 2026-04-28 追加：提高新增 Star 权重与完整链接显示
-
-### 1. 用户要求
-
-用户要求：
-
-1. 将新增 Star 作为重要筛选依据。
-2. 链接部分应显示完整链接，而不是只显示 `GitHub`。
-
-### 2. 评分调整
-
-已将综合评分权重调整为：
-
-1. Star 增量：40%
-2. 总 Star：25%
-3. 兴趣主题匹配：20%
-4. 活跃时间新鲜度：10%
-5. Fork：5%
-
-同时排序时增加明确的兜底顺序：
-
-```text
-score -> star_growth -> stargazers_count
-```
-
-这样新增 Star 会成为判断“本周最火爆”的主要依据。
-
-### 3. 链接显示调整
-
-周报中的 GitHub 链接统一显示为完整 URL，并保持可点击：
-
-```text
-[https://github.com/owner/repo](https://github.com/owner/repo)
-```
-
-报告清洗逻辑也会把模型生成的短文本链接：
-
-```text
-[GitHub](https://github.com/owner/repo)
-```
-
-转换为完整 URL 文本链接。
-
-### 4. 本地验证
-
-已补充测试，覆盖：
-
-1. 新增 Star 对排序的优先影响。
-2. 原始 GitHub URL 转换为完整 URL 文本链接。
-3. `[GitHub](...)` 链接转换为完整 URL 文本链接。
-
-已执行：
-
-```text
-py -m unittest
-py -m compileall main.py src tests scripts
-```
-
-验证结果：通过。
-
-### 5. 当前页面重新生成
-
-已重新执行：
-
-```text
-py main.py
-py scripts/build_pages.py
-```
-
-当前 `2026-04-28` 周报已按新增 Star 高权重重新排序，前两项为：
-
-1. `NousResearch/hermes-agent`，新增 Star 25。
-2. `affaan-m/everything-claude-code`，新增 Star 10。
-
-报告和 Pages 页面中的链接均显示完整 URL。
-
----
-
-## 2026-04-28 追加：第三阶段趋势总结
-
-### 1. 开发目的
-
-继续第三阶段产品化输出，增加数据驱动的趋势总结，减少周报趋势部分依赖模型自由发挥。
-
-### 2. 本次实现
-
-新增模块：
-
-```text
-src/trends.py
-```
-
-该模块根据本期入选仓库生成：
-
-1. 入选项目总数。
-2. 累计新增 Star。
-3. 主要语言分布。
-4. 项目方向分布。
-5. 新增 Star 最高的项目列表。
-6. 可直接写入周报的趋势要点。
-
-### 3. 归档文件
-
-新增归档路径：
-
-```text
-data/trends/YYYY-MM-DD.json
-```
-
-运行摘要新增字段：
-
-```text
-trend_summary_path
-```
-
-### 4. 报告生成变化
-
-Kimi 生成周报时会收到 `trend_summary`。如果本地未配置 Kimi，降级版周报也会在“本周趋势”部分展示趋势要点。
-
-### 5. 工作流变化
-
-`.github/workflows/weekly.yml` 自动提交范围增加：
-
-```text
-data/trends
-```
-
-### 6. 本地验证
-
-已补充测试：
-
-1. `tests/test_trends.py`
-2. `tests/test_reporter.py` 中的趋势要点展示断言
+1. 采集查询不再包含 `created` 条件。
+2. 部分采集失败会返回错误列表。
+3. `config/interests.json` 优先于示例配置。
+4. `data/raw` 和 `data/selected` 写入不同路径。
 
 ---
 
@@ -1321,2497 +2905,946 @@ write_raw_repositories(selected, settings)
 
 ---
 
-## 2026-04-29 追加：代码审查问题修复
+## 2026-04-28 追加：第三阶段趋势总结
 
-### 1. 修复范围
+### 1. 开发目的
 
-根据阶段性代码审查的下一步建议，本次继续处理数据质量和可观测性问题。
+继续第三阶段产品化输出，增加数据驱动的趋势总结，减少周报趋势部分依赖模型自由发挥。
 
-### 2. 采集查询修正
+### 2. 本次实现
 
-已从 `src/collector.py` 中移除：
-
-```text
-created:>=... stars:>10
-```
-
-当前采集查询只围绕最近一周 `pushed` 活跃项目展开，避免候选池继续偏向“本周新创建项目”。
-
-### 3. 部分采集失败记录
-
-`collect_repositories` 现在会返回：
+新增模块：
 
 ```text
-repositories
-queries
-errors
+src/trends.py
 ```
 
-如果部分 GitHub 查询失败但仍有其他查询成功，程序会继续生成周报，同时把错误写入运行摘要：
+该模块根据本期入选仓库生成：
+
+1. 入选项目总数。
+2. 累计新增 Star。
+3. 主要语言分布。
+4. 项目方向分布。
+5. 新增 Star 最高的项目列表。
+6. 可直接写入周报的趋势要点。
+
+### 3. 归档文件
+
+新增归档路径：
 
 ```text
-collector_errors
+data/trends/YYYY-MM-DD.json
 ```
 
-这样后续可以从 `data/runs/YYYY-MM-DD.json` 判断采集是否完整。
-
-### 4. 自定义兴趣配置
-
-`src/settings.py` 新增用户配置优先级：
-
-1. 优先读取 `config/interests.json`。
-2. 如果不存在，再读取 `config/interests.example.json`。
-
-这样用户可以维护自己的兴趣配置，不需要直接修改示例文件。
-
-### 5. 归档职责明确
-
-本次将原始候选数据和最终入选数据拆开：
-
-1. `data/raw/YYYY-MM-DD.json`：保存本次 GitHub API 采集到的原始候选仓库。
-2. `data/selected/YYYY-MM-DD.json`：保存最终入选周报的仓库。
-
-`.github/workflows/weekly.yml` 的自动提交范围也已加入：
+运行摘要新增字段：
 
 ```text
-data/selected
+trend_summary_path
 ```
 
-### 6. 测试补充
+### 4. 报告生成变化
 
-新增和更新测试：
+Kimi 生成周报时会收到 `trend_summary`。如果本地未配置 Kimi，降级版周报也会在“本周趋势”部分展示趋势要点。
 
-1. 采集查询不再包含 `created` 条件。
-2. 部分采集失败会返回错误列表。
-3. `config/interests.json` 优先于示例配置。
-4. `data/raw` 和 `data/selected` 写入不同路径。
+### 5. 工作流变化
+
+`.github/workflows/weekly.yml` 自动提交范围增加：
+
+```text
+data/trends
+```
+
+### 6. 本地验证
+
+已补充测试：
+
+1. `tests/test_trends.py`
+2. `tests/test_reporter.py` 中的趋势要点展示断言
 
 ---
 
-## 2026-04-29 追加：配置说明补充
+## 2026-04-28 追加：提高新增 Star 权重与完整链接显示
 
-### 1. 补充原因
+### 1. 用户要求
 
-代码已经支持优先读取 `config/interests.json`，但配置文档中还没有说明该文件的用途和提交方式。
+用户要求：
 
-### 2. 本次更新
+1. 将新增 Star 作为重要筛选依据。
+2. 链接部分应显示完整链接，而不是只显示 `GitHub`。
 
-已更新：
+### 2. 评分调整
+
+已将综合评分权重调整为：
+
+1. Star 增量：40%
+2. 总 Star：25%
+3. 兴趣主题匹配：20%
+4. 活跃时间新鲜度：10%
+5. Fork：5%
+
+同时排序时增加明确的兜底顺序：
 
 ```text
-docs/setup.md
+score -> star_growth -> stargazers_count
 ```
 
-新增内容：
+这样新增 Star 会成为判断“本周最火爆”的主要依据。
 
-1. `config/interests.json` 的读取优先级。
-2. `preferred_topics`、`preferred_languages`、`exclude_keywords`、`max_projects`、`min_stars` 的用途。
-3. 如果希望 GitHub Actions 使用自定义兴趣配置，需要将 `config/interests.json` 提交到仓库。
-4. `config/interests.json` 不应包含任何 API Key、Token 或 Chat ID。
+### 3. 链接显示调整
 
-### 3. 处理结论
+周报中的 GitHub 链接统一显示为完整 URL，并保持可点击：
 
-本次不把 `config/interests.json` 加入 `.gitignore`。原因是该文件不是密钥文件，并且 GitHub Actions 需要从仓库读取它才能使用自定义偏好。
+```text
+[https://github.com/owner/repo](https://github.com/owner/repo)
+```
+
+报告清洗逻辑也会把模型生成的短文本链接：
+
+```text
+[GitHub](https://github.com/owner/repo)
+```
+
+转换为完整 URL 文本链接。
+
+### 4. 本地验证
+
+已补充测试，覆盖：
+
+1. 新增 Star 对排序的优先影响。
+2. 原始 GitHub URL 转换为完整 URL 文本链接。
+3. `[GitHub](...)` 链接转换为完整 URL 文本链接。
+
+已执行：
+
+```text
+py -m unittest
+py -m compileall main.py src tests scripts
+```
+
+验证结果：通过。
+
+### 5. 当前页面重新生成
+
+已重新执行：
+
+```text
+py main.py
+py scripts/build_pages.py
+```
+
+当前 `2026-04-28` 周报已按新增 Star 高权重重新排序，前两项为：
+
+1. `NousResearch/hermes-agent`，新增 Star 25。
+2. `affaan-m/everything-claude-code`，新增 Star 10。
+
+报告和 Pages 页面中的链接均显示完整 URL。
 
 ---
 
-## 2026-04-29 追加：GitHub Actions 真实运行复测
+## 2026-04-28 追加：修正“本周最火爆”定义与 Kimi 降级原因
 
-### 1. 复测结果
+### 1. 用户纠正
 
-已通过 GitHub CLI 手动触发每周周报工作流：
+用户指出：项目应当是一周内最火爆的项目，而不是生成时间或创建时间在一周之内的项目。
+
+这是正确的。本项目的采集逻辑应以“最近一周活跃且热度高”为主，不能只看 `created_at`。
+
+### 2. 采集逻辑修正
+
+已将主查询从 `created:>=...` 改为 `pushed:>=...`：
 
 ```text
-https://github.com/windsky922/githubzhuaqu/actions/runs/25087537033
+pushed:>=YYYY-MM-DD stars:>N
+topic:ai pushed:>=YYYY-MM-DD stars:>N
+topic:agent pushed:>=YYYY-MM-DD stars:>10
+topic:llm pushed:>=YYYY-MM-DD stars:>10
+topic:automation pushed:>=YYYY-MM-DD stars:>10
+language:Python pushed:>=YYYY-MM-DD stars:>N
+language:TypeScript pushed:>=YYYY-MM-DD stars:>N
+created:>=YYYY-MM-DD stars:>10
+```
+
+其中 `created` 查询只作为补充，用于捕捉本周新出现且增长较快的项目。
+
+### 3. 过滤逻辑修正
+
+`Repository` 新增字段：
+
+```text
+pushed_at
+```
+
+处理阶段不再要求 `created_at >= since_date`，改为要求：
+
+```text
+pushed_at 或 updated_at >= since_date
+```
+
+这样老项目只要本周仍然活跃且热度高，也可以进入周报。
+
+### 4. Kimi 降级原因判断
+
+本次页面显示“ Kimi API 未启用或调用失败”的直接原因是：为了修正页面，我在本地执行了：
+
+```text
+py main.py
+```
+
+当前本地环境没有配置：
+
+```text
+KIMI_API_KEY
+KIMI_MODEL
+```
+
+因此程序按设计生成降级版 Markdown 周报，并在 `data/runs/2026-04-28.json` 中记录：
+
+```text
+"kimi_used": false
+"fallback_used": true
+"report_error": "Kimi API 未配置"
+```
+
+这不是 GitHub Actions Secrets 失效。之前 GitHub Actions 自动归档提交 `3767552` 中的运行摘要显示：
+
+```text
+"kimi_used": true
+"fallback_used": false
+"telegram_sent": true
+```
+
+说明在 GitHub Actions 环境中，Kimi Secrets 曾经正常生效。
+
+### 5. 当前页面重新生成
+
+已重新执行：
+
+```text
+py main.py
+py scripts/build_pages.py
+```
+
+当前 `2026-04-28` 页面已经按最近一周活跃项目重新生成。由于本地未配置 Kimi 和 Telegram，本次页面为降级版，且不会写入已推送状态。
+
+### 6. 校验结果
+
+已确认：
+
+1. `data/raw/2026-04-28.json` 中所有入选项目的 `pushed_at` 或 `updated_at` 都不早于 `2026-04-21`。
+2. 报告中没有“蟒蛇”。
+3. 热门项目总览中的 GitHub 链接为 Markdown 超链接。
+
+### 7. 本地验证
+
+已执行：
+
+```text
+py -m unittest
+py -m compileall main.py src tests scripts
+```
+
+验证结果：通过。
+
+---
+
+## 2026-04-28 追加：周报页面内容与链接格式修正
+
+### 1. 用户反馈
+
+用户反馈 GitHub Pages 中生成的周报页面存在以下问题：
+
+1. 需要确保页面内容属于本周范围。
+2. “主要语言”中不能出现“蟒蛇”这类中文直译，应保留 `Python` 等技术语言英文名称。
+3. 热门项目总览中的 GitHub 链接应为可点击超链接。
+4. 修改后需要检查代码是否存在冗余或明显问题。
+
+### 2. 本次修正
+
+采集范围修正：
+
+1. 移除 `pushed:>=...` 查询，避免历史老项目仅因本周更新而进入“本周创建项目”周报。
+2. 在处理阶段增加 `created_at >= since_date` 二次校验，即使 GitHub Search 查询变化，也不会让非本周创建项目进入周报。
+
+报告格式修正：
+
+1. Kimi 输出和降级报告都会经过 `normalize_report_markdown` 清洗。
+2. 将“蟒蛇”统一替换为 `Python`。
+3. 将 GitHub 原始 URL 转为 Markdown 超链接。
+4. 已经是 Markdown 格式的链接不会重复包装。
+5. 降级版周报中的 README 摘要截断展示，避免页面过长影响阅读。
+
+提示词修正：
+
+1. 要求技术语言名称保留官方英文名称。
+2. 要求只分析用户数据提供的本周创建项目。
+3. 要求热点项目总览中的链接列使用 Markdown 超链接格式。
+
+### 3. 当前页面重新生成
+
+已重新执行：
+
+```text
+py main.py
+py scripts/build_pages.py
+```
+
+说明：本地环境没有 Kimi 和 Telegram 密钥，因此本次重新生成的 `2026-04-28` 页面为降级版周报，且不会写入已推送状态。GitHub Actions 后续正式运行时仍会读取仓库 Secrets 并使用 Kimi 与 Telegram。
+
+### 4. 校验结果
+
+已确认：
+
+1. `reports/2026-04-28.md` 和 `docs/weekly/2026-04-28.md` 中没有“蟒蛇”。
+2. 热门项目总览中的 GitHub 链接已为 `[GitHub](...)` Markdown 超链接。
+3. `data/raw/2026-04-28.json` 中所有入选项目的 `created_at` 都不早于 `2026-04-21`。
+
+### 5. 本地验证
+
+已执行：
+
+```text
+py -m unittest
+py -m compileall main.py src tests scripts
+```
+
+验证结果：通过。
+
+---
+
+## 2026-04-28 追加：第三阶段 GitHub Pages 周报归档页面
+
+### 1. 开发目的
+
+进入第三阶段产品化输出后，优先实现轻量的周报归档页面，让生成的周报可以通过 GitHub Pages 直接浏览。
+
+### 2. 本次实现
+
+新增脚本：
+
+```text
+scripts/build_pages.py
+```
+
+该脚本负责：
+
+1. 读取 `reports/` 下的周报。
+2. 读取 `data/runs/` 下的运行摘要。
+3. 生成 `docs/index.md` 周报归档首页。
+4. 将周报同步到 `docs/weekly/YYYY-MM-DD.md`。
+
+### 3. 工作流变化
+
+`.github/workflows/weekly.yml` 新增步骤：
+
+```text
+python scripts/build_pages.py
+```
+
+自动提交范围新增：
+
+```text
+docs/index.md
+docs/weekly
+```
+
+### 4. 本次生成文件
+
+```text
+docs/index.md
+docs/weekly/2026-04-28.md
+```
+
+### 5. GitHub Pages 启用方式
+
+在 GitHub 仓库中进入：
+
+```text
+Settings -> Pages
+```
+
+设置：
+
+```text
+Source: Deploy from a branch
+Branch: main
+Folder: /docs
+```
+
+### 6. 本地验证
+
+已执行：
+
+```text
+py scripts/build_pages.py
+py -m unittest
+py -m compileall main.py src tests scripts
+```
+
+验证结果：通过。
+
+---
+
+## 2026-04-28 追加：第二阶段 Star 增量评分
+
+### 1. 开发目的
+
+补齐第二阶段数据质量增强中的历史热度能力。单纯按总 Star 排序容易长期偏向大型老项目；加入 Star 增量后，可以更好发现近期增长明显的项目。
+
+### 2. 本次实现
+
+新增状态文件：
+
+```text
+data/state/star_history.json
+```
+
+该文件记录：
+
+1. 仓库完整名称。
+2. 仓库链接。
+3. 最近一次采集到的 Star 数。
+4. 最近一次采集日期。
+
+### 3. 评分变化
+
+`Repository` 新增字段：
+
+```text
+star_growth
+```
+
+计算方式：
+
+```text
+star_growth = 当前 Star - 历史 Star
+```
+
+如果没有历史记录，则增长值为 0。
+
+当前评分权重：
+
+1. 总 Star：35%
+2. Fork：15%
+3. 兴趣主题匹配：25%
+4. Star 增量：15%
+5. 创建时间新鲜度：10%
+
+### 4. 主流程变化
+
+主流程会在处理仓库前读取 Star 历史，在完成本次归档时写入最新 Star 历史。
+
+运行摘要新增字段：
+
+1. `star_history_updated_count`
+2. `star_history_path`
+
+### 5. 初始状态写入
+
+由于 `2026-04-28` 已经有一次成功完整运行，本次使用 `data/raw/2026-04-28.json` 初始化 `data/state/star_history.json`，为下一次运行提供增量基线。
+
+### 6. 本地验证
+
+已执行：
+
+```text
+py -m unittest
+py -m compileall main.py src tests
+```
+
+验证结果：通过。
+
+---
+
+## 2026-04-28 追加：第二阶段 README 摘要抓取
+
+### 1. 开发目的
+
+提升周报内容质量。仅依赖仓库名称和简介时，Kimi 对项目定位容易过于粗略；加入 README 摘要后，可以让周报更准确地说明项目用途、特性和学习价值。
+
+### 2. 实现范围
+
+本次实现保持简洁，不增加新依赖，不引入复杂缓存或数据库。
+
+新增能力：
+
+1. 对最终入选周报的仓库抓取 README。
+2. 清洗 README 中的多余空白。
+3. 每个仓库只保留前 2000 个字符作为摘要。
+4. 单个 README 获取失败时跳过，不影响整体运行。
+5. Kimi 提示词要求优先参考 README 摘要。
+6. 降级版周报也会展示 README 摘要。
+
+### 3. 主流程变化
+
+新的处理顺序：
+
+```text
+collect_repositories
+-> load_sent_repository_names
+-> filter_unsent_repositories
+-> process_repositories
+-> enrich_repositories_with_readmes
+-> generate_report
+-> send_report
+-> write_sent_repositories
+```
+
+### 4. 运行摘要变化
+
+`data/runs/YYYY-MM-DD.json` 新增字段：
+
+```text
+readme_fetched_count
+```
+
+该字段记录本次成功获取 README 摘要的入选仓库数量。
+
+### 5. 本地验证
+
+已执行：
+
+```text
+py -m unittest
+py -m compileall main.py src tests
+```
+
+验证结果：通过。
+
+---
+
+## 2026-04-28 追加：第二阶段已推送仓库状态记录
+
+### 1. 开发目的
+
+进入第二阶段数据质量增强后，优先实现最小且必要的历史状态能力，避免同一仓库在后续周报中被重复推送。
+
+### 2. 本次实现
+
+新增模块：
+
+```text
+src/state.py
+```
+
+该模块负责：
+
+1. 读取 `data/state/sent_repos.json`。
+2. 过滤已经成功推送过的仓库。
+3. Telegram 推送成功后写入新的已推送仓库。
+4. 兼容旧的字符串数组格式和新的对象数组格式。
+
+### 3. 主流程变化
+
+新的处理顺序：
+
+```text
+collect_repositories
+-> load_sent_repository_names
+-> filter_unsent_repositories
+-> process_repositories
+-> generate_report
+-> send_report
+-> write_sent_repositories
+```
+
+状态写入条件：
+
+1. Telegram 推送成功。
+2. 本次筛选出的新仓库列表不为空。
+
+如果 Kimi 不可用，仍可使用降级版周报；如果 Telegram 不可用或发送失败，则不会写入已推送状态，避免遗漏后续真实推送。
+
+### 4. 运行摘要变化
+
+`data/runs/YYYY-MM-DD.json` 新增字段：
+
+1. `skipped_sent_count`：本次采集结果中被历史推送状态跳过的仓库数。
+2. `state_path`：本次成功写入的状态文件路径。
+
+### 5. 工作流变化
+
+`.github/workflows/weekly.yml` 的自动提交范围增加：
+
+```text
+data/state
+```
+
+这样 GitHub Actions 生成的已推送状态会和周报、原始数据、运行摘要一起提交回仓库。
+
+### 6. 本地验证
+
+已执行：
+
+```text
+py -m unittest
+py -m compileall main.py src tests
+```
+
+验证结果：通过。
+
+### 7. 初始状态写入
+
+由于 `2026-04-28` 的完整工作流已经确认 Telegram 推送成功，本次同步创建：
+
+```text
+data/state/sent_repos.json
+```
+
+该文件使用 `data/raw/2026-04-28.json` 中的 10 个已推送仓库初始化，避免下一次运行重复推送同一批项目。
+
+---
+
+## 2026-04-28 追加：完整周报工作流验证
+
+### 1. 验证目的
+
+在用户完成 GitHub Secrets 配置后，对完整自动化链路进行验证，确认从 GitHub Actions 到周报归档、Kimi 生成和 Telegram 推送的流程可以正常运行。
+
+验证链路：
+
+```text
+GitHub Actions
+-> python -m unittest
+-> python main.py
+-> GitHub 项目采集
+-> Kimi 中文周报生成
+-> reports/ 与 data/ 归档
+-> Telegram 推送
+-> Actions 自动提交归档文件
+```
+
+### 2. 临时触发方式
+
+为避免等待每周定时任务，临时给 `.github/workflows/weekly.yml` 增加了仅用于测试的 `push` 触发器。
+
+测试完成后已移除该临时触发器，正式工作流保留：
+
+1. `workflow_dispatch` 手动触发。
+2. 每周一 UTC 00:00 的定时触发。
+
+### 3. 第一次完整流程测试
+
+运行链接：
+
+```text
+https://github.com/windsky922/githubzhuaqu/actions/runs/25031865017
+```
+
+运行结论：成功。
+
+归档结果：
+
+1. `reports/2026-04-28.md`
+2. `data/raw/2026-04-28.json`
+3. `data/runs/2026-04-28.json`
+
+本次结果显示 Telegram 推送成功，但 Kimi 周报生成使用了降级报告。为便于后续定位，随后在运行摘要中增加了 `report_error` 字段，并增强了 Kimi 响应内容提取逻辑。
+
+### 4. 第二次完整流程测试
+
+运行链接：
+
+```text
+https://github.com/windsky922/githubzhuaqu/actions/runs/25031996992
 ```
 
 运行结论：成功。
 
 关键结果：
 
-1. `collected_count`: 210
+1. `collected_count`: 165
 2. `selected_count`: 10
-3. `collector_errors`: []
-4. `readme_fetched_count`: 10
+3. `kimi_used`: true
+4. `fallback_used`: false
 5. `telegram_sent`: true
-6. `raw_repositories_path`: `data/raw/2026-04-29.json`
-7. `selected_repositories_path`: `data/selected/2026-04-29.json`
-8. `trend_summary_path`: `data/trends/2026-04-29.json`
+6. `report_path`: `reports/2026-04-28.md`
+7. `run_summary_path`: `data/runs/2026-04-28.json`
 
-### 2. 发现的问题
+说明：第二次完整流程已经确认 Kimi 正常生成中文周报，Telegram 正常推送，Actions 自动归档提交正常执行。
 
-本次 Kimi 调用超时，运行摘要记录：
+### 5. 本次代码与文档调整
 
-```text
-"report_error": "The read operation timed out"
-```
+1. `src/models.py`：为运行摘要增加 `report_error` 字段。
+2. `src/reporter.py`：让 Kimi 生成失败时返回明确错误原因，并兼容更多响应内容结构。
+3. `main.py`：写入 `report_error`，便于从 `data/runs/` 追踪模型生成问题。
+4. `tests/test_reporter.py`：增加 Kimi 响应内容提取测试。
+5. `.github/workflows/weekly.yml`：移除测试用 `push` 触发器。
+6. `docs/operation-log.md`：记录完整工作流验证过程和结果。
 
-因此本次周报使用降级模板生成，但主流程、Telegram 推送和归档均成功。
+### 6. 当前结论
 
-### 3. 修复动作
-
-已将 Kimi 请求超时时间从固定 60 秒调整为可配置项：
-
-```text
-KIMI_TIMEOUT_SECONDS
-```
-
-默认值为：
-
-```text
-120
-```
-
-同时更新 `.env.example` 和 `docs/setup.md`。
+Secrets 配置已经通过完整链路验证。当前项目已具备按周自动抓取 GitHub 热点项目、生成中文周报、推送到 Telegram、归档运行结果并自动提交到 GitHub 的基础能力。
 
 ---
 
-## 2026-04-29 追加：GitHub Actions Node 24 兼容更新
+## 2026-04-27 追加：GitHub Secrets 配置测试
 
-### 1. 触发原因
+### 1. 测试方式
 
-GitHub Actions 运行时提示 `actions/checkout@v4` 和 `actions/setup-python@v5` 仍运行在 Node.js 20。GitHub 已提示 Node.js 20 actions 将被弃用。
-
-### 2. 官方版本确认
-
-已确认官方 action 新版本：
-
-1. `actions/checkout@v6`：支持 Node 24。
-2. `actions/setup-python@v6`：支持 Node 24。
-
-### 3. 本次调整
-
-已更新：
-
-```text
-.github/workflows/weekly.yml
-```
-
-调整内容：
-
-```text
-actions/checkout@v4 -> actions/checkout@v6
-actions/setup-python@v5 -> actions/setup-python@v6
-```
-
-### 4. 预期效果
-
-后续每周周报工作流不再触发 Node.js 20 action 弃用警告。
-
----
-
-## 2026-04-29 追加：Kimi 内容过滤降级修复
-
-### 1. 问题现象
-
-用户在 GitHub 网页手动触发工作流后，工作流本身运行成功，但生成的是降级版周报。
-
-运行摘要显示：
-
-```text
-"kimi_used": false
-"fallback_used": true
-"report_error": "Kimi API error 400: ... high risk ... content_filter"
-```
-
-### 2. 原因判断
-
-这次不是超时，也不是 Secrets 未配置。Kimi API 返回了内容过滤错误，说明请求中的提示词或项目数据被判定为高风险。
-
-最可能的触发源是某个入选仓库的 README 摘要包含模型安全策略不接受的原文内容。
-
-### 3. 修复动作
-
-已在 `src/reporter.py` 中增加安全重试：
-
-1. 第一次仍使用完整项目数据，包括 README 摘要。
-2. 如果 Kimi 返回 `content_filter` 或 `high risk`，自动重试一次。
-3. 重试时移除 `readme_excerpt`，只保留仓库名称、简介、语言、Star、Fork、链接、分类、趋势摘要等结构化信息。
-4. 如果重试成功，则不再生成降级版周报。
-5. 如果重试仍失败，才保留原有降级逻辑，避免整个工作流中断。
-
-### 4. 说明
-
-外部模型 API 仍可能因为服务不可用、限流或更严格的安全策略失败，因此无法绝对保证永远不出现降级版。但本次修复已经针对当前真实失败原因做了兜底，能显著降低因 README 原文触发内容过滤而降级的概率。
-
-### 5. 测试补充
-
-已增加测试：当第一次 Kimi 调用返回 `content_filter high risk` 时，程序会自动以不包含 README 摘要的 payload 重试，并在重试成功时返回 Kimi 周报。
-
----
-
-## 2026-04-29 追加：Codex 技能封装
-
-### 1. 开发目的
-
-路线图第三阶段最后一项是“在项目流程稳定后，再封装真正可用的 Codex 技能”。当前采集、筛选、Kimi 周报、Telegram 推送、归档和 GitHub Actions 已完成多次真实运行验证，因此开始封装技能。
-
-### 2. 本次实现
-
-新增技能目录：
-
-```text
-skills/github-weekly-agent/
-```
-
-核心文件：
-
-```text
-skills/github-weekly-agent/SKILL.md
-```
-
-技能内容覆盖：
-
-1. 项目维护约束。
-2. 主流程。
-3. 目录职责。
-4. 采集与排序修改规范。
-5. 周报生成修改规范。
-6. 归档和 GitHub Pages 修改规范。
-7. GitHub Actions 修改规范。
-8. 本地验证和真实链路验证方式。
-
-### 3. 简洁性处理
-
-本次只创建必要的技能说明，不增加脚本、模板或资产，避免重复维护已有项目代码。
-
-### 4. 路线图更新
-
-`docs/roadmap.md` 中第三阶段 Codex 技能封装标记为已完成。
-
----
-
-## 2026-04-29 追加：未来更新规划
-
-### 1. 规划目的
-
-当前前三阶段已经完成，项目具备稳定的采集、筛选、Kimi 周报、Telegram 推送、归档、GitHub Pages 和 Codex 技能能力。
-
-为了避免后续开发直接堆到主流程中，本次补充长期更新路线和架构边界。
-
-### 2. 新增文档
-
-新增：
-
-```text
-docs/future-plan.md
-```
-
-该文档规划：
-
-1. 数据质量增强。
-2. 多数据源采集。
-3. 报告质量增强。
-4. 推送渠道扩展。
-5. 展示页面增强。
-6. 长期状态和 SQLite 评估。
-7. 短期、中期、长期优先级。
-8. 暂不建议做的事项。
-
-### 3. 同步更新
-
-已更新：
-
-1. `docs/roadmap.md`：增加第四阶段和第五阶段。
-2. `docs/architecture.md`：增加后续扩展边界。
-3. `docs/index.md`：增加未来更新规划入口。
-
-### 4. 设计结论
-
-后续不应提前重构为复杂框架。当前主流程保持稳定，只有当某类能力开始包含多个实现或明显变复杂时，再拆出 `sources`、`quality`、`report_checks`、`channels`、`storage` 等模块。
-
----
-
-## 2026-04-29 追加：安全检查基础版本
-
-### 1. 用户要求
-
-用户要求在未来规划中加入安全性检查功能，用于检查项目是否存在安全风险，同时对当前工作方式做安全保护。
-
-### 2. 当前安全状态检查
-
-已检查：
-
-1. GitHub CLI 当前未登录，本机没有继续保留 CLI 登录态。
-2. 当前进程环境中未发现 `TOKEN`、`KEY`、`SECRET`、`CHAT_ID` 等密钥类环境变量名。
-3. 本次操作不读取、不输出任何真实密钥值。
-
-### 3. 本次实现
-
-新增：
-
-```text
-scripts/security_check.py
-tests/test_security_check.py
-```
-
-能力：
-
-1. 扫描源码、配置、workflow、文档和提示词中的疑似硬编码密钥。
-2. 检测 GitHub token、Telegram Bot Token、通用 key/token/secret/password/chat_id 赋值。
-3. 允许 GitHub Actions Secrets 引用和 `os.getenv` 这类安全读取方式。
-4. 排除 `data/` 和 `reports/`，避免把第三方 README 或生成报告误判为项目自身密钥。
-
-### 4. 工作流接入
-
-`.github/workflows/weekly.yml` 新增步骤：
-
-```text
-python scripts/security_check.py
-```
-
-该步骤在单元测试前运行。如果发现疑似硬编码密钥，工作流会失败，阻止继续生成和提交归档。
-
-### 5. 未来规划更新
-
-`docs/future-plan.md` 新增“安全风险检查”阶段，后续会扩展到入选仓库风险提示，例如可疑关键词、异常 Star 增长、许可证缺失和维护风险。
-
----
-
-## 2026-04-29 追加：入选仓库安全风险提示
-
-### 1. 开发目的
-
-在项目自身密钥扫描之后，继续增加入选仓库的安全风险提示能力。该能力用于提醒用户关注潜在风险，不对第三方项目做安全背书。
-
-### 2. 本次实现
-
-新增：
-
-```text
-src/security.py
-tests/test_security.py
-```
-
-`Repository` 新增字段：
-
-```text
-security_flags
-```
-
-主流程在抓取 README 后，对最终入选仓库执行：
-
-```text
-apply_security_flags(selected)
-```
-
-### 3. 当前检查范围
-
-当前只做元数据级检查：
-
-1. 缺少许可证。
-2. 仓库已归档。
-3. 仓库是 fork。
-4. 名称、简介、主题或 README 摘要中包含明显风险关键词，例如空投、赠送、破解、窃取、恶意软件、钓鱼。
-
-### 4. 报告变化
-
-降级版周报的重点项目分析中新增：
-
-```text
-风险提示
-```
-
-Kimi 周报生成也会收到 `security_flags` 字段，可用于生成更谨慎的项目说明。
-
-### 5. 安全边界
-
-本功能不会执行第三方仓库代码，不会下载或运行项目依赖，也不会把项目判定为安全。风险提示只作为人工复核线索。
-
----
-
-## 2026-04-29 追加：入选原因记录
-
-### 1. 开发目的
-
-继续第四阶段质量与可观测性增强，增加每个入选项目的解释字段，让用户知道项目为什么进入周报。
-
-### 2. 本次实现
-
-`Repository` 新增字段：
-
-```text
-selection_reasons
-```
-
-`src/processor.py` 会根据以下信号生成入选原因：
-
-1. 新增 Star。
-2. 当前累计 Star。
-3. 主题、语言或名称与关注方向匹配。
-4. 最近一周仍有更新或维护活动。
-
-### 3. 报告变化
-
-降级版周报在重点项目分析中新增：
-
-```text
-入选原因
-```
-
-Kimi 提示词也已更新，要求优先使用 `selection_reasons` 解释项目为什么值得关注，并结合 `security_flags` 保持谨慎表述。
-
-### 4. 归档变化
-
-`data/selected/YYYY-MM-DD.json` 会保存每个项目的 `selection_reasons` 字段，为后续报告质量检查和页面展示提供基础数据。
-
----
-
-## 2026-04-29 追加：报告质量检查
-
-### 1. 开发目的
-
-继续第四阶段质量与可观测性增强，降低 Kimi 输出缺项、链接格式错误或语言翻译不当的概率。
-
-### 2. 本次实现
-
-新增：
-
-```text
-src/report_checks.py
-tests/test_report_checks.py
-```
-
-当前检查范围：
-
-1. 报告中不能出现“蟒蛇”这类不合适的技术语言翻译。
-2. 每个入选项目的完整仓库名必须出现在报告中。
-3. 每个入选项目的 GitHub 链接必须以完整 URL 的 Markdown 链接形式出现。
-
-### 3. 主流程变化
-
-Kimi 输出会先经过：
-
-```text
-normalize_report_markdown
-check_report_quality
-```
-
-如果质量检查失败，程序会记录 `report_error`，并回退到规则周报，避免把结构不完整的模型输出推送给用户。
-
-### 4. 后续空间
-
-后续可以继续增强：
-
-1. 检查报告是否包含非入选项目。
-2. 对结构问题增加 Kimi 自动重试，而不是直接回退。
-3. 检查每个项目是否包含入选原因和风险提示。
-
----
-
-## 2026-04-29 追加：采集分项统计
-
-### 1. 开发目的
-
-继续第四阶段质量与可观测性增强。此前运行摘要只记录 `collector_errors`，无法清楚看到每条 GitHub Search 查询的成功、失败和返回数量。
-
-### 2. 本次实现
-
-`collect_repositories` 现在返回：
-
-```text
-repositories
-queries
-errors
-stats
-```
-
-运行摘要新增字段：
-
-```text
-collector_stats
-```
-
-每条统计包含：
-
-1. `query`：查询条件。
-2. `status`：`success` 或 `failed`。
-3. `count`：返回仓库数量。
-4. `error`：失败原因。
-
-### 3. 价值
-
-后续可以从 `data/runs/YYYY-MM-DD.json` 直接判断：
-
-1. 哪些查询成功。
-2. 哪些查询失败。
-3. 每条查询贡献了多少候选仓库。
-4. 是否存在 GitHub API 限流、网络异常或查询语法问题。
-
-该结构也为后续 GitHub Trending、GraphQL API 等多数据源扩展预留了统计入口。
-
----
-
-## 2026-04-29 追加：GitHub Pages 首页摘要增强
-
-### 1. 开发目的
-
-继续第四阶段质量与可观测性增强，让 GitHub Pages 首页不只显示周报列表，也能快速看到最新运行状态和趋势要点。
-
-### 2. 本次实现
-
-更新：
-
-```text
-scripts/build_pages.py
-tests/test_build_pages.py
-```
-
-首页新增：
-
-1. 最新运行摘要。
-2. 入选项目数。
-3. 采集候选数。
-4. 生成方式。
-5. Telegram 推送状态。
-6. 采集错误数量。
-7. 最新趋势要点。
-
-### 3. 数据来源
-
-首页读取：
-
-```text
-data/runs/YYYY-MM-DD.json
-data/trends/YYYY-MM-DD.json
-```
-
-### 4. 设计边界
-
-本次仍保持 GitHub Pages 为轻量 Markdown，不引入前端框架。后续当历史周报数量增加后，再考虑筛选、项目卡片和趋势可视化。
-
----
-
-## 2026-04-29 追加：历史周报趋势摘要
-
-### 1. 开发目的
-
-继续增强 GitHub Pages 的浏览效率，让“全部周报”列表不仅显示日期和推送状态，也能快速看出每期的主要语言、主要方向和新增 Star。
-
-### 2. 本次实现
-
-更新：
-
-```text
-scripts/build_pages.py
-tests/test_build_pages.py
-```
-
-`docs/index.md` 的每条历史周报记录会在存在趋势数据时追加：
-
-1. 主语言。
-2. 主方向。
-3. 累计新增 Star。
-
-### 3. 数据来源
-
-该信息来自：
-
-```text
-data/trends/YYYY-MM-DD.json
-```
-
-如果历史周报没有趋势数据，则保持原有简洁格式。
-
----
-
-## 2026-04-29 追加：历史项目索引
-
-### 1. 开发目的
-
-继续增强 GitHub Pages 浏览能力，让用户不只按周报日期回看，也能在一个页面中查看历次入选项目。
-
-### 2. 本次实现
-
-`scripts/build_pages.py` 新增生成：
-
-```text
-docs/projects.md
-```
-
-该页面从以下目录读取数据：
-
-```text
-data/selected/
-```
-
-并生成历史项目表格，包含：
-
-1. 日期。
-2. 项目名称。
-3. 方向。
-4. 语言。
-5. Star。
-6. 新增 Star。
-7. 风险提示数量。
-8. 完整 GitHub 链接。
-
-### 3. 首页入口
-
-`docs/index.md` 的项目文档区域新增：
-
-```text
-历史项目索引
-```
-
-### 4. 设计边界
-
-本次仍保持 Markdown 页面，不引入前端框架。后续如果历史项目明显增多，再考虑按语言、方向、日期生成更细的分组页面。
-
----
-
-## 2026-04-29 追加：GitHub Trending 第一优先级采集
-
-### 1. 用户要求
-
-用户明确希望以 GitHub Trending 作为热点考核的第一指标，其余信号作为辅助，同时保留垂直方向配置，方便后续做个性化调整。
-
-### 2. 架构判断
-
-本次没有提前拆出新的 `src/sources/` 目录，而是在现有 `src/collector.py` 中接入 Trending。原因是当前只有两个来源：GitHub Trending 和 GitHub Search API，直接在采集层扩展更简洁；等后续接入 GraphQL、自定义仓库列表或更多来源时，再拆分来源模块。
-
-当前数据源定位：
-
-1. GitHub Trending 周榜：第一优先级候选来源。
-2. GitHub Search API：辅助候选来源，主要用于补充垂直方向和 Trending 遗漏项目。
-3. 后续预留：GraphQL 细粒度热度、用户自定义关注仓库。
-
-### 3. 本次实现
-
-更新：
-
-```text
-src/models.py
-src/collector.py
-src/processor.py
-config/interests.example.json
-tests/test_collector.py
-tests/test_processor.py
-docs/architecture.md
-docs/future-plan.md
-docs/setup.md
-```
-
-新增仓库字段：
-
-1. `sources`：记录项目来自 `github_trending`、`github_search` 或多个来源。
-2. `trending_rank`：记录项目在 GitHub Trending 周榜中的排名。
-3. `trending_period`：当前为 `weekly`。
-4. `source_priority`：用于保留来源优先级，Trending 高于 Search。
-
-采集流程调整为：
-
-```text
-GitHub Trending weekly
--> GitHub Search API 辅助查询
--> 去重并合并来源信号
--> 过滤最近一周活跃项目
--> 综合评分排序
-```
-
-### 4. 评分调整
-
-当前默认评分权重：
-
-1. `trending`：45%。
-2. `star_growth`：25%。
-3. `topic`：15%。
-4. `freshness`：10%。
-5. `community`：5%。
-
-其中 `community` 由总 Star 和 Fork 共同构成。该设计把 Trending 作为第一指标，同时保留新增 Star、垂直方向匹配、近期活跃和社区基础信号。
-
-### 5. 个性化预留
-
-`config/interests.example.json` 新增：
-
-1. `enable_github_trending`：是否启用 Trending。
-2. `trending_languages`：额外采集指定语言的 Trending 榜。
-3. `trending_max_repositories`：限制每个 Trending 榜补齐详情的项目数。
-4. `search_topics`：Search API 的 topic 补充方向。
-5. `search_languages`：Search API 的语言补充方向。
-6. `score_weights`：综合评分权重。
-
-后续用户可以通过 `config/interests.json` 调整这些字段，不需要改主流程代码。
-
----
-
-## 2026-04-29 追加：Trending 信号展示增强
-
-### 1. 开发目的
-
-上一轮已经把 GitHub Trending 周榜作为第一优先级候选来源。本轮继续补齐可见性：让周报、趋势摘要和 GitHub Pages 历史项目索引都能直接看到项目来源与 Trending 排名，方便判断排序是否符合“Trending 优先”的设计。
-
-### 2. 本次实现
-
-更新：
-
-```text
-prompts/weekly_report.md
-src/reporter.py
-src/trends.py
-scripts/build_pages.py
-tests/test_reporter.py
-tests/test_trends.py
-tests/test_build_pages.py
-```
-
-具体变化：
-
-1. Kimi 提示词要求优先解释 `trending_rank`，并说明 `sources` 来源。
-2. 降级周报的项目总览新增“来源”和“Trending 排名”。
-3. 重点项目分析新增“热度来源”。
-4. 趋势摘要新增 `trending_project_count` 和 `top_trending`。
-5. GitHub Pages 历史项目索引新增“来源”和“Trending 排名”列。
-
-### 3. 设计边界
-
-本次只增强展示与摘要，不改变采集排序逻辑。排序逻辑仍由上一轮的 `score_weights` 控制，后续可以通过 `config/interests.json` 调整权重。
-
----
-
-## 2026-04-29 追加：Trending 页面非仓库链接过滤
-
-### 1. 问题来源
-
-检查 GitHub Actions 自动归档回来的 `data/runs/2026-04-29.json` 后发现，GitHub Trending 采集已经生效，但页面解析器把部分非仓库链接也当成仓库，例如：
-
-```text
-sponsors/explore
-apps/dependabot
-apps/github-actions
-```
-
-这些路径不是普通仓库，调用 GitHub 仓库详情 API 时会返回 404，导致运行摘要中出现不必要的 `collector_errors`。
-
-### 2. 本次修复
-
-更新：
-
-```text
-src/collector.py
-tests/test_collector.py
-```
-
-修复方式：
-
-1. 在 Trending 链接解析阶段过滤 `sponsors`、`apps`、`users`、`settings` 等非仓库路径前缀。
-2. 保留真实仓库路径解析逻辑，不改变 Trending 优先级和评分逻辑。
-3. 增加单元测试，确保 `sponsors/explore` 和 `apps/dependabot` 不会进入 Trending 仓库候选列表。
-
-### 3. 预期效果
-
-下一次 GitHub Actions 运行时，Trending 来源的 404 噪声应明显减少。若 GitHub 页面结构继续变化，后续再考虑把解析规则收紧到 Trending 项目卡片区域。
-
----
-
-## 2026-04-29 追加：Trending 标题区域解析收紧
-
-### 1. 开发目的
-
-上一轮通过过滤非仓库路径减少了 Trending 采集噪声。本轮继续收紧解析边界，避免未来 GitHub Trending 页面新增其他两段式链接时再次被误判为仓库。
-
-### 2. 本次实现
-
-更新：
-
-```text
-src/collector.py
-tests/test_collector.py
-```
-
-解析规则从“读取页面中所有形如 `/owner/repo` 的链接”调整为：
-
-```text
-只读取 article 内 h2 标题区域中的仓库链接
-```
-
-这样可以更贴近 GitHub Trending 项目卡片结构，避免页面导航、赞助入口、应用入口或项目卡片内部的辅助链接进入候选池。
-
-### 3. 测试补充
-
-测试中新增了以下噪声链接：
-
-```text
-/outside/not-repository
-/inside/not-repository
-```
-
-确认它们不会被解析为 Trending 候选仓库。
-
----
-
-## 2026-04-29 追加：架构、安全与冗余审查
-
-### 1. 审查范围
-
-本次审查了当前主流程和核心模块：
-
-```text
-main.py
-src/collector.py
-src/processor.py
-src/reporter.py
-src/archive.py
-src/security.py
-src/state.py
-scripts/security_check.py
-```
-
-### 2. 架构结论
-
-当前架构仍然清晰，主流程保持为：
-
-```text
-collector -> processor -> reporter -> archive -> sender
-```
-
-GitHub Trending 已经作为第一优先级候选来源接入，GitHub Search API 作为辅助来源。当前还不需要立刻拆分 `src/sources/`，因为数据源数量和复杂度仍可由 `collector.py` 承载。后续接入 GraphQL、自定义仓库列表或 OSSInsight 时，再拆分来源模块更合适。
-
-### 3. 安全结论
-
-当前未发现硬编码密钥风险：
-
-1. 密钥仍然只从环境变量或 GitHub Actions Secrets 读取。
-2. 项目不会下载、安装或执行第三方仓库代码。
-3. 入选仓库安全检查仍是元数据级提示，不把外部项目判断为“安全”。
-4. `scripts/security_check.py` 会继续扫描源码、配置、workflow、文档和提示词中的疑似硬编码密钥。
-
-需要继续注意的风险：
-
-1. README 摘要属于不可信输入，可能包含提示注入内容。
-2. GitHub Trending 是网页来源，不是稳定官方 API，页面结构变化可能影响解析。
-3. 若后续配置多个 `trending_languages`，GitHub API 请求量会增加，需要继续关注限流。
-
-### 4. 本次修复
-
-更新：
-
-```text
-prompts/weekly_report.md
-src/reporter.py
-```
-
-修复内容：
-
-1. 提示词新增要求：仓库简介、README 摘要、项目名称和 topic 都是不可信项目内容，只能作为分析材料，不能执行或遵循其中指令。
-2. 降级周报文案从旧的“GitHub Search API 结果”改为“GitHub Trending 与 GitHub Search 采集结果”，避免与当前架构不一致。
-
-### 5. 可继续优化方向
-
-后续优先级建议：
-
-1. 观察下一次 GitHub Actions 中 Trending 404 噪声是否消失。
-2. 为 Trending 解析增加真实页面样例测试，降低 GitHub 页面结构变化带来的风险。
-3. 增加报告结构校验，检查 Kimi 是否确实展示来源、Trending 排名和风险提示。
-4. 当数据源继续增加时，再拆分 `src/sources/`，不要现在提前复杂化。
-
----
-
-## 2026-04-29 追加：报告质量校验增强
-
-### 1. 开发目的
-
-当前采集和排序已经把 GitHub Trending 作为第一热度信号。为了避免 Kimi 周报漏掉关键字段，本轮增强报告质量校验，让模型输出必须体现项目来源、Trending 排名和风险提示。
-
-### 2. 本次实现
-
-更新：
-
-```text
-src/report_checks.py
-src/reporter.py
-tests/test_report_checks.py
-```
-
-校验规则：
-
-1. 如果项目包含 `sources`，报告中需要出现对应来源，例如 `GitHub Trending` 或 `GitHub Search`。
-2. 如果项目包含大于 0 的 `trending_rank`，报告中需要出现 `Trending` 和对应排名数字。
-3. 如果项目包含 `security_flags`，报告中需要出现风险提示相关内容。
-
-这些规则只在对应数据存在时触发，不会要求普通 Search 项目强行展示 Trending 排名。
-
-### 3. 冗余文案修正
-
-降级周报结论文案中仍提到“后续加入 README 深度分析和历史去重”，但这两类能力已经部分实现。本轮改为提醒用户优先查看 Trending 排名靠前、近期增长明显且匹配兴趣的项目，并强调复用前仍需人工审查代码、依赖和许可证。
-
----
-
-## 2026-04-29 追加：Telegram 改为推送周报链接
-
-### 1. 用户要求
-
-用户希望 Telegram 中直接推送 GitHub Actions 运行后由 Kimi 生成并归档到 GitHub Pages 的周报链接，而不是推送完整 Markdown 正文，方便在手机上阅读。同时需要为后续接入微信、飞书等渠道预留入口。
-
-### 2. 本次实现
-
-更新：
-
-```text
-src/sender.py
-src/settings.py
-tests/test_sender.py
-.env.example
-docs/setup.md
-docs/future-plan.md
-```
-
-具体变化：
-
-1. `send_report` 不再把完整 Markdown 拆分发送到 Telegram。
-2. 新增 `build_report_message`，统一构建短版推送消息。
-3. 新增 `report_url`，用于生成周报公开访问链接。
-4. 新增 `REPORT_BASE_URL` 配置，适配自定义域名、自定义 Pages 路径或未来其他展示入口。
-5. 如果未配置 `REPORT_BASE_URL`，GitHub Actions 中会根据 `GITHUB_REPOSITORY` 自动推导 GitHub Pages 链接。
-
-默认链接格式：
-
-```text
-https://<owner>.github.io/<repo>/weekly/YYYY-MM-DD.md
-```
-
-### 3. 后续渠道预留
-
-当前仍保持 Telegram 单渠道，不提前创建复杂的 `channels` 框架。后续接入微信、飞书时，可以复用 `build_report_message` 和 `report_url`，只新增对应渠道的发送函数即可。
-
----
-
-## 2026-04-29 追加：Trending 入选保底与 Telegram 超链接修复
-
-### 1. 问题现象
-
-用户反馈真实运行后仍然没有把 GitHub Trending 放在足够重要的位置，希望 Trending 周榜前 10 的项目至少有 7 个进入热点项目周报。同时 Telegram 推送中的周报地址不能直接点击，需要以超链接形式发送。
-
-### 2. 原因判断
-
-仅依赖评分权重仍可能让高 Star、高增长的 Search API 项目挤掉 Trending Top 10 项目。另一个隐藏原因是历史去重会在排序前过滤已推送项目，如果某个 Trending Top 10 项目之前发过，它会被挡在周报外。
-
-Telegram 侧的问题是当前消息只发送纯文本地址，而且默认生成的是 `.md` 地址；GitHub Pages 更适合使用 `.html` 页面地址。
-
-### 3. 本次实现
-
-更新：
-
-```text
-src/processor.py
-src/state.py
-src/sender.py
-config/interests.example.json
-tests/test_processor.py
-tests/test_state.py
-tests/test_sender.py
-docs/setup.md
-docs/future-plan.md
-```
-
-具体变化：
-
-1. `process_repositories` 新增 Trending Top 10 保底选择逻辑。
-2. 默认 `min_trending_top10_projects` 为 `7`，即 Trending 前 10 中至少 7 个进入周报；如果可用项目不足 7 个，则保留实际可用数量。
-3. `filter_unsent_repositories` 对 Trending Top 10 项目放行，避免历史去重挡掉本周真正热门项目。
-4. Telegram 消息改为 HTML 超链接：`打开本周周报`。
-5. 周报链接从 GitHub Pages 的 `.md` 地址改为 `.html` 地址，更适合浏览器直接打开。
-
-### 4. 设计边界
-
-该规则只保护 Trending 周榜前 10，不取消其他 Search API 辅助项目。周报剩余名额仍按综合评分补齐，继续保留垂直方向和个性化调整空间。
-
----
-
-## 2026-04-29 追加：Pages 历史项目索引提交范围修复
-
-### 1. 问题来源
-
-复核 workflow 时发现，`scripts/build_pages.py` 会生成：
-
-```text
-docs/projects.md
-```
-
-但 `.github/workflows/weekly.yml` 的自动提交范围只包含 `docs/index.md` 和 `docs/weekly`，没有包含 `docs/projects.md`。这会导致 GitHub Actions 运行后，历史项目索引可能没有随最新数据一起提交。
-
-### 2. 本次修复
-
-更新：
-
-```text
-.github/workflows/weekly.yml
-```
-
-将 `docs/projects.md` 加入自动提交范围，确保每次周报生成后，GitHub Pages 首页、周报页面和历史项目索引都能同步刷新。
-
----
-
-## 2026-04-29 追加：Telegram 链接发送顺序调整
-
-### 1. 问题来源
-
-Telegram 已经改为推送 GitHub Pages 周报链接，但原流程是在 `main.py` 内生成报告后立即发送 Telegram。此时 `scripts/build_pages.py` 还没有生成 `docs/weekly/YYYY-MM-DD.md`，GitHub Actions 也还没有把页面提交到仓库，因此用户点击链接时可能遇到页面尚未发布的问题。
-
-### 2. 本次调整
-
-更新：
-
-```text
-main.py
-scripts/send_report_link.py
-.github/workflows/weekly.yml
-tests/test_send_report_link.py
-```
-
-新的 Actions 顺序：
-
-```text
-python main.py（跳过 Telegram）
-python scripts/build_pages.py
-提交 reports/data/docs 归档
-python scripts/send_report_link.py（发送 Pages 链接）
-提交 data/runs 和 data/state 中的推送状态
-```
-
-### 3. 设计边界
-
-1. 本地运行 `python main.py` 默认仍可直接尝试发送 Telegram，保持兼容。
-2. GitHub Actions 中通过 `SKIP_TELEGRAM_SEND=true` 跳过主流程内发送，改由归档提交后的独立脚本发送。
-3. 如果 Telegram 未配置或发送失败，脚本会记录状态，但不阻断已经完成的周报归档。
-
----
-
-## 2026-04-30 追加：运行摘要记录 Telegram 周报链接
-
-### 1. 开发目的
-
-Telegram 改为推送 GitHub Pages 周报链接后，需要在运行摘要中记录实际发送的链接，方便从 GitHub 仓库直接排查本次推送是否指向正确页面。
-
-### 2. 本次实现
-
-更新：
-
-```text
-src/models.py
-main.py
-scripts/send_report_link.py
-tests/test_send_report_link.py
-```
-
-新增运行摘要字段：
-
-```text
-telegram_report_url
-```
-
-该字段记录本次发送到 Telegram 的 GitHub Pages 周报页面地址，例如：
-
-```text
-https://windsky922.github.io/githubzhuaqu/weekly/YYYY-MM-DD.html
-```
-
-### 3. 使用价值
-
-后续排查 Telegram 推送时，可以直接打开 `data/runs/YYYY-MM-DD.json`，确认：
-
-1. `telegram_sent` 是否为 `true`。
-2. `telegram_error` 是否为空。
-3. `telegram_report_url` 是否是预期的周报页面。
-
----
-
-## 2026-04-30 追加：GitHub Pages 内部链接修复
-
-### 1. 开发目的
-
-Telegram 已改为推送 GitHub Pages 的 `.html` 周报页面，但归档首页中仍使用 `weekly/YYYY-MM-DD.md` 作为周报入口。为了让手机端和 Pages 页面内的跳转路径保持一致，本次将页面导航链接统一改为最终网页地址。
-
-### 2. 本次实现
-
-更新：
-
-```text
-scripts/build_pages.py
-tests/test_build_pages.py
-```
-
-调整内容：
-
-1. 周报归档首页中的最新周报链接改为 `weekly/YYYY-MM-DD.html`。
-2. 全部周报列表中的历史周报链接改为 `weekly/YYYY-MM-DD.html`。
-3. 首页中的项目文档导航改为 `.html` 链接，适配 GitHub Pages 最终渲染页面。
-4. 历史项目索引的返回链接改为 `index.html`。
-5. 修复历史项目索引在暂无项目时的表格列数，避免表格结构不完整。
-
-### 3. 验证方式
-
-新增单元测试覆盖：
-
-1. 首页是否输出 `.html` 周报链接。
-2. 文档导航是否输出 `.html` 链接。
-3. 暂无项目时，历史项目索引表格是否仍保持完整列数。
-
----
-
-## 2026-04-30 追加：推送短消息结构预留
-
-### 1. 开发目的
-
-当前只需要 Telegram 推送，但后续可能接入微信、飞书或邮件。为了避免以后把 Telegram 的 HTML 文案复制到其他渠道，本次在不创建复杂 `channels/` 框架的前提下，先抽出统一的短消息结构。
-
-### 2. 本次实现
-
-更新：
-
-```text
-src/sender.py
-tests/test_sender.py
-```
-
-新增：
-
-```text
-DeliveryMessage
-build_delivery_message
-```
-
-字段说明：
-
-1. `title`：周报标题。
-2. `url`：GitHub Pages 周报链接。
-3. `text`：纯文本消息，适合后续微信、飞书或邮件复用。
-4. `html_text`：HTML 消息，当前 Telegram 使用它来发送可点击超链接。
-
-### 3. 架构边界
-
-本次没有提前创建 `src/channels/` 目录，也没有加入微信、飞书或邮件依赖。只有当第二个真实推送渠道接入时，再把各渠道发送函数拆出独立模块。
-
----
-
-## 2026-04-30 追加：安全检查 allowlist 收紧
-
-### 1. 开发目的
-
-项目要求不能在代码中硬编码 API Key、Token、Chat ID 或任何密钥。原安全检查会对包含 `os.getenv(` 的整行直接放行，这在正常读取环境变量时没有问题，但如果有人写入带真实密钥的默认值，例如 `os.getenv("TOKEN", "真实 token")`，就可能被漏检。
-
-### 2. 本次实现
-
-更新：
-
-```text
-scripts/security_check.py
-tests/test_security_check.py
-```
-
-调整内容：
-
-1. allowlist 不再整行跳过所有规则。
-2. 对 GitHub token 和 Telegram bot token 这类具有明确格式的密钥，始终执行检测。
-3. 仍然允许 GitHub Actions Secrets 引用和环境变量示例通过通用配置检查，避免误报正常配置。
-4. 新增测试覆盖 `os.getenv` 默认值中藏入 GitHub token 的情况。
-
-### 3. 安全边界
-
-该检查只能发现常见格式和明显硬编码的密钥，不能替代 GitHub Secret Scanning 或人工审查。后续如果接入更多外部服务，需要继续补充对应 token 格式规则。
-
----
-
-## 2026-04-30 追加：排除生成周报目录的密钥误报
-
-### 1. 开发目的
-
-`docs/weekly/` 是由 `reports/` 同步生成的 GitHub Pages 周报目录，里面可能包含第三方仓库 README 摘要。安全检查的目标是保护本项目源码、配置和手写文档中不要硬编码密钥，不应把第三方生成内容误判为本项目自身泄漏。
-
-### 2. 本次实现
-
-更新：
-
-```text
-scripts/security_check.py
-tests/test_security_check.py
-```
-
-调整内容：
-
-1. 新增 `EXCLUDED_PATH_PREFIXES`，当前只排除 `docs/weekly/`。
-2. 保留 `docs/setup.md`、`docs/operation-log.md` 等手写文档扫描。
-3. 新增测试确认 `docs/weekly/` 中的疑似 token 会被跳过。
-4. 新增测试确认普通 `docs/` 文档仍会被扫描。
-
-### 3. 安全边界
-
-该调整只处理误报来源，不降低对项目源码、workflow、配置、提示词和手写文档的检查强度。生成周报仍然会长期归档，因此后续可以考虑在报告生成阶段对 README 摘要做更保守的脱敏处理。
-
----
-
-## 2026-04-30 追加：第三方内容入库前脱敏
-
-### 1. 开发目的
-
-周报会保存第三方仓库简介和 README 摘要。即使这些内容不是本项目自己的密钥，也不应该把疑似 token 原样写入 `reports/`、`data/selected/` 或 GitHub Pages 周报中。本次在采集边界增加脱敏，降低归档第三方敏感字符串的风险。
-
-### 2. 本次实现
-
-更新：
-
-```text
-src/security.py
-src/collector.py
-tests/test_security.py
-tests/test_collector.py
-```
-
-新增：
-
-```text
-redact_sensitive_text
-```
-
-处理范围：
-
-1. GitHub token 形态字符串。
-2. Telegram bot token 形态字符串。
-3. GitHub 仓库简介进入系统时脱敏。
-4. README 摘要进入系统时脱敏。
-
-### 3. 设计边界
-
-该能力用于减少第三方内容归档风险，不改变安全扫描脚本的职责。后续如果接入更多服务，可以继续扩展 `redact_sensitive_text` 的模式列表。
-
----
-
-## 2026-04-30 追加：报告生成层最终脱敏
-
-### 1. 开发目的
-
-采集层已经会对第三方仓库简介和 README 摘要做脱敏，但报告生成层仍需要最后一道保护，防止手工构造的数据、测试数据或模型输出绕过采集边界，把疑似密钥写入 Markdown 周报。
-
-### 2. 本次实现
-
-更新：
-
-```text
-src/reporter.py
-tests/test_reporter.py
-```
-
-调整内容：
-
-1. `normalize_report_markdown` 会先执行 `redact_sensitive_text`，再做链接和语言规范化。
-2. `fallback_report` 返回前会做最终脱敏。
-3. `_repository_payload` 会在发给 Kimi 前对 `description` 和 `readme_excerpt` 再次脱敏。
-4. 新增测试覆盖报告归一化脱敏和 Kimi payload 脱敏。
-
-### 3. 安全边界
-
-该保护是“最后兜底”，不能替代采集层脱敏和仓库密钥扫描。未来如果报告中增加更多来自第三方的文本字段，应继续复用 `redact_sensitive_text`。
-
----
-
-## 2026-04-30 追加：通用密钥赋值脱敏
-
-### 1. 开发目的
-
-此前运行时脱敏已经覆盖 GitHub token 和 Telegram bot token 的明确格式，但第三方 README 中还可能出现 `api_key=...`、`password: ...`、`chat_id=...` 这类通用密钥赋值。为了和 `scripts/security_check.py` 的扫描策略保持一致，本次扩展运行时脱敏规则。
-
-### 2. 本次实现
-
-更新：
-
-```text
-src/security.py
-tests/test_security.py
-```
-
-新增脱敏匹配范围：
-
-1. `api_key` 或 `api-key`
-2. `token`
-3. `secret`
-4. `password`
-5. `chat_id` 或 `chat-id`
-
-### 3. 设计边界
-
-通用赋值规则只替换疑似密钥值，不阻止周报生成。它用于减少第三方内容归档风险，项目自身源码和手写文档仍由 `scripts/security_check.py` 阻断硬编码密钥。
-
----
-
-## 2026-04-30 追加：保留脱敏字段名
-
-### 1. 开发目的
-
-通用密钥赋值脱敏应该保留 `api_key=`、`password:` 等字段名，只替换后面的疑似密钥值。这样既能避免敏感字符串进入归档，也能让报告读者知道原文位置存在一个被脱敏的配置字段。
-
-### 2. 本次实现
-
-更新：
-
-```text
-src/security.py
-tests/test_security.py
-```
-
-调整内容：
-
-1. 将明确 token 形态和通用赋值形态分开处理。
-2. GitHub token、Telegram bot token 仍整体替换为 `[已脱敏疑似密钥]`。
-3. `api_key=...`、`password: ...` 等赋值形态保留键名和分隔符，只替换值。
-4. 测试增加对字段名保留行为的断言。
-
-### 3. 使用效果
-
-示例：
-
-```text
-api_key=[已脱敏疑似密钥]
-password: [已脱敏疑似密钥]
-```
-
----
-
-## 2026-04-30 追加：Open Issue 风险提示
-
-### 1. 开发目的
-
-未来计划中提到需要为入选仓库增加 Issue 风险提示。当前 GitHub 仓库详情已经包含 `open_issues_count`，可以先做一条保守规则：当 Open Issue 数量明显偏高时，在周报风险提示中标记“需要人工检查维护响应”。
-
-### 2. 本次实现
-
-更新：
-
-```text
-src/security.py
-tests/test_security.py
-```
-
-新增规则：
-
-```text
-open_issues_count >= 100
-并且 open_issues_count / stargazers_count >= 0.2
-```
-
-满足条件时，`security_flags` 会加入：
-
-```text
-Open Issue 数量相对较高，建议复用前人工检查维护响应和问题质量。
-```
-
-### 3. 设计边界
-
-该规则只做风险提示，不把项目判定为不可用，也不影响当前排序。Issue 多可能代表项目活跃，也可能代表维护压力较大，因此周报中只提示人工复核。
-
----
-
-## 2026-04-30 追加：报告非入选项目链接检查
-
-### 1. 开发目的
-
-未来计划中提到需要检查周报是否包含非入选项目。Kimi 生成周报时可能额外推荐未进入本期筛选结果的 GitHub 仓库，这会削弱 Trending 优先和个性化筛选的约束。
-
-### 2. 本次实现
-
-更新：
-
-```text
-src/report_checks.py
-tests/test_report_checks.py
-```
-
-新增检查：
-
-1. 从周报中提取 `https://github.com/owner/repo` 形式的仓库链接。
-2. 与本期入选仓库 `full_name` 对比。
-3. 如果出现非入选仓库链接，返回质量错误。
-4. Kimi 周报质量检查失败时，主流程会回退到规则周报。
-
-### 3. 设计边界
-
-该检查只针对 GitHub 仓库链接，不限制普通网页、文档链接或 GitHub Pages 周报链接。它用于保证本期周报严格围绕筛选后的项目集合展开。
-
----
-
-## 2026-04-30 追加：周报固定结构检查
-
-### 1. 开发目的
-
-未来计划中提到需要把周报拆成固定结构，减少模型自由发挥。提示词已经要求 Kimi 输出五个核心部分，但代码层还没有验证这些章节是否真的存在。
-
-### 2. 本次实现
-
-更新：
-
-```text
-src/report_checks.py
-tests/test_report_checks.py
-```
-
-新增检查：
-
-1. 本周总体趋势。
-2. 热点项目总览。
-3. 重点项目分析。
-4. 最适合用户学习的项目。
-5. 本周结论。
-
-为了兼容已有表达，部分章节允许近义标题，例如“本周趋势”“热门项目总览”“最适合关注的项目”。
-
-### 3. 设计边界
-
-该检查只用于 Kimi 周报质量校验。若 Kimi 输出缺少核心结构，主流程会回退到规则周报，避免生成结构混乱的报告。
-
----
-
-## 2026-04-30 追加：Kimi 质量失败自动重试
-
-### 1. 开发目的
-
-此前 Kimi 生成的周报只要未通过质量检查，就会直接回退到规则周报。这样虽然稳定，但会让一些可修复的问题也变成降级版本。本次增加一次自动重试机会，减少可避免的降级周报。
-
-### 2. 本次实现
-
-更新：
-
-```text
-src/reporter.py
-tests/test_reporter.py
-```
-
-调整内容：
-
-1. 首次 Kimi 输出未通过质量检查时，记录质量错误。
-2. 第二次请求 Kimi 时，把质量错误作为 `quality_retry_feedback` 传入。
-3. 重试指令要求 Kimi 只使用本次输入项目，并修复质量检查问题。
-4. 如果第二次仍不合格，才回退到规则周报。
-5. 内容安全过滤失败仍保留原有逻辑：必要时去掉 README 摘要后再试。
-
-### 3. 设计边界
-
-该重试只执行一次，避免外部 API 不稳定时无限重试。所有失败原因仍会写入运行摘要的 `report_error`，便于后续排查。
-
----
-
-## 2026-04-30 追加：前端、数据库与个性化分析规划提前
-
-### 1. 开发目的
-
-用户希望后期项目可以构建前端和数据库，同时希望个性化分析提上日程。本次先不直接开工复杂工程，而是把成熟度判断、触发条件、预留目录、分支策略和最终成品展望写入未来规划。
-
-### 2. 本次实现
-
-更新：
-
-```text
-docs/future-plan.md
-```
-
-新增规划：
-
-1. 前端建设计划。
-2. 数据库建设计划。
-3. 个性化分析计划。
-4. 多分支开发策略。
-5. 最终成品展望。
-6. 继续推进前需要解决的问题。
-
-### 3. 判断结论
-
-当前前端和数据库还不适合立即完整开发。更合理的路径是先稳定数据结构和周报质量，再做 GitHub Pages 轻量筛选，等历史数据足够后再引入 SQLite 和更完整的前端。个性化分析已经有 `config/interests.json` 基础，可以优先推进 profile 配置设计。
-
----
-
-## 2026-04-30 追加：个性化 profile 最小版本
-
-### 1. 开发目的
-
-用户希望后续可以通过选择 Java、Python、Agent 开发等选项，精准推送符合当前需求的项目。本次先实现配置层的最小版本，避免提前引入复杂前端或数据库。
-
-### 2. 本次实现
-
-更新：
-
-```text
-config/profiles.example.json
-src/personalization.py
-src/settings.py
-tests/test_personalization.py
-tests/test_settings.py
-README.md
-docs/setup.md
-.github/workflows/weekly.yml
-```
-
-调整内容：
-
-1. 新增 `config/profiles.example.json`，提供 `java`、`python`、`agent_development`、`learning`、`developer_tools` 五类示例方向。
-2. 新增 `src/personalization.py`，支持把多个 profile 叠加到基础兴趣配置中。
-3. 支持 `INTEREST_PROFILE=java,agent_development` 这种多选形式，为后续前端选择器预留入口。
-4. `src/settings.py` 在加载 `config/interests.json` 或 example 后自动应用 profile。
-5. GitHub Actions 支持从仓库变量读取 `INTEREST_PROFILE`。
-6. README 更新为当前真实项目能力说明。
-
-### 3. 设计边界
-
-本次只做个性化配置入口，不新增数据库、不新增登录系统、不新增复杂前端。profile 中只允许保存兴趣方向、语言、主题、搜索补充项和评分权重，不应写入任何密钥。
-
----
-
-## 2026-04-30 追加：个性化匹配原因
-
-### 1. 开发目的
-
-用户希望后续不仅能选择 Java、Python、Agent 开发等方向，还能精准推送符合当前需求的项目。本次在已有 profile 选择能力上增加“匹配原因”，让推荐结果可以解释为什么某个项目适合当前选择。
-
-### 2. 本次实现
-
-更新：
-
-```text
-src/personalization.py
-src/processor.py
-tests/test_personalization.py
-tests/test_processor.py
-README.md
-docs/setup.md
-```
-
-调整内容：
-
-1. profile 应用后会生成轻量的 `profile_match_rules`。
-2. 评分阶段根据仓库语言、topic、名称和简介判断命中哪些个性化方向。
-3. 入选项目的 `selection_reasons` 会追加类似“匹配当前个性化方向：Java 后端与工程实践、Agent 开发。”的说明。
-4. 该字段会进入 `data/selected/YYYY-MM-DD.json`，可供 Kimi 周报、规则版周报和后续前端筛选复用。
-
-### 3. 设计边界
-
-本次仍不新增前端或数据库。匹配逻辑保持轻量，先以 profile 的语言和主题关键词为依据，后续如果真实周报中误判较多，再扩展更细的规则。
-
-### 4. 追加修正
-
-运行真实周报后发现，子串匹配可能让 `java` 误命中 `JavaScript`。已将 profile 主题匹配调整为词项匹配，并新增测试覆盖，避免语言和主题出现明显误判。
----
-
-## 2026-04-30 追加：Kimi 过载重试与降级原因修正
-
-### 1. 问题原因
-
-真实运行时 Kimi 返回 `429 engine_overloaded_error`，表示模型服务过载。旧代码没有针对这类临时错误等待重试，而是第一次请求失败后直接回退到规则版周报。
-
-### 2. 本次实现
-
-更新：
-
-```text
-src/reporter.py
-tests/test_reporter.py
-README.md
-docs/setup.md
-```
-
-调整内容：
-
-1. Telegram 允许继续推送规则版周报链接，保证用户能收到兜底结果。
-2. Kimi 返回 `429`、`500`、`502`、`503`、`504`、`engine_overloaded` 或网络临时错误时，会先自动重试。
-3. 新增 `KIMI_MAX_RETRIES`，默认重试 `2` 次。
-4. 新增 `KIMI_RETRY_SECONDS`，默认每次等待 `20` 秒。
-5. 多次重试仍失败时，才会生成规则版周报，并在运行摘要的 `report_error` 中记录完整失败原因。
-
-### 3. 设计结论
-
-本次问题的直接原因不是配置错误，而是 Kimi 服务端过载。后续通过自动重试减少偶发过载导致的降级；如果多次重试后仍失败，说明外部模型服务持续不可用，系统仍会保留规则版周报作为兜底。
-
----
-
-## 2026-04-30 追加：外部项目 README 精炼摘要
-
-### 1. 开发目的
-
-用户说明需要保留本仓库 README 的完整状态，真正需要精简的是周报中来自外部项目的 README 内容。此前系统会截取外部项目 README 前段文本，容易把过长说明复制进周报页面。
-
-### 2. 本次实现
-
-更新：
-
-```text
-src/collector.py
-tests/test_collector.py
-README.md
-```
-
-调整内容：
-
-1. 恢复本仓库 README 的完整版本。
-2. 外部项目 README 进入周报前先清理徽章、图片、代码块、表格、安装命令和目录噪声。
-3. `readme_excerpt` 改为保存 2-3 句、约 300 字以内的精炼摘要。
-4. 规则版周报中原来的“README 摘要”位置会直接使用该精炼摘要，不再展示长篇 README 原文。
-
-### 3. 设计边界
-
-当前摘要是规则型提取，不调用额外模型，避免增加成本和失败点。后续如果 Kimi 稳定，可再让模型基于该精炼摘要做更自然的中文改写。
-
----
-
-## 2026-04-30 追加：代码审查问题修复
-
-### 1. 开发目的
-
-根据最新代码审查结果，修复四类问题：已推送状态影响热点完整性、Kimi 格式小错误导致整份降级、README 摘要字段不清晰、旧架构文档仍保留 `created` 查询示例。
-
-### 2. 本次实现
-
-更新：
-
-```text
-main.py
-src/models.py
-src/collector.py
-src/reporter.py
-tests/test_collector.py
-tests/test_reporter.py
-docs/project-architecture.md
-```
-
-调整内容：
-
-1. 周报候选池不再因 `sent_repos.json` 过滤历史已推送项目，避免遗漏持续热门项目。
-2. 运行摘要新增 `previously_sent_selected_count`，记录本期入选项目中有多少曾经推送过。
-3. 删除不再使用的 `filter_unsent_repositories`，避免后续误以为主流程仍会过滤已推送仓库。
-4. Kimi 输出进入质量检查前，会自动补齐项目完整链接、来源、Trending 排名和风险提示，减少可修复格式问题导致的降级。
-5. `Repository` 新增 `readme_summary` 字段，继续保留 `readme_excerpt` 兼容历史数据。
-6. README 规则摘要增加 bullet-only README 的兜底提取。
-7. `docs/project-architecture.md` 将旧 `created:>=...` 示例改为当前 `Trending + pushed` 策略。
-
-### 3. 设计边界
-
-本次没有引入数据库或新框架。`sent_repos.json` 仍用于记录推送状态，但不再影响周报候选池；Kimi 修复器只做结构化元数据补齐，不改写模型正文。
-
----
-
-## 2026-05-03 追加：吸收研究报告并修复发布状态一致性
-
-### 1. 开发目的
-
-用户提供 `deep-research-report.md` 后，确认后续方向应从“更复杂的抓取器”转向“可复盘、可订阅、可个性化的开源情报系统”。本次先吸收其中适合当前阶段的路线建议，并修复 Pages 页面可能显示旧 Telegram 状态的问题。
-
-### 2. 本次实现
-
-更新：
-
-```text
-.github/workflows/weekly.yml
-scripts/send_report_link.py
-tests/test_send_report_link.py
-docs/roadmap.md
-docs/future-plan.md
-```
-
-调整内容：
-
-1. `scripts/send_report_link.py` 在写回 `data/runs/YYYY-MM-DD.json` 的 Telegram 状态后，会重新构建 GitHub Pages 页面。
-2. workflow 的“提交推送状态”步骤同时提交 `docs/index.md`、`docs/projects.md` 和 `docs/weekly`，避免页面状态停留在推送前。
-3. 新增测试，验证 Telegram 状态写回后重建页面时，首页会展示“已推送”。
-4. 重写 `docs/roadmap.md`，将路线明确为“模块化单体 + SQLite 双写 + 公共 JSON + 中期轻量前端 + 个性化反馈”。
-5. 更新 `docs/future-plan.md` 的优先级，把 Pages 状态一致性、重复入选新颖度、SQLite 双写和公共 JSON 提到更靠前的位置。
-
-### 3. 设计边界
-
-本次没有直接引入数据库、前端框架或新外部服务。SQLite、GraphQL、公共 JSON 和前端增强只进入路线图，后续按小步提交逐项实现。
-
----
-
-## 2026-05-03 追加：重复入选项目的新颖度策略
-
-### 1. 开发目的
-
-用户要求周报必须保持“每周最火爆项目”的完整性，因此不能简单过滤已经推送过的仓库。但如果同一批项目连续多周入选，周报会降低新鲜感。本次实现轻量的新颖度惩罚和说明机制。
-
-### 2. 本次实现
-
-更新：
-
-```text
-main.py
-src/processor.py
-config/interests.example.json
-tests/test_processor.py
-README.md
-docs/roadmap.md
-docs/future-plan.md
-```
-
-调整内容：
-
-1. `process_repositories` 新增可选参数 `previously_sent_names`，旧调用保持兼容。
-2. 主流程把 `sent_repos.json` 中的已推送仓库集合传入排序阶段。
-3. 新增 `novelty_penalty_weight` 配置，默认 `0.08`，用于轻微降低非 Trending 前十的重复项目分数。
-4. GitHub Trending 前十项目不受该惩罚，避免破坏 Trending 优先级和前十保护策略。
-5. 重复入选项目会增加推荐理由：“此前已经推送过，本次因仍然具备热点信号继续保留观察。”
-6. 新增测试覆盖重复项目不被过滤、非 Trending 重复项目被轻量降权、Trending 前十重复项目仍保持优先。
-
-### 3. 设计边界
-
-本次没有引入按日期窗口的复杂去重，也不删除历史推送状态。后续如果需要更精细的长期体验，可基于 `first_sent_at`、最近推送日期和反馈数据做动态惩罚。
-
----
-
-## 2026-05-03 追加：公共 JSON 导出
-
-### 1. 开发目的
-
-根据路线图，后续前端、RSS、微信、飞书和外部订阅都需要稳定的数据入口。如果直接读取 Markdown 页面，后续会增加解析成本。因此本次先在现有 Pages 构建流程中导出公开 JSON。
-
-### 2. 本次实现
-
-更新：
-
-```text
-.github/workflows/weekly.yml
-scripts/build_pages.py
-tests/test_build_pages.py
-README.md
-docs/roadmap.md
-docs/future-plan.md
-```
-
-新增产物：
-
-```text
-docs/projects.json
-docs/runs.json
-```
-
-调整内容：
-
-1. `scripts/build_pages.py` 会在生成 `docs/index.md` 和 `docs/projects.md` 的同时生成公共 JSON。
-2. `projects.json` 汇总历次入选项目的公开摘要字段，包括项目名、链接、语言、方向、来源、Trending 排名、新增 Star、推荐理由和风险提示。
-3. `runs.json` 汇总历次运行摘要的公开字段，包括运行日期、入选数量、采集数量、Kimi/降级状态、Telegram 状态和趋势要点。
-4. workflow 的两处归档提交都加入 `docs/projects.json` 和 `docs/runs.json`。
-5. 新增测试验证公共 JSON 的 schema 版本、数量、项目链接、运行状态和空数据兜底。
-
-### 3. 设计边界
-
-公共 JSON 只导出适合公开展示的摘要字段，不导出密钥、用户隐私、原始错误堆栈或未脱敏配置。SQLite 仍未引入，后续数据库可以从这些公开 JSON 和原始 `data/` 工件继续演进。
-
----
-
-## 2026-05-03 追加：SQLite 派生索引基础版本
-
-### 1. 开发目的
-
-后续前端筛选、历史趋势查询和个性化反馈都需要更稳定的数据底座。当前 JSON 归档仍然适合作为可读事实来源，但跨周查询和一致性校验会逐步变复杂。因此本次先建立 SQLite 派生索引的最小基础，不改变主流程读取路径。
-
-### 2. 本次实现
-
-更新：
-
-```text
-.gitignore
-README.md
-docs/roadmap.md
-docs/future-plan.md
-src/storage/schema.sql
-src/storage/sqlite_store.py
-scripts/migrate_json_to_sqlite.py
-scripts/verify_migration.py
-tests/test_storage_sqlite.py
-```
-
-新增表：
-
-```text
-runs
-repositories
-selections
-trend_summaries
-sent_repositories
-star_history
-migration_meta
-```
-
-调整内容：
-
-1. 新增 SQLite schema，覆盖运行摘要、仓库、入选记录、趋势摘要、已推送状态和 Star 历史。
-2. 新增 `scripts/migrate_json_to_sqlite.py`，可将现有 `data/` JSON 归档导入 `data/github_weekly.sqlite`。
-3. 新增 `scripts/verify_migration.py`，校验 SQLite 表计数和 JSON 归档基础计数是否一致。
-4. 新增测试验证导入、幂等性、计数一致性和表名保护。
-5. `.gitignore` 排除 `data/*.sqlite`、`data/*.sqlite-shm`、`data/*.sqlite-wal`，避免提交派生数据库。
-
-### 3. 设计边界
-
-SQLite 当前只是可重建的派生索引，JSON 仍然是事实来源。主流程尚未接入双写，也没有从 SQLite 读取数据。后续可以在本基础上小步加入主流程双写，再逐步让前端或分析脚本消费 SQLite。
-
----
-
-## 2026-05-03 追加：主流程 SQLite 同步
-
-### 1. 开发目的
-
-上一阶段已经建立 SQLite schema、迁移脚本和校验脚本。本次继续把 SQLite 作为派生索引接入主流程，让每次运行在写入 JSON 归档后自动更新数据库，同时仍保持 JSON 为事实来源。
-
-### 2. 本次实现
-
-更新：
-
-```text
-main.py
-scripts/send_report_link.py
-src/archive.py
-src/models.py
-tests/test_archive.py
-tests/test_send_report_link.py
-README.md
-docs/roadmap.md
-docs/future-plan.md
-```
-
-调整内容：
-
-1. `RunSummary` 新增 `sqlite_index_path` 和 `sqlite_error` 字段。
-2. `src/archive.py` 新增 `sync_sqlite_index`，会从现有 JSON 归档同步到 SQLite。
-3. 主流程在 `write_run_summary` 后自动同步 SQLite；同步失败不会阻断周报生成。
-4. `scripts/send_report_link.py` 在 Telegram 状态写回后再次同步 SQLite，保证数据库中的发送状态和最终 JSON 一致。
-5. 新增 `SQLITE_INDEX_PATH` 环境变量，用于自定义 SQLite 路径。
-6. 新增 `SKIP_SQLITE_INDEX` 环境变量，用于跳过 SQLite 同步。
-7. 新增测试覆盖归档同步和发送脚本写回 SQLite 状态字段。
-
-### 3. 设计边界
-
-SQLite 仍是可重建派生索引，不是唯一事实来源。主流程不从 SQLite 读取数据；即使 SQLite 同步失败，报告、归档、Pages 和 Telegram 链路仍继续工作。
-
----
-
-## 2026-05-03 追加：公共数据契约测试
-
-### 1. 开发目的
-
-公共 JSON 和 SQLite 已经成为后续前端、多渠道推送、订阅和趋势分析的基础。如果字段被无意删除或重命名，下游功能会出现隐蔽问题。本次补充数据契约测试和中文说明文档。
-
-### 2. 本次实现
-
-更新：
-
-```text
-scripts/build_pages.py
-tests/test_build_pages.py
-tests/test_data_contracts.py
-docs/data-contracts.md
-docs/roadmap.md
-docs/future-plan.md
-```
-
-调整内容：
-
-1. 新增 `tests/test_data_contracts.py`，固定 `docs/projects.json` 的项目字段集合。
-2. 固定 `docs/runs.json` 的运行摘要字段集合。
-3. 固定 SQLite 关键表字段集合。
-4. 新增 `docs/data-contracts.md`，用中文说明公共 JSON、SQLite 表和修改字段时的要求。
-5. GitHub Pages 首页文档入口新增“数据契约说明”。
-
-### 3. 设计边界
-
-契约测试只锁定当前对外稳定字段，不阻止后续新增能力。未来如果确实要新增、删除或重命名字段，应同步更新契约测试、中文文档和所有下游消费逻辑。
-
----
-
-## 2026-05-03 追加：轻量项目筛选页
-
-### 1. 开发目的
-
-公共 JSON 已经具备稳定字段，下一步需要给未来前端和用户浏览提供一个最小可用入口。本次不引入前端框架，只在现有 GitHub Pages 构建流程中生成静态 HTML 页面。
-
-### 2. 本次实现
-
-更新：
-
-```text
-scripts/build_pages.py
-tests/test_build_pages.py
-.github/workflows/weekly.yml
-README.md
-docs/data-contracts.md
-docs/roadmap.md
-docs/future-plan.md
-```
-
-新增产物：
-
-```text
-docs/explorer.html
-```
-
-调整内容：
-
-1. `scripts/build_pages.py` 新增 `docs/explorer.html` 生成逻辑。
-2. 筛选页直接读取 `docs/projects.json`。
-3. 支持关键词、语言、方向、来源、风险提示筛选。
-4. 支持按最新入选、新增 Star、Trending 排名、综合分和累计 Star 排序。
-5. GitHub Pages 首页新增“项目筛选页”入口。
-6. workflow 归档提交范围加入 `docs/explorer.html`。
-7. 测试验证筛选页会生成，并包含核心控件和 `projects.json` 数据入口。
-
-### 3. 设计边界
-
-本次没有引入 Astro、React、Vue 或 SSR。页面只是最小可用的静态筛选入口，后续如果交互需求继续增加，再基于公共 JSON 和数据契约评估前端工程化。
-
----
-
-## 2026-05-06 追加：可分享筛选视图
-
-### 1. 开发目的
-
-项目筛选页已经可以读取 `projects.json` 做基础筛选，但筛选状态不能复现。为了让后续 Telegram、微信、飞书和浏览器书签能够指向同一个筛选视图，本次补充 URL 状态同步和结果概览。
-
-### 2. 本次实现
-
-更新：
-
-```text
-scripts/build_pages.py
-tests/test_build_pages.py
-README.md
-docs/data-contracts.md
-docs/operation-log.md
-```
-
-调整内容：
-
-1. `docs/explorer.html` 新增日期筛选。
-2. 新增筛选结果概览，展示新增 Star、Trending 项目数、风险提示数和主语言/方向。
-3. 筛选条件会同步到 URL 查询参数。
-4. 打开带查询参数的链接时会自动恢复筛选状态。
-5. 新增“复制链接”按钮，方便分享当前筛选视图。
-6. 测试覆盖日期控件、分享按钮、URL 状态恢复、URL 更新和结果概览函数存在性。
-
-### 3. 设计边界
-
-本次仍保持无框架静态页面。URL 参数只保存公开筛选条件，不写入隐私信息或密钥。
-
----
-
-## 2026-05-06 追加：RSS 订阅输出
-
-### 1. 开发目的
-
-项目已经支持 Telegram 推送和 GitHub Pages 阅读，但还缺少面向阅读器和自动化工具的订阅入口。本次新增 RSS 输出，让用户可以订阅每周周报更新，也为后续微信、飞书、邮件等渠道提供轻量监听来源。
-
-### 2. 本次实现
-
-更新：
-
-```text
-.github/workflows/weekly.yml
-scripts/build_pages.py
-tests/test_build_pages.py
-README.md
-docs/data-contracts.md
-docs/operation-log.md
-```
-
-新增产物：
-
-```text
-docs/feed.xml
-```
-
-调整内容：
-
-1. `scripts/build_pages.py` 在生成 Pages 时同步生成 RSS 2.0 文件。
-2. RSS 条目按周报日期倒序生成，最多保留最近 20 篇。
-3. 条目链接优先使用运行摘要中的公开 Pages 基础地址。
-4. RSS 描述包含入选数量、采集数量、生成方式、Telegram 状态和趋势摘要。
-5. workflow 归档提交范围加入 `docs/feed.xml`。
-6. 测试验证 RSS 文件生成、标题、周报链接和摘要内容。
-
-### 3. 设计边界
-
-RSS 只发布公开摘要，不包含密钥、用户隐私、原始错误堆栈或未脱敏配置。它是订阅入口，不替代 Telegram 推送和 GitHub Pages 阅读页。
-
----
-
-## 2026-05-06 追加：多推送通道入口
-
-### 1. 开发目的
-
-当前实际推送通道是 Telegram。为了后续接入微信、飞书或邮件，本次先把推送结果抽象为通道状态列表，保持现有 Telegram 行为不变，同时让运行摘要和公共 JSON 能记录多通道状态。
-
-### 2. 本次实现
-
-更新：
-
-```text
-main.py
-src/models.py
-src/sender.py
-scripts/send_report_link.py
-scripts/build_pages.py
-tests/test_sender.py
-tests/test_send_report_link.py
-tests/test_build_pages.py
-tests/test_data_contracts.py
-.env.example
-README.md
-docs/data-contracts.md
-docs/operation-log.md
-```
-
-调整内容：
-
-1. 新增 `DeliveryResult`，记录通道名称、发送状态、错误摘要和是否跳过。
-2. 新增 `DELIVERY_CHANNELS` 配置入口，默认 `telegram`。
-3. 当前仅 Telegram 会真实发送；`feishu`、`wechat` 会记录为预留通道未实现，不会发送请求。
-4. 运行摘要新增 `delivery_results` 字段。
-5. `docs/runs.json` 公开输出 `delivery_results`，方便后续前端和外部自动化读取。
-6. 保留 `telegram_sent`、`telegram_error`、`telegram_report_url` 旧字段，避免破坏现有 workflow 和页面逻辑。
-
-### 3. 设计边界
-
-本次不提前实现微信、飞书具体 API，也不新增密钥字段。后续接入时再按实际平台要求增加环境变量和发送函数，仍然不能把 Webhook、Token 或 Chat ID 写入代码和文档示例。
-
----
-
-## 2026-05-06 追加：飞书与企业微信 Webhook 推送
-
-### 1. 开发目的
-
-上一阶段已经把推送状态抽象为多通道结果。本次继续补齐飞书和企业微信 Webhook 发送能力，让周报链接可以直接推送到更多移动端协作工具。
-
-### 2. 本次实现
-
-更新：
-
-```text
-.env.example
-.github/workflows/weekly.yml
-README.md
-docs/data-contracts.md
-docs/operation-log.md
-docs/setup.md
-src/sender.py
-tests/test_sender.py
-```
-
-调整内容：
-
-1. `DELIVERY_CHANNELS` 支持 `telegram`、`feishu`、`wechat`。
-2. `lark` 会归一为 `feishu`，`wecom`、`weixin` 会归一为 `wechat`。
-3. 新增 `FEISHU_WEBHOOK_URL`，用于飞书机器人 Webhook。
-4. 新增 `WECHAT_WEBHOOK_URL` 和 `WECOM_WEBHOOK_URL`，用于企业微信机器人 Webhook。
-5. 飞书发送交互卡片，企业微信发送 Markdown 消息，内容都只包含周报标题和 GitHub Pages 阅读链接。
-6. 未配置 Webhook 的通道会记录为跳过，不影响周报生成、归档和其他通道发送。
-
-### 3. 安全边界
-
-Webhook 地址只从环境变量或 GitHub Actions Secrets 读取，不写入代码和示例值。错误摘要会做字段收敛，只记录平台返回的状态码和简短消息，不记录完整 Webhook 地址。
-
----
-
-## 2026-05-06 追加：推送通道配置检查
-
-### 1. 开发目的
-
-飞书和企业微信 Webhook 已经支持真实发送，但如果 `DELIVERY_CHANNELS` 启用了通道却没有配置对应 Secret，用户只能在运行后从日志里发现跳过。本次新增独立检查脚本，让配置问题可以提前暴露。
-
-### 2. 本次实现
-
-更新：
+新增检查工作流：
 
 ```text
 .github/workflows/secrets-check.yml
-README.md
-docs/operation-log.md
-docs/setup.md
-scripts/check_delivery_channels.py
-tests/test_delivery_channel_check.py
 ```
 
-调整内容：
+该工作流通过 GitHub Actions 读取仓库 Secrets，并验证：
 
-1. 新增 `scripts/check_delivery_channels.py`。
-2. 默认模式只打印 Telegram、飞书、企业微信通道配置状态，不发送真实消息。
-3. `--strict` 模式会在启用通道缺少配置或出现不支持通道时返回失败。
-4. Secrets 配置检查 workflow 新增推送通道配置检查步骤。
-5. 测试覆盖 Telegram 完整配置、飞书缺失 Webhook、企业微信双变量名和不支持通道。
+1. `GH_SEARCH_TOKEN` 是否存在并可访问 GitHub API。
+2. `KIMI_API_KEY`、`KIMI_BASE_URL`、`KIMI_MODEL` 是否存在并可调用 Kimi API。
+3. `TELEGRAM_BOT_TOKEN`、`TELEGRAM_CHAT_ID` 是否存在并可发送 Telegram 测试消息。
 
-### 3. 安全边界
+### 2. 初始测试结果
 
-检查脚本只判断环境变量是否存在，不打印变量值，不发送消息，也不访问外部 Webhook。真实连通性仍由后续发送流程负责。
+运行结论：失败。
+
+已确认：
+
+1. 所有必要 Secrets 都能被 GitHub Actions 读取到。
+2. `GH_SEARCH_TOKEN` 验证通过，GitHub API 剩余额度正常。
+
+失败点：
+
+```text
+Kimi API 返回 HTTP 400。
+```
+
+### 3. 失败原因
+
+GitHub Actions 日志显示：
+
+```text
+invalid temperature: only 1 is allowed for this model
+```
+
+说明当前配置的 Kimi 模型只允许 `temperature=1`。
+
+### 4. 修复动作
+
+已将以下位置的 `temperature` 改为 `1`：
+
+1. `src/reporter.py`
+2. `.github/workflows/secrets-check.yml`
+
+### 5. 最终测试结果
+
+最终运行结果：成功。
+
+已确认：
+
+1. `GH_SEARCH_TOKEN` 已配置，并通过 GitHub API 验证。
+2. `KIMI_API_KEY` 已配置。
+3. `KIMI_BASE_URL` 已配置。
+4. `KIMI_MODEL` 已配置。
+5. Kimi API 可以连通并返回 `choices`。
+6. `TELEGRAM_BOT_TOKEN` 已配置。
+7. `TELEGRAM_CHAT_ID` 已配置。
+8. Telegram 测试消息发送成功。
+
+GitHub Actions 成功运行链接：
+
+```text
+https://github.com/windsky922/githubzhuaqu/actions/runs/24992511910
+```
+
+说明：本次 Kimi 轻量测试请求返回内容为空，但 HTTP 调用成功并返回了有效 `choices` 字段，因此判断为 API 配置可用。正式周报生成流程会使用完整提示词和项目数据调用 Kimi。
 
 ---
 
-## 2026-05-06 追加：公开个性化方向数据
+## 2026-04-27 追加：文档中文化
 
-### 1. 开发目的
+### 1. 用户要求
 
-用户希望后续可以通过 Java、Python、Agent 开发等选项精准推送项目。当前 profile 已经能影响采集和评分，但前端缺少稳定公开数据入口。本次新增 `profiles.json`，让 GitHub Pages 和后续前端可以直接读取个性化方向。
+用户要求项目中所有文档使用中文书写，将英文写成的部分重新用中文表达。
 
-### 2. 本次实现
+### 2. 本次处理范围
 
-更新：
+本次已将以下文档性文件中的英文说明改写为中文：
 
-```text
-README.md
-docs/data-contracts.md
-docs/operation-log.md
-scripts/build_pages.py
-tests/test_build_pages.py
-tests/test_data_contracts.py
-```
+1. `AGENTS.md`
+2. `docs/architecture.md`
+3. `docs/setup.md`
+4. `docs/roadmap.md`
+5. `prompts/weekly_report.md`
+6. `.env.example`
+7. `requirements.txt`
+8. `.github/workflows/weekly.yml` 中面向用户显示的工作流名称和步骤名称
 
-调整内容：
+### 3. 保留内容
 
-1. `scripts/build_pages.py` 生成 `docs/profiles.json`。
-2. GitHub Pages 首页新增 `profiles.json` 入口。
-3. `docs/explorer.html` 新增“个性化方向”筛选项。
-4. 筛选页会读取 `profiles.json`，按 profile 的偏好语言和主题关键词过滤历史项目。
-5. URL 参数新增 `profile`，方便分享某个个性化方向视图。
-6. 契约测试覆盖 `profiles.json` 的公开字段集合。
+以下内容属于技术名词、命令、路径、环境变量名或 GitHub Actions 语法，保持原样：
 
-### 3. 安全边界
-
-`profiles.json` 只公开 profile 名称、显示标签、学习目标、偏好语言和主题关键词，不公开评分权重、私有配置、密钥或用户身份信息。
-
----
-
-## 2026-05-06 追加：安全分与风险等级
-
-### 1. 开发目的
-
-此前项目只保存风险提示文本，前端和后续个性化推荐难以排序或筛选风险强弱。本次新增基础安全分和风险等级，为后续安全检查功能、前端筛选和推送摘要提供结构化字段。
-
-### 2. 本次实现
-
-更新：
-
-```text
-README.md
-docs/data-contracts.md
-docs/operation-log.md
-scripts/build_pages.py
-src/models.py
-src/security.py
-tests/test_build_pages.py
-tests/test_data_contracts.py
-tests/test_security.py
-```
-
-调整内容：
-
-1. `Repository` 新增 `security_score` 和 `security_level`。
-2. `apply_security_flags` 会同步计算安全分和风险等级。
-3. 风险等级分为 `low`、`medium`、`high`。
-4. 不同风险提示按严重程度扣分，例如恶意软件、钓鱼、窃取类风险扣分更高。
-5. `docs/projects.json` 输出安全分和风险等级。
-6. `docs/explorer.html` 在风险列展示风险等级和安全分。
-
-### 3. 设计边界
-
-该评分是启发式基础检查，不代表完整安全审计。它用于排序、提醒和后续筛选，不应作为是否可以直接运行外部项目的唯一依据。
+1. `GitHub Weekly Agent`
+2. `GitHub Actions`
+3. `Telegram`
+4. `Kimi API`
+5. `python main.py`
+6. `GH_SEARCH_TOKEN` 等环境变量名
+7. `.github/workflows/weekly.yml` 中的工作流关键字
 
 ---
 
-## 2026-05-06 追加：历史项目详情展开
+## 2026-04-27 追加：第一阶段 MVP 开发
 
-### 1. 开发目的
+### 1. 开发范围
 
-当前历史项目筛选页已经能按语言、profile、来源和风险筛选，但用户仍需要打开周报或仓库才能理解项目价值。本次在静态筛选页中加入详情展开能力，提升浏览效率，同时继续保留未来升级复杂前端框架的空间。
+严格按照收敛后的 MVP 架构开发，未创建暂缓的 `skills/`、Web Dashboard、SQLite 或复杂插件系统。
 
-### 2. 本次实现
+本次实现内容：
 
-更新：
+1. `AGENTS.md` 项目级 Agent 开发规则。
+2. `prompts/weekly_report.md` 独立周报提示词。
+3. `main.py` 主流程编排。
+4. `src/collector.py` GitHub Search API 采集。
+5. `src/processor.py` 去重、过滤、评分和排序。
+6. `src/reporter.py` Kimi 生成和 fallback 基础报告。
+7. `src/sender.py` Telegram 分段推送。
+8. `src/archive.py` Markdown、原始数据和运行摘要归档。
+9. `src/settings.py` 环境变量和兴趣配置读取。
+10. `src/utils.py` 日期、分段和通用辅助函数。
+11. `.github/workflows/weekly.yml` 定时和手动触发工作流。
+12. `tests/` 最小单元测试。
+
+### 2. 简洁性处理
+
+1. 暂不增加外部依赖，`requirements.txt` 保持标准库实现。
+2. 暂不拆分 HTTP clients，避免 MVP 过度抽象。
+3. 暂不创建 Skill 目录，等工作流稳定后再产品化。
+4. 每个模块只负责一个主要职责。
+
+### 3. 本地验证
+
+已执行：
 
 ```text
-README.md
-docs/data-contracts.md
-docs/future-plan.md
-docs/operation-log.md
-scripts/build_pages.py
-tests/test_build_pages.py
-tests/test_data_contracts.py
+py -m unittest discover -v
+py -m compileall main.py src tests
+py main.py
 ```
 
-调整内容：
+验证结果：
 
-1. `docs/projects.json` 新增 `readme_summary` 字段。
-2. `docs/explorer.html` 每个项目新增“详情”按钮。
-3. 展开详情后展示 README 精简摘要、推荐理由、风险提示、项目指标、来源和完整链接。
-4. `docs/future-plan.md` 新增前端扩展边界，明确未来可升级到复杂框架，但当前仍以公共 JSON 契约为核心。
+1. 3 个单元测试通过。
+2. Python 编译检查通过。
+3. 端到端运行成功生成报告。
+4. 本地未配置 Telegram，程序按设计输出 `Telegram is not configured`，未阻断归档流程。
 
-### 3. 设计边界
-
-本次没有引入前端构建工具。所有交互仍在静态页面内完成，数据继续来自 `projects.json`、`profiles.json` 和 `runs.json`，为后续框架化迁移保留清晰接口。
+本地验证生成的临时报告和运行数据不作为源码提交。
 
 ---
 
-## 2026-05-06 追加：个性化方向快捷视图
+## 2026-04-27 追加：基于 pi-mono 的重新架构审查
 
-### 1. 开发目的
+### 1. 学习参考项目
 
-筛选页已有 profile 下拉框，但移动端和频繁切换场景下不够直观。本次增加快捷视图按钮，让用户可以一键切换 Java、Python、Agent 开发等方向，同时继续复用公开 `profiles.json`。
-
-### 2. 本次实现
-
-更新：
+参考链接：
 
 ```text
-README.md
-docs/operation-log.md
-scripts/build_pages.py
-tests/test_build_pages.py
+https://github.com/badlogic/pi-mono
 ```
 
-调整内容：
+重点学习内容：
 
-1. `docs/explorer.html` 新增 `profileShortcuts` 区域。
-2. 页面根据 `profiles.json` 自动生成“全部方向”和各 profile 快捷按钮。
-3. 点击快捷按钮会同步更新 profile 筛选条件、表格结果和 URL 查询参数。
-4. 当前仍为静态页面实现，不新增前端构建步骤。
+1. `pi-mono` 是围绕 AI Agent 构建的 monorepo，包含统一 LLM API、Agent runtime、coding agent、TUI、Web UI、Slack bot 和 vLLM pods 管理工具。
+2. `pi-coding-agent` 的核心思想是最小核心、工具扩展、Prompt Templates、Skills、AGENTS.md、Sessions 和 Extensions。
+3. 对本项目最有价值的是项目级 Agent 规则、提示词模板外置、运行历史记录、可扩展但不过度复杂的模块边界。
 
-### 3. 设计边界
+### 2. 审查新版架构文档
 
-快捷按钮只消费公开 profile 数据，不硬编码业务方向。未来升级到复杂前端框架时，可以直接复用 `profiles.json` 和当前 URL 参数约定。
+输入文件：
+
+```text
+D:\liulanqixiazai\github-weekly-agent-rearchitecture-from-pi-mono.md
+```
+
+结论：
+
+1. 新版架构方向正确，适合作为原架构的升级版。
+2. `AGENTS.md` 和 `prompts/weekly_report.md` 应纳入第一阶段。
+3. `data/` 历史记录设计应保留，但要区分不可变运行摘要和可变去重状态。
+4. `skills/` 目录只应作为后续预留说明，MVP 阶段不建议创建空 Skill 文件，避免增加无实际用途的维护面。
+5. GitHub Actions 自动提交必须加入防循环、并发控制和变更检测。
+
+### 3. 本次新增文档
+
+输出文件：
+
+```text
+docs/pi-mono-rearchitecture-review.md
+```
+
+该文档记录：
+
+1. 从 `pi-mono` 学到的可采纳设计。
+2. 新版架构中建议保留的部分。
+3. 需要收敛或延后的部分。
+4. 面向“代码简洁完整”的最终开发建议。
 
 ---
 
-## 2026-05-06 追加：探索页相似项目推荐
+## 2026-04-27
 
-### 1. 开发目的
+### 1. 读取原始文档
 
-项目详情已经能展示 README 摘要和推荐理由，但用户还需要在同一方向内横向比较类似仓库。本次在静态探索页中加入相似历史项目推荐，为后续个性化推荐、数据库查询和复杂前端框架迁移预留入口。
-
-### 2. 本次实现
-
-更新：
+输入文件：
 
 ```text
-README.md
-docs/explorer.html
-docs/operation-log.md
-tests/test_build_pages.py
+D:\liulanqixiazai\github-weekly-agent-architecture.md
 ```
 
-调整内容：
+处理结果：
 
-1. `docs/explorer.html` 的项目详情新增“相似项目”区域。
-2. 相似度暂按语言、方向、来源和项目关键词重合度计算，不依赖新接口或新数据库。
-3. 每个项目最多展示 3 个相似历史项目，并显示项目链接、语言、方向和新增 Star。
-4. 页面仍然只消费 `projects.json`，后续可把当前相似度函数迁移到前端框架、SQLite 查询或服务端推荐模块。
+1. 首次读取时终端中文显示为乱码。
+2. 使用显式 UTF-8 重新读取后，确认文档内容完整可读。
+3. 已完成对项目目标、用户需求、模块设计、技术选型、MVP 和验收标准的审查。
 
-### 3. 设计边界
+### 2. 审查架构
 
-当前相似项目推荐是轻量启发式匹配，用于提升浏览效率，不作为最终推荐模型。未来接入数据库后，可以把同语言、同主题、同 profile 和用户点击反馈纳入更稳定的相似度计算。
+结论：
+
+1. 原架构总体清晰，不需要推翻重建。
+2. 需要补强热点定义、GitHub Actions 自提交、防循环、Telegram 分段、运行摘要和模块边界。
+3. 推荐采用“原始架构 + 工程化增强”的架构。
+
+输出文件：
+
+```text
+docs/architecture-review.md
+```
+
+### 3. 生成优化后的项目文档
+
+新增完整架构文档，覆盖：
+
+1. 项目定位。
+2. 推荐架构。
+3. 数据流。
+4. MVP 范围。
+5. 推荐目录结构。
+6. 模块职责。
+7. 搜索策略。
+8. 推荐评分。
+9. 周报格式。
+10. Telegram 推送策略。
+11. 运行归档。
+12. GitHub Actions 要求。
+13. 安全要求。
+14. 迭代路线。
+
+输出文件：
+
+```text
+docs/project-architecture.md
+```
+
+### 4. 建立仓库入口文档
+
+新增 `README.md`，用于说明当前仓库状态、文档索引、项目目标、技术路线和第一阶段范围。
+
+### 5. 当前阶段未执行的事项
+
+按照用户要求，本阶段暂不开发项目代码，因此没有创建 Python 源码、GitHub Actions workflow、依赖文件或运行脚本。
+
+后续如果进入开发阶段，再按 `docs/project-architecture.md` 中的开发顺序实施。
 
 ---
 
-## 2026-05-06 追加：历史归档查询脚本
-
-### 1. 开发目的
-
-前端和数据库已经进入规划阶段，但当前不适合立刻引入完整后台服务。本次先补齐命令行历史查询入口，让 SQLite 派生索引真正可用，为后续后台 API、复杂前端筛选和个性化订阅打基础。
-
-### 2. 本次实现
-
-更新：
-
-```text
-README.md
-docs/data-contracts.md
-docs/operation-log.md
-scripts/query_archive.py
-tests/test_query_archive.py
-```
-
-调整内容：
-
-1. 新增 `scripts/query_archive.py`。
-2. 支持按语言、方向、profile、来源、风险提示和关键词查询历史项目。
-3. 支持 `--refresh` 在查询前从 JSON 归档同步 SQLite。
-4. 支持 `table` 和 `json` 两种输出格式。
-5. 新增测试覆盖语言、来源、关键词、profile、风险和表格输出。
-
-### 3. 设计边界
-
-该脚本只读取 JSON 归档、SQLite 派生索引和公开 profile 配置，不读取密钥，不发送外部请求，也不改变主流程。未来如果建设后端 API，可以直接复用其中的筛选条件和输出字段。
-
----
-
-## 2026-05-06 追加：历史归档查询说明页
-
-### 1. 开发目的
-
-历史查询 CLI 已经可用，但入口主要面向开发者。为了让后续前端、数据库和个性化能力有更清楚的文档入口，本次补充 GitHub Pages 可访问的查询说明页。
-
-### 2. 本次实现
-
-更新：
-
-```text
-README.md
-docs/archive-query.md
-docs/operation-log.md
-scripts/build_pages.py
-tests/test_build_pages.py
-```
-
-调整内容：
-
-1. 新增 `docs/archive-query.md`。
-2. 说明历史查询的使用场景、常用命令、安全边界和后续扩展方向。
-3. GitHub Pages 首页增加“历史归档查询说明”入口。
-4. README 的 SQLite 派生索引部分补充说明页引用。
-5. 页面构建测试覆盖新增入口。
-
-### 3. 设计边界
-
-该页面是静态说明文档，不引入新的运行依赖。后续如果建设数据库页面或前端后台，可以把这里的命令示例演进为页面筛选项和 API 查询参数。
-
----
-
-## 2026-05-06 追加：仓库质量信号
-
-### 1. 开发目的
-
-当前热点筛选已经以 Trending 和新增 Star 为核心，但仍需要区分“热度高”和“信息完整、便于学习或复用”的差异。本次新增轻量质量信号，用于补充判断 README、简介、许可证、主题标签、社区复用和维护连续性等维度。
-
-### 2. 本次实现
-
-更新：
-
-```text
-README.md
-docs/data-contracts.md
-docs/future-plan.md
-docs/operation-log.md
-main.py
-prompts/weekly_report.md
-scripts/build_pages.py
-src/models.py
-src/processor.py
-src/quality.py
-src/reporter.py
-tests/test_build_pages.py
-tests/test_data_contracts.py
-tests/test_processor.py
-tests/test_quality.py
-```
-
-调整内容：
-
-1. 新增 `src/quality.py`。
-2. `Repository` 新增 `quality_flags`、`quality_score` 和 `quality_level`。
-3. 质量信号覆盖 README 摘要、仓库简介、许可证、主题标签、社区复用信号和近期维护时间。
-4. 质量分以小权重接入综合评分，不改变 GitHub Trending 第一优先级。
-5. 规则版周报新增“质量信号”字段。
-6. Kimi 提示词要求参考质量字段解释项目成熟度和信息完整度。
-7. `docs/projects.json` 公开输出质量字段，供后续前端、数据库和个性化推荐复用。
-8. 探索页详情的项目指标新增质量分展示。
-
-### 3. 设计边界
-
-质量信号是启发式判断，不代表项目一定成熟或可靠。它只用于排序辅助、周报解释和前端展示。后续如果需要更准确的质量判断，可以继续接入 Release 活跃度、提交频率、Issue 响应时间、依赖文件完整度和异常 Star 增长提示。
-
----
-
-## 2026-05-07 追加：前端质量信号可视化
-
-### 1. 开发目的
-
-前端此前已经读取质量字段，但主要藏在详情页的项目指标文本中，用户不容易直接感知变化。本次把质量信号提升为筛选、排序、表格列和详情块，方便在 GitHub Pages 中直接查看项目质量状态。
-
-### 2. 本次实现
-
-更新：
-
-```text
-docs/operation-log.md
-scripts/build_pages.py
-tests/test_build_pages.py
-```
-
-调整内容：
-
-1. 项目筛选页新增“质量”筛选项，支持按高质量、中等质量、低质量和未知过滤。
-2. 排序方式新增“质量分”。
-3. 项目表格新增“质量”列，直接展示质量等级和质量分。
-4. 详情面板新增“质量信号”块，展示质量扣分项。
-5. 筛选概览新增平均质量分，便于快速判断当前筛选结果整体质量。
-6. 页面构建测试补充质量筛选、质量信号和质量排序的断言。
-
-### 3. 设计边界
-
-本次只增强静态 Pages 前端展示，不改变主采集、评分、报告生成和 Telegram 推送逻辑。质量判断仍来自归档数据中的 `quality_score`、`quality_level` 和 `quality_flags`。
-
----
-
-## 2026-05-07 追加：推送消息增加项目筛选入口
-
-### 1. 问题来源
-
-前端质量信号改动落在 `explorer.html`，但 Telegram 推送仍只发送 `weekly/YYYY-MM-DD.html` 周报正文链接。用户从手机端打开推送后只能看到周报正文，看不到项目筛选页新增的质量筛选、质量排序和质量信号详情。
-
-### 2. 本次实现
-
-更新：
-
-```text
-README.md
-docs/data-contracts.md
-docs/operation-log.md
-docs/setup.md
-main.py
-scripts/build_pages.py
-scripts/send_report_link.py
-src/models.py
-src/sender.py
-tests/test_data_contracts.py
-tests/test_send_report_link.py
-tests/test_sender.py
-```
-
-调整内容：
-
-1. 推送消息同时包含“周报正文”和“项目筛选”两个入口。
-2. 周报正文继续指向 `weekly/YYYY-MM-DD.html`。
-3. 项目筛选指向 `explorer.html?date=YYYY-MM-DD`。
-4. Telegram 使用 HTML 超链接；飞书和企业微信 Webhook 消息同步使用双入口。
-5. 运行摘要新增 `telegram_explorer_url`，公开 `docs/runs.json` 也输出该字段。
-6. 测试覆盖双链接消息、运行摘要写回和公共 JSON 数据契约。
-
-### 3. 设计边界
-
-本次不改变周报生成内容，也不把完整 Markdown 推送到手机端。推送消息保持短链接形式，只增加一个筛选页入口，方便用户在阅读周报之外继续按方向、语言、质量和风险查看项目。
-
----
-
-## 2026-05-07 追加：运行指标与数据契约稳定化
-
-### 1. 开发目的
-
-外部研究文档建议下一阶段优先提升一致性、可验证性和可观测性。当前项目已经能生成周报、Pages 和推送链接，但运行摘要中缺少标准化指标，后续很难持续判断 Trending 保底、README 摘要、GitHub 查询和持续热门项目占比是否健康。
-
-### 2. 本次实现
-
-更新：
-
-```text
-docs/data-contracts.md
-docs/operation-log.md
-main.py
-scripts/build_pages.py
-src/models.py
-src/trends.py
-tests/test_data_contracts.py
-tests/test_trends.py
-```
-
-调整内容：
-
-1. `RunSummary` 新增 `schema_version`。
-2. 运行摘要新增采集查询数量、成功数量和成功率。
-3. 运行摘要新增 README 抓取率。
-4. 运行摘要新增 Trending Top10 可用数量、入选数量和命中率。
-5. 运行摘要新增已推送项目入选占比，用于观察持续热门项目。
-6. 趋势摘要新增 `schema_version`、Trending Top10 入选数量和 Trending 入选比例。
-7. `docs/runs.json` 公开输出这些指标，方便前端、SQLite 和外部脚本复用。
-8. 测试覆盖趋势摘要和公共运行 JSON 的数据契约。
-
-### 3. 设计边界
-
-本次只增加可观测指标，不改变推荐逻辑。已推送项目仍然不会被硬过滤，只在评分中降权；这样可以避免把本周仍然热门的项目从周报中错误排除。

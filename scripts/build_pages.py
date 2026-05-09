@@ -648,7 +648,7 @@ def _explorer_content() -> str:
     </div>
   </main>
   <script>
-    const state = { projects: [], profiles: [] };
+    const state = { projects: [], profiles: [], dataSource: "json" };
     const controls = {
       query: document.getElementById("query"),
       runDate: document.getElementById("runDate"),
@@ -668,18 +668,19 @@ def _explorer_content() -> str:
     const share = document.getElementById("share");
 
     Promise.all([
-      fetch("projects.json", { cache: "no-store" }).then(response => response.json()),
-      fetch("profiles.json", { cache: "no-store" }).then(response => response.json()).catch(() => ({ profiles: [] }))
+      loadProjects(),
+      loadProfiles()
     ])
       .then(([projectsData, profilesData]) => {
         state.projects = Array.isArray(projectsData.projects) ? projectsData.projects : [];
         state.profiles = Array.isArray(profilesData.profiles) ? profilesData.profiles : [];
+        state.dataSource = projectsData.source || "json";
         hydrateOptions();
         restoreFiltersFromUrl();
         render();
       })
       .catch(() => {
-        rows.innerHTML = '<tr><td class="empty" colspan="10">无法读取 projects.json</td></tr>';
+        rows.innerHTML = '<tr><td class="empty" colspan="10">无法读取项目数据</td></tr>';
       });
 
     Object.values(controls).forEach(control => control.addEventListener("input", render));
@@ -721,7 +722,47 @@ def _explorer_content() -> str:
       renderProfileShortcuts();
       fillSelect(controls.category, values("category"));
       const runDates = dates();
-      updated.textContent = runDates.length ? `最新数据：${runDates[0]}` : "";
+      const source = state.dataSource === "api" ? "后端 API" : "静态 JSON";
+      updated.textContent = runDates.length ? `最新数据：${runDates[0]}，来源：${source}` : `来源：${source}`;
+    }
+
+    function loadProjects() {
+      if (!shouldUseApi()) return loadProjectsJson();
+      return fetch("/api/projects?limit=200&sort=recent", { cache: "no-store" })
+        .then(jsonOrThrow)
+        .then(data => ({ ...data, source: "api" }))
+        .catch(loadProjectsJson);
+    }
+
+    function loadProjectsJson() {
+      return fetch("projects.json", { cache: "no-store" })
+        .then(jsonOrThrow)
+        .then(data => ({ ...data, source: "json" }));
+    }
+
+    function loadProfiles() {
+      if (!shouldUseApi()) return loadProfilesJson();
+      return fetch("/api/profiles", { cache: "no-store" })
+        .then(jsonOrThrow)
+        .catch(loadProfilesJson);
+    }
+
+    function loadProfilesJson() {
+      return fetch("profiles.json", { cache: "no-store" })
+        .then(jsonOrThrow)
+        .catch(() => ({ profiles: [] }));
+    }
+
+    function shouldUseApi() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("api") === "1") return true;
+      if (params.get("api") === "0") return false;
+      return ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
+    }
+
+    function jsonOrThrow(response) {
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return response.json();
     }
 
     function dates() {
@@ -815,6 +856,8 @@ def _explorer_content() -> str:
 
     function updateUrl() {
       const params = new URLSearchParams();
+      const apiMode = new URLSearchParams(window.location.search).get("api");
+      if (apiMode === "1" || apiMode === "0") params.set("api", apiMode);
       if (controls.query.value.trim()) params.set("q", controls.query.value.trim());
       if (controls.runDate.value) params.set("date", controls.runDate.value);
       if (controls.language.value) params.set("lang", controls.language.value);

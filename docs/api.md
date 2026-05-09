@@ -78,7 +78,23 @@ http://127.0.0.1:8000/api/health
 
 返回最新 Markdown 周报正文、运行日期、周报页面路径和对应运行摘要。这个接口主要用于后续后台管理页、移动端入口或调试页面。
 
-## 四、后续扩展
+## 四、前端读取方式
+
+当前 `docs/explorer.html` 已支持渐进式读取后端 API：
+
+1. 在 `localhost`、`127.0.0.1` 或 `::1` 打开时，默认优先读取 `/api/projects` 和 `/api/profiles`。
+2. 在任意环境中给 URL 增加 `api=1` 时，会尝试读取后端 API。
+3. 给 URL 增加 `api=0` 时，会强制读取静态 `projects.json` 和 `profiles.json`。
+4. API 不可用时会自动回退到静态 JSON，GitHub Pages 线上页面不受影响。
+
+示例：
+
+```text
+explorer.html?api=1&profile=agent_development
+explorer.html?api=0&profile=python
+```
+
+## 五、后续扩展
 
 下一阶段可以在这个 API 层继续扩展：
 
