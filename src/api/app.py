@@ -44,6 +44,10 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
             sort=sort,
         )
 
+    @app.get("/api/projects/{owner}/{repo}")
+    def project_detail(owner: str, repo: str) -> dict[str, Any]:
+        return repository.project_detail(f"{owner}/{repo}")
+
     @app.get("/api/runs")
     def runs() -> dict[str, Any]:
         return repository.runs()

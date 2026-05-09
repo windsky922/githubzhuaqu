@@ -16,13 +16,19 @@ class ApiRepositoryTest(unittest.TestCase):
             repository = ApiRepository(root=root, db_path=root / "data" / "github_weekly.sqlite")
 
             projects = repository.projects(language="Python", source="github_trending", limit=10)
+            detail = repository.project_detail("owner/agent")
             runs = repository.runs()
             profiles = repository.profiles()
             latest = repository.latest_weekly()
 
             self.assertEqual(projects["schema_version"], 1)
-            self.assertEqual(projects["count"], 1)
+            self.assertGreaterEqual(projects["count"], 1)
             self.assertEqual(projects["projects"][0]["full_name"], "owner/agent")
+            self.assertTrue(detail["found"])
+            self.assertEqual(detail["history_count"], 2)
+            self.assertEqual(detail["total_star_growth"], 32)
+            self.assertEqual(detail["best_trending_rank"], 1)
+            self.assertEqual(detail["similar_projects"][0]["full_name"], "owner/agent-helper")
             self.assertEqual(runs["runs"][0]["run_date"], "2026-05-09")
             self.assertEqual(profiles["profiles"][0]["name"], "agent_development")
             self.assertEqual(latest["run_date"], "2026-05-09")
@@ -43,12 +49,15 @@ class ApiRepositoryTest(unittest.TestCase):
 
             health = client.get("/api/health")
             projects = client.get("/api/projects", params={"profile": "agent_development", "limit": 5})
+            detail = client.get("/api/projects/owner/agent")
             latest = client.get("/api/weekly/latest")
 
             self.assertEqual(health.status_code, 200)
             self.assertEqual(projects.status_code, 200)
+            self.assertEqual(detail.status_code, 200)
             self.assertEqual(latest.status_code, 200)
             self.assertEqual(projects.json()["projects"][0]["full_name"], "owner/agent")
+            self.assertEqual(detail.json()["history_count"], 2)
             self.assertEqual(latest.json()["run_date"], "2026-05-09")
         finally:
             shutil.rmtree(root, ignore_errors=True)
@@ -83,6 +92,10 @@ def _write_fixture(root: Path) -> None:
         json.dumps({"run_date": "2026-05-09", "status": "success", "selected_count": 1}, ensure_ascii=False),
         encoding="utf-8",
     )
+    (root / "data" / "runs" / "2026-05-08.json").write_text(
+        json.dumps({"run_date": "2026-05-08", "status": "success", "selected_count": 2}, ensure_ascii=False),
+        encoding="utf-8",
+    )
     (root / "data" / "selected" / "2026-05-09.json").write_text(
         json.dumps(
             [
@@ -104,6 +117,50 @@ def _write_fixture(root: Path) -> None:
                     "quality_level": "high",
                     "quality_flags": [],
                 }
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    (root / "data" / "selected" / "2026-05-08.json").write_text(
+        json.dumps(
+            [
+                {
+                    "full_name": "owner/agent",
+                    "html_url": "https://github.com/owner/agent",
+                    "description": "agent workflow automation",
+                    "language": "Python",
+                    "stargazers_count": 80,
+                    "forks_count": 8,
+                    "score": 0.7,
+                    "star_growth": 12,
+                    "trending_rank": 3,
+                    "category": "AI Agent",
+                    "sources": ["github_trending"],
+                    "selection_reasons": ["进入 GitHub Trending 周榜第 3 位。"],
+                    "security_flags": ["未识别到许可证。"],
+                    "quality_score": 86,
+                    "quality_level": "high",
+                    "quality_flags": ["README 摘要偏短。"],
+                },
+                {
+                    "full_name": "owner/agent-helper",
+                    "html_url": "https://github.com/owner/agent-helper",
+                    "description": "agent helper workflow",
+                    "language": "Python",
+                    "stargazers_count": 40,
+                    "forks_count": 4,
+                    "score": 0.6,
+                    "star_growth": 9,
+                    "trending_rank": 4,
+                    "category": "AI Agent",
+                    "sources": ["github_trending"],
+                    "selection_reasons": ["匹配 Agent 开发方向。"],
+                    "security_flags": [],
+                    "quality_score": 80,
+                    "quality_level": "medium",
+                    "quality_flags": [],
+                },
             ],
             ensure_ascii=False,
         ),

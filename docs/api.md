@@ -66,6 +66,26 @@ http://127.0.0.1:8000/api/health
 /api/projects?profile=agent_development&source=github_trending&trending_top=10&limit=20
 ```
 
+### `GET /api/projects/{owner}/{repo}`
+
+查询单个项目的历史详情。该接口会按 `owner/repo` 聚合历史入选记录，并返回：
+
+1. 最近一次入选日期和第一次入选日期。
+2. 历史入选次数。
+3. 累计新增 Star。
+4. 最好 GitHub Trending 排名。
+5. 历史来源、质量提示和风险提示。
+6. 最近一次完整项目记录。
+7. 相似历史项目列表。
+
+示例：
+
+```text
+/api/projects/owner/agent
+```
+
+这个接口用于后续项目详情页、项目对比、相似项目推荐和个性化订阅解释。
+
 ### `GET /api/runs`
 
 返回公开运行记录，数据来源为 `docs/runs.json`。
@@ -98,7 +118,7 @@ explorer.html?api=0&profile=python
 
 下一阶段可以在这个 API 层继续扩展：
 
-1. 项目详情接口：按 `full_name` 查看历史入选次数、Star 增长曲线、相似项目和质量变化。
+1. 项目详情页：把 `/api/projects/{owner}/{repo}` 接入前端，展示历史入选、相似项目和质量变化。
 2. 订阅接口：保存用户选择的语言、方向、profile 和推送渠道。
 3. 后台任务接口：触发采集、重建 SQLite、重新生成 Pages。
 4. 数据库演进：从当前派生 SQLite 过渡到持久化服务数据库，但保留 JSON 归档作为可读审计源。
