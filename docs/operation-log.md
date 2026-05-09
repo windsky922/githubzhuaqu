@@ -2,6 +2,23 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-05-09 追加：将自动归档分离到 weekly-archive 分支
+
+### 1. 问题原因
+
+GitHub Actions 原本会把每周生成的 `reports/`、`data/` 和 `docs/` 直接提交到 `main`。如果本地正在开发，远端 `main` 会被自动推进，导致本地提交经常需要 fetch、rebase，并且生成文件容易出现冲突。
+
+### 2. 本次修改
+
+1. 新增 `scripts/publish_archive_branch.py`，专门把生成文件发布到 `weekly-archive` 分支。
+2. 调整 `.github/workflows/weekly.yml`，运行前从 `weekly-archive` 恢复历史 `data/` 和 `reports/`，运行后把 `docs/`、`reports/` 和 `data/` 发布到 `weekly-archive`。
+3. `main` 不再由 weekly workflow 自动提交归档文件，后续主要用于代码、配置和文档开发。
+4. README 和 setup 文档补充 GitHub Pages 来源应切换为 `weekly-archive / docs`。
+
+### 3. 需要手动处理
+
+首次合并后，需要在 GitHub 仓库 `Settings -> Pages` 中把 Branch 从 `main` 改为 `weekly-archive`，Folder 保持 `/docs`。第一次 workflow 成功运行后才会创建该分支。
+
 ## 2026-05-09 追加：减少 feed.xml 重复冲突
 
 ### 1. 问题原因

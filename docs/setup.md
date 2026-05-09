@@ -184,9 +184,11 @@ Settings -> Pages
 
 ```text
 Source: Deploy from a branch
-Branch: main
+Branch: weekly-archive
 Folder: /docs
 ```
+
+`weekly-archive` 是自动归档分支，GitHub Actions 会把生成的 `docs/`、`reports/` 和 `data/` 发布到该分支；`main` 只保留代码和配置，避免自动归档提交反复打断本地开发。
 
 启用后，后续每次 GitHub Actions 生成周报，都会同步刷新归档页面。
 

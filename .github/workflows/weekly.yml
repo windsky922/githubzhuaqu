@@ -12,12 +12,17 @@ concurrency:
   group: github-weekly-agent
   cancel-in-progress: false
 
+env:
+  ARCHIVE_BRANCH: weekly-archive
+
 jobs:
   weekly:
     runs-on: ubuntu-latest
     steps:
       - name: 检出代码
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: 配置 Python
         uses: actions/setup-python@v6
@@ -32,6 +37,15 @@ jobs:
 
       - name: 运行测试
         run: python -m unittest
+
+      - name: 恢复归档分支历史数据
+        run: |
+          if git ls-remote --exit-code --heads origin "$ARCHIVE_BRANCH" >/dev/null 2>&1; then
+            git fetch origin "$ARCHIVE_BRANCH"
+            git checkout "origin/$ARCHIVE_BRANCH" -- data reports || true
+          else
+            echo "归档分支 $ARCHIVE_BRANCH 不存在，本次运行后会自动创建。"
+          fi
 
       - name: 生成每周周报
         env:
@@ -56,17 +70,8 @@ jobs:
       - name: 生成周报归档页面
         run: python scripts/build_pages.py
 
-      - name: 提交生成的归档文件
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add reports data/runs data/raw data/selected data/state data/trends docs/index.md docs/projects.md docs/explorer.html docs/projects.json docs/runs.json docs/profiles.json docs/feed.xml docs/weekly
-          if git diff --cached --quiet; then
-            echo "没有需要提交的归档变更。"
-          else
-            git commit -m "chore: archive weekly github report [skip ci]"
-            git push
-          fi
+      - name: 发布归档文件到独立分支
+        run: python scripts/publish_archive_branch.py --branch "$ARCHIVE_BRANCH" --message "chore: archive weekly github report [skip ci]"
 
       - name: 推送周报链接到 Telegram
         env:
@@ -79,14 +84,5 @@ jobs:
           DELIVERY_CHANNELS: ${{ vars.DELIVERY_CHANNELS }}
         run: python scripts/send_report_link.py
 
-      - name: 提交推送状态
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/runs data/state docs/index.md docs/projects.md docs/explorer.html docs/projects.json docs/runs.json docs/profiles.json docs/feed.xml docs/weekly
-          if git diff --cached --quiet; then
-            echo "没有需要提交的推送状态变更。"
-          else
-            git commit -m "chore: record telegram delivery [skip ci]"
-            git push
-          fi
+      - name: 发布推送状态到独立分支
+        run: python scripts/publish_archive_branch.py --branch "$ARCHIVE_BRANCH" --message "chore: record delivery status [skip ci]"
