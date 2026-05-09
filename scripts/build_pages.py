@@ -2532,7 +2532,7 @@ def _feed_content(root: Path, reports: list[Path]) -> str:
             "    <title>GitHub 每周热点项目周报</title>",
             f"    <link>{_xml(site_link)}</link>",
             "    <description>GitHub Weekly Agent 自动生成的中文开源项目情报周报。</description>",
-            f"    <lastBuildDate>{_xml(format_datetime(datetime.now(UTC)))}</lastBuildDate>",
+            f"    <lastBuildDate>{_xml(_feed_last_build_date(reports))}</lastBuildDate>",
             "    <language>zh-CN</language>",
             body,
             "  </channel>",
@@ -2576,6 +2576,12 @@ def _rss_date(run_date: str) -> str:
     except ValueError:
         value = datetime.now(UTC)
     return format_datetime(value)
+
+
+def _feed_last_build_date(reports: list[Path]) -> str:
+    if reports:
+        return _rss_date(reports[0].stem)
+    return format_datetime(datetime(1970, 1, 1, tzinfo=UTC))
 
 
 def _xml(value: object) -> str:

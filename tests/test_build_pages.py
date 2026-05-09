@@ -219,6 +219,7 @@ class BuildPagesTest(unittest.TestCase):
             self.assertIn("errorKindLabel", runs_page)
             feed = (root / "docs" / "feed.xml").read_text(encoding="utf-8")
             self.assertIn("<rss version=\"2.0\">", feed)
+            self.assertIn("<lastBuildDate>Tue, 28 Apr 2026 00:00:00 +0000</lastBuildDate>", feed)
             self.assertIn("GitHub 每周热点项目周报 - 2026-04-28", feed)
             self.assertIn("weekly/2026-04-28.html", feed)
             self.assertIn("入选项目 10 个", feed)
