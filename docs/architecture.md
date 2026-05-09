@@ -1,0 +1,260 @@
+# GitHub Weekly Agent 架构说明
+
+本文档记录第一阶段最小可用版本的实际实现架构。
+
+## 运行流程
+
+```text
+main.py
+-> src.settings.load_settings
+-> src.collector.collect_repositories
+-> src.state.load_sent_repository_names
+-> src.processor.process_repositories
+-> src.collector.enrich_repositories_with_readmes
+-> src.reporter.generate_report
+-> src.archive.archive_run
+-> src.sender.send_report
+-> src.state.write_sent_repositories
+-> src.archive.write_run_summary
+```
+
+## 最小可用版本范围
+
+第一阶段已实现：
+
+1. 通过 GitHub Search API 采集仓库。
+2. 对仓库进行过滤、去重、评分和排序。
+3. 使用 Kimi 聊天补全接口生成周报。
+4. 当 Kimi 不可用时生成降级版 Markdown 周报。
+5. Telegram 长消息自动分段发送。
+6. Markdown 周报归档到 `reports/`。
+7. 运行摘要归档到 `data/runs/`。
+8. GitHub Actions 支持每周定时运行和手动触发。
+9. Telegram 推送成功后记录已推送仓库，后续运行过滤重复项目。
+10. 对最终入选仓库抓取 README 摘要，作为 Kimi 和降级报告的补充上下文。
+11. 维护 Star 历史状态，并将 Star 增量纳入排序评分。
+12. 生成 GitHub Pages 周报归档页面。
+13. 生成数据驱动的趋势摘要，并归档到 `data/trends/`。
+14. 在运行摘要中记录部分采集失败，便于排查 GitHub API 限流或网络异常。
+
+暂缓实现：
+
+1. SQLite 历史数据库。
+2. 网页仪表盘。
+3. 正式发布技能包。
+4. Telegram 交互式机器人。
+
+## 状态文件
+
+`data/state/sent_repos.json` 用于记录已经成功推送到 Telegram 的仓库。
+
+写入时机：
+
+1. 本次运行成功生成周报。
+2. Telegram 推送成功。
+3. 本次筛选列表不为空。
+
+如果 Telegram 未配置或发送失败，程序仍然归档周报和运行摘要，但不会把仓库写入已推送状态，避免后续遗漏应推送项目。
+
+## 兴趣配置
+
+程序优先读取用户配置：
+
+```text
+config/interests.json
+```
+
+如果该文件不存在，再回退到示例配置：
+
+```text
+config/interests.example.json
+```
+
+这样可以保留示例文件，同时允许用户维护自己的关注方向、语言偏好、排除关键词和项目数量阈值。
+
+## 数据归档
+
+归档目录职责：
+
+1. `data/raw/YYYY-MM-DD.json`：保存 GitHub API 本次采集到的原始候选仓库。
+2. `data/selected/YYYY-MM-DD.json`：保存经过去重、过滤和排序后的最终入选仓库。
+3. `data/runs/YYYY-MM-DD.json`：保存运行摘要，包括采集数量、入选数量、降级原因、推送结果和部分采集错误。
+4. `data/trends/YYYY-MM-DD.json`：保存趋势摘要。
+
+## README 摘要
+
+程序只对最终入选周报的仓库抓取 README，不对全部搜索结果抓取，避免 GitHub API 请求量过大。
+
+处理规则：
+
+1. 使用 GitHub README API 读取仓库默认 README。
+2. 每个请求设置超时。
+3. 单个仓库 README 获取失败时跳过，不影响整体周报。
+4. 只保留前 2000 个字符的清洗后摘要，避免提示词过长。
+
+## Trending 优先采集与评分
+
+当前采集链路以 GitHub Trending 周榜作为第一优先级候选来源，GitHub Search API 作为辅助候选来源。
+
+处理顺序：
+
+```text
+GitHub Trending weekly
+-> GitHub Search API 辅助查询
+-> 按仓库名去重并合并来源信号
+-> 最近一周活跃过滤
+-> 综合评分排序
+```
+
+`Repository` 会记录以下来源字段：
+
+1. `sources`：项目来自 `github_trending`、`github_search` 或多个来源。
+2. `trending_rank`：项目在 GitHub Trending 周榜中的排名。
+3. `trending_period`：当前为 `weekly`。
+4. `source_priority`：来源优先级，Trending 高于 Search。
+
+GitHub Trending 是网页来源，不是稳定的官方 API。因此它失败时不会中断整个流程，程序会继续使用 GitHub Search API 生成周报，并把失败原因写入运行摘要。
+
+## 综合热度评分
+
+`data/state/star_history.json` 用于记录仓库上次采集时的 Star 数。
+
+评分时会计算：
+
+```text
+star_growth = 当前 Star - 历史 Star
+```
+
+如果仓库没有历史记录，则 `star_growth` 为 0。
+
+当前综合评分以 Trending 为第一指标，其余信号作为辅助：
+
+1. GitHub Trending 周榜排名：45%
+2. Star 增量：25%
+3. 兴趣主题匹配：15%
+4. 活跃时间新鲜度：10%
+5. 社区基础信号：5%，由总 Star 和 Fork 共同构成。
+
+这种设计把 Trending 作为本周热度的最高优先级，同时保留新增 Star、垂直兴趣匹配、近期活跃度和社区基础信号，避免只按单一 Star 数判断项目热度。
+
+评分权重可以通过 `config/interests.json` 中的 `score_weights` 调整。后续如果要做更细的个性化推荐，可以在不改主流程的前提下扩展该配置。
+
+周报候选项目以最近一周 `pushed_at` 或 `updated_at` 活跃为准，不要求仓库必须在最近一周创建。当前采集查询不再使用 `created` 条件，避免候选池偏向“新建项目”。
+
+## GitHub Pages 归档页面
+
+`scripts/build_pages.py` 会读取 `reports/` 和 `data/runs/`，生成：
+
+1. `docs/index.md`：周报归档首页。
+2. `docs/weekly/YYYY-MM-DD.md`：适合 GitHub Pages 浏览的周报副本。
+
+每次 GitHub Actions 生成周报后，都会自动刷新归档页面并提交到仓库。
+
+首页会显示最新周报链接、最新运行摘要和趋势要点，方便不打开完整周报也能快速确认生成方式、Telegram 推送状态和采集健康度。
+
+## 趋势摘要
+
+`src/trends.py` 会根据本期入选仓库生成趋势摘要，输出到：
+
+```text
+data/trends/YYYY-MM-DD.json
+```
+
+趋势摘要包含：
+
+1. 入选项目总数。
+2. 累计新增 Star。
+3. 主要语言分布。
+4. 项目方向分布。
+5. 新增 Star 最高的项目列表。
+6. 可直接写入周报的一组趋势要点。
+
+Kimi 生成周报时会收到该趋势摘要；降级版周报也会直接展示趋势要点。
+
+## 安全风险提示
+
+`src/security.py` 会对最终入选仓库生成元数据级风险提示，写入：
+
+```text
+security_flags
+```
+
+当前检查范围：
+
+1. 是否缺少许可证信息。
+2. 是否为归档仓库。
+3. 是否为 fork。
+4. 仓库名称、简介、主题和 README 摘要中是否包含明显风险关键词。
+
+注意：该检查不会执行第三方仓库代码，也不会把项目判定为“安全”。它只提供保守提示，提醒用户在学习、复用或运行项目之前进行人工审查。
+
+## 入选原因
+
+`src/processor.py` 会在评分后为最终候选仓库生成：
+
+```text
+selection_reasons
+```
+
+当前原因来源：
+
+1. 新增 Star。
+2. 当前累计 Star。
+3. 主题、语言或名称与关注方向匹配。
+4. 最近一周仍有更新或维护活动。
+
+该字段会写入 `data/selected/YYYY-MM-DD.json`，并传给 Kimi。降级版周报也会展示该字段，方便用户理解项目为什么入选。
+
+## 报告质量检查
+
+`src/report_checks.py` 会对 Kimi 生成的周报进行基础质量检查。
+
+当前检查范围：
+
+1. 不允许出现“蟒蛇”这类不合适的技术语言翻译。
+2. 每个入选项目的完整仓库名必须出现在报告中。
+3. 每个入选项目的 GitHub 链接必须以完整 URL 的 Markdown 链接形式出现。
+
+如果 Kimi 周报未通过质量检查，程序会记录 `report_error`，并回退到规则周报，避免把结构不完整的模型输出推送给用户。
+
+## 采集分项统计
+
+`src/collector.py` 会为 GitHub Trending 和每条 GitHub Search 查询记录：
+
+```text
+collector_stats
+```
+
+每条记录包含：
+
+1. 数据来源。
+2. 查询条件。
+3. 成功、失败或部分失败状态。
+4. 返回仓库数量。
+5. 失败原因。
+
+该字段写入 `data/runs/YYYY-MM-DD.json`，用于判断本次采集是否完整，并为后续多数据源扩展预留统一统计结构。
+
+## 后续扩展边界
+
+未来扩展应遵循“稳定核心 + 可插拔增强”的方式，不提前重构当前主流程。
+
+稳定核心继续保持：
+
+```text
+collector -> processor -> reporter -> archive -> sender
+```
+
+当某类能力明显变复杂时，再按职责拆分：
+
+1. `sources`：多数据源采集。
+2. `quality`：仓库质量评估和异常过滤。
+3. `report_checks`：周报结构和内容校验。
+4. `channels`：多推送渠道。
+5. `storage`：长期历史数据存储。
+
+详细演进计划见：
+
+```text
+docs/future-plan.md
+```

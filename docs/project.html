@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GitHub 项目详情</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f8fa;
+      --panel: #ffffff;
+      --text: #20242a;
+      --muted: #5f6b7a;
+      --line: #d9dee7;
+      --accent: #2563eb;
+      --risk: #b42318;
+      --ok: #15803d;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+    header {
+      border-bottom: 1px solid var(--line);
+      background: var(--panel);
+    }
+    .wrap {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+    .topbar {
+      min-height: 68px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: 0;
+    }
+    nav {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+    main {
+      padding: 20px 0 32px;
+    }
+    .hero {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .desc {
+      color: var(--muted);
+      max-width: 860px;
+      margin: 0;
+    }
+    .meta {
+      color: var(--muted);
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+      margin: 14px 0;
+    }
+    .metric,
+    .section {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 6px;
+    }
+    .metric {
+      min-height: 76px;
+      padding: 10px 12px;
+    }
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .metric strong {
+      display: block;
+      margin-top: 6px;
+      font-size: 18px;
+      line-height: 1.2;
+      overflow-wrap: anywhere;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .section {
+      padding: 14px;
+      min-width: 0;
+    }
+    h2 {
+      margin: 0 0 10px;
+      font-size: 16px;
+    }
+    ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+    li {
+      margin: 4px 0;
+    }
+    .tag {
+      display: inline-block;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 2px 8px;
+      margin: 0 4px 6px 0;
+      font-size: 12px;
+      background: #f9fafb;
+    }
+    .tag.risk {
+      border-color: #fecaca;
+      color: var(--risk);
+      background: #fff1f2;
+    }
+    .tag.ok {
+      border-color: #bbf7d0;
+      color: var(--ok);
+      background: #f0fdf4;
+    }
+    .trend-list {
+      display: grid;
+      gap: 10px;
+    }
+    .trend-row {
+      display: grid;
+      grid-template-columns: 96px 1fr 72px 72px;
+      gap: 10px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .trend-bars {
+      display: grid;
+      gap: 4px;
+      min-width: 0;
+    }
+    .bar-track {
+      height: 8px;
+      border-radius: 999px;
+      background: #eef2f7;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      min-width: 2px;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+    .bar-fill.quality {
+      background: var(--ok);
+    }
+    .trend-label {
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+    }
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 9px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: #eef2f7;
+      color: #344054;
+      font-size: 13px;
+    }
+    .table-shell {
+      overflow-x: auto;
+    }
+    .empty {
+      padding: 28px 12px;
+      color: var(--muted);
+      text-align: center;
+      border: 1px solid var(--line);
+      background: var(--panel);
+    }
+    @media (max-width: 800px) {
+      .topbar { align-items: flex-start; flex-direction: column; padding: 16px 0; }
+      .summary, .grid { grid-template-columns: 1fr; }
+      .wrap { width: min(100% - 20px, 1120px); }
+      .trend-row { grid-template-columns: 1fr 1fr; }
+      .trend-bars { grid-column: 1 / -1; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap topbar">
+      <h1 id="title">GitHub 项目详情</h1>
+      <nav>
+        <a href="index.html">周报归档</a>
+        <a href="explorer.html">项目筛选</a>
+        <a href="projects.json">projects.json</a>
+      </nav>
+    </div>
+  </header>
+  <main class="wrap">
+    <section id="content" class="empty">加载中</section>
+  </main>
+  <script>
+    const content = document.getElementById("content");
+    const title = document.getElementById("title");
+
+    Promise.resolve()
+      .then(loadDetail)
+      .then(render)
+      .catch(error => {
+        content.className = "empty";
+        content.textContent = `无法读取项目详情：${error.message}`;
+      });
+
+    function loadDetail() {
+      const repo = repoName();
+      if (!repo) throw new Error("URL 缺少 repo 参数，请从项目筛选页点击具体项目进入。");
+      if (!shouldUseApi()) return loadStaticDetail(repo);
+      return fetch(`/api/projects/${encodeURIComponentOwnerRepo(repo)}`, { cache: "no-store" })
+        .then(jsonOrThrow)
+        .then(data => data && data.found ? { ...data, data_source: "后端 API" } : loadStaticDetail(repo))
+        .catch(() => loadStaticDetail(repo));
+    }
+
+    function loadStaticDetail(repo) {
+      return fetch("projects.json", { cache: "no-store" })
+        .then(jsonOrThrow)
+        .then(data => buildStaticDetail(repo, Array.isArray(data.projects) ? data.projects : []));
+    }
+
+    function buildStaticDetail(repo, projects) {
+      const history = projects
+        .filter(project => String(project.full_name || "").toLowerCase() === repo.toLowerCase())
+        .sort((a, b) => String(b.run_date || "").localeCompare(String(a.run_date || "")));
+      if (!history.length) {
+        return { schema_version: 1, found: false, full_name: repo, history: [], similar_projects: [], data_source: "静态 JSON" };
+      }
+      const latest = history[0];
+      return {
+        schema_version: 1,
+        found: true,
+        full_name: latest.full_name || repo,
+        html_url: latest.html_url || "",
+        description: latest.description || "",
+        language: latest.language || "",
+        category: latest.category || "",
+        latest_run_date: latest.run_date || "",
+        first_run_date: history[history.length - 1].run_date || "",
+        history_count: history.length,
+        total_star_growth: history.reduce((total, project) => total + number(project.star_growth), 0),
+        best_trending_rank: bestTrendingRank(history),
+        sources: unique(history.flatMap(project => project.sources || [])),
+        security_flags: unique(history.flatMap(project => project.security_flags || [])),
+        quality_flags: unique(history.flatMap(project => project.quality_flags || [])),
+        best_quality_score: Math.max(0, ...history.map(project => number(project.quality_score))),
+        latest_quality_score: number(latest.quality_score),
+        latest_quality_level: latest.quality_level || "unknown",
+        history,
+        similar_projects: similarProjects(latest, projects),
+        data_source: "静态 JSON"
+      };
+    }
+
+    function render(detail) {
+      if (!detail.found) {
+        title.textContent = "未找到项目";
+        content.className = "empty";
+        content.innerHTML = `未找到 ${escapeHtml(detail.full_name || "")} 的历史记录。`;
+        return;
+      }
+      title.textContent = detail.full_name;
+      document.title = `${detail.full_name} - GitHub 项目详情`;
+      content.className = "";
+      content.innerHTML = `
+        <section class="hero">
+          <h1>${escapeHtml(detail.full_name)}</h1>
+          <p class="desc">${escapeHtml(detail.description || "")}</p>
+          <div class="meta">
+            <span>${escapeHtml(detail.language || "Unknown")}</span>
+            <span>${escapeHtml(detail.category || "Other")}</span>
+            <span>来源：${escapeHtml(detail.data_source || "静态 JSON")}</span>
+            ${detail.html_url ? `<a href="${escapeAttribute(detail.html_url)}" target="_blank" rel="noreferrer">${escapeHtml(detail.html_url)}</a>` : ""}
+          </div>
+        </section>
+        <section class="summary">
+          ${metric("历史入选", number(detail.history_count))}
+          ${metric("累计新增 Star", number(detail.total_star_growth))}
+          ${metric("最好 Trending", detail.best_trending_rank ? "#" + detail.best_trending_rank : "-")}
+          ${metric("最近入选", detail.latest_run_date || "-")}
+          ${metric("质量分", number(detail.latest_quality_score))}
+        </section>
+        <section class="grid">
+          <div class="section"><h2>风险提示</h2>${tags(detail.security_flags || [], "risk", "暂无风险提示")}</div>
+          <div class="section"><h2>质量提示</h2>${tags(detail.quality_flags || [], "ok", "暂无质量扣分项")}</div>
+          <div class="section"><h2>历史来源</h2>${tags(detail.sources || [], "", "暂无来源")}</div>
+          <div class="section"><h2>相似项目</h2>${similarHtml(detail.similar_projects || [])}</div>
+        </section>
+        <section class="section" style="margin-top:12px">
+          <h2>历史趋势</h2>
+          ${trendHtml(detail.history || [])}
+        </section>
+        <section class="section" style="margin-top:12px">
+          <h2>历史入选记录</h2>
+          <div class="table-shell">${historyTable(detail.history || [])}</div>
+        </section>
+      `;
+    }
+
+    function historyTable(history) {
+      if (!history.length) return '<div class="empty">暂无历史记录</div>';
+      return `<table><thead><tr><th>日期</th><th>方向</th><th>来源</th><th>Trending</th><th>新增 Star</th><th>质量</th><th>周报</th></tr></thead><tbody>${history.map(project => `
+        <tr>
+          <td>${escapeHtml(project.run_date || "")}</td>
+          <td>${escapeHtml(project.category || "Other")}</td>
+          <td>${escapeHtml((project.sources || []).join(" + ") || "-")}</td>
+          <td>${project.trending_rank ? "#" + escapeHtml(project.trending_rank) : "-"}</td>
+          <td>${number(project.star_growth)}</td>
+          <td>${number(project.quality_score)} / ${escapeHtml(project.quality_level || "unknown")}</td>
+          <td>${project.report_url ? `<a href="${escapeAttribute(project.report_url)}">查看</a>` : "-"}</td>
+        </tr>`).join("")}</tbody></table>`;
+    }
+
+    function trendHtml(history) {
+      if (!history.length) return '<div class="empty">暂无趋势数据</div>';
+      const ordered = [...history].sort((a, b) => String(a.run_date || "").localeCompare(String(b.run_date || "")));
+      const maxGrowth = Math.max(1, ...ordered.map(project => number(project.star_growth)));
+      return `<div class="trend-list">${ordered.map(project => {
+        const growth = number(project.star_growth);
+        const quality = number(project.quality_score);
+        const growthWidth = Math.max(2, Math.round((growth / maxGrowth) * 100));
+        const qualityWidth = Math.max(2, Math.min(100, quality));
+        return `<div class="trend-row">
+          <span class="trend-label">${escapeHtml(project.run_date || "")}</span>
+          <span class="trend-bars">
+            <span class="bar-track"><span class="bar-fill" style="width:${growthWidth}%"></span></span>
+            <span class="bar-track"><span class="bar-fill quality" style="width:${qualityWidth}%"></span></span>
+          </span>
+          <span class="trend-label">Star ${growth}</span>
+          <span class="trend-label">质量 ${quality}</span>
+        </div>`;
+      }).join("")}</div>`;
+    }
+
+    function similarHtml(projects) {
+      if (!projects.length) return "<p>暂无相似历史项目。</p>";
+      return `<ul>${projects.map(project => `<li><a href="project.html?repo=${encodeURIComponent(project.full_name || "")}">${escapeHtml(project.full_name || "")}</a> <span>${escapeHtml(project.language || "Unknown")} / ${escapeHtml(project.category || "Other")} / 新增 Star ${number(project.star_growth)}</span></li>`).join("")}</ul>`;
+    }
+
+    function tags(items, className, emptyText) {
+      const values = unique(items);
+      if (!values.length) return `<p>${escapeHtml(emptyText)}</p>`;
+      return values.map(value => `<span class="tag ${className}">${escapeHtml(value)}</span>`).join("");
+    }
+
+    function metric(label, value) {
+      return `<div class="metric"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`;
+    }
+
+    function similarProjects(base, projects) {
+      return projects
+        .filter(project => project.full_name && project.full_name !== base.full_name)
+        .map(project => ({ project, score: similarityScore(base, project) }))
+        .filter(item => item.score > 0)
+        .sort((a, b) => b.score - a.score || number(b.project.star_growth) - number(a.project.star_growth))
+        .slice(0, 5)
+        .map(item => item.project);
+    }
+
+    function similarityScore(base, project) {
+      let score = 0;
+      if (base.language && base.language === project.language) score += 4;
+      if (base.category && base.category === project.category) score += 5;
+      score += overlap(base.sources || [], project.sources || []);
+      score += Math.min(4, overlap(projectKeywords(base), projectKeywords(project)));
+      return score;
+    }
+
+    function projectKeywords(project) {
+      return String([project.full_name, project.description, project.category, ...(project.selection_reasons || [])].join(" "))
+        .toLowerCase()
+        .replace(/[\/\-_]/g, " ")
+        .split(/\s+/)
+        .filter(value => value.length >= 3);
+    }
+
+    function overlap(a, b) {
+      const right = new Set(b);
+      return unique(a).filter(value => right.has(value)).length;
+    }
+
+    function bestTrendingRank(history) {
+      const ranks = history.map(project => number(project.trending_rank)).filter(value => value > 0);
+      return ranks.length ? Math.min(...ranks) : 0;
+    }
+
+    function repoName() {
+      return new URLSearchParams(window.location.search).get("repo") || "";
+    }
+
+    function shouldUseApi() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("api") === "1") return true;
+      if (params.get("api") === "0") return false;
+      return ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
+    }
+
+    function encodeURIComponentOwnerRepo(repo) {
+      return repo.split("/").map(part => encodeURIComponent(part)).join("/");
+    }
+
+    function jsonOrThrow(response) {
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return response.json();
+    }
+
+    function unique(items) {
+      return [...new Set((items || []).map(value => String(value)).filter(Boolean))];
+    }
+
+    function number(value) {
+      const parsed = Number(value || 0);
+      return Number.isFinite(parsed) ? parsed : 0;
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
+    }
+
+    function escapeAttribute(value) {
+      return escapeHtml(value).replace(/`/g, "&#96;");
+    }
+  </script>
+</body>
+</html>
