@@ -3,11 +3,11 @@
     "full_name": "Hmbown/DeepSeek-TUI",
     "html_url": "https://github.com/Hmbown/DeepSeek-TUI",
     "description": "Coding agent for DeepSeek models that runs in your terminal",
-    "stargazers_count": 24487,
-    "forks_count": 2007,
+    "stargazers_count": 24550,
+    "forks_count": 2013,
     "language": "Rust",
     "created_at": "2026-01-19T18:21:01Z",
-    "updated_at": "2026-05-11T07:08:18Z",
+    "updated_at": "2026-05-11T07:53:45Z",
     "pushed_at": "2026-05-11T04:31:47Z",
     "topics": [
       "cli",
@@ -19,7 +19,7 @@
     ],
     "archived": false,
     "fork": false,
-    "open_issues_count": 351,
+    "open_issues_count": 353,
     "license_name": "MIT",
     "readme_excerpt": "Terminal coding agent for DeepSeek V4. It runs from the deepseek command, streams reasoning blocks, edits local workspaces with approval gates, and includes an auto mode that chooses both model and thinking level per turn.",
     "readme_summary": "Terminal coding agent for DeepSeek V4. It runs from the deepseek command, streams reasoning blocks, edits local workspaces with approval gates, and includes an auto mode that chooses both model and thinking level per turn.",
@@ -31,7 +31,7 @@
     "quality_level": "high",
     "selection_reasons": [
       "进入 GitHub Trending 周榜第 1 位，是本期最重要的热度信号。",
-      "较上次记录新增 Star 297，近期热度上升。",
+      "较上次记录新增 Star 63，近期热度上升。",
       "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
       "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
     ],
@@ -41,19 +41,19 @@
     "trending_rank": 1,
     "trending_period": "weekly",
     "source_priority": 100,
-    "star_growth": 297,
-    "score": 0.7651,
+    "star_growth": 63,
+    "score": 0.7898,
     "category": "AI Agent"
   },
   {
     "full_name": "ruvnet/ruflo",
     "html_url": "https://github.com/ruvnet/ruflo",
     "description": "🌊 The leading agent orchestration platform for Claude. Deploy intelligent multi-agent swarms, coordinate autonomous workflows, and build conversational AI systems. Features    enterprise-grade architecture, self-learning swarm intelligence, RAG integration, and native Claude Code / Codex Integration",
-    "stargazers_count": 48644,
-    "forks_count": 5390,
+    "stargazers_count": 48665,
+    "forks_count": 5392,
     "language": "TypeScript",
     "created_at": "2025-06-02T21:24:20Z",
-    "updated_at": "2026-05-11T06:59:42Z",
+    "updated_at": "2026-05-11T07:53:38Z",
     "pushed_at": "2026-05-11T04:31:59Z",
     "topics": [
       "agentic-ai",
@@ -91,7 +91,7 @@
     "quality_level": "high",
     "selection_reasons": [
       "进入 GitHub Trending 周榜第 3 位，是本期最重要的热度信号。",
-      "较上次记录新增 Star 117，近期热度上升。",
+      "较上次记录新增 Star 21，近期热度上升。",
       "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
       "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
     ],
@@ -101,19 +101,19 @@
     "trending_rank": 3,
     "trending_period": "weekly",
     "source_priority": 100,
-    "star_growth": 117,
-    "score": 0.6583,
+    "star_growth": 21,
+    "score": 0.6598,
     "category": "AI Agent"
   },
   {
     "full_name": "docusealco/docuseal",
     "html_url": "https://github.com/docusealco/docuseal",
     "description": "Open source DocuSign alternative. Create, fill, and sign digital documents ✍️",
-    "stargazers_count": 16278,
-    "forks_count": 1476,
+    "stargazers_count": 16286,
+    "forks_count": 1477,
     "language": "Ruby",
     "created_at": "2023-07-03T19:54:54Z",
-    "updated_at": "2026-05-11T07:08:27Z",
+    "updated_at": "2026-05-11T07:55:09Z",
     "pushed_at": "2026-05-08T11:02:33Z",
     "topics": [
       "document-signing",
@@ -144,9 +144,9 @@
     "quality_level": "high",
     "selection_reasons": [
       "进入 GitHub Trending 周榜第 4 位，是本期最重要的热度信号。",
-      "较上次记录新增 Star 39，近期热度上升。",
+      "较上次记录新增 Star 8，近期热度上升。",
       "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-      "当前累计 Star 16278，具备一定社区关注度。"
+      "当前累计 Star 16286，具备一定社区关注度。"
     ],
     "sources": [
       "github_trending"
@@ -154,19 +154,19 @@
     "trending_rank": 4,
     "trending_period": "weekly",
     "source_priority": 100,
-    "star_growth": 39,
-    "score": 0.4401,
+    "star_growth": 8,
+    "score": 0.4428,
     "category": "Other"
   },
   {
     "full_name": "TauricResearch/TradingAgents",
     "html_url": "https://github.com/TauricResearch/TradingAgents",
     "description": "TradingAgents: Multi-Agents LLM Financial Trading Framework",
-    "stargazers_count": 73397,
-    "forks_count": 14302,
+    "stargazers_count": 73418,
+    "forks_count": 14307,
     "language": "Python",
     "created_at": "2024-12-28T03:31:08Z",
-    "updated_at": "2026-05-11T07:06:12Z",
+    "updated_at": "2026-05-11T07:50:33Z",
     "pushed_at": "2026-05-11T06:25:23Z",
     "topics": [
       "agent",
@@ -177,7 +177,7 @@
     ],
     "archived": false,
     "fork": false,
-    "open_issues_count": 353,
+    "open_issues_count": 334,
     "license_name": "Apache-2.0",
     "readme_excerpt": "[2026-04] **TradingAgents v0.2.4** released with structured-output agents (Research Manager, Trader, Portfolio Manager), LangGraph checkpoint resume, persistent decision log, DeepSeek/Qwen/GLM/Azure provider support, Docker, and a Windows UTF-8 encoding fix. See CHANGELOG.md for the full list.",
     "readme_summary": "[2026-04] **TradingAgents v0.2.4** released with structured-output agents (Research Manager, Trader, Portfolio Manager), LangGraph checkpoint resume, persistent decision log, DeepSeek/Qwen/GLM/Azure provider support, Docker, and a Windows UTF-8 encoding fix. See CHANGELOG.md for the full list.",
@@ -189,7 +189,7 @@
     "quality_level": "high",
     "selection_reasons": [
       "进入 GitHub Trending 周榜第 5 位，是本期最重要的热度信号。",
-      "较上次记录新增 Star 127，近期热度上升。",
+      "较上次记录新增 Star 21，近期热度上升。",
       "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
       "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
     ],
@@ -200,19 +200,19 @@
     "trending_rank": 5,
     "trending_period": "weekly",
     "source_priority": 100,
-    "star_growth": 127,
-    "score": 0.6934,
+    "star_growth": 21,
+    "score": 0.6912,
     "category": "AI Agent"
   },
   {
     "full_name": "LearningCircuit/local-deep-research",
     "html_url": "https://github.com/LearningCircuit/local-deep-research",
     "description": " ~95% on SimpleQA (e.g. Qwen3.6-27B on a 3090). Supports all local and cloud LLMs (llama.cpp, Ollama, Google, ...). 10+ search engines - arXiv, PubMed, your private documents. Everything Local & Encrypted.",
-    "stargazers_count": 7125,
-    "forks_count": 630,
+    "stargazers_count": 7131,
+    "forks_count": 631,
     "language": "Python",
     "created_at": "2025-02-09T15:41:32Z",
-    "updated_at": "2026-05-11T07:06:48Z",
+    "updated_at": "2026-05-11T07:52:09Z",
     "pushed_at": "2026-05-11T04:30:36Z",
     "topics": [
       "academia",
@@ -250,7 +250,7 @@
     "quality_level": "high",
     "selection_reasons": [
       "进入 GitHub Trending 周榜第 6 位，是本期最重要的热度信号。",
-      "较上次记录新增 Star 38，近期热度上升。",
+      "较上次记录新增 Star 6，近期热度上升。",
       "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
       "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
     ],
@@ -260,19 +260,19 @@
     "trending_rank": 6,
     "trending_period": "weekly",
     "source_priority": 100,
-    "star_growth": 38,
-    "score": 0.4935,
+    "star_growth": 6,
+    "score": 0.4922,
     "category": "LLM Tooling"
   },
   {
     "full_name": "virattt/dexter",
     "html_url": "https://github.com/virattt/dexter",
     "description": "An autonomous agent for deep financial research",
-    "stargazers_count": 25208,
-    "forks_count": 3073,
+    "stargazers_count": 25214,
+    "forks_count": 3074,
     "language": "TypeScript",
     "created_at": "2025-10-14T21:02:00Z",
-    "updated_at": "2026-05-11T07:04:11Z",
+    "updated_at": "2026-05-11T07:55:01Z",
     "pushed_at": "2026-05-11T00:18:10Z",
     "topics": [],
     "archived": false,
@@ -294,7 +294,7 @@
     "quality_level": "high",
     "selection_reasons": [
       "进入 GitHub Trending 周榜第 7 位，是本期最重要的热度信号。",
-      "较上次记录新增 Star 35，近期热度上升。",
+      "较上次记录新增 Star 6，近期热度上升。",
       "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
       "匹配当前个性化方向：Agent 开发、开发者工具。"
     ],
@@ -304,19 +304,19 @@
     "trending_rank": 7,
     "trending_period": "weekly",
     "source_priority": 100,
-    "star_growth": 35,
-    "score": 0.3983,
+    "star_growth": 6,
+    "score": 0.3981,
     "category": "AI Agent"
   },
   {
     "full_name": "decolua/9router",
     "html_url": "https://github.com/decolua/9router",
     "description": "Unlimited FREE AI coding. Connect Claude Code, Codex, Cursor, Cline, Copilot, Antigravity to FREE Claude/GPT/Gemini via 40+ providers. Auto-fallback, RTK -40% tokens, never hit limits.",
-    "stargazers_count": 7595,
-    "forks_count": 1260,
+    "stargazers_count": 7625,
+    "forks_count": 1262,
     "language": "JavaScript",
     "created_at": "2026-01-05T02:59:30Z",
-    "updated_at": "2026-05-11T07:09:12Z",
+    "updated_at": "2026-05-11T07:53:40Z",
     "pushed_at": "2026-05-11T05:08:31Z",
     "topics": [
       "ai-agents",
@@ -354,7 +354,7 @@
     "quality_level": "high",
     "selection_reasons": [
       "进入 GitHub Trending 周榜第 8 位，是本期最重要的热度信号。",
-      "较上次记录新增 Star 214，近期热度上升。",
+      "较上次记录新增 Star 30，近期热度上升。",
       "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
       "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
     ],
@@ -364,19 +364,19 @@
     "trending_rank": 8,
     "trending_period": "weekly",
     "source_priority": 100,
-    "star_growth": 214,
-    "score": 0.587,
+    "star_growth": 30,
+    "score": 0.5716,
     "category": "AI Agent"
   },
   {
     "full_name": "1jehuang/jcode",
     "html_url": "https://github.com/1jehuang/jcode",
     "description": "Coding Agent Harness",
-    "stargazers_count": 5625,
-    "forks_count": 573,
+    "stargazers_count": 5637,
+    "forks_count": 574,
     "language": "Rust",
     "created_at": "2026-01-05T09:43:36Z",
-    "updated_at": "2026-05-11T07:07:48Z",
+    "updated_at": "2026-05-11T07:37:42Z",
     "pushed_at": "2026-05-11T02:07:49Z",
     "topics": [
       "ai",
@@ -406,7 +406,7 @@
     "quality_level": "high",
     "selection_reasons": [
       "进入 GitHub Trending 周榜第 9 位，是本期最重要的热度信号。",
-      "较上次记录新增 Star 54，近期热度上升。",
+      "较上次记录新增 Star 12，近期热度上升。",
       "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
       "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
     ],
@@ -416,19 +416,77 @@
     "trending_rank": 9,
     "trending_period": "weekly",
     "source_priority": 100,
-    "star_growth": 54,
-    "score": 0.5729,
+    "star_growth": 12,
+    "score": 0.5786,
+    "category": "AI Agent"
+  },
+  {
+    "full_name": "NousResearch/hermes-agent",
+    "html_url": "https://github.com/NousResearch/hermes-agent",
+    "description": "The agent that grows with you",
+    "stargazers_count": 143257,
+    "forks_count": 22353,
+    "language": "Python",
+    "created_at": "2025-07-22T22:22:28Z",
+    "updated_at": "2026-05-11T07:55:42Z",
+    "pushed_at": "2026-05-11T07:30:00Z",
+    "topics": [
+      "ai",
+      "ai-agent",
+      "ai-agents",
+      "anthropic",
+      "chatgpt",
+      "claude",
+      "claude-code",
+      "clawdbot",
+      "codex",
+      "hermes",
+      "hermes-agent",
+      "llm",
+      "moltbot",
+      "nous-research",
+      "openai",
+      "openclaw"
+    ],
+    "archived": false,
+    "fork": false,
+    "open_issues_count": 9908,
+    "license_name": "MIT",
+    "readme_excerpt": "The self-improving AI agent built by Nous Research.** It's the only agent with a built-in learning loop — it creates skills from experience, improves them during use, nudges itself to persist knowledge, searches its own past conversations, and builds a deepening model of who you are across sessions.",
+    "readme_summary": "The self-improving AI agent built by Nous Research.** It's the only agent with a built-in learning loop — it creates skills from experience, improves them during use, nudges itself to persist knowledge, searches its own past conversations, and builds a deepening model of who you are across sessions.",
+    "security_flags": [],
+    "security_score": 100,
+    "security_level": "low",
+    "quality_flags": [
+      "仓库简介较短，项目定位信息有限。"
+    ],
+    "quality_score": 92,
+    "quality_level": "high",
+    "selection_reasons": [
+      "较上次记录新增 Star 105，近期热度上升。",
+      "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+      "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+      "当前累计 Star 143257，具备一定社区关注度。"
+    ],
+    "sources": [
+      "github_search"
+    ],
+    "trending_rank": 0,
+    "trending_period": "",
+    "source_priority": 10,
+    "star_growth": 105,
+    "score": 0.4832,
     "category": "AI Agent"
   },
   {
     "full_name": "mattpocock/skills",
     "html_url": "https://github.com/mattpocock/skills",
     "description": "Skills for Real Engineers. Straight from my .claude directory.",
-    "stargazers_count": 69875,
-    "forks_count": 6043,
+    "stargazers_count": 69979,
+    "forks_count": 6053,
     "language": "Shell",
     "created_at": "2026-02-03T11:15:53Z",
-    "updated_at": "2026-05-11T07:09:08Z",
+    "updated_at": "2026-05-11T07:55:26Z",
     "pushed_at": "2026-05-10T19:59:51Z",
     "topics": [],
     "archived": false,
@@ -447,9 +505,9 @@
     "quality_level": "high",
     "selection_reasons": [
       "进入 GitHub Trending 周榜第 13 位，是本期最重要的热度信号。",
-      "较上次记录新增 Star 605，近期热度上升。",
+      "较上次记录新增 Star 104，近期热度上升。",
       "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-      "当前累计 Star 69875，具备一定社区关注度。"
+      "当前累计 Star 69979，具备一定社区关注度。"
     ],
     "sources": [
       "github_trending"
@@ -457,68 +515,8 @@
     "trending_rank": 13,
     "trending_period": "weekly",
     "source_priority": 100,
-    "star_growth": 605,
-    "score": 0.4822,
+    "star_growth": 104,
+    "score": 0.4801,
     "category": "LLM Tooling"
-  },
-  {
-    "full_name": "cocoindex-io/cocoindex",
-    "html_url": "https://github.com/cocoindex-io/cocoindex",
-    "description": "Incremental engine for long horizon agents 🌟 Star if you like it!",
-    "stargazers_count": 9520,
-    "forks_count": 729,
-    "language": "Python",
-    "created_at": "2025-03-03T23:03:09Z",
-    "updated_at": "2026-05-11T06:54:16Z",
-    "pushed_at": "2026-05-11T00:52:44Z",
-    "topics": [
-      "agentic-data-framework",
-      "ai",
-      "ai-agents",
-      "change-data-capture",
-      "codebase-intelligence",
-      "context-engineering",
-      "data-engineering",
-      "data-indexing",
-      "data-processing",
-      "etl",
-      "help-wanted",
-      "indexing",
-      "knowledge-graph",
-      "llm",
-      "long-horizon-agent",
-      "python",
-      "rag",
-      "real-time",
-      "rust",
-      "semantic-search"
-    ],
-    "archived": false,
-    "fork": false,
-    "open_issues_count": 57,
-    "license_name": "Apache-2.0",
-    "readme_excerpt": "Your agents deserve fresh context.",
-    "readme_summary": "Your agents deserve fresh context.",
-    "security_flags": [],
-    "security_score": 100,
-    "security_level": "low",
-    "quality_flags": [],
-    "quality_score": 100,
-    "quality_level": "high",
-    "selection_reasons": [
-      "进入 GitHub Trending 周榜第 11 位，是本期最重要的热度信号。",
-      "较上次记录新增 Star 18，近期热度上升。",
-      "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-      "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
-    ],
-    "sources": [
-      "github_trending"
-    ],
-    "trending_rank": 11,
-    "trending_period": "weekly",
-    "source_priority": 100,
-    "star_growth": 18,
-    "score": 0.4402,
-    "category": "AI Agent"
   }
 ]

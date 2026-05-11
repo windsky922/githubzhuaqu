@@ -10,17 +10,17 @@
       "readme_summary": "Terminal coding agent for DeepSeek V4. It runs from the deepseek command, streams reasoning blocks, edits local workspaces with approval gates, and includes an auto mode that chooses both model and thinking level per turn.",
       "category": "AI Agent",
       "language": "Rust",
-      "stargazers_count": 24487,
-      "forks_count": 2007,
-      "star_growth": 297,
-      "score": 0.7651,
+      "stargazers_count": 24550,
+      "forks_count": 2013,
+      "star_growth": 63,
+      "score": 0.7898,
       "sources": [
         "github_trending"
       ],
       "trending_rank": 1,
       "selection_reasons": [
         "进入 GitHub Trending 周榜第 1 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 297，近期热度上升。",
+        "较上次记录新增 Star 63，近期热度上升。",
         "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
         "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
       ],
@@ -40,17 +40,17 @@
       "readme_summary": "Multi-agent AI orchestration for Claude Code** Orchestrate 100+ specialized AI agents across machines, teams, and trust boundaries. Ruflo adds coordinated swarms, self-learning memory, federated comms, and enterprise security to Claude Code — so agents don't just run, they collaborate.",
       "category": "AI Agent",
       "language": "TypeScript",
-      "stargazers_count": 48644,
-      "forks_count": 5390,
-      "star_growth": 117,
-      "score": 0.6583,
+      "stargazers_count": 48665,
+      "forks_count": 5392,
+      "star_growth": 21,
+      "score": 0.6598,
       "sources": [
         "github_trending"
       ],
       "trending_rank": 3,
       "selection_reasons": [
         "进入 GitHub Trending 周榜第 3 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 117，近期热度上升。",
+        "较上次记录新增 Star 21，近期热度上升。",
         "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
         "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
       ],
@@ -70,19 +70,19 @@
       "readme_summary": "DocuSeal Open source document filling and signing DocuSeal is an open source platform that provides secure and efficient digital document signing and processing. Create PDF forms to have them filled and signed online on any device with an easy-to-use, mobile-optimized web tool.",
       "category": "Other",
       "language": "Ruby",
-      "stargazers_count": 16278,
-      "forks_count": 1476,
-      "star_growth": 39,
-      "score": 0.4401,
+      "stargazers_count": 16286,
+      "forks_count": 1477,
+      "star_growth": 8,
+      "score": 0.4428,
       "sources": [
         "github_trending"
       ],
       "trending_rank": 4,
       "selection_reasons": [
         "进入 GitHub Trending 周榜第 4 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 39，近期热度上升。",
+        "较上次记录新增 Star 8，近期热度上升。",
         "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "当前累计 Star 16278，具备一定社区关注度。"
+        "当前累计 Star 16286，具备一定社区关注度。"
       ],
       "security_flags": [],
       "security_score": 100,
@@ -100,10 +100,10 @@
       "readme_summary": "[2026-04] **TradingAgents v0.2.4** released with structured-output agents (Research Manager, Trader, Portfolio Manager), LangGraph checkpoint resume, persistent decision log, DeepSeek/Qwen/GLM/Azure provider support, Docker, and a Windows UTF-8 encoding fix. See CHANGELOG.md for the full list.",
       "category": "AI Agent",
       "language": "Python",
-      "stargazers_count": 73397,
-      "forks_count": 14302,
-      "star_growth": 127,
-      "score": 0.6934,
+      "stargazers_count": 73418,
+      "forks_count": 14307,
+      "star_growth": 21,
+      "score": 0.6912,
       "sources": [
         "github_search",
         "github_trending"
@@ -111,7 +111,7 @@
       "trending_rank": 5,
       "selection_reasons": [
         "进入 GitHub Trending 周榜第 5 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 127，近期热度上升。",
+        "较上次记录新增 Star 21，近期热度上升。",
         "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
         "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
       ],
@@ -131,17 +131,17 @@
       "readme_summary": "AI-powered research assistant for deep, agentic research** Performs deep, agentic research using multiple LLMs and search engines with proper citations* 🧪 **First open-source project — fully-local on a single RTX 3090 (Qwen3.6-27B) — to report ~95% SimpleQA (n=500) and 77% xbench-DeepSearch (n=100) on local hardware.** See the r/LocalLLaMA announcement and the benchmark dataset.",
       "category": "LLM Tooling",
       "language": "Python",
-      "stargazers_count": 7125,
-      "forks_count": 630,
-      "star_growth": 38,
-      "score": 0.4935,
+      "stargazers_count": 7131,
+      "forks_count": 631,
+      "star_growth": 6,
+      "score": 0.4922,
       "sources": [
         "github_trending"
       ],
       "trending_rank": 6,
       "selection_reasons": [
         "进入 GitHub Trending 周榜第 6 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 38，近期热度上升。",
+        "较上次记录新增 Star 6，近期热度上升。",
         "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
         "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
       ],
@@ -161,17 +161,17 @@
       "readme_summary": "Dexter is an autonomous financial research agent that thinks, plans, and learns as it works. It performs analysis using task planning, self-reflection, and real-time market data. Think Claude Code, but built specifically for financial research.",
       "category": "AI Agent",
       "language": "TypeScript",
-      "stargazers_count": 25208,
-      "forks_count": 3073,
-      "star_growth": 35,
-      "score": 0.3983,
+      "stargazers_count": 25214,
+      "forks_count": 3074,
+      "star_growth": 6,
+      "score": 0.3981,
       "sources": [
         "github_trending"
       ],
       "trending_rank": 7,
       "selection_reasons": [
         "进入 GitHub Trending 周榜第 7 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 35，近期热度上升。",
+        "较上次记录新增 Star 6，近期热度上升。",
         "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
         "匹配当前个性化方向：Agent 开发、开发者工具。"
       ],
@@ -196,17 +196,17 @@
       "readme_summary": "Never stop coding. Use in your CLI tool:** That's it!** Start coding with FREE AI models. Alternative: run from source (this repository):** This repository package is private (9router-app), so source/Docker execution is the expected local development path.",
       "category": "AI Agent",
       "language": "JavaScript",
-      "stargazers_count": 7595,
-      "forks_count": 1260,
-      "star_growth": 214,
-      "score": 0.587,
+      "stargazers_count": 7625,
+      "forks_count": 1262,
+      "star_growth": 30,
+      "score": 0.5716,
       "sources": [
         "github_trending"
       ],
       "trending_rank": 8,
       "selection_reasons": [
         "进入 GitHub Trending 周榜第 8 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 214，近期热度上升。",
+        "较上次记录新增 Star 30，近期热度上升。",
         "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
         "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
       ],
@@ -226,19 +226,51 @@
       "readme_summary": "The next generation coding agent harness to raise the skill ceiling. Built for multi-session workflows, infinite customizability, and performance.",
       "category": "AI Agent",
       "language": "Rust",
-      "stargazers_count": 5625,
-      "forks_count": 573,
-      "star_growth": 54,
-      "score": 0.5729,
+      "stargazers_count": 5637,
+      "forks_count": 574,
+      "star_growth": 12,
+      "score": 0.5786,
       "sources": [
         "github_trending"
       ],
       "trending_rank": 9,
       "selection_reasons": [
         "进入 GitHub Trending 周榜第 9 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 54，近期热度上升。",
+        "较上次记录新增 Star 12，近期热度上升。",
         "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
         "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库简介较短，项目定位信息有限。"
+      ],
+      "quality_score": 92,
+      "quality_level": "high",
+      "report_url": "weekly/2026-05-11.html"
+    },
+    {
+      "run_date": "2026-05-11",
+      "full_name": "NousResearch/hermes-agent",
+      "html_url": "https://github.com/NousResearch/hermes-agent",
+      "description": "The agent that grows with you",
+      "readme_summary": "The self-improving AI agent built by Nous Research.** It's the only agent with a built-in learning loop — it creates skills from experience, improves them during use, nudges itself to persist knowledge, searches its own past conversations, and builds a deepening model of who you are across sessions.",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 143257,
+      "forks_count": 22353,
+      "star_growth": 105,
+      "score": 0.4832,
+      "sources": [
+        "github_search"
+      ],
+      "trending_rank": 0,
+      "selection_reasons": [
+        "较上次记录新增 Star 105，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 143257，具备一定社区关注度。"
       ],
       "security_flags": [],
       "security_score": 100,
@@ -258,19 +290,19 @@
       "readme_summary": "My agent skills that I use every day to do real engineering - not vibe coding. Developing real applications is hard. Approaches like GSD, BMAD, and Spec-Kit try to help by owning the process.",
       "category": "LLM Tooling",
       "language": "Shell",
-      "stargazers_count": 69875,
-      "forks_count": 6043,
-      "star_growth": 605,
-      "score": 0.4822,
+      "stargazers_count": 69979,
+      "forks_count": 6053,
+      "star_growth": 104,
+      "score": 0.4801,
       "sources": [
         "github_trending"
       ],
       "trending_rank": 13,
       "selection_reasons": [
         "进入 GitHub Trending 周榜第 13 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 605，近期热度上升。",
+        "较上次记录新增 Star 104，近期热度上升。",
         "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "当前累计 Star 69875，具备一定社区关注度。"
+        "当前累计 Star 69979，具备一定社区关注度。"
       ],
       "security_flags": [],
       "security_score": 100,
@@ -279,36 +311,6 @@
         "仓库主题标签较少，垂直方向判断可能不够稳定。"
       ],
       "quality_score": 92,
-      "quality_level": "high",
-      "report_url": "weekly/2026-05-11.html"
-    },
-    {
-      "run_date": "2026-05-11",
-      "full_name": "cocoindex-io/cocoindex",
-      "html_url": "https://github.com/cocoindex-io/cocoindex",
-      "description": "Incremental engine for long horizon agents 🌟 Star if you like it!",
-      "readme_summary": "Your agents deserve fresh context.",
-      "category": "AI Agent",
-      "language": "Python",
-      "stargazers_count": 9520,
-      "forks_count": 729,
-      "star_growth": 18,
-      "score": 0.4402,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 11,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 11 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 18，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
       "quality_level": "high",
       "report_url": "weekly/2026-05-11.html"
     },

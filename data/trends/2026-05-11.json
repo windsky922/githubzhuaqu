@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
   "total_projects": 10,
-  "trending_project_count": 10,
+  "trending_project_count": 9,
   "trending_top10_selected_count": 8,
-  "trending_selected_rate": 1.0,
-  "total_star_growth": 1544,
+  "trending_selected_rate": 0.9,
+  "total_star_growth": 376,
   "top_languages": [
     {
       "name": "Python",
@@ -50,7 +50,7 @@
       "full_name": "Hmbown/DeepSeek-TUI",
       "html_url": "https://github.com/Hmbown/DeepSeek-TUI",
       "trending_rank": 1,
-      "stargazers_count": 24487,
+      "stargazers_count": 24550,
       "language": "Rust",
       "category": "AI Agent"
     },
@@ -58,7 +58,7 @@
       "full_name": "ruvnet/ruflo",
       "html_url": "https://github.com/ruvnet/ruflo",
       "trending_rank": 3,
-      "stargazers_count": 48644,
+      "stargazers_count": 48665,
       "language": "TypeScript",
       "category": "AI Agent"
     },
@@ -66,7 +66,7 @@
       "full_name": "docusealco/docuseal",
       "html_url": "https://github.com/docusealco/docuseal",
       "trending_rank": 4,
-      "stargazers_count": 16278,
+      "stargazers_count": 16286,
       "language": "Ruby",
       "category": "Other"
     },
@@ -74,7 +74,7 @@
       "full_name": "TauricResearch/TradingAgents",
       "html_url": "https://github.com/TauricResearch/TradingAgents",
       "trending_rank": 5,
-      "stargazers_count": 73397,
+      "stargazers_count": 73418,
       "language": "Python",
       "category": "AI Agent"
     },
@@ -82,49 +82,49 @@
       "full_name": "LearningCircuit/local-deep-research",
       "html_url": "https://github.com/LearningCircuit/local-deep-research",
       "trending_rank": 6,
-      "stargazers_count": 7125,
+      "stargazers_count": 7131,
       "language": "Python",
       "category": "LLM Tooling"
     }
   ],
   "top_star_growth": [
     {
+      "full_name": "NousResearch/hermes-agent",
+      "html_url": "https://github.com/NousResearch/hermes-agent",
+      "star_growth": 105,
+      "stargazers_count": 143257,
+      "language": "Python",
+      "category": "AI Agent"
+    },
+    {
       "full_name": "mattpocock/skills",
       "html_url": "https://github.com/mattpocock/skills",
-      "star_growth": 605,
-      "stargazers_count": 69875,
+      "star_growth": 104,
+      "stargazers_count": 69979,
       "language": "Shell",
       "category": "LLM Tooling"
     },
     {
       "full_name": "Hmbown/DeepSeek-TUI",
       "html_url": "https://github.com/Hmbown/DeepSeek-TUI",
-      "star_growth": 297,
-      "stargazers_count": 24487,
+      "star_growth": 63,
+      "stargazers_count": 24550,
       "language": "Rust",
       "category": "AI Agent"
     },
     {
       "full_name": "decolua/9router",
       "html_url": "https://github.com/decolua/9router",
-      "star_growth": 214,
-      "stargazers_count": 7595,
+      "star_growth": 30,
+      "stargazers_count": 7625,
       "language": "JavaScript",
-      "category": "AI Agent"
-    },
-    {
-      "full_name": "TauricResearch/TradingAgents",
-      "html_url": "https://github.com/TauricResearch/TradingAgents",
-      "star_growth": 127,
-      "stargazers_count": 73397,
-      "language": "Python",
       "category": "AI Agent"
     },
     {
       "full_name": "ruvnet/ruflo",
       "html_url": "https://github.com/ruvnet/ruflo",
-      "star_growth": 117,
-      "stargazers_count": 48644,
+      "star_growth": 21,
+      "stargazers_count": 48665,
       "language": "TypeScript",
       "category": "AI Agent"
     }
@@ -132,8 +132,8 @@
   "summary_points": [
     "AI Agent 是本期最集中的方向，共 7 个项目。",
     "Python 是本期出现最多的主要语言，共 3 个项目。",
-    "本期入选项目累计新增 Star 1544。",
+    "本期入选项目累计新增 Star 376。",
     "Hmbown/DeepSeek-TUI 是本期 GitHub Trending 排名最高的项目，周榜排名 1。",
-    "mattpocock/skills 是本期新增 Star 最高的项目，新增 605。"
+    "NousResearch/hermes-agent 是本期新增 Star 最高的项目，新增 105。"
   ]
 }

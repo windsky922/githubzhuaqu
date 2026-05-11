@@ -16,16 +16,16 @@
       "star_history_updated_count": 225,
       "kimi_used": true,
       "fallback_used": false,
-      "telegram_sent": true,
+      "telegram_sent": false,
       "telegram_report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-11.html",
       "telegram_explorer_url": "https://windsky922.github.io/githubzhuaqu/explorer.html?date=2026-05-11",
       "telegram_runs_url": "https://windsky922.github.io/githubzhuaqu/runs.html",
       "delivery_results": [
         {
           "channel": "telegram",
-          "sent": true,
-          "error": "",
-          "skipped": false
+          "sent": false,
+          "error": "Telegram send skipped",
+          "skipped": true
         }
       ],
       "collector_error_count": 0,
@@ -75,18 +75,18 @@
           "count": 1
         }
       ],
-      "total_star_growth": 1544,
-      "trending_project_count": 10,
+      "total_star_growth": 376,
+      "trending_project_count": 9,
       "trending_top10_available_count": 10,
       "trending_top10_selected_count": 8,
       "trending_top10_fulfillment_rate": 1.1429,
-      "trending_selected_rate": 1.0,
+      "trending_selected_rate": 0.9,
       "summary_points": [
         "AI Agent 是本期最集中的方向，共 7 个项目。",
         "Python 是本期出现最多的主要语言，共 3 个项目。",
-        "本期入选项目累计新增 Star 1544。",
+        "本期入选项目累计新增 Star 376。",
         "Hmbown/DeepSeek-TUI 是本期 GitHub Trending 排名最高的项目，周榜排名 1。",
-        "mattpocock/skills 是本期新增 Star 最高的项目，新增 605。"
+        "NousResearch/hermes-agent 是本期新增 Star 最高的项目，新增 105。"
       ]
     },
     {
