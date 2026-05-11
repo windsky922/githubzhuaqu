@@ -20,6 +20,11 @@
     "first_sent_at": "2026-05-03"
   },
   {
+    "full_name": "addyosmani/agent-skills",
+    "html_url": "https://github.com/addyosmani/agent-skills",
+    "first_sent_at": "2026-05-11"
+  },
+  {
     "full_name": "affaan-m/everything-claude-code",
     "html_url": "https://github.com/affaan-m/everything-claude-code",
     "first_sent_at": "2026-04-29"
@@ -260,6 +265,11 @@
     "first_sent_at": "2026-04-29"
   },
   {
+    "full_name": "Hmbown/DeepSeek-TUI",
+    "html_url": "https://github.com/Hmbown/DeepSeek-TUI",
+    "first_sent_at": "2026-05-11"
+  },
+  {
     "full_name": "huggingface/ml-intern",
     "html_url": "https://github.com/huggingface/ml-intern",
     "first_sent_at": "2026-04-29"
@@ -298,6 +308,11 @@
     "full_name": "langgenius/dify",
     "html_url": "https://github.com/langgenius/dify",
     "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "LearningCircuit/local-deep-research",
+    "html_url": "https://github.com/LearningCircuit/local-deep-research",
+    "first_sent_at": "2026-05-11"
   },
   {
     "full_name": "leon-ai/leon",
