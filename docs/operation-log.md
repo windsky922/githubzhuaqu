@@ -2,6 +2,24 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-05-09 追加：增加 workflow 防回归测试
+
+### 1. 开发目的
+
+weekly workflow 已经改为发布到 `weekly-archive`，但刚刚出现过 YAML 冒号导致 Actions 无法解析的问题。需要把关键约束纳入本地测试，避免后续修改 workflow 时再次破坏手动触发和归档分支发布。
+
+### 2. 本次修改
+
+1. 新增 `tests/test_workflows.py`。
+2. 检查 weekly workflow 保留 `workflow_dispatch` 和 `ARCHIVE_BRANCH: weekly-archive`。
+3. 检查 workflow 不再直接执行 `git commit -m` 或裸 `git push` 推进 `main`。
+4. 检查带 `--message` 的命令不再使用容易触发 YAML 冒号解析问题的单行写法。
+5. 测试归档发布脚本只复制 `docs/`、`reports/` 和 `data/`，不复制 README 等代码文档文件。
+
+### 3. 设计边界
+
+本次只增加本地测试，不触发远端 Actions，也不实际创建或推送归档分支。
+
 ## 2026-05-09 追加：修复 weekly workflow YAML 语法
 
 ### 1. 问题原因
