@@ -41,6 +41,7 @@ class ApiRepository:
                 "runs_query": True,
                 "jobs_query": True,
                 "run_trigger_preview": True,
+                "local_job_runner": True,
                 "run_trigger_execute": False,
             },
             "archive": archive_health,
@@ -169,6 +170,7 @@ class ApiRepository:
         profile = str(payload.get("profile") or payload.get("interest_profile") or "").strip()
         sources = _list_strings(payload.get("sources"))
         dry_run = bool(payload.get("dry_run", True))
+        days_back = _positive_int(payload.get("days_back"))
         submitted_at = datetime.now(UTC).isoformat().replace("+00:00", "Z")
         fingerprint = sha1(
             json.dumps(
@@ -176,6 +178,7 @@ class ApiRepository:
                     "profile": profile,
                     "sources": sources,
                     "dry_run": dry_run,
+                    "days_back": days_back,
                     "submitted_at": submitted_at,
                 },
                 sort_keys=True,
@@ -193,6 +196,7 @@ class ApiRepository:
                 "profile": profile,
                 "sources": sources,
                 "dry_run": dry_run,
+                "days_back": days_back,
             },
             "result": {},
             "error": "",
@@ -402,6 +406,14 @@ def _int_value(value: Any) -> int:
         return int(value or 0)
     except (TypeError, ValueError):
         return 0
+
+
+def _positive_int(value: Any) -> int | None:
+    try:
+        number = int(value)
+    except (TypeError, ValueError):
+        return None
+    return number if number > 0 else None
 
 
 def _best_trending_rank(projects: list[dict[str, Any]]) -> int:

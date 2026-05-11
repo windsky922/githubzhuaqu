@@ -47,9 +47,11 @@ GitHub Actions
 | `src/personalization.py` | 个性化 profile 合并逻辑 |
 | `src/sender.py` | 推送消息构造和通道发送，当前支持 Telegram、飞书和企业微信 Webhook |
 | `src/api/` | 只读后端 API，用于查询历史项目、运行记录、个性化方向和最新周报 |
+| `src/job_runner.py` | 执行 SQLite jobs 表中的计划任务 |
 | `scripts/build_pages.py` | 生成 GitHub Pages 归档页面 |
 | `scripts/migrate_json_to_sqlite.py` | 将历史 JSON 归档导入 SQLite 派生索引 |
 | `scripts/verify_migration.py` | 校验 SQLite 派生索引和 JSON 归档计数 |
+| `scripts/run_planned_job.py` | 执行一个 planned 周报任务 |
 | `scripts/query_archive.py` | 按语言、方向、profile、来源、风险和关键词查询历史项目 |
 | `scripts/send_report_link.py` | 推送 GitHub Pages 周报正文和项目筛选链接 |
 | `scripts/check_delivery_channels.py` | 检查 Telegram、飞书、企业微信推送通道配置 |
@@ -282,6 +284,15 @@ python scripts/verify_migration.py
 python scripts/query_archive.py --refresh --language Python --source github_trending --limit 10
 python scripts/query_archive.py --profile agent_development --query workflow --format json
 ```
+
+执行 planned 周报任务：
+
+```bash
+python scripts/run_planned_job.py
+python scripts/run_planned_job.py --job-id preview:xxxx
+```
+
+如果任务请求中的 `dry_run` 为 `true`，执行时会跳过 Telegram 推送，适合本地验证。
 
 更多命令示例见 `docs/archive-query.md`。
 

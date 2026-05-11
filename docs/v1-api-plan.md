@@ -26,6 +26,7 @@
 | `capabilities.runs_query` | 是否支持运行记录 |
 | `capabilities.jobs_query` | 是否支持任务查询 |
 | `capabilities.run_trigger_preview` | 是否支持触发预检 |
+| `capabilities.local_job_runner` | 是否支持本地任务执行器 |
 | `capabilities.run_trigger_execute` | 是否支持真实后台执行；当前为 `false` |
 
 ### `GET /v1/projects`
@@ -91,7 +92,8 @@
 {
   "profile": "agent_development",
   "sources": ["github_trending"],
-  "dry_run": true
+  "dry_run": true,
+  "days_back": 7
 }
 ```
 
@@ -105,7 +107,16 @@
 | `request` | 标准化后的请求参数 |
 | `next_steps` | 启用真实后台执行前需要完成的步骤 |
 
-设计原因：GitHub 采集、LLM 生成、页面构建和推送都是长任务，不能直接塞进 HTTP 请求生命周期。当前先持久化任务计划，下一步再接入 worker，把任务从 `planned` 推进到 `running`、`succeeded` 或 `failed`。
+设计原因：GitHub 采集、LLM 生成、页面构建和推送都是长任务，不能直接塞进 HTTP 请求生命周期。当前先持久化任务计划，再由本地任务执行器把任务从 `planned` 推进到 `running`、`succeeded` 或 `failed`。
+
+### 本地任务执行器
+
+```bash
+python scripts/run_planned_job.py
+python scripts/run_planned_job.py --job-id preview:xxxx
+```
+
+执行器只消费 `jobs` 表中的 `planned` 任务。请求中的 `dry_run=true` 时会调用 `run_weekly_report(skip_telegram_send=True)`，避免本地验证误推送；`dry_run=false` 时仍会尊重运行环境中的推送配置。
 
 ### `GET /v1/reports/latest`
 
@@ -118,10 +129,11 @@
 1. `main.py` 主流程已封装为 `src.weekly_run.run_weekly_report()`，CLI 入口只负责输出状态和退出码。
 2. `/v1/runs/trigger` 已具备任务计划预览，不会误执行长任务。
 3. SQLite 派生索引已增加 `jobs` 表，历史运行会同步为任务记录，触发预览会写入 `planned` 任务。
+4. `scripts/run_planned_job.py` 已可执行 planned 任务，并写回 running/succeeded/failed 状态。
 
 下一步：
 
-1. 将 `run_weekly_report()` 接入后台 worker 或本地任务执行器。
+1. 将本地任务执行器接入 GitHub Actions 或常驻 worker。
 2. 支持真实后台执行和状态轮询。
 3. 为 Agent/RAG 增加结构化 evidence 字段。
 4. 再考虑 SSE 流式任务状态。

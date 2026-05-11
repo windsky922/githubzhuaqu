@@ -2,6 +2,24 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-05-11 追加：接入本地任务执行器
+
+### 1. 开发目的
+
+`jobs` 表已经可以保存 `planned` 任务，但还缺少把计划任务推进为真实执行结果的最小执行器。为了后续接 GitHub Actions 手动触发、常驻 worker 或管理后台，需要先完成本地可测试的任务执行闭环。
+
+### 2. 本次修改
+
+1. 新增 `src/job_runner.py`，负责读取 `planned` 任务、标记 `running`、调用 `run_weekly_report()`，并写回 `succeeded` 或 `failed`。
+2. 新增 `scripts/run_planned_job.py`，可执行最早的 planned 任务，也可通过 `--job-id` 指定任务。
+3. `/v1/runs/trigger` 的请求保留 `profile`、`sources`、`dry_run`，并新增 `days_back`。
+4. `dry_run=true` 时任务执行器会跳过 Telegram 推送，避免本地验证误发消息。
+5. README 和 `/v1` API 文档补充任务执行器说明。
+
+### 3. 设计边界
+
+本次仍不在 HTTP 请求生命周期里执行采集任务，也不引入 Redis、Celery 或常驻进程。当前完成的是最小本地执行器，下一步再决定由 GitHub Actions、后台服务或前端管理页触发它。
+
 ## 2026-05-11 追加：增加持久化 job 任务表
 
 ### 1. 开发目的

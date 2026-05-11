@@ -28,7 +28,7 @@ class ApiRepositoryTest(unittest.TestCase):
             jobs = repository.jobs()
             job_detail = repository.job_detail("run:2026-05-09")
             trigger = repository.trigger_run_preview(
-                {"profile": "agent_development", "sources": ["github_trending"], "dry_run": True}
+                {"profile": "agent_development", "sources": ["github_trending"], "dry_run": True, "days_back": 3}
             )
             preview_detail = repository.job_detail(trigger["job_id"])
 
@@ -45,12 +45,14 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(latest["run_date"], "2026-05-09")
             self.assertIn("owner/agent", latest["markdown"])
             self.assertTrue(health["capabilities"]["jobs_query"])
+            self.assertTrue(health["capabilities"]["local_job_runner"])
             self.assertFalse(health["capabilities"]["run_trigger_execute"])
             self.assertEqual(jobs["jobs"][0]["job_id"], "run:2026-05-09")
             self.assertTrue(job_detail["found"])
             self.assertEqual(job_detail["run_summary"]["run_date"], "2026-05-09")
             self.assertTrue(trigger["job_id"].startswith("preview:"))
             self.assertFalse(trigger["execution_supported"])
+            self.assertEqual(trigger["request"]["days_back"], 3)
             self.assertTrue(preview_detail["found"])
             self.assertEqual(preview_detail["job"]["status"], "planned")
         finally:
@@ -76,7 +78,7 @@ class ApiRepositoryTest(unittest.TestCase):
             v1_jobs = client.get("/v1/jobs")
             v1_trigger = client.post(
                 "/v1/runs/trigger",
-                json={"profile": "agent_development", "sources": ["github_trending"], "dry_run": True},
+                json={"profile": "agent_development", "sources": ["github_trending"], "dry_run": True, "days_back": 3},
             )
 
             self.assertEqual(health.status_code, 200)
