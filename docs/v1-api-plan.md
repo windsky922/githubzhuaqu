@@ -112,11 +112,22 @@
 ### 本地任务执行器
 
 ```bash
+python scripts/create_planned_job.py --profile agent_development --days-back 7 --output .weekly-job.json
+python scripts/run_planned_job.py --job-file .weekly-job.json
 python scripts/run_planned_job.py
 python scripts/run_planned_job.py --job-id preview:xxxx
 ```
 
 执行器只消费 `jobs` 表中的 `planned` 任务。请求中的 `dry_run=true` 时会调用 `run_weekly_report(skip_telegram_send=True)`，避免本地验证误推送；`dry_run=false` 时仍会尊重运行环境中的推送配置。
+
+GitHub Actions 的手动触发入口已接入同一套任务模型，支持输入：
+
+| 输入 | 说明 |
+|---|---|
+| `profile` | 个性化 profile，例如 `agent_development`、`python`、`java` |
+| `days_back` | 回看天数，默认 `7` |
+| `skip_main_delivery` | 是否跳过主流程内置推送，默认 `true` |
+| `send_link` | 是否在生成后推送 GitHub Pages 周报链接，默认 `true` |
 
 ### `GET /v1/reports/latest`
 
@@ -130,10 +141,11 @@ python scripts/run_planned_job.py --job-id preview:xxxx
 2. `/v1/runs/trigger` 已具备任务计划预览，不会误执行长任务。
 3. SQLite 派生索引已增加 `jobs` 表，历史运行会同步为任务记录，触发预览会写入 `planned` 任务。
 4. `scripts/run_planned_job.py` 已可执行 planned 任务，并写回 running/succeeded/failed 状态。
+5. weekly workflow 已接入任务创建和任务执行脚本，手动运行时可指定 profile 和回看天数。
 
 下一步：
 
-1. 将本地任务执行器接入 GitHub Actions 或常驻 worker。
-2. 支持真实后台执行和状态轮询。
+1. 增加任务状态页面或 API 管理入口。
+2. 支持真实后台状态轮询。
 3. 为 Agent/RAG 增加结构化 evidence 字段。
 4. 再考虑 SSE 流式任务状态。

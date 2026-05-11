@@ -2,6 +2,24 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-05-11 追加：GitHub Actions 接入任务执行器
+
+### 1. 开发目的
+
+本地任务执行器已经可以消费 `planned` 任务，但还不能通过 GitHub 网页参数化触发。为了让项目从“定时脚本”继续演进为“可调度的后端任务系统”，需要把 weekly workflow 改造成任务创建和任务执行两段式流程。
+
+### 2. 本次修改
+
+1. weekly workflow 的 `workflow_dispatch` 新增 `profile`、`days_back`、`skip_main_delivery` 和 `send_link` 输入。
+2. 新增 `scripts/create_planned_job.py`，负责在 Actions 中创建 planned 任务并写入 `.weekly-job.json`。
+3. `scripts/run_planned_job.py` 支持 `--job-file`，可读取刚创建的任务编号并执行指定任务。
+4. weekly workflow 从直接运行 `python main.py` 改为先创建任务，再执行任务，后续仍构建 Pages、发布 `weekly-archive` 并推送周报链接。
+5. 补充 workflow 和任务脚本测试，防止后续改动破坏手动触发入口。
+
+### 3. 设计边界
+
+本次没有引入常驻服务，也没有让 HTTP 请求直接执行采集任务。GitHub Actions 只是当前阶段的任务执行环境；后续仍可以把相同的 job runner 接入 FastAPI 管理端、前端按钮或独立 worker。
+
 ## 2026-05-11 追加：接入本地任务执行器
 
 ### 1. 开发目的

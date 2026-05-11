@@ -2,6 +2,23 @@ name: GitHub 每周热点项目智能体
 
 on:
   workflow_dispatch:
+    inputs:
+      profile:
+        description: "个性化 profile，例如 agent_development、python、java"
+        required: false
+        default: ""
+      days_back:
+        description: "回看天数"
+        required: false
+        default: "7"
+      skip_main_delivery:
+        description: "执行主流程时跳过内置推送，推荐保持 true，由后续步骤统一推送链接"
+        required: false
+        default: "true"
+      send_link:
+        description: "生成后是否推送 GitHub Pages 周报链接"
+        required: false
+        default: "true"
   schedule:
     - cron: "0 0 * * 1"
 
@@ -47,7 +64,19 @@ jobs:
             echo "归档分支 $ARCHIVE_BRANCH 不存在，本次运行后会自动创建。"
           fi
 
-      - name: 生成每周周报
+      - name: 创建周报任务
+        env:
+          WORKFLOW_PROFILE: ${{ inputs.profile || vars.INTEREST_PROFILE }}
+          WORKFLOW_DAYS_BACK: ${{ inputs.days_back || '7' }}
+          WORKFLOW_SKIP_MAIN_DELIVERY: ${{ inputs.skip_main_delivery || 'true' }}
+        run: >
+          python scripts/create_planned_job.py
+          --profile "$WORKFLOW_PROFILE"
+          --days-back "$WORKFLOW_DAYS_BACK"
+          --dry-run "$WORKFLOW_SKIP_MAIN_DELIVERY"
+          --output .weekly-job.json
+
+      - name: 执行周报任务
         env:
           GH_SEARCH_TOKEN: ${{ secrets.GH_SEARCH_TOKEN }}
           KIMI_API_KEY: ${{ secrets.KIMI_API_KEY }}
@@ -63,9 +92,7 @@ jobs:
           WECOM_WEBHOOK_URL: ${{ secrets.WECOM_WEBHOOK_URL }}
           REPORT_BASE_URL: ${{ vars.REPORT_BASE_URL || secrets.REPORT_BASE_URL }}
           DELIVERY_CHANNELS: ${{ vars.DELIVERY_CHANNELS }}
-          INTEREST_PROFILE: ${{ vars.INTEREST_PROFILE }}
-          SKIP_TELEGRAM_SEND: "true"
-        run: python main.py
+        run: python scripts/run_planned_job.py --job-file .weekly-job.json
 
       - name: 生成周报归档页面
         run: python scripts/build_pages.py
@@ -77,6 +104,7 @@ jobs:
           --message "chore: archive weekly github report [skip ci]"
 
       - name: 推送周报链接到 Telegram
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.send_link == 'true' }}
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}

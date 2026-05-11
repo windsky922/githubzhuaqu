@@ -14,6 +14,9 @@ class WorkflowTest(unittest.TestCase):
         workflow = (ROOT / ".github" / "workflows" / "weekly.yml").read_text(encoding="utf-8")
 
         self.assertIn("workflow_dispatch:", workflow)
+        self.assertIn("profile:", workflow)
+        self.assertIn("days_back:", workflow)
+        self.assertIn("skip_main_delivery:", workflow)
         self.assertIn("ARCHIVE_BRANCH: weekly-archive", workflow)
         self.assertIn("scripts/publish_archive_branch.py", workflow)
         self.assertIn("git checkout \"origin/$ARCHIVE_BRANCH\" -- data reports || true", workflow)
@@ -26,6 +29,14 @@ class WorkflowTest(unittest.TestCase):
         for line in workflow.splitlines():
             if line.lstrip().startswith("run:") and "--message" in line:
                 self.assertNotIn(": ", line.split("--message", 1)[1])
+
+    def test_weekly_workflow_uses_job_runner_for_manual_runs(self) -> None:
+        workflow = (ROOT / ".github" / "workflows" / "weekly.yml").read_text(encoding="utf-8")
+
+        self.assertIn("scripts/create_planned_job.py", workflow)
+        self.assertIn("--output .weekly-job.json", workflow)
+        self.assertIn("scripts/run_planned_job.py --job-file .weekly-job.json", workflow)
+        self.assertIn("inputs.send_link == 'true'", workflow)
 
     def test_archive_branch_publish_scope_is_limited_to_generated_archive(self) -> None:
         script = (ROOT / "scripts" / "publish_archive_branch.py").read_text(encoding="utf-8")

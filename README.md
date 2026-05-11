@@ -49,6 +49,7 @@ GitHub Actions
 | `src/api/` | 只读后端 API，用于查询历史项目、运行记录、个性化方向和最新周报 |
 | `src/job_runner.py` | 执行 SQLite jobs 表中的计划任务 |
 | `scripts/build_pages.py` | 生成 GitHub Pages 归档页面 |
+| `scripts/create_planned_job.py` | 创建 planned 周报任务 |
 | `scripts/migrate_json_to_sqlite.py` | 将历史 JSON 归档导入 SQLite 派生索引 |
 | `scripts/verify_migration.py` | 校验 SQLite 派生索引和 JSON 归档计数 |
 | `scripts/run_planned_job.py` | 执行一个 planned 周报任务 |
@@ -288,11 +289,15 @@ python scripts/query_archive.py --profile agent_development --query workflow --f
 执行 planned 周报任务：
 
 ```bash
+python scripts/create_planned_job.py --profile agent_development --days-back 7 --output .weekly-job.json
+python scripts/run_planned_job.py --job-file .weekly-job.json
 python scripts/run_planned_job.py
 python scripts/run_planned_job.py --job-id preview:xxxx
 ```
 
 如果任务请求中的 `dry_run` 为 `true`，执行时会跳过 Telegram 推送，适合本地验证。
+
+GitHub Actions 的手动运行入口已经支持 `profile`、`days_back`、`skip_main_delivery` 和 `send_link`。其中 `skip_main_delivery=true` 时，主流程不直接推送 Telegram，而是由后续步骤统一推送 GitHub Pages 链接。
 
 更多命令示例见 `docs/archive-query.md`。
 

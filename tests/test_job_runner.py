@@ -1,12 +1,17 @@
 from __future__ import annotations
 
 import os
+import json
 import shutil
 import unittest
 import uuid
+from contextlib import redirect_stderr
+from io import StringIO
 from pathlib import Path
 from unittest.mock import patch
 
+from scripts.create_planned_job import _truthy
+from scripts.run_planned_job import _job_id_from_file, main as run_planned_job_script_main
 from src.job_runner import run_planned_job
 from src.models import RunSummary
 from src.storage.sqlite_store import connect, initialize, upsert_job
@@ -87,6 +92,34 @@ class JobRunnerTest(unittest.TestCase):
             result = run_planned_job(root=root, db_path=root / "data" / "github_weekly.sqlite")
             self.assertFalse(result["executed"])
             self.assertEqual(result["status"], "not_found")
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
+    def test_job_file_helper_reads_created_job_id(self) -> None:
+        root = Path.cwd() / f".tmp-job-runner-{uuid.uuid4().hex}"
+        try:
+            root.mkdir(parents=True)
+            path = root / "job.json"
+            path.write_text(json.dumps({"job_id": "preview:file"}), encoding="utf-8")
+            self.assertEqual(_job_id_from_file(path), "preview:file")
+            self.assertEqual(_job_id_from_file(root / "missing.json"), "")
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
+    def test_create_planned_job_truthy_parser(self) -> None:
+        self.assertTrue(_truthy("true"))
+        self.assertTrue(_truthy("1"))
+        self.assertFalse(_truthy("false"))
+
+    def test_run_planned_job_script_rejects_invalid_job_file(self) -> None:
+        root = Path.cwd() / f".tmp-job-runner-{uuid.uuid4().hex}"
+        try:
+            root.mkdir(parents=True)
+            bad_file = root / "bad.json"
+            bad_file.write_text("{}", encoding="utf-8")
+            with patch("sys.argv", ["run_planned_job.py", "--job-file", str(bad_file)]):
+                with redirect_stderr(StringIO()):
+                    self.assertEqual(run_planned_job_script_main(), 1)
         finally:
             shutil.rmtree(root, ignore_errors=True)
 
