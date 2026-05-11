@@ -30,6 +30,7 @@ class ApiRepositoryTest(unittest.TestCase):
             trigger = repository.trigger_run_preview(
                 {"profile": "agent_development", "sources": ["github_trending"], "dry_run": True}
             )
+            preview_detail = repository.job_detail(trigger["job_id"])
 
             self.assertEqual(projects["schema_version"], 1)
             self.assertGreaterEqual(projects["count"], 1)
@@ -50,6 +51,8 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(job_detail["run_summary"]["run_date"], "2026-05-09")
             self.assertTrue(trigger["job_id"].startswith("preview:"))
             self.assertFalse(trigger["execution_supported"])
+            self.assertTrue(preview_detail["found"])
+            self.assertEqual(preview_detail["job"]["status"], "planned")
         finally:
             shutil.rmtree(root, ignore_errors=True)
 

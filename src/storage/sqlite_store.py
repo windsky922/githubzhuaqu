@@ -31,6 +31,7 @@ def import_json_archive(root: Path, db_path: Path) -> dict[str, int]:
             "trend_summaries": import_trend_summaries(connection, root),
             "sent_repositories": import_sent_repositories(connection, root),
             "star_history": import_star_history(connection, root),
+            "jobs": import_jobs_from_runs(connection, root),
         }
         connection.execute(
             """
@@ -53,6 +54,17 @@ def import_runs(connection: sqlite3.Connection, root: Path) -> int:
         if not data:
             continue
         upsert_run(connection, data)
+        count += 1
+    return count
+
+
+def import_jobs_from_runs(connection: sqlite3.Connection, root: Path) -> int:
+    count = 0
+    for path in _json_files(root / "data" / "runs"):
+        data = _read_json_object(path)
+        if not data:
+            continue
+        upsert_job_from_run(connection, data)
         count += 1
     return count
 
@@ -264,6 +276,77 @@ def upsert_trend_summary(connection: sqlite3.Connection, run_date: str, data: di
     )
 
 
+def upsert_job_from_run(connection: sqlite3.Connection, data: dict[str, Any]) -> None:
+    run_date = str(data.get("run_date") or "")
+    if not run_date:
+        return
+    failed = bool(data.get("error") or data.get("report_error") or data.get("sqlite_error"))
+    status = "failed" if str(data.get("status") or "") == "failed" or failed else "succeeded"
+    result = {
+        "selected_count": _int_value(data.get("selected_count")),
+        "collected_count": _int_value(data.get("collected_count")),
+        "kimi_used": bool(data.get("kimi_used")),
+        "telegram_sent": bool(data.get("telegram_sent")),
+        "report_url": str(data.get("report_url") or data.get("telegram_report_url") or ""),
+        "report_path": str(data.get("report_path") or ""),
+    }
+    upsert_job(
+        connection,
+        {
+            "job_id": f"run:{run_date}",
+            "kind": "weekly_report",
+            "status": status,
+            "run_date": run_date,
+            "submitted_at": run_date,
+            "started_at": "",
+            "finished_at": run_date,
+            "request": {},
+            "result": result,
+            "error": str(data.get("error") or data.get("report_error") or data.get("sqlite_error") or ""),
+            "payload": data,
+        },
+    )
+
+
+def upsert_job(connection: sqlite3.Connection, data: dict[str, Any]) -> None:
+    payload = data.get("payload")
+    if not isinstance(payload, dict):
+        payload = data
+    connection.execute(
+        """
+        INSERT INTO jobs(
+          job_id, kind, status, run_date, submitted_at, started_at, finished_at,
+          request_json, result_json, error, payload_json
+        )
+        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(job_id) DO UPDATE SET
+          kind = excluded.kind,
+          status = excluded.status,
+          run_date = excluded.run_date,
+          submitted_at = excluded.submitted_at,
+          started_at = excluded.started_at,
+          finished_at = excluded.finished_at,
+          request_json = excluded.request_json,
+          result_json = excluded.result_json,
+          error = excluded.error,
+          payload_json = excluded.payload_json
+        """,
+        (
+            str(data.get("job_id") or ""),
+            str(data.get("kind") or "weekly_report"),
+            str(data.get("status") or "planned"),
+            str(data.get("run_date") or ""),
+            str(data.get("submitted_at") or ""),
+            str(data.get("started_at") or ""),
+            str(data.get("finished_at") or ""),
+            _json_text(data.get("request") or {}),
+            _json_text(data.get("result") or {}),
+            str(data.get("error") or ""),
+            _json_text(payload),
+        ),
+    )
+
+
 def table_count(connection: sqlite3.Connection, table_name: str) -> int:
     if table_name not in {
         "runs",
@@ -272,6 +355,7 @@ def table_count(connection: sqlite3.Connection, table_name: str) -> int:
         "trend_summaries",
         "sent_repositories",
         "star_history",
+        "jobs",
     }:
         raise ValueError(f"不支持的表名：{table_name}")
     row = connection.execute(f"SELECT COUNT(*) AS count FROM {table_name}").fetchone()

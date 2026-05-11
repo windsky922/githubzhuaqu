@@ -2,6 +2,41 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-05-11 追加：增加持久化 job 任务表
+
+### 1. 开发目的
+
+`/v1/jobs` 原本只把 `docs/runs.json` 临时映射为任务视图，`/v1/runs/trigger` 也只返回预览，不会留下任务记录。为了后续接入后台 worker、状态轮询和真实手动触发，需要先把任务模型落到 SQLite 派生索引中。
+
+### 2. 本次修改
+
+1. SQLite schema 新增 `jobs` 表和任务状态查询索引。
+2. JSON 归档导入 SQLite 时，会把历史 `data/runs/*.json` 同步为 `run:YYYY-MM-DD` 任务。
+3. `/v1/jobs` 和 `/v1/jobs/{job_id}` 改为优先读取持久化任务表。
+4. `/v1/runs/trigger` 会写入 `preview:*` 的 `planned` 任务记录，但仍不执行真实采集。
+5. 补充 SQLite、API 和数据契约测试，固定任务表结构。
+
+### 3. 设计边界
+
+本次只建立任务状态底座，不启动后台 worker，也不在 HTTP 请求中执行长任务。下一步会把 `run_weekly_report()` 接入任务执行器，让任务状态从 `planned` 推进到 `running`、`succeeded` 或 `failed`。
+
+## 2026-05-11 追加：封装周报主流程 use case
+
+### 1. 开发目的
+
+`main.py` 原本直接承载采集、评分、生成、归档、推送和运行摘要写入。这样 CLI 可以运行，但后续 `/v1/runs/trigger`、后台 worker 和任务状态模型无法复用主流程。根据核心功能优先路线，需要先把主链路封装成可调用 use case。
+
+### 2. 本次修改
+
+1. 新增 `src/weekly_run.py`，提供 `run_weekly_report()`。
+2. `main.py` 改为轻量 CLI 包装，只负责调用 use case、打印结果和返回退出码。
+3. 补充 `tests/test_weekly_run.py`，覆盖环境参数解析、观测指标计算和 CLI 委托行为。
+4. 更新 `docs/v1-api-plan.md`，标记主流程 use case 封装已完成。
+
+### 3. 设计边界
+
+本次不改变周报主链路行为，不新增真实后台 worker，也不让 `/v1/runs/trigger` 立即执行长任务。下一步才接持久化 job 表和任务执行器。
+
 ## 2026-05-11 追加：新增 `/v1` 后端核心接口骨架
 
 ### 1. 开发目的

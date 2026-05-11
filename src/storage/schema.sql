@@ -67,6 +67,23 @@ CREATE TABLE IF NOT EXISTS star_history (
   payload_json TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS jobs (
+  job_id TEXT PRIMARY KEY,
+  kind TEXT NOT NULL DEFAULT '',
+  status TEXT NOT NULL DEFAULT '',
+  run_date TEXT NOT NULL DEFAULT '',
+  submitted_at TEXT NOT NULL DEFAULT '',
+  started_at TEXT NOT NULL DEFAULT '',
+  finished_at TEXT NOT NULL DEFAULT '',
+  request_json TEXT NOT NULL DEFAULT '{}',
+  result_json TEXT NOT NULL DEFAULT '{}',
+  error TEXT NOT NULL DEFAULT '',
+  payload_json TEXT NOT NULL DEFAULT '{}'
+);
+
+CREATE INDEX IF NOT EXISTS idx_jobs_status_submitted_at ON jobs(status, submitted_at);
+CREATE INDEX IF NOT EXISTS idx_jobs_run_date ON jobs(run_date);
+
 CREATE TABLE IF NOT EXISTS migration_meta (
   key TEXT PRIMARY KEY,
   value TEXT NOT NULL

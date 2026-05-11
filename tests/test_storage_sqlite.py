@@ -23,17 +23,21 @@ class SqliteStorageTest(unittest.TestCase):
             self.assertEqual(counts["trend_summaries"], 1)
             self.assertEqual(counts["sent_repositories"], 1)
             self.assertEqual(counts["star_history"], 2)
+            self.assertEqual(counts["jobs"], 1)
             connection = connect(db_path)
             try:
                 self.assertEqual(table_count(connection, "runs"), 1)
                 self.assertEqual(table_count(connection, "selections"), 2)
                 self.assertEqual(table_count(connection, "repositories"), 2)
+                self.assertEqual(table_count(connection, "jobs"), 1)
                 row = connection.execute(
                     "SELECT full_name, language, stargazers_count FROM repositories WHERE full_name = ?",
                     ("owner/project",),
                 ).fetchone()
                 self.assertEqual(row["language"], "Python")
                 self.assertEqual(row["stargazers_count"], 100)
+                job = connection.execute("SELECT job_id, status FROM jobs WHERE job_id = ?", ("run:2026-05-03",)).fetchone()
+                self.assertEqual(job["status"], "succeeded")
             finally:
                 connection.close()
         finally:
@@ -53,6 +57,7 @@ class SqliteStorageTest(unittest.TestCase):
                 self.assertEqual(table_count(connection, "runs"), 1)
                 self.assertEqual(table_count(connection, "selections"), 2)
                 self.assertEqual(table_count(connection, "star_history"), 2)
+                self.assertEqual(table_count(connection, "jobs"), 1)
             finally:
                 connection.close()
         finally:

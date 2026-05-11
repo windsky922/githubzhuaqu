@@ -7,7 +7,7 @@
 1. 查询接口可以同步返回。
 2. 采集、生成、推送等长任务必须走任务模型。
 3. 当前阶段先提供任务预检和历史任务视图，不直接在 HTTP 请求中执行长任务。
-4. 所有接口只读取公开归档或本地派生索引，不返回密钥。
+4. 查询接口只读取公开归档或本地派生索引，触发接口只写入任务状态，不返回密钥。
 5. 后续接入 worker 后，再把 `run_trigger_execute` 从 `false` 切换为 `true`。
 
 ## 当前接口
@@ -58,7 +58,7 @@
 
 ### `GET /v1/jobs`
 
-把历史运行记录映射成任务视图。当前每次周报运行显示为一个 `weekly_report` 任务。
+从 SQLite 派生索引的 `jobs` 表读取任务视图。当前每次历史周报运行会同步为一个 `weekly_report` 任务，手动触发预览会写入一个 `preview:*` 计划任务。
 
 任务字段：
 
@@ -66,8 +66,11 @@
 |---|---|
 | `job_id` | 任务编号，例如 `run:2026-05-09` |
 | `kind` | 任务类型，当前为 `weekly_report` |
-| `status` | `succeeded` 或 `failed` |
+| `status` | `planned`、`running`、`succeeded` 或 `failed` |
 | `run_date` | 对应运行日期 |
+| `submitted_at` | 任务提交时间 |
+| `request` | 标准化后的任务请求 |
+| `result` | 任务执行结果摘要 |
 | `selected_count` | 入选项目数 |
 | `collected_count` | 候选项目数 |
 | `kimi_used` | 是否使用 Kimi |
@@ -80,7 +83,7 @@
 
 ### `POST /v1/runs/trigger`
 
-返回一次采集任务的计划预览，不立即执行真实后台任务。
+创建一次采集任务的计划预览并写入 `jobs` 表，不立即执行真实后台任务。
 
 请求示例：
 
@@ -102,7 +105,7 @@
 | `request` | 标准化后的请求参数 |
 | `next_steps` | 启用真实后台执行前需要完成的步骤 |
 
-设计原因：GitHub 采集、LLM 生成、页面构建和推送都是长任务，不能直接塞进 HTTP 请求生命周期。下一步应封装主流程 use case，再接入持久化 job 表和 worker。
+设计原因：GitHub 采集、LLM 生成、页面构建和推送都是长任务，不能直接塞进 HTTP 请求生命周期。当前先持久化任务计划，下一步再接入 worker，把任务从 `planned` 推进到 `running`、`succeeded` 或 `failed`。
 
 ### `GET /v1/reports/latest`
 
@@ -110,8 +113,15 @@
 
 ## 下一步
 
-1. 把 `main.py` 主流程封装成可复用 use case。
-2. 增加持久化 job 表。
-3. 支持真实后台执行和状态轮询。
-4. 为 Agent/RAG 增加结构化 evidence 字段。
-5. 再考虑 SSE 流式任务状态。
+已完成：
+
+1. `main.py` 主流程已封装为 `src.weekly_run.run_weekly_report()`，CLI 入口只负责输出状态和退出码。
+2. `/v1/runs/trigger` 已具备任务计划预览，不会误执行长任务。
+3. SQLite 派生索引已增加 `jobs` 表，历史运行会同步为任务记录，触发预览会写入 `planned` 任务。
+
+下一步：
+
+1. 将 `run_weekly_report()` 接入后台 worker 或本地任务执行器。
+2. 支持真实后台执行和状态轮询。
+3. 为 Agent/RAG 增加结构化 evidence 字段。
+4. 再考虑 SSE 流式任务状态。

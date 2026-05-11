@@ -58,6 +58,7 @@ def _json_counts(root: Path) -> dict[str, int]:
         "trend_summaries": len(_json_files(root / "data" / "trends")),
         "sent_repositories": len(_read_json_list(root / "data" / "state" / "sent_repos.json")),
         "star_history": len(_read_json_list(root / "data" / "state" / "star_history.json")),
+        "jobs": len(_json_files(root / "data" / "runs")),
     }
 
 

@@ -7,13 +7,13 @@ from pathlib import Path
 from typing import Any
 
 from scripts.query_archive import query_archive
-from src.storage.sqlite_store import import_json_archive
+from src.storage.sqlite_store import connect, import_json_archive, initialize, upsert_job
 
 ROOT = Path(__file__).resolve().parents[2]
 
 
 class ApiRepository:
-    """面向后端 API 的只读归档访问层。"""
+    """面向后端 API 的归档访问层。"""
 
     def __init__(self, root: Path = ROOT, db_path: Path | None = None) -> None:
         self.root = root
@@ -136,8 +136,11 @@ class ApiRepository:
         return _read_json_object(self.root / "docs" / "runs.json", {"schema_version": 1, "count": 0, "runs": []})
 
     def jobs(self, limit: int = 20) -> dict[str, Any]:
-        runs = self.runs().get("runs") or []
-        jobs = [_job_from_run(run) for run in runs[:limit]]
+        self.ensure_sqlite_index()
+        jobs = self._jobs_from_sqlite(limit)
+        if not jobs:
+            runs = self.runs().get("runs") or []
+            jobs = [_job_from_run(run) for run in runs[:limit]]
         return {
             "schema_version": 1,
             "count": len(jobs),
@@ -146,7 +149,7 @@ class ApiRepository:
 
     def job_detail(self, job_id: str) -> dict[str, Any]:
         normalized = _blank_to_none(job_id) or ""
-        for job in self.jobs(limit=200).get("jobs", []):
+        for job in self.jobs(limit=500).get("jobs", []):
             if job.get("job_id") == normalized:
                 return {
                     "schema_version": 1,
@@ -178,22 +181,35 @@ class ApiRepository:
                 sort_keys=True,
             ).encode("utf-8")
         ).hexdigest()[:12]
-        return {
-            "schema_version": 1,
+        job = {
             "job_id": f"preview:{fingerprint}",
+            "kind": "weekly_report",
             "status": "planned",
+            "run_date": "",
             "submitted_at": submitted_at,
-            "execution_supported": False,
-            "message": "当前接口只返回任务计划预览，实际后台执行将在 worker/job 层接入后启用。",
+            "started_at": "",
+            "finished_at": "",
             "request": {
                 "profile": profile,
                 "sources": sources,
                 "dry_run": dry_run,
             },
+            "result": {},
+            "error": "",
+        }
+        self._persist_preview_job(job)
+        return {
+            "schema_version": 1,
+            "job_id": job["job_id"],
+            "status": job["status"],
+            "submitted_at": submitted_at,
+            "execution_supported": False,
+            "message": "当前接口只创建任务预览记录，实际后台执行会在 worker/job 层接入后启用。",
+            "request": job["request"],
             "next_steps": [
-                "复用 main.py 主流程封装 run use case。",
-                "增加持久化 job 表。",
-                "接入后台 worker 后再允许 execution_supported=true。",
+                "复用 run_weekly_report() 周报主流程。",
+                "接入后台 worker 后把 planned 任务推进为 running/succeeded/failed。",
+                "确认执行权限后再允许 execution_supported=true。",
             ],
         }
 
@@ -224,8 +240,48 @@ class ApiRepository:
         }
 
     def ensure_sqlite_index(self) -> None:
-        if not self.db_path.exists():
+        if not self.db_path.exists() or not self._sqlite_table_exists("jobs"):
             import_json_archive(self.root, self.db_path)
+
+    def _jobs_from_sqlite(self, limit: int) -> list[dict[str, Any]]:
+        connection = connect(self.db_path)
+        try:
+            rows = connection.execute(
+                """
+                SELECT job_id, kind, status, run_date, submitted_at, started_at, finished_at,
+                       request_json, result_json, error, payload_json
+                FROM jobs
+                ORDER BY COALESCE(NULLIF(submitted_at, ''), run_date) DESC, job_id DESC
+                LIMIT ?
+                """,
+                (limit,),
+            ).fetchall()
+        finally:
+            connection.close()
+        return [_job_from_row(row) for row in rows]
+
+    def _persist_preview_job(self, job: dict[str, Any]) -> None:
+        self.ensure_sqlite_index()
+        connection = connect(self.db_path)
+        try:
+            initialize(connection)
+            upsert_job(connection, job)
+            connection.commit()
+        finally:
+            connection.close()
+
+    def _sqlite_table_exists(self, table_name: str) -> bool:
+        if not self.db_path.exists():
+            return False
+        connection = connect(self.db_path)
+        try:
+            row = connection.execute(
+                "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?",
+                (table_name,),
+            ).fetchone()
+            return bool(row)
+        finally:
+            connection.close()
 
     def _similar_projects(self, base: dict[str, Any], full_name: str) -> list[dict[str, Any]]:
         candidates = query_archive(db_path=self.db_path, root=self.root, limit=200, sort="recent")
@@ -289,6 +345,37 @@ def _job_from_run(run: dict[str, Any]) -> dict[str, Any]:
         "telegram_sent": bool(run.get("telegram_sent")),
         "report_url": run.get("report_url") or run.get("telegram_report_url") or "",
     }
+
+
+def _job_from_row(row: Any) -> dict[str, Any]:
+    payload = _json_object(row["payload_json"])
+    result = _json_object(row["result_json"])
+    request = _json_object(row["request_json"])
+    return {
+        "job_id": row["job_id"],
+        "run_date": row["run_date"],
+        "kind": row["kind"],
+        "status": row["status"],
+        "submitted_at": row["submitted_at"],
+        "started_at": row["started_at"],
+        "finished_at": row["finished_at"],
+        "request": request,
+        "result": result,
+        "error": row["error"],
+        "selected_count": _int_value(result.get("selected_count")),
+        "collected_count": _int_value(result.get("collected_count")),
+        "kimi_used": bool(result.get("kimi_used")),
+        "telegram_sent": bool(result.get("telegram_sent")),
+        "report_url": result.get("report_url") or result.get("telegram_report_url") or payload.get("report_url") or "",
+    }
+
+
+def _json_object(text: str) -> dict[str, Any]:
+    try:
+        data = json.loads(text or "{}")
+    except json.JSONDecodeError:
+        return {}
+    return data if isinstance(data, dict) else {}
 
 
 def _list_strings(value: Any) -> list[str]:
