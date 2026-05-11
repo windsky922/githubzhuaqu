@@ -18,7 +18,7 @@
   "collected_count": 319,
   "selected_count": 10,
   "skipped_sent_count": 0,
-  "previously_sent_selected_count": 7,
+  "previously_sent_selected_count": 10,
   "collector_errors": [],
   "collector_stats": [
     {
@@ -173,29 +173,29 @@
   "trending_top10_available_count": 10,
   "trending_top10_selected_count": 8,
   "trending_top10_fulfillment_rate": 1.1429,
-  "previously_sent_selected_rate": 0.7,
+  "previously_sent_selected_rate": 1.0,
   "star_history_updated_count": 225,
   "report_path": "reports/2026-05-11.md",
   "run_summary_path": "data/runs/2026-05-11.json",
   "raw_repositories_path": "data/raw/2026-05-11.json",
   "selected_repositories_path": "data/selected/2026-05-11.json",
-  "state_path": "data/state/sent_repos.json",
+  "state_path": "",
   "star_history_path": "data/state/star_history.json",
   "trend_summary_path": "data/trends/2026-05-11.json",
   "kimi_used": true,
   "fallback_used": false,
   "report_error": "",
-  "telegram_sent": true,
-  "telegram_error": "",
+  "telegram_sent": false,
+  "telegram_error": "Telegram send skipped",
   "telegram_report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-11.html",
   "telegram_explorer_url": "https://windsky922.github.io/githubzhuaqu/explorer.html?date=2026-05-11",
   "telegram_runs_url": "https://windsky922.github.io/githubzhuaqu/runs.html",
   "delivery_results": [
     {
       "channel": "telegram",
-      "sent": true,
-      "error": "",
-      "skipped": false
+      "sent": false,
+      "error": "Telegram send skipped",
+      "skipped": true
     }
   ],
   "sqlite_index_path": "data/github_weekly.sqlite",

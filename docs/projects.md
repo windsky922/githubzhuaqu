@@ -4,16 +4,16 @@
 
 | 日期 | 项目 | 来源 | Trending 排名 | 方向 | 语言 | Star | 新增 Star | 风险提示 | 链接 |
 |---|---|---|---:|---|---|---:|---:|---:|---|
-| 2026-05-11 | Hmbown/DeepSeek-TUI | GitHub Trending | 1 | AI Agent | Rust | 24190 | 0 | 0 | [https://github.com/Hmbown/DeepSeek-TUI](https://github.com/Hmbown/DeepSeek-TUI) |
-| 2026-05-11 | ruvnet/ruflo | GitHub Trending | 3 | AI Agent | TypeScript | 48527 | 1034 | 0 | [https://github.com/ruvnet/ruflo](https://github.com/ruvnet/ruflo) |
-| 2026-05-11 | docusealco/docuseal | GitHub Trending | 4 | Other | Ruby | 16239 | 222 | 0 | [https://github.com/docusealco/docuseal](https://github.com/docusealco/docuseal) |
-| 2026-05-11 | TauricResearch/TradingAgents | GitHub Search + GitHub Trending | 5 | AI Agent | Python | 73270 | 964 | 0 | [https://github.com/TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents) |
-| 2026-05-11 | LearningCircuit/local-deep-research | GitHub Trending | 6 | LLM Tooling | Python | 7087 | 1119 | 0 | [https://github.com/LearningCircuit/local-deep-research](https://github.com/LearningCircuit/local-deep-research) |
-| 2026-05-11 | virattt/dexter | GitHub Trending | 7 | AI Agent | TypeScript | 25173 | 181 | 1 | [https://github.com/virattt/dexter](https://github.com/virattt/dexter) |
-| 2026-05-11 | decolua/9router | GitHub Trending | 8 | AI Agent | JavaScript | 7381 | 1137 | 0 | [https://github.com/decolua/9router](https://github.com/decolua/9router) |
-| 2026-05-11 | 1jehuang/jcode | GitHub Trending | 9 | AI Agent | Rust | 5571 | 307 | 0 | [https://github.com/1jehuang/jcode](https://github.com/1jehuang/jcode) |
-| 2026-05-11 | addyosmani/agent-skills | GitHub Trending | 16 | AI Agent | Shell | 38565 | 12935 | 0 | [https://github.com/addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) |
-| 2026-05-11 | cocoindex-io/cocoindex | GitHub Trending | 11 | AI Agent | Python | 9502 | 233 | 0 | [https://github.com/cocoindex-io/cocoindex](https://github.com/cocoindex-io/cocoindex) |
+| 2026-05-11 | Hmbown/DeepSeek-TUI | GitHub Trending | 1 | AI Agent | Rust | 24487 | 297 | 0 | [https://github.com/Hmbown/DeepSeek-TUI](https://github.com/Hmbown/DeepSeek-TUI) |
+| 2026-05-11 | ruvnet/ruflo | GitHub Trending | 3 | AI Agent | TypeScript | 48644 | 117 | 0 | [https://github.com/ruvnet/ruflo](https://github.com/ruvnet/ruflo) |
+| 2026-05-11 | docusealco/docuseal | GitHub Trending | 4 | Other | Ruby | 16278 | 39 | 0 | [https://github.com/docusealco/docuseal](https://github.com/docusealco/docuseal) |
+| 2026-05-11 | TauricResearch/TradingAgents | GitHub Search + GitHub Trending | 5 | AI Agent | Python | 73397 | 127 | 0 | [https://github.com/TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents) |
+| 2026-05-11 | LearningCircuit/local-deep-research | GitHub Trending | 6 | LLM Tooling | Python | 7125 | 38 | 0 | [https://github.com/LearningCircuit/local-deep-research](https://github.com/LearningCircuit/local-deep-research) |
+| 2026-05-11 | virattt/dexter | GitHub Trending | 7 | AI Agent | TypeScript | 25208 | 35 | 1 | [https://github.com/virattt/dexter](https://github.com/virattt/dexter) |
+| 2026-05-11 | decolua/9router | GitHub Trending | 8 | AI Agent | JavaScript | 7595 | 214 | 0 | [https://github.com/decolua/9router](https://github.com/decolua/9router) |
+| 2026-05-11 | 1jehuang/jcode | GitHub Trending | 9 | AI Agent | Rust | 5625 | 54 | 0 | [https://github.com/1jehuang/jcode](https://github.com/1jehuang/jcode) |
+| 2026-05-11 | mattpocock/skills | GitHub Trending | 13 | LLM Tooling | Shell | 69875 | 605 | 0 | [https://github.com/mattpocock/skills](https://github.com/mattpocock/skills) |
+| 2026-05-11 | cocoindex-io/cocoindex | GitHub Trending | 11 | AI Agent | Python | 9520 | 18 | 0 | [https://github.com/cocoindex-io/cocoindex](https://github.com/cocoindex-io/cocoindex) |
 | 2026-05-09 | ruvnet/ruflo | GitHub Trending | 2 | AI Agent | TypeScript | 47493 | 23 | 0 | [https://github.com/ruvnet/ruflo](https://github.com/ruvnet/ruflo) |
 | 2026-05-09 | docusealco/docuseal | GitHub Trending | 4 | Other | Ruby | 16017 | 5 | 0 | [https://github.com/docusealco/docuseal](https://github.com/docusealco/docuseal) |
 | 2026-05-09 | virattt/dexter | GitHub Trending | 5 | AI Agent | TypeScript | 24992 | 4 | 1 | [https://github.com/virattt/dexter](https://github.com/virattt/dexter) |
