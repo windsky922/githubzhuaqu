@@ -24,6 +24,12 @@ class ApiRepositoryTest(unittest.TestCase):
             runs = repository.runs()
             profiles = repository.profiles()
             latest = repository.latest_weekly()
+            health = repository.v1_health()
+            jobs = repository.jobs()
+            job_detail = repository.job_detail("run:2026-05-09")
+            trigger = repository.trigger_run_preview(
+                {"profile": "agent_development", "sources": ["github_trending"], "dry_run": True}
+            )
 
             self.assertEqual(projects["schema_version"], 1)
             self.assertGreaterEqual(projects["count"], 1)
@@ -37,6 +43,13 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(profiles["profiles"][0]["name"], "agent_development")
             self.assertEqual(latest["run_date"], "2026-05-09")
             self.assertIn("owner/agent", latest["markdown"])
+            self.assertTrue(health["capabilities"]["jobs_query"])
+            self.assertFalse(health["capabilities"]["run_trigger_execute"])
+            self.assertEqual(jobs["jobs"][0]["job_id"], "run:2026-05-09")
+            self.assertTrue(job_detail["found"])
+            self.assertEqual(job_detail["run_summary"]["run_date"], "2026-05-09")
+            self.assertTrue(trigger["job_id"].startswith("preview:"))
+            self.assertFalse(trigger["execution_supported"])
         finally:
             shutil.rmtree(root, ignore_errors=True)
 
@@ -55,14 +68,28 @@ class ApiRepositoryTest(unittest.TestCase):
             projects = client.get("/api/projects", params={"profile": "agent_development", "limit": 5})
             detail = client.get("/api/projects/owner/agent")
             latest = client.get("/api/weekly/latest")
+            v1_health = client.get("/v1/health")
+            v1_projects = client.get("/v1/projects", params={"profile": "agent_development", "limit": 5})
+            v1_jobs = client.get("/v1/jobs")
+            v1_trigger = client.post(
+                "/v1/runs/trigger",
+                json={"profile": "agent_development", "sources": ["github_trending"], "dry_run": True},
+            )
 
             self.assertEqual(health.status_code, 200)
             self.assertEqual(projects.status_code, 200)
             self.assertEqual(detail.status_code, 200)
             self.assertEqual(latest.status_code, 200)
+            self.assertEqual(v1_health.status_code, 200)
+            self.assertEqual(v1_projects.status_code, 200)
+            self.assertEqual(v1_jobs.status_code, 200)
+            self.assertEqual(v1_trigger.status_code, 202)
             self.assertEqual(projects.json()["projects"][0]["full_name"], "owner/agent")
             self.assertEqual(detail.json()["history_count"], 2)
             self.assertEqual(latest.json()["run_date"], "2026-05-09")
+            self.assertEqual(v1_projects.json()["projects"][0]["full_name"], "owner/agent")
+            self.assertEqual(v1_jobs.json()["jobs"][0]["job_id"], "run:2026-05-09")
+            self.assertFalse(v1_trigger.json()["execution_supported"])
         finally:
             shutil.rmtree(root, ignore_errors=True)
 

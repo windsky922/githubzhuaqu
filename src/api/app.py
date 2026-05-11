@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, Query
+from fastapi import Body, FastAPI, Query
 
 from src.api.repository import ROOT, ApiRepository
 
@@ -58,6 +58,62 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
 
     @app.get("/api/weekly/latest")
     def latest_weekly() -> dict[str, Any]:
+        return repository.latest_weekly()
+
+    @app.get("/v1/health")
+    def v1_health() -> dict[str, Any]:
+        return repository.v1_health()
+
+    @app.get("/v1/projects")
+    def v1_projects(
+        language: str | None = None,
+        category: str | None = None,
+        profile: str | None = None,
+        source: str | None = None,
+        risk: str | None = Query(default=None, pattern="^(has|none)?$"),
+        quality_level: str | None = Query(default=None, pattern="^(high|medium|low|unknown)?$"),
+        min_quality: int | None = Query(default=None, ge=0, le=100),
+        trending_top: int | None = Query(default=None, ge=1),
+        query: str | None = None,
+        limit: int = Query(default=20, ge=1, le=200),
+        sort: str = Query(default="recent", pattern="^(recent|position|score|star-growth|trending|quality)$"),
+    ) -> dict[str, Any]:
+        return repository.projects(
+            language=language,
+            category=category,
+            profile=profile,
+            source=source,
+            risk=risk,
+            quality_level=quality_level,
+            min_quality=min_quality,
+            trending_top=trending_top,
+            query=query,
+            limit=limit,
+            sort=sort,
+        )
+
+    @app.get("/v1/projects/{owner}/{repo}")
+    def v1_project_detail(owner: str, repo: str) -> dict[str, Any]:
+        return repository.project_detail(f"{owner}/{repo}")
+
+    @app.get("/v1/runs")
+    def v1_runs() -> dict[str, Any]:
+        return repository.runs()
+
+    @app.get("/v1/jobs")
+    def v1_jobs(limit: int = Query(default=20, ge=1, le=200)) -> dict[str, Any]:
+        return repository.jobs(limit=limit)
+
+    @app.get("/v1/jobs/{job_id:path}")
+    def v1_job_detail(job_id: str) -> dict[str, Any]:
+        return repository.job_detail(job_id)
+
+    @app.post("/v1/runs/trigger", status_code=202)
+    def v1_trigger_run(payload: dict[str, Any] | None = Body(default=None)) -> dict[str, Any]:
+        return repository.trigger_run_preview(payload)
+
+    @app.get("/v1/reports/latest")
+    def v1_latest_report() -> dict[str, Any]:
         return repository.latest_weekly()
 
     return app

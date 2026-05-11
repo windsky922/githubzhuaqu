@@ -82,6 +82,7 @@ docs/profiles.json
 docs/feed.xml
 docs/api.md
 docs/core-development-plan.md
+docs/v1-api-plan.md
 docs/weekly/YYYY-MM-DD.md
 ```
 
@@ -97,6 +98,7 @@ docs/weekly/YYYY-MM-DD.md
 `feed.xml` 是 RSS 订阅入口，适合在 RSS 阅读器或后续自动化工具中订阅每周周报更新。
 `api.md` 记录只读后端 API 的启动方式和接口说明，后续前端工程、数据库管理和个性化订阅会优先复用这层接口。
 `core-development-plan.md` 记录后续核心功能优先建设路线，明确先建设后端服务化、数据层、Agent/RAG 和任务调度，再处理前端和末端体验优化。
+`v1-api-plan.md` 记录 `/v1/*` 核心服务接口、任务状态模型和后续真实后台执行的演进路径。
 
 ## 公共 JSON
 

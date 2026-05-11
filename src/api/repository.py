@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+from datetime import UTC, datetime
+from hashlib import sha1
 from pathlib import Path
 from typing import Any
 
@@ -24,6 +26,24 @@ class ApiRepository:
             "sqlite_exists": self.db_path.exists(),
             "reports_exists": (self.root / "reports").exists(),
             "docs_exists": (self.root / "docs").exists(),
+        }
+
+    def v1_health(self) -> dict[str, Any]:
+        archive_health = self.health()
+        return {
+            "schema_version": 1,
+            "status": archive_health["status"],
+            "service": "github-weekly-agent",
+            "api_version": "v1",
+            "capabilities": {
+                "projects_query": True,
+                "project_detail": True,
+                "runs_query": True,
+                "jobs_query": True,
+                "run_trigger_preview": True,
+                "run_trigger_execute": False,
+            },
+            "archive": archive_health,
         }
 
     def projects(
@@ -115,6 +135,68 @@ class ApiRepository:
     def runs(self) -> dict[str, Any]:
         return _read_json_object(self.root / "docs" / "runs.json", {"schema_version": 1, "count": 0, "runs": []})
 
+    def jobs(self, limit: int = 20) -> dict[str, Any]:
+        runs = self.runs().get("runs") or []
+        jobs = [_job_from_run(run) for run in runs[:limit]]
+        return {
+            "schema_version": 1,
+            "count": len(jobs),
+            "jobs": jobs,
+        }
+
+    def job_detail(self, job_id: str) -> dict[str, Any]:
+        normalized = _blank_to_none(job_id) or ""
+        for job in self.jobs(limit=200).get("jobs", []):
+            if job.get("job_id") == normalized:
+                return {
+                    "schema_version": 1,
+                    "found": True,
+                    "job": job,
+                    "run_summary": _read_json_object(self.root / "data" / "runs" / f"{job.get('run_date')}.json", {}),
+                }
+        return {
+            "schema_version": 1,
+            "found": False,
+            "job_id": normalized,
+            "job": {},
+        }
+
+    def trigger_run_preview(self, payload: dict[str, Any] | None = None) -> dict[str, Any]:
+        payload = payload or {}
+        profile = str(payload.get("profile") or payload.get("interest_profile") or "").strip()
+        sources = _list_strings(payload.get("sources"))
+        dry_run = bool(payload.get("dry_run", True))
+        submitted_at = datetime.now(UTC).isoformat().replace("+00:00", "Z")
+        fingerprint = sha1(
+            json.dumps(
+                {
+                    "profile": profile,
+                    "sources": sources,
+                    "dry_run": dry_run,
+                    "submitted_at": submitted_at,
+                },
+                sort_keys=True,
+            ).encode("utf-8")
+        ).hexdigest()[:12]
+        return {
+            "schema_version": 1,
+            "job_id": f"preview:{fingerprint}",
+            "status": "planned",
+            "submitted_at": submitted_at,
+            "execution_supported": False,
+            "message": "当前接口只返回任务计划预览，实际后台执行将在 worker/job 层接入后启用。",
+            "request": {
+                "profile": profile,
+                "sources": sources,
+                "dry_run": dry_run,
+            },
+            "next_steps": [
+                "复用 main.py 主流程封装 run use case。",
+                "增加持久化 job 表。",
+                "接入后台 worker 后再允许 execution_supported=true。",
+            ],
+        }
+
     def profiles(self) -> dict[str, Any]:
         return _read_json_object(
             self.root / "docs" / "profiles.json",
@@ -189,6 +271,32 @@ def _read_json_object(path: Path, default: dict[str, Any]) -> dict[str, Any]:
     except (FileNotFoundError, json.JSONDecodeError):
         return default
     return data if isinstance(data, dict) else default
+
+
+def _job_from_run(run: dict[str, Any]) -> dict[str, Any]:
+    run_date = str(run.get("run_date") or "")
+    status = str(run.get("status") or "")
+    failed = bool(run.get("report_error") or run.get("telegram_error") or run.get("sqlite_error"))
+    job_status = "failed" if status == "failed" or failed else "succeeded"
+    return {
+        "job_id": f"run:{run_date}",
+        "run_date": run_date,
+        "kind": "weekly_report",
+        "status": job_status,
+        "selected_count": _int_value(run.get("selected_count")),
+        "collected_count": _int_value(run.get("collected_count")),
+        "kimi_used": bool(run.get("kimi_used")),
+        "telegram_sent": bool(run.get("telegram_sent")),
+        "report_url": run.get("report_url") or run.get("telegram_report_url") or "",
+    }
+
+
+def _list_strings(value: Any) -> list[str]:
+    if isinstance(value, str):
+        return [part.strip() for part in value.split(",") if part.strip()]
+    if isinstance(value, list):
+        return [str(part).strip() for part in value if str(part).strip()]
+    return []
 
 
 def _blank_to_none(value: str | None) -> str | None:
