@@ -219,6 +219,7 @@ trend_summaries
 sent_repositories
 star_history
 jobs
+job_events
 migration_meta
 ```
 
@@ -231,7 +232,8 @@ migration_meta
 5. `sent_repositories` 保存已推送仓库状态。
 6. `star_history` 保存 Star 历史。
 7. `jobs` 保存历史周报任务和触发预览任务状态。
-8. `migration_meta` 保存迁移元数据。
+8. `job_events` 保存任务创建、重复命中、执行请求、执行阻止和执行完成等审计事件。
+9. `migration_meta` 保存迁移元数据。
 
 当前只读查询入口位于：
 

@@ -195,6 +195,16 @@ SQLITE_COLUMNS = {
         "error",
         "payload_json",
     },
+    "job_events": {
+        "event_id",
+        "job_id",
+        "event_type",
+        "status",
+        "actor",
+        "created_at",
+        "message",
+        "payload_json",
+    },
     "migration_meta": {
         "key",
         "value",

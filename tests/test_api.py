@@ -61,6 +61,7 @@ class ApiRepositoryTest(unittest.TestCase):
                 return_value={"executed": True, "job_id": trigger["job_id"], "status": "succeeded"},
             ) as runner:
                 accepted_execution = repository.execute_job(trigger["job_id"], {"confirm_execution": True})
+            job_events = repository.job_events(trigger["job_id"])
             planned_jobs = repository.jobs(status="planned", profile="agent_development", query="github_trending")
             audit_jobs = repository.jobs(status="planned", query="unit-test")
             succeeded_jobs = repository.jobs(status="succeeded", kind="weekly_report", query="2026-05-09")
@@ -117,6 +118,14 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertTrue(accepted_execution["executed"])
             self.assertEqual(accepted_execution["status"], "succeeded")
             runner.assert_called_once()
+            event_types = [event["event_type"] for event in job_events["events"]]
+            self.assertIn("job_created", event_types)
+            self.assertIn("duplicate_trigger_ignored", event_types)
+            self.assertIn("execution_requested", event_types)
+            self.assertIn("execution_blocked", event_types)
+            self.assertIn("execution_started", event_types)
+            self.assertIn("execution_finished", event_types)
+            self.assertEqual(job_events["job_id"], trigger["job_id"])
             self.assertEqual(planned_jobs["count"], 1)
             self.assertEqual(planned_jobs["jobs"][0]["job_id"], trigger["job_id"])
             self.assertEqual(audit_jobs["jobs"][0]["job_id"], trigger["job_id"])
@@ -160,6 +169,7 @@ class ApiRepositoryTest(unittest.TestCase):
                     f"/v1/jobs/{v1_trigger.json()['job_id']}/execute",
                     json={"confirm_execution": True},
                 )
+            v1_events = client.get(f"/v1/jobs/{v1_trigger.json()['job_id']}/events")
             v1_planned_jobs = client.get(
                 "/v1/jobs",
                 params={"status": "planned", "profile": "agent_development", "query": "github_trending"},
@@ -176,6 +186,7 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(v1_execution_check.status_code, 200)
             self.assertEqual(v1_blocked_execute.status_code, 200)
             self.assertEqual(v1_execute.status_code, 200)
+            self.assertEqual(v1_events.status_code, 200)
             self.assertEqual(v1_planned_jobs.status_code, 200)
             self.assertEqual(projects.json()["projects"][0]["full_name"], "owner/agent")
             self.assertEqual(detail.json()["history_count"], 2)
@@ -187,6 +198,8 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertFalse(v1_blocked_execute.json()["accepted"])
             self.assertTrue(v1_execute.json()["accepted"])
             self.assertTrue(v1_execute.json()["executed"])
+            self.assertGreaterEqual(v1_events.json()["count"], 4)
+            self.assertIn("execution_finished", [event["event_type"] for event in v1_events.json()["events"]])
             self.assertEqual(v1_planned_jobs.json()["count"], 1)
         finally:
             shutil.rmtree(root, ignore_errors=True)

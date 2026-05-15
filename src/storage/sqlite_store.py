@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+from hashlib import sha1
 from pathlib import Path
 from typing import Any
 
@@ -347,6 +348,39 @@ def upsert_job(connection: sqlite3.Connection, data: dict[str, Any]) -> None:
     )
 
 
+def insert_job_event(connection: sqlite3.Connection, data: dict[str, Any]) -> None:
+    payload = data.get("payload")
+    if not isinstance(payload, dict):
+        payload = data
+    event_id = str(data.get("event_id") or "")
+    if not event_id:
+        event_id = _event_id(data)
+    connection.execute(
+        """
+        INSERT INTO job_events(event_id, job_id, event_type, status, actor, created_at, message, payload_json)
+        VALUES(?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(event_id) DO UPDATE SET
+          job_id = excluded.job_id,
+          event_type = excluded.event_type,
+          status = excluded.status,
+          actor = excluded.actor,
+          created_at = excluded.created_at,
+          message = excluded.message,
+          payload_json = excluded.payload_json
+        """,
+        (
+            event_id,
+            str(data.get("job_id") or ""),
+            str(data.get("event_type") or ""),
+            str(data.get("status") or ""),
+            str(data.get("actor") or ""),
+            str(data.get("created_at") or ""),
+            str(data.get("message") or ""),
+            _json_text(payload),
+        ),
+    )
+
+
 def table_count(connection: sqlite3.Connection, table_name: str) -> int:
     if table_name not in {
         "runs",
@@ -356,6 +390,7 @@ def table_count(connection: sqlite3.Connection, table_name: str) -> int:
         "sent_repositories",
         "star_history",
         "jobs",
+        "job_events",
     }:
         raise ValueError(f"不支持的表名：{table_name}")
     row = connection.execute(f"SELECT COUNT(*) AS count FROM {table_name}").fetchone()
@@ -386,6 +421,20 @@ def _read_json_list(path: Path) -> list[Any]:
 
 def _json_text(data: Any) -> str:
     return json.dumps(data, ensure_ascii=False, sort_keys=True)
+
+
+def _event_id(data: dict[str, Any]) -> str:
+    text = _json_text(
+        {
+            "job_id": data.get("job_id") or "",
+            "event_type": data.get("event_type") or "",
+            "status": data.get("status") or "",
+            "actor": data.get("actor") or "",
+            "created_at": data.get("created_at") or "",
+            "message": data.get("message") or "",
+        }
+    )
+    return f"event:{sha1(text.encode('utf-8')).hexdigest()[:16]}"
 
 
 def _int_value(value: Any) -> int:

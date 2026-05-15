@@ -84,6 +84,20 @@ CREATE TABLE IF NOT EXISTS jobs (
 CREATE INDEX IF NOT EXISTS idx_jobs_status_submitted_at ON jobs(status, submitted_at);
 CREATE INDEX IF NOT EXISTS idx_jobs_run_date ON jobs(run_date);
 
+CREATE TABLE IF NOT EXISTS job_events (
+  event_id TEXT PRIMARY KEY,
+  job_id TEXT NOT NULL DEFAULT '',
+  event_type TEXT NOT NULL DEFAULT '',
+  status TEXT NOT NULL DEFAULT '',
+  actor TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL DEFAULT '',
+  message TEXT NOT NULL DEFAULT '',
+  payload_json TEXT NOT NULL DEFAULT '{}'
+);
+
+CREATE INDEX IF NOT EXISTS idx_job_events_job_id_created_at ON job_events(job_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_job_events_type_created_at ON job_events(event_type, created_at);
+
 CREATE TABLE IF NOT EXISTS migration_meta (
   key TEXT PRIMARY KEY,
   value TEXT NOT NULL

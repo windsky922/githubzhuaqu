@@ -30,6 +30,7 @@ class SqliteStorageTest(unittest.TestCase):
                 self.assertEqual(table_count(connection, "selections"), 2)
                 self.assertEqual(table_count(connection, "repositories"), 2)
                 self.assertEqual(table_count(connection, "jobs"), 1)
+                self.assertEqual(table_count(connection, "job_events"), 0)
                 row = connection.execute(
                     "SELECT full_name, language, stargazers_count FROM repositories WHERE full_name = ?",
                     ("owner/project",),
@@ -58,6 +59,7 @@ class SqliteStorageTest(unittest.TestCase):
                 self.assertEqual(table_count(connection, "selections"), 2)
                 self.assertEqual(table_count(connection, "star_history"), 2)
                 self.assertEqual(table_count(connection, "jobs"), 1)
+                self.assertEqual(table_count(connection, "job_events"), 0)
             finally:
                 connection.close()
         finally:

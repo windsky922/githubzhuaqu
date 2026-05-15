@@ -104,8 +104,9 @@ http://127.0.0.1:8000/api/health
 
 1. `GET /v1/jobs`：查询任务列表。
 2. `GET /v1/job-execution-check?job_id=...`：检查 planned 任务是否可执行。
-3. `POST /v1/runs/trigger`：创建 planned 周报任务，不直接执行。
-4. `POST /v1/jobs/{job_id}/execute`：显式传入 `confirm_execution=true` 后，把检查通过的 planned 任务交给 job runner 执行。
+3. `GET /v1/jobs/{job_id}/events`：查询任务审计事件。
+4. `POST /v1/runs/trigger`：创建 planned 周报任务，不直接执行。
+5. `POST /v1/jobs/{job_id}/execute`：显式传入 `confirm_execution=true` 后，把检查通过的 planned 任务交给 job runner 执行。
 
 执行接口仍然遵守任务请求中的 `dry_run` 和 `confirm_delivery`。如果任务允许真实推送，执行前需要确认 Telegram、飞书或微信等推送配置已经正确。
 

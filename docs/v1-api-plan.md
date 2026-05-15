@@ -25,6 +25,7 @@
 | `capabilities.project_detail` | 是否支持项目详情 |
 | `capabilities.runs_query` | 是否支持运行记录 |
 | `capabilities.jobs_query` | 是否支持任务查询 |
+| `capabilities.job_events` | 是否支持任务审计事件查询 |
 | `capabilities.run_trigger_preview` | 是否支持触发预检 |
 | `capabilities.local_job_runner` | 是否支持本地任务执行器 |
 | `capabilities.run_trigger_execute` | 是否支持受控任务执行；当前为 `true` |
@@ -91,6 +92,21 @@
 ### `GET /v1/jobs/{job_id}`
 
 查询单个任务详情。对于历史周报任务，会同时返回对应 `data/runs/YYYY-MM-DD.json` 的运行摘要。
+
+### `GET /v1/jobs/{job_id}/events`
+
+查询单个任务的审计事件，事件按创建时间升序返回。当前会记录：
+
+| 事件类型 | 说明 |
+|---|---|
+| `job_created` | 创建 planned 任务 |
+| `duplicate_trigger_ignored` | 命中已有 active 任务，未重复创建 |
+| `execution_requested` | 收到执行请求 |
+| `execution_blocked` | 执行请求被阻止 |
+| `execution_started` | 任务已交给 job runner |
+| `execution_finished` | job runner 返回执行结果 |
+
+事件字段包括 `event_id`、`job_id`、`event_type`、`status`、`actor`、`created_at`、`message` 和 `payload`。事件只保存审计摘要，不保存 Token、Chat ID、Webhook 或请求头。
 
 ### `GET /v1/job-execution-check?job_id=...`
 
