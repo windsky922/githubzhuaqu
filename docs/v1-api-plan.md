@@ -151,6 +151,8 @@
 | `q` | `query` | 关键词搜索，兼容旧的 `query` |
 | `api` | 无 | 页面数据源开关，`1` 强制 API，`0` 强制静态 JSON |
 
+任务状态页还提供一个最小 planned 任务创建表单。该表单只在本地后端或 `api=1` 模式下启用，提交时调用 `/v1/runs/trigger`，并固定写入 `trigger_source=jobs_page` 和 `requested_by=local-ui`。表单不会直接执行任务，只会创建 planned 记录；后续仍由 job runner 或 GitHub Actions 消费任务。
+
 ### 本地任务执行器
 
 ```bash

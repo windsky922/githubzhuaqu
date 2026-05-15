@@ -2,6 +2,24 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-05-15 追加：任务状态页新增 planned 任务创建表单
+
+### 1. 开发目的
+
+后端已经具备受控创建 planned 任务的能力，但用户仍需要通过接口文档或脚本才能创建任务。为了让后续前端管理页有一个最小可用入口，本次在任务状态页增加创建任务表单，同时继续保持“只创建 planned，不直接执行”的安全边界。
+
+### 2. 本次修改
+
+1. `jobs.html` 新增 planned 任务创建表单，支持填写 profile、回看天数、来源、dry_run 和确认推送。
+2. 表单只在本地后端或 `api=1` 模式下启用，静态 GitHub Pages 默认只能查看任务。
+3. 提交时调用 `/v1/runs/trigger`，写入 `trigger_source=jobs_page` 和 `requested_by=local-ui`。
+4. 创建成功后自动筛选 planned 任务并刷新任务列表。
+5. 补充页面构建测试，固定表单、受控触发接口和审计字段。
+
+### 3. 设计边界
+
+本次不在页面中执行 job runner，也不绕过 `confirm_delivery` 规则。真实执行仍需要由 `scripts/run_planned_job.py`、GitHub Actions 或后续受控 worker 消费 planned 任务。
+
 ## 2026-05-15 追加：任务触发入口增加推送确认和审计字段
 
 ### 1. 开发目的

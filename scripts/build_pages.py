@@ -2069,6 +2069,24 @@ def _jobs_dashboard_content() -> str:
       gap: 10px;
       margin-bottom: 14px;
     }
+    .task-panel {
+      margin-bottom: 14px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--panel);
+    }
+    .task-panel h2 {
+      margin: 0 0 10px;
+      font-size: 16px;
+      line-height: 1.3;
+    }
+    .task-form {
+      display: grid;
+      grid-template-columns: minmax(160px, 1.2fr) minmax(120px, .8fr) minmax(160px, 1fr) minmax(140px, .8fr) minmax(140px, .8fr);
+      gap: 10px;
+      align-items: end;
+    }
     label {
       display: grid;
       gap: 5px;
@@ -2076,7 +2094,7 @@ def _jobs_dashboard_content() -> str:
       font-size: 13px;
       font-weight: 700;
     }
-    input, select {
+    input, select, button {
       height: 38px;
       border: 1px solid var(--line);
       border-radius: 6px;
@@ -2084,6 +2102,35 @@ def _jobs_dashboard_content() -> str:
       color: var(--text);
       font: inherit;
       padding: 0 10px;
+    }
+    button {
+      cursor: pointer;
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #fff;
+      font-weight: 700;
+    }
+    button:disabled {
+      cursor: not-allowed;
+      border-color: var(--line);
+      background: #e5e7eb;
+      color: var(--muted);
+    }
+    .check-label {
+      grid-template-columns: 18px 1fr;
+      align-items: center;
+      gap: 8px;
+      min-height: 38px;
+    }
+    .check-label input {
+      width: 16px;
+      height: 16px;
+      padding: 0;
+    }
+    .task-status {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 13px;
     }
     .summary {
       display: grid;
@@ -2170,6 +2217,7 @@ def _jobs_dashboard_content() -> str:
         padding: 16px 0;
       }
       .filters,
+      .task-form,
       .summary {
         grid-template-columns: 1fr;
       }
@@ -2212,6 +2260,34 @@ def _jobs_dashboard_content() -> str:
         <input id="query" type="search" autocomplete="off">
       </label>
     </section>
+    <section class="task-panel" aria-label="创建 planned 任务">
+      <h2>创建 planned 任务</h2>
+      <div class="task-form">
+        <label>Profile
+          <input id="createProfile" type="search" autocomplete="off" placeholder="agent_development">
+        </label>
+        <label>回看天数
+          <input id="createDaysBack" type="number" min="1" max="30" value="7">
+        </label>
+        <label>来源
+          <select id="createSource">
+            <option value="github_trending">github_trending</option>
+            <option value="github_search">github_search</option>
+            <option value="">不指定</option>
+          </select>
+        </label>
+        <label class="check-label">
+          <input id="createDryRun" type="checkbox" checked>
+          <span>dry_run</span>
+        </label>
+        <label class="check-label">
+          <input id="createConfirmDelivery" type="checkbox">
+          <span>确认推送</span>
+        </label>
+        <button id="createTask" type="button">创建任务</button>
+      </div>
+      <p id="createTaskStatus" class="task-status">只在本地后端或 api=1 模式下创建 planned 任务。</p>
+    </section>
     <section id="summary" class="summary" aria-label="任务概览"></section>
     <div class="table-shell">
       <table>
@@ -2241,11 +2317,21 @@ def _jobs_dashboard_content() -> str:
       profile: document.getElementById("profile"),
       query: document.getElementById("query"),
     };
+    const createControls = {
+      profile: document.getElementById("createProfile"),
+      daysBack: document.getElementById("createDaysBack"),
+      source: document.getElementById("createSource"),
+      dryRun: document.getElementById("createDryRun"),
+      confirmDelivery: document.getElementById("createConfirmDelivery"),
+      button: document.getElementById("createTask"),
+      status: document.getElementById("createTaskStatus"),
+    };
     const rows = document.getElementById("rows");
     const summary = document.getElementById("summary");
 
     restoreFilters();
     bind();
+    setupCreateTask();
     loadJobs()
       .then(data => {
         state.jobs = Array.isArray(data.jobs) ? data.jobs : [];
@@ -2258,6 +2344,52 @@ def _jobs_dashboard_content() -> str:
     function bind() {
       Object.values(controls).forEach(control => control.addEventListener("input", render));
       Object.values(controls).forEach(control => control.addEventListener("change", render));
+    }
+
+    function setupCreateTask() {
+      if (!shouldUseApi()) {
+        createControls.button.disabled = true;
+        createControls.status.textContent = "当前使用静态 JSON，只能查看任务；启动本地后端或添加 api=1 后可创建 planned 任务。";
+        return;
+      }
+      createControls.button.addEventListener("click", createPlannedTask);
+    }
+
+    function createPlannedTask() {
+      createControls.button.disabled = true;
+      createControls.status.textContent = "正在创建 planned 任务...";
+      const source = createControls.source.value.trim();
+      const payload = {
+        profile: createControls.profile.value.trim(),
+        sources: source ? [source] : [],
+        dry_run: createControls.dryRun.checked,
+        confirm_delivery: createControls.confirmDelivery.checked,
+        days_back: number(createControls.daysBack.value) || 7,
+        trigger_source: "jobs_page",
+        requested_by: "local-ui",
+      };
+      fetch("/v1/runs/trigger", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+        .then(jsonOrThrow)
+        .then(data => {
+          const warnings = (data.safety_warnings || []).join(" ");
+          createControls.status.textContent = `已创建 ${data.job_id || "planned 任务"}。${warnings}`;
+          controls.status.value = "planned";
+          return loadJobs();
+        })
+        .then(data => {
+          state.jobs = Array.isArray(data.jobs) ? data.jobs : [];
+          render();
+        })
+        .catch(error => {
+          createControls.status.textContent = `创建失败：${error.message || error}`;
+        })
+        .finally(() => {
+          createControls.button.disabled = false;
+        });
     }
 
     function loadJobs() {
