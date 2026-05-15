@@ -6,9 +6,9 @@
 
 1. 查询接口可以同步返回。
 2. 采集、生成、推送等长任务必须走任务模型。
-3. 当前阶段先提供任务预检和历史任务视图，不直接在 HTTP 请求中执行长任务。
-4. 查询接口只读取公开归档或本地派生索引，触发接口只写入任务状态，不返回密钥。
-5. 后续接入 worker 后，再把 `run_trigger_execute` 从 `false` 切换为 `true`。
+3. 采集、生成、推送必须先落到任务模型，再通过受控执行入口交给 job runner。
+4. 查询接口只读取公开归档或本地派生索引，触发创建接口只写入任务状态，不返回密钥。
+5. 当前已提供本地受控执行入口，后续再演进为异步 worker、队列和权限控制。
 
 ## 当前接口
 
@@ -27,7 +27,7 @@
 | `capabilities.jobs_query` | 是否支持任务查询 |
 | `capabilities.run_trigger_preview` | 是否支持触发预检 |
 | `capabilities.local_job_runner` | 是否支持本地任务执行器 |
-| `capabilities.run_trigger_execute` | 是否支持真实后台执行；当前为 `false` |
+| `capabilities.run_trigger_execute` | 是否支持受控任务执行；当前为 `true` |
 
 ### `GET /v1/projects`
 
@@ -109,6 +109,38 @@
 | `next_command` | 可执行时给出的本地执行命令 |
 
 当前规则：只有 `kind=weekly_report` 且 `status=planned` 的任务可执行；如果 `dry_run=false` 但没有 `confirm_delivery=true`，会被阻止。
+
+### `POST /v1/jobs/{job_id}/execute`
+
+受控执行单个 planned 任务。该接口会先调用同一套执行前检查逻辑，检查不通过时只返回阻止原因，不会执行任务。
+
+请求示例：
+
+```json
+{
+  "confirm_execution": true
+}
+```
+
+返回字段：
+
+| 字段 | 说明 |
+|---|---|
+| `accepted` | 是否接受本次执行请求 |
+| `executed` | runner 是否实际执行 |
+| `job_id` | 任务编号 |
+| `status` | runner 返回的任务状态 |
+| `blockers` | 阻止执行的原因 |
+| `warnings` | 执行前提示 |
+| `precheck` | 执行前检查结果 |
+| `runner_result` | `src.job_runner.run_planned_job()` 返回的结果摘要 |
+
+执行规则：
+
+1. 必须传入 `confirm_execution=true`。
+2. 任务必须通过 `/v1/job-execution-check`。
+3. `dry_run=false` 的真实推送任务仍必须在任务请求中包含 `confirm_delivery=true`。
+4. API 只调用现有 job runner，不单独实现采集、生成或推送逻辑。
 
 ### `POST /v1/runs/trigger`
 

@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from scripts.query_archive import query_archive
+from src.job_runner import run_planned_job
 from src.storage.sqlite_store import connect, import_json_archive, initialize, upsert_job
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -43,7 +44,7 @@ class ApiRepository:
                 "job_execution_check": True,
                 "run_trigger_preview": True,
                 "local_job_runner": True,
-                "run_trigger_execute": False,
+                "run_trigger_execute": True,
             },
             "archive": archive_health,
         }
@@ -234,6 +235,39 @@ class ApiRepository:
             "blockers": blockers,
             "warnings": warnings,
             "next_command": f"python scripts/run_planned_job.py --job-id {job.get('job_id') or normalized}" if executable else "",
+        }
+
+    def execute_job(self, job_id: str, payload: dict[str, Any] | None = None) -> dict[str, Any]:
+        payload = payload or {}
+        check = self.job_execution_check(job_id)
+        blockers = list(check.get("blockers") or [])
+        if not _truthy(payload.get("confirm_execution")):
+            blockers.append("缺少 confirm_execution=true，未执行任务。")
+
+        if blockers:
+            return {
+                "schema_version": 1,
+                "accepted": False,
+                "executed": False,
+                "job_id": check.get("job_id") or (_blank_to_none(job_id) or ""),
+                "status": check.get("status") or "blocked",
+                "blockers": blockers,
+                "warnings": check.get("warnings") or [],
+                "precheck": check,
+                "runner_result": {},
+            }
+
+        runner_result = run_planned_job(root=self.root, db_path=self.db_path, job_id=str(check.get("job_id") or job_id))
+        return {
+            "schema_version": 1,
+            "accepted": True,
+            "executed": bool(runner_result.get("executed")),
+            "job_id": runner_result.get("job_id") or check.get("job_id") or (_blank_to_none(job_id) or ""),
+            "status": runner_result.get("status") or "",
+            "blockers": [],
+            "warnings": check.get("warnings") or [],
+            "precheck": check,
+            "runner_result": runner_result,
         }
 
     def trigger_run_preview(self, payload: dict[str, Any] | None = None) -> dict[str, Any]:

@@ -4,6 +4,7 @@ import shutil
 import unittest
 import uuid
 from pathlib import Path
+from unittest.mock import patch
 
 from src.api.repository import ApiRepository
 
@@ -53,6 +54,13 @@ class ApiRepositoryTest(unittest.TestCase):
             execution_check = repository.job_execution_check(trigger["job_id"])
             completed_execution_check = repository.job_execution_check("run:2026-05-09")
             missing_execution_check = repository.job_execution_check("missing")
+            blocked_execution = repository.execute_job(trigger["job_id"], {})
+            completed_execution = repository.execute_job("run:2026-05-09", {"confirm_execution": True})
+            with patch(
+                "src.api.repository.run_planned_job",
+                return_value={"executed": True, "job_id": trigger["job_id"], "status": "succeeded"},
+            ) as runner:
+                accepted_execution = repository.execute_job(trigger["job_id"], {"confirm_execution": True})
             planned_jobs = repository.jobs(status="planned", profile="agent_development", query="github_trending")
             audit_jobs = repository.jobs(status="planned", query="unit-test")
             succeeded_jobs = repository.jobs(status="succeeded", kind="weekly_report", query="2026-05-09")
@@ -72,7 +80,7 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertTrue(health["capabilities"]["jobs_query"])
             self.assertTrue(health["capabilities"]["job_execution_check"])
             self.assertTrue(health["capabilities"]["local_job_runner"])
-            self.assertFalse(health["capabilities"]["run_trigger_execute"])
+            self.assertTrue(health["capabilities"]["run_trigger_execute"])
             self.assertEqual(jobs["jobs"][0]["job_id"], "run:2026-05-09")
             self.assertTrue(job_detail["found"])
             self.assertEqual(job_detail["run_summary"]["run_date"], "2026-05-09")
@@ -100,6 +108,15 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertIn("只有 planned 任务可以被执行器消费", completed_execution_check["blockers"][0])
             self.assertFalse(missing_execution_check["found"])
             self.assertFalse(missing_execution_check["executable"])
+            self.assertFalse(blocked_execution["accepted"])
+            self.assertFalse(blocked_execution["executed"])
+            self.assertIn("confirm_execution=true", " ".join(blocked_execution["blockers"]))
+            self.assertFalse(completed_execution["accepted"])
+            self.assertFalse(completed_execution["executed"])
+            self.assertTrue(accepted_execution["accepted"])
+            self.assertTrue(accepted_execution["executed"])
+            self.assertEqual(accepted_execution["status"], "succeeded")
+            runner.assert_called_once()
             self.assertEqual(planned_jobs["count"], 1)
             self.assertEqual(planned_jobs["jobs"][0]["job_id"], trigger["job_id"])
             self.assertEqual(audit_jobs["jobs"][0]["job_id"], trigger["job_id"])
@@ -134,6 +151,15 @@ class ApiRepositoryTest(unittest.TestCase):
                 "/v1/job-execution-check",
                 params={"job_id": v1_trigger.json()["job_id"]},
             )
+            v1_blocked_execute = client.post(f"/v1/jobs/{v1_trigger.json()['job_id']}/execute", json={})
+            with patch(
+                "src.api.repository.run_planned_job",
+                return_value={"executed": True, "job_id": v1_trigger.json()["job_id"], "status": "succeeded"},
+            ):
+                v1_execute = client.post(
+                    f"/v1/jobs/{v1_trigger.json()['job_id']}/execute",
+                    json={"confirm_execution": True},
+                )
             v1_planned_jobs = client.get(
                 "/v1/jobs",
                 params={"status": "planned", "profile": "agent_development", "query": "github_trending"},
@@ -148,6 +174,8 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(v1_jobs.status_code, 200)
             self.assertEqual(v1_trigger.status_code, 202)
             self.assertEqual(v1_execution_check.status_code, 200)
+            self.assertEqual(v1_blocked_execute.status_code, 200)
+            self.assertEqual(v1_execute.status_code, 200)
             self.assertEqual(v1_planned_jobs.status_code, 200)
             self.assertEqual(projects.json()["projects"][0]["full_name"], "owner/agent")
             self.assertEqual(detail.json()["history_count"], 2)
@@ -156,6 +184,9 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(v1_jobs.json()["jobs"][0]["job_id"], "run:2026-05-09")
             self.assertFalse(v1_trigger.json()["execution_supported"])
             self.assertTrue(v1_execution_check.json()["executable"])
+            self.assertFalse(v1_blocked_execute.json()["accepted"])
+            self.assertTrue(v1_execute.json()["accepted"])
+            self.assertTrue(v1_execute.json()["executed"])
             self.assertEqual(v1_planned_jobs.json()["count"], 1)
         finally:
             shutil.rmtree(root, ignore_errors=True)

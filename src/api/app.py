@@ -114,6 +114,10 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
     def v1_job_execution_check(job_id: str = Query(..., min_length=1)) -> dict[str, Any]:
         return repository.job_execution_check(job_id)
 
+    @app.post("/v1/jobs/{job_id:path}/execute")
+    def v1_execute_job(job_id: str, payload: dict[str, Any] | None = Body(default=None)) -> dict[str, Any]:
+        return repository.execute_job(job_id, payload)
+
     @app.get("/v1/jobs/{job_id:path}")
     def v1_job_detail(job_id: str) -> dict[str, Any]:
         return repository.job_detail(job_id)
