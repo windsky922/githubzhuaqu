@@ -40,6 +40,7 @@ class ApiRepository:
                 "project_detail": True,
                 "runs_query": True,
                 "jobs_query": True,
+                "job_execution_check": True,
                 "run_trigger_preview": True,
                 "local_job_runner": True,
                 "run_trigger_execute": False,
@@ -182,6 +183,57 @@ class ApiRepository:
             "found": False,
             "job_id": normalized,
             "job": {},
+        }
+
+    def job_execution_check(self, job_id: str) -> dict[str, Any]:
+        detail = self.job_detail(job_id)
+        normalized = _blank_to_none(job_id) or ""
+        if not detail.get("found"):
+            return {
+                "schema_version": 1,
+                "found": False,
+                "job_id": normalized,
+                "executable": False,
+                "execution_path": "scripts/run_planned_job.py",
+                "blockers": ["任务不存在。"],
+                "warnings": [],
+                "next_command": "",
+            }
+
+        job = detail.get("job") if isinstance(detail.get("job"), dict) else {}
+        request = job.get("request") if isinstance(job.get("request"), dict) else {}
+        blockers = []
+        warnings = []
+        if job.get("kind") != "weekly_report":
+            blockers.append("当前执行器只支持 weekly_report 任务。")
+        if job.get("status") != "planned":
+            blockers.append(f"任务状态为 {job.get('status') or 'unknown'}，只有 planned 任务可以被执行器消费。")
+        if not _truthy(request.get("dry_run", True)) and not _truthy(request.get("confirm_delivery")):
+            blockers.append("dry_run=false 但缺少 confirm_delivery=true，不能进入真实推送执行。")
+        if not _truthy(request.get("dry_run", True)):
+            warnings.append("该任务允许真实推送，执行前请确认 Telegram/飞书/微信等推送配置正确。")
+
+        executable = not blockers
+        return {
+            "schema_version": 1,
+            "found": True,
+            "job_id": job.get("job_id") or normalized,
+            "status": job.get("status") or "",
+            "kind": job.get("kind") or "",
+            "executable": executable,
+            "execution_path": "scripts/run_planned_job.py",
+            "request": {
+                "profile": request.get("profile") or "",
+                "sources": _list_strings(request.get("sources")),
+                "dry_run": _truthy(request.get("dry_run", True)),
+                "confirm_delivery": _truthy(request.get("confirm_delivery")),
+                "days_back": _positive_int(request.get("days_back")),
+                "trigger_source": request.get("trigger_source") or "",
+                "requested_by": request.get("requested_by") or "",
+            },
+            "blockers": blockers,
+            "warnings": warnings,
+            "next_command": f"python scripts/run_planned_job.py --job-id {job.get('job_id') or normalized}" if executable else "",
         }
 
     def trigger_run_preview(self, payload: dict[str, Any] | None = None) -> dict[str, Any]:

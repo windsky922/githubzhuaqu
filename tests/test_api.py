@@ -50,6 +50,9 @@ class ApiRepositoryTest(unittest.TestCase):
             unsafe_trigger = repository.trigger_run_preview({"dry_run": "false", "confirm_delivery": False})
             confirmed_trigger = repository.trigger_run_preview({"dry_run": "false", "confirm_delivery": True})
             preview_detail = repository.job_detail(trigger["job_id"])
+            execution_check = repository.job_execution_check(trigger["job_id"])
+            completed_execution_check = repository.job_execution_check("run:2026-05-09")
+            missing_execution_check = repository.job_execution_check("missing")
             planned_jobs = repository.jobs(status="planned", profile="agent_development", query="github_trending")
             audit_jobs = repository.jobs(status="planned", query="unit-test")
             succeeded_jobs = repository.jobs(status="succeeded", kind="weekly_report", query="2026-05-09")
@@ -67,6 +70,7 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(latest["run_date"], "2026-05-09")
             self.assertIn("owner/agent", latest["markdown"])
             self.assertTrue(health["capabilities"]["jobs_query"])
+            self.assertTrue(health["capabilities"]["job_execution_check"])
             self.assertTrue(health["capabilities"]["local_job_runner"])
             self.assertFalse(health["capabilities"]["run_trigger_execute"])
             self.assertEqual(jobs["jobs"][0]["job_id"], "run:2026-05-09")
@@ -90,6 +94,12 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertTrue(confirmed_trigger["request"]["delivery_allowed"])
             self.assertTrue(preview_detail["found"])
             self.assertEqual(preview_detail["job"]["status"], "planned")
+            self.assertTrue(execution_check["executable"])
+            self.assertIn("scripts/run_planned_job.py", execution_check["next_command"])
+            self.assertFalse(completed_execution_check["executable"])
+            self.assertIn("只有 planned 任务可以被执行器消费", completed_execution_check["blockers"][0])
+            self.assertFalse(missing_execution_check["found"])
+            self.assertFalse(missing_execution_check["executable"])
             self.assertEqual(planned_jobs["count"], 1)
             self.assertEqual(planned_jobs["jobs"][0]["job_id"], trigger["job_id"])
             self.assertEqual(audit_jobs["jobs"][0]["job_id"], trigger["job_id"])
@@ -120,6 +130,10 @@ class ApiRepositoryTest(unittest.TestCase):
                 "/v1/runs/trigger",
                 json={"profile": "agent_development", "sources": ["github_trending"], "dry_run": True, "days_back": 3},
             )
+            v1_execution_check = client.get(
+                "/v1/job-execution-check",
+                params={"job_id": v1_trigger.json()["job_id"]},
+            )
             v1_planned_jobs = client.get(
                 "/v1/jobs",
                 params={"status": "planned", "profile": "agent_development", "query": "github_trending"},
@@ -133,6 +147,7 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(v1_projects.status_code, 200)
             self.assertEqual(v1_jobs.status_code, 200)
             self.assertEqual(v1_trigger.status_code, 202)
+            self.assertEqual(v1_execution_check.status_code, 200)
             self.assertEqual(v1_planned_jobs.status_code, 200)
             self.assertEqual(projects.json()["projects"][0]["full_name"], "owner/agent")
             self.assertEqual(detail.json()["history_count"], 2)
@@ -140,6 +155,7 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(v1_projects.json()["projects"][0]["full_name"], "owner/agent")
             self.assertEqual(v1_jobs.json()["jobs"][0]["job_id"], "run:2026-05-09")
             self.assertFalse(v1_trigger.json()["execution_supported"])
+            self.assertTrue(v1_execution_check.json()["executable"])
             self.assertEqual(v1_planned_jobs.json()["count"], 1)
         finally:
             shutil.rmtree(root, ignore_errors=True)

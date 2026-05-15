@@ -92,6 +92,24 @@
 
 查询单个任务详情。对于历史周报任务，会同时返回对应 `data/runs/YYYY-MM-DD.json` 的运行摘要。
 
+### `GET /v1/job-execution-check?job_id=...`
+
+执行前检查接口，只判断任务是否可以被 `scripts/run_planned_job.py` 消费，不直接执行任务。
+
+返回字段：
+
+| 字段 | 说明 |
+|---|---|
+| `found` | 是否找到任务 |
+| `executable` | 是否满足执行器消费条件 |
+| `execution_path` | 建议执行入口 |
+| `request` | 任务请求摘要 |
+| `blockers` | 阻止执行的原因 |
+| `warnings` | 执行前提示，例如真实推送风险 |
+| `next_command` | 可执行时给出的本地执行命令 |
+
+当前规则：只有 `kind=weekly_report` 且 `status=planned` 的任务可执行；如果 `dry_run=false` 但没有 `confirm_delivery=true`，会被阻止。
+
 ### `POST /v1/runs/trigger`
 
 创建一次受控的周报计划任务并写入 `jobs` 表，不在 HTTP 请求中直接执行采集、生成或推送。

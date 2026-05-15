@@ -2,6 +2,24 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-05-15 追加：新增任务执行前检查接口
+
+### 1. 开发目的
+
+planned 任务已经具备创建、去重和本地执行器消费能力，但前端或调度器在执行前还缺少统一检查入口。为了避免把不可执行、已完成或缺少确认的任务交给执行器，本次增加只读执行前检查接口。
+
+### 2. 本次修改
+
+1. 新增 `/v1/job-execution-check?job_id=...`，用于判断单个任务是否可被 `scripts/run_planned_job.py` 消费。
+2. `ApiRepository.job_execution_check()` 返回 `executable`、`blockers`、`warnings` 和建议执行命令。
+3. 检查规则要求任务必须是 `weekly_report` 且状态为 `planned`。
+4. 如果 `dry_run=false` 但没有 `confirm_delivery=true`，执行前检查会阻止执行。
+5. 补充 API 和 FastAPI 路由测试，覆盖 planned、历史完成任务和缺失任务。
+
+### 3. 设计边界
+
+本次只做执行前检查，不在 HTTP 请求中执行 job runner，不暴露任何密钥配置状态。真实执行仍通过脚本、GitHub Actions 或后续受控 worker 完成。
+
 ## 2026-05-15 追加：planned 任务创建增加重复防护
 
 ### 1. 开发目的
