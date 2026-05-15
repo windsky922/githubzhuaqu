@@ -2132,6 +2132,32 @@ def _jobs_dashboard_content() -> str:
       color: var(--muted);
       font-size: 13px;
     }
+    .row-actions {
+      display: grid;
+      gap: 6px;
+      min-width: 150px;
+    }
+    .secondary-button {
+      width: fit-content;
+      height: 30px;
+      padding: 0 8px;
+      border-color: var(--line);
+      background: var(--panel);
+      color: var(--accent);
+      font-size: 12px;
+    }
+    .precheck-result {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+    }
+    .precheck-result.ok {
+      color: var(--ok);
+    }
+    .precheck-result.blocked {
+      color: var(--bad);
+    }
     .summary {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -2344,6 +2370,11 @@ def _jobs_dashboard_content() -> str:
     function bind() {
       Object.values(controls).forEach(control => control.addEventListener("input", render));
       Object.values(controls).forEach(control => control.addEventListener("change", render));
+      rows.addEventListener("click", event => {
+        const button = event.target.closest("[data-precheck]");
+        if (!button) return;
+        runExecutionCheck(button);
+      });
     }
 
     function setupCreateTask() {
@@ -2402,6 +2433,44 @@ def _jobs_dashboard_content() -> str:
     function loadJobsJson() {
       return fetch("jobs.json", { cache: "no-store" })
         .then(jsonOrThrow);
+    }
+
+    function runExecutionCheck(button) {
+      const jobId = button.dataset.precheck || "";
+      const target = document.getElementById(button.dataset.target || "");
+      if (!target) return;
+      if (!shouldUseApi()) {
+        target.className = "precheck-result blocked";
+        target.textContent = "执行前检查需要本地后端或 api=1 模式。";
+        return;
+      }
+      button.disabled = true;
+      target.className = "precheck-result";
+      target.textContent = "检查中...";
+      fetch(`/v1/job-execution-check?job_id=${encodeURIComponent(jobId)}`, { cache: "no-store" })
+        .then(jsonOrThrow)
+        .then(data => {
+          target.className = `precheck-result ${data.executable ? "ok" : "blocked"}`;
+          target.innerHTML = precheckHtml(data);
+        })
+        .catch(error => {
+          target.className = "precheck-result blocked";
+          target.textContent = `检查失败：${error.message || error}`;
+        })
+        .finally(() => {
+          button.disabled = false;
+        });
+    }
+
+    function precheckHtml(data) {
+      if (!data || !data.found) return "未找到任务。";
+      const lines = [
+        data.executable ? "可执行" : "不可执行",
+        ...(data.blockers || []).map(item => `阻止：${item}`),
+        ...(data.warnings || []).map(item => `提示：${item}`),
+      ];
+      if (data.next_command) lines.push(`命令：${data.next_command}`);
+      return lines.map(line => `<div>${escapeHtml(line)}</div>`).join("");
     }
 
     function shouldUseApi() {
@@ -2463,6 +2532,11 @@ def _jobs_dashboard_content() -> str:
       const request = job.request || {};
       const result = job.result || {};
       const report = result.report_url || job.report_url || "";
+      const jobId = job.job_id || "";
+      const precheckId = `precheck-${safeId(jobId)}`;
+      const precheckDisabled = shouldUseApi() ? "" : " disabled";
+      const precheckTitle = shouldUseApi() ? "执行前检查" : "仅本地后端或 api=1 模式可用";
+      const errorText = escapeHtml(shortText(job.error || result.error || ""));
       const resultText = [
         result.selected_count !== undefined ? `入选 ${number(result.selected_count)}` : "",
         result.collected_count !== undefined ? `候选 ${number(result.collected_count)}` : "",
@@ -2477,7 +2551,13 @@ def _jobs_dashboard_content() -> str:
         <td>${escapeHtml(job.submitted_at || "-")}</td>
         <td>${escapeHtml(job.finished_at || "-")}</td>
         <td>${resultText}</td>
-        <td>${escapeHtml(shortText(job.error || result.error || ""))}</td>
+        <td>
+          <div class="row-actions">
+            <div>${errorText || "-"}</div>
+            <button class="secondary-button" type="button" title="${escapeAttribute(precheckTitle)}" data-precheck="${escapeAttribute(jobId)}" data-target="${escapeAttribute(precheckId)}"${precheckDisabled}>执行前检查</button>
+            <div id="${escapeAttribute(precheckId)}" class="precheck-result" aria-live="polite"></div>
+          </div>
+        </td>
       </tr>`;
     }
 
@@ -2509,6 +2589,10 @@ def _jobs_dashboard_content() -> str:
     function shortText(value) {
       const text = String(value || "");
       return text.length > 160 ? `${text.slice(0, 157)}...` : text;
+    }
+
+    function safeId(value) {
+      return String(value || "unknown").replace(/[^a-zA-Z0-9_-]/g, "-") || "unknown";
     }
 
     function escapeHtml(value) {

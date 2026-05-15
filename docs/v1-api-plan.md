@@ -174,6 +174,8 @@
 
 任务状态页还提供一个最小 planned 任务创建表单。该表单只在本地后端或 `api=1` 模式下启用，提交时调用 `/v1/runs/trigger`，并固定写入 `trigger_source=jobs_page` 和 `requested_by=local-ui`。表单不会直接执行任务，只会创建 planned 记录；后续仍由 job runner 或 GitHub Actions 消费任务。
 
+任务状态页的每条任务还提供“执行前检查”按钮。该按钮只在本地后端或 `api=1` 模式下调用 `/v1/job-execution-check?job_id=...`，用于展示任务是否可执行、阻止原因、提示信息和建议执行命令；页面不会直接运行任务。
+
 ### 本地任务执行器
 
 ```bash
