@@ -1,7 +1,319 @@
 {
   "schema_version": 1,
-  "count": 90,
+  "count": 100,
   "projects": [
+    {
+      "run_date": "2026-05-15",
+      "full_name": "CloakHQ/CloakBrowser",
+      "html_url": "https://github.com/CloakHQ/CloakBrowser",
+      "description": "Stealth Chromium that passes every bot detection test. Drop-in Playwright replacement with source-level fingerprint patches. 30/30 tests passed.",
+      "readme_summary": "Stealth Chromium that passes every bot detection test. Not a patched config. Not a JS injection.",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 11179,
+      "forks_count": 835,
+      "star_growth": 0,
+      "score": 0.5439,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 2,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 2 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 11179，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-05-15.html"
+    },
+    {
+      "run_date": "2026-05-15",
+      "full_name": "bytedance/UI-TARS-desktop",
+      "html_url": "https://github.com/bytedance/UI-TARS-desktop",
+      "description": "The Open-Source Multimodal AI Agent Stack: Connecting Cutting-Edge AI Models and Agent Infra",
+      "readme_summary": "English | 简体中文 TARS \\* is a Multimodal AI Agent stack, currently shipping two projects: Agent TARS and UI-TARS-desktop: Agent TARS UI-TARS-desktop Agent TARS is a general multimodal AI Agent stack, it brings the power of GUI Agent and Vision into your terminal, computer, browser and product.",
+      "category": "AI Agent",
+      "language": "TypeScript",
+      "stargazers_count": 33962,
+      "forks_count": 3374,
+      "star_growth": 1441,
+      "score": 0.558,
+      "sources": [
+        "github_search",
+        "github_trending"
+      ],
+      "trending_rank": 3,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 3 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 1441，近期热度上升。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 33962，具备一定社区关注度。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-05-15.html"
+    },
+    {
+      "run_date": "2026-05-15",
+      "full_name": "Hmbown/DeepSeek-TUI",
+      "html_url": "https://github.com/Hmbown/DeepSeek-TUI",
+      "description": "Coding agent for DeepSeek models that runs in your terminal",
+      "readme_summary": "Terminal coding agent for DeepSeek V4. It runs from the deepseek command, streams reasoning blocks, edits local workspaces with approval gates, and includes an auto mode that chooses both model and thinking level per turn.",
+      "category": "AI Agent",
+      "language": "Rust",
+      "stargazers_count": 29272,
+      "forks_count": 2442,
+      "star_growth": 4722,
+      "score": 0.6573,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 4,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 4 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 4722，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-05-15.html"
+    },
+    {
+      "run_date": "2026-05-15",
+      "full_name": "rohitg00/agentmemory",
+      "html_url": "https://github.com/rohitg00/agentmemory",
+      "description": "#1 Persistent memory for AI coding agents based on real-world benchmarks",
+      "readme_summary": "Your coding agent remembers everything. No more re-explaining. Built on iii engine Persistent memory for Claude Code, Cursor, Gemini CLI, Codex CLI, Hermes, OpenClaw, pi, OpenCode, and any MCP client.",
+      "category": "AI Agent",
+      "language": "TypeScript",
+      "stargazers_count": 9165,
+      "forks_count": 761,
+      "star_growth": 0,
+      "score": 0.6164,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 5,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 5 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 9165，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-05-15.html"
+    },
+    {
+      "run_date": "2026-05-15",
+      "full_name": "yikart/AiToEarn",
+      "html_url": "https://github.com/yikart/AiToEarn",
+      "description": "Let's use AI to Earn!",
+      "readme_summary": "简体中文 | English | 日本語 Monetize · Publish · Engage · Create —— 一站式平台。** AiToEarn 通过 **AI Agent自动化**，帮助 OPC（一人公司）、创作者、品牌与企业在全球主流平台上构建、分发并变现内容。 支持渠道： 抖音、小红书（Rednote）、快手、哔哩哔哩、视频号、微信公众号、TikTok、YouTube、Facebook、Instagram、Threads、Twitter（X）、Pinterest、LinkedIn 💡 **方式 ②③④ 都需要先获取 API Key**，请先看 如何获取 API Key。",
+      "category": "Other",
+      "language": "TypeScript",
+      "stargazers_count": 13863,
+      "forks_count": 2346,
+      "star_growth": 0,
+      "score": 0.3809,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 6,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 6 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 13863，具备一定社区关注度。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库简介较短，项目定位信息有限。"
+      ],
+      "quality_score": 92,
+      "quality_level": "high",
+      "report_url": "weekly/2026-05-15.html"
+    },
+    {
+      "run_date": "2026-05-15",
+      "full_name": "decolua/9router",
+      "html_url": "https://github.com/decolua/9router",
+      "description": "Unlimited FREE AI coding. Connect Claude Code, Codex, Cursor, Cline, Copilot, Antigravity to FREE Claude/GPT/Gemini via 40+ providers. Auto-fallback, RTK -40% tokens, never hit limits.",
+      "readme_summary": "Never stop coding. Use in your CLI tool:** That's it!** Start coding with FREE AI models. Alternative: run from source (this repository):** This repository package is private (9router-app), so source/Docker execution is the expected local development path.",
+      "category": "AI Agent",
+      "language": "JavaScript",
+      "stargazers_count": 10374,
+      "forks_count": 1585,
+      "star_growth": 2749,
+      "score": 0.5425,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 7,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 7 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 2749，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-05-15.html"
+    },
+    {
+      "run_date": "2026-05-15",
+      "full_name": "HKUDS/AI-Trader",
+      "html_url": "https://github.com/HKUDS/AI-Trader",
+      "description": "\"AI-Trader: 100% Fully-Automated Agent-Native Trading\"  ",
+      "readme_summary": "Just like humans have their trading platforms, **AI agents need their own**. AI-Trader** is an **Agent-Native Trading Platform**: Exchange ideas and sharpen trading skills through AI agents! Any AI agent joins the **AI-Trader** platform in seconds -- Simply send this message to your agent.",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 17259,
+      "forks_count": 2661,
+      "star_growth": 0,
+      "score": 0.3806,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 8,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 8 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 17259，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [
+        "未识别到许可证，复用代码前需要人工确认授权。"
+      ],
+      "security_score": 85,
+      "security_level": "low",
+      "quality_flags": [
+        "许可证元数据缺失，复用代码前需要确认授权。",
+        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+      ],
+      "quality_score": 80,
+      "quality_level": "high",
+      "report_url": "weekly/2026-05-15.html"
+    },
+    {
+      "run_date": "2026-05-15",
+      "full_name": "mattpocock/skills",
+      "html_url": "https://github.com/mattpocock/skills",
+      "description": "Skills for Real Engineers. Straight from my .claude directory.",
+      "readme_summary": "My agent skills that I use every day to do real engineering - not vibe coding. Developing real applications is hard. Approaches like GSD, BMAD, and Spec-Kit try to help by owning the process.",
+      "category": "LLM Tooling",
+      "language": "Shell",
+      "stargazers_count": 83001,
+      "forks_count": 7183,
+      "star_growth": 13022,
+      "score": 0.456,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 11,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 11 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 13022，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "当前累计 Star 83001，具备一定社区关注度。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+      ],
+      "quality_score": 92,
+      "quality_level": "high",
+      "report_url": "weekly/2026-05-15.html"
+    },
+    {
+      "run_date": "2026-05-15",
+      "full_name": "addyosmani/agent-skills",
+      "html_url": "https://github.com/addyosmani/agent-skills",
+      "description": "Production-grade engineering skills for AI coding agents.",
+      "readme_summary": "Production-grade engineering skills for AI coding agents.** Skills encode the workflows, quality gates, and best practices that senior engineers use when building software. These ones are packaged so AI agents follow them consistently across every phase of development.",
+      "category": "AI Agent",
+      "language": "Shell",
+      "stargazers_count": 41693,
+      "forks_count": 4578,
+      "star_growth": 2744,
+      "score": 0.4094,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 9,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 9 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 2744，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-05-15.html"
+    },
+    {
+      "run_date": "2026-05-15",
+      "full_name": "NousResearch/hermes-agent",
+      "html_url": "https://github.com/NousResearch/hermes-agent",
+      "description": "The agent that grows with you",
+      "readme_summary": "The self-improving AI agent built by Nous Research.** It's the only agent with a built-in learning loop — it creates skills from experience, improves them during use, nudges itself to persist knowledge, searches its own past conversations, and builds a deepening model of who you are across sessions.",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 150783,
+      "forks_count": 23890,
+      "star_growth": 7525,
+      "score": 0.3888,
+      "sources": [
+        "github_search"
+      ],
+      "trending_rank": 0,
+      "selection_reasons": [
+        "较上次记录新增 Star 7525，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 150783，具备一定社区关注度。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库简介较短，项目定位信息有限。"
+      ],
+      "quality_score": 92,
+      "quality_level": "high",
+      "report_url": "weekly/2026-05-15.html"
+    },
     {
       "run_date": "2026-05-11",
       "full_name": "Hmbown/DeepSeek-TUI",

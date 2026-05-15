@@ -61,6 +61,16 @@
 
 从 SQLite 派生索引的 `jobs` 表读取任务视图。当前每次历史周报运行会同步为一个 `weekly_report` 任务，手动触发预览会写入一个 `preview:*` 计划任务。
 
+查询参数：
+
+| 参数 | 说明 |
+|---|---|
+| `status` | 按任务状态筛选，可选 `planned`、`running`、`succeeded`、`failed` |
+| `kind` | 按任务类型筛选，当前为 `weekly_report` |
+| `profile` | 按个性化 profile 精确筛选 |
+| `query` | 按任务编号、日期、来源、报告链接等文本关键词筛选 |
+| `limit` | 返回数量，默认 20，最大 200 |
+
 任务字段：
 
 | 字段 | 说明 |

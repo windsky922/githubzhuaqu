@@ -4,6 +4,16 @@
 
 | 日期 | 项目 | 来源 | Trending 排名 | 方向 | 语言 | Star | 新增 Star | 风险提示 | 链接 |
 |---|---|---|---:|---|---|---:|---:|---:|---|
+| 2026-05-15 | CloakHQ/CloakBrowser | GitHub Trending | 2 | AI Agent | Python | 11179 | 0 | 0 | [https://github.com/CloakHQ/CloakBrowser](https://github.com/CloakHQ/CloakBrowser) |
+| 2026-05-15 | bytedance/UI-TARS-desktop | GitHub Search + GitHub Trending | 3 | AI Agent | TypeScript | 33962 | 1441 | 0 | [https://github.com/bytedance/UI-TARS-desktop](https://github.com/bytedance/UI-TARS-desktop) |
+| 2026-05-15 | Hmbown/DeepSeek-TUI | GitHub Trending | 4 | AI Agent | Rust | 29272 | 4722 | 0 | [https://github.com/Hmbown/DeepSeek-TUI](https://github.com/Hmbown/DeepSeek-TUI) |
+| 2026-05-15 | rohitg00/agentmemory | GitHub Trending | 5 | AI Agent | TypeScript | 9165 | 0 | 0 | [https://github.com/rohitg00/agentmemory](https://github.com/rohitg00/agentmemory) |
+| 2026-05-15 | yikart/AiToEarn | GitHub Trending | 6 | Other | TypeScript | 13863 | 0 | 0 | [https://github.com/yikart/AiToEarn](https://github.com/yikart/AiToEarn) |
+| 2026-05-15 | decolua/9router | GitHub Trending | 7 | AI Agent | JavaScript | 10374 | 2749 | 0 | [https://github.com/decolua/9router](https://github.com/decolua/9router) |
+| 2026-05-15 | HKUDS/AI-Trader | GitHub Trending | 8 | AI Agent | Python | 17259 | 0 | 1 | [https://github.com/HKUDS/AI-Trader](https://github.com/HKUDS/AI-Trader) |
+| 2026-05-15 | mattpocock/skills | GitHub Trending | 11 | LLM Tooling | Shell | 83001 | 13022 | 0 | [https://github.com/mattpocock/skills](https://github.com/mattpocock/skills) |
+| 2026-05-15 | addyosmani/agent-skills | GitHub Trending | 9 | AI Agent | Shell | 41693 | 2744 | 0 | [https://github.com/addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) |
+| 2026-05-15 | NousResearch/hermes-agent | GitHub Search | - | AI Agent | Python | 150783 | 7525 | 0 | [https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) |
 | 2026-05-11 | Hmbown/DeepSeek-TUI | GitHub Trending | 1 | AI Agent | Rust | 24550 | 63 | 0 | [https://github.com/Hmbown/DeepSeek-TUI](https://github.com/Hmbown/DeepSeek-TUI) |
 | 2026-05-11 | ruvnet/ruflo | GitHub Trending | 3 | AI Agent | TypeScript | 48665 | 21 | 0 | [https://github.com/ruvnet/ruflo](https://github.com/ruvnet/ruflo) |
 | 2026-05-11 | docusealco/docuseal | GitHub Trending | 4 | Other | Ruby | 16286 | 8 | 0 | [https://github.com/docusealco/docuseal](https://github.com/docusealco/docuseal) |

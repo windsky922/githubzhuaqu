@@ -1,0 +1,422 @@
+{
+  "schema_version": 1,
+  "count": 13,
+  "jobs": [
+    {
+      "job_id": "preview:5c09373a9ddc",
+      "kind": "weekly_report",
+      "status": "succeeded",
+      "run_date": "2026-05-15",
+      "submitted_at": "2026-05-15T05:52:17.712762Z",
+      "started_at": "2026-05-15T05:52:17.806380Z",
+      "finished_at": "2026-05-15T05:54:15.549557Z",
+      "request": {
+        "profile": "java,python,agent_development,developer_tools",
+        "sources": [],
+        "dry_run": true,
+        "days_back": 7
+      },
+      "result": {
+        "run_date": "2026-05-15",
+        "status": "success",
+        "selected_count": 10,
+        "collected_count": 315,
+        "kimi_used": true,
+        "fallback_used": false,
+        "telegram_sent": false,
+        "telegram_error": "Telegram send skipped",
+        "report_path": "reports/2026-05-15.md",
+        "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-15.html",
+        "sqlite_index_path": "data/github_weekly.sqlite",
+        "sqlite_error": "",
+        "error": ""
+      },
+      "error": "",
+      "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-15.html"
+    },
+    {
+      "job_id": "run:2026-05-15",
+      "kind": "weekly_report",
+      "status": "succeeded",
+      "run_date": "2026-05-15",
+      "submitted_at": "2026-05-15",
+      "started_at": "",
+      "finished_at": "2026-05-15",
+      "request": {
+        "profile": "",
+        "sources": [],
+        "dry_run": false,
+        "days_back": 0
+      },
+      "result": {
+        "run_date": "",
+        "status": "",
+        "selected_count": 10,
+        "collected_count": 315,
+        "kimi_used": true,
+        "fallback_used": false,
+        "telegram_sent": false,
+        "telegram_error": "",
+        "report_path": "reports/2026-05-15.md",
+        "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-15.html",
+        "sqlite_index_path": "",
+        "sqlite_error": "",
+        "error": ""
+      },
+      "error": "",
+      "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-15.html"
+    },
+    {
+      "job_id": "preview:64ce5ee3fc6d",
+      "kind": "weekly_report",
+      "status": "succeeded",
+      "run_date": "2026-05-11",
+      "submitted_at": "2026-05-11T07:55:38.385719Z",
+      "started_at": "2026-05-11T07:55:38.516941Z",
+      "finished_at": "2026-05-11T07:57:52.249776Z",
+      "request": {
+        "profile": "java,python,agent_development,developer_tools",
+        "sources": [],
+        "dry_run": true,
+        "days_back": 7
+      },
+      "result": {
+        "run_date": "2026-05-11",
+        "status": "success",
+        "selected_count": 10,
+        "collected_count": 319,
+        "kimi_used": true,
+        "fallback_used": false,
+        "telegram_sent": false,
+        "telegram_error": "Telegram send skipped",
+        "report_path": "reports/2026-05-11.md",
+        "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-11.html",
+        "sqlite_index_path": "data/github_weekly.sqlite",
+        "sqlite_error": "",
+        "error": ""
+      },
+      "error": "",
+      "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-11.html"
+    },
+    {
+      "job_id": "run:2026-05-11",
+      "kind": "weekly_report",
+      "status": "succeeded",
+      "run_date": "2026-05-11",
+      "submitted_at": "2026-05-11",
+      "started_at": "",
+      "finished_at": "2026-05-11",
+      "request": {
+        "profile": "",
+        "sources": [],
+        "dry_run": false,
+        "days_back": 0
+      },
+      "result": {
+        "run_date": "",
+        "status": "",
+        "selected_count": 10,
+        "collected_count": 319,
+        "kimi_used": true,
+        "fallback_used": false,
+        "telegram_sent": true,
+        "telegram_error": "",
+        "report_path": "reports/2026-05-11.md",
+        "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-11.html",
+        "sqlite_index_path": "",
+        "sqlite_error": "",
+        "error": ""
+      },
+      "error": "",
+      "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-11.html"
+    },
+    {
+      "job_id": "run:2026-05-09",
+      "kind": "weekly_report",
+      "status": "succeeded",
+      "run_date": "2026-05-09",
+      "submitted_at": "2026-05-09",
+      "started_at": "",
+      "finished_at": "2026-05-09",
+      "request": {
+        "profile": "",
+        "sources": [],
+        "dry_run": false,
+        "days_back": 0
+      },
+      "result": {
+        "run_date": "",
+        "status": "",
+        "selected_count": 10,
+        "collected_count": 316,
+        "kimi_used": true,
+        "fallback_used": false,
+        "telegram_sent": true,
+        "telegram_error": "",
+        "report_path": "reports/2026-05-09.md",
+        "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-09.html",
+        "sqlite_index_path": "",
+        "sqlite_error": "",
+        "error": ""
+      },
+      "error": "",
+      "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-09.html"
+    },
+    {
+      "job_id": "run:2026-05-07",
+      "kind": "weekly_report",
+      "status": "succeeded",
+      "run_date": "2026-05-07",
+      "submitted_at": "2026-05-07",
+      "started_at": "",
+      "finished_at": "2026-05-07",
+      "request": {
+        "profile": "",
+        "sources": [],
+        "dry_run": false,
+        "days_back": 0
+      },
+      "result": {
+        "run_date": "",
+        "status": "",
+        "selected_count": 10,
+        "collected_count": 315,
+        "kimi_used": true,
+        "fallback_used": false,
+        "telegram_sent": true,
+        "telegram_error": "",
+        "report_path": "reports/2026-05-07.md",
+        "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-07.html",
+        "sqlite_index_path": "",
+        "sqlite_error": "",
+        "error": ""
+      },
+      "error": "",
+      "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-07.html"
+    },
+    {
+      "job_id": "run:2026-05-06",
+      "kind": "weekly_report",
+      "status": "succeeded",
+      "run_date": "2026-05-06",
+      "submitted_at": "2026-05-06",
+      "started_at": "",
+      "finished_at": "2026-05-06",
+      "request": {
+        "profile": "",
+        "sources": [],
+        "dry_run": false,
+        "days_back": 0
+      },
+      "result": {
+        "run_date": "",
+        "status": "",
+        "selected_count": 10,
+        "collected_count": 315,
+        "kimi_used": true,
+        "fallback_used": false,
+        "telegram_sent": true,
+        "telegram_error": "",
+        "report_path": "reports/2026-05-06.md",
+        "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-06.html",
+        "sqlite_index_path": "",
+        "sqlite_error": "",
+        "error": ""
+      },
+      "error": "",
+      "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-06.html"
+    },
+    {
+      "job_id": "run:2026-05-05",
+      "kind": "weekly_report",
+      "status": "succeeded",
+      "run_date": "2026-05-05",
+      "submitted_at": "2026-05-05",
+      "started_at": "",
+      "finished_at": "2026-05-05",
+      "request": {
+        "profile": "",
+        "sources": [],
+        "dry_run": false,
+        "days_back": 0
+      },
+      "result": {
+        "run_date": "",
+        "status": "",
+        "selected_count": 10,
+        "collected_count": 311,
+        "kimi_used": true,
+        "fallback_used": false,
+        "telegram_sent": true,
+        "telegram_error": "",
+        "report_path": "reports/2026-05-05.md",
+        "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-05.html",
+        "sqlite_index_path": "",
+        "sqlite_error": "",
+        "error": ""
+      },
+      "error": "",
+      "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-05.html"
+    },
+    {
+      "job_id": "run:2026-05-04",
+      "kind": "weekly_report",
+      "status": "succeeded",
+      "run_date": "2026-05-04",
+      "submitted_at": "2026-05-04",
+      "started_at": "",
+      "finished_at": "2026-05-04",
+      "request": {
+        "profile": "",
+        "sources": [],
+        "dry_run": false,
+        "days_back": 0
+      },
+      "result": {
+        "run_date": "",
+        "status": "",
+        "selected_count": 10,
+        "collected_count": 312,
+        "kimi_used": true,
+        "fallback_used": false,
+        "telegram_sent": true,
+        "telegram_error": "",
+        "report_path": "reports/2026-05-04.md",
+        "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-04.html",
+        "sqlite_index_path": "",
+        "sqlite_error": "",
+        "error": ""
+      },
+      "error": "",
+      "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-04.html"
+    },
+    {
+      "job_id": "run:2026-05-03",
+      "kind": "weekly_report",
+      "status": "succeeded",
+      "run_date": "2026-05-03",
+      "submitted_at": "2026-05-03",
+      "started_at": "",
+      "finished_at": "2026-05-03",
+      "request": {
+        "profile": "",
+        "sources": [],
+        "dry_run": false,
+        "days_back": 0
+      },
+      "result": {
+        "run_date": "",
+        "status": "",
+        "selected_count": 10,
+        "collected_count": 311,
+        "kimi_used": true,
+        "fallback_used": false,
+        "telegram_sent": true,
+        "telegram_error": "",
+        "report_path": "reports/2026-05-03.md",
+        "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-03.html",
+        "sqlite_index_path": "",
+        "sqlite_error": "",
+        "error": ""
+      },
+      "error": "",
+      "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-03.html"
+    },
+    {
+      "job_id": "run:2026-04-30",
+      "kind": "weekly_report",
+      "status": "succeeded",
+      "run_date": "2026-04-30",
+      "submitted_at": "2026-04-30",
+      "started_at": "",
+      "finished_at": "2026-04-30",
+      "request": {
+        "profile": "",
+        "sources": [],
+        "dry_run": false,
+        "days_back": 0
+      },
+      "result": {
+        "run_date": "",
+        "status": "",
+        "selected_count": 10,
+        "collected_count": 312,
+        "kimi_used": true,
+        "fallback_used": false,
+        "telegram_sent": true,
+        "telegram_error": "",
+        "report_path": "reports/2026-04-30.md",
+        "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-04-30.html",
+        "sqlite_index_path": "",
+        "sqlite_error": "",
+        "error": ""
+      },
+      "error": "",
+      "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-04-30.html"
+    },
+    {
+      "job_id": "run:2026-04-29",
+      "kind": "weekly_report",
+      "status": "failed",
+      "run_date": "2026-04-29",
+      "submitted_at": "2026-04-29",
+      "started_at": "",
+      "finished_at": "2026-04-29",
+      "request": {
+        "profile": "",
+        "sources": [],
+        "dry_run": false,
+        "days_back": 0
+      },
+      "result": {
+        "run_date": "",
+        "status": "",
+        "selected_count": 10,
+        "collected_count": 223,
+        "kimi_used": false,
+        "fallback_used": false,
+        "telegram_sent": true,
+        "telegram_error": "",
+        "report_path": "reports/2026-04-29.md",
+        "report_url": "",
+        "sqlite_index_path": "",
+        "sqlite_error": "",
+        "error": ""
+      },
+      "error": "Kimi 周报质量检查失败：报告缺少完整 Markdown 链接：https://github.com/Alishahryar1/free-claude-code；报告缺少完整 Markdown 链接：https://github.com/huggingface/ml-intern；报告缺少完整 Markdown 链接：https://github.com/mattpocock/skills；报告缺少完整 Markdown 链接：https://github.com/zill",
+      "report_url": ""
+    },
+    {
+      "job_id": "run:2026-04-28",
+      "kind": "weekly_report",
+      "status": "failed",
+      "run_date": "2026-04-28",
+      "submitted_at": "2026-04-28",
+      "started_at": "",
+      "finished_at": "2026-04-28",
+      "request": {
+        "profile": "",
+        "sources": [],
+        "dry_run": false,
+        "days_back": 0
+      },
+      "result": {
+        "run_date": "",
+        "status": "",
+        "selected_count": 10,
+        "collected_count": 240,
+        "kimi_used": false,
+        "fallback_used": false,
+        "telegram_sent": false,
+        "telegram_error": "",
+        "report_path": "reports/2026-04-28.md",
+        "report_url": "",
+        "sqlite_index_path": "",
+        "sqlite_error": "",
+        "error": ""
+      },
+      "error": "Kimi API 未配置",
+      "report_url": ""
+    }
+  ]
+}
