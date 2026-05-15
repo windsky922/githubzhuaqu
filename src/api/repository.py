@@ -136,12 +136,31 @@ class ApiRepository:
     def runs(self) -> dict[str, Any]:
         return _read_json_object(self.root / "docs" / "runs.json", {"schema_version": 1, "count": 0, "runs": []})
 
-    def jobs(self, limit: int = 20) -> dict[str, Any]:
+    def jobs(
+        self,
+        *,
+        status: str | None = None,
+        kind: str | None = None,
+        profile: str | None = None,
+        query: str | None = None,
+        limit: int = 20,
+    ) -> dict[str, Any]:
         self.ensure_sqlite_index()
-        jobs = self._jobs_from_sqlite(limit)
+        jobs = self._jobs_from_sqlite(max(limit, 500))
         if not jobs:
             runs = self.runs().get("runs") or []
-            jobs = [_job_from_run(run) for run in runs[:limit]]
+            jobs = [_job_from_run(run) for run in runs[: max(limit, 500)]]
+        jobs = [
+            job
+            for job in jobs
+            if _job_matches(
+                job,
+                status=_blank_to_none(status),
+                kind=_blank_to_none(kind),
+                profile=_blank_to_none(profile),
+                query=_blank_to_none(query),
+            )
+        ][:limit]
         return {
             "schema_version": 1,
             "count": len(jobs),
@@ -372,6 +391,44 @@ def _job_from_row(row: Any) -> dict[str, Any]:
         "telegram_sent": bool(result.get("telegram_sent")),
         "report_url": result.get("report_url") or result.get("telegram_report_url") or payload.get("report_url") or "",
     }
+
+
+def _job_matches(
+    job: dict[str, Any],
+    *,
+    status: str | None = None,
+    kind: str | None = None,
+    profile: str | None = None,
+    query: str | None = None,
+) -> bool:
+    if status and str(job.get("status") or "") != status:
+        return False
+    if kind and str(job.get("kind") or "") != kind:
+        return False
+
+    request = job.get("request") if isinstance(job.get("request"), dict) else {}
+    result = job.get("result") if isinstance(job.get("result"), dict) else {}
+    if profile and str(request.get("profile") or "").lower() != profile.lower():
+        return False
+    if query and query.lower() not in _job_search_text(job, request, result):
+        return False
+    return True
+
+
+def _job_search_text(job: dict[str, Any], request: dict[str, Any], result: dict[str, Any]) -> str:
+    values = [
+        job.get("job_id"),
+        job.get("run_date"),
+        job.get("kind"),
+        job.get("status"),
+        job.get("error"),
+        job.get("report_url"),
+        request.get("profile"),
+        result.get("report_url"),
+        result.get("telegram_report_url"),
+    ]
+    values.extend(request.get("sources") or [])
+    return " ".join(str(value or "") for value in values).lower()
 
 
 def _json_object(text: str) -> dict[str, Any]:

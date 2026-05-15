@@ -101,8 +101,14 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
         return repository.runs()
 
     @app.get("/v1/jobs")
-    def v1_jobs(limit: int = Query(default=20, ge=1, le=200)) -> dict[str, Any]:
-        return repository.jobs(limit=limit)
+    def v1_jobs(
+        status: str | None = Query(default=None, pattern="^(planned|running|succeeded|failed)?$"),
+        kind: str | None = Query(default=None, pattern="^(weekly_report)?$"),
+        profile: str | None = None,
+        query: str | None = None,
+        limit: int = Query(default=20, ge=1, le=200),
+    ) -> dict[str, Any]:
+        return repository.jobs(status=status, kind=kind, profile=profile, query=query, limit=limit)
 
     @app.get("/v1/jobs/{job_id:path}")
     def v1_job_detail(job_id: str) -> dict[str, Any]:

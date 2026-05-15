@@ -31,6 +31,8 @@ class ApiRepositoryTest(unittest.TestCase):
                 {"profile": "agent_development", "sources": ["github_trending"], "dry_run": True, "days_back": 3}
             )
             preview_detail = repository.job_detail(trigger["job_id"])
+            planned_jobs = repository.jobs(status="planned", profile="agent_development", query="github_trending")
+            succeeded_jobs = repository.jobs(status="succeeded", kind="weekly_report", query="2026-05-09")
 
             self.assertEqual(projects["schema_version"], 1)
             self.assertGreaterEqual(projects["count"], 1)
@@ -55,6 +57,10 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(trigger["request"]["days_back"], 3)
             self.assertTrue(preview_detail["found"])
             self.assertEqual(preview_detail["job"]["status"], "planned")
+            self.assertEqual(planned_jobs["count"], 1)
+            self.assertEqual(planned_jobs["jobs"][0]["job_id"], trigger["job_id"])
+            self.assertEqual(succeeded_jobs["count"], 1)
+            self.assertEqual(succeeded_jobs["jobs"][0]["job_id"], "run:2026-05-09")
         finally:
             shutil.rmtree(root, ignore_errors=True)
 
@@ -75,10 +81,14 @@ class ApiRepositoryTest(unittest.TestCase):
             latest = client.get("/api/weekly/latest")
             v1_health = client.get("/v1/health")
             v1_projects = client.get("/v1/projects", params={"profile": "agent_development", "limit": 5})
-            v1_jobs = client.get("/v1/jobs")
+            v1_jobs = client.get("/v1/jobs", params={"status": "succeeded", "kind": "weekly_report", "limit": 5})
             v1_trigger = client.post(
                 "/v1/runs/trigger",
                 json={"profile": "agent_development", "sources": ["github_trending"], "dry_run": True, "days_back": 3},
+            )
+            v1_planned_jobs = client.get(
+                "/v1/jobs",
+                params={"status": "planned", "profile": "agent_development", "query": "github_trending"},
             )
 
             self.assertEqual(health.status_code, 200)
@@ -89,12 +99,14 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(v1_projects.status_code, 200)
             self.assertEqual(v1_jobs.status_code, 200)
             self.assertEqual(v1_trigger.status_code, 202)
+            self.assertEqual(v1_planned_jobs.status_code, 200)
             self.assertEqual(projects.json()["projects"][0]["full_name"], "owner/agent")
             self.assertEqual(detail.json()["history_count"], 2)
             self.assertEqual(latest.json()["run_date"], "2026-05-09")
             self.assertEqual(v1_projects.json()["projects"][0]["full_name"], "owner/agent")
             self.assertEqual(v1_jobs.json()["jobs"][0]["job_id"], "run:2026-05-09")
             self.assertFalse(v1_trigger.json()["execution_supported"])
+            self.assertEqual(v1_planned_jobs.json()["count"], 1)
         finally:
             shutil.rmtree(root, ignore_errors=True)
 
