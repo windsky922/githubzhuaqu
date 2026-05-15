@@ -119,6 +119,20 @@
 
 设计原因：GitHub 采集、LLM 生成、页面构建和推送都是长任务，不能直接塞进 HTTP 请求生命周期。当前先持久化任务计划，再由本地任务执行器把任务从 `planned` 推进到 `running`、`succeeded` 或 `failed`。
 
+### 任务状态页接入方式
+
+`docs/jobs.html` 在本地后端环境或 URL 带 `api=1` 时优先读取 `/v1/jobs?limit=200`，读取失败时回退到 `jobs.json`。GitHub Pages 上默认使用静态 `jobs.json`，避免公开页面依赖常驻后端。
+
+页面筛选参数和 `/v1/jobs` 保持同一语义：
+
+| 页面参数 | API 参数 | 说明 |
+|---|---|---|
+| `status` | `status` | 任务状态 |
+| `kind` | `kind` | 任务类型 |
+| `profile` | `profile` | 个性化方向，精确匹配 |
+| `q` | `query` | 关键词搜索，兼容旧的 `query` |
+| `api` | 无 | 页面数据源开关，`1` 强制 API，`0` 强制静态 JSON |
+
 ### 本地任务执行器
 
 ```bash

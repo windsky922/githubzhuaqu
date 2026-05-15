@@ -2244,12 +2244,11 @@ def _jobs_dashboard_content() -> str:
     const rows = document.getElementById("rows");
     const summary = document.getElementById("summary");
 
-    fetch("jobs.json", { cache: "no-store" })
-      .then(response => response.ok ? response.json() : Promise.reject(new Error(`HTTP ${response.status}`)))
+    restoreFilters();
+    bind();
+    loadJobs()
       .then(data => {
         state.jobs = Array.isArray(data.jobs) ? data.jobs : [];
-        restoreFilters();
-        bind();
         render();
       })
       .catch(() => {
@@ -2261,20 +2260,46 @@ def _jobs_dashboard_content() -> str:
       Object.values(controls).forEach(control => control.addEventListener("change", render));
     }
 
+    function loadJobs() {
+      if (!shouldUseApi()) return loadJobsJson();
+      return fetch("/v1/jobs?limit=200", { cache: "no-store" })
+        .then(jsonOrThrow)
+        .catch(loadJobsJson);
+    }
+
+    function loadJobsJson() {
+      return fetch("jobs.json", { cache: "no-store" })
+        .then(jsonOrThrow);
+    }
+
+    function shouldUseApi() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("api") === "1") return true;
+      if (params.get("api") === "0") return false;
+      return ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
+    }
+
+    function jsonOrThrow(response) {
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return response.json();
+    }
+
     function render() {
       const filtered = state.jobs.filter(job => {
         if (controls.status.value && job.status !== controls.status.value) return false;
         if (controls.kind.value && job.kind !== controls.kind.value) return false;
         const profile = String((job.request || {}).profile || "").toLowerCase();
-        if (controls.profile.value.trim() && !profile.includes(controls.profile.value.trim().toLowerCase())) return false;
+        if (controls.profile.value.trim() && profile !== controls.profile.value.trim().toLowerCase()) return false;
         const haystack = [
           job.job_id,
           job.kind,
           job.status,
           job.run_date,
           job.submitted_at,
+          ...((job.request || {}).sources || []),
           profile,
           job.error,
+          job.report_url,
           (job.result || {}).report_url,
           (job.result || {}).report_path,
         ].join(" ").toLowerCase();
@@ -2329,12 +2354,16 @@ def _jobs_dashboard_content() -> str:
       for (const [key, control] of Object.entries(controls)) {
         if (params.has(key)) control.value = params.get(key) || "";
       }
+      if (params.has("q")) controls.query.value = params.get("q") || "";
     }
 
     function updateUrl() {
       const params = new URLSearchParams();
+      const apiMode = new URLSearchParams(window.location.search).get("api");
+      if (apiMode === "1" || apiMode === "0") params.set("api", apiMode);
       for (const [key, control] of Object.entries(controls)) {
-        if (control.value) params.set(key, control.value);
+        if (!control.value) continue;
+        params.set(key === "query" ? "q" : key, control.value);
       }
       const next = `${window.location.pathname}${params.toString() ? "?" + params.toString() : ""}`;
       window.history.replaceState({}, "", next);
