@@ -37,6 +37,16 @@ class ApiRepositoryTest(unittest.TestCase):
                     "requested_by": "unit-test",
                 }
             )
+            duplicate_trigger = repository.trigger_run_preview(
+                {
+                    "profile": "agent_development",
+                    "sources": ["github_trending"],
+                    "dry_run": True,
+                    "days_back": 3,
+                    "trigger_source": "test",
+                    "requested_by": "unit-test-duplicate",
+                }
+            )
             unsafe_trigger = repository.trigger_run_preview({"dry_run": "false", "confirm_delivery": False})
             confirmed_trigger = repository.trigger_run_preview({"dry_run": "false", "confirm_delivery": True})
             preview_detail = repository.job_detail(trigger["job_id"])
@@ -70,6 +80,10 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(trigger["request"]["days_back"], 3)
             self.assertEqual(trigger["request"]["trigger_source"], "test")
             self.assertEqual(trigger["request"]["requested_by"], "unit-test")
+            self.assertEqual(duplicate_trigger["job_id"], trigger["job_id"])
+            self.assertFalse(duplicate_trigger["planned_job_created"])
+            self.assertEqual(duplicate_trigger["duplicate_of"], trigger["job_id"])
+            self.assertIn("未重复创建", " ".join(duplicate_trigger["safety_warnings"]))
             self.assertTrue(unsafe_trigger["request"]["dry_run"])
             self.assertTrue(unsafe_trigger["safety_warnings"])
             self.assertFalse(confirmed_trigger["request"]["dry_run"])

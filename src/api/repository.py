@@ -226,6 +226,27 @@ class ApiRepository:
             "requested_by": requested_by,
             "safety_warnings": safety_warnings,
         }
+        duplicate = self._find_active_duplicate_job(request)
+        if duplicate:
+            duplicate_warnings = [*safety_warnings, "已存在相同 planned/running 任务，未重复创建。"]
+            return {
+                "schema_version": 1,
+                "job_id": duplicate.get("job_id") or "",
+                "status": duplicate.get("status") or "",
+                "submitted_at": duplicate.get("submitted_at") or "",
+                "execution_supported": False,
+                "http_execution_supported": False,
+                "planned_job_created": False,
+                "duplicate_of": duplicate.get("job_id") or "",
+                "execution_path": "scripts/run_planned_job.py",
+                "message": "已存在相同 planned/running 任务，本次请求未重复创建。",
+                "request": request,
+                "safety_warnings": duplicate_warnings,
+                "next_steps": [
+                    "查看已有任务状态，等待 job runner 或 GitHub Actions 消费。",
+                    "如需重新创建，请先让已有任务完成，或调整 profile、来源、回看天数、dry_run 参数。",
+                ],
+            }
         job = {
             "job_id": f"preview:{fingerprint}",
             "kind": "weekly_report",
@@ -304,6 +325,29 @@ class ApiRepository:
         finally:
             connection.close()
         return [_job_from_row(row) for row in rows]
+
+    def _find_active_duplicate_job(self, request: dict[str, Any]) -> dict[str, Any]:
+        self.ensure_sqlite_index()
+        target_key = _job_request_key(request)
+        connection = connect(self.db_path)
+        try:
+            rows = connection.execute(
+                """
+                SELECT job_id, kind, status, run_date, submitted_at, started_at, finished_at,
+                       request_json, result_json, error, payload_json
+                FROM jobs
+                WHERE kind = 'weekly_report' AND status IN ('planned', 'running')
+                ORDER BY COALESCE(NULLIF(submitted_at, ''), run_date) DESC, job_id DESC
+                LIMIT 200
+                """
+            ).fetchall()
+        finally:
+            connection.close()
+        for row in rows:
+            job = _job_from_row(row)
+            if _job_request_key(job.get("request") or {}) == target_key:
+                return job
+        return {}
 
     def _persist_preview_job(self, job: dict[str, Any]) -> None:
         self.ensure_sqlite_index()
@@ -454,6 +498,20 @@ def _job_search_text(job: dict[str, Any], request: dict[str, Any], result: dict[
     values.extend(request.get("sources") or [])
     values.extend(request.get("safety_warnings") or [])
     return " ".join(str(value or "") for value in values).lower()
+
+
+def _job_request_key(request: dict[str, Any]) -> str:
+    return json.dumps(
+        {
+            "profile": str(request.get("profile") or "").strip(),
+            "sources": sorted(_list_strings(request.get("sources"))),
+            "dry_run": _truthy(request.get("dry_run", True)),
+            "confirm_delivery": _truthy(request.get("confirm_delivery")),
+            "days_back": _positive_int(request.get("days_back")),
+        },
+        ensure_ascii=False,
+        sort_keys=True,
+    )
 
 
 def _json_object(text: str) -> dict[str, Any]:

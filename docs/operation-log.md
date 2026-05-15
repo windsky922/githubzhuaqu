@@ -2,6 +2,24 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-05-15 追加：planned 任务创建增加重复防护
+
+### 1. 开发目的
+
+任务状态页已经可以创建 planned 任务，但如果用户多次点击按钮，或多个入口提交同一组参数，可能在 `jobs` 表里产生重复的 planned 任务。为了让后续前端和 worker 更稳定，本次在后端任务创建入口增加 active 任务去重。
+
+### 2. 本次修改
+
+1. `/v1/runs/trigger` 创建任务前会检查已有 `planned` 或 `running` 周报任务。
+2. 去重依据为 `profile`、`sources`、`dry_run`、`confirm_delivery` 和 `days_back`，不受 `requested_by` 或 `trigger_source` 影响。
+3. 如果命中重复任务，接口返回已有 `job_id`，并设置 `planned_job_created=false` 和 `duplicate_of`。
+4. 补充 API 测试，覆盖重复提交不会创建第二个 planned 任务。
+5. `/v1` API 规划文档补充重复任务防护说明。
+
+### 3. 设计边界
+
+本次只拦截 active 状态的重复任务。已经完成或失败的历史任务不会阻止新任务创建，避免影响后续按周重新运行和人工重试。
+
 ## 2026-05-15 追加：任务状态页新增 planned 任务创建表单
 
 ### 1. 开发目的

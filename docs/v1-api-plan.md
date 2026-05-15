@@ -130,12 +130,15 @@
 | `status` | 当前为 `planned` |
 | `execution_supported` | 当前为 `false` |
 | `planned_job_created` | 是否已创建 planned 任务 |
+| `duplicate_of` | 如果命中已有 active 任务，则返回已有任务编号 |
 | `execution_path` | 后续执行入口，例如 `scripts/run_planned_job.py` |
 | `request` | 标准化后的请求参数 |
 | `safety_warnings` | 安全降级提示，例如未确认推送时强制 dry_run |
 | `next_steps` | 启用真实后台执行前需要完成的步骤 |
 
 设计原因：GitHub 采集、LLM 生成、页面构建和推送都是长任务，不能直接塞进 HTTP 请求生命周期。当前先持久化任务计划，再由本地任务执行器把任务从 `planned` 推进到 `running`、`succeeded` 或 `failed`。如果请求传入 `dry_run=false` 但没有 `confirm_delivery=true`，接口会自动改为 `dry_run=true`，避免前端或脚本误触发真实推送。
+
+重复任务防护：如果同一组 `profile`、`sources`、`dry_run`、`confirm_delivery` 和 `days_back` 已经存在 `planned` 或 `running` 任务，接口会返回已有 `job_id`，并设置 `planned_job_created=false`，不重复写入新任务。
 
 ### 任务状态页接入方式
 
