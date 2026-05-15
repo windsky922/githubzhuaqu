@@ -205,7 +205,7 @@ error
 report_url
 ```
 
-`request` 只公开 `profile`、`sources`、`dry_run` 和 `days_back`。`result` 只公开运行日期、状态、项目数量、Kimi/降级状态、Telegram 状态、报告路径、报告链接、SQLite 同步状态和截断后的错误摘要。
+`request` 只公开 `profile`、`sources`、`dry_run`、`requested_dry_run`、`confirm_delivery`、`delivery_allowed`、`days_back`、`trigger_source`、`requested_by` 和 `safety_warnings`。这些字段用于任务审计和受控推送确认，不应包含 Token、Chat ID、Webhook 或其他密钥。`result` 只公开运行日期、状态、项目数量、Kimi/降级状态、Telegram 状态、报告路径、报告链接、SQLite 同步状态和截断后的错误摘要。
 
 ## 七、SQLite 表
 

@@ -28,10 +28,20 @@ class ApiRepositoryTest(unittest.TestCase):
             jobs = repository.jobs()
             job_detail = repository.job_detail("run:2026-05-09")
             trigger = repository.trigger_run_preview(
-                {"profile": "agent_development", "sources": ["github_trending"], "dry_run": True, "days_back": 3}
+                {
+                    "profile": "agent_development",
+                    "sources": ["github_trending"],
+                    "dry_run": True,
+                    "days_back": 3,
+                    "trigger_source": "test",
+                    "requested_by": "unit-test",
+                }
             )
+            unsafe_trigger = repository.trigger_run_preview({"dry_run": "false", "confirm_delivery": False})
+            confirmed_trigger = repository.trigger_run_preview({"dry_run": "false", "confirm_delivery": True})
             preview_detail = repository.job_detail(trigger["job_id"])
             planned_jobs = repository.jobs(status="planned", profile="agent_development", query="github_trending")
+            audit_jobs = repository.jobs(status="planned", query="unit-test")
             succeeded_jobs = repository.jobs(status="succeeded", kind="weekly_report", query="2026-05-09")
 
             self.assertEqual(projects["schema_version"], 1)
@@ -54,11 +64,21 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(job_detail["run_summary"]["run_date"], "2026-05-09")
             self.assertTrue(trigger["job_id"].startswith("preview:"))
             self.assertFalse(trigger["execution_supported"])
+            self.assertFalse(trigger["http_execution_supported"])
+            self.assertTrue(trigger["planned_job_created"])
+            self.assertEqual(trigger["execution_path"], "scripts/run_planned_job.py")
             self.assertEqual(trigger["request"]["days_back"], 3)
+            self.assertEqual(trigger["request"]["trigger_source"], "test")
+            self.assertEqual(trigger["request"]["requested_by"], "unit-test")
+            self.assertTrue(unsafe_trigger["request"]["dry_run"])
+            self.assertTrue(unsafe_trigger["safety_warnings"])
+            self.assertFalse(confirmed_trigger["request"]["dry_run"])
+            self.assertTrue(confirmed_trigger["request"]["delivery_allowed"])
             self.assertTrue(preview_detail["found"])
             self.assertEqual(preview_detail["job"]["status"], "planned")
             self.assertEqual(planned_jobs["count"], 1)
             self.assertEqual(planned_jobs["jobs"][0]["job_id"], trigger["job_id"])
+            self.assertEqual(audit_jobs["jobs"][0]["job_id"], trigger["job_id"])
             self.assertEqual(succeeded_jobs["count"], 1)
             self.assertEqual(succeeded_jobs["jobs"][0]["job_id"], "run:2026-05-09")
         finally:

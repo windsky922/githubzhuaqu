@@ -2,6 +2,24 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-05-15 追加：任务触发入口增加推送确认和审计字段
+
+### 1. 开发目的
+
+项目已经具备 planned 任务、job runner 和 GitHub Actions 手动触发能力，但 `/v1/runs/trigger` 的语义仍容易被理解成“HTTP 直接执行任务”。为了给后续前端管理页和真实任务触发按钮打基础，本次先明确触发边界：接口只创建计划任务，真实执行仍由 job runner 完成。
+
+### 2. 本次修改
+
+1. `/v1/runs/trigger` 的任务请求新增 `trigger_source`、`requested_by`、`requested_dry_run`、`confirm_delivery`、`delivery_allowed` 和 `safety_warnings`。
+2. 如果请求传入 `dry_run=false` 但没有 `confirm_delivery=true`，系统会自动改为 `dry_run=true`，防止误推送。
+3. 返回结果新增 `planned_job_created`、`http_execution_supported` 和 `execution_path`，明确当前不会在 HTTP 请求中直接执行长任务。
+4. `scripts/create_planned_job.py` 写入触发来源和触发人，GitHub Actions 场景默认记录 `github_actions` 与 `GITHUB_ACTOR`。
+5. README、数据契约和 `/v1` API 规划文档补充受控推送规则。
+
+### 3. 设计边界
+
+本次不增加前端“立即执行”按钮，也不让 API 请求直接跑采集和推送。后续要开放前端触发时，还需要补鉴权、重复任务控制、审计查看和失败重试策略。
+
 ## 2026-05-15 追加：任务状态页接入后端任务查询
 
 ### 1. 开发目的

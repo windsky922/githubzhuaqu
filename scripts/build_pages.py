@@ -2978,7 +2978,13 @@ def _public_job_request(data: dict) -> dict:
         "profile": str(data.get("profile") or ""),
         "sources": _string_list(data.get("sources")),
         "dry_run": bool(data.get("dry_run")),
+        "requested_dry_run": bool(data.get("requested_dry_run", data.get("dry_run"))),
+        "confirm_delivery": bool(data.get("confirm_delivery")),
+        "delivery_allowed": bool(data.get("delivery_allowed")),
         "days_back": _int_value(data.get("days_back")),
+        "trigger_source": str(data.get("trigger_source") or ""),
+        "requested_by": str(data.get("requested_by") or ""),
+        "safety_warnings": _string_list(data.get("safety_warnings")),
     }
 
 

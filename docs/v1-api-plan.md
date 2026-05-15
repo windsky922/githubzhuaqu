@@ -94,7 +94,7 @@
 
 ### `POST /v1/runs/trigger`
 
-创建一次采集任务的计划预览并写入 `jobs` 表，不立即执行真实后台任务。
+创建一次受控的周报计划任务并写入 `jobs` 表，不在 HTTP 请求中直接执行采集、生成或推送。
 
 请求示例：
 
@@ -103,9 +103,24 @@
   "profile": "agent_development",
   "sources": ["github_trending"],
   "dry_run": true,
-  "days_back": 7
+  "days_back": 7,
+  "trigger_source": "api",
+  "requested_by": "local-user",
+  "confirm_delivery": false
 }
 ```
+
+请求规则：
+
+| 字段 | 说明 |
+|---|---|
+| `profile` | 个性化方向，可为空 |
+| `sources` | 期望来源标签，当前用于审计和筛选 |
+| `dry_run` | `true` 时执行器会跳过主流程内置推送 |
+| `days_back` | 回看天数 |
+| `trigger_source` | 触发来源，例如 `api`、`github_actions`、`manual` |
+| `requested_by` | 触发人或系统标识，只保存非密钥文本 |
+| `confirm_delivery` | 只有该值为 `true` 且 `dry_run=false` 时，才允许真实推送 |
 
 当前返回：
 
@@ -114,10 +129,13 @@
 | `job_id` | 预览任务编号，格式为 `preview:*` |
 | `status` | 当前为 `planned` |
 | `execution_supported` | 当前为 `false` |
+| `planned_job_created` | 是否已创建 planned 任务 |
+| `execution_path` | 后续执行入口，例如 `scripts/run_planned_job.py` |
 | `request` | 标准化后的请求参数 |
+| `safety_warnings` | 安全降级提示，例如未确认推送时强制 dry_run |
 | `next_steps` | 启用真实后台执行前需要完成的步骤 |
 
-设计原因：GitHub 采集、LLM 生成、页面构建和推送都是长任务，不能直接塞进 HTTP 请求生命周期。当前先持久化任务计划，再由本地任务执行器把任务从 `planned` 推进到 `running`、`succeeded` 或 `failed`。
+设计原因：GitHub 采集、LLM 生成、页面构建和推送都是长任务，不能直接塞进 HTTP 请求生命周期。当前先持久化任务计划，再由本地任务执行器把任务从 `planned` 推进到 `running`、`succeeded` 或 `failed`。如果请求传入 `dry_run=false` 但没有 `confirm_delivery=true`，接口会自动改为 `dry_run=true`，避免前端或脚本误触发真实推送。
 
 ### 任务状态页接入方式
 

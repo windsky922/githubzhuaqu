@@ -188,8 +188,16 @@ class ApiRepository:
         payload = payload or {}
         profile = str(payload.get("profile") or payload.get("interest_profile") or "").strip()
         sources = _list_strings(payload.get("sources"))
-        dry_run = bool(payload.get("dry_run", True))
+        requested_dry_run = _truthy(payload.get("dry_run", True))
+        confirm_delivery = _truthy(payload.get("confirm_delivery"))
+        dry_run = requested_dry_run
+        safety_warnings = []
+        if not requested_dry_run and not confirm_delivery:
+            dry_run = True
+            safety_warnings.append("未显式确认真实推送，已自动改为 dry_run=true。")
         days_back = _positive_int(payload.get("days_back"))
+        trigger_source = str(payload.get("trigger_source") or "api").strip()[:80]
+        requested_by = str(payload.get("requested_by") or "").strip()[:120]
         submitted_at = datetime.now(UTC).isoformat().replace("+00:00", "Z")
         fingerprint = sha1(
             json.dumps(
@@ -197,12 +205,27 @@ class ApiRepository:
                     "profile": profile,
                     "sources": sources,
                     "dry_run": dry_run,
+                    "confirm_delivery": confirm_delivery,
                     "days_back": days_back,
+                    "trigger_source": trigger_source,
+                    "requested_by": requested_by,
                     "submitted_at": submitted_at,
                 },
                 sort_keys=True,
             ).encode("utf-8")
         ).hexdigest()[:12]
+        request = {
+            "profile": profile,
+            "sources": sources,
+            "dry_run": dry_run,
+            "requested_dry_run": requested_dry_run,
+            "confirm_delivery": confirm_delivery,
+            "delivery_allowed": not dry_run,
+            "days_back": days_back,
+            "trigger_source": trigger_source,
+            "requested_by": requested_by,
+            "safety_warnings": safety_warnings,
+        }
         job = {
             "job_id": f"preview:{fingerprint}",
             "kind": "weekly_report",
@@ -211,12 +234,7 @@ class ApiRepository:
             "submitted_at": submitted_at,
             "started_at": "",
             "finished_at": "",
-            "request": {
-                "profile": profile,
-                "sources": sources,
-                "dry_run": dry_run,
-                "days_back": days_back,
-            },
+            "request": request,
             "result": {},
             "error": "",
         }
@@ -227,12 +245,16 @@ class ApiRepository:
             "status": job["status"],
             "submitted_at": submitted_at,
             "execution_supported": False,
-            "message": "当前接口只创建任务预览记录，实际后台执行会在 worker/job 层接入后启用。",
-            "request": job["request"],
+            "http_execution_supported": False,
+            "planned_job_created": True,
+            "execution_path": "scripts/run_planned_job.py",
+            "message": "当前接口只创建 planned 任务，不在 HTTP 请求中直接执行采集、生成或推送。",
+            "request": request,
+            "safety_warnings": safety_warnings,
             "next_steps": [
-                "复用 run_weekly_report() 周报主流程。",
-                "接入后台 worker 后把 planned 任务推进为 running/succeeded/failed。",
-                "确认执行权限后再允许 execution_supported=true。",
+                "由 job runner 消费 planned 任务并推进为 running/succeeded/failed。",
+                "dry_run=true 时跳过主流程内置推送，适合验证采集和生成。",
+                "dry_run=false 必须同时提供 confirm_delivery=true，避免误触发真实推送。",
             ],
         }
 
@@ -426,8 +448,11 @@ def _job_search_text(job: dict[str, Any], request: dict[str, Any], result: dict[
         request.get("profile"),
         result.get("report_url"),
         result.get("telegram_report_url"),
+        request.get("trigger_source"),
+        request.get("requested_by"),
     ]
     values.extend(request.get("sources") or [])
+    values.extend(request.get("safety_warnings") or [])
     return " ".join(str(value or "") for value in values).lower()
 
 
@@ -471,6 +496,10 @@ def _positive_int(value: Any) -> int | None:
     except (TypeError, ValueError):
         return None
     return number if number > 0 else None
+
+
+def _truthy(value: Any) -> bool:
+    return str(value or "").strip().lower() in {"1", "true", "yes", "y", "on"}
 
 
 def _best_trending_rank(projects: list[dict[str, Any]]) -> int:

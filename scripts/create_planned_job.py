@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -19,13 +20,20 @@ def main() -> int:
     parser.add_argument("--profile", default="", help="个性化 profile，例如 agent_development。")
     parser.add_argument("--days-back", type=int, default=7, help="回看天数，默认 7。")
     parser.add_argument("--dry-run", default="true", help="true 时执行主流程会跳过内置 Telegram 推送。")
+    parser.add_argument("--confirm-delivery", default="", help="true 时明确允许 dry-run=false 的真实推送。")
+    parser.add_argument("--trigger-source", default="github_actions", help="任务触发来源。")
+    parser.add_argument("--requested-by", default="", help="任务触发人或系统标识。")
     parser.add_argument("--output", type=Path, default=None, help="把任务创建结果写入 JSON 文件。")
     args = parser.parse_args()
 
+    dry_run = _truthy(args.dry_run)
     payload = {
         "profile": args.profile.strip(),
         "days_back": args.days_back,
-        "dry_run": _truthy(args.dry_run),
+        "dry_run": dry_run,
+        "confirm_delivery": _truthy(args.confirm_delivery) or not dry_run,
+        "trigger_source": args.trigger_source.strip() or "github_actions",
+        "requested_by": args.requested_by.strip() or os.getenv("GITHUB_ACTOR", ""),
     }
     repository = ApiRepository(root=args.root, db_path=args.db)
     result = repository.trigger_run_preview(payload)

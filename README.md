@@ -302,6 +302,7 @@ python scripts/run_planned_job.py --job-id preview:xxxx
 ```
 
 如果任务请求中的 `dry_run` 为 `true`，执行时会跳过 Telegram 推送，适合本地验证。
+如果任务请求中的 `dry_run` 为 `false`，必须同时提供 `confirm_delivery=true` 才允许真实推送；否则系统会自动降级为 `dry_run=true`，避免误触发。
 
 GitHub Actions 的手动运行入口已经支持 `profile`、`days_back`、`skip_main_delivery` 和 `send_link`。其中 `skip_main_delivery=true` 时，主流程不直接推送 Telegram，而是由后续步骤统一推送 GitHub Pages 链接。
 

@@ -87,7 +87,13 @@ JOB_REQUEST_KEYS = {
     "profile",
     "sources",
     "dry_run",
+    "requested_dry_run",
+    "confirm_delivery",
+    "delivery_allowed",
     "days_back",
+    "trigger_source",
+    "requested_by",
+    "safety_warnings",
 }
 
 JOB_RESULT_KEYS = {
