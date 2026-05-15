@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import sqlite3
 import sys
 from datetime import UTC, datetime
 from email.utils import format_datetime
@@ -41,12 +42,18 @@ def build_pages(root: Path = ROOT) -> list[Path]:
     runs_page = root / "docs" / "runs.html"
     runs_page.write_text(_runs_dashboard_content(), encoding="utf-8")
     written.append(runs_page)
+    jobs_page = root / "docs" / "jobs.html"
+    jobs_page.write_text(_jobs_dashboard_content(), encoding="utf-8")
+    written.append(jobs_page)
     projects_json = root / "docs" / "projects.json"
     projects_json.write_text(_json_text(_public_projects(root)), encoding="utf-8")
     written.append(projects_json)
     runs_json = root / "docs" / "runs.json"
     runs_json.write_text(_json_text(_public_runs(root, reports)), encoding="utf-8")
     written.append(runs_json)
+    jobs_json = root / "docs" / "jobs.json"
+    jobs_json.write_text(_json_text(_public_jobs(root, reports)), encoding="utf-8")
+    written.append(jobs_json)
     profiles_json = root / "docs" / "profiles.json"
     profiles_json.write_text(_json_text(_public_profiles(root)), encoding="utf-8")
     written.append(profiles_json)
@@ -100,9 +107,11 @@ def _index_content(root: Path, reports: list[Path]) -> str:
             "- [项目筛选页](explorer.html)",
             "- [项目详情页](project.html)",
             "- [运行状态面板](runs.html)",
+            "- [任务状态面板](jobs.html)",
             "- [历史项目索引](projects.html)",
             "- [公共项目 JSON](projects.json)",
             "- [公共运行 JSON](runs.json)",
+            "- [公共任务 JSON](jobs.json)",
             "- [个性化方向页](profiles.html)",
             "- [个性化方向 JSON](profiles.json)",
             "- [RSS 订阅](feed.xml)",
@@ -1991,6 +2000,369 @@ def _runs_dashboard_content() -> str:
 """
 
 
+def _jobs_dashboard_content() -> str:
+    return """<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GitHub 周报任务状态</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f7f8fa;
+      --panel: #ffffff;
+      --text: #20242a;
+      --muted: #5f6b7a;
+      --line: #d9dee7;
+      --accent: #2563eb;
+      --ok: #15803d;
+      --warn: #a16207;
+      --bad: #b42318;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+    header {
+      border-bottom: 1px solid var(--line);
+      background: var(--panel);
+    }
+    .wrap {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      min-height: 68px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    nav a {
+      color: var(--accent);
+      font-weight: 700;
+      text-decoration: none;
+    }
+    main {
+      padding: 20px 0 32px;
+    }
+    .filters {
+      display: grid;
+      grid-template-columns: minmax(160px, 1fr) minmax(160px, 1fr) minmax(180px, 1.2fr) minmax(220px, 2fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    label {
+      display: grid;
+      gap: 5px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+    input, select {
+      height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--panel);
+      color: var(--text);
+      font: inherit;
+      padding: 0 10px;
+    }
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .metric {
+      min-height: 72px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 6px;
+    }
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .metric strong {
+      display: block;
+      margin-top: 6px;
+      font-size: 18px;
+      line-height: 1.2;
+    }
+    .table-shell {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      background: var(--panel);
+    }
+    table {
+      width: 100%;
+      min-width: 980px;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+      text-align: left;
+    }
+    th {
+      background: #eef2f7;
+      color: #344054;
+      font-size: 13px;
+    }
+    .status {
+      display: inline-block;
+      min-width: 78px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid var(--line);
+      background: #f9fafb;
+    }
+    .status.succeeded { color: var(--ok); border-color: #bbf7d0; background: #f0fdf4; }
+    .status.failed { color: var(--bad); border-color: #fecaca; background: #fff1f2; }
+    .status.running { color: var(--accent); border-color: #bfdbfe; background: #eff6ff; }
+    .status.planned { color: var(--warn); border-color: #fde68a; background: #fffbeb; }
+    .muted {
+      color: var(--muted);
+    }
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      overflow-wrap: anywhere;
+    }
+    a {
+      color: var(--accent);
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .empty {
+      padding: 28px 12px;
+      color: var(--muted);
+      text-align: center;
+    }
+    @media (max-width: 760px) {
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 16px 0;
+      }
+      .filters,
+      .summary {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap topbar">
+      <h1>GitHub 周报任务状态</h1>
+      <nav>
+        <a href="index.html">周报归档</a>
+        <a href="runs.html">运行状态</a>
+        <a href="explorer.html">项目筛选</a>
+        <a href="jobs.json">jobs.json</a>
+      </nav>
+    </div>
+  </header>
+  <main class="wrap">
+    <section class="filters" aria-label="任务筛选">
+      <label>状态
+        <select id="status">
+          <option value="">全部</option>
+          <option value="planned">planned</option>
+          <option value="running">running</option>
+          <option value="succeeded">succeeded</option>
+          <option value="failed">failed</option>
+        </select>
+      </label>
+      <label>类型
+        <select id="kind">
+          <option value="">全部</option>
+          <option value="weekly_report">weekly_report</option>
+        </select>
+      </label>
+      <label>Profile
+        <input id="profile" type="search" autocomplete="off">
+      </label>
+      <label>关键词
+        <input id="query" type="search" autocomplete="off">
+      </label>
+    </section>
+    <section id="summary" class="summary" aria-label="任务概览"></section>
+    <div class="table-shell">
+      <table>
+        <thead>
+          <tr>
+            <th>任务</th>
+            <th>状态</th>
+            <th>Profile</th>
+            <th>日期</th>
+            <th>提交时间</th>
+            <th>完成时间</th>
+            <th>结果</th>
+            <th>错误</th>
+          </tr>
+        </thead>
+        <tbody id="rows">
+          <tr><td class="empty" colspan="8">加载中</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+  <script>
+    const state = { jobs: [] };
+    const controls = {
+      status: document.getElementById("status"),
+      kind: document.getElementById("kind"),
+      profile: document.getElementById("profile"),
+      query: document.getElementById("query"),
+    };
+    const rows = document.getElementById("rows");
+    const summary = document.getElementById("summary");
+
+    fetch("jobs.json", { cache: "no-store" })
+      .then(response => response.ok ? response.json() : Promise.reject(new Error(`HTTP ${response.status}`)))
+      .then(data => {
+        state.jobs = Array.isArray(data.jobs) ? data.jobs : [];
+        restoreFilters();
+        bind();
+        render();
+      })
+      .catch(() => {
+        rows.innerHTML = '<tr><td class="empty" colspan="8">无法读取 jobs.json</td></tr>';
+      });
+
+    function bind() {
+      Object.values(controls).forEach(control => control.addEventListener("input", render));
+      Object.values(controls).forEach(control => control.addEventListener("change", render));
+    }
+
+    function render() {
+      const filtered = state.jobs.filter(job => {
+        if (controls.status.value && job.status !== controls.status.value) return false;
+        if (controls.kind.value && job.kind !== controls.kind.value) return false;
+        const profile = String((job.request || {}).profile || "").toLowerCase();
+        if (controls.profile.value.trim() && !profile.includes(controls.profile.value.trim().toLowerCase())) return false;
+        const haystack = [
+          job.job_id,
+          job.kind,
+          job.status,
+          job.run_date,
+          job.submitted_at,
+          profile,
+          job.error,
+          (job.result || {}).report_url,
+          (job.result || {}).report_path,
+        ].join(" ").toLowerCase();
+        return !controls.query.value.trim() || haystack.includes(controls.query.value.trim().toLowerCase());
+      });
+      renderSummary(filtered);
+      rows.innerHTML = filtered.length ? filtered.map(rowHtml).join("") : '<tr><td class="empty" colspan="8">没有匹配任务</td></tr>';
+      updateUrl();
+    }
+
+    function renderSummary(jobs) {
+      const succeeded = jobs.filter(job => job.status === "succeeded").length;
+      const failed = jobs.filter(job => job.status === "failed").length;
+      const planned = jobs.filter(job => job.status === "planned").length;
+      const running = jobs.filter(job => job.status === "running").length;
+      summary.innerHTML = [
+        metric("任务总数", jobs.length),
+        metric("成功", succeeded),
+        metric("失败", failed),
+        metric("待执行 / 执行中", `${planned} / ${running}`),
+      ].join("");
+    }
+
+    function metric(label, value) {
+      return `<article class="metric"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></article>`;
+    }
+
+    function rowHtml(job) {
+      const request = job.request || {};
+      const result = job.result || {};
+      const report = result.report_url || job.report_url || "";
+      const resultText = [
+        result.selected_count !== undefined ? `入选 ${number(result.selected_count)}` : "",
+        result.collected_count !== undefined ? `候选 ${number(result.collected_count)}` : "",
+        result.kimi_used ? "Kimi" : "",
+        report ? `<a href="${escapeAttribute(report)}">周报</a>` : "",
+      ].filter(Boolean).join(" · ") || "-";
+      return `<tr>
+        <td><div class="mono">${escapeHtml(job.job_id || "")}</div><div class="muted">${escapeHtml(job.kind || "")}</div></td>
+        <td><span class="status ${escapeAttribute(job.status || "")}">${escapeHtml(job.status || "")}</span></td>
+        <td>${escapeHtml(request.profile || "-")}</td>
+        <td>${escapeHtml(job.run_date || "-")}</td>
+        <td>${escapeHtml(job.submitted_at || "-")}</td>
+        <td>${escapeHtml(job.finished_at || "-")}</td>
+        <td>${resultText}</td>
+        <td>${escapeHtml(shortText(job.error || result.error || ""))}</td>
+      </tr>`;
+    }
+
+    function restoreFilters() {
+      const params = new URLSearchParams(window.location.search);
+      for (const [key, control] of Object.entries(controls)) {
+        if (params.has(key)) control.value = params.get(key) || "";
+      }
+    }
+
+    function updateUrl() {
+      const params = new URLSearchParams();
+      for (const [key, control] of Object.entries(controls)) {
+        if (control.value) params.set(key, control.value);
+      }
+      const next = `${window.location.pathname}${params.toString() ? "?" + params.toString() : ""}`;
+      window.history.replaceState({}, "", next);
+    }
+
+    function number(value) {
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : 0;
+    }
+
+    function shortText(value) {
+      const text = String(value || "");
+      return text.length > 160 ? `${text.slice(0, 157)}...` : text;
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
+    }
+
+    function escapeAttribute(value) {
+      return escapeHtml(value).replace(/`/g, "&#96;");
+    }
+  </script>
+</body>
+</html>
+"""
+
+
 def _profiles_page_content() -> str:
     return """<!doctype html>
 <html lang="zh-CN">
@@ -2473,6 +2845,138 @@ def _public_runs(root: Path, reports: list[Path]) -> dict:
         "count": len(runs),
         "runs": runs,
     }
+
+
+def _public_jobs(root: Path, reports: list[Path]) -> dict:
+    jobs = _sqlite_jobs(root)
+    if not jobs:
+        jobs = _jobs_from_runs(_public_runs(root, reports).get("runs") or [])
+    return {
+        "schema_version": 1,
+        "count": len(jobs),
+        "jobs": jobs,
+    }
+
+
+def _sqlite_jobs(root: Path) -> list[dict]:
+    db_path = root / "data" / "github_weekly.sqlite"
+    if not db_path.exists():
+        return []
+    try:
+        connection = sqlite3.connect(db_path)
+        connection.row_factory = sqlite3.Row
+        try:
+            table = connection.execute(
+                "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'jobs'"
+            ).fetchone()
+            if not table:
+                return []
+            rows = connection.execute(
+                """
+                SELECT job_id, kind, status, run_date, submitted_at, started_at, finished_at,
+                       request_json, result_json, error
+                FROM jobs
+                ORDER BY COALESCE(NULLIF(submitted_at, ''), run_date) DESC, job_id DESC
+                LIMIT 500
+                """
+            ).fetchall()
+        finally:
+            connection.close()
+    except sqlite3.Error:
+        return []
+    return [_public_job_from_row(row) for row in rows]
+
+
+def _public_job_from_row(row: sqlite3.Row) -> dict:
+    request = _public_job_request(_json_object(row["request_json"]))
+    result = _public_job_result(_json_object(row["result_json"]))
+    return {
+        "job_id": str(row["job_id"] or ""),
+        "kind": str(row["kind"] or ""),
+        "status": str(row["status"] or ""),
+        "run_date": str(row["run_date"] or ""),
+        "submitted_at": str(row["submitted_at"] or ""),
+        "started_at": str(row["started_at"] or ""),
+        "finished_at": str(row["finished_at"] or ""),
+        "request": request,
+        "result": result,
+        "error": str(row["error"] or "")[:240],
+        "report_url": str(result.get("report_url") or ""),
+    }
+
+
+def _jobs_from_runs(runs: list[dict]) -> list[dict]:
+    jobs = []
+    for run in runs:
+        run_date = str(run.get("run_date") or "")
+        if not run_date:
+            continue
+        failed = run.get("status") == "failed"
+        jobs.append(
+            {
+                "job_id": f"run:{run_date}",
+                "kind": "weekly_report",
+                "status": "failed" if failed else "succeeded",
+                "run_date": run_date,
+                "submitted_at": run_date,
+                "started_at": "",
+                "finished_at": run_date,
+                "request": _public_job_request({}),
+                "result": {
+                    "run_date": run_date,
+                    "status": str(run.get("status") or ""),
+                    "selected_count": _int_value(run.get("selected_count")),
+                    "collected_count": _int_value(run.get("collected_count")),
+                    "kimi_used": bool(run.get("kimi_used")),
+                    "fallback_used": bool(run.get("fallback_used")),
+                    "telegram_sent": bool(run.get("telegram_sent")),
+                    "telegram_error": "",
+                    "report_path": "",
+                    "report_url": str(run.get("report_url") or run.get("telegram_report_url") or ""),
+                    "sqlite_index_path": "",
+                    "sqlite_error": "",
+                    "error": "",
+                },
+                "error": "",
+                "report_url": str(run.get("report_url") or run.get("telegram_report_url") or ""),
+            }
+        )
+    return jobs
+
+
+def _public_job_request(data: dict) -> dict:
+    return {
+        "profile": str(data.get("profile") or ""),
+        "sources": _string_list(data.get("sources")),
+        "dry_run": bool(data.get("dry_run")),
+        "days_back": _int_value(data.get("days_back")),
+    }
+
+
+def _public_job_result(data: dict) -> dict:
+    return {
+        "run_date": str(data.get("run_date") or ""),
+        "status": str(data.get("status") or ""),
+        "selected_count": _int_value(data.get("selected_count")),
+        "collected_count": _int_value(data.get("collected_count")),
+        "kimi_used": bool(data.get("kimi_used")),
+        "fallback_used": bool(data.get("fallback_used")),
+        "telegram_sent": bool(data.get("telegram_sent")),
+        "telegram_error": str(data.get("telegram_error") or "")[:240],
+        "report_path": str(data.get("report_path") or ""),
+        "report_url": str(data.get("report_url") or ""),
+        "sqlite_index_path": str(data.get("sqlite_index_path") or ""),
+        "sqlite_error": str(data.get("sqlite_error") or "")[:240],
+        "error": str(data.get("error") or "")[:240],
+    }
+
+
+def _json_object(text: str) -> dict:
+    try:
+        data = json.loads(text or "{}")
+    except json.JSONDecodeError:
+        return {}
+    return data if isinstance(data, dict) else {}
 
 
 def _public_collector_errors(collector_stats: list) -> list[dict]:

@@ -69,6 +69,43 @@ RUN_KEYS = {
     "summary_points",
 }
 
+JOB_KEYS = {
+    "job_id",
+    "kind",
+    "status",
+    "run_date",
+    "submitted_at",
+    "started_at",
+    "finished_at",
+    "request",
+    "result",
+    "error",
+    "report_url",
+}
+
+JOB_REQUEST_KEYS = {
+    "profile",
+    "sources",
+    "dry_run",
+    "days_back",
+}
+
+JOB_RESULT_KEYS = {
+    "run_date",
+    "status",
+    "selected_count",
+    "collected_count",
+    "kimi_used",
+    "fallback_used",
+    "telegram_sent",
+    "telegram_error",
+    "report_path",
+    "report_url",
+    "sqlite_index_path",
+    "sqlite_error",
+    "error",
+}
+
 PROFILE_KEYS = {
     "name",
     "label",
@@ -169,12 +206,17 @@ class DataContractsTest(unittest.TestCase):
 
             projects = json.loads((root / "docs" / "projects.json").read_text(encoding="utf-8"))
             runs = json.loads((root / "docs" / "runs.json").read_text(encoding="utf-8"))
+            jobs = json.loads((root / "docs" / "jobs.json").read_text(encoding="utf-8"))
             profiles = json.loads((root / "docs" / "profiles.json").read_text(encoding="utf-8"))
             self.assertEqual(projects["schema_version"], 1)
             self.assertEqual(runs["schema_version"], 1)
+            self.assertEqual(jobs["schema_version"], 1)
             self.assertEqual(profiles["schema_version"], 1)
             self.assertEqual(set(projects["projects"][0]), PROJECT_KEYS)
             self.assertEqual(set(runs["runs"][0]), RUN_KEYS)
+            self.assertEqual(set(jobs["jobs"][0]), JOB_KEYS)
+            self.assertEqual(set(jobs["jobs"][0]["request"]), JOB_REQUEST_KEYS)
+            self.assertEqual(set(jobs["jobs"][0]["result"]), JOB_RESULT_KEYS)
             self.assertEqual(set(profiles["profiles"][0]), PROFILE_KEYS)
             self.assertIsInstance(projects["projects"][0]["selection_reasons"], list)
             self.assertIsInstance(projects["projects"][0]["security_flags"], list)

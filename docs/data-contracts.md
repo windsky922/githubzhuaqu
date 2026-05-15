@@ -5,7 +5,7 @@
 ## 一、设计原则
 
 1. JSON 归档仍是事实来源。
-2. `docs/projects.json`、`docs/runs.json` 和 `docs/profiles.json` 是公开展示与订阅入口。
+2. `docs/projects.json`、`docs/runs.json`、`docs/jobs.json` 和 `docs/profiles.json` 是公开展示与订阅入口。
 3. SQLite 是可重建派生索引，不提交数据库文件。
 4. 公共数据不能包含密钥、用户隐私、未脱敏配置或原始错误堆栈。
 5. 修改字段时必须同步更新测试、文档和下游消费逻辑。
@@ -187,7 +187,27 @@ projects
 
 其中 `projects` 内部字段与归档查询结果保持一致。后续如需新增字段，应先更新本文档、`docs/api.md` 和对应测试。
 
-## 六、SQLite 表
+## 六、`docs/jobs.json`
+
+任务状态公开字段：
+
+```text
+job_id
+kind
+status
+run_date
+submitted_at
+started_at
+finished_at
+request
+result
+error
+report_url
+```
+
+`request` 只公开 `profile`、`sources`、`dry_run` 和 `days_back`。`result` 只公开运行日期、状态、项目数量、Kimi/降级状态、Telegram 状态、报告路径、报告链接、SQLite 同步状态和截断后的错误摘要。
+
+## 七、SQLite 表
 
 当前 SQLite 表：
 
@@ -233,7 +253,8 @@ tests/test_data_contracts.py
 
 1. `projects.json` 的字段集合。
 2. `runs.json` 的字段集合。
-3. SQLite 关键表字段集合。
+3. `jobs.json` 的字段集合。
+4. SQLite 关键表字段集合。
 
 如果未来确实需要新增、删除或重命名字段，应先确认下游影响，再同步更新契约测试和本文档。
 
