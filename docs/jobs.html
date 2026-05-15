@@ -155,6 +155,10 @@
     .precheck-result.blocked {
       color: var(--bad);
     }
+    .execute-button {
+      border-color: var(--warn);
+      color: var(--warn);
+    }
     .summary {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -368,9 +372,13 @@
       Object.values(controls).forEach(control => control.addEventListener("input", render));
       Object.values(controls).forEach(control => control.addEventListener("change", render));
       rows.addEventListener("click", event => {
-        const button = event.target.closest("[data-precheck]");
-        if (!button) return;
-        runExecutionCheck(button);
+        const precheckButton = event.target.closest("[data-precheck]");
+        if (precheckButton) {
+          runExecutionCheck(precheckButton);
+          return;
+        }
+        const executeButton = event.target.closest("[data-execute]");
+        if (executeButton) runJobExecution(executeButton);
       });
     }
 
@@ -470,6 +478,53 @@
       return lines.map(line => `<div>${escapeHtml(line)}</div>`).join("");
     }
 
+    function runJobExecution(button) {
+      const jobId = button.dataset.execute || "";
+      const target = document.getElementById(button.dataset.target || "");
+      if (!target) return;
+      if (!shouldUseApi()) {
+        target.className = "precheck-result blocked";
+        target.textContent = "执行任务需要本地后端或 api=1 模式。";
+        return;
+      }
+      if (!window.confirm(`确认执行任务 ${jobId}？`)) return;
+      button.disabled = true;
+      target.className = "precheck-result";
+      target.textContent = "执行中...";
+      fetch(`/v1/jobs/${encodeURIComponent(jobId)}/execute`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ confirm_execution: true }),
+      })
+        .then(jsonOrThrow)
+        .then(data => {
+          target.className = `precheck-result ${data.accepted && data.executed ? "ok" : "blocked"}`;
+          target.innerHTML = executionHtml(data);
+          return loadJobs();
+        })
+        .then(data => {
+          state.jobs = Array.isArray(data.jobs) ? data.jobs : [];
+          render();
+        })
+        .catch(error => {
+          target.className = "precheck-result blocked";
+          target.textContent = `执行失败：${error.message || error}`;
+        })
+        .finally(() => {
+          button.disabled = false;
+        });
+    }
+
+    function executionHtml(data) {
+      const lines = [
+        data.accepted ? "已接受执行" : "未执行",
+        data.status ? `状态：${data.status}` : "",
+        ...(data.blockers || []).map(item => `阻止：${item}`),
+        ...(data.warnings || []).map(item => `提示：${item}`),
+      ].filter(Boolean);
+      return lines.map(line => `<div>${escapeHtml(line)}</div>`).join("");
+    }
+
     function shouldUseApi() {
       const params = new URLSearchParams(window.location.search);
       if (params.get("api") === "1") return true;
@@ -531,8 +586,12 @@
       const report = result.report_url || job.report_url || "";
       const jobId = job.job_id || "";
       const precheckId = `precheck-${safeId(jobId)}`;
+      const executeId = `execute-${safeId(jobId)}`;
       const precheckDisabled = shouldUseApi() ? "" : " disabled";
       const precheckTitle = shouldUseApi() ? "执行前检查" : "仅本地后端或 api=1 模式可用";
+      const executeEnabled = shouldUseApi() && job.status === "planned";
+      const executeDisabled = executeEnabled ? "" : " disabled";
+      const executeTitle = executeEnabled ? "确认后执行 planned 任务" : "仅 API 模式下的 planned 任务可执行";
       const errorText = escapeHtml(shortText(job.error || result.error || ""));
       const resultText = [
         result.selected_count !== undefined ? `入选 ${number(result.selected_count)}` : "",
@@ -552,7 +611,9 @@
           <div class="row-actions">
             <div>${errorText || "-"}</div>
             <button class="secondary-button" type="button" title="${escapeAttribute(precheckTitle)}" data-precheck="${escapeAttribute(jobId)}" data-target="${escapeAttribute(precheckId)}"${precheckDisabled}>执行前检查</button>
+            <button class="secondary-button execute-button" type="button" title="${escapeAttribute(executeTitle)}" data-execute="${escapeAttribute(jobId)}" data-target="${escapeAttribute(executeId)}"${executeDisabled}>确认执行</button>
             <div id="${escapeAttribute(precheckId)}" class="precheck-result" aria-live="polite"></div>
+            <div id="${escapeAttribute(executeId)}" class="precheck-result" aria-live="polite"></div>
           </div>
         </td>
       </tr>`;
