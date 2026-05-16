@@ -205,7 +205,7 @@ error
 report_url
 ```
 
-`request` 只公开 `profile`、`sources`、`dry_run` 和 `days_back`。`result` 只公开运行日期、状态、项目数量、Kimi/降级状态、Telegram 状态、报告路径、报告链接、SQLite 同步状态和截断后的错误摘要。
+`request` 只公开 `profile`、`sources`、`dry_run`、`requested_dry_run`、`confirm_delivery`、`delivery_allowed`、`days_back`、`trigger_source`、`requested_by` 和 `safety_warnings`。这些字段用于任务审计和受控推送确认，不应包含 Token、Chat ID、Webhook 或其他密钥。`result` 只公开运行日期、状态、项目数量、Kimi/降级状态、Telegram 状态、报告路径、报告链接、SQLite 同步状态和截断后的错误摘要。
 
 ## 七、SQLite 表
 
@@ -219,6 +219,7 @@ trend_summaries
 sent_repositories
 star_history
 jobs
+job_events
 migration_meta
 ```
 
@@ -231,7 +232,8 @@ migration_meta
 5. `sent_repositories` 保存已推送仓库状态。
 6. `star_history` 保存 Star 历史。
 7. `jobs` 保存历史周报任务和触发预览任务状态。
-8. `migration_meta` 保存迁移元数据。
+8. `job_events` 保存任务创建、重复命中、执行请求、执行阻止和执行完成等审计事件。
+9. `migration_meta` 保存迁移元数据。
 
 当前只读查询入口位于：
 

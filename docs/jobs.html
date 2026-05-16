@@ -66,6 +66,24 @@
       gap: 10px;
       margin-bottom: 14px;
     }
+    .task-panel {
+      margin-bottom: 14px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--panel);
+    }
+    .task-panel h2 {
+      margin: 0 0 10px;
+      font-size: 16px;
+      line-height: 1.3;
+    }
+    .task-form {
+      display: grid;
+      grid-template-columns: minmax(160px, 1.2fr) minmax(120px, .8fr) minmax(160px, 1fr) minmax(140px, .8fr) minmax(140px, .8fr);
+      gap: 10px;
+      align-items: end;
+    }
     label {
       display: grid;
       gap: 5px;
@@ -73,7 +91,7 @@
       font-size: 13px;
       font-weight: 700;
     }
-    input, select {
+    input, select, button {
       height: 38px;
       border: 1px solid var(--line);
       border-radius: 6px;
@@ -81,6 +99,65 @@
       color: var(--text);
       font: inherit;
       padding: 0 10px;
+    }
+    button {
+      cursor: pointer;
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #fff;
+      font-weight: 700;
+    }
+    button:disabled {
+      cursor: not-allowed;
+      border-color: var(--line);
+      background: #e5e7eb;
+      color: var(--muted);
+    }
+    .check-label {
+      grid-template-columns: 18px 1fr;
+      align-items: center;
+      gap: 8px;
+      min-height: 38px;
+    }
+    .check-label input {
+      width: 16px;
+      height: 16px;
+      padding: 0;
+    }
+    .task-status {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .row-actions {
+      display: grid;
+      gap: 6px;
+      min-width: 150px;
+    }
+    .secondary-button {
+      width: fit-content;
+      height: 30px;
+      padding: 0 8px;
+      border-color: var(--line);
+      background: var(--panel);
+      color: var(--accent);
+      font-size: 12px;
+    }
+    .precheck-result {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+    }
+    .precheck-result.ok {
+      color: var(--ok);
+    }
+    .precheck-result.blocked {
+      color: var(--bad);
+    }
+    .execute-button {
+      border-color: var(--warn);
+      color: var(--warn);
     }
     .summary {
       display: grid;
@@ -167,6 +244,7 @@
         padding: 16px 0;
       }
       .filters,
+      .task-form,
       .summary {
         grid-template-columns: 1fr;
       }
@@ -209,6 +287,34 @@
         <input id="query" type="search" autocomplete="off">
       </label>
     </section>
+    <section class="task-panel" aria-label="创建 planned 任务">
+      <h2>创建 planned 任务</h2>
+      <div class="task-form">
+        <label>Profile
+          <input id="createProfile" type="search" autocomplete="off" placeholder="agent_development">
+        </label>
+        <label>回看天数
+          <input id="createDaysBack" type="number" min="1" max="30" value="7">
+        </label>
+        <label>来源
+          <select id="createSource">
+            <option value="github_trending">github_trending</option>
+            <option value="github_search">github_search</option>
+            <option value="">不指定</option>
+          </select>
+        </label>
+        <label class="check-label">
+          <input id="createDryRun" type="checkbox" checked>
+          <span>dry_run</span>
+        </label>
+        <label class="check-label">
+          <input id="createConfirmDelivery" type="checkbox">
+          <span>确认推送</span>
+        </label>
+        <button id="createTask" type="button">创建任务</button>
+      </div>
+      <p id="createTaskStatus" class="task-status">只在本地后端或 api=1 模式下创建 planned 任务。</p>
+    </section>
     <section id="summary" class="summary" aria-label="任务概览"></section>
     <div class="table-shell">
       <table>
@@ -238,15 +344,24 @@
       profile: document.getElementById("profile"),
       query: document.getElementById("query"),
     };
+    const createControls = {
+      profile: document.getElementById("createProfile"),
+      daysBack: document.getElementById("createDaysBack"),
+      source: document.getElementById("createSource"),
+      dryRun: document.getElementById("createDryRun"),
+      confirmDelivery: document.getElementById("createConfirmDelivery"),
+      button: document.getElementById("createTask"),
+      status: document.getElementById("createTaskStatus"),
+    };
     const rows = document.getElementById("rows");
     const summary = document.getElementById("summary");
 
-    fetch("jobs.json", { cache: "no-store" })
-      .then(response => response.ok ? response.json() : Promise.reject(new Error(`HTTP ${response.status}`)))
+    restoreFilters();
+    bind();
+    setupCreateTask();
+    loadJobs()
       .then(data => {
         state.jobs = Array.isArray(data.jobs) ? data.jobs : [];
-        restoreFilters();
-        bind();
         render();
       })
       .catch(() => {
@@ -256,6 +371,170 @@
     function bind() {
       Object.values(controls).forEach(control => control.addEventListener("input", render));
       Object.values(controls).forEach(control => control.addEventListener("change", render));
+      rows.addEventListener("click", event => {
+        const precheckButton = event.target.closest("[data-precheck]");
+        if (precheckButton) {
+          runExecutionCheck(precheckButton);
+          return;
+        }
+        const executeButton = event.target.closest("[data-execute]");
+        if (executeButton) runJobExecution(executeButton);
+      });
+    }
+
+    function setupCreateTask() {
+      if (!shouldUseApi()) {
+        createControls.button.disabled = true;
+        createControls.status.textContent = "当前使用静态 JSON，只能查看任务；启动本地后端或添加 api=1 后可创建 planned 任务。";
+        return;
+      }
+      createControls.button.addEventListener("click", createPlannedTask);
+    }
+
+    function createPlannedTask() {
+      createControls.button.disabled = true;
+      createControls.status.textContent = "正在创建 planned 任务...";
+      const source = createControls.source.value.trim();
+      const payload = {
+        profile: createControls.profile.value.trim(),
+        sources: source ? [source] : [],
+        dry_run: createControls.dryRun.checked,
+        confirm_delivery: createControls.confirmDelivery.checked,
+        days_back: number(createControls.daysBack.value) || 7,
+        trigger_source: "jobs_page",
+        requested_by: "local-ui",
+      };
+      fetch("/v1/runs/trigger", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+        .then(jsonOrThrow)
+        .then(data => {
+          const warnings = (data.safety_warnings || []).join(" ");
+          createControls.status.textContent = `已创建 ${data.job_id || "planned 任务"}。${warnings}`;
+          controls.status.value = "planned";
+          return loadJobs();
+        })
+        .then(data => {
+          state.jobs = Array.isArray(data.jobs) ? data.jobs : [];
+          render();
+        })
+        .catch(error => {
+          createControls.status.textContent = `创建失败：${error.message || error}`;
+        })
+        .finally(() => {
+          createControls.button.disabled = false;
+        });
+    }
+
+    function loadJobs() {
+      if (!shouldUseApi()) return loadJobsJson();
+      return fetch("/v1/jobs?limit=200", { cache: "no-store" })
+        .then(jsonOrThrow)
+        .catch(loadJobsJson);
+    }
+
+    function loadJobsJson() {
+      return fetch("jobs.json", { cache: "no-store" })
+        .then(jsonOrThrow);
+    }
+
+    function runExecutionCheck(button) {
+      const jobId = button.dataset.precheck || "";
+      const target = document.getElementById(button.dataset.target || "");
+      if (!target) return;
+      if (!shouldUseApi()) {
+        target.className = "precheck-result blocked";
+        target.textContent = "执行前检查需要本地后端或 api=1 模式。";
+        return;
+      }
+      button.disabled = true;
+      target.className = "precheck-result";
+      target.textContent = "检查中...";
+      fetch(`/v1/job-execution-check?job_id=${encodeURIComponent(jobId)}`, { cache: "no-store" })
+        .then(jsonOrThrow)
+        .then(data => {
+          target.className = `precheck-result ${data.executable ? "ok" : "blocked"}`;
+          target.innerHTML = precheckHtml(data);
+        })
+        .catch(error => {
+          target.className = "precheck-result blocked";
+          target.textContent = `检查失败：${error.message || error}`;
+        })
+        .finally(() => {
+          button.disabled = false;
+        });
+    }
+
+    function precheckHtml(data) {
+      if (!data || !data.found) return "未找到任务。";
+      const lines = [
+        data.executable ? "可执行" : "不可执行",
+        ...(data.blockers || []).map(item => `阻止：${item}`),
+        ...(data.warnings || []).map(item => `提示：${item}`),
+      ];
+      if (data.next_command) lines.push(`命令：${data.next_command}`);
+      return lines.map(line => `<div>${escapeHtml(line)}</div>`).join("");
+    }
+
+    function runJobExecution(button) {
+      const jobId = button.dataset.execute || "";
+      const target = document.getElementById(button.dataset.target || "");
+      if (!target) return;
+      if (!shouldUseApi()) {
+        target.className = "precheck-result blocked";
+        target.textContent = "执行任务需要本地后端或 api=1 模式。";
+        return;
+      }
+      if (!window.confirm(`确认执行任务 ${jobId}？`)) return;
+      button.disabled = true;
+      target.className = "precheck-result";
+      target.textContent = "执行中...";
+      fetch(`/v1/jobs/${encodeURIComponent(jobId)}/execute`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ confirm_execution: true }),
+      })
+        .then(jsonOrThrow)
+        .then(data => {
+          target.className = `precheck-result ${data.accepted && data.executed ? "ok" : "blocked"}`;
+          target.innerHTML = executionHtml(data);
+          return loadJobs();
+        })
+        .then(data => {
+          state.jobs = Array.isArray(data.jobs) ? data.jobs : [];
+          render();
+        })
+        .catch(error => {
+          target.className = "precheck-result blocked";
+          target.textContent = `执行失败：${error.message || error}`;
+        })
+        .finally(() => {
+          button.disabled = false;
+        });
+    }
+
+    function executionHtml(data) {
+      const lines = [
+        data.accepted ? "已接受执行" : "未执行",
+        data.status ? `状态：${data.status}` : "",
+        ...(data.blockers || []).map(item => `阻止：${item}`),
+        ...(data.warnings || []).map(item => `提示：${item}`),
+      ].filter(Boolean);
+      return lines.map(line => `<div>${escapeHtml(line)}</div>`).join("");
+    }
+
+    function shouldUseApi() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("api") === "1") return true;
+      if (params.get("api") === "0") return false;
+      return ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
+    }
+
+    function jsonOrThrow(response) {
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return response.json();
     }
 
     function render() {
@@ -263,15 +542,17 @@
         if (controls.status.value && job.status !== controls.status.value) return false;
         if (controls.kind.value && job.kind !== controls.kind.value) return false;
         const profile = String((job.request || {}).profile || "").toLowerCase();
-        if (controls.profile.value.trim() && !profile.includes(controls.profile.value.trim().toLowerCase())) return false;
+        if (controls.profile.value.trim() && profile !== controls.profile.value.trim().toLowerCase()) return false;
         const haystack = [
           job.job_id,
           job.kind,
           job.status,
           job.run_date,
           job.submitted_at,
+          ...((job.request || {}).sources || []),
           profile,
           job.error,
+          job.report_url,
           (job.result || {}).report_url,
           (job.result || {}).report_path,
         ].join(" ").toLowerCase();
@@ -303,6 +584,15 @@
       const request = job.request || {};
       const result = job.result || {};
       const report = result.report_url || job.report_url || "";
+      const jobId = job.job_id || "";
+      const precheckId = `precheck-${safeId(jobId)}`;
+      const executeId = `execute-${safeId(jobId)}`;
+      const precheckDisabled = shouldUseApi() ? "" : " disabled";
+      const precheckTitle = shouldUseApi() ? "执行前检查" : "仅本地后端或 api=1 模式可用";
+      const executeEnabled = shouldUseApi() && job.status === "planned";
+      const executeDisabled = executeEnabled ? "" : " disabled";
+      const executeTitle = executeEnabled ? "确认后执行 planned 任务" : "仅 API 模式下的 planned 任务可执行";
+      const errorText = escapeHtml(shortText(job.error || result.error || ""));
       const resultText = [
         result.selected_count !== undefined ? `入选 ${number(result.selected_count)}` : "",
         result.collected_count !== undefined ? `候选 ${number(result.collected_count)}` : "",
@@ -317,7 +607,15 @@
         <td>${escapeHtml(job.submitted_at || "-")}</td>
         <td>${escapeHtml(job.finished_at || "-")}</td>
         <td>${resultText}</td>
-        <td>${escapeHtml(shortText(job.error || result.error || ""))}</td>
+        <td>
+          <div class="row-actions">
+            <div>${errorText || "-"}</div>
+            <button class="secondary-button" type="button" title="${escapeAttribute(precheckTitle)}" data-precheck="${escapeAttribute(jobId)}" data-target="${escapeAttribute(precheckId)}"${precheckDisabled}>执行前检查</button>
+            <button class="secondary-button execute-button" type="button" title="${escapeAttribute(executeTitle)}" data-execute="${escapeAttribute(jobId)}" data-target="${escapeAttribute(executeId)}"${executeDisabled}>确认执行</button>
+            <div id="${escapeAttribute(precheckId)}" class="precheck-result" aria-live="polite"></div>
+            <div id="${escapeAttribute(executeId)}" class="precheck-result" aria-live="polite"></div>
+          </div>
+        </td>
       </tr>`;
     }
 
@@ -326,12 +624,16 @@
       for (const [key, control] of Object.entries(controls)) {
         if (params.has(key)) control.value = params.get(key) || "";
       }
+      if (params.has("q")) controls.query.value = params.get("q") || "";
     }
 
     function updateUrl() {
       const params = new URLSearchParams();
+      const apiMode = new URLSearchParams(window.location.search).get("api");
+      if (apiMode === "1" || apiMode === "0") params.set("api", apiMode);
       for (const [key, control] of Object.entries(controls)) {
-        if (control.value) params.set(key, control.value);
+        if (!control.value) continue;
+        params.set(key === "query" ? "q" : key, control.value);
       }
       const next = `${window.location.pathname}${params.toString() ? "?" + params.toString() : ""}`;
       window.history.replaceState({}, "", next);
@@ -345,6 +647,10 @@
     function shortText(value) {
       const text = String(value || "");
       return text.length > 160 ? `${text.slice(0, 157)}...` : text;
+    }
+
+    function safeId(value) {
+      return String(value || "unknown").replace(/[^a-zA-Z0-9_-]/g, "-") || "unknown";
     }
 
     function escapeHtml(value) {

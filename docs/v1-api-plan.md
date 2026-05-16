@@ -6,9 +6,9 @@
 
 1. 查询接口可以同步返回。
 2. 采集、生成、推送等长任务必须走任务模型。
-3. 当前阶段先提供任务预检和历史任务视图，不直接在 HTTP 请求中执行长任务。
-4. 查询接口只读取公开归档或本地派生索引，触发接口只写入任务状态，不返回密钥。
-5. 后续接入 worker 后，再把 `run_trigger_execute` 从 `false` 切换为 `true`。
+3. 采集、生成、推送必须先落到任务模型，再通过受控执行入口交给 job runner。
+4. 查询接口只读取公开归档或本地派生索引，触发创建接口只写入任务状态，不返回密钥。
+5. 当前已提供本地受控执行入口，后续再演进为异步 worker、队列和权限控制。
 
 ## 当前接口
 
@@ -25,9 +25,10 @@
 | `capabilities.project_detail` | 是否支持项目详情 |
 | `capabilities.runs_query` | 是否支持运行记录 |
 | `capabilities.jobs_query` | 是否支持任务查询 |
+| `capabilities.job_events` | 是否支持任务审计事件查询 |
 | `capabilities.run_trigger_preview` | 是否支持触发预检 |
 | `capabilities.local_job_runner` | 是否支持本地任务执行器 |
-| `capabilities.run_trigger_execute` | 是否支持真实后台执行；当前为 `false` |
+| `capabilities.run_trigger_execute` | 是否支持受控任务执行；当前为 `true` |
 
 ### `GET /v1/projects`
 
@@ -92,9 +93,74 @@
 
 查询单个任务详情。对于历史周报任务，会同时返回对应 `data/runs/YYYY-MM-DD.json` 的运行摘要。
 
+### `GET /v1/jobs/{job_id}/events`
+
+查询单个任务的审计事件，事件按创建时间升序返回。当前会记录：
+
+| 事件类型 | 说明 |
+|---|---|
+| `job_created` | 创建 planned 任务 |
+| `duplicate_trigger_ignored` | 命中已有 active 任务，未重复创建 |
+| `execution_requested` | 收到执行请求 |
+| `execution_blocked` | 执行请求被阻止 |
+| `execution_started` | 任务已交给 job runner |
+| `execution_finished` | job runner 返回执行结果 |
+
+事件字段包括 `event_id`、`job_id`、`event_type`、`status`、`actor`、`created_at`、`message` 和 `payload`。事件只保存审计摘要，不保存 Token、Chat ID、Webhook 或请求头。
+
+### `GET /v1/job-execution-check?job_id=...`
+
+执行前检查接口，只判断任务是否可以被 `scripts/run_planned_job.py` 消费，不直接执行任务。
+
+返回字段：
+
+| 字段 | 说明 |
+|---|---|
+| `found` | 是否找到任务 |
+| `executable` | 是否满足执行器消费条件 |
+| `execution_path` | 建议执行入口 |
+| `request` | 任务请求摘要 |
+| `blockers` | 阻止执行的原因 |
+| `warnings` | 执行前提示，例如真实推送风险 |
+| `next_command` | 可执行时给出的本地执行命令 |
+
+当前规则：只有 `kind=weekly_report` 且 `status=planned` 的任务可执行；如果 `dry_run=false` 但没有 `confirm_delivery=true`，会被阻止。
+
+### `POST /v1/jobs/{job_id}/execute`
+
+受控执行单个 planned 任务。该接口会先调用同一套执行前检查逻辑，检查不通过时只返回阻止原因，不会执行任务。
+
+请求示例：
+
+```json
+{
+  "confirm_execution": true
+}
+```
+
+返回字段：
+
+| 字段 | 说明 |
+|---|---|
+| `accepted` | 是否接受本次执行请求 |
+| `executed` | runner 是否实际执行 |
+| `job_id` | 任务编号 |
+| `status` | runner 返回的任务状态 |
+| `blockers` | 阻止执行的原因 |
+| `warnings` | 执行前提示 |
+| `precheck` | 执行前检查结果 |
+| `runner_result` | `src.job_runner.run_planned_job()` 返回的结果摘要 |
+
+执行规则：
+
+1. 必须传入 `confirm_execution=true`。
+2. 任务必须通过 `/v1/job-execution-check`。
+3. `dry_run=false` 的真实推送任务仍必须在任务请求中包含 `confirm_delivery=true`。
+4. API 只调用现有 job runner，不单独实现采集、生成或推送逻辑。
+
 ### `POST /v1/runs/trigger`
 
-创建一次采集任务的计划预览并写入 `jobs` 表，不立即执行真实后台任务。
+创建一次受控的周报计划任务并写入 `jobs` 表，不在 HTTP 请求中直接执行采集、生成或推送。
 
 请求示例：
 
@@ -103,9 +169,24 @@
   "profile": "agent_development",
   "sources": ["github_trending"],
   "dry_run": true,
-  "days_back": 7
+  "days_back": 7,
+  "trigger_source": "api",
+  "requested_by": "local-user",
+  "confirm_delivery": false
 }
 ```
+
+请求规则：
+
+| 字段 | 说明 |
+|---|---|
+| `profile` | 个性化方向，可为空 |
+| `sources` | 期望来源标签，当前用于审计和筛选 |
+| `dry_run` | `true` 时执行器会跳过主流程内置推送 |
+| `days_back` | 回看天数 |
+| `trigger_source` | 触发来源，例如 `api`、`github_actions`、`manual` |
+| `requested_by` | 触发人或系统标识，只保存非密钥文本 |
+| `confirm_delivery` | 只有该值为 `true` 且 `dry_run=false` 时，才允许真实推送 |
 
 当前返回：
 
@@ -114,10 +195,36 @@
 | `job_id` | 预览任务编号，格式为 `preview:*` |
 | `status` | 当前为 `planned` |
 | `execution_supported` | 当前为 `false` |
+| `planned_job_created` | 是否已创建 planned 任务 |
+| `duplicate_of` | 如果命中已有 active 任务，则返回已有任务编号 |
+| `execution_path` | 后续执行入口，例如 `scripts/run_planned_job.py` |
 | `request` | 标准化后的请求参数 |
+| `safety_warnings` | 安全降级提示，例如未确认推送时强制 dry_run |
 | `next_steps` | 启用真实后台执行前需要完成的步骤 |
 
-设计原因：GitHub 采集、LLM 生成、页面构建和推送都是长任务，不能直接塞进 HTTP 请求生命周期。当前先持久化任务计划，再由本地任务执行器把任务从 `planned` 推进到 `running`、`succeeded` 或 `failed`。
+设计原因：GitHub 采集、LLM 生成、页面构建和推送都是长任务，不能直接塞进 HTTP 请求生命周期。当前先持久化任务计划，再由本地任务执行器把任务从 `planned` 推进到 `running`、`succeeded` 或 `failed`。如果请求传入 `dry_run=false` 但没有 `confirm_delivery=true`，接口会自动改为 `dry_run=true`，避免前端或脚本误触发真实推送。
+
+重复任务防护：如果同一组 `profile`、`sources`、`dry_run`、`confirm_delivery` 和 `days_back` 已经存在 `planned` 或 `running` 任务，接口会返回已有 `job_id`，并设置 `planned_job_created=false`，不重复写入新任务。
+
+### 任务状态页接入方式
+
+`docs/jobs.html` 在本地后端环境或 URL 带 `api=1` 时优先读取 `/v1/jobs?limit=200`，读取失败时回退到 `jobs.json`。GitHub Pages 上默认使用静态 `jobs.json`，避免公开页面依赖常驻后端。
+
+页面筛选参数和 `/v1/jobs` 保持同一语义：
+
+| 页面参数 | API 参数 | 说明 |
+|---|---|---|
+| `status` | `status` | 任务状态 |
+| `kind` | `kind` | 任务类型 |
+| `profile` | `profile` | 个性化方向，精确匹配 |
+| `q` | `query` | 关键词搜索，兼容旧的 `query` |
+| `api` | 无 | 页面数据源开关，`1` 强制 API，`0` 强制静态 JSON |
+
+任务状态页还提供一个最小 planned 任务创建表单。该表单只在本地后端或 `api=1` 模式下启用，提交时调用 `/v1/runs/trigger`，并固定写入 `trigger_source=jobs_page` 和 `requested_by=local-ui`。表单不会直接执行任务，只会创建 planned 记录；后续仍由 job runner 或 GitHub Actions 消费任务。
+
+任务状态页的每条任务还提供“执行前检查”按钮。该按钮只在本地后端或 `api=1` 模式下调用 `/v1/job-execution-check?job_id=...`，用于展示任务是否可执行、阻止原因、提示信息和建议执行命令；页面不会直接运行任务。
+
+任务状态页还提供“确认执行”按钮。该按钮只在 API 模式且任务状态为 `planned` 时启用，点击后需要浏览器二次确认，并调用 `POST /v1/jobs/{job_id}/execute` 传入 `confirm_execution=true`。执行后页面会重新读取任务列表。
 
 ### 本地任务执行器
 

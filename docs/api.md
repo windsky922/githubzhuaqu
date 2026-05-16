@@ -1,6 +1,6 @@
 # 后端 API 说明
 
-本文档记录当前后端 API 的最小可用设计。它暂时只提供只读接口，不改变采集、评分、周报生成和推送流程。
+本文档记录当前后端 API 的最小可用设计。`/api/*` 继续作为兼容只读接口，`/v1/*` 用于任务调度、受控执行和后续管理端能力。
 
 ## 一、定位
 
@@ -10,9 +10,9 @@
 
 1. JSON 归档仍然是事实来源。
 2. SQLite 仍然是可重建的派生索引，不提交到 GitHub。
-3. API 只读取公开归档数据，不读取、不返回任何密钥。
-4. API 不负责采集 GitHub，也不负责调用 Kimi 或 Telegram。
-5. 后续可以在不破坏现有 Actions 工作流的前提下，把前端逐步切换到 API。
+3. API 不读取、不返回任何密钥。
+4. `/v1/runs/trigger` 只创建 planned 任务，真实执行必须走任务模型和受控执行入口。
+5. `/v1/jobs/{job_id}/execute` 复用执行前检查并调用现有 job runner，不单独实现采集、Kimi 或推送逻辑。
 
 ## 二、本地启动
 
@@ -97,6 +97,18 @@ http://127.0.0.1:8000/api/health
 ### `GET /api/weekly/latest`
 
 返回最新 Markdown 周报正文、运行日期、周报页面路径和对应运行摘要。这个接口主要用于后续后台管理页、移动端入口或调试页面。
+
+### `/v1` 任务接口
+
+`/v1` 是后端服务化入口，当前已经支持：
+
+1. `GET /v1/jobs`：查询任务列表。
+2. `GET /v1/job-execution-check?job_id=...`：检查 planned 任务是否可执行。
+3. `GET /v1/jobs/{job_id}/events`：查询任务审计事件。
+4. `POST /v1/runs/trigger`：创建 planned 周报任务，不直接执行。
+5. `POST /v1/jobs/{job_id}/execute`：显式传入 `confirm_execution=true` 后，把检查通过的 planned 任务交给 job runner 执行。
+
+执行接口仍然遵守任务请求中的 `dry_run` 和 `confirm_delivery`。如果任务允许真实推送，执行前需要确认 Telegram、飞书或微信等推送配置已经正确。
 
 ## 四、前端读取方式
 

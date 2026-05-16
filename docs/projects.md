@@ -4,6 +4,16 @@
 
 | 日期 | 项目 | 来源 | Trending 排名 | 方向 | 语言 | Star | 新增 Star | 风险提示 | 链接 |
 |---|---|---|---:|---|---|---:|---:|---:|---|
+| 2026-05-16 | CloakHQ/CloakBrowser | GitHub Trending | 2 | AI Agent | Python | 12038 | 859 | 0 | [https://github.com/CloakHQ/CloakBrowser](https://github.com/CloakHQ/CloakBrowser) |
+| 2026-05-16 | yikart/AiToEarn | GitHub Trending | 3 | Other | TypeScript | 14125 | 262 | 0 | [https://github.com/yikart/AiToEarn](https://github.com/yikart/AiToEarn) |
+| 2026-05-16 | rohitg00/agentmemory | GitHub Trending | 4 | AI Agent | TypeScript | 9815 | 650 | 0 | [https://github.com/rohitg00/agentmemory](https://github.com/rohitg00/agentmemory) |
+| 2026-05-16 | bytedance/UI-TARS-desktop | GitHub Search + GitHub Trending | 5 | AI Agent | TypeScript | 34137 | 175 | 0 | [https://github.com/bytedance/UI-TARS-desktop](https://github.com/bytedance/UI-TARS-desktop) |
+| 2026-05-16 | decolua/9router | GitHub Trending | 6 | AI Agent | JavaScript | 10780 | 406 | 0 | [https://github.com/decolua/9router](https://github.com/decolua/9router) |
+| 2026-05-16 | Hmbown/DeepSeek-TUI | GitHub Trending | 7 | AI Agent | Rust | 30036 | 764 | 0 | [https://github.com/Hmbown/DeepSeek-TUI](https://github.com/Hmbown/DeepSeek-TUI) |
+| 2026-05-16 | HKUDS/AI-Trader | GitHub Trending | 8 | AI Agent | Python | 17429 | 170 | 1 | [https://github.com/HKUDS/AI-Trader](https://github.com/HKUDS/AI-Trader) |
+| 2026-05-16 | mattpocock/skills | GitHub Trending | 9 | LLM Tooling | Shell | 85440 | 2439 | 0 | [https://github.com/mattpocock/skills](https://github.com/mattpocock/skills) |
+| 2026-05-16 | NousResearch/hermes-agent | GitHub Search | - | AI Agent | Python | 152400 | 1617 | 0 | [https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) |
+| 2026-05-16 | rtk-ai/rtk | GitHub Search | - | AI Agent | Rust | 48629 | 513 | 0 | [https://github.com/rtk-ai/rtk](https://github.com/rtk-ai/rtk) |
 | 2026-05-15 | CloakHQ/CloakBrowser | GitHub Trending | 2 | AI Agent | Python | 11179 | 0 | 0 | [https://github.com/CloakHQ/CloakBrowser](https://github.com/CloakHQ/CloakBrowser) |
 | 2026-05-15 | bytedance/UI-TARS-desktop | GitHub Search + GitHub Trending | 3 | AI Agent | TypeScript | 33962 | 1441 | 0 | [https://github.com/bytedance/UI-TARS-desktop](https://github.com/bytedance/UI-TARS-desktop) |
 | 2026-05-15 | Hmbown/DeepSeek-TUI | GitHub Trending | 4 | AI Agent | Rust | 29272 | 4722 | 0 | [https://github.com/Hmbown/DeepSeek-TUI](https://github.com/Hmbown/DeepSeek-TUI) |

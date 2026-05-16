@@ -2,6 +2,171 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-05-15 追加：新增任务审计事件表和事件查询 API
+
+### 1. 开发目的
+
+任务系统已经可以创建、检查和执行 planned 任务，但缺少可查询的过程记录。为了支撑后续失败重试、后台管理页、用户审查和问题排查，本次新增任务审计事件能力，记录任务从创建到执行结束的关键动作。
+
+### 2. 修改内容
+
+1. SQLite schema 新增 `job_events` 表，保存 `event_id`、`job_id`、`event_type`、`status`、`actor`、`created_at`、`message` 和脱敏 payload。
+2. 新增 `insert_job_event()`，统一写入任务事件。
+3. `/v1/runs/trigger` 在创建任务或命中重复任务时写入事件。
+4. `/v1/jobs/{job_id}/execute` 在收到执行请求、阻止执行、开始执行和执行结束时写入事件。
+5. 新增 `GET /v1/jobs/{job_id}/events`，用于查询单个任务的审计事件。
+6. 补充 API、SQLite 和数据契约测试，固定事件表结构和查询入口。
+
+### 3. 边界说明
+
+事件 payload 只记录审计摘要，不记录 Token、Chat ID、Webhook、请求头或原始密钥配置。当前事件表仍属于可重建本地 SQLite 派生索引，后续可迁移到持久化数据库。
+
+## 2026-05-15 追加：任务状态页接入受控执行按钮
+
+### 1. 开发目的
+
+后端已经具备 `POST /v1/jobs/{job_id}/execute` 受控执行入口，但用户仍需要手动调用接口。为了完成“前端 -> 后端 -> 数据库 -> runner”的最小闭环，本次把执行入口接入任务状态页，让本地后端模式下的 planned 任务可以从页面发起执行。
+
+### 2. 修改内容
+
+1. `jobs.html` 的任务行新增“确认执行”按钮。
+2. 该按钮只在本地后端或 `api=1` 模式下，并且任务状态为 `planned` 时启用。
+3. 点击执行前会触发浏览器确认，随后向 `/v1/jobs/{job_id}/execute` 发送 `confirm_execution=true`。
+4. 页面展示执行接口返回的接受状态、任务状态、阻止原因和提示信息。
+5. 执行后自动刷新任务列表，便于查看任务从 planned 推进后的状态。
+6. 补充页面构建测试，固定执行按钮、确认参数和执行 API 路径。
+
+### 3. 边界说明
+
+该按钮仍然依赖本地后端和现有 job runner，不会在 GitHub Pages 静态页面中直接运行任务。真实推送仍由任务请求中的 `dry_run` 和 `confirm_delivery` 控制。
+
+## 2026-05-15 追加：新增受控任务执行 API
+
+### 1. 开发目的
+
+任务系统已经具备 planned 创建、重复防护、执行前检查和本地 job runner，但后端 API 还不能把一个已检查通过的任务交给执行器。为了推进核心后端能力，本次新增受控执行入口，让后续前端管理页、脚本或本地服务可以通过同一套任务模型执行 planned 周报任务。
+
+### 2. 修改内容
+
+1. 新增 `POST /v1/jobs/{job_id}/execute`。
+2. 执行前强制复用 `/v1/job-execution-check` 的判断结果。
+3. 请求必须显式传入 `confirm_execution=true`，否则只返回阻止原因，不执行任务。
+4. 检查不通过的任务不会交给 runner，包括已完成任务、缺失任务和不满足真实推送确认的任务。
+5. 检查通过后调用 `src.job_runner.run_planned_job()`，由现有执行器负责状态推进和结果写回。
+6. 补充 repository 和 FastAPI 路由测试，避免后续改动绕过确认逻辑。
+
+### 3. 边界说明
+
+该接口是本地后端和后续管理端的核心执行入口，不用于公开 GitHub Pages 静态页面。真实推送仍受任务请求中的 `dry_run` 和 `confirm_delivery` 控制。
+
+## 2026-05-15 追加：任务状态页接入执行前检查按钮
+
+### 1. 开发目的
+
+任务执行前检查接口已经可以判断 planned 任务是否可被本地执行器消费，但用户仍需要手动调用 API。为了让任务管理页形成更完整的闭环，本次把检查能力接入 `jobs.html`，让每条任务都可以在页面中查看是否可执行、阻止原因、提示信息和下一步命令。
+
+### 2. 修改内容
+
+1. `jobs.html` 的任务行新增“执行前检查”按钮。
+2. 按钮在本地后端或 `api=1` 模式下调用 `/v1/job-execution-check?job_id=...`。
+3. GitHub Pages 静态模式下不会调用后端，只提示需要本地后端或 `api=1`。
+4. 检查结果显示可执行状态、阻止原因、提示信息和 `next_command`。
+5. 补充页面构建测试，固定执行前检查入口不会被后续改动移除。
+
+### 3. 边界说明
+
+本次只做执行前检查，不在浏览器页面里直接执行任务。真实执行仍由 `scripts/run_planned_job.py`、GitHub Actions 或后续受控 worker 处理。
+
+## 2026-05-15 追加：新增任务执行前检查接口
+
+### 1. 开发目的
+
+planned 任务已经具备创建、去重和本地执行器消费能力，但前端或调度器在执行前还缺少统一检查入口。为了避免把不可执行、已完成或缺少确认的任务交给执行器，本次增加只读执行前检查接口。
+
+### 2. 本次修改
+
+1. 新增 `/v1/job-execution-check?job_id=...`，用于判断单个任务是否可被 `scripts/run_planned_job.py` 消费。
+2. `ApiRepository.job_execution_check()` 返回 `executable`、`blockers`、`warnings` 和建议执行命令。
+3. 检查规则要求任务必须是 `weekly_report` 且状态为 `planned`。
+4. 如果 `dry_run=false` 但没有 `confirm_delivery=true`，执行前检查会阻止执行。
+5. 补充 API 和 FastAPI 路由测试，覆盖 planned、历史完成任务和缺失任务。
+
+### 3. 设计边界
+
+本次只做执行前检查，不在 HTTP 请求中执行 job runner，不暴露任何密钥配置状态。真实执行仍通过脚本、GitHub Actions 或后续受控 worker 完成。
+
+## 2026-05-15 追加：planned 任务创建增加重复防护
+
+### 1. 开发目的
+
+任务状态页已经可以创建 planned 任务，但如果用户多次点击按钮，或多个入口提交同一组参数，可能在 `jobs` 表里产生重复的 planned 任务。为了让后续前端和 worker 更稳定，本次在后端任务创建入口增加 active 任务去重。
+
+### 2. 本次修改
+
+1. `/v1/runs/trigger` 创建任务前会检查已有 `planned` 或 `running` 周报任务。
+2. 去重依据为 `profile`、`sources`、`dry_run`、`confirm_delivery` 和 `days_back`，不受 `requested_by` 或 `trigger_source` 影响。
+3. 如果命中重复任务，接口返回已有 `job_id`，并设置 `planned_job_created=false` 和 `duplicate_of`。
+4. 补充 API 测试，覆盖重复提交不会创建第二个 planned 任务。
+5. `/v1` API 规划文档补充重复任务防护说明。
+
+### 3. 设计边界
+
+本次只拦截 active 状态的重复任务。已经完成或失败的历史任务不会阻止新任务创建，避免影响后续按周重新运行和人工重试。
+
+## 2026-05-15 追加：任务状态页新增 planned 任务创建表单
+
+### 1. 开发目的
+
+后端已经具备受控创建 planned 任务的能力，但用户仍需要通过接口文档或脚本才能创建任务。为了让后续前端管理页有一个最小可用入口，本次在任务状态页增加创建任务表单，同时继续保持“只创建 planned，不直接执行”的安全边界。
+
+### 2. 本次修改
+
+1. `jobs.html` 新增 planned 任务创建表单，支持填写 profile、回看天数、来源、dry_run 和确认推送。
+2. 表单只在本地后端或 `api=1` 模式下启用，静态 GitHub Pages 默认只能查看任务。
+3. 提交时调用 `/v1/runs/trigger`，写入 `trigger_source=jobs_page` 和 `requested_by=local-ui`。
+4. 创建成功后自动筛选 planned 任务并刷新任务列表。
+5. 补充页面构建测试，固定表单、受控触发接口和审计字段。
+
+### 3. 设计边界
+
+本次不在页面中执行 job runner，也不绕过 `confirm_delivery` 规则。真实执行仍需要由 `scripts/run_planned_job.py`、GitHub Actions 或后续受控 worker 消费 planned 任务。
+
+## 2026-05-15 追加：任务触发入口增加推送确认和审计字段
+
+### 1. 开发目的
+
+项目已经具备 planned 任务、job runner 和 GitHub Actions 手动触发能力，但 `/v1/runs/trigger` 的语义仍容易被理解成“HTTP 直接执行任务”。为了给后续前端管理页和真实任务触发按钮打基础，本次先明确触发边界：接口只创建计划任务，真实执行仍由 job runner 完成。
+
+### 2. 本次修改
+
+1. `/v1/runs/trigger` 的任务请求新增 `trigger_source`、`requested_by`、`requested_dry_run`、`confirm_delivery`、`delivery_allowed` 和 `safety_warnings`。
+2. 如果请求传入 `dry_run=false` 但没有 `confirm_delivery=true`，系统会自动改为 `dry_run=true`，防止误推送。
+3. 返回结果新增 `planned_job_created`、`http_execution_supported` 和 `execution_path`，明确当前不会在 HTTP 请求中直接执行长任务。
+4. `scripts/create_planned_job.py` 写入触发来源和触发人，GitHub Actions 场景默认记录 `github_actions` 与 `GITHUB_ACTOR`。
+5. README、数据契约和 `/v1` API 规划文档补充受控推送规则。
+
+### 3. 设计边界
+
+本次不增加前端“立即执行”按钮，也不让 API 请求直接跑采集和推送。后续要开放前端触发时，还需要补鉴权、重复任务控制、审计查看和失败重试策略。
+
+## 2026-05-15 追加：任务状态页接入后端任务查询
+
+### 1. 开发目的
+
+`/v1/jobs` 已经支持按状态、类型、profile 和关键词查询任务，但 GitHub Pages 的任务状态页仍只读取静态 `jobs.json`。为了让本地后端、未来前端和静态页面使用一致的任务查询语义，本次把任务页改成“后端 API 优先、静态 JSON 回退”的加载方式。
+
+### 2. 本次修改
+
+1. `jobs.html` 在本地或 `api=1` 时优先读取 `/v1/jobs?limit=200`。
+2. GitHub Pages 环境继续自动回退到 `jobs.json`，不影响公开归档查看。
+3. 任务页 URL 保留 `api=1/api=0`，关键词参数统一输出为 `q`，同时兼容旧的 `query`。
+4. profile 筛选改为精确匹配，与 `/v1/jobs?profile=...` 保持一致。
+5. 补充页面构建测试，固定 API 回退、URL 参数和 profile 匹配行为。
+
+### 3. 设计边界
+
+本次只让任务页读取后端查询入口，不增加页面上的真实任务触发按钮。后续如果要开放前端触发，需要先完成鉴权、触发权限、审计日志和任务防重复策略。
+
 ## 2026-05-15 追加：增强任务 API 查询过滤
 
 ### 1. 开发目的
