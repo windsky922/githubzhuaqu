@@ -43,6 +43,7 @@ class ApiRepository:
                 "jobs_query": True,
                 "job_events": True,
                 "job_execution_check": True,
+                "job_retry": True,
                 "run_trigger_preview": True,
                 "local_job_runner": True,
                 "run_trigger_execute": True,
@@ -329,6 +330,125 @@ class ApiRepository:
             "warnings": check.get("warnings") or [],
             "precheck": check,
             "runner_result": runner_result,
+        }
+
+    def retry_job(self, job_id: str, payload: dict[str, Any] | None = None) -> dict[str, Any]:
+        payload = payload or {}
+        detail = self.job_detail(job_id)
+        normalized = _blank_to_none(job_id) or ""
+        job = detail.get("job") if isinstance(detail.get("job"), dict) else {}
+        actor = str(payload.get("requested_by") or (job.get("request") or {}).get("requested_by") or "api").strip()[:120]
+        blockers = []
+        if not detail.get("found"):
+            blockers.append("任务不存在，不能重试。")
+        if job and job.get("kind") != "weekly_report":
+            blockers.append("当前只支持 weekly_report 任务重试。")
+        if job and job.get("status") != "failed":
+            blockers.append(f"任务状态为 {job.get('status') or 'unknown'}，只有 failed 任务可以重试。")
+
+        self._record_job_event(
+            normalized,
+            "retry_requested",
+            str(job.get("status") or ""),
+            actor,
+            "收到任务重试请求。",
+            {"requested_by": actor},
+        )
+        if blockers:
+            self._record_job_event(
+                normalized,
+                "retry_blocked",
+                str(job.get("status") or "blocked"),
+                actor,
+                "任务重试被阻止。",
+                {"blockers": blockers},
+            )
+            return {
+                "schema_version": 1,
+                "accepted": False,
+                "retry_created": False,
+                "original_job_id": normalized,
+                "job_id": "",
+                "status": "blocked",
+                "blockers": blockers,
+                "retry_job": {},
+            }
+
+        request = job.get("request") if isinstance(job.get("request"), dict) else {}
+        retry_request = {
+            **request,
+            "trigger_source": "retry",
+            "requested_by": actor,
+            "retry_of": normalized,
+        }
+        duplicate = self._find_active_duplicate_job(retry_request)
+        if duplicate:
+            self._record_job_event(
+                normalized,
+                "retry_duplicate_ignored",
+                duplicate.get("status") or "",
+                actor,
+                "已存在相同 active 任务，未创建重试任务。",
+                {"duplicate_of": duplicate.get("job_id") or "", "request": retry_request},
+            )
+            return {
+                "schema_version": 1,
+                "accepted": True,
+                "retry_created": False,
+                "original_job_id": normalized,
+                "job_id": duplicate.get("job_id") or "",
+                "status": duplicate.get("status") or "",
+                "blockers": [],
+                "duplicate_of": duplicate.get("job_id") or "",
+                "retry_job": duplicate,
+            }
+
+        submitted_at = datetime.now(UTC).isoformat().replace("+00:00", "Z")
+        fingerprint = sha1(
+            json.dumps(
+                {"original_job_id": normalized, "submitted_at": submitted_at, "request": retry_request},
+                ensure_ascii=False,
+                sort_keys=True,
+            ).encode("utf-8")
+        ).hexdigest()[:12]
+        retry_job = {
+            "job_id": f"retry:{fingerprint}",
+            "kind": "weekly_report",
+            "status": "planned",
+            "run_date": "",
+            "submitted_at": submitted_at,
+            "started_at": "",
+            "finished_at": "",
+            "request": retry_request,
+            "result": {},
+            "error": "",
+        }
+        self._persist_preview_job(retry_job)
+        self._record_job_event(
+            normalized,
+            "retry_created",
+            "planned",
+            actor,
+            "已创建重试 planned 任务。",
+            {"retry_job_id": retry_job["job_id"], "request": retry_request},
+        )
+        self._record_job_event(
+            retry_job["job_id"],
+            "job_created",
+            "planned",
+            actor,
+            "已创建 failed 任务的重试任务。",
+            {"retry_of": normalized, "request": retry_request},
+        )
+        return {
+            "schema_version": 1,
+            "accepted": True,
+            "retry_created": True,
+            "original_job_id": normalized,
+            "job_id": retry_job["job_id"],
+            "status": retry_job["status"],
+            "blockers": [],
+            "retry_job": retry_job,
         }
 
     def trigger_run_preview(self, payload: dict[str, Any] | None = None) -> dict[str, Any]:

@@ -50,18 +50,42 @@ class ApiRepositoryTest(unittest.TestCase):
             )
             unsafe_trigger = repository.trigger_run_preview({"dry_run": "false", "confirm_delivery": False})
             confirmed_trigger = repository.trigger_run_preview({"dry_run": "false", "confirm_delivery": True})
+            failed_job = {
+                "job_id": "preview:failed",
+                "kind": "weekly_report",
+                "status": "failed",
+                "run_date": "",
+                "submitted_at": "2026-05-09T00:00:00Z",
+                "started_at": "2026-05-09T00:01:00Z",
+                "finished_at": "2026-05-09T00:02:00Z",
+                "request": {
+                    "profile": "python",
+                    "sources": ["github_search"],
+                    "dry_run": True,
+                    "days_back": 7,
+                    "trigger_source": "test",
+                    "requested_by": "unit-test",
+                },
+                "result": {},
+                "error": "unit test failure",
+            }
+            repository._persist_preview_job(failed_job)
             preview_detail = repository.job_detail(trigger["job_id"])
             execution_check = repository.job_execution_check(trigger["job_id"])
             completed_execution_check = repository.job_execution_check("run:2026-05-09")
             missing_execution_check = repository.job_execution_check("missing")
             blocked_execution = repository.execute_job(trigger["job_id"], {})
             completed_execution = repository.execute_job("run:2026-05-09", {"confirm_execution": True})
+            retry = repository.retry_job("preview:failed", {"requested_by": "unit-test-retry"})
+            retry_blocked = repository.retry_job(trigger["job_id"], {"requested_by": "unit-test-retry"})
             with patch(
                 "src.api.repository.run_planned_job",
                 return_value={"executed": True, "job_id": trigger["job_id"], "status": "succeeded"},
             ) as runner:
                 accepted_execution = repository.execute_job(trigger["job_id"], {"confirm_execution": True})
             job_events = repository.job_events(trigger["job_id"])
+            retry_events = repository.job_events("preview:failed")
+            retry_job_detail = repository.job_detail(retry["job_id"])
             planned_jobs = repository.jobs(status="planned", profile="agent_development", query="github_trending")
             audit_jobs = repository.jobs(status="planned", query="unit-test")
             succeeded_jobs = repository.jobs(status="succeeded", kind="weekly_report", query="2026-05-09")
@@ -80,6 +104,7 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertIn("owner/agent", latest["markdown"])
             self.assertTrue(health["capabilities"]["jobs_query"])
             self.assertTrue(health["capabilities"]["job_execution_check"])
+            self.assertTrue(health["capabilities"]["job_retry"])
             self.assertTrue(health["capabilities"]["local_job_runner"])
             self.assertTrue(health["capabilities"]["run_trigger_execute"])
             self.assertEqual(jobs["jobs"][0]["job_id"], "run:2026-05-09")
@@ -118,6 +143,16 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertTrue(accepted_execution["executed"])
             self.assertEqual(accepted_execution["status"], "succeeded")
             runner.assert_called_once()
+            self.assertTrue(retry["accepted"])
+            self.assertTrue(retry["retry_created"])
+            self.assertTrue(retry["job_id"].startswith("retry:"))
+            self.assertEqual(retry["retry_job"]["request"]["retry_of"], "preview:failed")
+            self.assertEqual(retry["retry_job"]["request"]["requested_by"], "unit-test-retry")
+            self.assertFalse(retry_blocked["accepted"])
+            self.assertFalse(retry_blocked["retry_created"])
+            self.assertIn("只有 failed 任务可以重试", " ".join(retry_blocked["blockers"]))
+            self.assertTrue(retry_job_detail["found"])
+            self.assertEqual(retry_job_detail["job"]["status"], "planned")
             event_types = [event["event_type"] for event in job_events["events"]]
             self.assertIn("job_created", event_types)
             self.assertIn("duplicate_trigger_ignored", event_types)
@@ -126,9 +161,12 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertIn("execution_started", event_types)
             self.assertIn("execution_finished", event_types)
             self.assertEqual(job_events["job_id"], trigger["job_id"])
+            retry_event_types = [event["event_type"] for event in retry_events["events"]]
+            self.assertIn("retry_requested", retry_event_types)
+            self.assertIn("retry_created", retry_event_types)
             self.assertEqual(planned_jobs["count"], 1)
             self.assertEqual(planned_jobs["jobs"][0]["job_id"], trigger["job_id"])
-            self.assertEqual(audit_jobs["jobs"][0]["job_id"], trigger["job_id"])
+            self.assertIn(trigger["job_id"], [job["job_id"] for job in audit_jobs["jobs"]])
             self.assertEqual(succeeded_jobs["count"], 1)
             self.assertEqual(succeeded_jobs["jobs"][0]["job_id"], "run:2026-05-09")
         finally:
@@ -142,6 +180,18 @@ class ApiRepositoryTest(unittest.TestCase):
         root = Path.cwd() / f".tmp-api-route-test-{uuid.uuid4().hex}"
         try:
             _write_fixture(root)
+            setup_repository = ApiRepository(root=root, db_path=root / "data" / "github_weekly.sqlite")
+            setup_repository._persist_preview_job(
+                {
+                    "job_id": "preview:route-failed",
+                    "kind": "weekly_report",
+                    "status": "failed",
+                    "submitted_at": "2026-05-09T00:00:00Z",
+                    "request": {"profile": "python", "sources": ["github_search"], "dry_run": True},
+                    "result": {},
+                    "error": "route failure",
+                }
+            )
             app = create_app(root=root, db_path=root / "data" / "github_weekly.sqlite")
             client = TestClient(app)
 
@@ -170,6 +220,8 @@ class ApiRepositoryTest(unittest.TestCase):
                     json={"confirm_execution": True},
                 )
             v1_events = client.get(f"/v1/jobs/{v1_trigger.json()['job_id']}/events")
+            v1_retry = client.post("/v1/jobs/preview:route-failed/retry", json={"requested_by": "route-test"})
+            v1_retry_events = client.get("/v1/jobs/preview:route-failed/events")
             v1_planned_jobs = client.get(
                 "/v1/jobs",
                 params={"status": "planned", "profile": "agent_development", "query": "github_trending"},
@@ -187,6 +239,8 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(v1_blocked_execute.status_code, 200)
             self.assertEqual(v1_execute.status_code, 200)
             self.assertEqual(v1_events.status_code, 200)
+            self.assertEqual(v1_retry.status_code, 200)
+            self.assertEqual(v1_retry_events.status_code, 200)
             self.assertEqual(v1_planned_jobs.status_code, 200)
             self.assertEqual(projects.json()["projects"][0]["full_name"], "owner/agent")
             self.assertEqual(detail.json()["history_count"], 2)
@@ -200,6 +254,9 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertTrue(v1_execute.json()["executed"])
             self.assertGreaterEqual(v1_events.json()["count"], 4)
             self.assertIn("execution_finished", [event["event_type"] for event in v1_events.json()["events"]])
+            self.assertTrue(v1_retry.json()["retry_created"])
+            self.assertTrue(v1_retry.json()["job_id"].startswith("retry:"))
+            self.assertIn("retry_created", [event["event_type"] for event in v1_retry_events.json()["events"]])
             self.assertEqual(v1_planned_jobs.json()["count"], 1)
         finally:
             shutil.rmtree(root, ignore_errors=True)

@@ -2,6 +2,25 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-05-16 追加：新增失败任务重试 API
+
+### 1. 开发目的
+
+任务系统已经具备任务创建、受控执行和审计事件，但 failed 任务还缺少标准重试入口。为了避免人工重复构造任务参数，本次新增失败任务重试能力，让后续前端管理页和自动恢复策略可以基于同一套任务模型创建新的 planned 重试任务。
+
+### 2. 修改内容
+
+1. 新增 `POST /v1/jobs/{job_id}/retry`。
+2. 只有 `status=failed` 且 `kind=weekly_report` 的任务允许重试。
+3. 重试会复用原任务 request，并追加 `trigger_source=retry`、`requested_by` 和 `retry_of`。
+4. 如果已存在相同 active 任务，则返回已有任务，不重复创建。
+5. 重试过程写入 `retry_requested`、`retry_blocked`、`retry_duplicate_ignored`、`retry_created` 和新任务 `job_created` 事件。
+6. 补充 repository 和 FastAPI 路由测试，覆盖重试成功和非 failed 任务被阻止。
+
+### 3. 边界说明
+
+该接口只创建新的 planned 任务，不直接执行。真实执行仍走 `/v1/jobs/{job_id}/execute` 或 job runner，继续遵守 `dry_run` 和 `confirm_delivery` 规则。
+
 ## 2026-05-15 追加：新增任务审计事件表和事件查询 API
 
 ### 1. 开发目的

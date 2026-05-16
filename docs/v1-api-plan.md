@@ -27,6 +27,7 @@
 | `capabilities.jobs_query` | 是否支持任务查询 |
 | `capabilities.job_events` | 是否支持任务审计事件查询 |
 | `capabilities.run_trigger_preview` | 是否支持触发预检 |
+| `capabilities.job_retry` | 是否支持 failed 任务重试 |
 | `capabilities.local_job_runner` | 是否支持本地任务执行器 |
 | `capabilities.run_trigger_execute` | 是否支持受控任务执行；当前为 `true` |
 
@@ -105,6 +106,10 @@
 | `execution_blocked` | 执行请求被阻止 |
 | `execution_started` | 任务已交给 job runner |
 | `execution_finished` | job runner 返回执行结果 |
+| `retry_requested` | 收到重试请求 |
+| `retry_blocked` | 重试请求被阻止 |
+| `retry_duplicate_ignored` | 已存在相同 active 任务，未重复创建 |
+| `retry_created` | 已创建新的 planned 重试任务 |
 
 事件字段包括 `event_id`、`job_id`、`event_type`、`status`、`actor`、`created_at`、`message` 和 `payload`。事件只保存审计摘要，不保存 Token、Chat ID、Webhook 或请求头。
 
@@ -157,6 +162,39 @@
 2. 任务必须通过 `/v1/job-execution-check`。
 3. `dry_run=false` 的真实推送任务仍必须在任务请求中包含 `confirm_delivery=true`。
 4. API 只调用现有 job runner，不单独实现采集、生成或推送逻辑。
+
+### `POST /v1/jobs/{job_id}/retry`
+
+为 failed 任务创建一个新的 planned 重试任务。该接口只创建任务，不直接执行。
+
+请求示例：
+
+```json
+{
+  "requested_by": "local-user"
+}
+```
+
+执行规则：
+
+1. 原任务必须存在。
+2. 原任务必须是 `weekly_report`。
+3. 原任务状态必须是 `failed`。
+4. 新任务复用原任务 `request`，并追加 `trigger_source=retry`、`requested_by` 和 `retry_of`。
+5. 如果已经存在相同参数的 `planned` 或 `running` 任务，则返回已有任务，不重复创建。
+
+返回字段：
+
+| 字段 | 说明 |
+|---|---|
+| `accepted` | 是否接受重试请求 |
+| `retry_created` | 是否创建了新的 planned 重试任务 |
+| `original_job_id` | 原失败任务编号 |
+| `job_id` | 新重试任务编号，或命中的已有 active 任务编号 |
+| `status` | 新任务或已有任务状态 |
+| `blockers` | 阻止重试的原因 |
+| `duplicate_of` | 命中已有 active 任务时返回 |
+| `retry_job` | 新任务或已有任务摘要 |
 
 ### `POST /v1/runs/trigger`
 
