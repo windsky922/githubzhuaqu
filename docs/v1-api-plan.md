@@ -264,6 +264,8 @@
 
 任务状态页还提供“确认执行”按钮。该按钮只在 API 模式且任务状态为 `planned` 时启用，点击后需要浏览器二次确认，并调用 `POST /v1/jobs/{job_id}/execute` 传入 `confirm_execution=true`。执行后页面会重新读取任务列表。
 
+任务状态页还提供“重试”按钮。该按钮只在 API 模式且任务状态为 `failed` 时启用，点击后需要浏览器二次确认，并调用 `POST /v1/jobs/{job_id}/retry`，固定写入 `requested_by=jobs_page`。接口只创建新的 planned 重试任务，不直接执行；请求结束后页面会重新读取任务列表。
+
 ### 本地任务执行器
 
 ```bash
