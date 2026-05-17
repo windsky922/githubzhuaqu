@@ -381,6 +381,45 @@ def _admin_dashboard_content() -> str:
       font-size: 13px;
       overflow-wrap: anywhere;
     }
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .filter-button {
+      width: fit-content;
+      height: 32px;
+      border-color: var(--line);
+      background: var(--panel);
+      color: var(--accent);
+      font-size: 13px;
+    }
+    .filter-button.active {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #fff;
+    }
+    .workbench-list {
+      display: grid;
+      gap: 8px;
+    }
+    .job-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) 110px minmax(0, 1fr) minmax(0, 1.2fr);
+      gap: 10px;
+      align-items: center;
+      border: 1px solid var(--line);
+      padding: 10px;
+      background: #f9fafb;
+    }
+    .job-row span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .job-row strong {
+      overflow-wrap: anywhere;
+    }
     .card h2,
     .panel h2 {
       margin: 0;
@@ -495,6 +534,17 @@ def _admin_dashboard_content() -> str:
       </div>
       <p id="createTaskStatus" class="task-status">静态模式只能查看；启动本地后端或添加 api=1 后可创建任务。</p>
     </section>
+    <section class="panel">
+      <h2>任务工作台</h2>
+      <div class="toolbar" aria-label="任务筛选">
+        <button class="filter-button active" type="button" data-job-filter="attention">重点</button>
+        <button class="filter-button" type="button" data-job-filter="failed">失败</button>
+        <button class="filter-button" type="button" data-job-filter="planned">待执行</button>
+        <button class="filter-button" type="button" data-job-filter="running">运行中</button>
+        <button class="filter-button" type="button" data-job-filter="all">全部</button>
+      </div>
+      <div id="jobWorkbench" class="workbench-list"></div>
+    </section>
     <section class="grid" aria-label="管理入口">
       <article class="card">
         <h2>项目</h2>
@@ -530,6 +580,8 @@ def _admin_dashboard_content() -> str:
     const health = document.getElementById("health");
     const overview = document.getElementById("overview");
     const latestLinks = document.getElementById("latestLinks");
+    const jobWorkbench = document.getElementById("jobWorkbench");
+    const adminState = { jobs: [], jobFilter: "attention" };
     const createControls = {
       profile: document.getElementById("taskProfile"),
       daysBack: document.getElementById("taskDaysBack"),
@@ -543,6 +595,17 @@ def _admin_dashboard_content() -> str:
     loadHealth();
     loadOverview();
     setupCreateTask();
+    bindWorkbenchFilters();
+
+    function bindWorkbenchFilters() {
+      document.querySelectorAll("[data-job-filter]").forEach(button => {
+        button.addEventListener("click", () => {
+          adminState.jobFilter = button.dataset.jobFilter || "attention";
+          document.querySelectorAll("[data-job-filter]").forEach(item => item.classList.toggle("active", item === button));
+          renderJobWorkbench();
+        });
+      });
+    }
 
     function setupCreateTask() {
       if (!shouldUseApi()) {
@@ -596,6 +659,7 @@ def _admin_dashboard_content() -> str:
         const projects = Array.isArray(projectsData.projects) ? projectsData.projects : [];
         const runs = Array.isArray(runsData.runs) ? runsData.runs : [];
         const jobs = Array.isArray(jobsData.jobs) ? jobsData.jobs : [];
+        adminState.jobs = jobs;
         const latestRun = runs[0] || {};
         const failedJobs = jobs.filter(job => job.status === "failed");
         const plannedJobs = jobs.filter(job => job.status === "planned");
@@ -606,7 +670,34 @@ def _admin_dashboard_content() -> str:
           metric("待执行任务", plannedJobs.length),
         ].join("");
         latestLinks.innerHTML = latestLinksHtml(latestRun, failedJobs[0], plannedJobs[0]);
+        renderJobWorkbench();
       });
+    }
+
+    function renderJobWorkbench() {
+      const jobs = filteredWorkbenchJobs().slice(0, 8);
+      if (!jobs.length) {
+        jobWorkbench.innerHTML = '<p>当前筛选下没有任务。</p>';
+        return;
+      }
+      jobWorkbench.innerHTML = jobs.map(job => {
+        const request = job.request || {};
+        return `<article class="job-row">
+          <strong><a href="job.html?job=${encodeURIComponent(job.job_id || "")}">${escapeHtml(job.job_id || "")}</a><span>${escapeHtml(job.kind || "")}</span></strong>
+          <span class="status ${escapeAttribute(job.status || "")}">${escapeHtml(job.status || "")}</span>
+          <div><span>方向</span><strong>${escapeHtml(request.profile || "-")}</strong></div>
+          <div><span>提交时间</span><strong>${escapeHtml(job.submitted_at || job.run_date || "-")}</strong></div>
+        </article>`;
+      }).join("");
+    }
+
+    function filteredWorkbenchJobs() {
+      const jobs = [...adminState.jobs];
+      if (adminState.jobFilter === "all") return jobs;
+      if (adminState.jobFilter === "attention") {
+        return jobs.filter(job => ["failed", "planned", "running"].includes(job.status));
+      }
+      return jobs.filter(job => job.status === adminState.jobFilter);
     }
 
     function latestLinksHtml(latestRun, firstFailedJob, firstPlannedJob) {

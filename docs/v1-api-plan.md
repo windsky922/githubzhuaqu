@@ -276,6 +276,8 @@
 
 管理首页还提供最小 planned 周报任务创建表单。表单在 API 模式下调用 `POST /v1/runs/trigger`，支持传入 `profile`、`days_back`、`sources`、`dry_run` 和 `confirm_delivery`，并固定写入 `trigger_source=admin_page` 与 `requested_by=local-admin`。接口只创建任务，创建成功后跳转到 `job.html?job=...&api=1` 继续人工确认。
 
+管理首页的任务工作台读取 `jobs.json`，支持按重点、失败、待执行、运行中和全部任务筛选。重点视图聚合 `failed`、`planned` 和 `running`，任务编号链接到 `job.html?job=...`。
+
 ### 本地任务执行器
 
 ```bash
