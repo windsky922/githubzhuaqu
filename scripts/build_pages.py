@@ -360,6 +360,26 @@ def _admin_dashboard_content() -> str:
       display: block;
       margin-top: 4px;
     }
+    .workflow-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .workflow-card {
+      border: 1px solid var(--line);
+      background: #f9fafb;
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+      min-height: 128px;
+    }
+    .workflow-card h3 {
+      margin: 0;
+      font-size: 15px;
+    }
+    .workflow-card p {
+      font-size: 13px;
+    }
     .task-form {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -551,6 +571,7 @@ def _admin_dashboard_content() -> str:
       .grid,
       .overview,
       .result-grid,
+      .workflow-grid,
       .task-form,
       .capabilities { grid-template-columns: 1fr; }
       .job-row { grid-template-columns: 1fr; }
@@ -580,6 +601,10 @@ def _admin_dashboard_content() -> str:
       <div id="overview" class="overview"></div>
       <div id="latestLinks" class="links"></div>
       <div id="latestJobResult" class="result-panel"></div>
+    </section>
+    <section class="panel">
+      <h2>核心工作流</h2>
+      <div id="workflowBoard" class="workflow-grid"></div>
     </section>
     <section class="panel">
       <h2>创建 planned 周报任务</h2>
@@ -656,6 +681,7 @@ def _admin_dashboard_content() -> str:
     const overview = document.getElementById("overview");
     const latestLinks = document.getElementById("latestLinks");
     const latestJobResult = document.getElementById("latestJobResult");
+    const workflowBoard = document.getElementById("workflowBoard");
     const jobWorkbench = document.getElementById("jobWorkbench");
     const adminState = { jobs: [], jobFilter: "attention" };
     const createControls = {
@@ -748,6 +774,7 @@ def _admin_dashboard_content() -> str:
         ].join("");
         latestLinks.innerHTML = latestLinksHtml(latestRun, failedJobs[0], plannedJobs[0]);
         latestJobResult.innerHTML = latestJobResultHtml(latestJob(jobs));
+        workflowBoard.innerHTML = workflowBoardHtml(projects, runs, jobs);
         renderJobWorkbench();
       });
     }
@@ -1002,6 +1029,61 @@ def _admin_dashboard_content() -> str:
         links.push(`<a href="${escapeAttribute(jobDetailUrl(firstPlannedJob.job_id || ""))}">查看待执行任务</a>`);
       }
       return links.join("");
+    }
+
+    function workflowBoardHtml(projects, runs, jobs) {
+      const latestRun = runs[0] || {};
+      const topProject = topProjects(projects)[0] || null;
+      const failedJob = jobs.find(job => job.status === "failed") || null;
+      const plannedJob = jobs.find(job => job.status === "planned") || null;
+      return [
+        workflowCard("最近周报", latestRun.run_date || "暂无运行", latestReportText(latestRun), latestRun.report_url || latestRun.telegram_report_url || "runs.html", "打开周报"),
+        workflowCard("Top 项目", projectName(topProject), projectSummary(topProject), topProject ? projectDetailUrl(topProject) : "explorer.html", "查看项目"),
+        workflowCard("失败任务", failedJob ? failedJob.job_id : "暂无失败", failedJob ? jobNextAction(failedJob) : "当前没有失败任务。", failedJob ? jobDetailUrl(failedJob.job_id || "") : "jobs.html?status=failed", "处理失败"),
+        workflowCard("待执行任务", plannedJob ? plannedJob.job_id : "暂无待执行", plannedJob ? jobNextAction(plannedJob) : "当前没有待执行任务。", plannedJob ? jobDetailUrl(plannedJob.job_id || "") : "jobs.html?status=planned", "查看待执行"),
+      ].join("");
+    }
+
+    function workflowCard(title, headline, body, href, action) {
+      return `<article class="workflow-card">
+        <h3>${escapeHtml(title)}</h3>
+        <p><strong>${escapeHtml(headline || "-")}</strong></p>
+        <p>${escapeHtml(body || "-")}</p>
+        <div class="links"><a href="${escapeAttribute(href || "#")}">${escapeHtml(action || "打开")}</a></div>
+      </article>`;
+    }
+
+    function latestReportText(run) {
+      if (!run || !run.run_date) return "等待下一次周报生成。";
+      const selected = run.selected_count ?? "-";
+      const collected = run.collected_count ?? "-";
+      return `入选 ${selected} 个项目，候选 ${collected} 个项目。`;
+    }
+
+    function topProjects(projects) {
+      return [...projects].sort((left, right) => projectScore(right) - projectScore(left)).slice(0, 3);
+    }
+
+    function projectScore(project) {
+      if (!project) return 0;
+      return number(project.total_score ?? project.score ?? project.weekly_stars ?? project.stargazers_count);
+    }
+
+    function projectName(project) {
+      if (!project) return "暂无项目";
+      return project.full_name || project.name || project.repo || "-";
+    }
+
+    function projectSummary(project) {
+      if (!project) return "等待项目归档数据。";
+      const language = project.language || "未知语言";
+      const stars = project.weekly_stars ?? project.stargazers_count ?? "-";
+      return `${language}，热度 ${stars}。`;
+    }
+
+    function projectDetailUrl(project) {
+      const repo = projectName(project);
+      return repo && repo !== "-" ? `project.html?repo=${encodeURIComponent(repo)}` : "explorer.html";
     }
 
     function metric(label, value) {

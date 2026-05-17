@@ -276,6 +276,8 @@
 
 管理首页还会从任务数据中选出最近任务，展示任务编号、状态、完成时间、周报链接、错误信息和下一步建议。下一步建议由任务状态派生：`failed` 引导重试，`planned` 引导执行前检查，`running` 引导等待或查看详情，`succeeded` 引导打开周报或继续查看项目筛选结果。
 
+管理首页新增“核心工作流”区域，把最近周报、Top 项目、失败任务和待执行任务聚合为四个入口。该区域只消费 `projects.json`、`runs.json` 和任务数据：最近周报链接到周报或运行面板，Top 项目链接到项目详情页，失败任务和待执行任务链接到单任务详情页。
+
 管理首页还提供最小 planned 周报任务创建表单。表单在 API 模式下调用 `POST /v1/runs/trigger`，支持传入 `profile`、`days_back`、`sources`、`dry_run` 和 `confirm_delivery`，并固定写入 `trigger_source=admin_page` 与 `requested_by=local-admin`。接口只创建任务，创建成功后跳转到 `job.html?job=...&api=1` 继续人工确认。
 
 管理首页的任务工作台复用同一任务数据源：API 模式优先读取 `/v1/jobs?limit=200`，读取失败时回退到静态 `jobs.json`；静态 Pages 模式默认读取 `jobs.json`。工作台支持按重点、失败、待执行、运行中和全部任务筛选。重点视图聚合 `failed`、`planned` 和 `running`，任务编号链接到 `job.html?job=...`。
