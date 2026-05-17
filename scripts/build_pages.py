@@ -327,6 +327,39 @@ def _admin_dashboard_content() -> str:
       font-size: 20px;
       overflow-wrap: anywhere;
     }
+    .result-panel {
+      margin-top: 12px;
+      border: 1px solid var(--line);
+      background: #f9fafb;
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+    }
+    .result-panel h3 {
+      margin: 0;
+      font-size: 16px;
+    }
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .result-item {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      padding: 8px;
+      overflow-wrap: anywhere;
+    }
+    .result-item span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .result-item strong {
+      display: block;
+      margin-top: 4px;
+    }
     .task-form {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -486,6 +519,10 @@ def _admin_dashboard_content() -> str:
     .status.ok { color: var(--ok); border-color: #bbf7d0; background: #f0fdf4; }
     .status.bad { color: var(--bad); border-color: #fecaca; background: #fff1f2; }
     .status.warn { color: var(--warn); border-color: #fde68a; background: #fffbeb; }
+    .status.succeeded { color: var(--ok); border-color: #bbf7d0; background: #f0fdf4; }
+    .status.failed { color: var(--bad); border-color: #fecaca; background: #fff1f2; }
+    .status.planned,
+    .status.running { color: var(--warn); border-color: #fde68a; background: #fffbeb; }
     .capabilities {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -513,6 +550,7 @@ def _admin_dashboard_content() -> str:
       .topbar { align-items: flex-start; flex-direction: column; }
       .grid,
       .overview,
+      .result-grid,
       .task-form,
       .capabilities { grid-template-columns: 1fr; }
       .job-row { grid-template-columns: 1fr; }
@@ -541,6 +579,7 @@ def _admin_dashboard_content() -> str:
       <h2>数据概览</h2>
       <div id="overview" class="overview"></div>
       <div id="latestLinks" class="links"></div>
+      <div id="latestJobResult" class="result-panel"></div>
     </section>
     <section class="panel">
       <h2>创建 planned 周报任务</h2>
@@ -616,6 +655,7 @@ def _admin_dashboard_content() -> str:
     const health = document.getElementById("health");
     const overview = document.getElementById("overview");
     const latestLinks = document.getElementById("latestLinks");
+    const latestJobResult = document.getElementById("latestJobResult");
     const jobWorkbench = document.getElementById("jobWorkbench");
     const adminState = { jobs: [], jobFilter: "attention" };
     const createControls = {
@@ -707,6 +747,7 @@ def _admin_dashboard_content() -> str:
           metric("待执行任务", plannedJobs.length),
         ].join("");
         latestLinks.innerHTML = latestLinksHtml(latestRun, failedJobs[0], plannedJobs[0]);
+        latestJobResult.innerHTML = latestJobResultHtml(latestJob(jobs));
         renderJobWorkbench();
       });
     }
@@ -740,7 +781,7 @@ def _admin_dashboard_content() -> str:
         const retryEnabled = apiEnabled && job.status === "failed";
         return `<article class="job-row">
           <strong><a href="${escapeAttribute(jobDetailUrl(jobId))}">${escapeHtml(jobId)}</a><span>${escapeHtml(job.kind || "")}</span></strong>
-          <span class="status ${escapeAttribute(job.status || "")}">${escapeHtml(job.status || "")}</span>
+          <span class="status ${escapeAttribute(statusClass(job.status))}">${escapeHtml(job.status || "")}</span>
           <div><span>方向</span><strong>${escapeHtml(request.profile || "-")}</strong></div>
           <div><span>提交时间</span><strong>${escapeHtml(job.submitted_at || job.run_date || "-")}</strong></div>
           <div class="job-actions">
@@ -897,6 +938,51 @@ def _admin_dashboard_content() -> str:
         return jobs.filter(job => ["failed", "planned", "running"].includes(job.status));
       }
       return jobs.filter(job => job.status === adminState.jobFilter);
+    }
+
+    function latestJob(jobs) {
+      return [...jobs].sort((left, right) => jobTime(right).localeCompare(jobTime(left)))[0] || null;
+    }
+
+    function jobTime(job) {
+      return String(job.finished_at || job.submitted_at || job.run_date || "");
+    }
+
+    function latestJobResultHtml(job) {
+      if (!job) {
+        return '<h3>最近任务结果</h3><p>当前没有任务记录。</p>';
+      }
+      const result = job.result || {};
+      const report = result.report_url || job.report_url || "";
+      const error = job.error || result.error || "";
+      const nextAction = jobNextAction(job);
+      const detailUrl = jobDetailUrl(job.job_id || "");
+      const reportLink = report ? `<a href="${escapeAttribute(report)}">打开周报</a>` : "暂无";
+      return `<h3>最近任务结果</h3>
+        <div class="result-grid">
+          <div class="result-item"><span>任务</span><strong><a href="${escapeAttribute(detailUrl)}">${escapeHtml(job.job_id || "-")}</a></strong></div>
+          <div class="result-item"><span>状态</span><strong><span class="status ${escapeAttribute(statusClass(job.status))}">${escapeHtml(job.status || "-")}</span></strong></div>
+          <div class="result-item"><span>完成时间</span><strong>${escapeHtml(job.finished_at || job.submitted_at || job.run_date || "-")}</strong></div>
+          <div class="result-item"><span>周报</span><strong>${reportLink}</strong></div>
+        </div>
+        <p><strong>下一步：</strong>${escapeHtml(nextAction)}</p>
+        <p><strong>错误：</strong>${escapeHtml(error || "无")}</p>`;
+    }
+
+    function jobNextAction(job) {
+      if (job.status === "failed") return "建议先查看错误信息，必要时在任务工作台创建重试任务。";
+      if (job.status === "planned") return "建议先执行前检查，通过后再确认执行。";
+      if (job.status === "running") return "建议等待任务完成，或进入任务详情页查看最新状态。";
+      if (job.status === "succeeded") return "任务已成功，可打开周报或继续查看项目筛选结果。";
+      return "建议进入任务详情页查看完整记录。";
+    }
+
+    function statusClass(status) {
+      if (status === "succeeded") return "succeeded";
+      if (status === "failed") return "failed";
+      if (status === "planned") return "planned";
+      if (status === "running") return "running";
+      return "";
     }
 
     function latestLinksHtml(latestRun, firstFailedJob, firstPlannedJob) {
