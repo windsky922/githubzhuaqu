@@ -274,6 +274,8 @@
 
 管理首页同时读取 `projects.json`、`runs.json` 和 `jobs.json`，展示项目总数、最新运行、失败任务数和待执行任务数，并提供最新周报、失败任务和待执行任务的快捷入口。该概览只读取公开归档数据，不触发后端任务。
 
+管理首页还提供最小 planned 周报任务创建表单。表单在 API 模式下调用 `POST /v1/runs/trigger`，支持传入 `profile`、`days_back`、`sources`、`dry_run` 和 `confirm_delivery`，并固定写入 `trigger_source=admin_page` 与 `requested_by=local-admin`。接口只创建任务，创建成功后跳转到 `job.html?job=...&api=1` 继续人工确认。
+
 ### 本地任务执行器
 
 ```bash

@@ -327,6 +327,60 @@ def _admin_dashboard_content() -> str:
       font-size: 20px;
       overflow-wrap: anywhere;
     }
+    .task-form {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      align-items: end;
+    }
+    label {
+      display: grid;
+      gap: 5px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+    input,
+    select,
+    button {
+      height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--panel);
+      color: var(--text);
+      font: inherit;
+      padding: 0 10px;
+    }
+    button {
+      cursor: pointer;
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #fff;
+      font-weight: 700;
+    }
+    button:disabled {
+      cursor: not-allowed;
+      border-color: var(--line);
+      background: #e5e7eb;
+      color: var(--muted);
+    }
+    .check-label {
+      grid-template-columns: 18px 1fr;
+      align-items: center;
+      gap: 8px;
+      min-height: 38px;
+    }
+    .check-label input {
+      width: 16px;
+      height: 16px;
+      padding: 0;
+    }
+    .task-status {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      overflow-wrap: anywhere;
+    }
     .card h2,
     .panel h2 {
       margin: 0;
@@ -385,6 +439,7 @@ def _admin_dashboard_content() -> str:
       .topbar { align-items: flex-start; flex-direction: column; }
       .grid,
       .overview,
+      .task-form,
       .capabilities { grid-template-columns: 1fr; }
     }
   </style>
@@ -411,6 +466,34 @@ def _admin_dashboard_content() -> str:
       <h2>数据概览</h2>
       <div id="overview" class="overview"></div>
       <div id="latestLinks" class="links"></div>
+    </section>
+    <section class="panel">
+      <h2>创建 planned 周报任务</h2>
+      <div class="task-form">
+        <label>个性化方向
+          <input id="taskProfile" type="text" placeholder="agent_development">
+        </label>
+        <label>回看天数
+          <input id="taskDaysBack" type="number" min="1" max="30" value="7">
+        </label>
+        <label>来源
+          <select id="taskSource">
+            <option value="github_trending">GitHub Trending</option>
+            <option value="github_search">GitHub Search</option>
+            <option value="">默认来源</option>
+          </select>
+        </label>
+        <label class="check-label">
+          <input id="taskDryRun" type="checkbox" checked>
+          dry_run
+        </label>
+        <label class="check-label">
+          <input id="taskConfirmDelivery" type="checkbox">
+          确认真实推送
+        </label>
+        <button id="createTask" type="button">创建任务</button>
+      </div>
+      <p id="createTaskStatus" class="task-status">静态模式只能查看；启动本地后端或添加 api=1 后可创建任务。</p>
     </section>
     <section class="grid" aria-label="管理入口">
       <article class="card">
@@ -447,9 +530,62 @@ def _admin_dashboard_content() -> str:
     const health = document.getElementById("health");
     const overview = document.getElementById("overview");
     const latestLinks = document.getElementById("latestLinks");
+    const createControls = {
+      profile: document.getElementById("taskProfile"),
+      daysBack: document.getElementById("taskDaysBack"),
+      source: document.getElementById("taskSource"),
+      dryRun: document.getElementById("taskDryRun"),
+      confirmDelivery: document.getElementById("taskConfirmDelivery"),
+      button: document.getElementById("createTask"),
+      status: document.getElementById("createTaskStatus"),
+    };
 
     loadHealth();
     loadOverview();
+    setupCreateTask();
+
+    function setupCreateTask() {
+      if (!shouldUseApi()) {
+        createControls.button.disabled = true;
+        return;
+      }
+      createControls.status.textContent = "API 模式可创建 planned 任务；创建后进入任务详情页执行检查或运行。";
+      createControls.button.addEventListener("click", createPlannedTask);
+    }
+
+    function createPlannedTask() {
+      createControls.button.disabled = true;
+      createControls.status.textContent = "正在创建 planned 任务...";
+      const source = createControls.source.value.trim();
+      const payload = {
+        profile: createControls.profile.value.trim(),
+        sources: source ? [source] : [],
+        dry_run: createControls.dryRun.checked,
+        confirm_delivery: createControls.confirmDelivery.checked,
+        days_back: number(createControls.daysBack.value) || 7,
+        trigger_source: "admin_page",
+        requested_by: "local-admin",
+      };
+      fetch("/v1/runs/trigger", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+        .then(jsonOrThrow)
+        .then(data => {
+          const jobId = data.job_id || "";
+          const warnings = (data.safety_warnings || []).join(" ");
+          const detailUrl = jobId ? `job.html?job=${encodeURIComponent(jobId)}&api=1` : "jobs.html?api=1";
+          createControls.status.innerHTML = `已创建 ${escapeHtml(jobId || "planned 任务")}。${escapeHtml(warnings)} <a href="${escapeAttribute(detailUrl)}">打开任务详情</a>`;
+          return loadOverview();
+        })
+        .catch(error => {
+          createControls.status.textContent = `创建失败：${error.message || error}`;
+        })
+        .finally(() => {
+          createControls.button.disabled = false;
+        });
+    }
 
     function loadOverview() {
       Promise.all([
@@ -494,6 +630,11 @@ def _admin_dashboard_content() -> str:
 
     function metric(label, value) {
       return `<article class="metric"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></article>`;
+    }
+
+    function number(value) {
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : 0;
     }
 
     function loadHealth() {
