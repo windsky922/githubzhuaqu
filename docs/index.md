@@ -40,6 +40,7 @@
 - [项目详情页](project.html)
 - [运行状态面板](runs.html)
 - [任务状态面板](jobs.html)
+- [任务详情页](job.html)
 - [历史项目索引](projects.html)
 - [公共项目 JSON](projects.json)
 - [公共运行 JSON](runs.json)

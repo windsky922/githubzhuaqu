@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GitHub 周报任务详情</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --panel: #ffffff;
+      --text: #172033;
+      --muted: #667085;
+      --line: #d8dee8;
+      --accent: #2563eb;
+      --ok: #15803d;
+      --bad: #b42318;
+      --warn: #a16207;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.55;
+    }
+    header {
+      border-bottom: 1px solid var(--line);
+      background: var(--panel);
+    }
+    .wrap {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      padding: 18px 0;
+    }
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.2;
+    }
+    nav {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    a {
+      color: var(--accent);
+      font-weight: 700;
+      text-decoration: none;
+    }
+    main { padding: 24px 0 40px; }
+    .panel {
+      margin-bottom: 14px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      padding: 16px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .field span,
+    .event span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .field strong,
+    .event strong {
+      display: block;
+      margin-top: 3px;
+      overflow-wrap: anywhere;
+    }
+    .status {
+      display: inline-block;
+      padding: 2px 8px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .status.succeeded { color: var(--ok); border-color: #bbf7d0; background: #f0fdf4; }
+    .status.failed { color: var(--bad); border-color: #fecaca; background: #fff1f2; }
+    .status.running { color: var(--accent); border-color: #bfdbfe; background: #eff6ff; }
+    .status.planned { color: var(--warn); border-color: #fde68a; background: #fffbeb; }
+    pre {
+      margin: 8px 0 0;
+      overflow: auto;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      background: #0f172a;
+      color: #e5e7eb;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 12px;
+    }
+    .events { display: grid; gap: 10px; }
+    .event {
+      border-left: 3px solid var(--line);
+      padding-left: 12px;
+    }
+    .event.succeeded,
+    .event.planned { border-color: var(--ok); }
+    .event.failed,
+    .event.blocked { border-color: var(--bad); }
+    .muted { color: var(--muted); }
+    .empty {
+      color: var(--muted);
+      text-align: center;
+      padding: 30px 12px;
+    }
+    @media (max-width: 760px) {
+      .topbar { align-items: flex-start; flex-direction: column; }
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap topbar">
+      <h1>GitHub 周报任务详情</h1>
+      <nav>
+        <a href="jobs.html">任务状态</a>
+        <a href="runs.html">运行状态</a>
+        <a href="index.html">周报归档</a>
+      </nav>
+    </div>
+  </header>
+  <main class="wrap">
+    <section id="content" class="panel"><div class="empty">加载中</div></section>
+  </main>
+  <script>
+    const content = document.getElementById("content");
+    const params = new URLSearchParams(window.location.search);
+    const jobId = params.get("job") || "";
+
+    if (!jobId) {
+      content.innerHTML = '<div class="empty">URL 缺少 job 参数，请从任务状态页点击任务编号进入。</div>';
+    } else {
+      Promise.all([loadJob(jobId), loadEvents(jobId)])
+        .then(([detail, events]) => render(detail, events))
+        .catch(error => {
+          content.innerHTML = `<div class="empty">无法读取任务详情：${escapeHtml(error.message || error)}</div>`;
+        });
+    }
+
+    function loadJob(id) {
+      if (shouldUseApi()) {
+        return fetch(`/v1/jobs/${encodeURIComponent(id)}`, { cache: "no-store" })
+          .then(jsonOrThrow)
+          .catch(() => loadJobFromJson(id));
+      }
+      return loadJobFromJson(id);
+    }
+
+    function loadJobFromJson(id) {
+      return fetch("jobs.json", { cache: "no-store" })
+        .then(jsonOrThrow)
+        .then(data => {
+          const job = (data.jobs || []).find(item => item.job_id === id);
+          return { schema_version: 1, found: Boolean(job), job: job || {}, run_summary: {} };
+        });
+    }
+
+    function loadEvents(id) {
+      if (!shouldUseApi()) return Promise.resolve({ schema_version: 1, count: 0, events: [] });
+      return fetch(`/v1/jobs/${encodeURIComponent(id)}/events?limit=200`, { cache: "no-store" })
+        .then(jsonOrThrow)
+        .catch(() => ({ schema_version: 1, count: 0, events: [] }));
+    }
+
+    function render(detail, eventData) {
+      if (!detail || !detail.found) {
+        content.innerHTML = `<div class="empty">未找到任务：${escapeHtml(jobId)}</div>`;
+        return;
+      }
+      const job = detail.job || {};
+      const events = Array.isArray(eventData.events) ? eventData.events : [];
+      content.className = "";
+      content.innerHTML = `
+        <section class="panel">
+          <h2>${escapeHtml(job.job_id || jobId)}</h2>
+          <div class="grid">
+            ${field("状态", `<span class="status ${escapeAttribute(job.status || "")}">${escapeHtml(job.status || "")}</span>`)}
+            ${field("类型", escapeHtml(job.kind || "-"))}
+            ${field("运行日期", escapeHtml(job.run_date || "-"))}
+            ${field("提交时间", escapeHtml(job.submitted_at || "-"))}
+            ${field("开始时间", escapeHtml(job.started_at || "-"))}
+            ${field("结束时间", escapeHtml(job.finished_at || "-"))}
+          </div>
+        </section>
+        <section class="panel">
+          <h2>任务请求</h2>
+          <pre>${escapeHtml(JSON.stringify(job.request || {}, null, 2))}</pre>
+        </section>
+        <section class="panel">
+          <h2>执行结果</h2>
+          ${job.error ? `<p class="muted">错误：${escapeHtml(job.error)}</p>` : ""}
+          <pre>${escapeHtml(JSON.stringify(job.result || {}, null, 2))}</pre>
+        </section>
+        <section class="panel">
+          <h2>审计事件</h2>
+          ${eventsHtml(events)}
+        </section>`;
+    }
+
+    function eventsHtml(events) {
+      if (!events.length) return '<p class="muted">静态模式不包含事件；启动本地后端或添加 api=1 后可查看审计事件。</p>';
+      return `<div class="events">${events.map(event => `
+        <article class="event ${escapeAttribute(event.status || "")}">
+          <span>${escapeHtml(event.created_at || "")} · ${escapeHtml(event.actor || "-")}</span>
+          <strong>${escapeHtml(event.event_type || "")} / ${escapeHtml(event.status || "")}</strong>
+          <p>${escapeHtml(event.message || "")}</p>
+          ${event.payload && Object.keys(event.payload).length ? `<pre>${escapeHtml(JSON.stringify(event.payload, null, 2))}</pre>` : ""}
+        </article>`).join("")}</div>`;
+    }
+
+    function field(label, value) {
+      return `<div class="field"><span>${escapeHtml(label)}</span><strong>${value}</strong></div>`;
+    }
+
+    function shouldUseApi() {
+      const apiMode = params.get("api");
+      if (apiMode === "1") return true;
+      if (apiMode === "0") return false;
+      return ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
+    }
+
+    function jsonOrThrow(response) {
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return response.json();
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;",
+      }[char]));
+    }
+
+    function escapeAttribute(value) {
+      return escapeHtml(value);
+    }
+  </script>
+</body>
+</html>

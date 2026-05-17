@@ -266,6 +266,8 @@
 
 任务状态页还提供“重试”按钮。该按钮只在 API 模式且任务状态为 `failed` 时启用，点击后需要浏览器二次确认，并调用 `POST /v1/jobs/{job_id}/retry`，固定写入 `requested_by=jobs_page`。接口只创建新的 planned 重试任务，不直接执行；请求结束后页面会重新读取任务列表。
 
+任务编号会链接到 `job.html?job=...`。任务详情页在 API 模式下读取 `/v1/jobs/{job_id}` 和 `/v1/jobs/{job_id}/events?limit=200`，展示任务请求、执行结果、错误信息和审计事件时间线；在静态 Pages 模式下只从 `jobs.json` 展示基础任务信息。
+
 ### 本地任务执行器
 
 ```bash

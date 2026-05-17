@@ -661,7 +661,7 @@
         report ? `<a href="${escapeAttribute(report)}">周报</a>` : "",
       ].filter(Boolean).join(" · ") || "-";
       return `<tr>
-        <td><div class="mono">${escapeHtml(job.job_id || "")}</div><div class="muted">${escapeHtml(job.kind || "")}</div></td>
+        <td><div class="mono"><a href="${escapeAttribute(jobDetailUrl(jobId))}">${escapeHtml(job.job_id || "")}</a></div><div class="muted">${escapeHtml(job.kind || "")}</div></td>
         <td><span class="status ${escapeAttribute(job.status || "")}">${escapeHtml(job.status || "")}</span></td>
         <td>${escapeHtml(request.profile || "-")}</td>
         <td>${escapeHtml(job.run_date || "-")}</td>
@@ -688,6 +688,14 @@
         if (params.has(key)) control.value = params.get(key) || "";
       }
       if (params.has("q")) controls.query.value = params.get("q") || "";
+    }
+
+    function jobDetailUrl(jobId) {
+      const params = new URLSearchParams();
+      params.set("job", jobId || "");
+      const apiMode = new URLSearchParams(window.location.search).get("api");
+      if (apiMode === "1" || apiMode === "0") params.set("api", apiMode);
+      return `job.html?${params.toString()}`;
     }
 
     function updateUrl() {
