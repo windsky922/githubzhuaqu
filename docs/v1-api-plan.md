@@ -268,6 +268,8 @@
 
 任务编号会链接到 `job.html?job=...`。任务详情页在 API 模式下读取 `/v1/jobs/{job_id}` 和 `/v1/jobs/{job_id}/events?limit=200`，展示任务请求、执行结果、错误信息和审计事件时间线；在静态 Pages 模式下只从 `jobs.json` 展示基础任务信息。
 
+任务详情页同时提供单任务操作区：执行前检查调用 `/v1/job-execution-check?job_id=...`，确认执行调用 `POST /v1/jobs/{job_id}/execute`，失败重试调用 `POST /v1/jobs/{job_id}/retry`。详情页固定写入 `requested_by=job_detail_page`，操作后刷新任务详情和事件时间线。静态 Pages 模式下操作按钮禁用。
+
 ### 本地任务执行器
 
 ```bash

@@ -112,6 +112,49 @@
     .event.failed,
     .event.blocked { border-color: var(--bad); }
     .muted { color: var(--muted); }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    button {
+      height: 34px;
+      padding: 0 10px;
+      border: 1px solid var(--accent);
+      border-radius: 6px;
+      background: var(--accent);
+      color: #fff;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    button:disabled {
+      cursor: not-allowed;
+      border-color: var(--line);
+      background: #e5e7eb;
+      color: var(--muted);
+    }
+    .secondary-button {
+      background: var(--panel);
+      color: var(--accent);
+    }
+    .execute-button {
+      border-color: var(--warn);
+      color: var(--warn);
+    }
+    .retry-button {
+      border-color: var(--bad);
+      color: var(--bad);
+    }
+    .action-result {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      overflow-wrap: anywhere;
+    }
+    .action-result.ok { color: var(--ok); }
+    .action-result.blocked { color: var(--bad); }
     .empty {
       color: var(--muted);
       text-align: center;
@@ -141,11 +184,17 @@
     const content = document.getElementById("content");
     const params = new URLSearchParams(window.location.search);
     const jobId = params.get("job") || "";
+    let actionMessage = "";
+    let actionMessageClass = "";
 
     if (!jobId) {
       content.innerHTML = '<div class="empty">URL 缺少 job 参数，请从任务状态页点击任务编号进入。</div>';
     } else {
-      Promise.all([loadJob(jobId), loadEvents(jobId)])
+      refreshDetail();
+    }
+
+    function refreshDetail() {
+      return Promise.all([loadJob(jobId), loadEvents(jobId)])
         .then(([detail, events]) => render(detail, events))
         .catch(error => {
           content.innerHTML = `<div class="empty">无法读取任务详情：${escapeHtml(error.message || error)}</div>`;
@@ -198,6 +247,11 @@
           </div>
         </section>
         <section class="panel">
+          <h2>任务操作</h2>
+          ${operationHtml(job)}
+          <div id="actionResult" class="action-result ${escapeAttribute(actionMessageClass)}" aria-live="polite">${actionMessage}</div>
+        </section>
+        <section class="panel">
           <h2>任务请求</h2>
           <pre>${escapeHtml(JSON.stringify(job.request || {}, null, 2))}</pre>
         </section>
@@ -210,6 +264,129 @@
           <h2>审计事件</h2>
           ${eventsHtml(events)}
         </section>`;
+      bindOperationControls(job);
+    }
+
+    function operationHtml(job) {
+      const apiEnabled = shouldUseApi();
+      const status = job.status || "";
+      const precheckDisabled = apiEnabled ? "" : " disabled";
+      const executeDisabled = apiEnabled && status === "planned" ? "" : " disabled";
+      const retryDisabled = apiEnabled && status === "failed" ? "" : " disabled";
+      return `<div class="actions">
+        <button class="secondary-button" type="button" id="precheckButton"${precheckDisabled}>执行前检查</button>
+        <button class="secondary-button execute-button" type="button" id="executeButton"${executeDisabled}>确认执行</button>
+        <button class="secondary-button retry-button" type="button" id="retryButton"${retryDisabled}>重试失败任务</button>
+      </div>
+      <p class="muted">${apiEnabled ? "操作会调用本地后端 /v1 接口。" : "静态 Pages 模式只能查看；启动本地后端或添加 api=1 后可操作。"}</p>`;
+    }
+
+    function bindOperationControls(job) {
+      const precheckButton = document.getElementById("precheckButton");
+      const executeButton = document.getElementById("executeButton");
+      const retryButton = document.getElementById("retryButton");
+      if (precheckButton) precheckButton.addEventListener("click", () => runDetailPrecheck(precheckButton));
+      if (executeButton) executeButton.addEventListener("click", () => runDetailExecution(executeButton));
+      if (retryButton) retryButton.addEventListener("click", () => runDetailRetry(retryButton));
+    }
+
+    function runDetailPrecheck(button) {
+      if (!shouldUseApi()) return setAction("执行前检查需要本地后端或 api=1 模式。", "blocked");
+      button.disabled = true;
+      setAction("检查中...", "");
+      fetch(`/v1/job-execution-check?job_id=${encodeURIComponent(jobId)}`, { cache: "no-store" })
+        .then(jsonOrThrow)
+        .then(data => {
+          setAction(precheckHtml(data), data.executable ? "ok" : "blocked");
+        })
+        .catch(error => setAction(`检查失败：${escapeHtml(error.message || error)}`, "blocked"))
+        .finally(() => {
+          button.disabled = false;
+        });
+    }
+
+    function runDetailExecution(button) {
+      if (!shouldUseApi()) return setAction("执行任务需要本地后端或 api=1 模式。", "blocked");
+      if (!window.confirm(`确认执行任务 ${jobId}？`)) return;
+      button.disabled = true;
+      setAction("执行中...", "");
+      fetch(`/v1/jobs/${encodeURIComponent(jobId)}/execute`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ confirm_execution: true, requested_by: "job_detail_page" }),
+      })
+        .then(jsonOrThrow)
+        .then(data => {
+          setAction(executionHtml(data), data.accepted && data.executed ? "ok" : "blocked");
+          return refreshDetail();
+        })
+        .catch(error => setAction(`执行失败：${escapeHtml(error.message || error)}`, "blocked"))
+        .finally(() => {
+          button.disabled = false;
+        });
+    }
+
+    function runDetailRetry(button) {
+      if (!shouldUseApi()) return setAction("重试任务需要本地后端或 api=1 模式。", "blocked");
+      if (!window.confirm(`确认为失败任务 ${jobId} 创建重试任务？`)) return;
+      button.disabled = true;
+      setAction("重试创建中...", "");
+      fetch(`/v1/jobs/${encodeURIComponent(jobId)}/retry`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ requested_by: "job_detail_page" }),
+      })
+        .then(jsonOrThrow)
+        .then(data => {
+          setAction(retryHtml(data), data.accepted && data.retry_created ? "ok" : "blocked");
+          return refreshDetail();
+        })
+        .catch(error => setAction(`重试失败：${escapeHtml(error.message || error)}`, "blocked"))
+        .finally(() => {
+          button.disabled = false;
+        });
+    }
+
+    function precheckHtml(data) {
+      if (!data || !data.found) return "未找到任务。";
+      const lines = [
+        data.executable ? "可执行" : "不可执行",
+        ...(data.blockers || []).map(item => `阻止：${item}`),
+        ...(data.warnings || []).map(item => `提示：${item}`),
+      ];
+      if (data.next_command) lines.push(`命令：${data.next_command}`);
+      return lines.map(line => `<div>${escapeHtml(line)}</div>`).join("");
+    }
+
+    function executionHtml(data) {
+      const lines = [
+        data.accepted ? "已接受执行" : "未执行",
+        data.status ? `状态：${data.status}` : "",
+        ...(data.blockers || []).map(item => `阻止：${item}`),
+        ...(data.warnings || []).map(item => `提示：${item}`),
+      ].filter(Boolean);
+      return lines.map(line => `<div>${escapeHtml(line)}</div>`).join("");
+    }
+
+    function retryHtml(data) {
+      const lines = [
+        data.retry_created ? "已创建重试任务" : data.accepted ? "已命中已有任务" : "未创建重试任务",
+        data.job_id ? `任务：${data.job_id}` : "",
+        data.status ? `状态：${data.status}` : "",
+        data.duplicate_of ? `已有任务：${data.duplicate_of}` : "",
+        ...(data.blockers || []).map(item => `阻止：${item}`),
+      ].filter(Boolean);
+      return lines.map(line => `<div>${escapeHtml(line)}</div>`).join("");
+    }
+
+    function setAction(html, className) {
+      actionMessage = html;
+      actionMessageClass = className || "";
+      const target = document.getElementById("actionResult");
+      if (target) {
+        target.className = `action-result ${actionMessageClass}`;
+        target.innerHTML = actionMessage;
+      }
     }
 
     function eventsHtml(events) {
