@@ -165,9 +165,9 @@
     }
     .job-row {
       display: grid;
-      grid-template-columns: minmax(0, 1.4fr) 110px minmax(0, 1fr) minmax(0, 1.2fr);
+      grid-template-columns: minmax(0, 1.25fr) 90px minmax(0, .9fr) minmax(0, 1.1fr) minmax(180px, .9fr);
       gap: 10px;
-      align-items: center;
+      align-items: start;
       border: 1px solid var(--line);
       padding: 10px;
       background: #f9fafb;
@@ -178,6 +178,41 @@
     }
     .job-row strong {
       overflow-wrap: anywhere;
+    }
+    .job-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .secondary-button {
+      width: fit-content;
+      height: 28px;
+      padding: 0 8px;
+      border-color: var(--line);
+      background: var(--panel);
+      color: var(--accent);
+      font-size: 12px;
+    }
+    .execute-button {
+      border-color: var(--warn);
+      color: var(--warn);
+    }
+    .retry-button {
+      border-color: var(--bad);
+      color: var(--bad);
+    }
+    .precheck-result {
+      flex-basis: 100%;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+    }
+    .precheck-result.ok {
+      color: var(--ok);
+    }
+    .precheck-result.blocked {
+      color: var(--bad);
     }
     .card h2,
     .panel h2 {
@@ -239,6 +274,7 @@
       .overview,
       .task-form,
       .capabilities { grid-template-columns: 1fr; }
+      .job-row { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -355,6 +391,7 @@
     loadOverview();
     setupCreateTask();
     bindWorkbenchFilters();
+    jobWorkbench.addEventListener("click", handleWorkbenchAction);
 
     function bindWorkbenchFilters() {
       document.querySelectorAll("[data-job-filter]").forEach(button => {
@@ -454,13 +491,162 @@
       }
       jobWorkbench.innerHTML = jobs.map(job => {
         const request = job.request || {};
+        const jobId = job.job_id || "";
+        const targetId = `admin-action-${safeId(jobId)}`;
+        const apiEnabled = shouldUseApi();
+        const precheckDisabled = apiEnabled ? "" : " disabled";
+        const executeEnabled = apiEnabled && job.status === "planned";
+        const retryEnabled = apiEnabled && job.status === "failed";
         return `<article class="job-row">
-          <strong><a href="job.html?job=${encodeURIComponent(job.job_id || "")}">${escapeHtml(job.job_id || "")}</a><span>${escapeHtml(job.kind || "")}</span></strong>
+          <strong><a href="${escapeAttribute(jobDetailUrl(jobId))}">${escapeHtml(jobId)}</a><span>${escapeHtml(job.kind || "")}</span></strong>
           <span class="status ${escapeAttribute(job.status || "")}">${escapeHtml(job.status || "")}</span>
           <div><span>方向</span><strong>${escapeHtml(request.profile || "-")}</strong></div>
           <div><span>提交时间</span><strong>${escapeHtml(job.submitted_at || job.run_date || "-")}</strong></div>
+          <div class="job-actions">
+            <button class="secondary-button" type="button" data-admin-action="precheck" data-job-id="${escapeAttribute(jobId)}" data-target="${escapeAttribute(targetId)}"${precheckDisabled}>执行前检查</button>
+            <button class="secondary-button execute-button" type="button" data-admin-action="execute" data-job-id="${escapeAttribute(jobId)}" data-target="${escapeAttribute(targetId)}"${executeEnabled ? "" : " disabled"}>确认执行</button>
+            <button class="secondary-button retry-button" type="button" data-admin-action="retry" data-job-id="${escapeAttribute(jobId)}" data-target="${escapeAttribute(targetId)}"${retryEnabled ? "" : " disabled"}>重试</button>
+            <div id="${escapeAttribute(targetId)}" class="precheck-result" aria-live="polite"></div>
+          </div>
         </article>`;
       }).join("");
+    }
+
+    function handleWorkbenchAction(event) {
+      const button = event.target.closest("[data-admin-action]");
+      if (!button) return;
+      if (button.dataset.adminAction === "precheck") {
+        runWorkbenchPrecheck(button);
+      } else if (button.dataset.adminAction === "execute") {
+        runWorkbenchExecution(button);
+      } else if (button.dataset.adminAction === "retry") {
+        runWorkbenchRetry(button);
+      }
+    }
+
+    function runWorkbenchPrecheck(button) {
+      const jobId = button.dataset.jobId || "";
+      const target = document.getElementById(button.dataset.target || "");
+      if (!target) return;
+      if (!shouldUseApi()) {
+        target.className = "precheck-result blocked";
+        target.textContent = "执行前检查需要本地后端或 api=1 模式。";
+        return;
+      }
+      button.disabled = true;
+      target.className = "precheck-result";
+      target.textContent = "检查中...";
+      fetch(`/v1/job-execution-check?job_id=${encodeURIComponent(jobId)}`, { cache: "no-store" })
+        .then(jsonOrThrow)
+        .then(data => {
+          target.className = `precheck-result ${data.executable ? "ok" : "blocked"}`;
+          target.innerHTML = precheckHtml(data);
+        })
+        .catch(error => {
+          target.className = "precheck-result blocked";
+          target.textContent = `检查失败：${error.message || error}`;
+        })
+        .finally(() => {
+          button.disabled = false;
+        });
+    }
+
+    function runWorkbenchExecution(button) {
+      const jobId = button.dataset.jobId || "";
+      const target = document.getElementById(button.dataset.target || "");
+      if (!target) return;
+      if (!shouldUseApi()) {
+        target.className = "precheck-result blocked";
+        target.textContent = "执行任务需要本地后端或 api=1 模式。";
+        return;
+      }
+      if (!window.confirm(`确认执行任务 ${jobId}？`)) return;
+      button.disabled = true;
+      target.className = "precheck-result";
+      target.textContent = "执行中...";
+      fetch(`/v1/jobs/${encodeURIComponent(jobId)}/execute`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ confirm_execution: true, requested_by: "admin_page" }),
+      })
+        .then(jsonOrThrow)
+        .then(data => {
+          target.className = `precheck-result ${data.accepted && data.executed ? "ok" : "blocked"}`;
+          target.innerHTML = executionHtml(data);
+          return loadOverview();
+        })
+        .catch(error => {
+          target.className = "precheck-result blocked";
+          target.textContent = `执行失败：${error.message || error}`;
+        })
+        .finally(() => {
+          button.disabled = false;
+        });
+    }
+
+    function runWorkbenchRetry(button) {
+      const jobId = button.dataset.jobId || "";
+      const target = document.getElementById(button.dataset.target || "");
+      if (!target) return;
+      if (!shouldUseApi()) {
+        target.className = "precheck-result blocked";
+        target.textContent = "重试任务需要本地后端或 api=1 模式。";
+        return;
+      }
+      if (!window.confirm(`确认为失败任务 ${jobId} 创建重试任务？`)) return;
+      button.disabled = true;
+      target.className = "precheck-result";
+      target.textContent = "重试创建中...";
+      fetch(`/v1/jobs/${encodeURIComponent(jobId)}/retry`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ requested_by: "admin_page" }),
+      })
+        .then(jsonOrThrow)
+        .then(data => {
+          target.className = `precheck-result ${data.accepted && data.retry_created ? "ok" : "blocked"}`;
+          target.innerHTML = retryHtml(data);
+          return loadOverview();
+        })
+        .catch(error => {
+          target.className = "precheck-result blocked";
+          target.textContent = `重试失败：${error.message || error}`;
+        })
+        .finally(() => {
+          button.disabled = false;
+        });
+    }
+
+    function precheckHtml(data) {
+      if (!data || !data.found) return "未找到任务。";
+      const lines = [
+        data.executable ? "可执行" : "不可执行",
+        ...(data.blockers || []).map(item => `阻止：${item}`),
+        ...(data.warnings || []).map(item => `提示：${item}`),
+      ];
+      if (data.next_command) lines.push(`命令：${data.next_command}`);
+      return lines.map(line => `<div>${escapeHtml(line)}</div>`).join("");
+    }
+
+    function executionHtml(data) {
+      const lines = [
+        data.accepted ? "已接受执行" : "未执行",
+        data.status ? `状态：${data.status}` : "",
+        ...(data.blockers || []).map(item => `阻止：${item}`),
+        ...(data.warnings || []).map(item => `提示：${item}`),
+      ].filter(Boolean);
+      return lines.map(line => `<div>${escapeHtml(line)}</div>`).join("");
+    }
+
+    function retryHtml(data) {
+      const lines = [
+        data.retry_created ? "已创建重试任务" : data.accepted ? "已命中已有任务" : "未创建重试任务",
+        data.job_id ? `任务：${data.job_id}` : "",
+        data.status ? `状态：${data.status}` : "",
+        data.duplicate_of ? `已有任务：${data.duplicate_of}` : "",
+        ...(data.blockers || []).map(item => `阻止：${item}`),
+      ].filter(Boolean);
+      return lines.map(line => `<div>${escapeHtml(line)}</div>`).join("");
     }
 
     function filteredWorkbenchJobs() {
@@ -483,10 +669,10 @@
         links.push('<a href="runs.html">运行面板</a>');
       }
       if (firstFailedJob) {
-        links.push(`<a href="job.html?job=${encodeURIComponent(firstFailedJob.job_id || "")}">处理失败任务</a>`);
+        links.push(`<a href="${escapeAttribute(jobDetailUrl(firstFailedJob.job_id || ""))}">处理失败任务</a>`);
       }
       if (firstPlannedJob) {
-        links.push(`<a href="job.html?job=${encodeURIComponent(firstPlannedJob.job_id || "")}">查看待执行任务</a>`);
+        links.push(`<a href="${escapeAttribute(jobDetailUrl(firstPlannedJob.job_id || ""))}">查看待执行任务</a>`);
       }
       return links.join("");
     }
@@ -538,6 +724,18 @@
     function jsonOrThrow(response) {
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       return response.json();
+    }
+
+    function jobDetailUrl(jobId) {
+      const params = new URLSearchParams();
+      params.set("job", jobId || "");
+      const apiMode = new URLSearchParams(window.location.search).get("api");
+      if (apiMode === "1" || apiMode === "0") params.set("api", apiMode);
+      return `job.html?${params.toString()}`;
+    }
+
+    function safeId(value) {
+      return String(value || "unknown").replace(/[^a-zA-Z0-9_-]/g, "-") || "unknown";
     }
 
     function escapeHtml(value) {

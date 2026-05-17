@@ -278,6 +278,8 @@
 
 管理首页的任务工作台复用同一任务数据源：API 模式优先读取 `/v1/jobs?limit=200`，读取失败时回退到静态 `jobs.json`；静态 Pages 模式默认读取 `jobs.json`。工作台支持按重点、失败、待执行、运行中和全部任务筛选。重点视图聚合 `failed`、`planned` 和 `running`，任务编号链接到 `job.html?job=...`。
 
+管理首页的任务工作台也提供轻量任务操作：执行前检查调用 `/v1/job-execution-check?job_id=...`，planned 任务确认执行调用 `POST /v1/jobs/{job_id}/execute` 并传入 `confirm_execution=true`，failed 任务重试调用 `POST /v1/jobs/{job_id}/retry`。这些按钮只在 API 模式下启用，固定写入 `requested_by=admin_page`，操作完成后重新读取任务概览；静态 Pages 模式下按钮禁用，不会触发后端。
+
 ### 本地任务执行器
 
 ```bash
