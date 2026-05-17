@@ -304,6 +304,29 @@ def _admin_dashboard_content() -> str:
       gap: 8px;
       align-content: start;
     }
+    .overview {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .metric {
+      border: 1px solid var(--line);
+      background: #f9fafb;
+      padding: 10px;
+    }
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .metric strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 20px;
+      overflow-wrap: anywhere;
+    }
     .card h2,
     .panel h2 {
       margin: 0;
@@ -361,6 +384,7 @@ def _admin_dashboard_content() -> str:
     @media (max-width: 860px) {
       .topbar { align-items: flex-start; flex-direction: column; }
       .grid,
+      .overview,
       .capabilities { grid-template-columns: 1fr; }
     }
   </style>
@@ -382,6 +406,11 @@ def _admin_dashboard_content() -> str:
       <h2>后端连接</h2>
       <p id="apiMode">检测中</p>
       <div id="health"></div>
+    </section>
+    <section class="panel">
+      <h2>数据概览</h2>
+      <div id="overview" class="overview"></div>
+      <div id="latestLinks" class="links"></div>
     </section>
     <section class="grid" aria-label="管理入口">
       <article class="card">
@@ -416,8 +445,56 @@ def _admin_dashboard_content() -> str:
   <script>
     const apiMode = document.getElementById("apiMode");
     const health = document.getElementById("health");
+    const overview = document.getElementById("overview");
+    const latestLinks = document.getElementById("latestLinks");
 
     loadHealth();
+    loadOverview();
+
+    function loadOverview() {
+      Promise.all([
+        fetch("projects.json", { cache: "no-store" }).then(jsonOrThrow).catch(() => ({ projects: [] })),
+        fetch("runs.json", { cache: "no-store" }).then(jsonOrThrow).catch(() => ({ runs: [] })),
+        fetch("jobs.json", { cache: "no-store" }).then(jsonOrThrow).catch(() => ({ jobs: [] })),
+      ]).then(([projectsData, runsData, jobsData]) => {
+        const projects = Array.isArray(projectsData.projects) ? projectsData.projects : [];
+        const runs = Array.isArray(runsData.runs) ? runsData.runs : [];
+        const jobs = Array.isArray(jobsData.jobs) ? jobsData.jobs : [];
+        const latestRun = runs[0] || {};
+        const failedJobs = jobs.filter(job => job.status === "failed");
+        const plannedJobs = jobs.filter(job => job.status === "planned");
+        overview.innerHTML = [
+          metric("项目总数", projects.length),
+          metric("最新运行", latestRun.run_date || "-"),
+          metric("失败任务", failedJobs.length),
+          metric("待执行任务", plannedJobs.length),
+        ].join("");
+        latestLinks.innerHTML = latestLinksHtml(latestRun, failedJobs[0], plannedJobs[0]);
+      });
+    }
+
+    function latestLinksHtml(latestRun, firstFailedJob, firstPlannedJob) {
+      const links = [];
+      if (latestRun.report_url || latestRun.telegram_report_url) {
+        links.push(`<a href="${escapeAttribute(latestRun.report_url || latestRun.telegram_report_url)}">最新周报</a>`);
+      }
+      if (latestRun.telegram_runs_url) {
+        links.push(`<a href="${escapeAttribute(latestRun.telegram_runs_url)}">运行面板</a>`);
+      } else {
+        links.push('<a href="runs.html">运行面板</a>');
+      }
+      if (firstFailedJob) {
+        links.push(`<a href="job.html?job=${encodeURIComponent(firstFailedJob.job_id || "")}">处理失败任务</a>`);
+      }
+      if (firstPlannedJob) {
+        links.push(`<a href="job.html?job=${encodeURIComponent(firstPlannedJob.job_id || "")}">查看待执行任务</a>`);
+      }
+      return links.join("");
+    }
+
+    function metric(label, value) {
+      return `<article class="metric"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></article>`;
+    }
 
     function loadHealth() {
       if (!shouldUseApi()) {
@@ -467,6 +544,10 @@ def _admin_dashboard_content() -> str:
         '"': "&quot;",
         "'": "&#039;",
       }[char]));
+    }
+
+    function escapeAttribute(value) {
+      return escapeHtml(value);
     }
   </script>
 </body>
