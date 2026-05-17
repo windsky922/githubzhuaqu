@@ -33,6 +33,9 @@ def build_pages(root: Path = ROOT) -> list[Path]:
     projects = root / "docs" / "projects.md"
     projects.write_text(_projects_content(root), encoding="utf-8")
     written.append(projects)
+    admin_page = root / "docs" / "admin.html"
+    admin_page.write_text(_admin_dashboard_content(), encoding="utf-8")
+    written.append(admin_page)
     explorer = root / "docs" / "explorer.html"
     explorer.write_text(_explorer_content(), encoding="utf-8")
     written.append(explorer)
@@ -107,6 +110,7 @@ def _index_content(root: Path, reports: list[Path]) -> str:
             "",
             "## 项目文档",
             "",
+            "- [本地管理首页](admin.html)",
             "- [项目筛选页](explorer.html)",
             "- [项目详情页](project.html)",
             "- [运行状态面板](runs.html)",
@@ -232,6 +236,242 @@ def _projects_content(root: Path) -> str:
         lines.append("| - | 暂无项目 | - | - | - | - | 0 | 0 | 0 | - |")
     lines.extend(["", "## 返回", "", "- [周报归档首页](index.html)", ""])
     return "\n".join(lines)
+
+
+def _admin_dashboard_content() -> str:
+    return """<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GitHub 周报本地管理首页</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --panel: #ffffff;
+      --text: #172033;
+      --muted: #667085;
+      --line: #d8dee8;
+      --accent: #2563eb;
+      --ok: #15803d;
+      --bad: #b42318;
+      --warn: #a16207;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.55;
+    }
+    header {
+      border-bottom: 1px solid var(--line);
+      background: var(--panel);
+    }
+    .wrap {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      padding: 18px 0;
+    }
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.2;
+    }
+    main { padding: 24px 0 40px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .panel,
+    .card {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      padding: 16px;
+    }
+    .panel { margin-bottom: 14px; }
+    .card {
+      min-height: 140px;
+      display: grid;
+      gap: 8px;
+      align-content: start;
+    }
+    .card h2,
+    .panel h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+    p {
+      margin: 0;
+      color: var(--muted);
+    }
+    a {
+      color: var(--accent);
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .links {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .status {
+      display: inline-block;
+      width: fit-content;
+      padding: 2px 8px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .status.ok { color: var(--ok); border-color: #bbf7d0; background: #f0fdf4; }
+    .status.bad { color: var(--bad); border-color: #fecaca; background: #fff1f2; }
+    .status.warn { color: var(--warn); border-color: #fde68a; background: #fffbeb; }
+    .capabilities {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .capability {
+      border: 1px solid var(--line);
+      padding: 8px;
+      font-size: 13px;
+      overflow-wrap: anywhere;
+    }
+    pre {
+      margin: 10px 0 0;
+      overflow: auto;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      background: #0f172a;
+      color: #e5e7eb;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 12px;
+    }
+    @media (max-width: 860px) {
+      .topbar { align-items: flex-start; flex-direction: column; }
+      .grid,
+      .capabilities { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap topbar">
+      <h1>GitHub 周报本地管理首页</h1>
+      <nav class="links">
+        <a href="index.html">周报归档</a>
+        <a href="explorer.html">项目筛选</a>
+        <a href="runs.html">运行状态</a>
+        <a href="jobs.html">任务状态</a>
+      </nav>
+    </div>
+  </header>
+  <main class="wrap">
+    <section class="panel">
+      <h2>后端连接</h2>
+      <p id="apiMode">检测中</p>
+      <div id="health"></div>
+    </section>
+    <section class="grid" aria-label="管理入口">
+      <article class="card">
+        <h2>项目</h2>
+        <p>查看热点项目、个性化方向、相似项目和公开 JSON。</p>
+        <div class="links">
+          <a href="explorer.html">项目筛选</a>
+          <a href="projects.json">projects.json</a>
+          <a href="profiles.html">个性化方向</a>
+        </div>
+      </article>
+      <article class="card">
+        <h2>运行</h2>
+        <p>查看每次采集、生成、推送和观测指标。</p>
+        <div class="links">
+          <a href="runs.html">运行状态</a>
+          <a href="runs.json">runs.json</a>
+          <a href="feed.xml">RSS</a>
+        </div>
+      </article>
+      <article class="card">
+        <h2>任务</h2>
+        <p>创建 planned 任务，进入单任务详情页后执行检查、执行和重试。</p>
+        <div class="links">
+          <a href="jobs.html">任务状态</a>
+          <a href="job.html">任务详情</a>
+          <a href="jobs.json">jobs.json</a>
+        </div>
+      </article>
+    </section>
+  </main>
+  <script>
+    const apiMode = document.getElementById("apiMode");
+    const health = document.getElementById("health");
+
+    loadHealth();
+
+    function loadHealth() {
+      if (!shouldUseApi()) {
+        apiMode.innerHTML = '<span class="status warn">静态模式</span> 当前页面使用 GitHub Pages 静态数据；本地启动后端或添加 api=1 后显示 /v1/health。';
+        health.innerHTML = "";
+        return;
+      }
+      apiMode.innerHTML = '<span class="status warn">API 模式</span> 正在读取 /v1/health。';
+      fetch("/v1/health", { cache: "no-store" })
+        .then(jsonOrThrow)
+        .then(data => {
+          apiMode.innerHTML = '<span class="status ok">API 已连接</span> 本地后端可用。';
+          health.innerHTML = healthHtml(data);
+        })
+        .catch(error => {
+          apiMode.innerHTML = `<span class="status bad">API 不可用</span> ${escapeHtml(error.message || error)}`;
+          health.innerHTML = '<p>会继续保留静态页面查看能力。</p>';
+        });
+    }
+
+    function healthHtml(data) {
+      const capabilities = data.capabilities || {};
+      const capabilityHtml = Object.entries(capabilities).map(([key, value]) => {
+        const state = value ? "ok" : "bad";
+        return `<div class="capability"><span class="status ${state}">${value ? "启用" : "关闭"}</span> ${escapeHtml(key)}</div>`;
+      }).join("");
+      return `<div class="capabilities">${capabilityHtml}</div><pre>${escapeHtml(JSON.stringify(data.archive || {}, null, 2))}</pre>`;
+    }
+
+    function shouldUseApi() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("api") === "1") return true;
+      if (params.get("api") === "0") return false;
+      return ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
+    }
+
+    function jsonOrThrow(response) {
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return response.json();
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;",
+      }[char]));
+    }
+  </script>
+</body>
+</html>
+"""
 
 
 def _explorer_content() -> str:

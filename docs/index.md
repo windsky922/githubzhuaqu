@@ -36,6 +36,7 @@
 
 ## 项目文档
 
+- [本地管理首页](admin.html)
 - [项目筛选页](explorer.html)
 - [项目详情页](project.html)
 - [运行状态面板](runs.html)

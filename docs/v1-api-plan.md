@@ -270,6 +270,8 @@
 
 任务详情页同时提供单任务操作区：执行前检查调用 `/v1/job-execution-check?job_id=...`，确认执行调用 `POST /v1/jobs/{job_id}/execute`，失败重试调用 `POST /v1/jobs/{job_id}/retry`。详情页固定写入 `requested_by=job_detail_page`，操作后刷新任务详情和事件时间线。静态 Pages 模式下操作按钮禁用。
 
+`admin.html` 是本地管理首页，聚合项目筛选、运行状态、任务状态和任务详情入口。页面在静态模式下只显示只读入口；在本地后端或 `api=1` 模式下读取 `/v1/health`，展示能力开关和归档健康摘要。
+
 ### 本地任务执行器
 
 ```bash
