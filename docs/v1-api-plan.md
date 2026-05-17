@@ -272,11 +272,11 @@
 
 `admin.html` 是本地管理首页，聚合项目筛选、运行状态、任务状态和任务详情入口。页面在静态模式下只显示只读入口；在本地后端或 `api=1` 模式下读取 `/v1/health`，展示能力开关和归档健康摘要。
 
-管理首页同时读取 `projects.json`、`runs.json` 和 `jobs.json`，展示项目总数、最新运行、失败任务数和待执行任务数，并提供最新周报、失败任务和待执行任务的快捷入口。该概览只读取公开归档数据，不触发后端任务。
+管理首页同时读取 `projects.json`、`runs.json` 和任务数据，展示项目总数、最新运行、失败任务数和待执行任务数，并提供最新周报、失败任务和待执行任务的快捷入口。任务数据在 API 模式下优先读取 `/v1/jobs?limit=200`，失败时回退到 `jobs.json`；静态 Pages 模式仍只读取 `jobs.json`。该概览只读取公开归档或本地后端数据，不触发后端任务。
 
 管理首页还提供最小 planned 周报任务创建表单。表单在 API 模式下调用 `POST /v1/runs/trigger`，支持传入 `profile`、`days_back`、`sources`、`dry_run` 和 `confirm_delivery`，并固定写入 `trigger_source=admin_page` 与 `requested_by=local-admin`。接口只创建任务，创建成功后跳转到 `job.html?job=...&api=1` 继续人工确认。
 
-管理首页的任务工作台读取 `jobs.json`，支持按重点、失败、待执行、运行中和全部任务筛选。重点视图聚合 `failed`、`planned` 和 `running`，任务编号链接到 `job.html?job=...`。
+管理首页的任务工作台复用同一任务数据源：API 模式优先读取 `/v1/jobs?limit=200`，读取失败时回退到静态 `jobs.json`；静态 Pages 模式默认读取 `jobs.json`。工作台支持按重点、失败、待执行、运行中和全部任务筛选。重点视图聚合 `failed`、`planned` 和 `running`，任务编号链接到 `job.html?job=...`。
 
 ### 本地任务执行器
 

@@ -654,7 +654,7 @@ def _admin_dashboard_content() -> str:
       Promise.all([
         fetch("projects.json", { cache: "no-store" }).then(jsonOrThrow).catch(() => ({ projects: [] })),
         fetch("runs.json", { cache: "no-store" }).then(jsonOrThrow).catch(() => ({ runs: [] })),
-        fetch("jobs.json", { cache: "no-store" }).then(jsonOrThrow).catch(() => ({ jobs: [] })),
+        loadAdminJobs(),
       ]).then(([projectsData, runsData, jobsData]) => {
         const projects = Array.isArray(projectsData.projects) ? projectsData.projects : [];
         const runs = Array.isArray(runsData.runs) ? runsData.runs : [];
@@ -672,6 +672,19 @@ def _admin_dashboard_content() -> str:
         latestLinks.innerHTML = latestLinksHtml(latestRun, failedJobs[0], plannedJobs[0]);
         renderJobWorkbench();
       });
+    }
+
+    function loadAdminJobs() {
+      if (!shouldUseApi()) return loadAdminJobsJson();
+      return fetch("/v1/jobs?limit=200", { cache: "no-store" })
+        .then(jsonOrThrow)
+        .catch(loadAdminJobsJson);
+    }
+
+    function loadAdminJobsJson() {
+      return fetch("jobs.json", { cache: "no-store" })
+        .then(jsonOrThrow)
+        .catch(() => ({ jobs: [] }));
     }
 
     function renderJobWorkbench() {
