@@ -4,6 +4,8 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import Body, FastAPI, Query
+from fastapi.responses import RedirectResponse
+from fastapi.staticfiles import StaticFiles
 
 from src.api.repository import ROOT, ApiRepository
 
@@ -137,6 +139,14 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
     @app.get("/v1/reports/latest")
     def v1_latest_report() -> dict[str, Any]:
         return repository.latest_weekly()
+
+    @app.get("/", include_in_schema=False)
+    def local_admin_home() -> RedirectResponse:
+        return RedirectResponse(url="/admin.html?api=1")
+
+    docs_dir = root / "docs"
+    if docs_dir.exists():
+        app.mount("/", StaticFiles(directory=docs_dir, html=True), name="public_docs")
 
     return app
 

@@ -34,6 +34,14 @@ py -m uvicorn src.api.app:app --reload
 http://127.0.0.1:8000/api/health
 ```
 
+本地管理首页：
+
+```text
+http://127.0.0.1:8000/admin.html?api=1
+```
+
+根路径 `http://127.0.0.1:8000/` 会跳转到管理首页。`/v1/*` 路径是 JSON API，例如 `/v1/jobs?limit=50` 返回机器可读任务数据，不是 HTML 页面。
+
 如果本地没有 `data/github_weekly.sqlite`，查询项目接口会从 `data/` 下的 JSON 归档自动重建 SQLite 派生索引。
 
 ## 三、接口

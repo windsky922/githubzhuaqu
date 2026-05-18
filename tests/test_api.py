@@ -226,6 +226,8 @@ class ApiRepositoryTest(unittest.TestCase):
                 "/v1/jobs",
                 params={"status": "planned", "profile": "agent_development", "query": "github_trending"},
             )
+            admin_page = client.get("/admin.html", params={"api": "1"})
+            home = client.get("/", follow_redirects=False)
 
             self.assertEqual(health.status_code, 200)
             self.assertEqual(projects.status_code, 200)
@@ -242,6 +244,11 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(v1_retry.status_code, 200)
             self.assertEqual(v1_retry_events.status_code, 200)
             self.assertEqual(v1_planned_jobs.status_code, 200)
+            self.assertEqual(admin_page.status_code, 200)
+            self.assertIn("text/html", admin_page.headers["content-type"])
+            self.assertIn("GitHub 周报本地管理首页", admin_page.text)
+            self.assertEqual(home.status_code, 307)
+            self.assertEqual(home.headers["location"], "/admin.html?api=1")
             self.assertEqual(projects.json()["projects"][0]["full_name"], "owner/agent")
             self.assertEqual(detail.json()["history_count"], 2)
             self.assertEqual(latest.json()["run_date"], "2026-05-09")
@@ -272,6 +279,10 @@ def _write_fixture(root: Path) -> None:
     (root / "config").mkdir(parents=True)
 
     (root / "reports" / "2026-05-09.md").write_text("# 周报\n\n- owner/agent", encoding="utf-8")
+    (root / "docs" / "admin.html").write_text(
+        "<!doctype html><html lang=\"zh-CN\"><body>GitHub 周报本地管理首页</body></html>",
+        encoding="utf-8",
+    )
     (root / "docs" / "runs.json").write_text(
         json.dumps({"schema_version": 1, "count": 1, "runs": [{"run_date": "2026-05-09"}]}, ensure_ascii=False),
         encoding="utf-8",
