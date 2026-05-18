@@ -23,6 +23,7 @@
 | `api_version` | 当前接口版本 |
 | `capabilities.projects_query` | 是否支持项目查询 |
 | `capabilities.project_detail` | 是否支持项目详情 |
+| `capabilities.recommendations` | 是否支持个性化推荐查询 |
 | `capabilities.runs_query` | 是否支持运行记录 |
 | `capabilities.jobs_query` | 是否支持任务查询 |
 | `capabilities.job_events` | 是否支持任务审计事件查询 |
@@ -54,6 +55,31 @@
 ### `GET /v1/projects/{owner}/{repo}`
 
 兼容 `/api/projects/{owner}/{repo}`，返回项目详情、历史入选记录、推荐理由、趋势判断、质量信号、风险提示和相似项目。
+
+### `GET /v1/recommendations`
+
+面向用户选择场景的个性化推荐接口。它复用 `/v1/projects` 的历史索引和 profile 过滤能力，但响应字段以推荐页为中心。
+
+支持参数：
+
+| 参数 | 说明 |
+|---|---|
+| `profile` | 个性化方向，例如 `agent_development`、`python`、`java` |
+| `language` | 主要语言，例如 `Python`、`Java` |
+| `category` | 项目方向，例如 `AI Agent`、`Backend` |
+| `query` | 关键词 |
+| `limit` | 返回数量，默认 20，最大 200 |
+| `sort` | 排序方式，默认 `score` |
+
+返回字段：
+
+| 字段 | 说明 |
+|---|---|
+| `recommendations` | 推荐项目数组 |
+| `selection_summary` | 筛选条件、命中数量、Trending 命中和首选项目说明 |
+| `profile` / `language` / `category` / `query` | 当前筛选条件回显 |
+
+该接口用于 `docs/recommendations.html`，后续也可作为用户订阅、移动端推送和多渠道精准推荐的统一读取入口。
 
 ### `GET /v1/runs`
 

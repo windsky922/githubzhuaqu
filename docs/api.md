@@ -95,6 +95,39 @@ http://127.0.0.1:8000/admin.html?api=1
 
 这个接口用于后续项目详情页、项目对比、相似项目推荐和个性化订阅解释。
 
+### `GET /api/recommendations`
+
+返回面向用户选择场景的推荐项目列表。它复用历史归档、SQLite 派生索引和 profile 过滤逻辑，但响应字段更适合推荐页直接展示。
+
+支持参数：
+
+| 参数 | 说明 |
+|---|---|
+| `profile` | 个性化方向，例如 `agent_development`、`python`、`java` |
+| `language` | 主要语言，例如 `Python`、`Java`、`TypeScript` |
+| `category` | 项目方向，例如 `AI Agent`、`Developer Tools`、`Backend` |
+| `query` | 关键词，匹配项目名、简介、方向和推荐理由 |
+| `limit` | 返回数量，范围 1 到 200 |
+| `sort` | `score`、`trending`、`star-growth`、`quality`、`recent` 等 |
+
+示例：
+
+```text
+/api/recommendations?profile=agent_development&language=Python&limit=20
+```
+
+返回内容包含：
+
+1. `recommendations`：推荐项目数组。
+2. `selection_summary`：本次推荐的筛选条件、命中数量、Trending 命中和首选项目说明。
+3. `profile`、`language`、`category`、`query`：前端回显当前筛选条件。
+
+对应的 v1 入口为：
+
+```text
+/v1/recommendations?profile=agent_development&limit=20
+```
+
 ### `GET /api/runs`
 
 返回公开运行记录，数据来源为 `docs/runs.json`。
@@ -147,6 +180,19 @@ explorer.html?api=0&profile=python
 ```text
 project.html?repo=owner/agent
 project.html?repo=owner/agent&api=1
+```
+
+`docs/recommendations.html` 是个性化推荐页：
+
+1. 本地后端或 URL 带 `api=1` 时优先读取 `/v1/recommendations`。
+2. GitHub Pages 静态模式下读取 `projects.json` 并在浏览器中完成基础筛选和排序。
+3. 页面预留 Agent 开发、Python、Java、后端、前端、AI 工具等快捷方向，后续可以接入用户订阅数据库。
+
+示例：
+
+```text
+recommendations.html?api=1&profile=agent_development
+recommendations.html?api=0&language=Java&q=spring
 ```
 
 ## 五、后续扩展

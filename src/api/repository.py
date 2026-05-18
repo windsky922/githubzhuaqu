@@ -39,6 +39,7 @@ class ApiRepository:
             "capabilities": {
                 "projects_query": True,
                 "project_detail": True,
+                "recommendations": True,
                 "runs_query": True,
                 "jobs_query": True,
                 "job_events": True,
@@ -86,6 +87,43 @@ class ApiRepository:
             "schema_version": 1,
             "count": len(rows),
             "projects": rows,
+        }
+
+    def recommendations(
+        self,
+        *,
+        language: str | None = None,
+        category: str | None = None,
+        profile: str | None = None,
+        query: str | None = None,
+        limit: int = 20,
+        sort: str = "score",
+    ) -> dict[str, Any]:
+        projects = self.projects(
+            language=language,
+            category=category,
+            profile=profile,
+            query=query,
+            limit=limit,
+            sort=sort,
+        ).get("projects", [])
+        projects = _dedupe_projects_by_full_name(projects)
+        return {
+            "schema_version": 1,
+            "profile": _blank_to_none(profile) or "",
+            "language": _blank_to_none(language) or "",
+            "category": _blank_to_none(category) or "",
+            "query": _blank_to_none(query) or "",
+            "sort": sort,
+            "count": len(projects),
+            "selection_summary": _recommendation_summary(
+                projects,
+                profile=_blank_to_none(profile),
+                language=_blank_to_none(language),
+                category=_blank_to_none(category),
+                query=_blank_to_none(query),
+            ),
+            "recommendations": projects,
         }
 
     def project_detail(self, full_name: str) -> dict[str, Any]:
@@ -889,6 +927,53 @@ def _positive_int(value: Any) -> int | None:
 
 def _truthy(value: Any) -> bool:
     return str(value or "").strip().lower() in {"1", "true", "yes", "y", "on"}
+
+
+def _recommendation_summary(
+    projects: list[dict[str, Any]],
+    *,
+    profile: str | None,
+    language: str | None,
+    category: str | None,
+    query: str | None,
+) -> list[str]:
+    filters = []
+    if profile:
+        filters.append(f"profile={profile}")
+    if language:
+        filters.append(f"language={language}")
+    if category:
+        filters.append(f"category={category}")
+    if query:
+        filters.append(f"query={query}")
+
+    summary = [
+        "当前筛选：" + ("、".join(filters) if filters else "全部项目"),
+        f"返回 {len(projects)} 个候选项目，排序优先考虑综合分、Trending 和新增 Star。",
+    ]
+    trending_count = sum(1 for project in projects if _int_value(project.get("trending_rank")) > 0)
+    if trending_count:
+        summary.append(f"其中 {trending_count} 个项目进入过 GitHub Trending。")
+    if projects:
+        top = projects[0]
+        name = str(top.get("full_name") or "")
+        growth = _int_value(top.get("star_growth"))
+        reasons = _unique_strings(top.get("selection_reasons") or [])
+        reason_text = reasons[0] if reasons else "综合热度最高"
+        summary.append(f"当前首选项目是 {name}，新增 Star {growth}，原因：{reason_text}")
+    return summary
+
+
+def _dedupe_projects_by_full_name(projects: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    deduped = []
+    seen = set()
+    for project in projects:
+        full_name = str(project.get("full_name") or "").lower()
+        if not full_name or full_name in seen:
+            continue
+        seen.add(full_name)
+        deduped.append(project)
+    return deduped
 
 
 def _best_trending_rank(projects: list[dict[str, Any]]) -> int:

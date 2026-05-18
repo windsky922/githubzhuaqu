@@ -50,6 +50,24 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
     def project_detail(owner: str, repo: str) -> dict[str, Any]:
         return repository.project_detail(f"{owner}/{repo}")
 
+    @app.get("/api/recommendations")
+    def recommendations(
+        language: str | None = None,
+        category: str | None = None,
+        profile: str | None = None,
+        query: str | None = None,
+        limit: int = Query(default=20, ge=1, le=200),
+        sort: str = Query(default="score", pattern="^(recent|position|score|star-growth|trending|quality)$"),
+    ) -> dict[str, Any]:
+        return repository.recommendations(
+            language=language,
+            category=category,
+            profile=profile,
+            query=query,
+            limit=limit,
+            sort=sort,
+        )
+
     @app.get("/api/runs")
     def runs() -> dict[str, Any]:
         return repository.runs()
@@ -97,6 +115,24 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
     @app.get("/v1/projects/{owner}/{repo}")
     def v1_project_detail(owner: str, repo: str) -> dict[str, Any]:
         return repository.project_detail(f"{owner}/{repo}")
+
+    @app.get("/v1/recommendations")
+    def v1_recommendations(
+        language: str | None = None,
+        category: str | None = None,
+        profile: str | None = None,
+        query: str | None = None,
+        limit: int = Query(default=20, ge=1, le=200),
+        sort: str = Query(default="score", pattern="^(recent|position|score|star-growth|trending|quality)$"),
+    ) -> dict[str, Any]:
+        return repository.recommendations(
+            language=language,
+            category=category,
+            profile=profile,
+            query=query,
+            limit=limit,
+            sort=sort,
+        )
 
     @app.get("/v1/runs")
     def v1_runs() -> dict[str, Any]:

@@ -21,6 +21,7 @@ class ApiRepositoryTest(unittest.TestCase):
             repository = ApiRepository(root=root, db_path=root / "data" / "github_weekly.sqlite")
 
             projects = repository.projects(language="Python", source="github_trending", limit=10)
+            recommendations = repository.recommendations(profile="agent_development", language="Python", limit=10)
             detail = repository.project_detail("owner/agent")
             runs = repository.runs()
             profiles = repository.profiles()
@@ -93,6 +94,11 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(projects["schema_version"], 1)
             self.assertGreaterEqual(projects["count"], 1)
             self.assertEqual(projects["projects"][0]["full_name"], "owner/agent")
+            self.assertEqual(recommendations["schema_version"], 1)
+            self.assertEqual(recommendations["profile"], "agent_development")
+            self.assertGreaterEqual(recommendations["count"], 1)
+            self.assertEqual(recommendations["recommendations"][0]["full_name"], "owner/agent")
+            self.assertIn("profile=agent_development", recommendations["selection_summary"][0])
             self.assertTrue(detail["found"])
             self.assertEqual(detail["history_count"], 2)
             self.assertEqual(detail["total_star_growth"], 32)
@@ -106,6 +112,7 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(latest["run_date"], "2026-05-09")
             self.assertIn("owner/agent", latest["markdown"])
             self.assertTrue(health["capabilities"]["jobs_query"])
+            self.assertTrue(health["capabilities"]["recommendations"])
             self.assertTrue(health["capabilities"]["job_execution_check"])
             self.assertTrue(health["capabilities"]["job_retry"])
             self.assertTrue(health["capabilities"]["local_job_runner"])
@@ -204,6 +211,10 @@ class ApiRepositoryTest(unittest.TestCase):
             latest = client.get("/api/weekly/latest")
             v1_health = client.get("/v1/health")
             v1_projects = client.get("/v1/projects", params={"profile": "agent_development", "limit": 5})
+            v1_recommendations = client.get(
+                "/v1/recommendations",
+                params={"profile": "agent_development", "language": "Python", "limit": 5},
+            )
             v1_jobs = client.get("/v1/jobs", params={"status": "succeeded", "kind": "weekly_report", "limit": 5})
             v1_trigger = client.post(
                 "/v1/runs/trigger",
@@ -238,6 +249,7 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(latest.status_code, 200)
             self.assertEqual(v1_health.status_code, 200)
             self.assertEqual(v1_projects.status_code, 200)
+            self.assertEqual(v1_recommendations.status_code, 200)
             self.assertEqual(v1_jobs.status_code, 200)
             self.assertEqual(v1_trigger.status_code, 202)
             self.assertEqual(v1_execution_check.status_code, 200)
@@ -256,6 +268,8 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(detail.json()["history_count"], 2)
             self.assertEqual(latest.json()["run_date"], "2026-05-09")
             self.assertEqual(v1_projects.json()["projects"][0]["full_name"], "owner/agent")
+            self.assertEqual(v1_recommendations.json()["recommendations"][0]["full_name"], "owner/agent")
+            self.assertIn("profile=agent_development", v1_recommendations.json()["selection_summary"][0])
             self.assertEqual(v1_jobs.json()["jobs"][0]["job_id"], "run:2026-05-09")
             self.assertFalse(v1_trigger.json()["execution_supported"])
             self.assertTrue(v1_execution_check.json()["executable"])

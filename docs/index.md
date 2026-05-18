@@ -58,3 +58,4 @@
 - [开发路线图](roadmap.html)
 - [未来更新规划](future-plan.html)
 - [操作日志](operation-log.html)
+- [个性化推荐页](recommendations.html)

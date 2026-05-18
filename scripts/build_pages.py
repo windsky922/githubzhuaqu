@@ -39,6 +39,9 @@ def build_pages(root: Path = ROOT) -> list[Path]:
     explorer = root / "docs" / "explorer.html"
     explorer.write_text(_explorer_content(), encoding="utf-8")
     written.append(explorer)
+    recommendations = root / "docs" / "recommendations.html"
+    recommendations.write_text(_recommendations_content(), encoding="utf-8")
+    written.append(recommendations)
     project_page = root / "docs" / "project.html"
     project_page.write_text(_project_detail_content(), encoding="utf-8")
     written.append(project_page)
@@ -134,6 +137,8 @@ def _index_content(root: Path, reports: list[Path]) -> str:
             "",
         ]
     )
+    if "- [个性化推荐页](recommendations.html)" not in lines:
+        lines.insert(-1, "- [个性化推荐页](recommendations.html)")
     return "\n".join(lines)
 
 
@@ -585,6 +590,7 @@ def _admin_dashboard_content() -> str:
       <nav class="links">
         <a href="index.html">周报归档</a>
         <a href="explorer.html">项目筛选</a>
+        <a href="recommendations.html">个性化推荐</a>
         <a href="runs.html">运行状态</a>
         <a href="jobs.html">任务状态</a>
       </nav>
@@ -1160,6 +1166,317 @@ def _admin_dashboard_content() -> str:
     function escapeAttribute(value) {
       return escapeHtml(value);
     }
+  </script>
+</body>
+</html>
+"""
+
+
+def _recommendations_content() -> str:
+    return """<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GitHub 个性化推荐</title>
+  <style>
+    :root { color-scheme: light; font-family: Inter, "Microsoft YaHei", Arial, sans-serif; background: #f6f8fa; color: #1f2328; }
+    body { margin: 0; }
+    header { background: #ffffff; border-bottom: 1px solid #d8dee4; }
+    .wrap { max-width: 1180px; margin: 0 auto; padding: 22px 18px; }
+    nav { display: flex; gap: 14px; flex-wrap: wrap; font-weight: 700; }
+    nav a { color: #0969da; text-decoration: none; }
+    h1 { margin: 0 0 6px; font-size: 28px; }
+    h2 { margin: 0 0 12px; font-size: 18px; }
+    .sub { margin: 0; color: #57606a; }
+    .panel { background: #ffffff; border: 1px solid #d8dee4; border-radius: 8px; padding: 16px; margin-top: 18px; }
+    .filters { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; align-items: end; }
+    label { display: grid; gap: 6px; color: #57606a; font-size: 13px; font-weight: 700; }
+    input, select { box-sizing: border-box; width: 100%; border: 1px solid #d0d7de; border-radius: 6px; padding: 9px 10px; font: inherit; background: #ffffff; }
+    button, .button { border: 1px solid #0969da; background: #0969da; color: #ffffff; border-radius: 6px; padding: 9px 12px; font: inherit; font-weight: 700; cursor: pointer; text-decoration: none; text-align: center; }
+    .ghost { background: #ffffff; color: #0969da; }
+    .quick { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+    .quick button { background: #f6f8fa; color: #0969da; border-color: #d0d7de; }
+    .summary { display: grid; gap: 8px; margin: 0; padding-left: 18px; color: #57606a; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-top: 14px; }
+    .card { background: #ffffff; border: 1px solid #d8dee4; border-radius: 8px; padding: 14px; display: grid; gap: 10px; }
+    .repo { font-size: 17px; font-weight: 800; color: #0969da; text-decoration: none; overflow-wrap: anywhere; }
+    .desc { color: #57606a; margin: 0; line-height: 1.5; }
+    .meta { display: flex; flex-wrap: wrap; gap: 8px; }
+    .pill { border: 1px solid #d8dee4; border-radius: 999px; padding: 3px 8px; color: #57606a; background: #f6f8fa; font-size: 12px; }
+    .reasons { margin: 0; padding-left: 18px; color: #57606a; line-height: 1.55; }
+    .empty, .error { border: 1px dashed #d0d7de; color: #57606a; padding: 18px; text-align: center; background: #ffffff; }
+    .error { color: #cf222e; }
+    @media (max-width: 900px) { .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 560px) { .filters { grid-template-columns: 1fr; } h1 { font-size: 24px; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>GitHub 个性化推荐</h1>
+      <p class="sub">按语言、方向和关键词快速查看适合当前需求的热点项目。</p>
+      <nav>
+        <a href="admin.html">管理首页</a>
+        <a href="explorer.html">项目筛选</a>
+        <a href="profiles.html">方向配置</a>
+        <a href="projects.json">projects.json</a>
+      </nav>
+    </div>
+  </header>
+  <main class="wrap">
+    <section class="panel">
+      <h2>推荐条件</h2>
+      <div class="filters">
+        <label>方向 profile
+          <input id="profile" placeholder="agent_development">
+        </label>
+        <label>主要语言
+          <input id="language" placeholder="Python / Java / TypeScript">
+        </label>
+        <label>项目方向
+          <input id="category" placeholder="AI Agent / Backend">
+        </label>
+        <label>关键词
+          <input id="query" placeholder="agent / java / workflow">
+        </label>
+        <label>排序
+          <select id="sort">
+            <option value="score">综合分</option>
+            <option value="trending">Trending 排名</option>
+            <option value="star-growth">新增 Star</option>
+            <option value="quality">质量分</option>
+            <option value="recent">最新入选</option>
+          </select>
+        </label>
+        <button id="apply">生成推荐</button>
+      </div>
+      <div id="profileButtons" class="quick"></div>
+    </section>
+    <section class="panel">
+      <h2>推荐摘要</h2>
+      <ul id="summary" class="summary"><li>加载中</li></ul>
+    </section>
+    <section id="recommendationRows" class="cards"></section>
+  </main>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const apiMode = params.get("api") === "1" || (params.get("api") !== "0" && ["localhost", "127.0.0.1", "::1"].includes(location.hostname));
+    const quickProfiles = [
+      ["agent_development", "Agent 开发"],
+      ["python", "Python"],
+      ["java", "Java"],
+      ["backend", "后端"],
+      ["frontend", "前端"],
+      ["ai_tools", "AI 工具"]
+    ];
+    const controls = {
+      profile: document.getElementById("profile"),
+      language: document.getElementById("language"),
+      category: document.getElementById("category"),
+      query: document.getElementById("query"),
+      sort: document.getElementById("sort")
+    };
+
+    function init() {
+      controls.profile.value = params.get("profile") || "";
+      controls.language.value = params.get("language") || "";
+      controls.category.value = params.get("category") || "";
+      controls.query.value = params.get("q") || params.get("query") || "";
+      controls.sort.value = params.get("sort") || "score";
+      renderProfileButtons();
+      document.getElementById("apply").addEventListener("click", () => loadRecommendations(true));
+      Object.values(controls).forEach(control => control.addEventListener("keydown", event => {
+        if (event.key === "Enter") loadRecommendations(true);
+      }));
+      loadRecommendations(false);
+    }
+
+    function renderProfileButtons() {
+      document.getElementById("profileButtons").innerHTML = quickProfiles.map(([value, label]) =>
+        `<button type="button" data-profile="${escapeAttribute(value)}">${escapeHtml(label)}</button>`
+      ).join("");
+      document.querySelectorAll("[data-profile]").forEach(button => button.addEventListener("click", () => {
+        controls.profile.value = button.dataset.profile || "";
+        loadRecommendations(true);
+      }));
+    }
+
+    async function loadRecommendations(updateLocation) {
+      const request = currentRequest();
+      if (updateLocation) updateUrl(request);
+      try {
+        const data = apiMode ? await fetchApiRecommendations(request) : await fetchStaticRecommendations(request);
+        renderRecommendations(data);
+      } catch (error) {
+        renderError(error);
+      }
+    }
+
+    function currentRequest() {
+      return {
+        profile: controls.profile.value.trim(),
+        language: controls.language.value.trim(),
+        category: controls.category.value.trim(),
+        query: controls.query.value.trim(),
+        sort: controls.sort.value,
+        limit: "50"
+      };
+    }
+
+    function updateUrl(request) {
+      const next = new URLSearchParams();
+      Object.entries(request).forEach(([key, value]) => {
+        if (!value || key === "limit") return;
+        next.set(key === "query" ? "q" : key, value);
+      });
+      if (params.get("api")) next.set("api", params.get("api"));
+      history.replaceState(null, "", `${location.pathname}?${next.toString()}`);
+    }
+
+    async function fetchApiRecommendations(request) {
+      const query = new URLSearchParams(request);
+      const response = await fetch(`/v1/recommendations?${query.toString()}`);
+      if (!response.ok) throw new Error(`API 请求失败：${response.status}`);
+      return response.json();
+    }
+
+    async function fetchStaticRecommendations(request) {
+      const response = await fetch("projects.json");
+      if (!response.ok) throw new Error(`静态 projects.json 读取失败：${response.status}`);
+      const data = await response.json();
+      let projects = Array.isArray(data.projects) ? data.projects.slice() : [];
+      projects = projects.filter(project => matchesRequest(project, request));
+      projects = dedupeProjects(sortProjects(projects, request.sort)).slice(0, Number(request.limit || 50));
+      return {
+        schema_version: 1,
+        profile: request.profile,
+        language: request.language,
+        category: request.category,
+        query: request.query,
+        sort: request.sort,
+        count: projects.length,
+        selection_summary: staticSummary(projects, request),
+        recommendations: projects
+      };
+    }
+
+    function matchesRequest(project, request) {
+      if (request.language && (project.language || "").toLowerCase() !== request.language.toLowerCase()) return false;
+      if (request.category && (project.category || "").toLowerCase() !== request.category.toLowerCase()) return false;
+      const text = [
+        project.full_name, project.description, project.category, project.language,
+        ...(project.sources || []), ...(project.selection_reasons || [])
+      ].join(" ").toLowerCase();
+      if (request.profile && !text.includes(request.profile.toLowerCase().replaceAll("_", " "))) {
+        const profileWords = request.profile.toLowerCase().split(/[_\\s-]+/).filter(Boolean);
+        if (!profileWords.some(word => text.includes(word))) return false;
+      }
+      if (request.query && !text.includes(request.query.toLowerCase())) return false;
+      return true;
+    }
+
+    function sortProjects(projects, sort) {
+      const number = value => Number(value || 0);
+      return projects.sort((left, right) => {
+        if (sort === "trending") return trendingValue(left) - trendingValue(right);
+        if (sort === "star-growth") return number(right.star_growth) - number(left.star_growth);
+        if (sort === "quality") return number(right.quality_score) - number(left.quality_score);
+        if (sort === "recent") return String(right.run_date || "").localeCompare(String(left.run_date || ""));
+        return number(right.score) - number(left.score) || number(right.star_growth) - number(left.star_growth);
+      });
+    }
+
+    function dedupeProjects(projects) {
+      const seen = new Set();
+      return projects.filter(project => {
+        const fullName = String(project.full_name || "").toLowerCase();
+        if (!fullName || seen.has(fullName)) return false;
+        seen.add(fullName);
+        return true;
+      });
+    }
+
+    function trendingValue(project) {
+      const rank = Number(project.trending_rank || 0);
+      return rank > 0 ? rank : 999999;
+    }
+
+    function staticSummary(projects, request) {
+      const filters = [];
+      if (request.profile) filters.push(`profile=${request.profile}`);
+      if (request.language) filters.push(`language=${request.language}`);
+      if (request.category) filters.push(`category=${request.category}`);
+      if (request.query) filters.push(`query=${request.query}`);
+      const trendingCount = projects.filter(project => Number(project.trending_rank || 0) > 0).length;
+      const summary = [
+        `当前筛选：${filters.length ? filters.join("、") : "全部项目"}`,
+        `返回 ${projects.length} 个候选项目，静态模式按本地 projects.json 计算。`
+      ];
+      if (trendingCount) summary.push(`其中 ${trendingCount} 个项目进入过 GitHub Trending。`);
+      if (projects[0]) summary.push(`当前首选项目是 ${projects[0].full_name || "-"}，新增 Star ${projects[0].star_growth || 0}。`);
+      return summary;
+    }
+
+    function renderRecommendations(data) {
+      const projects = data.recommendations || [];
+      document.getElementById("summary").innerHTML = (data.selection_summary || []).map(item => `<li>${escapeHtml(item)}</li>`).join("") || "<li>暂无摘要。</li>";
+      const target = document.getElementById("recommendationRows");
+      if (!projects.length) {
+        target.innerHTML = '<div class="empty">暂无匹配项目，请调整方向、语言或关键词。</div>';
+        return;
+      }
+      target.innerHTML = projects.map(project => `
+        <article class="card">
+          <a class="repo" href="${escapeAttribute(projectDetailUrl(project))}">${escapeHtml(project.full_name || "-")}</a>
+          <p class="desc">${escapeHtml(project.description || "暂无简介")}</p>
+          <div class="meta">
+            <span class="pill">${escapeHtml(project.language || "Unknown")}</span>
+            <span class="pill">${escapeHtml(project.category || "Other")}</span>
+            <span class="pill">新增 Star ${number(project.star_growth)}</span>
+            <span class="pill">Trending ${project.trending_rank ? "#" + number(project.trending_rank) : "-"}</span>
+            <span class="pill">质量 ${number(project.quality_score)}</span>
+          </div>
+          <ul class="reasons">${reasonsHtml(project)}</ul>
+          <div class="meta">
+            <a class="button ghost" href="${escapeAttribute(projectDetailUrl(project))}">项目详情</a>
+            <a class="button ghost" href="${escapeAttribute(project.html_url || "#")}" target="_blank" rel="noreferrer">GitHub</a>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function reasonsHtml(project) {
+      const reasons = Array.isArray(project.selection_reasons) && project.selection_reasons.length ? project.selection_reasons.slice(0, 3) : ["综合热度、方向和项目质量进入推荐列表。"];
+      return reasons.map(reason => `<li>${escapeHtml(reason)}</li>`).join("");
+    }
+
+    function renderError(error) {
+      document.getElementById("summary").innerHTML = `<li>${escapeHtml(error.message || String(error))}</li>`;
+      document.getElementById("recommendationRows").innerHTML = '<div class="error">推荐数据读取失败。</div>';
+    }
+
+    function projectDetailUrl(project) {
+      const repo = project.full_name || "";
+      const next = new URLSearchParams();
+      next.set("repo", repo);
+      if (params.get("api")) next.set("api", params.get("api"));
+      return `project.html?${next.toString()}`;
+    }
+
+    function number(value) {
+      return Number(value || 0).toLocaleString("zh-CN");
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
+    }
+
+    function escapeAttribute(value) {
+      return escapeHtml(value);
+    }
+
+    init();
   </script>
 </body>
 </html>
