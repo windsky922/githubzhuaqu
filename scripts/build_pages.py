@@ -1208,6 +1208,11 @@ def _subscriptions_content() -> str:
     .pill { border: 1px solid #d8dee4; border-radius: 999px; padding: 3px 8px; color: #57606a; background: #f6f8fa; font-size: 12px; }
     .enabled { color: #1a7f37; }
     .disabled { color: #cf222e; }
+    .preview { border-top: 1px solid #d8dee4; padding-top: 10px; display: grid; gap: 8px; }
+    .preview-list { display: grid; gap: 8px; }
+    .preview-item { border: 1px solid #d8dee4; border-radius: 6px; padding: 10px; background: #f6f8fa; }
+    .preview-item a { color: #0969da; font-weight: 800; text-decoration: none; }
+    .summary-list { margin: 0; padding-left: 18px; color: #57606a; line-height: 1.5; }
     .notice { color: #57606a; line-height: 1.6; }
     .error { color: #cf222e; }
     @media (max-width: 900px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
@@ -1342,11 +1347,14 @@ def _subscriptions_content() -> str:
           </div>
           <div class="meta">
             <a class="button ghost" href="${escapeAttribute(recommendationUrl(item))}">查看推荐</a>
+            <button class="ghost" data-preview="${escapeAttribute(item.subscription_id)}" data-target="${escapeAttribute(previewTargetId(item))}">预览推荐</button>
             <button class="ghost" data-toggle="${escapeAttribute(item.subscription_id)}" data-status="${item.status === "enabled" ? "disabled" : "enabled"}">${item.status === "enabled" ? "停用" : "启用"}</button>
           </div>
+          <div id="${escapeAttribute(previewTargetId(item))}" class="preview" hidden></div>
         </article>
       `).join("");
       document.querySelectorAll("[data-toggle]").forEach(button => button.addEventListener("click", () => updateStatus(button.dataset.toggle, button.dataset.status)));
+      document.querySelectorAll("[data-preview]").forEach(button => button.addEventListener("click", () => loadSubscriptionPreview(button.dataset.preview, button.dataset.target)));
     }
 
     async function updateStatus(id, status) {
@@ -1363,6 +1371,45 @@ def _subscriptions_content() -> str:
       }
     }
 
+    async function loadSubscriptionPreview(id, targetId) {
+      const target = document.getElementById(targetId);
+      if (!target) return;
+      target.hidden = false;
+      target.innerHTML = '<p class="notice">正在读取推荐预览...</p>';
+      try {
+        const response = await fetch(`/v1/subscriptions/${encodeURIComponent(id)}/recommendations?limit=5`, { cache: "no-store" });
+        if (!response.ok) throw new Error(`预览失败：${response.status}`);
+        const data = await response.json();
+        target.innerHTML = previewHtml(data);
+      } catch (error) {
+        target.innerHTML = `<p class="error">${escapeHtml(error.message || String(error))}</p>`;
+      }
+    }
+
+    function previewHtml(data) {
+      if (!data.found) {
+        return '<p class="notice">订阅不存在，无法生成推荐预览。</p>';
+      }
+      const summary = (data.selection_summary || []).map(item => `<li>${escapeHtml(item)}</li>`).join("");
+      const projects = data.recommendations || [];
+      const rows = projects.map(project => `
+        <div class="preview-item">
+          <a href="${escapeAttribute(projectDetailUrl(project.full_name || ""))}">${escapeHtml(project.full_name || "")}</a>
+          <div class="notice">${escapeHtml(project.description || "暂无简介")}</div>
+          <div class="meta">
+            ${pill("语言", project.language)}
+            ${pill("方向", project.category)}
+            ${pill("新增 Star", project.star_growth)}
+            ${pill("Trending", project.trending_rank ? `#${project.trending_rank}` : "")}
+          </div>
+        </div>
+      `).join("");
+      return `
+        <ul class="summary-list">${summary}</ul>
+        <div class="preview-list">${rows || '<p class="notice">当前订阅没有匹配到推荐项目。</p>'}</div>
+      `;
+    }
+
     function recommendationUrl(item) {
       const next = new URLSearchParams();
       ["profile", "language", "category", "sort"].forEach(key => {
@@ -1371,6 +1418,21 @@ def _subscriptions_content() -> str:
       if (item.query) next.set("q", item.query);
       if (params.get("api")) next.set("api", params.get("api"));
       return `recommendations.html?${next.toString()}`;
+    }
+
+    function previewTargetId(item) {
+      return `preview-${safeId(item.subscription_id || item.name || "subscription")}`;
+    }
+
+    function projectDetailUrl(fullName) {
+      const next = new URLSearchParams();
+      next.set("repo", fullName);
+      if (params.get("api")) next.set("api", params.get("api"));
+      return `project.html?${next.toString()}`;
+    }
+
+    function safeId(value) {
+      return String(value || "").replace(/[^a-zA-Z0-9_-]/g, "-");
     }
 
     function pill(label, value) {

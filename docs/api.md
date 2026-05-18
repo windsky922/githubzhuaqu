@@ -251,7 +251,8 @@ recommendations.html?api=0&language=Java&q=spring
 
 1. 本地后端或 URL 带 `api=1` 时读取 `/v1/subscriptions`。
 2. 支持创建订阅，并通过 `PATCH /v1/subscriptions/{subscription_id}` 启用或停用订阅。
-3. 静态 GitHub Pages 模式只展示说明，不写入任何配置。
+3. 支持调用 `/v1/subscriptions/{subscription_id}/recommendations` 在当前页面预览该订阅命中的推荐项目。
+4. 静态 GitHub Pages 模式只展示说明，不写入任何配置。
 
 示例：
 
