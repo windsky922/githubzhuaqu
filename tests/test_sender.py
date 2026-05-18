@@ -1,5 +1,7 @@
 import os
+import tempfile
 import unittest
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 from src.sender import (
@@ -11,13 +13,16 @@ from src.sender import (
     runs_url,
     send_report,
     send_report_to_channels,
+    subscription_recommendation_urls,
+    subscriptions_url,
 )
 from src.settings import Settings
+from src.storage.sqlite_store import connect, initialize
 
 
-def settings(report_base_url=""):
+def settings(report_base_url="", root=None):
     return Settings(
-        root=None,
+        root=root,
         run_date="2026-04-29",
         since_date="2026-04-22",
         days_back=7,
@@ -62,6 +67,11 @@ class SenderTest(unittest.TestCase):
 
         self.assertEqual(result, "https://example.com/runs.html")
 
+    def test_builds_subscriptions_url_from_report_base_url(self):
+        result = subscriptions_url(settings("https://example.com/weekly/"))
+
+        self.assertEqual(result, "https://example.com/subscriptions.html")
+
     def test_builds_short_report_message(self):
         message = build_report_message(settings("https://example.com/weekly"))
 
@@ -69,6 +79,7 @@ class SenderTest(unittest.TestCase):
         self.assertIn('周报正文：<a href="https://example.com/weekly/2026-04-29.html">打开周报正文</a>', message)
         self.assertIn('项目筛选：<a href="https://example.com/explorer.html?date=2026-04-29">打开项目筛选</a>', message)
         self.assertIn('运行状态：<a href="https://example.com/runs.html">打开运行状态面板</a>', message)
+        self.assertIn('订阅配置：<a href="https://example.com/subscriptions.html">打开订阅配置</a>', message)
 
     def test_builds_channel_neutral_delivery_message(self):
         message = build_delivery_message(settings("https://example.com/weekly"))
@@ -78,12 +89,47 @@ class SenderTest(unittest.TestCase):
         self.assertEqual(message.url, "https://example.com/weekly/2026-04-29.html")
         self.assertEqual(message.explorer_url, "https://example.com/explorer.html?date=2026-04-29")
         self.assertEqual(message.runs_url, "https://example.com/runs.html")
+        self.assertEqual(message.subscriptions_url, "https://example.com/subscriptions.html")
         self.assertIn("周报正文：https://example.com/weekly/2026-04-29.html", message.text)
         self.assertIn("项目筛选：https://example.com/explorer.html?date=2026-04-29", message.text)
         self.assertIn("运行状态：https://example.com/runs.html", message.text)
+        self.assertIn("订阅配置：https://example.com/subscriptions.html", message.text)
         self.assertIn('<a href="https://example.com/weekly/2026-04-29.html">打开周报正文</a>', message.html_text)
         self.assertIn('<a href="https://example.com/explorer.html?date=2026-04-29">打开项目筛选</a>', message.html_text)
         self.assertIn('<a href="https://example.com/runs.html">打开运行状态面板</a>', message.html_text)
+        self.assertIn('<a href="https://example.com/subscriptions.html">打开订阅配置</a>', message.html_text)
+
+    def test_builds_subscription_recommendation_links_from_sqlite(self):
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as directory:
+            root = Path(directory)
+            db_path = root / "data" / "github_weekly.sqlite"
+            connection = connect(db_path)
+            try:
+                initialize(connection)
+                connection.execute(
+                    """
+                    INSERT INTO subscriptions(
+                      subscription_id, name, status, profile, language, category, query,
+                      sort, limit_count, channels_json, created_at, updated_at, payload_json
+                    )
+                    VALUES('sub:test', 'Agent 订阅', 'enabled', 'agent_development', 'Python', '', 'workflow', 'score', 20, '["telegram"]', '2026-05-18', '2026-05-18', '{}')
+                    """
+                )
+                connection.commit()
+            finally:
+                connection.close()
+
+            links = subscription_recommendation_urls(settings("https://example.com/weekly", root=root))
+            message = build_delivery_message(settings("https://example.com/weekly", root=root))
+
+        self.assertEqual(len(links), 1)
+        self.assertEqual(links[0][0], "Agent 订阅")
+        self.assertIn("recommendations.html?", links[0][1])
+        self.assertIn("profile=agent_development", links[0][1])
+        self.assertIn("language=Python", links[0][1])
+        self.assertIn("q=workflow", links[0][1])
+        self.assertIn("Agent 订阅", message.html_text)
+        self.assertIn("打开推荐", message.html_text)
 
     def test_send_report_sends_link_message_only(self):
         with patch("src.sender._send_message") as send:
@@ -95,6 +141,7 @@ class SenderTest(unittest.TestCase):
         self.assertIn('<a href="https://example.com/weekly/2026-04-29.html">打开周报正文</a>', send.call_args.args[0])
         self.assertIn('<a href="https://example.com/explorer.html?date=2026-04-29">打开项目筛选</a>', send.call_args.args[0])
         self.assertIn('<a href="https://example.com/runs.html">打开运行状态面板</a>', send.call_args.args[0])
+        self.assertIn('<a href="https://example.com/subscriptions.html">打开订阅配置</a>', send.call_args.args[0])
         self.assertNotIn("# long markdown", send.call_args.args[0])
 
     def test_configured_delivery_channels_defaults_to_telegram(self):

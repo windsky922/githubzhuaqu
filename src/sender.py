@@ -3,6 +3,7 @@ from __future__ import annotations
 import html
 import json
 import os
+import sqlite3
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -17,6 +18,8 @@ class DeliveryMessage:
     url: str
     explorer_url: str
     runs_url: str
+    subscriptions_url: str
+    subscription_recommendation_urls: list[tuple[str, str]]
     text: str
     html_text: str
 
@@ -78,26 +81,45 @@ def build_delivery_message(settings: Settings) -> DeliveryMessage | None:
         return None
     project_url = explorer_url(settings)
     dashboard_url = runs_url(settings)
+    subscription_page_url = subscriptions_url(settings)
+    recommendation_links = subscription_recommendation_urls(settings)
     title = f"GitHub 每周热点项目周报 - {settings.run_date}"
-    text = "\n".join(
-        [
-            title,
-            "",
-            f"周报正文：{url}",
-            f"项目筛选：{project_url}",
-            f"运行状态：{dashboard_url}",
-        ]
+    text_lines = [
+        title,
+        "",
+        f"周报正文：{url}",
+        f"项目筛选：{project_url}",
+        f"运行状态：{dashboard_url}",
+        f"订阅配置：{subscription_page_url}",
+    ]
+    html_lines = [
+        title,
+        "",
+        f'周报正文：<a href="{html.escape(url, quote=True)}">打开周报正文</a>',
+        f'项目筛选：<a href="{html.escape(project_url, quote=True)}">打开项目筛选</a>',
+        f'运行状态：<a href="{html.escape(dashboard_url, quote=True)}">打开运行状态面板</a>',
+        f'订阅配置：<a href="{html.escape(subscription_page_url, quote=True)}">打开订阅配置</a>',
+    ]
+    if recommendation_links:
+        text_lines.append("")
+        text_lines.append("订阅推荐：")
+        html_lines.append("")
+        html_lines.append("订阅推荐：")
+        for label, link in recommendation_links:
+            text_lines.append(f"- {label}：{link}")
+            html_lines.append(f'- {html.escape(label)}：<a href="{html.escape(link, quote=True)}">打开推荐</a>')
+    text = "\n".join(text_lines)
+    html_text = "\n".join(html_lines)
+    return DeliveryMessage(
+        title=title,
+        url=url,
+        explorer_url=project_url,
+        runs_url=dashboard_url,
+        subscriptions_url=subscription_page_url,
+        subscription_recommendation_urls=recommendation_links,
+        text=text,
+        html_text=html_text,
     )
-    html_text = "\n".join(
-        [
-            title,
-            "",
-            f'周报正文：<a href="{html.escape(url, quote=True)}">打开周报正文</a>',
-            f'项目筛选：<a href="{html.escape(project_url, quote=True)}">打开项目筛选</a>',
-            f'运行状态：<a href="{html.escape(dashboard_url, quote=True)}">打开运行状态面板</a>',
-        ]
-    )
-    return DeliveryMessage(title=title, url=url, explorer_url=project_url, runs_url=dashboard_url, text=text, html_text=html_text)
 
 
 def report_url(settings: Settings) -> str:
@@ -124,6 +146,49 @@ def runs_url(settings: Settings) -> str:
     if not base_url:
         return ""
     return f"{base_url}/runs.html"
+
+
+def subscriptions_url(settings: Settings) -> str:
+    base_url = _site_base_url(settings)
+    if not base_url:
+        return ""
+    return f"{base_url}/subscriptions.html"
+
+
+def subscription_recommendation_urls(settings: Settings, limit: int = 3) -> list[tuple[str, str]]:
+    base_url = _site_base_url(settings)
+    root = getattr(settings, "root", None)
+    if not base_url or not root:
+        return []
+    db_path = root / "data" / "github_weekly.sqlite"
+    if not db_path.exists():
+        return []
+    try:
+        with sqlite3.connect(db_path) as connection:
+            connection.row_factory = sqlite3.Row
+            table = connection.execute(
+                "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'subscriptions'"
+            ).fetchone()
+            if not table:
+                return []
+            rows = connection.execute(
+                """
+                SELECT name, profile, language, category, query, sort
+                FROM subscriptions
+                WHERE status = 'enabled'
+                ORDER BY updated_at DESC, created_at DESC, subscription_id DESC
+                LIMIT ?
+                """,
+                (max(1, min(limit, 10)),),
+            ).fetchall()
+    except sqlite3.Error:
+        return []
+    output = []
+    for row in rows:
+        link = _subscription_recommendation_url(base_url, row)
+        if link:
+            output.append((str(row["name"] or row["profile"] or row["language"] or "订阅推荐"), link))
+    return output
 
 
 def _site_base_url(settings: Settings) -> str:
@@ -170,7 +235,7 @@ def _send_feishu(message: DeliveryMessage | None) -> DeliveryResult:
                 "template": "blue",
             },
             "elements": [
-                {"tag": "markdown", "content": f"周报正文：[打开周报正文]({message.url})\n\n项目筛选：[打开项目筛选]({message.explorer_url})\n\n运行状态：[打开运行状态面板]({message.runs_url})"},
+                {"tag": "markdown", "content": _delivery_markdown(message)},
             ],
         },
     }
@@ -190,7 +255,7 @@ def _send_wechat(message: DeliveryMessage | None) -> DeliveryResult:
     payload = {
         "msgtype": "markdown",
         "markdown": {
-            "content": f"**{message.title}**\n\n周报正文：[打开周报正文]({message.url})\n\n项目筛选：[打开项目筛选]({message.explorer_url})\n\n运行状态：[打开运行状态面板]({message.runs_url})",
+            "content": f"**{message.title}**\n\n{_delivery_markdown(message)}",
         },
     }
     try:
@@ -208,6 +273,34 @@ def _normalize_channel(value: str) -> str:
         "weixin": "wechat",
     }
     return aliases.get(channel, channel)
+
+
+def _delivery_markdown(message: DeliveryMessage) -> str:
+    lines = [
+        f"周报正文：[打开周报正文]({message.url})",
+        f"项目筛选：[打开项目筛选]({message.explorer_url})",
+        f"运行状态：[打开运行状态面板]({message.runs_url})",
+        f"订阅配置：[打开订阅配置]({message.subscriptions_url})",
+    ]
+    if message.subscription_recommendation_urls:
+        lines.append("")
+        lines.append("订阅推荐：")
+        for label, link in message.subscription_recommendation_urls:
+            lines.append(f"- {label}：[打开推荐]({link})")
+    return "\n\n".join(lines)
+
+
+def _subscription_recommendation_url(base_url: str, row: sqlite3.Row) -> str:
+    params = {}
+    for key in ("profile", "language", "category", "sort"):
+        value = str(row[key] or "").strip()
+        if value:
+            params[key] = value
+    query = str(row["query"] or "").strip()
+    if query:
+        params["q"] = query
+    suffix = urllib.parse.urlencode(params)
+    return f"{base_url}/recommendations.html?{suffix}" if suffix else f"{base_url}/recommendations.html"
 
 
 def _send_message(text: str, settings: Settings) -> None:
