@@ -391,6 +391,7 @@ def table_count(connection: sqlite3.Connection, table_name: str) -> int:
         "star_history",
         "jobs",
         "job_events",
+        "subscriptions",
     }:
         raise ValueError(f"不支持的表名：{table_name}")
     row = connection.execute(f"SELECT COUNT(*) AS count FROM {table_name}").fetchone()

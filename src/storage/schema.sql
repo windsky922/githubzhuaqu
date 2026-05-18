@@ -98,6 +98,25 @@ CREATE TABLE IF NOT EXISTS job_events (
 CREATE INDEX IF NOT EXISTS idx_job_events_job_id_created_at ON job_events(job_id, created_at);
 CREATE INDEX IF NOT EXISTS idx_job_events_type_created_at ON job_events(event_type, created_at);
 
+CREATE TABLE IF NOT EXISTS subscriptions (
+  subscription_id TEXT PRIMARY KEY,
+  name TEXT NOT NULL DEFAULT '',
+  status TEXT NOT NULL DEFAULT 'enabled',
+  profile TEXT NOT NULL DEFAULT '',
+  language TEXT NOT NULL DEFAULT '',
+  category TEXT NOT NULL DEFAULT '',
+  query TEXT NOT NULL DEFAULT '',
+  sort TEXT NOT NULL DEFAULT 'score',
+  limit_count INTEGER NOT NULL DEFAULT 20,
+  channels_json TEXT NOT NULL DEFAULT '[]',
+  created_at TEXT NOT NULL DEFAULT '',
+  updated_at TEXT NOT NULL DEFAULT '',
+  payload_json TEXT NOT NULL DEFAULT '{}'
+);
+
+CREATE INDEX IF NOT EXISTS idx_subscriptions_status_updated_at ON subscriptions(status, updated_at);
+CREATE INDEX IF NOT EXISTS idx_subscriptions_profile_language ON subscriptions(profile, language);
+
 CREATE TABLE IF NOT EXISTS migration_meta (
   key TEXT PRIMARY KEY,
   value TEXT NOT NULL

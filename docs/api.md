@@ -140,6 +140,45 @@ http://127.0.0.1:8000/admin.html?api=1
 
 返回最新 Markdown 周报正文、运行日期、周报页面路径和对应运行摘要。这个接口主要用于后续后台管理页、移动端入口或调试页面。
 
+### `/v1` 订阅接口
+
+订阅接口用于保存本地个性化偏好，后续精准推送和多用户订阅可以复用这个入口。当前订阅只保存筛选条件和通道名称，不保存 Token、Chat ID、Webhook 或请求头。
+
+当前支持：
+
+1. `GET /v1/subscriptions`：查询订阅列表。
+2. `POST /v1/subscriptions`：创建订阅。
+3. `PATCH /v1/subscriptions/{subscription_id}`：更新订阅条件或启停状态。
+
+订阅字段包括：
+
+| 字段 | 说明 |
+|---|---|
+| `name` | 订阅名称 |
+| `status` | `enabled` 或 `disabled` |
+| `profile` | 个性化方向 |
+| `language` | 主要语言 |
+| `category` | 项目方向 |
+| `query` | 关键词 |
+| `sort` | 推荐排序方式 |
+| `limit` | 推荐数量 |
+| `channels` | 推送通道名称，例如 `telegram`、`feishu`、`wecom` |
+
+示例：
+
+```text
+POST /v1/subscriptions
+```
+
+```json
+{
+  "name": "Agent 开发订阅",
+  "profile": "agent_development",
+  "language": "Python",
+  "channels": ["telegram"]
+}
+```
+
 ### `/v1` 任务接口
 
 `/v1` 是后端服务化入口，当前已经支持：
@@ -193,6 +232,19 @@ project.html?repo=owner/agent&api=1
 ```text
 recommendations.html?api=1&profile=agent_development
 recommendations.html?api=0&language=Java&q=spring
+```
+
+`docs/subscriptions.html` 是订阅配置页：
+
+1. 本地后端或 URL 带 `api=1` 时读取 `/v1/subscriptions`。
+2. 支持创建订阅，并通过 `PATCH /v1/subscriptions/{subscription_id}` 启用或停用订阅。
+3. 静态 GitHub Pages 模式只展示说明，不写入任何配置。
+
+示例：
+
+```text
+subscriptions.html?api=1
+subscriptions.html?api=1&profile=agent_development
 ```
 
 ## 五、后续扩展

@@ -40,6 +40,7 @@ class ApiRepository:
                 "projects_query": True,
                 "project_detail": True,
                 "recommendations": True,
+                "subscriptions": True,
                 "runs_query": True,
                 "jobs_query": True,
                 "job_events": True,
@@ -610,6 +611,75 @@ class ApiRepository:
             {"schema_version": 1, "count": 0, "profiles": []},
         )
 
+    def subscriptions(self, *, status: str | None = None, limit: int = 50) -> dict[str, Any]:
+        self.ensure_sqlite_index()
+        status = _blank_to_none(status)
+        limit = max(1, min(int(limit or 50), 200))
+        conditions = []
+        parameters: list[Any] = []
+        if status:
+            conditions.append("status = ?")
+            parameters.append(status)
+        sql = """
+            SELECT subscription_id, name, status, profile, language, category, query,
+                   sort, limit_count, channels_json, created_at, updated_at, payload_json
+            FROM subscriptions
+        """
+        if conditions:
+            sql += " WHERE " + " AND ".join(conditions)
+        sql += " ORDER BY updated_at DESC, created_at DESC, subscription_id DESC LIMIT ?"
+        parameters.append(limit)
+        connection = connect(self.db_path)
+        try:
+            initialize(connection)
+            rows = connection.execute(sql, parameters).fetchall()
+        finally:
+            connection.close()
+        subscriptions = [_subscription_from_row(row) for row in rows]
+        return {
+            "schema_version": 1,
+            "count": len(subscriptions),
+            "subscriptions": subscriptions,
+        }
+
+    def create_subscription(self, payload: dict[str, Any] | None = None) -> dict[str, Any]:
+        self.ensure_sqlite_index()
+        data = _subscription_payload(payload or {})
+        now = datetime.now(UTC).isoformat().replace("+00:00", "Z")
+        data["created_at"] = now
+        data["updated_at"] = now
+        data["subscription_id"] = _subscription_id(data)
+        self._upsert_subscription(data)
+        return {
+            "schema_version": 1,
+            "created": True,
+            "subscription": data,
+        }
+
+    def update_subscription(self, subscription_id: str, payload: dict[str, Any] | None = None) -> dict[str, Any]:
+        self.ensure_sqlite_index()
+        current = self._subscription_by_id(subscription_id)
+        if not current:
+            return {
+                "schema_version": 1,
+                "found": False,
+                "updated": False,
+                "subscription_id": subscription_id,
+                "subscription": {},
+            }
+        updates = _subscription_payload({**current, **(payload or {})})
+        updates["subscription_id"] = current["subscription_id"]
+        updates["created_at"] = current.get("created_at") or ""
+        updates["updated_at"] = datetime.now(UTC).isoformat().replace("+00:00", "Z")
+        self._upsert_subscription(updates)
+        return {
+            "schema_version": 1,
+            "found": True,
+            "updated": True,
+            "subscription_id": updates["subscription_id"],
+            "subscription": updates,
+        }
+
     def latest_weekly(self) -> dict[str, Any]:
         reports = sorted((self.root / "reports").glob("*.md"), key=lambda path: path.stem, reverse=True)
         reports = [path for path in reports if path.name != ".gitkeep"]
@@ -633,6 +703,12 @@ class ApiRepository:
     def ensure_sqlite_index(self) -> None:
         if not self.db_path.exists() or not self._sqlite_table_exists("jobs"):
             import_json_archive(self.root, self.db_path)
+        if not self._sqlite_table_exists("subscriptions"):
+            connection = connect(self.db_path)
+            try:
+                initialize(connection)
+            finally:
+                connection.close()
 
     def _jobs_from_sqlite(self, limit: int) -> list[dict[str, Any]]:
         connection = connect(self.db_path)
@@ -710,6 +786,67 @@ class ApiRepository:
                     "message": message,
                     "payload": payload or {},
                 },
+            )
+            connection.commit()
+        finally:
+            connection.close()
+
+    def _subscription_by_id(self, subscription_id: str) -> dict[str, Any]:
+        connection = connect(self.db_path)
+        try:
+            initialize(connection)
+            row = connection.execute(
+                """
+                SELECT subscription_id, name, status, profile, language, category, query,
+                       sort, limit_count, channels_json, created_at, updated_at, payload_json
+                FROM subscriptions
+                WHERE subscription_id = ?
+                """,
+                (subscription_id,),
+            ).fetchone()
+        finally:
+            connection.close()
+        return _subscription_from_row(row) if row else {}
+
+    def _upsert_subscription(self, data: dict[str, Any]) -> None:
+        connection = connect(self.db_path)
+        try:
+            initialize(connection)
+            connection.execute(
+                """
+                INSERT INTO subscriptions(
+                  subscription_id, name, status, profile, language, category, query,
+                  sort, limit_count, channels_json, created_at, updated_at, payload_json
+                )
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(subscription_id) DO UPDATE SET
+                  name = excluded.name,
+                  status = excluded.status,
+                  profile = excluded.profile,
+                  language = excluded.language,
+                  category = excluded.category,
+                  query = excluded.query,
+                  sort = excluded.sort,
+                  limit_count = excluded.limit_count,
+                  channels_json = excluded.channels_json,
+                  updated_at = excluded.updated_at,
+                  payload_json = excluded.payload_json
+                """,
+                (
+                    data["subscription_id"],
+                    data["name"],
+                    data["status"],
+                    data["profile"],
+                    data["language"],
+                    data["category"],
+                    data["query"],
+                    data["sort"],
+                    data["limit"],
+                    json.dumps(data["channels"], ensure_ascii=False, sort_keys=True),
+                    data["created_at"],
+                    data["updated_at"],
+                    json.dumps(data, ensure_ascii=False, sort_keys=True),
+                ),
             )
             connection.commit()
         finally:
@@ -828,6 +965,81 @@ def _job_event_from_row(row: Any) -> dict[str, Any]:
     }
 
 
+def _subscription_from_row(row: Any) -> dict[str, Any]:
+    payload = _json_object(row["payload_json"])
+    return {
+        "subscription_id": row["subscription_id"],
+        "name": row["name"],
+        "status": row["status"],
+        "profile": row["profile"],
+        "language": row["language"],
+        "category": row["category"],
+        "query": row["query"],
+        "sort": row["sort"],
+        "limit": _int_value(row["limit_count"]),
+        "channels": _list_strings(_json_list(row["channels_json"])),
+        "created_at": row["created_at"],
+        "updated_at": row["updated_at"],
+        "payload": payload,
+    }
+
+
+def _subscription_payload(payload: dict[str, Any]) -> dict[str, Any]:
+    sort = str(payload.get("sort") or "score").strip()
+    if sort not in {"recent", "position", "score", "star-growth", "trending", "quality"}:
+        sort = "score"
+    status = str(payload.get("status") or "enabled").strip().lower()
+    if status not in {"enabled", "disabled"}:
+        status = "enabled"
+    channels = [
+        channel
+        for channel in _list_strings(payload.get("channels"))
+        if channel.lower() in {"telegram", "feishu", "wechat", "wecom"}
+    ]
+    limit = _positive_int(payload.get("limit") or payload.get("limit_count")) or 20
+    limit = max(1, min(limit, 50))
+    profile = str(payload.get("profile") or "").strip()[:80]
+    language = str(payload.get("language") or "").strip()[:80]
+    category = str(payload.get("category") or "").strip()[:120]
+    query = str(payload.get("query") or "").strip()[:160]
+    name = str(payload.get("name") or "").strip()[:120]
+    if not name:
+        name = profile or language or category or query or "默认订阅"
+    return {
+        "subscription_id": str(payload.get("subscription_id") or "").strip(),
+        "name": name,
+        "status": status,
+        "profile": profile,
+        "language": language,
+        "category": category,
+        "query": query,
+        "sort": sort,
+        "limit": limit,
+        "channels": channels or ["telegram"],
+        "created_at": str(payload.get("created_at") or ""),
+        "updated_at": str(payload.get("updated_at") or ""),
+    }
+
+
+def _subscription_id(data: dict[str, Any]) -> str:
+    if data.get("subscription_id"):
+        return str(data["subscription_id"])
+    text = json.dumps(
+        {
+            "name": data.get("name") or "",
+            "profile": data.get("profile") or "",
+            "language": data.get("language") or "",
+            "category": data.get("category") or "",
+            "query": data.get("query") or "",
+            "channels": data.get("channels") or [],
+            "created_at": data.get("created_at") or "",
+        },
+        ensure_ascii=False,
+        sort_keys=True,
+    )
+    return "sub:" + sha1(text.encode("utf-8")).hexdigest()[:12]
+
+
 def _job_matches(
     job: dict[str, Any],
     *,
@@ -889,6 +1101,14 @@ def _json_object(text: str) -> dict[str, Any]:
     except json.JSONDecodeError:
         return {}
     return data if isinstance(data, dict) else {}
+
+
+def _json_list(text: str) -> list[Any]:
+    try:
+        data = json.loads(text or "[]")
+    except json.JSONDecodeError:
+        return []
+    return data if isinstance(data, list) else []
 
 
 def _list_strings(value: Any) -> list[str]:

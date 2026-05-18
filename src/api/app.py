@@ -148,6 +148,24 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
     ) -> dict[str, Any]:
         return repository.jobs(status=status, kind=kind, profile=profile, query=query, limit=limit)
 
+    @app.get("/v1/subscriptions")
+    def v1_subscriptions(
+        status: str | None = Query(default=None, pattern="^(enabled|disabled)?$"),
+        limit: int = Query(default=50, ge=1, le=200),
+    ) -> dict[str, Any]:
+        return repository.subscriptions(status=status, limit=limit)
+
+    @app.post("/v1/subscriptions", status_code=201)
+    def v1_create_subscription(payload: dict[str, Any] | None = Body(default=None)) -> dict[str, Any]:
+        return repository.create_subscription(payload)
+
+    @app.patch("/v1/subscriptions/{subscription_id:path}")
+    def v1_update_subscription(
+        subscription_id: str,
+        payload: dict[str, Any] | None = Body(default=None),
+    ) -> dict[str, Any]:
+        return repository.update_subscription(subscription_id, payload)
+
     @app.get("/v1/job-execution-check")
     def v1_job_execution_check(job_id: str = Query(..., min_length=1)) -> dict[str, Any]:
         return repository.job_execution_check(job_id)

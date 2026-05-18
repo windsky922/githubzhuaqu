@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GitHub 订阅配置</title>
+  <style>
+    :root { color-scheme: light; font-family: Inter, "Microsoft YaHei", Arial, sans-serif; background: #f6f8fa; color: #1f2328; }
+    body { margin: 0; }
+    header { background: #ffffff; border-bottom: 1px solid #d8dee4; }
+    .wrap { max-width: 1120px; margin: 0 auto; padding: 22px 18px; }
+    nav { display: flex; gap: 14px; flex-wrap: wrap; font-weight: 700; }
+    nav a { color: #0969da; text-decoration: none; }
+    h1 { margin: 0 0 6px; font-size: 28px; }
+    h2 { margin: 0 0 12px; font-size: 18px; }
+    .sub { margin: 0; color: #57606a; }
+    .panel { background: #ffffff; border: 1px solid #d8dee4; border-radius: 8px; padding: 16px; margin-top: 18px; }
+    .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; align-items: end; }
+    label { display: grid; gap: 6px; color: #57606a; font-size: 13px; font-weight: 700; }
+    input, select { box-sizing: border-box; width: 100%; border: 1px solid #d0d7de; border-radius: 6px; padding: 9px 10px; font: inherit; background: #ffffff; }
+    button, .button { border: 1px solid #0969da; background: #0969da; color: #ffffff; border-radius: 6px; padding: 9px 12px; font: inherit; font-weight: 700; cursor: pointer; text-decoration: none; text-align: center; }
+    .ghost { background: #ffffff; color: #0969da; }
+    .list { display: grid; gap: 12px; }
+    .item { border: 1px solid #d8dee4; border-radius: 8px; padding: 14px; display: grid; gap: 10px; }
+    .title { font-weight: 800; font-size: 16px; }
+    .meta { display: flex; gap: 8px; flex-wrap: wrap; }
+    .pill { border: 1px solid #d8dee4; border-radius: 999px; padding: 3px 8px; color: #57606a; background: #f6f8fa; font-size: 12px; }
+    .enabled { color: #1a7f37; }
+    .disabled { color: #cf222e; }
+    .notice { color: #57606a; line-height: 1.6; }
+    .error { color: #cf222e; }
+    @media (max-width: 900px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 24px; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>GitHub 订阅配置</h1>
+      <p class="sub">保存 Java、Python、Agent 开发等偏好，作为后续精准推荐和多渠道推送的输入。</p>
+      <nav>
+        <a href="admin.html">管理首页</a>
+        <a href="recommendations.html">个性化推荐</a>
+        <a href="explorer.html">项目筛选</a>
+        <a href="profiles.html">方向配置</a>
+      </nav>
+    </div>
+  </header>
+  <main class="wrap">
+    <section class="panel">
+      <h2>新增订阅</h2>
+      <div class="grid">
+        <label>订阅名称<input id="name" placeholder="Agent 开发周报"></label>
+        <label>方向 profile<input id="profile" placeholder="agent_development"></label>
+        <label>主要语言<input id="language" placeholder="Python / Java"></label>
+        <label>项目方向<input id="category" placeholder="AI Agent / Backend"></label>
+        <label>关键词<input id="query" placeholder="agent / spring"></label>
+        <label>排序<select id="sort"><option value="score">综合分</option><option value="trending">Trending</option><option value="star-growth">新增 Star</option><option value="quality">质量分</option></select></label>
+        <label>数量<input id="limit" type="number" min="1" max="50" value="20"></label>
+        <label>推送通道<input id="channels" placeholder="telegram,feishu"></label>
+      </div>
+      <p class="notice">这里只保存通道名称，不保存 Token、Chat ID 或 Webhook。真实密钥仍从环境变量或 GitHub Actions Secrets 读取。</p>
+      <button id="save">保存订阅</button>
+      <span id="message" class="notice"></span>
+    </section>
+    <section class="panel">
+      <h2>订阅列表</h2>
+      <div id="subscriptions" class="list"><p class="notice">加载中</p></div>
+    </section>
+  </main>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const apiMode = params.get("api") === "1" || (params.get("api") !== "0" && ["localhost", "127.0.0.1", "::1"].includes(location.hostname));
+    const fields = {
+      name: document.getElementById("name"),
+      profile: document.getElementById("profile"),
+      language: document.getElementById("language"),
+      category: document.getElementById("category"),
+      query: document.getElementById("query"),
+      sort: document.getElementById("sort"),
+      limit: document.getElementById("limit"),
+      channels: document.getElementById("channels")
+    };
+
+    function init() {
+      fields.profile.value = params.get("profile") || "";
+      fields.language.value = params.get("language") || "";
+      fields.category.value = params.get("category") || "";
+      fields.query.value = params.get("q") || params.get("query") || "";
+      document.getElementById("save").addEventListener("click", createSubscription);
+      loadSubscriptions();
+    }
+
+    async function loadSubscriptions() {
+      const target = document.getElementById("subscriptions");
+      if (!apiMode) {
+        target.innerHTML = '<p class="notice">当前是静态模式。请用本地后端打开 subscriptions.html?api=1 后保存订阅。</p>';
+        return;
+      }
+      try {
+        const response = await fetch("/v1/subscriptions?limit=100", { cache: "no-store" });
+        if (!response.ok) throw new Error(`读取失败：${response.status}`);
+        const data = await response.json();
+        renderSubscriptions(data.subscriptions || []);
+      } catch (error) {
+        target.innerHTML = `<p class="error">${escapeHtml(error.message || String(error))}</p>`;
+      }
+    }
+
+    async function createSubscription() {
+      if (!apiMode) {
+        setMessage("静态模式不能保存订阅，请启动本地后端。", true);
+        return;
+      }
+      const payload = currentPayload();
+      try {
+        const response = await fetch("/v1/subscriptions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        if (!response.ok) throw new Error(`保存失败：${response.status}`);
+        const data = await response.json();
+        setMessage(`已保存：${data.subscription.name || data.subscription.subscription_id}`, false);
+        loadSubscriptions();
+      } catch (error) {
+        setMessage(error.message || String(error), true);
+      }
+    }
+
+    function currentPayload() {
+      return {
+        name: fields.name.value.trim(),
+        profile: fields.profile.value.trim(),
+        language: fields.language.value.trim(),
+        category: fields.category.value.trim(),
+        query: fields.query.value.trim(),
+        sort: fields.sort.value,
+        limit: Number(fields.limit.value || 20),
+        channels: fields.channels.value.split(",").map(item => item.trim()).filter(Boolean)
+      };
+    }
+
+    function renderSubscriptions(items) {
+      const target = document.getElementById("subscriptions");
+      if (!items.length) {
+        target.innerHTML = '<p class="notice">暂无订阅。</p>';
+        return;
+      }
+      target.innerHTML = items.map(item => `
+        <article class="item">
+          <div class="title">${escapeHtml(item.name || item.subscription_id)} <span class="${escapeAttribute(item.status)}">${escapeHtml(item.status)}</span></div>
+          <div class="meta">
+            ${pill("profile", item.profile)}
+            ${pill("语言", item.language)}
+            ${pill("方向", item.category)}
+            ${pill("关键词", item.query)}
+            ${pill("排序", item.sort)}
+            ${pill("数量", item.limit)}
+            ${pill("通道", (item.channels || []).join(","))}
+          </div>
+          <div class="meta">
+            <a class="button ghost" href="${escapeAttribute(recommendationUrl(item))}">查看推荐</a>
+            <button class="ghost" data-toggle="${escapeAttribute(item.subscription_id)}" data-status="${item.status === "enabled" ? "disabled" : "enabled"}">${item.status === "enabled" ? "停用" : "启用"}</button>
+          </div>
+        </article>
+      `).join("");
+      document.querySelectorAll("[data-toggle]").forEach(button => button.addEventListener("click", () => updateStatus(button.dataset.toggle, button.dataset.status)));
+    }
+
+    async function updateStatus(id, status) {
+      try {
+        const response = await fetch(`/v1/subscriptions/${encodeURIComponent(id)}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status })
+        });
+        if (!response.ok) throw new Error(`更新失败：${response.status}`);
+        loadSubscriptions();
+      } catch (error) {
+        setMessage(error.message || String(error), true);
+      }
+    }
+
+    function recommendationUrl(item) {
+      const next = new URLSearchParams();
+      ["profile", "language", "category", "sort"].forEach(key => {
+        if (item[key]) next.set(key, item[key]);
+      });
+      if (item.query) next.set("q", item.query);
+      if (params.get("api")) next.set("api", params.get("api"));
+      return `recommendations.html?${next.toString()}`;
+    }
+
+    function pill(label, value) {
+      return value ? `<span class="pill">${escapeHtml(label)}：${escapeHtml(value)}</span>` : "";
+    }
+
+    function setMessage(text, isError) {
+      const message = document.getElementById("message");
+      message.textContent = text;
+      message.className = isError ? "error" : "notice";
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
+    }
+
+    function escapeAttribute(value) {
+      return escapeHtml(value);
+    }
+
+    init();
+  </script>
+</body>
+</html>

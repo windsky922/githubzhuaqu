@@ -25,6 +25,21 @@ class ApiRepositoryTest(unittest.TestCase):
             detail = repository.project_detail("owner/agent")
             runs = repository.runs()
             profiles = repository.profiles()
+            created_subscription = repository.create_subscription(
+                {
+                    "name": "Agent 开发订阅",
+                    "profile": "agent_development",
+                    "language": "Python",
+                    "query": "agent",
+                    "channels": ["telegram", "unknown"],
+                    "limit": 8,
+                }
+            )
+            subscriptions = repository.subscriptions()
+            updated_subscription = repository.update_subscription(
+                created_subscription["subscription"]["subscription_id"],
+                {"status": "disabled", "query": "workflow"},
+            )
             latest = repository.latest_weekly()
             health = repository.v1_health()
             jobs = repository.jobs()
@@ -109,6 +124,15 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(detail["similar_projects"][0]["full_name"], "owner/agent-helper")
             self.assertEqual(runs["runs"][0]["run_date"], "2026-05-09")
             self.assertEqual(profiles["profiles"][0]["name"], "agent_development")
+            self.assertTrue(health["capabilities"]["subscriptions"])
+            self.assertTrue(created_subscription["created"])
+            self.assertEqual(created_subscription["subscription"]["channels"], ["telegram"])
+            self.assertEqual(created_subscription["subscription"]["limit"], 8)
+            self.assertEqual(subscriptions["count"], 1)
+            self.assertEqual(subscriptions["subscriptions"][0]["profile"], "agent_development")
+            self.assertTrue(updated_subscription["updated"])
+            self.assertEqual(updated_subscription["subscription"]["status"], "disabled")
+            self.assertEqual(updated_subscription["subscription"]["query"], "workflow")
             self.assertEqual(latest["run_date"], "2026-05-09")
             self.assertIn("owner/agent", latest["markdown"])
             self.assertTrue(health["capabilities"]["jobs_query"])
@@ -216,6 +240,21 @@ class ApiRepositoryTest(unittest.TestCase):
                 params={"profile": "agent_development", "language": "Python", "limit": 5},
             )
             v1_jobs = client.get("/v1/jobs", params={"status": "succeeded", "kind": "weekly_report", "limit": 5})
+            v1_create_subscription = client.post(
+                "/v1/subscriptions",
+                json={
+                    "name": "Agent 开发订阅",
+                    "profile": "agent_development",
+                    "language": "Python",
+                    "channels": ["telegram", "secret-token"],
+                },
+            )
+            subscription_id = v1_create_subscription.json()["subscription"]["subscription_id"]
+            v1_subscriptions = client.get("/v1/subscriptions", params={"limit": 5})
+            v1_update_subscription = client.patch(
+                f"/v1/subscriptions/{subscription_id}",
+                json={"status": "disabled"},
+            )
             v1_trigger = client.post(
                 "/v1/runs/trigger",
                 json={"profile": "agent_development", "sources": ["github_trending"], "dry_run": True, "days_back": 3},
@@ -251,6 +290,9 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(v1_projects.status_code, 200)
             self.assertEqual(v1_recommendations.status_code, 200)
             self.assertEqual(v1_jobs.status_code, 200)
+            self.assertEqual(v1_create_subscription.status_code, 201)
+            self.assertEqual(v1_subscriptions.status_code, 200)
+            self.assertEqual(v1_update_subscription.status_code, 200)
             self.assertEqual(v1_trigger.status_code, 202)
             self.assertEqual(v1_execution_check.status_code, 200)
             self.assertEqual(v1_blocked_execute.status_code, 200)
@@ -271,6 +313,9 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(v1_recommendations.json()["recommendations"][0]["full_name"], "owner/agent")
             self.assertIn("profile=agent_development", v1_recommendations.json()["selection_summary"][0])
             self.assertEqual(v1_jobs.json()["jobs"][0]["job_id"], "run:2026-05-09")
+            self.assertEqual(v1_subscriptions.json()["subscriptions"][0]["profile"], "agent_development")
+            self.assertEqual(v1_create_subscription.json()["subscription"]["channels"], ["telegram"])
+            self.assertEqual(v1_update_subscription.json()["subscription"]["status"], "disabled")
             self.assertFalse(v1_trigger.json()["execution_supported"])
             self.assertTrue(v1_execution_check.json()["executable"])
             self.assertFalse(v1_blocked_execute.json()["accepted"])
