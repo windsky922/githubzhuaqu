@@ -109,6 +109,8 @@ class ApiRepository:
                 "full_name": normalized,
                 "history_count": 0,
                 "history": [],
+                "selection_reasons": [],
+                "trend_summary": [],
                 "similar_projects": [],
             }
 
@@ -128,6 +130,8 @@ class ApiRepository:
             "total_star_growth": sum(_int_value(project.get("star_growth")) for project in history),
             "best_trending_rank": _best_trending_rank(history),
             "sources": _unique_strings(source for project in history for source in project.get("sources") or []),
+            "selection_reasons": _project_selection_reasons(history),
+            "trend_summary": _project_trend_summary(history),
             "security_flags": _unique_strings(flag for project in history for flag in project.get("security_flags") or []),
             "quality_flags": _unique_strings(flag for project in history for flag in project.get("quality_flags") or []),
             "best_quality_score": max((_int_value(project.get("quality_score")) for project in history), default=0),
@@ -891,6 +895,35 @@ def _best_trending_rank(projects: list[dict[str, Any]]) -> int:
     ranks = [_int_value(project.get("trending_rank")) for project in projects]
     ranks = [rank for rank in ranks if rank > 0]
     return min(ranks) if ranks else 0
+
+
+def _project_selection_reasons(history: list[dict[str, Any]]) -> list[str]:
+    return _unique_strings(reason for project in history for reason in project.get("selection_reasons") or [])
+
+
+def _project_trend_summary(history: list[dict[str, Any]]) -> list[str]:
+    if not history:
+        return []
+    ordered = sorted(history, key=lambda project: str(project.get("run_date") or ""))
+    total_growth = sum(_int_value(project.get("star_growth")) for project in ordered)
+    best_rank = _best_trending_rank(ordered)
+    latest = ordered[-1]
+    summary = [
+        f"历史入选 {len(ordered)} 次，累计新增 Star {total_growth}。",
+        f"最近一次入选日期为 {latest.get('run_date') or 'unknown'}。",
+    ]
+    if best_rank:
+        summary.append(f"最好 GitHub Trending 排名为第 {best_rank} 位。")
+    if len(ordered) >= 2:
+        latest_growth = _int_value(ordered[-1].get("star_growth"))
+        previous_growth = _int_value(ordered[-2].get("star_growth"))
+        if latest_growth > previous_growth:
+            summary.append("最近一次新增 Star 高于上次入选，热度仍在上升。")
+        elif latest_growth < previous_growth:
+            summary.append("最近一次新增 Star 低于上次入选，热度可能回落。")
+        else:
+            summary.append("最近两次新增 Star 持平，热度相对稳定。")
+    return summary
 
 
 def _unique_strings(values: Any) -> list[str]:

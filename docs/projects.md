@@ -4,6 +4,16 @@
 
 | 日期 | 项目 | 来源 | Trending 排名 | 方向 | 语言 | Star | 新增 Star | 风险提示 | 链接 |
 |---|---|---|---:|---|---|---:|---:|---:|---|
+| 2026-05-18 | CloakHQ/CloakBrowser | GitHub Trending | 1 | AI Agent | Python | 13914 | 0 | 0 | [https://github.com/CloakHQ/CloakBrowser](https://github.com/CloakHQ/CloakBrowser) |
+| 2026-05-18 | rohitg00/agentmemory | GitHub Trending | 2 | AI Agent | TypeScript | 11422 | 0 | 0 | [https://github.com/rohitg00/agentmemory](https://github.com/rohitg00/agentmemory) |
+| 2026-05-18 | yikart/AiToEarn | GitHub Trending | 3 | Other | TypeScript | 14771 | 0 | 0 | [https://github.com/yikart/AiToEarn](https://github.com/yikart/AiToEarn) |
+| 2026-05-18 | oven-sh/bun | GitHub Trending | 5 | Other | Rust | 91749 | 0 | 0 | [https://github.com/oven-sh/bun](https://github.com/oven-sh/bun) |
+| 2026-05-18 | Imbad0202/academic-research-skills | GitHub Trending | 6 | LLM Tooling | Python | 9505 | 0 | 0 | [https://github.com/Imbad0202/academic-research-skills](https://github.com/Imbad0202/academic-research-skills) |
+| 2026-05-18 | mattpocock/skills | GitHub Trending | 7 | LLM Tooling | Shell | 89290 | 21656 | 0 | [https://github.com/mattpocock/skills](https://github.com/mattpocock/skills) |
+| 2026-05-18 | ruvnet/RuView | GitHub Trending | 8 | AI Agent | Rust | 59267 | 0 | 0 | [https://github.com/ruvnet/RuView](https://github.com/ruvnet/RuView) |
+| 2026-05-18 | bytedance/UI-TARS-desktop | GitHub Search + GitHub Trending | 9 | AI Agent | TypeScript | 34449 | 4826 | 0 | [https://github.com/bytedance/UI-TARS-desktop](https://github.com/bytedance/UI-TARS-desktop) |
+| 2026-05-18 | decolua/9router | GitHub Trending | 11 | AI Agent | JavaScript | 11671 | 5444 | 0 | [https://github.com/decolua/9router](https://github.com/decolua/9router) |
+| 2026-05-18 | NousResearch/hermes-agent | GitHub Search | - | AI Agent | Python | 154981 | 14543 | 0 | [https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) |
 | 2026-05-09 | ruvnet/ruflo | GitHub Trending | 2 | AI Agent | TypeScript | 47470 | 16 | 0 | [https://github.com/ruvnet/ruflo](https://github.com/ruvnet/ruflo) |
 | 2026-05-09 | docusealco/docuseal | GitHub Trending | 4 | Other | Ruby | 16012 | 1 | 0 | [https://github.com/docusealco/docuseal](https://github.com/docusealco/docuseal) |
 | 2026-05-09 | virattt/dexter | GitHub Trending | 5 | AI Agent | TypeScript | 24988 | 0 | 1 | [https://github.com/virattt/dexter](https://github.com/virattt/dexter) |

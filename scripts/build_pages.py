@@ -2269,7 +2269,7 @@ def _project_detail_content() -> str:
         .filter(project => String(project.full_name || "").toLowerCase() === repo.toLowerCase())
         .sort((a, b) => String(b.run_date || "").localeCompare(String(a.run_date || "")));
       if (!history.length) {
-        return { schema_version: 1, found: false, full_name: repo, history: [], similar_projects: [], data_source: "静态 JSON" };
+        return { schema_version: 1, found: false, full_name: repo, history: [], selection_reasons: [], trend_summary: [], similar_projects: [], data_source: "静态 JSON" };
       }
       const latest = history[0];
       return {
@@ -2286,6 +2286,8 @@ def _project_detail_content() -> str:
         total_star_growth: history.reduce((total, project) => total + number(project.star_growth), 0),
         best_trending_rank: bestTrendingRank(history),
         sources: unique(history.flatMap(project => project.sources || [])),
+        selection_reasons: projectSelectionReasons(history),
+        trend_summary: projectTrendSummary(history),
         security_flags: unique(history.flatMap(project => project.security_flags || [])),
         quality_flags: unique(history.flatMap(project => project.quality_flags || [])),
         best_quality_score: Math.max(0, ...history.map(project => number(project.quality_score))),
@@ -2326,6 +2328,8 @@ def _project_detail_content() -> str:
           ${metric("质量分", number(detail.latest_quality_score))}
         </section>
         <section class="grid">
+          <div class="section"><h2>推荐理由</h2>${listHtml(detail.selection_reasons || [], "暂无推荐理由。")}</div>
+          <div class="section"><h2>趋势判断</h2>${listHtml(detail.trend_summary || [], "暂无趋势判断。")}</div>
           <div class="section"><h2>风险提示</h2>${tags(detail.security_flags || [], "risk", "暂无风险提示")}</div>
           <div class="section"><h2>质量提示</h2>${tags(detail.quality_flags || [], "ok", "暂无质量扣分项")}</div>
           <div class="section"><h2>历史来源</h2>${tags(detail.sources || [], "", "暂无来源")}</div>
@@ -2377,9 +2381,44 @@ def _project_detail_content() -> str:
       }).join("")}</div>`;
     }
 
+    function projectSelectionReasons(history) {
+      return unique(history.flatMap(project => project.selection_reasons || []));
+    }
+
+    function projectTrendSummary(history) {
+      if (!history.length) return [];
+      const ordered = [...history].sort((a, b) => String(a.run_date || "").localeCompare(String(b.run_date || "")));
+      const totalGrowth = ordered.reduce((total, project) => total + number(project.star_growth), 0);
+      const bestRank = bestTrendingRank(ordered);
+      const latest = ordered[ordered.length - 1] || {};
+      const summary = [
+        `历史入选 ${ordered.length} 次，累计新增 Star ${totalGrowth}。`,
+        `最近一次入选日期为 ${latest.run_date || "unknown"}。`,
+      ];
+      if (bestRank) summary.push(`最好 GitHub Trending 排名为第 ${bestRank} 位。`);
+      if (ordered.length >= 2) {
+        const latestGrowth = number(ordered[ordered.length - 1].star_growth);
+        const previousGrowth = number(ordered[ordered.length - 2].star_growth);
+        if (latestGrowth > previousGrowth) {
+          summary.push("最近一次新增 Star 高于上次入选，热度仍在上升。");
+        } else if (latestGrowth < previousGrowth) {
+          summary.push("最近一次新增 Star 低于上次入选，热度可能回落。");
+        } else {
+          summary.push("最近两次新增 Star 持平，热度相对稳定。");
+        }
+      }
+      return summary;
+    }
+
     function similarHtml(projects) {
       if (!projects.length) return "<p>暂无相似历史项目。</p>";
       return `<ul>${projects.map(project => `<li><a href="project.html?repo=${encodeURIComponent(project.full_name || "")}">${escapeHtml(project.full_name || "")}</a> <span>${escapeHtml(project.language || "Unknown")} / ${escapeHtml(project.category || "Other")} / 新增 Star ${number(project.star_growth)}</span></li>`).join("")}</ul>`;
+    }
+
+    function listHtml(items, emptyText) {
+      const values = unique(items);
+      if (!values.length) return `<p>${escapeHtml(emptyText)}</p>`;
+      return `<ul>${values.map(item => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
     }
 
     function tags(items, className, emptyText) {

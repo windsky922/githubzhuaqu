@@ -53,7 +53,7 @@
 
 ### `GET /v1/projects/{owner}/{repo}`
 
-兼容 `/api/projects/{owner}/{repo}`，返回项目详情、历史入选记录、趋势、质量信号、风险提示和相似项目。
+兼容 `/api/projects/{owner}/{repo}`，返回项目详情、历史入选记录、推荐理由、趋势判断、质量信号、风险提示和相似项目。
 
 ### `GET /v1/runs`
 

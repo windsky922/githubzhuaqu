@@ -1,0 +1,127 @@
+{
+  "schema_version": 1,
+  "total_projects": 10,
+  "trending_project_count": 9,
+  "trending_top10_selected_count": 8,
+  "trending_selected_rate": 0.9,
+  "total_star_growth": 46469,
+  "top_languages": [
+    {
+      "name": "Python",
+      "count": 3
+    },
+    {
+      "name": "TypeScript",
+      "count": 3
+    },
+    {
+      "name": "Rust",
+      "count": 2
+    },
+    {
+      "name": "Shell",
+      "count": 1
+    },
+    {
+      "name": "JavaScript",
+      "count": 1
+    }
+  ],
+  "top_categories": [
+    {
+      "name": "AI Agent",
+      "count": 6
+    },
+    {
+      "name": "Other",
+      "count": 2
+    },
+    {
+      "name": "LLM Tooling",
+      "count": 2
+    }
+  ],
+  "top_trending": [
+    {
+      "full_name": "CloakHQ/CloakBrowser",
+      "html_url": "https://github.com/CloakHQ/CloakBrowser",
+      "trending_rank": 1,
+      "stargazers_count": 13914,
+      "language": "Python",
+      "category": "AI Agent"
+    },
+    {
+      "full_name": "rohitg00/agentmemory",
+      "html_url": "https://github.com/rohitg00/agentmemory",
+      "trending_rank": 2,
+      "stargazers_count": 11422,
+      "language": "TypeScript",
+      "category": "AI Agent"
+    },
+    {
+      "full_name": "yikart/AiToEarn",
+      "html_url": "https://github.com/yikart/AiToEarn",
+      "trending_rank": 3,
+      "stargazers_count": 14771,
+      "language": "TypeScript",
+      "category": "Other"
+    },
+    {
+      "full_name": "oven-sh/bun",
+      "html_url": "https://github.com/oven-sh/bun",
+      "trending_rank": 5,
+      "stargazers_count": 91749,
+      "language": "Rust",
+      "category": "Other"
+    },
+    {
+      "full_name": "Imbad0202/academic-research-skills",
+      "html_url": "https://github.com/Imbad0202/academic-research-skills",
+      "trending_rank": 6,
+      "stargazers_count": 9505,
+      "language": "Python",
+      "category": "LLM Tooling"
+    }
+  ],
+  "top_star_growth": [
+    {
+      "full_name": "mattpocock/skills",
+      "html_url": "https://github.com/mattpocock/skills",
+      "star_growth": 21656,
+      "stargazers_count": 89290,
+      "language": "Shell",
+      "category": "LLM Tooling"
+    },
+    {
+      "full_name": "NousResearch/hermes-agent",
+      "html_url": "https://github.com/NousResearch/hermes-agent",
+      "star_growth": 14543,
+      "stargazers_count": 154981,
+      "language": "Python",
+      "category": "AI Agent"
+    },
+    {
+      "full_name": "decolua/9router",
+      "html_url": "https://github.com/decolua/9router",
+      "star_growth": 5444,
+      "stargazers_count": 11671,
+      "language": "JavaScript",
+      "category": "AI Agent"
+    },
+    {
+      "full_name": "bytedance/UI-TARS-desktop",
+      "html_url": "https://github.com/bytedance/UI-TARS-desktop",
+      "star_growth": 4826,
+      "stargazers_count": 34449,
+      "language": "TypeScript",
+      "category": "AI Agent"
+    }
+  ],
+  "summary_points": [
+    "AI Agent 是本期最集中的方向，共 6 个项目。",
+    "Python 是本期出现最多的主要语言，共 3 个项目。",
+    "本期入选项目累计新增 Star 46469。",
+    "CloakHQ/CloakBrowser 是本期 GitHub Trending 排名最高的项目，周榜排名 1。",
+    "mattpocock/skills 是本期新增 Star 最高的项目，新增 21656。"
+  ]
+}
