@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import sqlite3
 import time
 import urllib.error
 import urllib.request
@@ -21,31 +22,29 @@ def generate_report(
 ) -> tuple[str, bool, str]:
     if settings.kimi_api_key and settings.kimi_model:
         try:
-            return _generate_checked_kimi_report(
+            report = _generate_checked_kimi_report(
                 repositories,
                 queries,
                 settings,
                 trend_summary or {},
                 include_readme=True,
-            ), False, ""
+            )
+            return _final_report(report, repositories, settings), False, ""
         except Exception as error:
             if _is_content_filter_error(error):
                 try:
-                    return _generate_checked_kimi_report(
+                    report = _generate_checked_kimi_report(
                         repositories,
                         queries,
                         settings,
                         trend_summary or {},
                         include_readme=False,
-                    ), False, ""
+                    )
+                    return _final_report(report, repositories, settings), False, ""
                 except Exception as retry_error:
                     error = RuntimeError(f"{error}; retry_without_readme: {retry_error}")
-            return normalize_report_markdown(
-                fallback_report(repositories, queries, settings, trend_summary or {})
-            ), True, str(error)
-    return normalize_report_markdown(
-        fallback_report(repositories, queries, settings, trend_summary or {})
-    ), True, "Kimi API 未配置"
+            return _final_report(fallback_report(repositories, queries, settings, trend_summary or {}), repositories, settings), True, str(error)
+    return _final_report(fallback_report(repositories, queries, settings, trend_summary or {}), repositories, settings), True, "Kimi API 未配置"
 
 
 def _generate_checked_kimi_report(
@@ -164,6 +163,113 @@ def fallback_report(
     )
     lines.extend(f"  - `{query}`" for query in queries)
     return redact_sensitive_text("\n".join(lines).strip()) + "\n"
+
+
+def _final_report(report: str, repositories: list[Repository], settings: Settings) -> str:
+    return normalize_report_markdown(_append_subscription_sections(report, repositories, settings))
+
+
+def _append_subscription_sections(report: str, repositories: list[Repository], settings: Settings) -> str:
+    sections = _subscription_section_lines(repositories, settings)
+    if not sections:
+        return report
+    return report.rstrip() + "\n\n" + "\n".join(sections) + "\n"
+
+
+def _subscription_section_lines(repositories: list[Repository], settings: Settings) -> list[str]:
+    subscriptions = _enabled_subscriptions(settings)
+    if not subscriptions:
+        return []
+    lines = ["## 订阅推荐分区", ""]
+    for subscription in subscriptions:
+        matches = [repo for repo in repositories if _matches_subscription(repo, subscription)]
+        lines.extend([f"### {subscription.get('name') or subscription.get('profile') or '默认订阅'}", ""])
+        if not matches:
+            lines.extend(["- 本期暂无匹配项目。", ""])
+            continue
+        for repo in matches[: _subscription_limit(subscription)]:
+            trending = f"Trending 排名 {repo.trending_rank}" if repo.trending_rank > 0 else "未进入 Trending 排名"
+            lines.append(
+                f"- {repo.full_name}：{repo.language} / {repo.category} / 新增 Star {repo.star_growth} / {trending} / [{repo.html_url}]({repo.html_url})"
+            )
+        lines.append("")
+    return lines
+
+
+def _enabled_subscriptions(settings: Settings) -> list[dict]:
+    root = getattr(settings, "root", None)
+    if not root:
+        return []
+    db_path = root / "data" / "github_weekly.sqlite"
+    if not db_path.exists():
+        return []
+    try:
+        with sqlite3.connect(db_path) as connection:
+            connection.row_factory = sqlite3.Row
+            table = connection.execute(
+                "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'subscriptions'"
+            ).fetchone()
+            if not table:
+                return []
+            rows = connection.execute(
+                """
+                SELECT name, profile, language, category, query, sort, limit_count
+                FROM subscriptions
+                WHERE status = 'enabled'
+                ORDER BY updated_at DESC, created_at DESC, subscription_id DESC
+                LIMIT 8
+                """
+            ).fetchall()
+    except sqlite3.Error:
+        return []
+    return [dict(row) for row in rows]
+
+
+def _matches_subscription(repo: Repository, subscription: dict) -> bool:
+    language = str(subscription.get("language") or "").strip().lower()
+    if language and repo.language.lower() != language:
+        return False
+    category = str(subscription.get("category") or "").strip().lower()
+    if category and category not in repo.category.lower():
+        return False
+    query = str(subscription.get("query") or "").strip().lower()
+    if query and query not in _repo_search_text(repo):
+        return False
+    profile = str(subscription.get("profile") or "").strip().lower()
+    if profile and not _profile_matches_repo(profile, repo):
+        return False
+    return True
+
+
+def _repo_search_text(repo: Repository) -> str:
+    return " ".join(
+        [
+            repo.full_name,
+            repo.description,
+            repo.language,
+            repo.category,
+            " ".join(repo.topics),
+            " ".join(repo.selection_reasons),
+            " ".join(repo.sources),
+            repo.readme_summary,
+            repo.readme_excerpt,
+        ]
+    ).lower()
+
+
+def _profile_matches_repo(profile: str, repo: Repository) -> bool:
+    text = _repo_search_text(repo)
+    normalized = profile.replace("_", " ").replace("-", " ")
+    tokens = [token for token in normalized.split() if len(token) >= 3]
+    return any(token in text for token in tokens)
+
+
+def _subscription_limit(subscription: dict) -> int:
+    try:
+        value = int(subscription.get("limit_count") or 5)
+    except (TypeError, ValueError):
+        value = 5
+    return max(1, min(value, 5))
 
 
 def _checked_kimi_report(report: str, repositories: list[Repository]) -> str:

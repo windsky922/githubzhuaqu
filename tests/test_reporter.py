@@ -1,7 +1,9 @@
 import io
 import json
+import tempfile
 import unittest
 import urllib.error
+from pathlib import Path
 from unittest.mock import patch
 
 from src.models import Repository
@@ -15,6 +17,7 @@ from src.reporter import (
     normalize_report_markdown,
 )
 from src.settings import Settings
+from src.storage.sqlite_store import connect, initialize
 
 
 class ReporterTest(unittest.TestCase):
@@ -96,6 +99,80 @@ class ReporterTest(unittest.TestCase):
         self.assertIn("Trending 排名 3", report)
         self.assertIn("created:>=2026-04-20 stars:>20", report)
         self.assertIn("Python 是本期出现最多的主要语言", report)
+
+    def test_generate_report_appends_subscription_sections(self):
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as directory:
+            root = Path(directory)
+            db_path = root / "data" / "github_weekly.sqlite"
+            connection = connect(db_path)
+            try:
+                initialize(connection)
+                connection.execute(
+                    """
+                    INSERT INTO subscriptions(
+                      subscription_id, name, status, profile, language, category, query,
+                      sort, limit_count, channels_json, created_at, updated_at, payload_json
+                    )
+                    VALUES('sub:agent', 'Agent 开发推荐', 'enabled', 'agent_development', 'Python', 'AI Agent', 'agent', 'score', 3, '["telegram"]', '2026-05-18', '2026-05-18', '{}')
+                    """
+                )
+                connection.commit()
+            finally:
+                connection.close()
+            settings = Settings(
+                root=root,
+                run_date="2026-04-27",
+                since_date="2026-04-20",
+                days_back=7,
+                min_stars=20,
+                max_projects=10,
+                github_token="",
+                kimi_api_key="",
+                kimi_base_url="",
+                kimi_model="",
+                telegram_bot_token="",
+                telegram_chat_id="",
+                interests={},
+            )
+            repositories = [
+                Repository(
+                    full_name="owner/agent",
+                    html_url="https://github.com/owner/agent",
+                    description="agent workflow automation",
+                    stargazers_count=120,
+                    forks_count=20,
+                    language="Python",
+                    created_at="2026-04-25T00:00:00Z",
+                    updated_at="2026-04-25T00:00:00Z",
+                    category="AI Agent",
+                    selection_reasons=["匹配 Agent 开发方向。"],
+                    sources=["github_trending"],
+                    trending_rank=2,
+                    star_growth=30,
+                ),
+                Repository(
+                    full_name="owner/java",
+                    html_url="https://github.com/owner/java",
+                    description="spring backend",
+                    stargazers_count=100,
+                    forks_count=10,
+                    language="Java",
+                    created_at="2026-04-25T00:00:00Z",
+                    updated_at="2026-04-25T00:00:00Z",
+                    category="Backend",
+                ),
+            ]
+
+            report, fallback_used, error = generate_report(repositories, [], settings, {})
+
+        self.assertTrue(fallback_used)
+        self.assertEqual(error, "Kimi API 未配置")
+        self.assertIn("## 订阅推荐分区", report)
+        self.assertIn("### Agent 开发推荐", report)
+        self.assertIn("owner/agent", report)
+        self.assertIn("新增 Star 30", report)
+        self.assertIn("[https://github.com/owner/agent](https://github.com/owner/agent)", report)
+        self.assertNotIn("owner/java：Java", report)
 
     def test_checked_kimi_report_repairs_missing_metadata_appendix(self):
         repository = Repository(
