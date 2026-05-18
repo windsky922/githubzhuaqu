@@ -57,6 +57,9 @@ class JobRunnerTest(unittest.TestCase):
             self.assertEqual(job["status"], "succeeded")
             self.assertEqual(job["run_date"], "2026-05-11")
             self.assertIn("2026-05-11.html", job["result_json"])
+            event_types = _read_job_event_types(db_path, "preview:abc")
+            self.assertIn("runner_started", event_types)
+            self.assertIn("runner_finished", event_types)
         finally:
             shutil.rmtree(root, ignore_errors=True)
 
@@ -83,6 +86,9 @@ class JobRunnerTest(unittest.TestCase):
             job = _read_job(db_path, "preview:failed")
             self.assertEqual(job["status"], "failed")
             self.assertEqual(job["error"], "boom")
+            event_types = _read_job_event_types(db_path, "preview:failed")
+            self.assertIn("runner_started", event_types)
+            self.assertIn("runner_failed", event_types)
         finally:
             shutil.rmtree(root, ignore_errors=True)
 
@@ -138,6 +144,18 @@ def _read_job(db_path: Path, job_id: str):
     connection = connect(db_path)
     try:
         return connection.execute("SELECT * FROM jobs WHERE job_id = ?", (job_id,)).fetchone()
+    finally:
+        connection.close()
+
+
+def _read_job_event_types(db_path: Path, job_id: str) -> list[str]:
+    connection = connect(db_path)
+    try:
+        rows = connection.execute(
+            "SELECT event_type FROM job_events WHERE job_id = ? ORDER BY created_at ASC",
+            (job_id,),
+        ).fetchall()
+        return [str(row["event_type"]) for row in rows]
     finally:
         connection.close()
 

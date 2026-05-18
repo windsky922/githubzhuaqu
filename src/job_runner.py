@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any, Iterator
 
 from src.models import RunSummary
-from src.storage.sqlite_store import connect, initialize, upsert_job
+from src.storage.sqlite_store import connect, initialize, insert_job_event, upsert_job
 from src.weekly_run import run_weekly_report
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -27,6 +27,14 @@ def run_planned_job(root: Path = ROOT, db_path: Path | None = None, job_id: str 
 
     started_at = _now()
     _save_job(database, {**job, "status": "running", "started_at": started_at, "error": ""})
+    _record_job_event(
+        database,
+        job["job_id"],
+        "runner_started",
+        "running",
+        "本地任务执行器已开始执行 planned 任务。",
+        {"request": job.get("request") or {}, "started_at": started_at},
+    )
 
     try:
         request = job.get("request") or {}
@@ -47,6 +55,14 @@ def run_planned_job(root: Path = ROOT, db_path: Path | None = None, job_id: str 
                 "payload": {"request": request, "result": result},
             },
         )
+        _record_job_event(
+            database,
+            job["job_id"],
+            "runner_finished",
+            status,
+            "本地任务执行器已完成任务。",
+            {"result": result, "finished_at": finished_at},
+        )
         return {"executed": True, "job_id": job["job_id"], "status": status, "result": result}
     except Exception as error:
         finished_at = _now()
@@ -61,6 +77,14 @@ def run_planned_job(root: Path = ROOT, db_path: Path | None = None, job_id: str 
                 "error": message,
                 "payload": {"request": job.get("request") or {}, "error": message},
             },
+        )
+        _record_job_event(
+            database,
+            job["job_id"],
+            "runner_failed",
+            "failed",
+            "本地任务执行器执行失败。",
+            {"error": message, "finished_at": finished_at},
         )
         return {"executed": True, "job_id": job["job_id"], "status": "failed", "error": message}
 
@@ -108,6 +132,34 @@ def _save_job(db_path: Path, job: dict[str, Any]) -> None:
     try:
         initialize(connection)
         upsert_job(connection, job)
+        connection.commit()
+    finally:
+        connection.close()
+
+
+def _record_job_event(
+    db_path: Path,
+    job_id: str,
+    event_type: str,
+    status: str,
+    message: str,
+    payload: dict[str, Any] | None = None,
+) -> None:
+    connection = connect(db_path)
+    try:
+        initialize(connection)
+        insert_job_event(
+            connection,
+            {
+                "job_id": job_id,
+                "event_type": event_type,
+                "status": status,
+                "actor": "job_runner",
+                "created_at": _now(),
+                "message": message,
+                "payload": payload or {},
+            },
+        )
         connection.commit()
     finally:
         connection.close()

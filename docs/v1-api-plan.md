@@ -173,6 +173,9 @@
 | `execution_blocked` | 执行请求被阻止 |
 | `execution_started` | 任务已交给 job runner |
 | `execution_finished` | job runner 返回执行结果 |
+| `runner_started` | 本地任务执行器开始消费 planned 任务 |
+| `runner_finished` | 本地任务执行器执行完成并写回结果 |
+| `runner_failed` | 本地任务执行器执行失败并写回错误 |
 | `retry_requested` | 收到重试请求 |
 | `retry_blocked` | 重试请求被阻止 |
 | `retry_duplicate_ignored` | 已存在相同 active 任务，未重复创建 |
