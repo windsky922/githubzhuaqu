@@ -41,6 +41,7 @@ class ApiRepository:
                 "project_detail": True,
                 "recommendations": True,
                 "subscriptions": True,
+                "subscription_recommendations": True,
                 "runs_query": True,
                 "jobs_query": True,
                 "job_events": True,
@@ -125,6 +126,49 @@ class ApiRepository:
                 query=_blank_to_none(query),
             ),
             "recommendations": projects,
+        }
+
+    def subscription_recommendations(self, subscription_id: str, *, limit: int | None = None) -> dict[str, Any]:
+        self.ensure_sqlite_index()
+        normalized = _blank_to_none(subscription_id) or ""
+        subscription = self._subscription_by_id(normalized)
+        if not subscription:
+            return {
+                "schema_version": 1,
+                "found": False,
+                "subscription_id": normalized,
+                "subscription": {},
+                "count": 0,
+                "selection_summary": ["订阅不存在，无法生成推荐预览。"],
+                "recommendations": [],
+            }
+
+        target_limit = limit or _int_value(subscription.get("limit")) or 20
+        target_limit = max(1, min(target_limit, 200))
+        recommendations = self.recommendations(
+            profile=_blank_to_none(subscription.get("profile")),
+            language=_blank_to_none(subscription.get("language")),
+            category=_blank_to_none(subscription.get("category")),
+            query=_blank_to_none(subscription.get("query")),
+            limit=target_limit,
+            sort=subscription.get("sort") or "score",
+        )
+        summary = list(recommendations.get("selection_summary") or [])
+        status = subscription.get("status") or "unknown"
+        summary.insert(0, f"订阅 {subscription.get('name') or normalized} 当前状态为 {status}。")
+        return {
+            "schema_version": 1,
+            "found": True,
+            "subscription_id": normalized,
+            "subscription": subscription,
+            "profile": recommendations.get("profile") or "",
+            "language": recommendations.get("language") or "",
+            "category": recommendations.get("category") or "",
+            "query": recommendations.get("query") or "",
+            "sort": recommendations.get("sort") or "",
+            "count": recommendations.get("count") or 0,
+            "selection_summary": summary,
+            "recommendations": recommendations.get("recommendations") or [],
         }
 
     def project_detail(self, full_name: str) -> dict[str, Any]:

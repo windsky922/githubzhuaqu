@@ -112,6 +112,16 @@
 
 更新订阅配置或启停状态。常用场景是把 `status` 改为 `enabled` 或 `disabled`。
 
+### `GET /v1/subscriptions/{subscription_id}/recommendations`
+
+按订阅编号预览推荐结果。接口会读取该订阅保存的 profile、语言、方向、关键词、排序和数量，并复用 `/v1/recommendations` 的筛选逻辑返回匹配项目。该接口用于订阅页预览、推送前调试和后续多渠道精准推送，不读取任何密钥。
+
+查询参数：
+
+| 参数 | 说明 |
+|---|---|
+| `limit` | 可选，临时覆盖订阅保存的推荐数量，最大 200 |
+
 ### `GET /v1/runs`
 
 兼容 `/api/runs`，返回公开运行记录。

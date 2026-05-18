@@ -153,6 +153,7 @@ http://127.0.0.1:8000/admin.html?api=1
 1. `GET /v1/subscriptions`：查询订阅列表。
 2. `POST /v1/subscriptions`：创建订阅。
 3. `PATCH /v1/subscriptions/{subscription_id}`：更新订阅条件或启停状态。
+4. `GET /v1/subscriptions/{subscription_id}/recommendations`：按订阅编号预览推荐结果。
 
 订阅字段包括：
 
@@ -182,6 +183,14 @@ POST /v1/subscriptions
   "channels": ["telegram"]
 }
 ```
+
+预览某个订阅的推荐结果：
+
+```text
+GET /v1/subscriptions/sub:xxxx/recommendations?limit=10
+```
+
+该接口会复用 `/v1/recommendations` 的筛选和排序逻辑，只把订阅保存的 profile、语言、方向、关键词和排序条件作为输入，不读取任何推送密钥。
 
 ### `/v1` 任务接口
 

@@ -155,6 +155,13 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
     ) -> dict[str, Any]:
         return repository.subscriptions(status=status, limit=limit)
 
+    @app.get("/v1/subscriptions/{subscription_id:path}/recommendations")
+    def v1_subscription_recommendations(
+        subscription_id: str,
+        limit: int | None = Query(default=None, ge=1, le=200),
+    ) -> dict[str, Any]:
+        return repository.subscription_recommendations(subscription_id, limit=limit)
+
     @app.post("/v1/subscriptions", status_code=201)
     def v1_create_subscription(payload: dict[str, Any] | None = Body(default=None)) -> dict[str, Any]:
         return repository.create_subscription(payload)

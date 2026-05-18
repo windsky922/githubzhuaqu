@@ -36,6 +36,11 @@ class ApiRepositoryTest(unittest.TestCase):
                 }
             )
             subscriptions = repository.subscriptions()
+            subscription_recommendations = repository.subscription_recommendations(
+                created_subscription["subscription"]["subscription_id"],
+                limit=5,
+            )
+            missing_subscription_recommendations = repository.subscription_recommendations("sub:missing")
             updated_subscription = repository.update_subscription(
                 created_subscription["subscription"]["subscription_id"],
                 {"status": "disabled", "query": "workflow"},
@@ -130,6 +135,11 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(created_subscription["subscription"]["limit"], 8)
             self.assertEqual(subscriptions["count"], 1)
             self.assertEqual(subscriptions["subscriptions"][0]["profile"], "agent_development")
+            self.assertTrue(subscription_recommendations["found"])
+            self.assertEqual(subscription_recommendations["subscription"]["subscription_id"], created_subscription["subscription"]["subscription_id"])
+            self.assertEqual(subscription_recommendations["recommendations"][0]["full_name"], "owner/agent")
+            self.assertIn("订阅 Agent 开发订阅 当前状态为 enabled", subscription_recommendations["selection_summary"][0])
+            self.assertFalse(missing_subscription_recommendations["found"])
             self.assertTrue(updated_subscription["updated"])
             self.assertEqual(updated_subscription["subscription"]["status"], "disabled")
             self.assertEqual(updated_subscription["subscription"]["query"], "workflow")
@@ -141,6 +151,7 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertTrue(health["capabilities"]["job_retry"])
             self.assertTrue(health["capabilities"]["local_job_runner"])
             self.assertTrue(health["capabilities"]["run_trigger_execute"])
+            self.assertTrue(health["capabilities"]["subscription_recommendations"])
             self.assertEqual(jobs["jobs"][0]["job_id"], "run:2026-05-09")
             self.assertTrue(job_detail["found"])
             self.assertEqual(job_detail["run_summary"]["run_date"], "2026-05-09")
@@ -251,6 +262,10 @@ class ApiRepositoryTest(unittest.TestCase):
             )
             subscription_id = v1_create_subscription.json()["subscription"]["subscription_id"]
             v1_subscriptions = client.get("/v1/subscriptions", params={"limit": 5})
+            v1_subscription_recommendations = client.get(
+                f"/v1/subscriptions/{subscription_id}/recommendations",
+                params={"limit": 5},
+            )
             v1_update_subscription = client.patch(
                 f"/v1/subscriptions/{subscription_id}",
                 json={"status": "disabled"},
@@ -292,6 +307,7 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(v1_jobs.status_code, 200)
             self.assertEqual(v1_create_subscription.status_code, 201)
             self.assertEqual(v1_subscriptions.status_code, 200)
+            self.assertEqual(v1_subscription_recommendations.status_code, 200)
             self.assertEqual(v1_update_subscription.status_code, 200)
             self.assertEqual(v1_trigger.status_code, 202)
             self.assertEqual(v1_execution_check.status_code, 200)
@@ -315,6 +331,8 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(v1_jobs.json()["jobs"][0]["job_id"], "run:2026-05-09")
             self.assertEqual(v1_subscriptions.json()["subscriptions"][0]["profile"], "agent_development")
             self.assertEqual(v1_create_subscription.json()["subscription"]["channels"], ["telegram"])
+            self.assertTrue(v1_subscription_recommendations.json()["found"])
+            self.assertEqual(v1_subscription_recommendations.json()["recommendations"][0]["full_name"], "owner/agent")
             self.assertEqual(v1_update_subscription.json()["subscription"]["status"], "disabled")
             self.assertFalse(v1_trigger.json()["execution_supported"])
             self.assertTrue(v1_execution_check.json()["executable"])
