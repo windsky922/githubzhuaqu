@@ -159,6 +159,10 @@
       border-color: var(--warn);
       color: var(--warn);
     }
+    .retry-button {
+      border-color: var(--bad);
+      color: var(--bad);
+    }
     .summary {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -378,7 +382,12 @@
           return;
         }
         const executeButton = event.target.closest("[data-execute]");
-        if (executeButton) runJobExecution(executeButton);
+        if (executeButton) {
+          runJobExecution(executeButton);
+          return;
+        }
+        const retryButton = event.target.closest("[data-retry]");
+        if (retryButton) runJobRetry(retryButton);
       });
     }
 
@@ -525,6 +534,54 @@
       return lines.map(line => `<div>${escapeHtml(line)}</div>`).join("");
     }
 
+    function runJobRetry(button) {
+      const jobId = button.dataset.retry || "";
+      const target = document.getElementById(button.dataset.target || "");
+      if (!target) return;
+      if (!shouldUseApi()) {
+        target.className = "precheck-result blocked";
+        target.textContent = "重试任务需要本地后端或 api=1 模式。";
+        return;
+      }
+      if (!window.confirm(`确认为失败任务 ${jobId} 创建重试任务？`)) return;
+      button.disabled = true;
+      target.className = "precheck-result";
+      target.textContent = "重试创建中...";
+      fetch(`/v1/jobs/${encodeURIComponent(jobId)}/retry`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ requested_by: "jobs_page" }),
+      })
+        .then(jsonOrThrow)
+        .then(data => {
+          target.className = `precheck-result ${data.accepted && data.retry_created ? "ok" : "blocked"}`;
+          target.innerHTML = retryHtml(data);
+          return loadJobs();
+        })
+        .then(data => {
+          state.jobs = Array.isArray(data.jobs) ? data.jobs : [];
+          render();
+        })
+        .catch(error => {
+          target.className = "precheck-result blocked";
+          target.textContent = `重试失败：${error.message || error}`;
+        })
+        .finally(() => {
+          button.disabled = false;
+        });
+    }
+
+    function retryHtml(data) {
+      const lines = [
+        data.retry_created ? "已创建重试任务" : data.accepted ? "已命中已有任务" : "未创建重试任务",
+        data.job_id ? `任务：${data.job_id}` : "",
+        data.status ? `状态：${data.status}` : "",
+        data.duplicate_of ? `已有任务：${data.duplicate_of}` : "",
+        ...(data.blockers || []).map(item => `阻止：${item}`),
+      ].filter(Boolean);
+      return lines.map(line => `<div>${escapeHtml(line)}</div>`).join("");
+    }
+
     function shouldUseApi() {
       const params = new URLSearchParams(window.location.search);
       if (params.get("api") === "1") return true;
@@ -587,11 +644,15 @@
       const jobId = job.job_id || "";
       const precheckId = `precheck-${safeId(jobId)}`;
       const executeId = `execute-${safeId(jobId)}`;
+      const retryId = `retry-${safeId(jobId)}`;
       const precheckDisabled = shouldUseApi() ? "" : " disabled";
       const precheckTitle = shouldUseApi() ? "执行前检查" : "仅本地后端或 api=1 模式可用";
       const executeEnabled = shouldUseApi() && job.status === "planned";
       const executeDisabled = executeEnabled ? "" : " disabled";
       const executeTitle = executeEnabled ? "确认后执行 planned 任务" : "仅 API 模式下的 planned 任务可执行";
+      const retryEnabled = shouldUseApi() && job.status === "failed";
+      const retryDisabled = retryEnabled ? "" : " disabled";
+      const retryTitle = retryEnabled ? "为 failed 任务创建 planned 重试任务" : "仅 API 模式下的 failed 任务可重试";
       const errorText = escapeHtml(shortText(job.error || result.error || ""));
       const resultText = [
         result.selected_count !== undefined ? `入选 ${number(result.selected_count)}` : "",
@@ -600,7 +661,7 @@
         report ? `<a href="${escapeAttribute(report)}">周报</a>` : "",
       ].filter(Boolean).join(" · ") || "-";
       return `<tr>
-        <td><div class="mono">${escapeHtml(job.job_id || "")}</div><div class="muted">${escapeHtml(job.kind || "")}</div></td>
+        <td><div class="mono"><a href="${escapeAttribute(jobDetailUrl(jobId))}">${escapeHtml(job.job_id || "")}</a></div><div class="muted">${escapeHtml(job.kind || "")}</div></td>
         <td><span class="status ${escapeAttribute(job.status || "")}">${escapeHtml(job.status || "")}</span></td>
         <td>${escapeHtml(request.profile || "-")}</td>
         <td>${escapeHtml(job.run_date || "-")}</td>
@@ -612,8 +673,10 @@
             <div>${errorText || "-"}</div>
             <button class="secondary-button" type="button" title="${escapeAttribute(precheckTitle)}" data-precheck="${escapeAttribute(jobId)}" data-target="${escapeAttribute(precheckId)}"${precheckDisabled}>执行前检查</button>
             <button class="secondary-button execute-button" type="button" title="${escapeAttribute(executeTitle)}" data-execute="${escapeAttribute(jobId)}" data-target="${escapeAttribute(executeId)}"${executeDisabled}>确认执行</button>
+            <button class="secondary-button retry-button" type="button" title="${escapeAttribute(retryTitle)}" data-retry="${escapeAttribute(jobId)}" data-target="${escapeAttribute(retryId)}"${retryDisabled}>重试</button>
             <div id="${escapeAttribute(precheckId)}" class="precheck-result" aria-live="polite"></div>
             <div id="${escapeAttribute(executeId)}" class="precheck-result" aria-live="polite"></div>
+            <div id="${escapeAttribute(retryId)}" class="precheck-result" aria-live="polite"></div>
           </div>
         </td>
       </tr>`;
@@ -625,6 +688,14 @@
         if (params.has(key)) control.value = params.get(key) || "";
       }
       if (params.has("q")) controls.query.value = params.get("q") || "";
+    }
+
+    function jobDetailUrl(jobId) {
+      const params = new URLSearchParams();
+      params.set("job", jobId || "");
+      const apiMode = new URLSearchParams(window.location.search).get("api");
+      if (apiMode === "1" || apiMode === "0") params.set("api", apiMode);
+      return `job.html?${params.toString()}`;
     }
 
     function updateUrl() {

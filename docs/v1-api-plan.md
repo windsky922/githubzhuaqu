@@ -27,6 +27,7 @@
 | `capabilities.jobs_query` | 是否支持任务查询 |
 | `capabilities.job_events` | 是否支持任务审计事件查询 |
 | `capabilities.run_trigger_preview` | 是否支持触发预检 |
+| `capabilities.job_retry` | 是否支持 failed 任务重试 |
 | `capabilities.local_job_runner` | 是否支持本地任务执行器 |
 | `capabilities.run_trigger_execute` | 是否支持受控任务执行；当前为 `true` |
 
@@ -105,6 +106,10 @@
 | `execution_blocked` | 执行请求被阻止 |
 | `execution_started` | 任务已交给 job runner |
 | `execution_finished` | job runner 返回执行结果 |
+| `retry_requested` | 收到重试请求 |
+| `retry_blocked` | 重试请求被阻止 |
+| `retry_duplicate_ignored` | 已存在相同 active 任务，未重复创建 |
+| `retry_created` | 已创建新的 planned 重试任务 |
 
 事件字段包括 `event_id`、`job_id`、`event_type`、`status`、`actor`、`created_at`、`message` 和 `payload`。事件只保存审计摘要，不保存 Token、Chat ID、Webhook 或请求头。
 
@@ -157,6 +162,39 @@
 2. 任务必须通过 `/v1/job-execution-check`。
 3. `dry_run=false` 的真实推送任务仍必须在任务请求中包含 `confirm_delivery=true`。
 4. API 只调用现有 job runner，不单独实现采集、生成或推送逻辑。
+
+### `POST /v1/jobs/{job_id}/retry`
+
+为 failed 任务创建一个新的 planned 重试任务。该接口只创建任务，不直接执行。
+
+请求示例：
+
+```json
+{
+  "requested_by": "local-user"
+}
+```
+
+执行规则：
+
+1. 原任务必须存在。
+2. 原任务必须是 `weekly_report`。
+3. 原任务状态必须是 `failed`。
+4. 新任务复用原任务 `request`，并追加 `trigger_source=retry`、`requested_by` 和 `retry_of`。
+5. 如果已经存在相同参数的 `planned` 或 `running` 任务，则返回已有任务，不重复创建。
+
+返回字段：
+
+| 字段 | 说明 |
+|---|---|
+| `accepted` | 是否接受重试请求 |
+| `retry_created` | 是否创建了新的 planned 重试任务 |
+| `original_job_id` | 原失败任务编号 |
+| `job_id` | 新重试任务编号，或命中的已有 active 任务编号 |
+| `status` | 新任务或已有任务状态 |
+| `blockers` | 阻止重试的原因 |
+| `duplicate_of` | 命中已有 active 任务时返回 |
+| `retry_job` | 新任务或已有任务摘要 |
 
 ### `POST /v1/runs/trigger`
 
@@ -225,6 +263,26 @@
 任务状态页的每条任务还提供“执行前检查”按钮。该按钮只在本地后端或 `api=1` 模式下调用 `/v1/job-execution-check?job_id=...`，用于展示任务是否可执行、阻止原因、提示信息和建议执行命令；页面不会直接运行任务。
 
 任务状态页还提供“确认执行”按钮。该按钮只在 API 模式且任务状态为 `planned` 时启用，点击后需要浏览器二次确认，并调用 `POST /v1/jobs/{job_id}/execute` 传入 `confirm_execution=true`。执行后页面会重新读取任务列表。
+
+任务状态页还提供“重试”按钮。该按钮只在 API 模式且任务状态为 `failed` 时启用，点击后需要浏览器二次确认，并调用 `POST /v1/jobs/{job_id}/retry`，固定写入 `requested_by=jobs_page`。接口只创建新的 planned 重试任务，不直接执行；请求结束后页面会重新读取任务列表。
+
+任务编号会链接到 `job.html?job=...`。任务详情页在 API 模式下读取 `/v1/jobs/{job_id}` 和 `/v1/jobs/{job_id}/events?limit=200`，展示任务请求、执行结果、错误信息和审计事件时间线；在静态 Pages 模式下只从 `jobs.json` 展示基础任务信息。
+
+任务详情页同时提供单任务操作区：执行前检查调用 `/v1/job-execution-check?job_id=...`，确认执行调用 `POST /v1/jobs/{job_id}/execute`，失败重试调用 `POST /v1/jobs/{job_id}/retry`。详情页固定写入 `requested_by=job_detail_page`，操作后刷新任务详情和事件时间线。静态 Pages 模式下操作按钮禁用。
+
+`admin.html` 是本地管理首页，聚合项目筛选、运行状态、任务状态和任务详情入口。页面在静态模式下只显示只读入口；在本地后端或 `api=1` 模式下读取 `/v1/health`，展示能力开关和归档健康摘要。
+
+管理首页同时读取 `projects.json`、`runs.json` 和任务数据，展示项目总数、最新运行、失败任务数和待执行任务数，并提供最新周报、失败任务和待执行任务的快捷入口。任务数据在 API 模式下优先读取 `/v1/jobs?limit=200`，失败时回退到 `jobs.json`；静态 Pages 模式仍只读取 `jobs.json`。该概览只读取公开归档或本地后端数据，不触发后端任务。
+
+管理首页还会从任务数据中选出最近任务，展示任务编号、状态、完成时间、周报链接、错误信息和下一步建议。下一步建议由任务状态派生：`failed` 引导重试，`planned` 引导执行前检查，`running` 引导等待或查看详情，`succeeded` 引导打开周报或继续查看项目筛选结果。
+
+管理首页新增“核心工作流”区域，把最近周报、Top 项目、失败任务和待执行任务聚合为四个入口。该区域只消费 `projects.json`、`runs.json` 和任务数据：最近周报链接到周报或运行面板，Top 项目链接到项目详情页，失败任务和待执行任务链接到单任务详情页。
+
+管理首页还提供最小 planned 周报任务创建表单。表单在 API 模式下调用 `POST /v1/runs/trigger`，支持传入 `profile`、`days_back`、`sources`、`dry_run` 和 `confirm_delivery`，并固定写入 `trigger_source=admin_page` 与 `requested_by=local-admin`。接口只创建任务，创建成功后跳转到 `job.html?job=...&api=1` 继续人工确认。
+
+管理首页的任务工作台复用同一任务数据源：API 模式优先读取 `/v1/jobs?limit=200`，读取失败时回退到静态 `jobs.json`；静态 Pages 模式默认读取 `jobs.json`。工作台支持按重点、失败、待执行、运行中和全部任务筛选。重点视图聚合 `failed`、`planned` 和 `running`，任务编号链接到 `job.html?job=...`。
+
+管理首页的任务工作台也提供轻量任务操作：执行前检查调用 `/v1/job-execution-check?job_id=...`，planned 任务确认执行调用 `POST /v1/jobs/{job_id}/execute` 并传入 `confirm_execution=true`，failed 任务重试调用 `POST /v1/jobs/{job_id}/retry`。这些按钮只在 API 模式下启用，固定写入 `requested_by=admin_page`，操作完成后重新读取任务概览；静态 Pages 模式下按钮禁用，不会触发后端。
 
 ### 本地任务执行器
 

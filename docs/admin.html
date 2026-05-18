@@ -1,0 +1,924 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GitHub 周报本地管理首页</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --panel: #ffffff;
+      --text: #172033;
+      --muted: #667085;
+      --line: #d8dee8;
+      --accent: #2563eb;
+      --ok: #15803d;
+      --bad: #b42318;
+      --warn: #a16207;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.55;
+    }
+    header {
+      border-bottom: 1px solid var(--line);
+      background: var(--panel);
+    }
+    .wrap {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      padding: 18px 0;
+    }
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.2;
+    }
+    main { padding: 24px 0 40px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .panel,
+    .card {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      padding: 16px;
+    }
+    .panel { margin-bottom: 14px; }
+    .card {
+      min-height: 140px;
+      display: grid;
+      gap: 8px;
+      align-content: start;
+    }
+    .overview {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .metric {
+      border: 1px solid var(--line);
+      background: #f9fafb;
+      padding: 10px;
+    }
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .metric strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 20px;
+      overflow-wrap: anywhere;
+    }
+    .result-panel {
+      margin-top: 12px;
+      border: 1px solid var(--line);
+      background: #f9fafb;
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+    }
+    .result-panel h3 {
+      margin: 0;
+      font-size: 16px;
+    }
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .result-item {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      padding: 8px;
+      overflow-wrap: anywhere;
+    }
+    .result-item span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .result-item strong {
+      display: block;
+      margin-top: 4px;
+    }
+    .workflow-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .workflow-card {
+      border: 1px solid var(--line);
+      background: #f9fafb;
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+      min-height: 128px;
+    }
+    .workflow-card h3 {
+      margin: 0;
+      font-size: 15px;
+    }
+    .workflow-card p {
+      font-size: 13px;
+    }
+    .task-form {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      align-items: end;
+    }
+    label {
+      display: grid;
+      gap: 5px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+    input,
+    select,
+    button {
+      height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--panel);
+      color: var(--text);
+      font: inherit;
+      padding: 0 10px;
+    }
+    button {
+      cursor: pointer;
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #fff;
+      font-weight: 700;
+    }
+    button:disabled {
+      cursor: not-allowed;
+      border-color: var(--line);
+      background: #e5e7eb;
+      color: var(--muted);
+    }
+    .check-label {
+      grid-template-columns: 18px 1fr;
+      align-items: center;
+      gap: 8px;
+      min-height: 38px;
+    }
+    .check-label input {
+      width: 16px;
+      height: 16px;
+      padding: 0;
+    }
+    .task-status {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      overflow-wrap: anywhere;
+    }
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .filter-button {
+      width: fit-content;
+      height: 32px;
+      border-color: var(--line);
+      background: var(--panel);
+      color: var(--accent);
+      font-size: 13px;
+    }
+    .filter-button.active {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #fff;
+    }
+    .workbench-list {
+      display: grid;
+      gap: 8px;
+    }
+    .job-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) 90px minmax(0, .9fr) minmax(0, 1.1fr) minmax(180px, .9fr);
+      gap: 10px;
+      align-items: start;
+      border: 1px solid var(--line);
+      padding: 10px;
+      background: #f9fafb;
+    }
+    .job-row span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .job-row strong {
+      overflow-wrap: anywhere;
+    }
+    .job-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .secondary-button {
+      width: fit-content;
+      height: 28px;
+      padding: 0 8px;
+      border-color: var(--line);
+      background: var(--panel);
+      color: var(--accent);
+      font-size: 12px;
+    }
+    .execute-button {
+      border-color: var(--warn);
+      color: var(--warn);
+    }
+    .retry-button {
+      border-color: var(--bad);
+      color: var(--bad);
+    }
+    .precheck-result {
+      flex-basis: 100%;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+    }
+    .precheck-result.ok {
+      color: var(--ok);
+    }
+    .precheck-result.blocked {
+      color: var(--bad);
+    }
+    .card h2,
+    .panel h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+    p {
+      margin: 0;
+      color: var(--muted);
+    }
+    a {
+      color: var(--accent);
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .links {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .status {
+      display: inline-block;
+      width: fit-content;
+      padding: 2px 8px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .status.ok { color: var(--ok); border-color: #bbf7d0; background: #f0fdf4; }
+    .status.bad { color: var(--bad); border-color: #fecaca; background: #fff1f2; }
+    .status.warn { color: var(--warn); border-color: #fde68a; background: #fffbeb; }
+    .status.succeeded { color: var(--ok); border-color: #bbf7d0; background: #f0fdf4; }
+    .status.failed { color: var(--bad); border-color: #fecaca; background: #fff1f2; }
+    .status.planned,
+    .status.running { color: var(--warn); border-color: #fde68a; background: #fffbeb; }
+    .capabilities {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .capability {
+      border: 1px solid var(--line);
+      padding: 8px;
+      font-size: 13px;
+      overflow-wrap: anywhere;
+    }
+    pre {
+      margin: 10px 0 0;
+      overflow: auto;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      background: #0f172a;
+      color: #e5e7eb;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 12px;
+    }
+    @media (max-width: 860px) {
+      .topbar { align-items: flex-start; flex-direction: column; }
+      .grid,
+      .overview,
+      .result-grid,
+      .workflow-grid,
+      .task-form,
+      .capabilities { grid-template-columns: 1fr; }
+      .job-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap topbar">
+      <h1>GitHub 周报本地管理首页</h1>
+      <nav class="links">
+        <a href="index.html">周报归档</a>
+        <a href="explorer.html">项目筛选</a>
+        <a href="runs.html">运行状态</a>
+        <a href="jobs.html">任务状态</a>
+      </nav>
+    </div>
+  </header>
+  <main class="wrap">
+    <section class="panel">
+      <h2>后端连接</h2>
+      <p id="apiMode">检测中</p>
+      <div id="health"></div>
+    </section>
+    <section class="panel">
+      <h2>数据概览</h2>
+      <div id="overview" class="overview"></div>
+      <div id="latestLinks" class="links"></div>
+      <div id="latestJobResult" class="result-panel"></div>
+    </section>
+    <section class="panel">
+      <h2>核心工作流</h2>
+      <div id="workflowBoard" class="workflow-grid"></div>
+    </section>
+    <section class="panel">
+      <h2>创建 planned 周报任务</h2>
+      <div class="task-form">
+        <label>个性化方向
+          <input id="taskProfile" type="text" placeholder="agent_development">
+        </label>
+        <label>回看天数
+          <input id="taskDaysBack" type="number" min="1" max="30" value="7">
+        </label>
+        <label>来源
+          <select id="taskSource">
+            <option value="github_trending">GitHub Trending</option>
+            <option value="github_search">GitHub Search</option>
+            <option value="">默认来源</option>
+          </select>
+        </label>
+        <label class="check-label">
+          <input id="taskDryRun" type="checkbox" checked>
+          dry_run
+        </label>
+        <label class="check-label">
+          <input id="taskConfirmDelivery" type="checkbox">
+          确认真实推送
+        </label>
+        <button id="createTask" type="button">创建任务</button>
+      </div>
+      <p id="createTaskStatus" class="task-status">静态模式只能查看；启动本地后端或添加 api=1 后可创建任务。</p>
+    </section>
+    <section class="panel">
+      <h2>任务工作台</h2>
+      <div class="toolbar" aria-label="任务筛选">
+        <button class="filter-button active" type="button" data-job-filter="attention">重点</button>
+        <button class="filter-button" type="button" data-job-filter="failed">失败</button>
+        <button class="filter-button" type="button" data-job-filter="planned">待执行</button>
+        <button class="filter-button" type="button" data-job-filter="running">运行中</button>
+        <button class="filter-button" type="button" data-job-filter="all">全部</button>
+      </div>
+      <div id="jobWorkbench" class="workbench-list"></div>
+    </section>
+    <section class="grid" aria-label="管理入口">
+      <article class="card">
+        <h2>项目</h2>
+        <p>查看热点项目、个性化方向、相似项目和公开 JSON。</p>
+        <div class="links">
+          <a href="explorer.html">项目筛选</a>
+          <a href="projects.json">projects.json</a>
+          <a href="profiles.html">个性化方向</a>
+        </div>
+      </article>
+      <article class="card">
+        <h2>运行</h2>
+        <p>查看每次采集、生成、推送和观测指标。</p>
+        <div class="links">
+          <a href="runs.html">运行状态</a>
+          <a href="runs.json">runs.json</a>
+          <a href="feed.xml">RSS</a>
+        </div>
+      </article>
+      <article class="card">
+        <h2>任务</h2>
+        <p>创建 planned 任务，进入单任务详情页后执行检查、执行和重试。</p>
+        <div class="links">
+          <a href="jobs.html">任务状态</a>
+          <a href="job.html">任务详情</a>
+          <a href="jobs.json">jobs.json</a>
+        </div>
+      </article>
+    </section>
+  </main>
+  <script>
+    const apiMode = document.getElementById("apiMode");
+    const health = document.getElementById("health");
+    const overview = document.getElementById("overview");
+    const latestLinks = document.getElementById("latestLinks");
+    const latestJobResult = document.getElementById("latestJobResult");
+    const workflowBoard = document.getElementById("workflowBoard");
+    const jobWorkbench = document.getElementById("jobWorkbench");
+    const adminState = { jobs: [], jobFilter: "attention" };
+    const createControls = {
+      profile: document.getElementById("taskProfile"),
+      daysBack: document.getElementById("taskDaysBack"),
+      source: document.getElementById("taskSource"),
+      dryRun: document.getElementById("taskDryRun"),
+      confirmDelivery: document.getElementById("taskConfirmDelivery"),
+      button: document.getElementById("createTask"),
+      status: document.getElementById("createTaskStatus"),
+    };
+
+    loadHealth();
+    loadOverview();
+    setupCreateTask();
+    bindWorkbenchFilters();
+    jobWorkbench.addEventListener("click", handleWorkbenchAction);
+
+    function bindWorkbenchFilters() {
+      document.querySelectorAll("[data-job-filter]").forEach(button => {
+        button.addEventListener("click", () => {
+          adminState.jobFilter = button.dataset.jobFilter || "attention";
+          document.querySelectorAll("[data-job-filter]").forEach(item => item.classList.toggle("active", item === button));
+          renderJobWorkbench();
+        });
+      });
+    }
+
+    function setupCreateTask() {
+      if (!shouldUseApi()) {
+        createControls.button.disabled = true;
+        return;
+      }
+      createControls.status.textContent = "API 模式可创建 planned 任务；创建后进入任务详情页执行检查或运行。";
+      createControls.button.addEventListener("click", createPlannedTask);
+    }
+
+    function createPlannedTask() {
+      createControls.button.disabled = true;
+      createControls.status.textContent = "正在创建 planned 任务...";
+      const source = createControls.source.value.trim();
+      const payload = {
+        profile: createControls.profile.value.trim(),
+        sources: source ? [source] : [],
+        dry_run: createControls.dryRun.checked,
+        confirm_delivery: createControls.confirmDelivery.checked,
+        days_back: number(createControls.daysBack.value) || 7,
+        trigger_source: "admin_page",
+        requested_by: "local-admin",
+      };
+      fetch("/v1/runs/trigger", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+        .then(jsonOrThrow)
+        .then(data => {
+          const jobId = data.job_id || "";
+          const warnings = (data.safety_warnings || []).join(" ");
+          const detailUrl = jobId ? `job.html?job=${encodeURIComponent(jobId)}&api=1` : "jobs.html?api=1";
+          createControls.status.innerHTML = `已创建 ${escapeHtml(jobId || "planned 任务")}。${escapeHtml(warnings)} <a href="${escapeAttribute(detailUrl)}">打开任务详情</a>`;
+          return loadOverview();
+        })
+        .catch(error => {
+          createControls.status.textContent = `创建失败：${error.message || error}`;
+        })
+        .finally(() => {
+          createControls.button.disabled = false;
+        });
+    }
+
+    function loadOverview() {
+      Promise.all([
+        fetch("projects.json", { cache: "no-store" }).then(jsonOrThrow).catch(() => ({ projects: [] })),
+        fetch("runs.json", { cache: "no-store" }).then(jsonOrThrow).catch(() => ({ runs: [] })),
+        loadAdminJobs(),
+      ]).then(([projectsData, runsData, jobsData]) => {
+        const projects = Array.isArray(projectsData.projects) ? projectsData.projects : [];
+        const runs = Array.isArray(runsData.runs) ? runsData.runs : [];
+        const jobs = Array.isArray(jobsData.jobs) ? jobsData.jobs : [];
+        adminState.jobs = jobs;
+        const latestRun = runs[0] || {};
+        const failedJobs = jobs.filter(job => job.status === "failed");
+        const plannedJobs = jobs.filter(job => job.status === "planned");
+        overview.innerHTML = [
+          metric("项目总数", projects.length),
+          metric("最新运行", latestRun.run_date || "-"),
+          metric("失败任务", failedJobs.length),
+          metric("待执行任务", plannedJobs.length),
+        ].join("");
+        latestLinks.innerHTML = latestLinksHtml(latestRun, failedJobs[0], plannedJobs[0]);
+        latestJobResult.innerHTML = latestJobResultHtml(latestJob(jobs));
+        workflowBoard.innerHTML = workflowBoardHtml(projects, runs, jobs);
+        renderJobWorkbench();
+      });
+    }
+
+    function loadAdminJobs() {
+      if (!shouldUseApi()) return loadAdminJobsJson();
+      return fetch("/v1/jobs?limit=200", { cache: "no-store" })
+        .then(jsonOrThrow)
+        .catch(loadAdminJobsJson);
+    }
+
+    function loadAdminJobsJson() {
+      return fetch("jobs.json", { cache: "no-store" })
+        .then(jsonOrThrow)
+        .catch(() => ({ jobs: [] }));
+    }
+
+    function renderJobWorkbench() {
+      const jobs = filteredWorkbenchJobs().slice(0, 8);
+      if (!jobs.length) {
+        jobWorkbench.innerHTML = '<p>当前筛选下没有任务。</p>';
+        return;
+      }
+      jobWorkbench.innerHTML = jobs.map(job => {
+        const request = job.request || {};
+        const jobId = job.job_id || "";
+        const targetId = `admin-action-${safeId(jobId)}`;
+        const apiEnabled = shouldUseApi();
+        const precheckDisabled = apiEnabled ? "" : " disabled";
+        const executeEnabled = apiEnabled && job.status === "planned";
+        const retryEnabled = apiEnabled && job.status === "failed";
+        return `<article class="job-row">
+          <strong><a href="${escapeAttribute(jobDetailUrl(jobId))}">${escapeHtml(jobId)}</a><span>${escapeHtml(job.kind || "")}</span></strong>
+          <span class="status ${escapeAttribute(statusClass(job.status))}">${escapeHtml(job.status || "")}</span>
+          <div><span>方向</span><strong>${escapeHtml(request.profile || "-")}</strong></div>
+          <div><span>提交时间</span><strong>${escapeHtml(job.submitted_at || job.run_date || "-")}</strong></div>
+          <div class="job-actions">
+            <button class="secondary-button" type="button" data-admin-action="precheck" data-job-id="${escapeAttribute(jobId)}" data-target="${escapeAttribute(targetId)}"${precheckDisabled}>执行前检查</button>
+            <button class="secondary-button execute-button" type="button" data-admin-action="execute" data-job-id="${escapeAttribute(jobId)}" data-target="${escapeAttribute(targetId)}"${executeEnabled ? "" : " disabled"}>确认执行</button>
+            <button class="secondary-button retry-button" type="button" data-admin-action="retry" data-job-id="${escapeAttribute(jobId)}" data-target="${escapeAttribute(targetId)}"${retryEnabled ? "" : " disabled"}>重试</button>
+            <div id="${escapeAttribute(targetId)}" class="precheck-result" aria-live="polite"></div>
+          </div>
+        </article>`;
+      }).join("");
+    }
+
+    function handleWorkbenchAction(event) {
+      const button = event.target.closest("[data-admin-action]");
+      if (!button) return;
+      if (button.dataset.adminAction === "precheck") {
+        runWorkbenchPrecheck(button);
+      } else if (button.dataset.adminAction === "execute") {
+        runWorkbenchExecution(button);
+      } else if (button.dataset.adminAction === "retry") {
+        runWorkbenchRetry(button);
+      }
+    }
+
+    function runWorkbenchPrecheck(button) {
+      const jobId = button.dataset.jobId || "";
+      const target = document.getElementById(button.dataset.target || "");
+      if (!target) return;
+      if (!shouldUseApi()) {
+        target.className = "precheck-result blocked";
+        target.textContent = "执行前检查需要本地后端或 api=1 模式。";
+        return;
+      }
+      button.disabled = true;
+      target.className = "precheck-result";
+      target.textContent = "检查中...";
+      fetch(`/v1/job-execution-check?job_id=${encodeURIComponent(jobId)}`, { cache: "no-store" })
+        .then(jsonOrThrow)
+        .then(data => {
+          target.className = `precheck-result ${data.executable ? "ok" : "blocked"}`;
+          target.innerHTML = precheckHtml(data);
+        })
+        .catch(error => {
+          target.className = "precheck-result blocked";
+          target.textContent = `检查失败：${error.message || error}`;
+        })
+        .finally(() => {
+          button.disabled = false;
+        });
+    }
+
+    function runWorkbenchExecution(button) {
+      const jobId = button.dataset.jobId || "";
+      const target = document.getElementById(button.dataset.target || "");
+      if (!target) return;
+      if (!shouldUseApi()) {
+        target.className = "precheck-result blocked";
+        target.textContent = "执行任务需要本地后端或 api=1 模式。";
+        return;
+      }
+      if (!window.confirm(`确认执行任务 ${jobId}？`)) return;
+      button.disabled = true;
+      target.className = "precheck-result";
+      target.textContent = "执行中...";
+      fetch(`/v1/jobs/${encodeURIComponent(jobId)}/execute`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ confirm_execution: true, requested_by: "admin_page" }),
+      })
+        .then(jsonOrThrow)
+        .then(data => {
+          target.className = `precheck-result ${data.accepted && data.executed ? "ok" : "blocked"}`;
+          target.innerHTML = executionHtml(data);
+          return loadOverview();
+        })
+        .catch(error => {
+          target.className = "precheck-result blocked";
+          target.textContent = `执行失败：${error.message || error}`;
+        })
+        .finally(() => {
+          button.disabled = false;
+        });
+    }
+
+    function runWorkbenchRetry(button) {
+      const jobId = button.dataset.jobId || "";
+      const target = document.getElementById(button.dataset.target || "");
+      if (!target) return;
+      if (!shouldUseApi()) {
+        target.className = "precheck-result blocked";
+        target.textContent = "重试任务需要本地后端或 api=1 模式。";
+        return;
+      }
+      if (!window.confirm(`确认为失败任务 ${jobId} 创建重试任务？`)) return;
+      button.disabled = true;
+      target.className = "precheck-result";
+      target.textContent = "重试创建中...";
+      fetch(`/v1/jobs/${encodeURIComponent(jobId)}/retry`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ requested_by: "admin_page" }),
+      })
+        .then(jsonOrThrow)
+        .then(data => {
+          target.className = `precheck-result ${data.accepted && data.retry_created ? "ok" : "blocked"}`;
+          target.innerHTML = retryHtml(data);
+          return loadOverview();
+        })
+        .catch(error => {
+          target.className = "precheck-result blocked";
+          target.textContent = `重试失败：${error.message || error}`;
+        })
+        .finally(() => {
+          button.disabled = false;
+        });
+    }
+
+    function precheckHtml(data) {
+      if (!data || !data.found) return "未找到任务。";
+      const lines = [
+        data.executable ? "可执行" : "不可执行",
+        ...(data.blockers || []).map(item => `阻止：${item}`),
+        ...(data.warnings || []).map(item => `提示：${item}`),
+      ];
+      if (data.next_command) lines.push(`命令：${data.next_command}`);
+      return lines.map(line => `<div>${escapeHtml(line)}</div>`).join("");
+    }
+
+    function executionHtml(data) {
+      const lines = [
+        data.accepted ? "已接受执行" : "未执行",
+        data.status ? `状态：${data.status}` : "",
+        ...(data.blockers || []).map(item => `阻止：${item}`),
+        ...(data.warnings || []).map(item => `提示：${item}`),
+      ].filter(Boolean);
+      return lines.map(line => `<div>${escapeHtml(line)}</div>`).join("");
+    }
+
+    function retryHtml(data) {
+      const lines = [
+        data.retry_created ? "已创建重试任务" : data.accepted ? "已命中已有任务" : "未创建重试任务",
+        data.job_id ? `任务：${data.job_id}` : "",
+        data.status ? `状态：${data.status}` : "",
+        data.duplicate_of ? `已有任务：${data.duplicate_of}` : "",
+        ...(data.blockers || []).map(item => `阻止：${item}`),
+      ].filter(Boolean);
+      return lines.map(line => `<div>${escapeHtml(line)}</div>`).join("");
+    }
+
+    function filteredWorkbenchJobs() {
+      const jobs = [...adminState.jobs];
+      if (adminState.jobFilter === "all") return jobs;
+      if (adminState.jobFilter === "attention") {
+        return jobs.filter(job => ["failed", "planned", "running"].includes(job.status));
+      }
+      return jobs.filter(job => job.status === adminState.jobFilter);
+    }
+
+    function latestJob(jobs) {
+      return [...jobs].sort((left, right) => jobTime(right).localeCompare(jobTime(left)))[0] || null;
+    }
+
+    function jobTime(job) {
+      return String(job.finished_at || job.submitted_at || job.run_date || "");
+    }
+
+    function latestJobResultHtml(job) {
+      if (!job) {
+        return '<h3>最近任务结果</h3><p>当前没有任务记录。</p>';
+      }
+      const result = job.result || {};
+      const report = result.report_url || job.report_url || "";
+      const error = job.error || result.error || "";
+      const nextAction = jobNextAction(job);
+      const detailUrl = jobDetailUrl(job.job_id || "");
+      const reportLink = report ? `<a href="${escapeAttribute(report)}">打开周报</a>` : "暂无";
+      return `<h3>最近任务结果</h3>
+        <div class="result-grid">
+          <div class="result-item"><span>任务</span><strong><a href="${escapeAttribute(detailUrl)}">${escapeHtml(job.job_id || "-")}</a></strong></div>
+          <div class="result-item"><span>状态</span><strong><span class="status ${escapeAttribute(statusClass(job.status))}">${escapeHtml(job.status || "-")}</span></strong></div>
+          <div class="result-item"><span>完成时间</span><strong>${escapeHtml(job.finished_at || job.submitted_at || job.run_date || "-")}</strong></div>
+          <div class="result-item"><span>周报</span><strong>${reportLink}</strong></div>
+        </div>
+        <p><strong>下一步：</strong>${escapeHtml(nextAction)}</p>
+        <p><strong>错误：</strong>${escapeHtml(error || "无")}</p>`;
+    }
+
+    function jobNextAction(job) {
+      if (job.status === "failed") return "建议先查看错误信息，必要时在任务工作台创建重试任务。";
+      if (job.status === "planned") return "建议先执行前检查，通过后再确认执行。";
+      if (job.status === "running") return "建议等待任务完成，或进入任务详情页查看最新状态。";
+      if (job.status === "succeeded") return "任务已成功，可打开周报或继续查看项目筛选结果。";
+      return "建议进入任务详情页查看完整记录。";
+    }
+
+    function statusClass(status) {
+      if (status === "succeeded") return "succeeded";
+      if (status === "failed") return "failed";
+      if (status === "planned") return "planned";
+      if (status === "running") return "running";
+      return "";
+    }
+
+    function latestLinksHtml(latestRun, firstFailedJob, firstPlannedJob) {
+      const links = [];
+      if (latestRun.report_url || latestRun.telegram_report_url) {
+        links.push(`<a href="${escapeAttribute(latestRun.report_url || latestRun.telegram_report_url)}">最新周报</a>`);
+      }
+      if (latestRun.telegram_runs_url) {
+        links.push(`<a href="${escapeAttribute(latestRun.telegram_runs_url)}">运行面板</a>`);
+      } else {
+        links.push('<a href="runs.html">运行面板</a>');
+      }
+      if (firstFailedJob) {
+        links.push(`<a href="${escapeAttribute(jobDetailUrl(firstFailedJob.job_id || ""))}">处理失败任务</a>`);
+      }
+      if (firstPlannedJob) {
+        links.push(`<a href="${escapeAttribute(jobDetailUrl(firstPlannedJob.job_id || ""))}">查看待执行任务</a>`);
+      }
+      return links.join("");
+    }
+
+    function workflowBoardHtml(projects, runs, jobs) {
+      const latestRun = runs[0] || {};
+      const topProject = topProjects(projects)[0] || null;
+      const failedJob = jobs.find(job => job.status === "failed") || null;
+      const plannedJob = jobs.find(job => job.status === "planned") || null;
+      return [
+        workflowCard("最近周报", latestRun.run_date || "暂无运行", latestReportText(latestRun), latestRun.report_url || latestRun.telegram_report_url || "runs.html", "打开周报"),
+        workflowCard("Top 项目", projectName(topProject), projectSummary(topProject), topProject ? projectDetailUrl(topProject) : "explorer.html", "查看项目"),
+        workflowCard("失败任务", failedJob ? failedJob.job_id : "暂无失败", failedJob ? jobNextAction(failedJob) : "当前没有失败任务。", failedJob ? jobDetailUrl(failedJob.job_id || "") : "jobs.html?status=failed", "处理失败"),
+        workflowCard("待执行任务", plannedJob ? plannedJob.job_id : "暂无待执行", plannedJob ? jobNextAction(plannedJob) : "当前没有待执行任务。", plannedJob ? jobDetailUrl(plannedJob.job_id || "") : "jobs.html?status=planned", "查看待执行"),
+      ].join("");
+    }
+
+    function workflowCard(title, headline, body, href, action) {
+      return `<article class="workflow-card">
+        <h3>${escapeHtml(title)}</h3>
+        <p><strong>${escapeHtml(headline || "-")}</strong></p>
+        <p>${escapeHtml(body || "-")}</p>
+        <div class="links"><a href="${escapeAttribute(href || "#")}">${escapeHtml(action || "打开")}</a></div>
+      </article>`;
+    }
+
+    function latestReportText(run) {
+      if (!run || !run.run_date) return "等待下一次周报生成。";
+      const selected = run.selected_count ?? "-";
+      const collected = run.collected_count ?? "-";
+      return `入选 ${selected} 个项目，候选 ${collected} 个项目。`;
+    }
+
+    function topProjects(projects) {
+      return [...projects].sort((left, right) => projectScore(right) - projectScore(left)).slice(0, 3);
+    }
+
+    function projectScore(project) {
+      if (!project) return 0;
+      return number(project.total_score ?? project.score ?? project.weekly_stars ?? project.stargazers_count);
+    }
+
+    function projectName(project) {
+      if (!project) return "暂无项目";
+      return project.full_name || project.name || project.repo || "-";
+    }
+
+    function projectSummary(project) {
+      if (!project) return "等待项目归档数据。";
+      const language = project.language || "未知语言";
+      const stars = project.weekly_stars ?? project.stargazers_count ?? "-";
+      return `${language}，热度 ${stars}。`;
+    }
+
+    function projectDetailUrl(project) {
+      const repo = projectName(project);
+      return repo && repo !== "-" ? `project.html?repo=${encodeURIComponent(repo)}` : "explorer.html";
+    }
+
+    function metric(label, value) {
+      return `<article class="metric"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></article>`;
+    }
+
+    function number(value) {
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : 0;
+    }
+
+    function loadHealth() {
+      if (!shouldUseApi()) {
+        apiMode.innerHTML = '<span class="status warn">静态模式</span> 当前页面使用 GitHub Pages 静态数据；本地启动后端或添加 api=1 后显示 /v1/health。';
+        health.innerHTML = "";
+        return;
+      }
+      apiMode.innerHTML = '<span class="status warn">API 模式</span> 正在读取 /v1/health。';
+      fetch("/v1/health", { cache: "no-store" })
+        .then(jsonOrThrow)
+        .then(data => {
+          apiMode.innerHTML = '<span class="status ok">API 已连接</span> 本地后端可用。';
+          health.innerHTML = healthHtml(data);
+        })
+        .catch(error => {
+          apiMode.innerHTML = `<span class="status bad">API 不可用</span> ${escapeHtml(error.message || error)}`;
+          health.innerHTML = '<p>会继续保留静态页面查看能力。</p>';
+        });
+    }
+
+    function healthHtml(data) {
+      const capabilities = data.capabilities || {};
+      const capabilityHtml = Object.entries(capabilities).map(([key, value]) => {
+        const state = value ? "ok" : "bad";
+        return `<div class="capability"><span class="status ${state}">${value ? "启用" : "关闭"}</span> ${escapeHtml(key)}</div>`;
+      }).join("");
+      return `<div class="capabilities">${capabilityHtml}</div><pre>${escapeHtml(JSON.stringify(data.archive || {}, null, 2))}</pre>`;
+    }
+
+    function shouldUseApi() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("api") === "1") return true;
+      if (params.get("api") === "0") return false;
+      return ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname);
+    }
+
+    function jsonOrThrow(response) {
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return response.json();
+    }
+
+    function jobDetailUrl(jobId) {
+      const params = new URLSearchParams();
+      params.set("job", jobId || "");
+      const apiMode = new URLSearchParams(window.location.search).get("api");
+      if (apiMode === "1" || apiMode === "0") params.set("api", apiMode);
+      return `job.html?${params.toString()}`;
+    }
+
+    function safeId(value) {
+      return String(value || "unknown").replace(/[^a-zA-Z0-9_-]/g, "-") || "unknown";
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;",
+      }[char]));
+    }
+
+    function escapeAttribute(value) {
+      return escapeHtml(value);
+    }
+  </script>
+</body>
+</html>
