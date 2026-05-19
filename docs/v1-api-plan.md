@@ -26,6 +26,7 @@
 | `capabilities.recommendations` | 是否支持个性化推荐查询 |
 | `capabilities.subscriptions` | 是否支持本地订阅配置 |
 | `capabilities.database_summary` | 是否支持 SQLite 数据库概览 |
+| `capabilities.database_trends` | 是否支持 SQLite 运行趋势查询 |
 | `capabilities.runs_query` | 是否支持运行记录 |
 | `capabilities.jobs_query` | 是否支持任务查询 |
 | `capabilities.job_events` | 是否支持任务审计事件查询 |
@@ -144,6 +145,12 @@
 | `top_categories` | 项目方向分布 |
 | `recent_events` | 最近任务审计事件 |
 | `rag_readiness` | 后续构建文本索引和向量检索的基础数据量提示 |
+
+### `GET /v1/database/trends`
+
+返回近 N 次运行的趋势点，默认 20 条，最大 100 条。趋势点按时间升序返回，字段包括运行日期、状态、采集数量、入选数量、新增 Star、Trending 命中率、Trending Top10 命中数、Kimi/降级/推送状态等。
+
+该接口是后续数据库分析、管理台图表、推荐特征工程和 RAG 数据健康检查的基础，不触发外部请求。
 
 ### `GET /v1/jobs`
 

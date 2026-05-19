@@ -43,6 +43,7 @@ class ApiRepository:
                 "subscriptions": True,
                 "subscription_recommendations": True,
                 "database_summary": True,
+                "database_trends": True,
                 "runs_query": True,
                 "jobs_query": True,
                 "job_events": True,
@@ -300,6 +301,56 @@ class ApiRepository:
                 "event_records": table_counts.get("job_events", 0),
                 "ready_for_text_index": table_counts.get("repositories", 0) > 0,
             },
+        }
+
+    def database_trends(self, *, limit: int = 20) -> dict[str, Any]:
+        self.ensure_sqlite_index()
+        limit = max(1, min(int(limit or 20), 100))
+        connection = connect(self.db_path)
+        try:
+            initialize(connection)
+            rows = connection.execute(
+                """
+                SELECT
+                  r.run_date,
+                  r.status,
+                  r.collected_count,
+                  r.selected_count,
+                  r.kimi_used,
+                  r.fallback_used,
+                  r.telegram_sent,
+                  COALESCE(t.total_projects, 0) AS total_projects,
+                  COALESCE(t.trending_project_count, 0) AS trending_project_count,
+                  COALESCE(t.total_star_growth, selection_stats.total_star_growth, 0) AS total_star_growth,
+                  COALESCE(selection_stats.trending_top10_count, 0) AS trending_top10_count,
+                  COALESCE(selection_stats.avg_score, 0) AS avg_score
+                FROM runs r
+                LEFT JOIN trend_summaries t ON t.run_date = r.run_date
+                LEFT JOIN (
+                  SELECT
+                    run_date,
+                    SUM(star_growth) AS total_star_growth,
+                    SUM(CASE WHEN trending_rank BETWEEN 1 AND 10 THEN 1 ELSE 0 END) AS trending_top10_count,
+                    AVG(score) AS avg_score
+                  FROM selections
+                  GROUP BY run_date
+                ) AS selection_stats ON selection_stats.run_date = r.run_date
+                ORDER BY r.run_date DESC
+                LIMIT ?
+                """,
+                (limit,),
+            ).fetchall()
+            points = [dict(row) for row in rows]
+        finally:
+            connection.close()
+
+        points = list(reversed(points))
+        return {
+            "schema_version": 1,
+            "count": len(points),
+            "limit": limit,
+            "points": [_trend_point(point) for point in points],
+            "summary": _database_trend_summary(points),
         }
 
     def jobs(
@@ -1114,6 +1165,58 @@ def _top_counts(connection: Any, table_name: str, column_name: str, limit: int =
     return [{"name": str(row["name"]), "count": _int_value(row["count"])} for row in rows]
 
 
+def _trend_point(point: dict[str, Any]) -> dict[str, Any]:
+    selected_count = _int_value(point.get("selected_count"))
+    collected_count = _int_value(point.get("collected_count"))
+    trending_project_count = _int_value(point.get("trending_project_count"))
+    return {
+        "run_date": point.get("run_date") or "",
+        "status": point.get("status") or "",
+        "collected_count": collected_count,
+        "selected_count": selected_count,
+        "kimi_used": bool(point.get("kimi_used")),
+        "fallback_used": bool(point.get("fallback_used")),
+        "telegram_sent": bool(point.get("telegram_sent")),
+        "total_projects": _int_value(point.get("total_projects")),
+        "trending_project_count": trending_project_count,
+        "trending_selected_rate": _rate(trending_project_count, selected_count),
+        "trending_top10_count": _int_value(point.get("trending_top10_count")),
+        "total_star_growth": _int_value(point.get("total_star_growth")),
+        "avg_score": round(float(point.get("avg_score") or 0), 4),
+        "collection_to_selection_rate": _rate(selected_count, collected_count),
+    }
+
+
+def _database_trend_summary(points: list[dict[str, Any]]) -> dict[str, Any]:
+    trend_points = [_trend_point(point) for point in points]
+    if not trend_points:
+        return {
+            "run_count": 0,
+            "latest_run_date": "",
+            "latest_status": "",
+            "total_selected_count": 0,
+            "total_star_growth": 0,
+            "average_trending_selected_rate": 0,
+            "failed_run_count": 0,
+            "fallback_run_count": 0,
+            "telegram_sent_count": 0,
+        }
+    return {
+        "run_count": len(trend_points),
+        "latest_run_date": trend_points[-1]["run_date"],
+        "latest_status": trend_points[-1]["status"],
+        "total_selected_count": sum(point["selected_count"] for point in trend_points),
+        "total_star_growth": sum(point["total_star_growth"] for point in trend_points),
+        "average_trending_selected_rate": round(
+            sum(point["trending_selected_rate"] for point in trend_points) / len(trend_points),
+            4,
+        ),
+        "failed_run_count": sum(1 for point in trend_points if point["status"] == "failed"),
+        "fallback_run_count": sum(1 for point in trend_points if point["fallback_used"]),
+        "telegram_sent_count": sum(1 for point in trend_points if point["telegram_sent"]),
+    }
+
+
 def _subscription_from_row(row: Any) -> dict[str, Any]:
     payload = _json_object(row["payload_json"])
     return {
@@ -1292,6 +1395,10 @@ def _positive_int(value: Any) -> int | None:
     except (TypeError, ValueError):
         return None
     return number if number > 0 else None
+
+
+def _rate(numerator: int, denominator: int) -> float:
+    return round(numerator / denominator, 4) if denominator else 0
 
 
 def _truthy(value: Any) -> bool:

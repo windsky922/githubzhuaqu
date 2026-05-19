@@ -145,6 +145,21 @@ http://127.0.0.1:8000/admin.html?api=1
 
 该接口只读取本地 SQLite 统计摘要，不返回密钥、Webhook、请求头或完整原始载荷。
 
+### `GET /v1/database/trends`
+
+返回近 N 次运行的数据库趋势点，用于观察周报质量、数据变化和后续推荐特征。支持参数：
+
+| 参数 | 说明 |
+|---|---|
+| `limit` | 返回最近运行数量，默认 20，最大 100 |
+
+返回内容包括：
+
+1. `points`：按时间升序排列的运行趋势点，包含入选数量、采集数量、新增 Star、Trending 命中率、Top10 命中数量、Kimi/降级/推送状态。
+2. `summary`：聚合摘要，包含总入选数量、总新增 Star、平均 Trending 命中率、失败运行数、降级运行数和推送成功数。
+
+该接口只做统计读取，不调用 GitHub、Kimi、Telegram 或任何外部服务。
+
 ### `GET /api/profiles`
 
 返回公开个性化方向，数据来源为 `docs/profiles.json`。

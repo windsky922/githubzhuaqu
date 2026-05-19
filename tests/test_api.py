@@ -111,6 +111,7 @@ class ApiRepositoryTest(unittest.TestCase):
             audit_jobs = repository.jobs(status="planned", query="unit-test")
             succeeded_jobs = repository.jobs(status="succeeded", kind="weekly_report", query="2026-05-09")
             database_summary = repository.database_summary()
+            database_trends = repository.database_trends(limit=5)
 
             self.assertEqual(projects["schema_version"], 1)
             self.assertGreaterEqual(projects["count"], 1)
@@ -154,6 +155,7 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertTrue(health["capabilities"]["run_trigger_execute"])
             self.assertTrue(health["capabilities"]["subscription_recommendations"])
             self.assertTrue(health["capabilities"]["database_summary"])
+            self.assertTrue(health["capabilities"]["database_trends"])
             self.assertEqual(jobs["jobs"][0]["job_id"], "run:2026-05-09")
             self.assertTrue(job_detail["found"])
             self.assertEqual(job_detail["run_summary"]["run_date"], "2026-05-09")
@@ -222,6 +224,10 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertIn("planned", database_summary["job_status_counts"])
             self.assertIn("disabled", database_summary["subscription_status_counts"])
             self.assertTrue(database_summary["rag_readiness"]["ready_for_text_index"])
+            self.assertGreaterEqual(database_trends["count"], 2)
+            self.assertEqual(database_trends["summary"]["latest_run_date"], "2026-05-09")
+            self.assertGreaterEqual(database_trends["summary"]["total_selected_count"], 3)
+            self.assertEqual(database_trends["points"][-1]["run_date"], "2026-05-09")
         finally:
             shutil.rmtree(root, ignore_errors=True)
 
@@ -254,6 +260,7 @@ class ApiRepositoryTest(unittest.TestCase):
             latest = client.get("/api/weekly/latest")
             v1_health = client.get("/v1/health")
             v1_database_summary = client.get("/v1/database/summary")
+            v1_database_trends = client.get("/v1/database/trends", params={"limit": 5})
             v1_projects = client.get("/v1/projects", params={"profile": "agent_development", "limit": 5})
             v1_recommendations = client.get(
                 "/v1/recommendations",
@@ -312,6 +319,7 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(latest.status_code, 200)
             self.assertEqual(v1_health.status_code, 200)
             self.assertEqual(v1_database_summary.status_code, 200)
+            self.assertEqual(v1_database_trends.status_code, 200)
             self.assertEqual(v1_projects.status_code, 200)
             self.assertEqual(v1_recommendations.status_code, 200)
             self.assertEqual(v1_jobs.status_code, 200)
@@ -337,6 +345,7 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(latest.json()["run_date"], "2026-05-09")
             self.assertGreaterEqual(v1_database_summary.json()["table_counts"]["repositories"], 1)
             self.assertTrue(v1_database_summary.json()["rag_readiness"]["ready_for_text_index"])
+            self.assertGreaterEqual(v1_database_trends.json()["count"], 1)
             self.assertEqual(v1_projects.json()["projects"][0]["full_name"], "owner/agent")
             self.assertEqual(v1_recommendations.json()["recommendations"][0]["full_name"], "owner/agent")
             self.assertIn("profile=agent_development", v1_recommendations.json()["selection_summary"][0])
