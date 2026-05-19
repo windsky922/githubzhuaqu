@@ -27,6 +27,7 @@
 | `capabilities.subscriptions` | 是否支持本地订阅配置 |
 | `capabilities.database_summary` | 是否支持 SQLite 数据库概览 |
 | `capabilities.database_trends` | 是否支持 SQLite 运行趋势查询 |
+| `capabilities.database_facets` | 是否支持 SQLite 分面统计查询 |
 | `capabilities.runs_query` | 是否支持运行记录 |
 | `capabilities.jobs_query` | 是否支持任务查询 |
 | `capabilities.job_events` | 是否支持任务审计事件查询 |
@@ -151,6 +152,12 @@
 返回近 N 次运行的趋势点，默认 20 条，最大 100 条。趋势点按时间升序返回，字段包括运行日期、状态、采集数量、入选数量、新增 Star、Trending 命中率、Trending Top10 命中数、Kimi/降级/推送状态等。
 
 该接口是后续数据库分析、管理台图表、推荐特征工程和 RAG 数据健康检查的基础，不触发外部请求。
+
+### `GET /v1/database/facets`
+
+返回 SQLite 分面统计，默认每类 20 条，最大 100 条。当前分面包括语言、项目方向、来源、质量等级、风险状态和订阅偏好分布。
+
+该接口用于把项目库从“列表查询”推进到“可分析的数据资产”：前端可以直接用它生成筛选器和图表，推荐系统可以用它判断偏好覆盖情况，后续 RAG/向量索引也可以用它检查语料是否具备足够的语言、方向和来源分布。
 
 ### `GET /v1/jobs`
 

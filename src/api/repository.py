@@ -44,6 +44,7 @@ class ApiRepository:
                 "subscription_recommendations": True,
                 "database_summary": True,
                 "database_trends": True,
+                "database_facets": True,
                 "runs_query": True,
                 "jobs_query": True,
                 "job_events": True,
@@ -351,6 +352,72 @@ class ApiRepository:
             "limit": limit,
             "points": [_trend_point(point) for point in points],
             "summary": _database_trend_summary(points),
+        }
+
+    def database_facets(self, *, limit: int = 20) -> dict[str, Any]:
+        self.ensure_sqlite_index()
+        limit = max(1, min(int(limit or 20), 100))
+        connection = connect(self.db_path)
+        try:
+            initialize(connection)
+            language_rows = connection.execute(
+                """
+                SELECT
+                  COALESCE(NULLIF(language, ''), 'unknown') AS name,
+                  COUNT(*) AS project_count,
+                  SUM(stargazers_count) AS total_stars,
+                  SUM(forks_count) AS total_forks,
+                  MAX(pushed_at) AS latest_pushed_at
+                FROM repositories
+                GROUP BY COALESCE(NULLIF(language, ''), 'unknown')
+                ORDER BY project_count DESC, total_stars DESC, name ASC
+                LIMIT ?
+                """,
+                (limit,),
+            ).fetchall()
+            category_rows = connection.execute(
+                """
+                SELECT
+                  COALESCE(NULLIF(category, ''), 'Other') AS name,
+                  COUNT(*) AS selection_count,
+                  COUNT(DISTINCT full_name) AS project_count,
+                  SUM(star_growth) AS total_star_growth,
+                  AVG(score) AS avg_score,
+                  SUM(CASE WHEN trending_rank BETWEEN 1 AND 10 THEN 1 ELSE 0 END) AS trending_top10_count
+                FROM selections
+                GROUP BY COALESCE(NULLIF(category, ''), 'Other')
+                ORDER BY selection_count DESC, total_star_growth DESC, name ASC
+                LIMIT ?
+                """,
+                (limit,),
+            ).fetchall()
+            selection_rows = connection.execute(
+                "SELECT full_name, sources_json, payload_json FROM selections"
+            ).fetchall()
+            subscription_rows = connection.execute(
+                "SELECT status, profile, language, category FROM subscriptions"
+            ).fetchall()
+        finally:
+            connection.close()
+
+        sources = _source_facets(selection_rows, limit)
+        quality_levels, risk_levels = _quality_facets(selection_rows, limit)
+        subscription_facets = _subscription_facets(subscription_rows, limit)
+        return {
+            "schema_version": 1,
+            "limit": limit,
+            "languages": [_language_facet(row) for row in language_rows],
+            "categories": [_category_facet(row) for row in category_rows],
+            "sources": sources,
+            "quality_levels": quality_levels,
+            "risk_levels": risk_levels,
+            "subscriptions": subscription_facets,
+            "rag_readiness": {
+                "has_language_facets": bool(language_rows),
+                "has_category_facets": bool(category_rows),
+                "has_source_facets": bool(sources),
+                "ready_for_personalized_filters": bool(language_rows or category_rows or subscription_facets["profiles"]),
+            },
         }
 
     def jobs(
@@ -1215,6 +1282,103 @@ def _database_trend_summary(points: list[dict[str, Any]]) -> dict[str, Any]:
         "fallback_run_count": sum(1 for point in trend_points if point["fallback_used"]),
         "telegram_sent_count": sum(1 for point in trend_points if point["telegram_sent"]),
     }
+
+
+def _language_facet(row: Any) -> dict[str, Any]:
+    return {
+        "name": str(row["name"] or "unknown"),
+        "project_count": _int_value(row["project_count"]),
+        "total_stars": _int_value(row["total_stars"]),
+        "total_forks": _int_value(row["total_forks"]),
+        "latest_pushed_at": row["latest_pushed_at"] or "",
+    }
+
+
+def _category_facet(row: Any) -> dict[str, Any]:
+    selection_count = _int_value(row["selection_count"])
+    return {
+        "name": str(row["name"] or "Other"),
+        "selection_count": selection_count,
+        "project_count": _int_value(row["project_count"]),
+        "total_star_growth": _int_value(row["total_star_growth"]),
+        "avg_score": round(float(row["avg_score"] or 0), 4),
+        "trending_top10_count": _int_value(row["trending_top10_count"]),
+        "trending_top10_rate": _rate(_int_value(row["trending_top10_count"]), selection_count),
+    }
+
+
+def _source_facets(rows: list[Any], limit: int) -> list[dict[str, Any]]:
+    counts: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        full_name = str(row["full_name"] or "")
+        sources = _list_strings(_json_list(row["sources_json"]))
+        if not sources:
+            sources = ["unknown"]
+        for source in sources:
+            item = counts.setdefault(source, {"name": source, "selection_count": 0, "projects": set()})
+            item["selection_count"] += 1
+            if full_name:
+                item["projects"].add(full_name)
+    return [
+        {
+            "name": str(item["name"]),
+            "selection_count": _int_value(item["selection_count"]),
+            "project_count": len(item["projects"]),
+        }
+        for item in sorted(counts.values(), key=lambda value: (-value["selection_count"], value["name"]))[:limit]
+    ]
+
+
+def _quality_facets(rows: list[Any], limit: int) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    quality_counts: dict[str, dict[str, Any]] = {}
+    risk_counts: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        full_name = str(row["full_name"] or "")
+        payload = _json_object(row["payload_json"])
+        quality_level = str(payload.get("quality_level") or "unknown").strip() or "unknown"
+        security_flags = _list_strings(payload.get("security_flags"))
+        risk_level = "has" if security_flags else "none"
+        _increment_facet(quality_counts, quality_level, full_name)
+        _increment_facet(risk_counts, risk_level, full_name)
+    return _facet_counts(quality_counts, limit), _facet_counts(risk_counts, limit)
+
+
+def _subscription_facets(rows: list[Any], limit: int) -> dict[str, Any]:
+    status_counts: dict[str, dict[str, Any]] = {}
+    profile_counts: dict[str, dict[str, Any]] = {}
+    language_counts: dict[str, dict[str, Any]] = {}
+    category_counts: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        _increment_facet(status_counts, str(row["status"] or "unknown"), "")
+        _increment_facet(profile_counts, str(row["profile"] or "unknown"), "")
+        _increment_facet(language_counts, str(row["language"] or "unknown"), "")
+        _increment_facet(category_counts, str(row["category"] or "unknown"), "")
+    return {
+        "statuses": _facet_counts(status_counts, limit),
+        "profiles": _facet_counts(profile_counts, limit),
+        "languages": _facet_counts(language_counts, limit),
+        "categories": _facet_counts(category_counts, limit),
+    }
+
+
+def _increment_facet(counts: dict[str, dict[str, Any]], name: str, full_name: str) -> None:
+    key = name.strip() or "unknown"
+    item = counts.setdefault(key, {"name": key, "count": 0, "projects": set()})
+    item["count"] += 1
+    if full_name:
+        item["projects"].add(full_name)
+
+
+def _facet_counts(counts: dict[str, dict[str, Any]], limit: int) -> list[dict[str, Any]]:
+    values = sorted(counts.values(), key=lambda value: (-value["count"], value["name"]))[:limit]
+    return [
+        {
+            "name": str(item["name"]),
+            "count": _int_value(item["count"]),
+            "project_count": len(item["projects"]),
+        }
+        for item in values
+    ]
 
 
 def _subscription_from_row(row: Any) -> dict[str, Any]:

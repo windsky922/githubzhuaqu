@@ -160,6 +160,25 @@ http://127.0.0.1:8000/admin.html?api=1
 
 该接口只做统计读取，不调用 GitHub、Kimi、Telegram 或任何外部服务。
 
+### `GET /v1/database/facets`
+
+返回数据库分面统计，用于前端筛选、个性化推荐和后续 RAG 索引建设。支持参数：
+
+| 参数 | 说明 |
+|---|---|
+| `limit` | 每类分面最多返回数量，默认 20，最大 100 |
+
+返回内容包括：
+
+1. `languages`：按语言聚合项目数量、总 Star、总 Fork 和最近推送时间。
+2. `categories`：按项目方向聚合入选次数、项目数、新增 Star、平均分和 Trending Top10 命中率。
+3. `sources`：按来源聚合入选次数和项目数，例如 `github_trending`、`github_search`。
+4. `quality_levels` 和 `risk_levels`：从入选项目载荷中提取质量等级和风险状态。
+5. `subscriptions`：统计本地订阅的状态、profile、语言和方向分布。
+6. `rag_readiness`：提示当前分面数据是否足够支撑个性化筛选和后续文本索引。
+
+该接口只读取 SQLite 中的公开归档字段，不返回密钥、Webhook、请求头或完整原始载荷。
+
 ### `GET /api/profiles`
 
 返回公开个性化方向，数据来源为 `docs/profiles.json`。
