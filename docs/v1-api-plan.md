@@ -25,6 +25,7 @@
 | `capabilities.project_detail` | 是否支持项目详情 |
 | `capabilities.recommendations` | 是否支持个性化推荐查询 |
 | `capabilities.subscriptions` | 是否支持本地订阅配置 |
+| `capabilities.database_summary` | 是否支持 SQLite 数据库概览 |
 | `capabilities.runs_query` | 是否支持运行记录 |
 | `capabilities.jobs_query` | 是否支持任务查询 |
 | `capabilities.job_events` | 是否支持任务审计事件查询 |
@@ -125,6 +126,24 @@
 ### `GET /v1/runs`
 
 兼容 `/api/runs`，返回公开运行记录。
+
+### `GET /v1/database/summary`
+
+返回 SQLite 数据库概览。该接口用于数据库健康检查、后续管理台数据库面板和 RAG 索引准备，不直接执行迁移以外的业务任务。
+
+返回字段：
+
+| 字段 | 说明 |
+|---|---|
+| `table_counts` | 核心表记录数 |
+| `latest_run` | 最近运行记录 |
+| `latest_job` | 最近任务记录 |
+| `job_status_counts` | 任务状态分布 |
+| `subscription_status_counts` | 订阅状态分布 |
+| `top_languages` | 主要语言分布 |
+| `top_categories` | 项目方向分布 |
+| `recent_events` | 最近任务审计事件 |
+| `rag_readiness` | 后续构建文本索引和向量检索的基础数据量提示 |
 
 ### `GET /v1/jobs`
 

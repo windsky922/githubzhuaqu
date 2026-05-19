@@ -8,7 +8,7 @@ from typing import Any
 
 from scripts.query_archive import query_archive
 from src.job_runner import run_planned_job
-from src.storage.sqlite_store import connect, import_json_archive, initialize, insert_job_event, upsert_job
+from src.storage.sqlite_store import connect, import_json_archive, initialize, insert_job_event, table_count, upsert_job
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -42,6 +42,7 @@ class ApiRepository:
                 "recommendations": True,
                 "subscriptions": True,
                 "subscription_recommendations": True,
+                "database_summary": True,
                 "runs_query": True,
                 "jobs_query": True,
                 "job_events": True,
@@ -226,6 +227,80 @@ class ApiRepository:
 
     def runs(self) -> dict[str, Any]:
         return _read_json_object(self.root / "docs" / "runs.json", {"schema_version": 1, "count": 0, "runs": []})
+
+    def database_summary(self) -> dict[str, Any]:
+        self.ensure_sqlite_index()
+        connection = connect(self.db_path)
+        try:
+            initialize(connection)
+            tables = [
+                "runs",
+                "repositories",
+                "selections",
+                "trend_summaries",
+                "jobs",
+                "job_events",
+                "subscriptions",
+            ]
+            table_counts = {name: table_count(connection, name) for name in tables}
+            latest_run = _optional_row(
+                connection.execute(
+                    """
+                    SELECT run_date, status, collected_count, selected_count, kimi_used,
+                           fallback_used, telegram_sent, telegram_report_url
+                    FROM runs
+                    ORDER BY run_date DESC
+                    LIMIT 1
+                    """
+                ).fetchone()
+            )
+            latest_job = _optional_row(
+                connection.execute(
+                    """
+                    SELECT job_id, kind, status, run_date, submitted_at, started_at, finished_at, error
+                    FROM jobs
+                    ORDER BY COALESCE(NULLIF(finished_at, ''), NULLIF(submitted_at, ''), run_date) DESC, job_id DESC
+                    LIMIT 1
+                    """
+                ).fetchone()
+            )
+            job_status_counts = _group_counts(connection, "jobs", "status")
+            subscription_status_counts = _group_counts(connection, "subscriptions", "status")
+            top_languages = _top_counts(connection, "repositories", "language")
+            top_categories = _top_counts(connection, "selections", "category")
+            recent_events = [
+                dict(row)
+                for row in connection.execute(
+                    """
+                    SELECT job_id, event_type, status, actor, created_at, message
+                    FROM job_events
+                    ORDER BY created_at DESC, event_id DESC
+                    LIMIT 10
+                    """
+                ).fetchall()
+            ]
+        finally:
+            connection.close()
+
+        return {
+            "schema_version": 1,
+            "sqlite_path": str(self.db_path),
+            "sqlite_exists": self.db_path.exists(),
+            "table_counts": table_counts,
+            "latest_run": latest_run,
+            "latest_job": latest_job,
+            "job_status_counts": job_status_counts,
+            "subscription_status_counts": subscription_status_counts,
+            "top_languages": top_languages,
+            "top_categories": top_categories,
+            "recent_events": recent_events,
+            "rag_readiness": {
+                "project_records": table_counts.get("repositories", 0),
+                "selection_records": table_counts.get("selections", 0),
+                "event_records": table_counts.get("job_events", 0),
+                "ready_for_text_index": table_counts.get("repositories", 0) > 0,
+            },
+        }
 
     def jobs(
         self,
@@ -1007,6 +1082,36 @@ def _job_event_from_row(row: Any) -> dict[str, Any]:
         "message": row["message"],
         "payload": _json_object(row["payload_json"]),
     }
+
+
+def _optional_row(row: Any) -> dict[str, Any]:
+    return dict(row) if row else {}
+
+
+def _group_counts(connection: Any, table_name: str, column_name: str) -> dict[str, int]:
+    rows = connection.execute(
+        f"""
+        SELECT COALESCE(NULLIF({column_name}, ''), 'unknown') AS name, COUNT(*) AS count
+        FROM {table_name}
+        GROUP BY COALESCE(NULLIF({column_name}, ''), 'unknown')
+        ORDER BY count DESC, name ASC
+        """
+    ).fetchall()
+    return {str(row["name"]): _int_value(row["count"]) for row in rows}
+
+
+def _top_counts(connection: Any, table_name: str, column_name: str, limit: int = 8) -> list[dict[str, Any]]:
+    rows = connection.execute(
+        f"""
+        SELECT COALESCE(NULLIF({column_name}, ''), 'unknown') AS name, COUNT(*) AS count
+        FROM {table_name}
+        GROUP BY COALESCE(NULLIF({column_name}, ''), 'unknown')
+        ORDER BY count DESC, name ASC
+        LIMIT ?
+        """,
+        (limit,),
+    ).fetchall()
+    return [{"name": str(row["name"]), "count": _int_value(row["count"])} for row in rows]
 
 
 def _subscription_from_row(row: Any) -> dict[str, Any]:

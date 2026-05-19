@@ -132,6 +132,19 @@ http://127.0.0.1:8000/admin.html?api=1
 
 返回公开运行记录，数据来源为 `docs/runs.json`。
 
+### `GET /v1/database/summary`
+
+返回 SQLite 派生索引的数据库概览，用于本地管理台、数据健康检查和后续 RAG 索引准备。该接口会返回：
+
+1. `table_counts`：`runs`、`repositories`、`selections`、`jobs`、`job_events`、`subscriptions` 等表的记录数。
+2. `latest_run` 和 `latest_job`：最近一次运行和最近一个任务。
+3. `job_status_counts` 和 `subscription_status_counts`：任务状态和订阅状态分布。
+4. `top_languages` 和 `top_categories`：当前归档中主要语言和项目方向分布。
+5. `recent_events`：最近 10 条任务审计事件。
+6. `rag_readiness`：后续构建文本索引或向量检索前的基础数据量提示。
+
+该接口只读取本地 SQLite 统计摘要，不返回密钥、Webhook、请求头或完整原始载荷。
+
 ### `GET /api/profiles`
 
 返回公开个性化方向，数据来源为 `docs/profiles.json`。

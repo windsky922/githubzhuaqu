@@ -84,6 +84,10 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
     def v1_health() -> dict[str, Any]:
         return repository.v1_health()
 
+    @app.get("/v1/database/summary")
+    def v1_database_summary() -> dict[str, Any]:
+        return repository.database_summary()
+
     @app.get("/v1/projects")
     def v1_projects(
         language: str | None = None,
