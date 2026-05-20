@@ -2,6 +2,25 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-05-20 追加：新增项目语料搜索接口
+
+### 1. 开发目的
+
+项目后续要进入数据库、RAG 和个性化推荐阶段，不能只依赖项目列表过滤。需要先把项目描述、README 摘要、推荐理由、语言、方向和来源整理成统一语料，并提供一个不依赖外部模型的本地搜索入口，作为后续 FTS、向量检索和 LangChain 编排的地基。
+
+### 2. 修改内容
+
+1. SQLite 新增 `project_corpus` 派生表，保存历史入选项目的公开搜索语料。
+2. JSON 归档导入 SQLite 时自动重建 `project_corpus`，已有数据库在首次访问 API 时也会补建空缺语料。
+3. 后端新增 `GET /v1/search`，支持 `q`、`language`、`category`、`source` 和 `limit` 参数。
+4. `/v1/health` 新增 `project_search` 能力标识。
+5. 数据库概览和分面接口补充语料表数量与文本搜索准备度。
+6. 补充 API、SQLite、数据契约和迁移校验测试。
+
+### 3. 边界说明
+
+当前搜索只读取 SQLite 中的公开归档字段，不调用 GitHub、Kimi、Telegram、Embedding 或任何外部模型，也不保存密钥。`project_corpus` 是派生表，可由 `data/selected` 重新构建。
+
 ## 2026-05-19 追加：新增数据库分面统计接口
 
 ### 1. 开发目的

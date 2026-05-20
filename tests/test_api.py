@@ -113,6 +113,7 @@ class ApiRepositoryTest(unittest.TestCase):
             database_summary = repository.database_summary()
             database_trends = repository.database_trends(limit=5)
             database_facets = repository.database_facets(limit=5)
+            search = repository.search(query="agent workflow", language="Python", limit=5)
 
             self.assertEqual(projects["schema_version"], 1)
             self.assertGreaterEqual(projects["count"], 1)
@@ -158,6 +159,7 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertTrue(health["capabilities"]["database_summary"])
             self.assertTrue(health["capabilities"]["database_trends"])
             self.assertTrue(health["capabilities"]["database_facets"])
+            self.assertTrue(health["capabilities"]["project_search"])
             self.assertEqual(jobs["jobs"][0]["job_id"], "run:2026-05-09")
             self.assertTrue(job_detail["found"])
             self.assertEqual(job_detail["run_summary"]["run_date"], "2026-05-09")
@@ -221,6 +223,7 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(succeeded_jobs["count"], 1)
             self.assertEqual(succeeded_jobs["jobs"][0]["job_id"], "run:2026-05-09")
             self.assertGreaterEqual(database_summary["table_counts"]["repositories"], 1)
+            self.assertGreaterEqual(database_summary["table_counts"]["project_corpus"], 1)
             self.assertGreaterEqual(database_summary["table_counts"]["job_events"], 1)
             self.assertEqual(database_summary["latest_run"]["run_date"], "2026-05-09")
             self.assertIn("planned", database_summary["job_status_counts"])
@@ -237,6 +240,11 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertIn("none", [item["name"] for item in database_facets["risk_levels"]])
             self.assertIn("disabled", [item["name"] for item in database_facets["subscriptions"]["statuses"]])
             self.assertTrue(database_facets["rag_readiness"]["ready_for_personalized_filters"])
+            self.assertTrue(database_facets["rag_readiness"]["ready_for_text_search"])
+            self.assertEqual(search["schema_version"], 1)
+            self.assertGreaterEqual(search["count"], 1)
+            self.assertIn("owner/agent", [item["full_name"] for item in search["results"]])
+            self.assertIn("agent", search["results"][0]["snippet"].lower())
         finally:
             shutil.rmtree(root, ignore_errors=True)
 
@@ -271,6 +279,7 @@ class ApiRepositoryTest(unittest.TestCase):
             v1_database_summary = client.get("/v1/database/summary")
             v1_database_trends = client.get("/v1/database/trends", params={"limit": 5})
             v1_database_facets = client.get("/v1/database/facets", params={"limit": 5})
+            v1_search = client.get("/v1/search", params={"q": "agent workflow", "language": "Python", "limit": 5})
             v1_projects = client.get("/v1/projects", params={"profile": "agent_development", "limit": 5})
             v1_recommendations = client.get(
                 "/v1/recommendations",
@@ -331,6 +340,7 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(v1_database_summary.status_code, 200)
             self.assertEqual(v1_database_trends.status_code, 200)
             self.assertEqual(v1_database_facets.status_code, 200)
+            self.assertEqual(v1_search.status_code, 200)
             self.assertEqual(v1_projects.status_code, 200)
             self.assertEqual(v1_recommendations.status_code, 200)
             self.assertEqual(v1_jobs.status_code, 200)
@@ -359,6 +369,7 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertGreaterEqual(v1_database_trends.json()["count"], 1)
             self.assertEqual(v1_database_facets.json()["languages"][0]["name"], "Python")
             self.assertEqual(v1_database_facets.json()["sources"][0]["name"], "github_trending")
+            self.assertIn("owner/agent", [item["full_name"] for item in v1_search.json()["results"]])
             self.assertEqual(v1_projects.json()["projects"][0]["full_name"], "owner/agent")
             self.assertEqual(v1_recommendations.json()["recommendations"][0]["full_name"], "owner/agent")
             self.assertIn("profile=agent_development", v1_recommendations.json()["selection_summary"][0])

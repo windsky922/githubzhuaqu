@@ -44,6 +44,23 @@ CREATE TABLE IF NOT EXISTS selections (
 CREATE INDEX IF NOT EXISTS idx_selections_run_date_position ON selections(run_date, position);
 CREATE INDEX IF NOT EXISTS idx_selections_full_name ON selections(full_name);
 
+CREATE TABLE IF NOT EXISTS project_corpus (
+  corpus_id TEXT PRIMARY KEY,
+  run_date TEXT NOT NULL DEFAULT '',
+  full_name TEXT NOT NULL DEFAULT '',
+  html_url TEXT NOT NULL DEFAULT '',
+  title TEXT NOT NULL DEFAULT '',
+  language TEXT NOT NULL DEFAULT '',
+  category TEXT NOT NULL DEFAULT '',
+  sources_json TEXT NOT NULL DEFAULT '[]',
+  search_text TEXT NOT NULL DEFAULT '',
+  payload_json TEXT NOT NULL DEFAULT '{}'
+);
+
+CREATE INDEX IF NOT EXISTS idx_project_corpus_run_date ON project_corpus(run_date);
+CREATE INDEX IF NOT EXISTS idx_project_corpus_full_name ON project_corpus(full_name);
+CREATE INDEX IF NOT EXISTS idx_project_corpus_language_category ON project_corpus(language, category);
+
 CREATE TABLE IF NOT EXISTS trend_summaries (
   run_date TEXT PRIMARY KEY,
   total_projects INTEGER NOT NULL DEFAULT 0,

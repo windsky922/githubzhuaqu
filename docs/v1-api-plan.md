@@ -28,6 +28,7 @@
 | `capabilities.database_summary` | 是否支持 SQLite 数据库概览 |
 | `capabilities.database_trends` | 是否支持 SQLite 运行趋势查询 |
 | `capabilities.database_facets` | 是否支持 SQLite 分面统计查询 |
+| `capabilities.project_search` | 是否支持项目语料搜索 |
 | `capabilities.runs_query` | 是否支持运行记录 |
 | `capabilities.jobs_query` | 是否支持任务查询 |
 | `capabilities.job_events` | 是否支持任务审计事件查询 |
@@ -158,6 +159,12 @@
 返回 SQLite 分面统计，默认每类 20 条，最大 100 条。当前分面包括语言、项目方向、来源、质量等级、风险状态和订阅偏好分布。
 
 该接口用于把项目库从“列表查询”推进到“可分析的数据资产”：前端可以直接用它生成筛选器和图表，推荐系统可以用它判断偏好覆盖情况，后续 RAG/向量索引也可以用它检查语料是否具备足够的语言、方向和来源分布。
+
+### `GET /v1/search`
+
+基于 SQLite `project_corpus` 派生语料表搜索历史入选项目。当前是轻量文本检索，参数包括 `q`、`language`、`category`、`source` 和 `limit`。
+
+该接口是 RAG 的前置层：先把 README 摘要、项目描述、推荐理由、语言、方向和来源统一成可检索语料，再逐步升级到 FTS、Embedding、向量库或 LangChain 编排。当前版本不调用外部模型，也不写入密钥。
 
 ### `GET /v1/jobs`
 

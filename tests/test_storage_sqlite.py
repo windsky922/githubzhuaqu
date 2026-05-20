@@ -20,6 +20,7 @@ class SqliteStorageTest(unittest.TestCase):
 
             self.assertEqual(counts["runs"], 1)
             self.assertEqual(counts["selections"], 2)
+            self.assertEqual(counts["project_corpus"], 2)
             self.assertEqual(counts["trend_summaries"], 1)
             self.assertEqual(counts["sent_repositories"], 1)
             self.assertEqual(counts["star_history"], 2)
@@ -28,6 +29,7 @@ class SqliteStorageTest(unittest.TestCase):
             try:
                 self.assertEqual(table_count(connection, "runs"), 1)
                 self.assertEqual(table_count(connection, "selections"), 2)
+                self.assertEqual(table_count(connection, "project_corpus"), 2)
                 self.assertEqual(table_count(connection, "repositories"), 2)
                 self.assertEqual(table_count(connection, "jobs"), 1)
                 self.assertEqual(table_count(connection, "job_events"), 0)
@@ -39,6 +41,12 @@ class SqliteStorageTest(unittest.TestCase):
                 self.assertEqual(row["stargazers_count"], 100)
                 job = connection.execute("SELECT job_id, status FROM jobs WHERE job_id = ?", ("run:2026-05-03",)).fetchone()
                 self.assertEqual(job["status"], "succeeded")
+                corpus = connection.execute(
+                    "SELECT full_name, search_text FROM project_corpus WHERE full_name = ?",
+                    ("owner/project",),
+                ).fetchone()
+                self.assertIn("owner/project", corpus["search_text"])
+                self.assertIn("AI Agent", corpus["search_text"])
             finally:
                 connection.close()
         finally:
@@ -57,6 +65,7 @@ class SqliteStorageTest(unittest.TestCase):
             try:
                 self.assertEqual(table_count(connection, "runs"), 1)
                 self.assertEqual(table_count(connection, "selections"), 2)
+                self.assertEqual(table_count(connection, "project_corpus"), 2)
                 self.assertEqual(table_count(connection, "star_history"), 2)
                 self.assertEqual(table_count(connection, "jobs"), 1)
                 self.assertEqual(table_count(connection, "job_events"), 0)

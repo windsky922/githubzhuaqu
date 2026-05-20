@@ -162,6 +162,18 @@ SQLITE_COLUMNS = {
         "security_flags_json",
         "payload_json",
     },
+    "project_corpus": {
+        "corpus_id",
+        "run_date",
+        "full_name",
+        "html_url",
+        "title",
+        "language",
+        "category",
+        "sources_json",
+        "search_text",
+        "payload_json",
+    },
     "trend_summaries": {
         "run_date",
         "total_projects",

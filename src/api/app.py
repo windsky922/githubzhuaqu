@@ -146,6 +146,22 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
             sort=sort,
         )
 
+    @app.get("/v1/search")
+    def v1_search(
+        q: str = Query(..., min_length=1),
+        language: str | None = None,
+        category: str | None = None,
+        source: str | None = None,
+        limit: int = Query(default=20, ge=1, le=100),
+    ) -> dict[str, Any]:
+        return repository.search(
+            query=q,
+            language=language,
+            category=category,
+            source=source,
+            limit=limit,
+        )
+
     @app.get("/v1/runs")
     def v1_runs() -> dict[str, Any]:
         return repository.runs()

@@ -179,6 +179,31 @@ http://127.0.0.1:8000/admin.html?api=1
 
 该接口只读取 SQLite 中的公开归档字段，不返回密钥、Webhook、请求头或完整原始载荷。
 
+### `GET /v1/search`
+
+读取 SQLite 派生的 `project_corpus` 语料表，按关键词搜索历史入选项目。当前使用本地 SQL 文本匹配，不调用模型、不调用外部服务，后续可以平滑升级为 FTS、向量检索或 RAG。
+
+支持参数：
+
+| 参数 | 说明 |
+|---|---|
+| `q` | 必填，搜索关键词，多个词用空格分隔 |
+| `language` | 可选，按语言过滤 |
+| `category` | 可选，按项目方向过滤 |
+| `source` | 可选，按来源过滤，例如 `github_trending` |
+| `limit` | 返回数量，默认 20，最大 100 |
+
+返回内容包括：
+
+1. `results`：搜索结果数组，包含项目名、链接、语言、方向、来源、命中片段、质量等级、Trending 排名和新增 Star。
+2. `summary`：本次搜索的命中数量、主要语言和主要方向。
+
+示例：
+
+```text
+/v1/search?q=agent%20workflow&language=Python&limit=10
+```
+
 ### `GET /api/profiles`
 
 返回公开个性化方向，数据来源为 `docs/profiles.json`。

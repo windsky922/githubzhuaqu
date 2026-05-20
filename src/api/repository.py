@@ -8,7 +8,15 @@ from typing import Any
 
 from scripts.query_archive import query_archive
 from src.job_runner import run_planned_job
-from src.storage.sqlite_store import connect, import_json_archive, initialize, insert_job_event, table_count, upsert_job
+from src.storage.sqlite_store import (
+    connect,
+    import_json_archive,
+    initialize,
+    insert_job_event,
+    rebuild_project_corpus,
+    table_count,
+    upsert_job,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -45,6 +53,7 @@ class ApiRepository:
                 "database_summary": True,
                 "database_trends": True,
                 "database_facets": True,
+                "project_search": True,
                 "runs_query": True,
                 "jobs_query": True,
                 "job_events": True,
@@ -129,6 +138,75 @@ class ApiRepository:
                 query=_blank_to_none(query),
             ),
             "recommendations": projects,
+        }
+
+    def search(
+        self,
+        *,
+        query: str,
+        language: str | None = None,
+        category: str | None = None,
+        source: str | None = None,
+        limit: int = 20,
+    ) -> dict[str, Any]:
+        self.ensure_sqlite_index()
+        normalized_query = (_blank_to_none(query) or "").strip()
+        terms = _search_terms(normalized_query)
+        limit = max(1, min(int(limit or 20), 100))
+        if not terms:
+            return {
+                "schema_version": 1,
+                "query": normalized_query,
+                "count": 0,
+                "results": [],
+                "summary": ["请输入搜索关键词。"],
+            }
+
+        conditions = []
+        parameters: list[Any] = []
+        if _blank_to_none(language):
+            conditions.append("language = ?")
+            parameters.append(_blank_to_none(language))
+        if _blank_to_none(category):
+            conditions.append("category = ?")
+            parameters.append(_blank_to_none(category))
+        if _blank_to_none(source):
+            conditions.append("sources_json LIKE ?")
+            parameters.append(f"%{_blank_to_none(source)}%")
+        for term in terms:
+            conditions.append("LOWER(search_text) LIKE ?")
+            parameters.append(f"%{term.lower()}%")
+
+        sql = """
+            SELECT corpus_id, run_date, full_name, html_url, title, language, category,
+                   sources_json, search_text, payload_json
+            FROM project_corpus
+        """
+        if conditions:
+            sql += " WHERE " + " AND ".join(conditions)
+        sql += " ORDER BY run_date DESC, full_name ASC LIMIT ?"
+        parameters.append(limit * 4)
+        connection = connect(self.db_path)
+        try:
+            initialize(connection)
+            rows = connection.execute(sql, parameters).fetchall()
+        finally:
+            connection.close()
+
+        results = sorted(
+            [_search_result(row, terms) for row in rows],
+            key=lambda item: (item["score"], item["run_date"], item["full_name"]),
+            reverse=True,
+        )[:limit]
+        return {
+            "schema_version": 1,
+            "query": normalized_query,
+            "language": _blank_to_none(language) or "",
+            "category": _blank_to_none(category) or "",
+            "source": _blank_to_none(source) or "",
+            "count": len(results),
+            "results": results,
+            "summary": _search_summary(results, terms),
         }
 
     def subscription_recommendations(self, subscription_id: str, *, limit: int | None = None) -> dict[str, Any]:
@@ -239,6 +317,7 @@ class ApiRepository:
                 "runs",
                 "repositories",
                 "selections",
+                "project_corpus",
                 "trend_summaries",
                 "jobs",
                 "job_events",
@@ -299,8 +378,9 @@ class ApiRepository:
             "rag_readiness": {
                 "project_records": table_counts.get("repositories", 0),
                 "selection_records": table_counts.get("selections", 0),
+                "corpus_records": table_counts.get("project_corpus", 0),
                 "event_records": table_counts.get("job_events", 0),
-                "ready_for_text_index": table_counts.get("repositories", 0) > 0,
+                "ready_for_text_index": table_counts.get("project_corpus", 0) > 0,
             },
         }
 
@@ -397,6 +477,7 @@ class ApiRepository:
             subscription_rows = connection.execute(
                 "SELECT status, profile, language, category FROM subscriptions"
             ).fetchall()
+            corpus_count = table_count(connection, "project_corpus")
         finally:
             connection.close()
 
@@ -417,6 +498,7 @@ class ApiRepository:
                 "has_category_facets": bool(category_rows),
                 "has_source_facets": bool(sources),
                 "ready_for_personalized_filters": bool(language_rows or category_rows or subscription_facets["profiles"]),
+                "ready_for_text_search": corpus_count > 0,
             },
         }
 
@@ -940,10 +1022,19 @@ class ApiRepository:
     def ensure_sqlite_index(self) -> None:
         if not self.db_path.exists() or not self._sqlite_table_exists("jobs"):
             import_json_archive(self.root, self.db_path)
-        if not self._sqlite_table_exists("subscriptions"):
+        if not self._sqlite_table_exists("subscriptions") or not self._sqlite_table_exists("project_corpus"):
             connection = connect(self.db_path)
             try:
                 initialize(connection)
+            finally:
+                connection.close()
+        if self._sqlite_table_exists("selections") and self._sqlite_table_exists("project_corpus"):
+            connection = connect(self.db_path)
+            try:
+                initialize(connection)
+                if table_count(connection, "project_corpus") == 0 and table_count(connection, "selections") > 0:
+                    rebuild_project_corpus(connection)
+                    connection.commit()
             finally:
                 connection.close()
 
@@ -1379,6 +1470,79 @@ def _facet_counts(counts: dict[str, dict[str, Any]], limit: int) -> list[dict[st
         }
         for item in values
     ]
+
+
+def _search_terms(query: str) -> list[str]:
+    return [part.strip() for part in query.replace(",", " ").split() if part.strip()][:8]
+
+
+def _search_result(row: Any, terms: list[str]) -> dict[str, Any]:
+    text = str(row["search_text"] or "")
+    lower_text = text.lower()
+    score = 0
+    for term in terms:
+        term_lower = term.lower()
+        score += lower_text.count(term_lower) * 10
+        if str(row["full_name"] or "").lower().find(term_lower) >= 0:
+            score += 20
+        if str(row["category"] or "").lower().find(term_lower) >= 0:
+            score += 8
+        if str(row["language"] or "").lower().find(term_lower) >= 0:
+            score += 6
+    payload = _json_object(row["payload_json"])
+    return {
+        "corpus_id": row["corpus_id"],
+        "run_date": row["run_date"],
+        "full_name": row["full_name"],
+        "html_url": row["html_url"],
+        "title": row["title"],
+        "language": row["language"],
+        "category": row["category"],
+        "sources": _list_strings(_json_list(row["sources_json"])),
+        "score": score,
+        "snippet": _snippet(text, terms),
+        "quality_level": payload.get("quality_level") or "",
+        "trending_rank": _int_value(payload.get("trending_rank")),
+        "star_growth": _int_value(payload.get("star_growth")),
+    }
+
+
+def _snippet(text: str, terms: list[str], size: int = 180) -> str:
+    if not text:
+        return ""
+    lower_text = text.lower()
+    positions = [lower_text.find(term.lower()) for term in terms if term and lower_text.find(term.lower()) >= 0]
+    start = max(0, min(positions) - 40) if positions else 0
+    snippet = text[start : start + size].strip()
+    if start > 0:
+        snippet = "..." + snippet
+    if start + size < len(text):
+        snippet += "..."
+    return snippet
+
+
+def _search_summary(results: list[dict[str, Any]], terms: list[str]) -> list[str]:
+    if not results:
+        return [f"没有找到同时匹配 {'、'.join(terms)} 的项目语料。"]
+    top_languages = _summary_counts(result.get("language") or "unknown" for result in results)
+    top_categories = _summary_counts(result.get("category") or "Other" for result in results)
+    return [
+        f"命中 {len(results)} 条项目语料，关键词：{'、'.join(terms)}。",
+        f"主要语言：{_summary_text(top_languages)}。",
+        f"主要方向：{_summary_text(top_categories)}。",
+    ]
+
+
+def _summary_counts(values: Any) -> list[tuple[str, int]]:
+    counts: dict[str, int] = {}
+    for value in values:
+        name = str(value or "unknown")
+        counts[name] = counts.get(name, 0) + 1
+    return sorted(counts.items(), key=lambda item: (-item[1], item[0]))[:3]
+
+
+def _summary_text(items: list[tuple[str, int]]) -> str:
+    return "、".join(f"{name}({count})" for name, count in items) if items else "无"
 
 
 def _subscription_from_row(row: Any) -> dict[str, Any]:

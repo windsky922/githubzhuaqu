@@ -29,6 +29,7 @@ def import_json_archive(root: Path, db_path: Path) -> dict[str, int]:
         counts = {
             "runs": import_runs(connection, root),
             "selections": import_selections(connection, root),
+            "project_corpus": rebuild_project_corpus(connection),
             "trend_summaries": import_trend_summaries(connection, root),
             "sent_repositories": import_sent_repositories(connection, root),
             "star_history": import_star_history(connection, root),
@@ -277,6 +278,100 @@ def upsert_trend_summary(connection: sqlite3.Connection, run_date: str, data: di
     )
 
 
+def rebuild_project_corpus(connection: sqlite3.Connection) -> int:
+    connection.execute("DELETE FROM project_corpus")
+    rows = connection.execute(
+        """
+        SELECT
+          s.run_date,
+          s.full_name,
+          s.category,
+          s.sources_json,
+          s.selection_reasons_json,
+          s.security_flags_json,
+          s.payload_json AS selection_payload_json,
+          r.html_url,
+          r.description,
+          r.language,
+          r.payload_json AS repository_payload_json
+        FROM selections s
+        LEFT JOIN repositories r ON r.full_name = s.full_name
+        ORDER BY s.run_date DESC, s.position ASC
+        """
+    ).fetchall()
+    for row in rows:
+        upsert_project_corpus(connection, row)
+    return len(rows)
+
+
+def upsert_project_corpus(connection: sqlite3.Connection, row: sqlite3.Row) -> None:
+    selection_payload = _json_object(row["selection_payload_json"])
+    repository_payload = _json_object(row["repository_payload_json"])
+    full_name = str(row["full_name"] or "")
+    run_date = str(row["run_date"] or "")
+    title = str(selection_payload.get("name") or full_name)
+    html_url = str(row["html_url"] or selection_payload.get("html_url") or repository_payload.get("html_url") or "")
+    language = str(row["language"] or selection_payload.get("language") or repository_payload.get("language") or "")
+    category = str(row["category"] or selection_payload.get("category") or "Other")
+    sources = _json_list(row["sources_json"])
+    text_parts = [
+        full_name,
+        title,
+        str(row["description"] or ""),
+        str(selection_payload.get("description") or ""),
+        str(selection_payload.get("readme_summary") or selection_payload.get("readme_excerpt") or ""),
+        category,
+        language,
+        " ".join(str(item) for item in sources if item),
+        " ".join(str(item) for item in _json_list(row["selection_reasons_json"]) if item),
+        " ".join(str(item) for item in _json_list(row["security_flags_json"]) if item),
+        " ".join(str(item) for item in _list_value(selection_payload.get("topics")) if item),
+    ]
+    payload = {
+        "run_date": run_date,
+        "full_name": full_name,
+        "html_url": html_url,
+        "language": language,
+        "category": category,
+        "sources": sources,
+        "quality_level": selection_payload.get("quality_level") or "",
+        "trending_rank": _int_value(selection_payload.get("trending_rank")),
+        "star_growth": _int_value(selection_payload.get("star_growth")),
+    }
+    corpus_id = sha1(f"{run_date}:{full_name}".encode("utf-8")).hexdigest()
+    connection.execute(
+        """
+        INSERT INTO project_corpus(
+          corpus_id, run_date, full_name, html_url, title, language, category,
+          sources_json, search_text, payload_json
+        )
+        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(corpus_id) DO UPDATE SET
+          run_date = excluded.run_date,
+          full_name = excluded.full_name,
+          html_url = excluded.html_url,
+          title = excluded.title,
+          language = excluded.language,
+          category = excluded.category,
+          sources_json = excluded.sources_json,
+          search_text = excluded.search_text,
+          payload_json = excluded.payload_json
+        """,
+        (
+            corpus_id,
+            run_date,
+            full_name,
+            html_url,
+            title,
+            language,
+            category,
+            _json_text(sources),
+            _clean_text(" ".join(text_parts)),
+            _json_text(payload),
+        ),
+    )
+
+
 def upsert_job_from_run(connection: sqlite3.Connection, data: dict[str, Any]) -> None:
     run_date = str(data.get("run_date") or "")
     if not run_date:
@@ -386,6 +481,7 @@ def table_count(connection: sqlite3.Connection, table_name: str) -> int:
         "runs",
         "repositories",
         "selections",
+        "project_corpus",
         "trend_summaries",
         "sent_repositories",
         "star_history",
@@ -418,6 +514,30 @@ def _read_json_list(path: Path) -> list[Any]:
     except (FileNotFoundError, json.JSONDecodeError):
         return []
     return data if isinstance(data, list) else []
+
+
+def _json_object(text: str) -> dict[str, Any]:
+    try:
+        data = json.loads(text or "{}")
+    except json.JSONDecodeError:
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def _json_list(text: str) -> list[Any]:
+    try:
+        data = json.loads(text or "[]")
+    except json.JSONDecodeError:
+        return []
+    return data if isinstance(data, list) else []
+
+
+def _list_value(value: Any) -> list[Any]:
+    return value if isinstance(value, list) else []
+
+
+def _clean_text(value: str) -> str:
+    return " ".join(value.split())
 
 
 def _json_text(data: Any) -> str:
