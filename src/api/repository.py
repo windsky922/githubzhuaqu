@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import sqlite3
 from datetime import UTC, datetime
 from hashlib import sha1
 from pathlib import Path
@@ -162,48 +163,45 @@ class ApiRepository:
                 "summary": ["请输入搜索关键词。"],
             }
 
-        conditions = []
-        parameters: list[Any] = []
-        if _blank_to_none(language):
-            conditions.append("language = ?")
-            parameters.append(_blank_to_none(language))
-        if _blank_to_none(category):
-            conditions.append("category = ?")
-            parameters.append(_blank_to_none(category))
-        if _blank_to_none(source):
-            conditions.append("sources_json LIKE ?")
-            parameters.append(f"%{_blank_to_none(source)}%")
-        for term in terms:
-            conditions.append("LOWER(search_text) LIKE ?")
-            parameters.append(f"%{term.lower()}%")
-
-        sql = """
-            SELECT corpus_id, run_date, full_name, html_url, title, language, category,
-                   sources_json, search_text, payload_json
-            FROM project_corpus
-        """
-        if conditions:
-            sql += " WHERE " + " AND ".join(conditions)
-        sql += " ORDER BY run_date DESC, full_name ASC LIMIT ?"
-        parameters.append(limit * 4)
         connection = connect(self.db_path)
+        search_engine = "fts5"
         try:
             initialize(connection)
-            rows = connection.execute(sql, parameters).fetchall()
+            try:
+                rows = _search_rows_fts(
+                    connection,
+                    terms=terms,
+                    language=_blank_to_none(language),
+                    category=_blank_to_none(category),
+                    source=_blank_to_none(source),
+                    limit=limit * 4,
+                )
+            except sqlite3.Error:
+                search_engine = "like"
+                rows = _search_rows_like(
+                    connection,
+                    terms=terms,
+                    language=_blank_to_none(language),
+                    category=_blank_to_none(category),
+                    source=_blank_to_none(source),
+                    limit=limit * 4,
+                )
         finally:
             connection.close()
 
-        results = sorted(
+        ranked_results = sorted(
             [_search_result(row, terms) for row in rows],
             key=lambda item: (item["score"], item["run_date"], item["full_name"]),
             reverse=True,
-        )[:limit]
+        )
+        results = _dedupe_search_results(ranked_results)[:limit]
         return {
             "schema_version": 1,
             "query": normalized_query,
             "language": _blank_to_none(language) or "",
             "category": _blank_to_none(category) or "",
             "source": _blank_to_none(source) or "",
+            "search_engine": search_engine,
             "count": len(results),
             "results": results,
             "summary": _search_summary(results, terms),
@@ -318,6 +316,7 @@ class ApiRepository:
                 "repositories",
                 "selections",
                 "project_corpus",
+                "project_corpus_fts",
                 "trend_summaries",
                 "jobs",
                 "job_events",
@@ -379,8 +378,9 @@ class ApiRepository:
                 "project_records": table_counts.get("repositories", 0),
                 "selection_records": table_counts.get("selections", 0),
                 "corpus_records": table_counts.get("project_corpus", 0),
+                "fts_records": table_counts.get("project_corpus_fts", 0),
                 "event_records": table_counts.get("job_events", 0),
-                "ready_for_text_index": table_counts.get("project_corpus", 0) > 0,
+                "ready_for_text_index": table_counts.get("project_corpus_fts", 0) > 0,
             },
         }
 
@@ -1022,17 +1022,28 @@ class ApiRepository:
     def ensure_sqlite_index(self) -> None:
         if not self.db_path.exists() or not self._sqlite_table_exists("jobs"):
             import_json_archive(self.root, self.db_path)
-        if not self._sqlite_table_exists("subscriptions") or not self._sqlite_table_exists("project_corpus"):
+        if (
+            not self._sqlite_table_exists("subscriptions")
+            or not self._sqlite_table_exists("project_corpus")
+            or not self._sqlite_table_exists("project_corpus_fts")
+        ):
             connection = connect(self.db_path)
             try:
                 initialize(connection)
             finally:
                 connection.close()
-        if self._sqlite_table_exists("selections") and self._sqlite_table_exists("project_corpus"):
+        if (
+            self._sqlite_table_exists("selections")
+            and self._sqlite_table_exists("project_corpus")
+            and self._sqlite_table_exists("project_corpus_fts")
+        ):
             connection = connect(self.db_path)
             try:
                 initialize(connection)
-                if table_count(connection, "project_corpus") == 0 and table_count(connection, "selections") > 0:
+                if (
+                    table_count(connection, "project_corpus") == 0
+                    or table_count(connection, "project_corpus_fts") == 0
+                ) and table_count(connection, "selections") > 0:
                     rebuild_project_corpus(connection)
                     connection.commit()
             finally:
@@ -1476,6 +1487,85 @@ def _search_terms(query: str) -> list[str]:
     return [part.strip() for part in query.replace(",", " ").split() if part.strip()][:8]
 
 
+def _search_rows_fts(
+    connection: Any,
+    *,
+    terms: list[str],
+    language: str | None,
+    category: str | None,
+    source: str | None,
+    limit: int,
+) -> list[Any]:
+    conditions = ["project_corpus_fts MATCH ?"]
+    parameters: list[Any] = [_fts_query(terms)]
+    if language:
+        conditions.append("c.language = ?")
+        parameters.append(language)
+    if category:
+        conditions.append("c.category = ?")
+        parameters.append(category)
+    if source:
+        conditions.append("c.sources_json LIKE ?")
+        parameters.append(f"%{source}%")
+    parameters.append(limit)
+    return connection.execute(
+        f"""
+        SELECT c.corpus_id, c.run_date, c.full_name, c.html_url, c.title, c.language, c.category,
+               c.sources_json, c.search_text, c.payload_json
+        FROM project_corpus c
+        JOIN project_corpus_fts f ON f.corpus_id = c.corpus_id
+        WHERE {" AND ".join(conditions)}
+        ORDER BY bm25(project_corpus_fts), c.run_date DESC, c.full_name ASC
+        LIMIT ?
+        """,
+        parameters,
+    ).fetchall()
+
+
+def _search_rows_like(
+    connection: Any,
+    *,
+    terms: list[str],
+    language: str | None,
+    category: str | None,
+    source: str | None,
+    limit: int,
+) -> list[Any]:
+    conditions = []
+    parameters: list[Any] = []
+    if language:
+        conditions.append("language = ?")
+        parameters.append(language)
+    if category:
+        conditions.append("category = ?")
+        parameters.append(category)
+    if source:
+        conditions.append("sources_json LIKE ?")
+        parameters.append(f"%{source}%")
+    for term in terms:
+        conditions.append("LOWER(search_text) LIKE ?")
+        parameters.append(f"%{term.lower()}%")
+    sql = """
+        SELECT corpus_id, run_date, full_name, html_url, title, language, category,
+               sources_json, search_text, payload_json
+        FROM project_corpus
+    """
+    if conditions:
+        sql += " WHERE " + " AND ".join(conditions)
+    sql += " ORDER BY run_date DESC, full_name ASC LIMIT ?"
+    parameters.append(limit)
+    return connection.execute(sql, parameters).fetchall()
+
+
+def _fts_query(terms: list[str]) -> str:
+    quoted_terms = []
+    for term in terms:
+        cleaned = term.replace('"', " ").strip()
+        if cleaned:
+            quoted_terms.append(f'"{cleaned}"')
+    return " ".join(quoted_terms) or '""'
+
+
 def _search_result(row: Any, terms: list[str]) -> dict[str, Any]:
     text = str(row["search_text"] or "")
     lower_text = text.lower()
@@ -1505,6 +1595,18 @@ def _search_result(row: Any, terms: list[str]) -> dict[str, Any]:
         "trending_rank": _int_value(payload.get("trending_rank")),
         "star_growth": _int_value(payload.get("star_growth")),
     }
+
+
+def _dedupe_search_results(results: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    seen = set()
+    deduped = []
+    for result in results:
+        full_name = str(result.get("full_name") or "").lower()
+        if not full_name or full_name in seen:
+            continue
+        seen.add(full_name)
+        deduped.append(result)
+    return deduped
 
 
 def _snippet(text: str, terms: list[str], size: int = 180) -> str:

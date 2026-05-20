@@ -174,6 +174,14 @@ SQLITE_COLUMNS = {
         "search_text",
         "payload_json",
     },
+    "project_corpus_fts": {
+        "corpus_id",
+        "full_name",
+        "title",
+        "language",
+        "category",
+        "search_text",
+    },
     "trend_summaries": {
         "run_date",
         "total_projects",

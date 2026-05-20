@@ -162,9 +162,9 @@
 
 ### `GET /v1/search`
 
-基于 SQLite `project_corpus` 派生语料表搜索历史入选项目。当前是轻量文本检索，参数包括 `q`、`language`、`category`、`source` 和 `limit`。
+基于 SQLite `project_corpus` 派生语料表搜索历史入选项目。当前优先使用 SQLite FTS5，FTS 不可用时自动回退到普通文本匹配。参数包括 `q`、`language`、`category`、`source` 和 `limit`。
 
-该接口是 RAG 的前置层：先把 README 摘要、项目描述、推荐理由、语言、方向和来源统一成可检索语料，再逐步升级到 FTS、Embedding、向量库或 LangChain 编排。当前版本不调用外部模型，也不写入密钥。
+该接口是 RAG 的前置层：先把 README 摘要、项目描述、推荐理由、语言、方向和来源统一成可检索语料，再逐步升级到 Embedding、向量库或 LangChain 编排。当前版本不调用外部模型，也不写入密钥。
 
 ### `GET /v1/jobs`
 

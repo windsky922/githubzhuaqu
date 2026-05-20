@@ -61,6 +61,15 @@ CREATE INDEX IF NOT EXISTS idx_project_corpus_run_date ON project_corpus(run_dat
 CREATE INDEX IF NOT EXISTS idx_project_corpus_full_name ON project_corpus(full_name);
 CREATE INDEX IF NOT EXISTS idx_project_corpus_language_category ON project_corpus(language, category);
 
+CREATE VIRTUAL TABLE IF NOT EXISTS project_corpus_fts USING fts5(
+  corpus_id UNINDEXED,
+  full_name,
+  title,
+  language,
+  category,
+  search_text
+);
+
 CREATE TABLE IF NOT EXISTS trend_summaries (
   run_date TEXT PRIMARY KEY,
   total_projects INTEGER NOT NULL DEFAULT 0,

@@ -26,10 +26,13 @@ def import_json_archive(root: Path, db_path: Path) -> dict[str, int]:
     connection = connect(db_path)
     try:
         initialize(connection)
+        selection_count = import_selections(connection, root)
+        corpus_count = rebuild_project_corpus(connection)
         counts = {
             "runs": import_runs(connection, root),
-            "selections": import_selections(connection, root),
-            "project_corpus": rebuild_project_corpus(connection),
+            "selections": selection_count,
+            "project_corpus": corpus_count,
+            "project_corpus_fts": corpus_count,
             "trend_summaries": import_trend_summaries(connection, root),
             "sent_repositories": import_sent_repositories(connection, root),
             "star_history": import_star_history(connection, root),
@@ -280,6 +283,7 @@ def upsert_trend_summary(connection: sqlite3.Connection, run_date: str, data: di
 
 def rebuild_project_corpus(connection: sqlite3.Connection) -> int:
     connection.execute("DELETE FROM project_corpus")
+    connection.execute("DELETE FROM project_corpus_fts")
     rows = connection.execute(
         """
         SELECT
@@ -339,6 +343,7 @@ def upsert_project_corpus(connection: sqlite3.Connection, row: sqlite3.Row) -> N
         "star_growth": _int_value(selection_payload.get("star_growth")),
     }
     corpus_id = sha1(f"{run_date}:{full_name}".encode("utf-8")).hexdigest()
+    search_text = _clean_text(" ".join(text_parts))
     connection.execute(
         """
         INSERT INTO project_corpus(
@@ -366,8 +371,23 @@ def upsert_project_corpus(connection: sqlite3.Connection, row: sqlite3.Row) -> N
             language,
             category,
             _json_text(sources),
-            _clean_text(" ".join(text_parts)),
+            search_text,
             _json_text(payload),
+        ),
+    )
+    connection.execute("DELETE FROM project_corpus_fts WHERE corpus_id = ?", (corpus_id,))
+    connection.execute(
+        """
+        INSERT INTO project_corpus_fts(corpus_id, full_name, title, language, category, search_text)
+        VALUES(?, ?, ?, ?, ?, ?)
+        """,
+        (
+            corpus_id,
+            full_name,
+            title,
+            language,
+            category,
+            search_text,
         ),
     )
 
@@ -482,6 +502,7 @@ def table_count(connection: sqlite3.Connection, table_name: str) -> int:
         "repositories",
         "selections",
         "project_corpus",
+        "project_corpus_fts",
         "trend_summaries",
         "sent_repositories",
         "star_history",
