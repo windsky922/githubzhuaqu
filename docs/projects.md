@@ -4,6 +4,16 @@
 
 | 日期 | 项目 | 来源 | Trending 排名 | 方向 | 语言 | Star | 新增 Star | 风险提示 | 链接 |
 |---|---|---|---:|---|---|---:|---:|---:|---|
+| 2026-05-19 | CloakHQ/CloakBrowser | GitHub Trending | 1 | AI Agent | Python | 15774 | 1 | 0 | [https://github.com/CloakHQ/CloakBrowser](https://github.com/CloakHQ/CloakBrowser) |
+| 2026-05-19 | rohitg00/agentmemory | GitHub Trending | 2 | AI Agent | TypeScript | 13390 | 2 | 0 | [https://github.com/rohitg00/agentmemory](https://github.com/rohitg00/agentmemory) |
+| 2026-05-19 | oven-sh/bun | GitHub Trending | 3 | Other | Rust | 91988 | 0 | 0 | [https://github.com/oven-sh/bun](https://github.com/oven-sh/bun) |
+| 2026-05-19 | Imbad0202/academic-research-skills | GitHub Trending | 4 | LLM Tooling | Python | 13008 | 1 | 0 | [https://github.com/Imbad0202/academic-research-skills](https://github.com/Imbad0202/academic-research-skills) |
+| 2026-05-19 | yikart/AiToEarn | GitHub Trending | 5 | Other | TypeScript | 15351 | 0 | 0 | [https://github.com/yikart/AiToEarn](https://github.com/yikart/AiToEarn) |
+| 2026-05-19 | mattpocock/skills | GitHub Trending | 7 | LLM Tooling | Shell | 92912 | 0 | 0 | [https://github.com/mattpocock/skills](https://github.com/mattpocock/skills) |
+| 2026-05-19 | ruvnet/RuView | GitHub Trending | 8 | AI Agent | Rust | 60251 | 0 | 0 | [https://github.com/ruvnet/RuView](https://github.com/ruvnet/RuView) |
+| 2026-05-19 | colbymchenry/codegraph | GitHub Trending | 10 | LLM Tooling | TypeScript | 5510 | 1 | 0 | [https://github.com/colbymchenry/codegraph](https://github.com/colbymchenry/codegraph) |
+| 2026-05-19 | facebook/pyrefly | GitHub Trending | 12 | Other | Rust | 6238 | 1 | 0 | [https://github.com/facebook/pyrefly](https://github.com/facebook/pyrefly) |
+| 2026-05-19 | firecrawl/firecrawl | GitHub Search | - | AI Agent | TypeScript | 121632 | 2 | 0 | [https://github.com/firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) |
 | 2026-05-18 | CloakHQ/CloakBrowser | GitHub Trending | 1 | AI Agent | Python | 13914 | 0 | 0 | [https://github.com/CloakHQ/CloakBrowser](https://github.com/CloakHQ/CloakBrowser) |
 | 2026-05-18 | rohitg00/agentmemory | GitHub Trending | 2 | AI Agent | TypeScript | 11422 | 0 | 0 | [https://github.com/rohitg00/agentmemory](https://github.com/rohitg00/agentmemory) |
 | 2026-05-18 | yikart/AiToEarn | GitHub Trending | 3 | Other | TypeScript | 14771 | 0 | 0 | [https://github.com/yikart/AiToEarn](https://github.com/yikart/AiToEarn) |
