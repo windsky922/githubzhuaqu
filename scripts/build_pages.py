@@ -370,6 +370,40 @@ def _admin_dashboard_content() -> str:
       display: block;
       margin-top: 4px;
     }
+    .split {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .facet-list,
+    .search-results {
+      display: grid;
+      gap: 8px;
+    }
+    .facet-row,
+    .search-row {
+      border: 1px solid var(--line);
+      background: #f9fafb;
+      padding: 10px;
+      overflow-wrap: anywhere;
+    }
+    .facet-row strong,
+    .search-row strong {
+      display: block;
+    }
+    .facet-row span,
+    .search-row span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .search-form {
+      display: grid;
+      grid-template-columns: minmax(180px, 1fr) minmax(120px, .45fr) minmax(120px, .45fr) 96px;
+      gap: 8px;
+      margin-top: 12px;
+      align-items: end;
+    }
     .workflow-grid {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -581,6 +615,8 @@ def _admin_dashboard_content() -> str:
       .grid,
       .overview,
       .result-grid,
+      .split,
+      .search-form,
       .workflow-grid,
       .task-form,
       .capabilities { grid-template-columns: 1fr; }
@@ -613,6 +649,33 @@ def _admin_dashboard_content() -> str:
       <div id="overview" class="overview"></div>
       <div id="latestLinks" class="links"></div>
       <div id="latestJobResult" class="result-panel"></div>
+    </section>
+    <section class="panel">
+      <h2>数据库与语料</h2>
+      <div id="databaseOverview" class="overview"></div>
+      <div class="split">
+        <div>
+          <h3>主要分面</h3>
+          <div id="databaseFacets" class="facet-list"></div>
+        </div>
+        <div>
+          <h3>趋势摘要</h3>
+          <div id="databaseTrends" class="facet-list"></div>
+        </div>
+      </div>
+      <div class="search-form">
+        <label>语料搜索
+          <input id="corpusQuery" type="text" placeholder="agent workflow">
+        </label>
+        <label>语言
+          <input id="corpusLanguage" type="text" placeholder="Python">
+        </label>
+        <label>方向
+          <input id="corpusCategory" type="text" placeholder="AI Agent">
+        </label>
+        <button id="runCorpusSearch" type="button">搜索</button>
+      </div>
+      <div id="corpusSearchResults" class="search-results"></div>
     </section>
     <section class="panel">
       <h2>核心工作流</h2>
@@ -695,6 +758,10 @@ def _admin_dashboard_content() -> str:
     const latestJobResult = document.getElementById("latestJobResult");
     const workflowBoard = document.getElementById("workflowBoard");
     const jobWorkbench = document.getElementById("jobWorkbench");
+    const databaseOverview = document.getElementById("databaseOverview");
+    const databaseFacets = document.getElementById("databaseFacets");
+    const databaseTrends = document.getElementById("databaseTrends");
+    const corpusSearchResults = document.getElementById("corpusSearchResults");
     const adminState = { jobs: [], jobFilter: "attention" };
     const createControls = {
       profile: document.getElementById("taskProfile"),
@@ -705,10 +772,18 @@ def _admin_dashboard_content() -> str:
       button: document.getElementById("createTask"),
       status: document.getElementById("createTaskStatus"),
     };
+    const searchControls = {
+      query: document.getElementById("corpusQuery"),
+      language: document.getElementById("corpusLanguage"),
+      category: document.getElementById("corpusCategory"),
+      button: document.getElementById("runCorpusSearch"),
+    };
 
     loadHealth();
     loadOverview();
+    loadDatabaseInsights();
     setupCreateTask();
+    setupCorpusSearch();
     bindWorkbenchFilters();
     jobWorkbench.addEventListener("click", handleWorkbenchAction);
 
@@ -729,6 +804,44 @@ def _admin_dashboard_content() -> str:
       }
       createControls.status.textContent = "API 模式可创建 planned 任务；创建后进入任务详情页执行检查或运行。";
       createControls.button.addEventListener("click", createPlannedTask);
+    }
+
+    function setupCorpusSearch() {
+      if (!shouldUseApi()) {
+        searchControls.button.disabled = true;
+        corpusSearchResults.innerHTML = '<p>语料搜索需要本地后端或 api=1 模式。</p>';
+        return;
+      }
+      searchControls.button.addEventListener("click", runCorpusSearch);
+      searchControls.query.addEventListener("keydown", event => {
+        if (event.key === "Enter") runCorpusSearch();
+      });
+    }
+
+    function runCorpusSearch() {
+      const query = searchControls.query.value.trim();
+      if (!query) {
+        corpusSearchResults.innerHTML = '<p>请输入搜索关键词。</p>';
+        return;
+      }
+      const params = new URLSearchParams();
+      params.set("q", query);
+      params.set("limit", "8");
+      if (searchControls.language.value.trim()) params.set("language", searchControls.language.value.trim());
+      if (searchControls.category.value.trim()) params.set("category", searchControls.category.value.trim());
+      searchControls.button.disabled = true;
+      corpusSearchResults.innerHTML = '<p>搜索中...</p>';
+      fetch(`/v1/search?${params.toString()}`, { cache: "no-store" })
+        .then(jsonOrThrow)
+        .then(data => {
+          corpusSearchResults.innerHTML = corpusSearchHtml(data);
+        })
+        .catch(error => {
+          corpusSearchResults.innerHTML = `<p>搜索失败：${escapeHtml(error.message || error)}</p>`;
+        })
+        .finally(() => {
+          searchControls.button.disabled = false;
+        });
     }
 
     function createPlannedTask() {
@@ -802,6 +915,36 @@ def _admin_dashboard_content() -> str:
       return fetch("jobs.json", { cache: "no-store" })
         .then(jsonOrThrow)
         .catch(() => ({ jobs: [] }));
+    }
+
+    function loadDatabaseInsights() {
+      if (!shouldUseApi()) {
+        databaseOverview.innerHTML = metric("数据库模式", "静态");
+        databaseFacets.innerHTML = '<p>启动本地后端或添加 api=1 后显示数据库分面。</p>';
+        databaseTrends.innerHTML = '<p>启动本地后端或添加 api=1 后显示运行趋势。</p>';
+        return;
+      }
+      Promise.all([
+        fetch("/v1/database/summary", { cache: "no-store" }).then(jsonOrThrow),
+        fetch("/v1/database/facets?limit=6", { cache: "no-store" }).then(jsonOrThrow),
+        fetch("/v1/database/trends?limit=8", { cache: "no-store" }).then(jsonOrThrow),
+      ])
+        .then(([summary, facets, trends]) => {
+          const counts = summary.table_counts || {};
+          databaseOverview.innerHTML = [
+            metric("仓库记录", counts.repositories || 0),
+            metric("入选记录", counts.selections || 0),
+            metric("语料记录", counts.project_corpus || 0),
+            metric("订阅记录", counts.subscriptions || 0),
+          ].join("");
+          databaseFacets.innerHTML = databaseFacetsHtml(facets);
+          databaseTrends.innerHTML = databaseTrendsHtml(trends);
+        })
+        .catch(error => {
+          databaseOverview.innerHTML = metric("数据库状态", "读取失败");
+          databaseFacets.innerHTML = `<p>数据库分面读取失败：${escapeHtml(error.message || error)}</p>`;
+          databaseTrends.innerHTML = "";
+        });
     }
 
     function renderJobWorkbench() {
@@ -1006,6 +1149,53 @@ def _admin_dashboard_content() -> str:
         </div>
         <p><strong>下一步：</strong>${escapeHtml(nextAction)}</p>
         <p><strong>错误：</strong>${escapeHtml(error || "无")}</p>`;
+    }
+
+    function databaseFacetsHtml(data) {
+      const languages = (data.languages || []).slice(0, 4).map(item => facetRow(item.name, `${item.project_count || item.count || 0} 个项目`, `Star ${item.total_stars || 0}`));
+      const categories = (data.categories || []).slice(0, 4).map(item => facetRow(item.name, `${item.selection_count || item.count || 0} 次入选`, `新增 Star ${item.total_star_growth || 0}`));
+      const sources = (data.sources || []).slice(0, 3).map(item => facetRow(item.name, `${item.selection_count || 0} 次入选`, `${item.project_count || 0} 个项目`));
+      const ready = data.rag_readiness || {};
+      return [
+        '<h4>语言</h4>',
+        ...(languages.length ? languages : [facetRow("无", "-", "-")]),
+        '<h4>方向</h4>',
+        ...(categories.length ? categories : [facetRow("无", "-", "-")]),
+        '<h4>来源</h4>',
+        ...(sources.length ? sources : [facetRow("无", "-", "-")]),
+        facetRow("文本搜索", ready.ready_for_text_search ? "已准备" : "未准备", "project_corpus"),
+      ].join("");
+    }
+
+    function databaseTrendsHtml(data) {
+      const summary = data.summary || {};
+      const latest = (data.points || []).slice(-1)[0] || {};
+      return [
+        facetRow("最近运行", summary.latest_run_date || "-", summary.latest_status || "-"),
+        facetRow("总入选", summary.total_selected_count || 0, `新增 Star ${summary.total_star_growth || 0}`),
+        facetRow("Trending 命中率", percent(summary.average_trending_selected_rate), `Top10 ${latest.trending_top10_count || 0}`),
+        facetRow("推送成功", summary.telegram_sent_count || 0, `降级 ${summary.fallback_run_count || 0}`),
+      ].join("");
+    }
+
+    function corpusSearchHtml(data) {
+      const summary = (data.summary || []).map(item => `<p>${escapeHtml(item)}</p>`).join("");
+      const results = data.results || [];
+      if (!results.length) return `${summary}<p>没有搜索结果。</p>`;
+      return `${summary}${results.map(result => `<article class="search-row">
+        <strong><a href="${escapeAttribute(projectDetailUrl({ full_name: result.full_name }))}">${escapeHtml(result.full_name || "-")}</a></strong>
+        <span>${escapeHtml(result.language || "-")} · ${escapeHtml(result.category || "-")} · 分数 ${escapeHtml(result.score || 0)}</span>
+        <p>${escapeHtml(result.snippet || result.title || "")}</p>
+      </article>`).join("")}`;
+    }
+
+    function facetRow(name, value, detail) {
+      return `<div class="facet-row"><strong>${escapeHtml(name)}</strong><span>${escapeHtml(value)} · ${escapeHtml(detail)}</span></div>`;
+    }
+
+    function percent(value) {
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? `${Math.round(parsed * 100)}%` : "0%";
     }
 
     function jobNextAction(job) {
