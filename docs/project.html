@@ -247,8 +247,20 @@
       if (!shouldUseApi()) return loadStaticDetail(repo);
       return fetch(`/api/projects/${encodeURIComponentOwnerRepo(repo)}`, { cache: "no-store" })
         .then(jsonOrThrow)
-        .then(data => data && data.found ? { ...data, data_source: "后端 API" } : loadStaticDetail(repo))
+        .then(data => data && data.found ? enrichApiDetail(repo, { ...data, data_source: "后端 API" }) : loadStaticDetail(repo))
         .catch(() => loadStaticDetail(repo));
+    }
+
+    function enrichApiDetail(repo, detail) {
+      return fetch(`/api/projects/${encodeURIComponentOwnerRepo(repo)}/similar?limit=8`, { cache: "no-store" })
+        .then(jsonOrThrow)
+        .then(data => ({
+          ...detail,
+          similar_projects: Array.isArray(data.similar_projects) ? data.similar_projects : detail.similar_projects || [],
+          similar_summary: Array.isArray(data.selection_summary) ? data.selection_summary : [],
+          similar_search_engine: data.search_engine || ""
+        }))
+        .catch(() => detail);
     }
 
     function loadStaticDetail(repo) {
@@ -326,7 +338,7 @@
           <div class="section"><h2>风险提示</h2>${tags(detail.security_flags || [], "risk", "暂无风险提示")}</div>
           <div class="section"><h2>质量提示</h2>${tags(detail.quality_flags || [], "ok", "暂无质量扣分项")}</div>
           <div class="section"><h2>历史来源</h2>${tags(detail.sources || [], "", "暂无来源")}</div>
-          <div class="section"><h2>相似项目</h2>${similarHtml(detail.similar_projects || [])}</div>
+          <div class="section"><h2>相似项目</h2>${similarHtml(detail.similar_projects || [], detail.similar_summary || [])}</div>
         </section>
         <section class="section" style="margin-top:12px">
           <h2>历史趋势</h2>
@@ -403,9 +415,16 @@
       return summary;
     }
 
-    function similarHtml(projects) {
+    function similarHtml(projects, summary) {
       if (!projects.length) return "<p>暂无相似历史项目。</p>";
-      return `<ul>${projects.map(project => `<li><a href="project.html?repo=${encodeURIComponent(project.full_name || "")}">${escapeHtml(project.full_name || "")}</a> <span>${escapeHtml(project.language || "Unknown")} / ${escapeHtml(project.category || "Other")} / 新增 Star ${number(project.star_growth)}</span></li>`).join("")}</ul>`;
+      const summaryHtml = Array.isArray(summary) && summary.length ? `<p class="desc">${escapeHtml(summary[0])}</p>` : "";
+      return `${summaryHtml}<ul>${projects.map(project => {
+        const reasons = Array.isArray(project.similarity_reasons) && project.similarity_reasons.length
+          ? `<br><span>${escapeHtml(project.similarity_reasons.join("；"))}</span>`
+          : "";
+        const score = project.similarity_score ? ` / 相似度 ${number(project.similarity_score)}` : "";
+        return `<li><a href="project.html?repo=${encodeURIComponent(project.full_name || "")}${shouldUseApi() ? "&api=1" : ""}">${escapeHtml(project.full_name || "")}</a> <span>${escapeHtml(project.language || "Unknown")} / ${escapeHtml(project.category || "Other")} / 新增 Star ${number(project.star_growth)}${score}</span>${reasons}</li>`;
+      }).join("")}</ul>`;
     }
 
     function listHtml(items, emptyText) {

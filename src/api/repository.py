@@ -227,35 +227,34 @@ class ApiRepository:
 
         latest = detail["history"][0] if detail.get("history") else detail
         query = _similarity_query(latest)
-        search = self.search(
-            query=query,
-            language=_blank_to_none(str(latest.get("language") or "")),
-            category=_blank_to_none(str(latest.get("category") or "")),
-            limit=max(limit * 4, 20),
-        )
-        candidates = _rank_similar_search_results(
-            latest,
-            search.get("results") or [],
-            exclude_full_name=normalized,
-        )
-        if len(candidates) < limit:
-            fallback = self.search(query=query, limit=max(limit * 5, 30))
+        candidate_results = []
+        search_engines = []
+        for attempt in _similarity_search_attempts(latest):
+            search = self.search(
+                query=attempt["query"],
+                language=attempt["language"],
+                category=attempt["category"],
+                limit=max(limit * 5, 30),
+            )
+            candidate_results.extend(search.get("results") or [])
+            if search.get("search_engine"):
+                search_engines.append(str(search.get("search_engine")))
             candidates = _rank_similar_search_results(
                 latest,
-                [*candidates, *(fallback.get("results") or [])],
+                candidate_results,
                 exclude_full_name=normalized,
             )
-            search_engine = f"{search.get('search_engine') or 'unknown'}+{fallback.get('search_engine') or 'unknown'}"
-        else:
-            search_engine = str(search.get("search_engine") or "")
+            if len(_dedupe_search_results(candidates)) >= limit:
+                break
 
+        candidates = _rank_similar_search_results(latest, candidate_results, exclude_full_name=normalized)
         similar = _dedupe_search_results(candidates)[:limit]
         return {
             "schema_version": 1,
             "found": True,
             "full_name": detail.get("full_name") or normalized,
             "query": query,
-            "search_engine": search_engine,
+            "search_engine": "+".join(_unique_strings(search_engines)),
             "count": len(similar),
             "source_project": {
                 "full_name": detail.get("full_name") or normalized,
@@ -1690,6 +1689,31 @@ def _similarity_query(project: dict[str, Any]) -> str:
         seen.add(key)
         ordered.append(cleaned)
     return " ".join(ordered[:2]) or str(project.get("full_name") or "")
+
+
+def _similarity_search_attempts(project: dict[str, Any]) -> list[dict[str, str | None]]:
+    language = _blank_to_none(str(project.get("language") or ""))
+    category = _blank_to_none(str(project.get("category") or ""))
+    primary = _similarity_query(project)
+    first_keyword = _search_terms(primary)[0] if _search_terms(primary) else ""
+    attempts = [
+        {"query": primary, "language": language, "category": category},
+        {"query": category or primary, "language": None, "category": category},
+        {"query": language or primary, "language": language, "category": None},
+        {"query": first_keyword or category or language or primary, "language": None, "category": None},
+    ]
+    unique_attempts = []
+    seen = set()
+    for attempt in attempts:
+        query = str(attempt.get("query") or "").strip()
+        if not query:
+            continue
+        key = (query.lower(), attempt.get("language") or "", attempt.get("category") or "")
+        if key in seen:
+            continue
+        seen.add(key)
+        unique_attempts.append(attempt)
+    return unique_attempts
 
 
 def _rank_similar_search_results(
