@@ -29,6 +29,7 @@
 | `capabilities.database_trends` | 是否支持 SQLite 运行趋势查询 |
 | `capabilities.database_facets` | 是否支持 SQLite 分面统计查询 |
 | `capabilities.project_search` | 是否支持项目语料搜索 |
+| `capabilities.project_similarity` | 是否支持相似项目候选召回 |
 | `capabilities.runs_query` | 是否支持运行记录 |
 | `capabilities.jobs_query` | 是否支持任务查询 |
 | `capabilities.job_events` | 是否支持任务审计事件查询 |
@@ -165,6 +166,28 @@
 基于 SQLite `project_corpus` 派生语料表搜索历史入选项目。当前优先使用 SQLite FTS5，FTS 不可用时自动回退到普通文本匹配。参数包括 `q`、`language`、`category`、`source` 和 `limit`。
 
 该接口是 RAG 的前置层：先把 README 摘要、项目描述、推荐理由、语言、方向和来源统一成可检索语料，再逐步升级到 Embedding、向量库或 LangChain 编排。当前版本不调用外部模型，也不写入密钥。
+
+### `GET /v1/projects/{owner}/{repo}/similar`
+
+基于项目详情和 `project_corpus` 语料索引生成相似项目候选。接口会自动提取项目名称、简介、方向和历史入选信息中的关键词，优先通过 SQLite FTS5 召回候选，再综合同语言、同方向、同来源、关键词重合、Trending 排名和新增 Star 生成可解释排序。
+
+查询参数：
+
+| 参数 | 说明 |
+|---|---|
+| `limit` | 返回候选数量，默认 10，最大 50 |
+
+响应字段：
+
+| 字段 | 说明 |
+|---|---|
+| `source_project` | 被查询项目的基础信息 |
+| `similar_projects` | 相似项目候选列表 |
+| `similarity_score` | 候选相似度分 |
+| `similarity_reasons` | 同语言、同方向、同来源、关键词和热度等解释 |
+| `search_engine` | 候选召回使用的检索引擎 |
+
+该接口是 RAG/个性化推荐的候选池层，不调用外部模型，不读写密钥。后续可以在该接口结果上增加 Embedding 重排、LangChain 编排、用户反馈权重和模型生成解释。
 
 ### `GET /v1/jobs`
 

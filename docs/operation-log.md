@@ -2,6 +2,25 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-05-21 追加：新增相似项目候选接口
+
+### 1. 开发目的
+
+项目已经具备 FTS5 语料搜索能力，但后续 RAG、个性化推荐和项目对比不能只停留在关键词搜索。需要先提供一个稳定的“相似项目候选召回”接口，把同语言、同方向、同来源、关键词重合和历史热度综合起来，为后续向量检索和模型总结提供候选池。
+
+### 2. 修改内容
+
+1. 后端新增 `GET /v1/projects/{owner}/{repo}/similar`，支持 `limit` 参数。
+2. 兼容新增 `GET /api/projects/{owner}/{repo}/similar`。
+3. 接口会读取项目详情，自动构造检索词，优先通过 SQLite FTS5 语料索引召回候选。
+4. 候选排序综合基础搜索分、同语言、同方向、同来源、关键词重合、Trending 排名和新增 Star。
+5. 响应新增 `similarity_score` 和 `similarity_reasons`，便于前端解释为什么相似。
+6. `/v1/health` 新增 `project_similarity` 能力标识。
+
+### 3. 边界说明
+
+该能力只读取本地 SQLite 和公开归档字段，不调用 Kimi、GitHub、Embedding、Telegram 或任何外部服务。当前是 RAG 前置候选层，不做最终语义总结；后续可以在该接口之后接入 Embedding、向量库、LangChain 或模型重排。
+
 ## 2026-05-20 追加：项目语料搜索升级为 FTS5
 
 ### 1. 开发目的

@@ -46,10 +46,6 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
             sort=sort,
         )
 
-    @app.get("/api/projects/{owner}/{repo}")
-    def project_detail(owner: str, repo: str) -> dict[str, Any]:
-        return repository.project_detail(f"{owner}/{repo}")
-
     @app.get("/api/recommendations")
     def recommendations(
         language: str | None = None,
@@ -67,6 +63,14 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
             limit=limit,
             sort=sort,
         )
+
+    @app.get("/api/projects/{owner}/{repo}/similar")
+    def project_similar(owner: str, repo: str, limit: int = Query(default=10, ge=1, le=50)) -> dict[str, Any]:
+        return repository.similar_projects(f"{owner}/{repo}", limit=limit)
+
+    @app.get("/api/projects/{owner}/{repo}")
+    def project_detail(owner: str, repo: str) -> dict[str, Any]:
+        return repository.project_detail(f"{owner}/{repo}")
 
     @app.get("/api/runs")
     def runs() -> dict[str, Any]:
@@ -124,10 +128,6 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
             sort=sort,
         )
 
-    @app.get("/v1/projects/{owner}/{repo}")
-    def v1_project_detail(owner: str, repo: str) -> dict[str, Any]:
-        return repository.project_detail(f"{owner}/{repo}")
-
     @app.get("/v1/recommendations")
     def v1_recommendations(
         language: str | None = None,
@@ -145,6 +145,14 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
             limit=limit,
             sort=sort,
         )
+
+    @app.get("/v1/projects/{owner}/{repo}/similar")
+    def v1_project_similar(owner: str, repo: str, limit: int = Query(default=10, ge=1, le=50)) -> dict[str, Any]:
+        return repository.similar_projects(f"{owner}/{repo}", limit=limit)
+
+    @app.get("/v1/projects/{owner}/{repo}")
+    def v1_project_detail(owner: str, repo: str) -> dict[str, Any]:
+        return repository.project_detail(f"{owner}/{repo}")
 
     @app.get("/v1/search")
     def v1_search(

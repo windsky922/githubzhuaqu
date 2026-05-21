@@ -205,6 +205,31 @@ http://127.0.0.1:8000/admin.html?api=1
 /v1/search?q=agent%20workflow&language=Python&limit=10
 ```
 
+### `GET /v1/projects/{owner}/{repo}/similar`
+
+基于单项目详情和 `project_corpus` 语料索引生成相似项目候选。该接口优先使用 SQLite FTS5 召回候选，再结合语言、方向、来源、关键词重合、Trending 排名和新增 Star 计算 `similarity_score`。
+
+支持参数：
+
+| 参数 | 说明 |
+|---|---|
+| `limit` | 返回相似候选数量，默认 10，最大 50 |
+
+返回内容包括：
+
+1. `source_project`：被查询项目的基础信息。
+2. `similar_projects`：相似项目候选，包含 `similarity_score` 和 `similarity_reasons`。
+3. `search_engine`：本次候选召回使用的检索引擎。
+4. `selection_summary`：候选生成摘要。
+
+示例：
+
+```text
+/v1/projects/owner/agent/similar?limit=10
+```
+
+该接口只读取本地公开归档数据，不调用外部模型或外部服务。它是后续 RAG、向量检索、项目对比和个性化推荐重排的前置候选层。
+
 ### `GET /api/profiles`
 
 返回公开个性化方向，数据来源为 `docs/profiles.json`。

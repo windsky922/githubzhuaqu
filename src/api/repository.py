@@ -55,6 +55,7 @@ class ApiRepository:
                 "database_trends": True,
                 "database_facets": True,
                 "project_search": True,
+                "project_similarity": True,
                 "runs_query": True,
                 "jobs_query": True,
                 "job_events": True,
@@ -205,6 +206,67 @@ class ApiRepository:
             "count": len(results),
             "results": results,
             "summary": _search_summary(results, terms),
+        }
+
+    def similar_projects(self, full_name: str, *, limit: int = 10) -> dict[str, Any]:
+        detail = self.project_detail(full_name)
+        normalized = _normalize_full_name(full_name)
+        limit = max(1, min(int(limit or 10), 50))
+        if not detail.get("found"):
+            return {
+                "schema_version": 1,
+                "found": False,
+                "full_name": normalized,
+                "query": "",
+                "search_engine": "",
+                "count": 0,
+                "source_project": {},
+                "similar_projects": [],
+                "selection_summary": ["项目不存在，无法生成相似项目候选。"],
+            }
+
+        latest = detail["history"][0] if detail.get("history") else detail
+        query = _similarity_query(latest)
+        search = self.search(
+            query=query,
+            language=_blank_to_none(str(latest.get("language") or "")),
+            category=_blank_to_none(str(latest.get("category") or "")),
+            limit=max(limit * 4, 20),
+        )
+        candidates = _rank_similar_search_results(
+            latest,
+            search.get("results") or [],
+            exclude_full_name=normalized,
+        )
+        if len(candidates) < limit:
+            fallback = self.search(query=query, limit=max(limit * 5, 30))
+            candidates = _rank_similar_search_results(
+                latest,
+                [*candidates, *(fallback.get("results") or [])],
+                exclude_full_name=normalized,
+            )
+            search_engine = f"{search.get('search_engine') or 'unknown'}+{fallback.get('search_engine') or 'unknown'}"
+        else:
+            search_engine = str(search.get("search_engine") or "")
+
+        similar = _dedupe_search_results(candidates)[:limit]
+        return {
+            "schema_version": 1,
+            "found": True,
+            "full_name": detail.get("full_name") or normalized,
+            "query": query,
+            "search_engine": search_engine,
+            "count": len(similar),
+            "source_project": {
+                "full_name": detail.get("full_name") or normalized,
+                "html_url": detail.get("html_url") or "",
+                "description": detail.get("description") or "",
+                "language": detail.get("language") or "",
+                "category": detail.get("category") or "",
+                "sources": detail.get("sources") or [],
+            },
+            "similar_projects": similar,
+            "selection_summary": _similarity_summary(detail, similar),
         }
 
     def subscription_recommendations(self, subscription_id: str, *, limit: int | None = None) -> dict[str, Any]:
@@ -1607,6 +1669,95 @@ def _dedupe_search_results(results: list[dict[str, Any]]) -> list[dict[str, Any]
         seen.add(full_name)
         deduped.append(result)
     return deduped
+
+
+def _similarity_query(project: dict[str, Any]) -> str:
+    keywords = sorted(_project_keywords(project))
+    priority = []
+    for value in [
+        str(project.get("full_name") or "").split("/")[-1],
+        str(project.get("category") or ""),
+        str(project.get("description") or ""),
+    ]:
+        priority.extend(_search_terms(value.replace("-", " ").replace("_", " ")))
+    ordered = []
+    seen = set()
+    for term in [*priority, *keywords]:
+        cleaned = term.strip()
+        key = cleaned.lower()
+        if len(cleaned) < 3 or key in seen:
+            continue
+        seen.add(key)
+        ordered.append(cleaned)
+    return " ".join(ordered[:2]) or str(project.get("full_name") or "")
+
+
+def _rank_similar_search_results(
+    base: dict[str, Any],
+    results: list[dict[str, Any]],
+    *,
+    exclude_full_name: str,
+) -> list[dict[str, Any]]:
+    ranked = []
+    for result in results:
+        full_name = str(result.get("full_name") or "")
+        if not full_name or full_name.lower() == exclude_full_name.lower():
+            continue
+        item = dict(result)
+        score, reasons = _similar_search_score(base, item)
+        item["similarity_score"] = score
+        item["similarity_reasons"] = reasons
+        ranked.append(item)
+    return sorted(
+        ranked,
+        key=lambda item: (
+            _int_value(item.get("similarity_score")),
+            _int_value(item.get("star_growth")),
+            -_rank_value(item.get("trending_rank")),
+            str(item.get("run_date") or ""),
+            str(item.get("full_name") or ""),
+        ),
+        reverse=True,
+    )
+
+
+def _similar_search_score(base: dict[str, Any], candidate: dict[str, Any]) -> tuple[int, list[str]]:
+    score = _int_value(candidate.get("score"))
+    reasons = []
+    if base.get("language") and base.get("language") == candidate.get("language"):
+        score += 20
+        reasons.append(f"同为 {base.get('language')} 项目")
+    if base.get("category") and base.get("category") == candidate.get("category"):
+        score += 24
+        reasons.append(f"同属 {base.get('category')} 方向")
+    source_overlap = set(base.get("sources") or []) & set(candidate.get("sources") or [])
+    if source_overlap:
+        score += 8 * len(source_overlap)
+        reasons.append(f"来源重合：{'、'.join(sorted(source_overlap))}")
+    shared_keywords = sorted((_project_keywords(base) & _project_keywords(candidate)))[:4]
+    if shared_keywords:
+        score += 6 * len(shared_keywords)
+        reasons.append(f"关键词重合：{'、'.join(shared_keywords)}")
+    if _int_value(candidate.get("trending_rank")):
+        score += max(1, 12 - min(_int_value(candidate.get("trending_rank")), 10))
+        reasons.append(f"进入 Trending 第 {_int_value(candidate.get('trending_rank'))} 位")
+    if _int_value(candidate.get("star_growth")):
+        score += min(12, _int_value(candidate.get("star_growth")) // 10)
+        reasons.append(f"新增 Star {_int_value(candidate.get('star_growth'))}")
+    return score, reasons[:5]
+
+
+def _similarity_summary(detail: dict[str, Any], similar: list[dict[str, Any]]) -> list[str]:
+    if not similar:
+        return ["暂未找到足够相似的历史项目候选。"]
+    language = detail.get("language") or "unknown"
+    category = detail.get("category") or "Other"
+    top = similar[0]
+    return [
+        f"基于项目名称、简介、方向、语言、来源和历史热度召回 {len(similar)} 个相似候选。",
+        f"优先匹配同语言 {language}、同方向 {category} 的历史入选项目。",
+        f"当前最相似候选为 {top.get('full_name') or ''}，相似度分 {top.get('similarity_score') or 0}。",
+    ]
 
 
 def _snippet(text: str, terms: list[str], size: int = 180) -> str:
