@@ -34,6 +34,14 @@ py -m uvicorn src.api.app:app --reload
 http://127.0.0.1:8000/api/health
 ```
 
+本地管理首页：
+
+```text
+http://127.0.0.1:8000/admin.html?api=1
+```
+
+根路径 `http://127.0.0.1:8000/` 会跳转到管理首页。`/v1/*` 路径是 JSON API，例如 `/v1/jobs?limit=50` 返回机器可读任务数据，不是 HTML 页面。
+
 如果本地没有 `data/github_weekly.sqlite`，查询项目接口会从 `data/` 下的 JSON 归档自动重建 SQLite 派生索引。
 
 ## 三、接口
@@ -74,9 +82,10 @@ http://127.0.0.1:8000/api/health
 2. 历史入选次数。
 3. 累计新增 Star。
 4. 最好 GitHub Trending 排名。
-5. 历史来源、质量提示和风险提示。
-6. 最近一次完整项目记录。
-7. 相似历史项目列表。
+5. 推荐理由和趋势判断。
+6. 历史来源、质量提示和风险提示。
+7. 最近一次完整项目记录。
+8. 相似历史项目列表。
 
 示例：
 
@@ -86,9 +95,140 @@ http://127.0.0.1:8000/api/health
 
 这个接口用于后续项目详情页、项目对比、相似项目推荐和个性化订阅解释。
 
+### `GET /api/recommendations`
+
+返回面向用户选择场景的推荐项目列表。它复用历史归档、SQLite 派生索引和 profile 过滤逻辑，但响应字段更适合推荐页直接展示。
+
+支持参数：
+
+| 参数 | 说明 |
+|---|---|
+| `profile` | 个性化方向，例如 `agent_development`、`python`、`java` |
+| `language` | 主要语言，例如 `Python`、`Java`、`TypeScript` |
+| `category` | 项目方向，例如 `AI Agent`、`Developer Tools`、`Backend` |
+| `query` | 关键词，匹配项目名、简介、方向和推荐理由 |
+| `limit` | 返回数量，范围 1 到 200 |
+| `sort` | `score`、`trending`、`star-growth`、`quality`、`recent` 等 |
+
+示例：
+
+```text
+/api/recommendations?profile=agent_development&language=Python&limit=20
+```
+
+返回内容包含：
+
+1. `recommendations`：推荐项目数组。
+2. `selection_summary`：本次推荐的筛选条件、命中数量、Trending 命中和首选项目说明。
+3. `profile`、`language`、`category`、`query`：前端回显当前筛选条件。
+
+对应的 v1 入口为：
+
+```text
+/v1/recommendations?profile=agent_development&limit=20
+```
+
 ### `GET /api/runs`
 
 返回公开运行记录，数据来源为 `docs/runs.json`。
+
+### `GET /v1/database/summary`
+
+返回 SQLite 派生索引的数据库概览，用于本地管理台、数据健康检查和后续 RAG 索引准备。该接口会返回：
+
+1. `table_counts`：`runs`、`repositories`、`selections`、`jobs`、`job_events`、`subscriptions` 等表的记录数。
+2. `latest_run` 和 `latest_job`：最近一次运行和最近一个任务。
+3. `job_status_counts` 和 `subscription_status_counts`：任务状态和订阅状态分布。
+4. `top_languages` 和 `top_categories`：当前归档中主要语言和项目方向分布。
+5. `recent_events`：最近 10 条任务审计事件。
+6. `rag_readiness`：后续构建文本索引或向量检索前的基础数据量提示。
+
+该接口只读取本地 SQLite 统计摘要，不返回密钥、Webhook、请求头或完整原始载荷。
+
+### `GET /v1/database/trends`
+
+返回近 N 次运行的数据库趋势点，用于观察周报质量、数据变化和后续推荐特征。支持参数：
+
+| 参数 | 说明 |
+|---|---|
+| `limit` | 返回最近运行数量，默认 20，最大 100 |
+
+返回内容包括：
+
+1. `points`：按时间升序排列的运行趋势点，包含入选数量、采集数量、新增 Star、Trending 命中率、Top10 命中数量、Kimi/降级/推送状态。
+2. `summary`：聚合摘要，包含总入选数量、总新增 Star、平均 Trending 命中率、失败运行数、降级运行数和推送成功数。
+
+该接口只做统计读取，不调用 GitHub、Kimi、Telegram 或任何外部服务。
+
+### `GET /v1/database/facets`
+
+返回数据库分面统计，用于前端筛选、个性化推荐和后续 RAG 索引建设。支持参数：
+
+| 参数 | 说明 |
+|---|---|
+| `limit` | 每类分面最多返回数量，默认 20，最大 100 |
+
+返回内容包括：
+
+1. `languages`：按语言聚合项目数量、总 Star、总 Fork 和最近推送时间。
+2. `categories`：按项目方向聚合入选次数、项目数、新增 Star、平均分和 Trending Top10 命中率。
+3. `sources`：按来源聚合入选次数和项目数，例如 `github_trending`、`github_search`。
+4. `quality_levels` 和 `risk_levels`：从入选项目载荷中提取质量等级和风险状态。
+5. `subscriptions`：统计本地订阅的状态、profile、语言和方向分布。
+6. `rag_readiness`：提示当前分面数据是否足够支撑个性化筛选和后续文本索引。
+
+该接口只读取 SQLite 中的公开归档字段，不返回密钥、Webhook、请求头或完整原始载荷。
+
+### `GET /v1/search`
+
+读取 SQLite 派生的 `project_corpus` 语料表，按关键词搜索历史入选项目。当前优先使用 SQLite FTS5，FTS 不可用时自动回退到普通 SQL 文本匹配；不调用模型、不调用外部服务，后续可以平滑升级为向量检索或 RAG。
+
+支持参数：
+
+| 参数 | 说明 |
+|---|---|
+| `q` | 必填，搜索关键词，多个词用空格分隔 |
+| `language` | 可选，按语言过滤 |
+| `category` | 可选，按项目方向过滤 |
+| `source` | 可选，按来源过滤，例如 `github_trending` |
+| `limit` | 返回数量，默认 20，最大 100 |
+
+返回内容包括：
+
+1. `results`：搜索结果数组，包含项目名、链接、语言、方向、来源、命中片段、质量等级、Trending 排名和新增 Star。
+2. `search_engine`：本次使用的搜索引擎，通常为 `fts5`，回退时为 `like`。
+3. `summary`：本次搜索的命中数量、主要语言和主要方向。
+
+示例：
+
+```text
+/v1/search?q=agent%20workflow&language=Python&limit=10
+```
+
+### `GET /v1/projects/{owner}/{repo}/similar`
+
+基于单项目详情和 `project_corpus` 语料索引生成相似项目候选。该接口优先使用 SQLite FTS5 召回候选，再结合语言、方向、来源、关键词重合、Trending 排名和新增 Star 计算 `similarity_score`。
+
+支持参数：
+
+| 参数 | 说明 |
+|---|---|
+| `limit` | 返回相似候选数量，默认 10，最大 50 |
+
+返回内容包括：
+
+1. `source_project`：被查询项目的基础信息。
+2. `similar_projects`：相似项目候选，包含 `similarity_score` 和 `similarity_reasons`。
+3. `search_engine`：本次候选召回使用的检索引擎。
+4. `selection_summary`：候选生成摘要。
+
+示例：
+
+```text
+/v1/projects/owner/agent/similar?limit=10
+```
+
+该接口只读取本地公开归档数据，不调用外部模型或外部服务。它是后续 RAG、向量检索、项目对比和个性化推荐重排的前置候选层。
 
 ### `GET /api/profiles`
 
@@ -97,6 +237,58 @@ http://127.0.0.1:8000/api/health
 ### `GET /api/weekly/latest`
 
 返回最新 Markdown 周报正文、运行日期、周报页面路径和对应运行摘要。这个接口主要用于后续后台管理页、移动端入口或调试页面。
+
+### `/v1` 订阅接口
+
+订阅接口用于保存本地个性化偏好，后续精准推送和多用户订阅可以复用这个入口。当前订阅只保存筛选条件和通道名称，不保存 Token、Chat ID、Webhook 或请求头。
+
+推送消息会使用这些订阅生成推荐入口：如果 SQLite 中存在启用订阅，Telegram、飞书和企业微信消息会追加最多 3 个 `recommendations.html` 个性化推荐链接。没有订阅时，消息仍只发送周报正文、项目筛选、运行状态和订阅配置页入口。
+
+周报正文也会读取启用订阅生成“订阅推荐分区”。该分区只基于本期已经入选的项目做二次筛选，不改变采集、评分和入选逻辑。
+
+当前支持：
+
+1. `GET /v1/subscriptions`：查询订阅列表。
+2. `POST /v1/subscriptions`：创建订阅。
+3. `PATCH /v1/subscriptions/{subscription_id}`：更新订阅条件或启停状态。
+4. `GET /v1/subscriptions/{subscription_id}/recommendations`：按订阅编号预览推荐结果。
+
+订阅字段包括：
+
+| 字段 | 说明 |
+|---|---|
+| `name` | 订阅名称 |
+| `status` | `enabled` 或 `disabled` |
+| `profile` | 个性化方向 |
+| `language` | 主要语言 |
+| `category` | 项目方向 |
+| `query` | 关键词 |
+| `sort` | 推荐排序方式 |
+| `limit` | 推荐数量 |
+| `channels` | 推送通道名称，例如 `telegram`、`feishu`、`wecom` |
+
+示例：
+
+```text
+POST /v1/subscriptions
+```
+
+```json
+{
+  "name": "Agent 开发订阅",
+  "profile": "agent_development",
+  "language": "Python",
+  "channels": ["telegram"]
+}
+```
+
+预览某个订阅的推荐结果：
+
+```text
+GET /v1/subscriptions/sub:xxxx/recommendations?limit=10
+```
+
+该接口会复用 `/v1/recommendations` 的筛选和排序逻辑，只把订阅保存的 profile、语言、方向、关键词和排序条件作为输入，不读取任何推送密钥。
 
 ### `/v1` 任务接口
 
@@ -138,6 +330,33 @@ explorer.html?api=0&profile=python
 ```text
 project.html?repo=owner/agent
 project.html?repo=owner/agent&api=1
+```
+
+`docs/recommendations.html` 是个性化推荐页：
+
+1. 本地后端或 URL 带 `api=1` 时优先读取 `/v1/recommendations`。
+2. GitHub Pages 静态模式下读取 `projects.json` 并在浏览器中完成基础筛选和排序。
+3. 页面预留 Agent 开发、Python、Java、后端、前端、AI 工具等快捷方向，后续可以接入用户订阅数据库。
+
+示例：
+
+```text
+recommendations.html?api=1&profile=agent_development
+recommendations.html?api=0&language=Java&q=spring
+```
+
+`docs/subscriptions.html` 是订阅配置页：
+
+1. 本地后端或 URL 带 `api=1` 时读取 `/v1/subscriptions`。
+2. 支持创建订阅，并通过 `PATCH /v1/subscriptions/{subscription_id}` 启用或停用订阅。
+3. 支持调用 `/v1/subscriptions/{subscription_id}/recommendations` 在当前页面预览该订阅命中的推荐项目。
+4. 静态 GitHub Pages 模式只展示说明，不写入任何配置。
+
+示例：
+
+```text
+subscriptions.html?api=1
+subscriptions.html?api=1&profile=agent_development
 ```
 
 ## 五、后续扩展

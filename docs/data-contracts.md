@@ -215,11 +215,14 @@ report_url
 runs
 repositories
 selections
+project_corpus
+project_corpus_fts
 trend_summaries
 sent_repositories
 star_history
 jobs
 job_events
+subscriptions
 migration_meta
 ```
 
@@ -228,12 +231,15 @@ migration_meta
 1. `runs` 保存运行摘要索引。
 2. `repositories` 保存仓库基础信息。
 3. `selections` 保存每次运行入选项目及排序信息。
-4. `trend_summaries` 保存趋势摘要。
-5. `sent_repositories` 保存已推送仓库状态。
-6. `star_history` 保存 Star 历史。
-7. `jobs` 保存历史周报任务和触发预览任务状态。
-8. `job_events` 保存任务创建、重复命中、执行请求、执行阻止和执行完成等审计事件。
-9. `migration_meta` 保存迁移元数据。
+4. `project_corpus` 保存从入选项目派生的公开文本语料，用于本地搜索、后续向量检索和 RAG。
+5. `project_corpus_fts` 保存 `project_corpus` 的 SQLite FTS5 搜索索引，可由派生语料重建。
+6. `trend_summaries` 保存趋势摘要。
+7. `sent_repositories` 保存已推送仓库状态。
+8. `star_history` 保存 Star 历史。
+9. `jobs` 保存历史周报任务和触发预览任务状态。
+10. `job_events` 保存任务创建、重复命中、执行请求、执行阻止和执行完成等审计事件。
+11. `subscriptions` 保存本地订阅偏好，只记录筛选条件和通道名称，不记录 Token、Chat ID 或 Webhook。
+12. `migration_meta` 保存迁移元数据。
 
 当前只读查询入口位于：
 

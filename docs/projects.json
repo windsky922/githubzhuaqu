@@ -1,7 +1,627 @@
 {
   "schema_version": 1,
-  "count": 120,
+  "count": 140,
   "projects": [
+    {
+      "run_date": "2026-05-25",
+      "full_name": "colbymchenry/codegraph",
+      "html_url": "https://github.com/colbymchenry/codegraph",
+      "description": "Pre-indexed code knowledge graph for Claude Code, Codex, Cursor, OpenCode, and Hermes Agent — fewer tokens, fewer tool calls, 100% local",
+      "readme_summary": "~35% cheaper · ~70% fewer tool calls · 100% local** No Node.js required** — one command grabs the right build for your OS: Already have Node? Use npm instead (works on any version): CodeGraph bundles its own runtime — nothing to compile, no native build, works the same everywhere.",
+      "category": "AI Agent",
+      "language": "TypeScript",
+      "stargazers_count": 22469,
+      "forks_count": 1242,
+      "star_growth": 0,
+      "score": 0.5131,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 1,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 1 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Agent 开发、开发者工具。",
+        "当前累计 Star 22469，具备一定社区关注度。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+      ],
+      "quality_score": 92,
+      "quality_level": "high",
+      "report_url": "weekly/2026-05-25.html"
+    },
+    {
+      "run_date": "2026-05-25",
+      "full_name": "tinyhumansai/openhuman",
+      "html_url": "https://github.com/tinyhumansai/openhuman",
+      "description": "Your Personal AI super intelligence. Private, Simple and extremely powerful.",
+      "readme_summary": "OpenHuman OpenHuman is your Personal AI super intelligence: local memory, managed services where needed, simple and powerful. 🇺🇸 English | 🇨🇳 简体中文 | 🇯🇵 日本語 | 🇰🇷 한국어 | 🇩🇪 Deutsch Early Beta**: Under active development. Expect rough edges.",
+      "category": "Other",
+      "language": "Rust",
+      "stargazers_count": 27234,
+      "forks_count": 2526,
+      "star_growth": 0,
+      "score": 0.4904,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 2,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 2 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、开发者工具。",
+        "当前累计 Star 27234，具备一定社区关注度。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+      ],
+      "quality_score": 92,
+      "quality_level": "high",
+      "report_url": "weekly/2026-05-25.html"
+    },
+    {
+      "run_date": "2026-05-25",
+      "full_name": "Imbad0202/academic-research-skills",
+      "html_url": "https://github.com/Imbad0202/academic-research-skills",
+      "description": "Academic Research Skills for Claude Code: research → write → review → revise → finalize",
+      "readme_summary": "简体中文版 | 繁體中文版 | 日本語版 A comprehensive suite of Claude Code skills for academic research, covering the full pipeline from research to publication.",
+      "category": "LLM Tooling",
+      "language": "Python",
+      "stargazers_count": 20701,
+      "forks_count": 1763,
+      "star_growth": 11215,
+      "score": 0.7644,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 3,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 3 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 11215，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-05-25.html"
+    },
+    {
+      "run_date": "2026-05-25",
+      "full_name": "rohitg00/ai-engineering-from-scratch",
+      "html_url": "https://github.com/rohitg00/ai-engineering-from-scratch",
+      "description": "Learn it. Build it. Ship it for others.",
+      "readme_summary": "% of students already use AI tools. Only 18% feel prepared to use them professionally.** This curriculum closes that gap. Python, TypeScript, Rust, Julia.",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 16363,
+      "forks_count": 2887,
+      "star_growth": 0,
+      "score": 0.6396,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 4,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 4 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 16363，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-05-25.html"
+    },
+    {
+      "run_date": "2026-05-25",
+      "full_name": "ruvnet/RuView",
+      "html_url": "https://github.com/ruvnet/RuView",
+      "description": "π RuView turns commodity WiFi signals into real-time spatial intelligence, vital sign monitoring, and presence detection — all without a single pixel of video.",
+      "readme_summary": "Beta Software** — Under active development. APIs and firmware may change.",
+      "category": "AI Agent",
+      "language": "Rust",
+      "stargazers_count": 65464,
+      "forks_count": 8656,
+      "star_growth": 6201,
+      "score": 0.6209,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 5,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 5 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 6201，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-05-25.html"
+    },
+    {
+      "run_date": "2026-05-25",
+      "full_name": "rohitg00/agentmemory",
+      "html_url": "https://github.com/rohitg00/agentmemory",
+      "description": "#1 Persistent memory for AI coding agents based on real-world benchmarks",
+      "readme_summary": "Your coding agent remembers everything. No more re-explaining. Built on iii engine Persistent memory for Claude Code, Cursor, Gemini CLI, Codex CLI, Hermes, OpenClaw, pi, OpenCode, and any MCP client.",
+      "category": "AI Agent",
+      "language": "TypeScript",
+      "stargazers_count": 17417,
+      "forks_count": 1424,
+      "star_growth": 6004,
+      "score": 0.7004,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 6,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 6 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 6004，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-05-25.html"
+    },
+    {
+      "run_date": "2026-05-25",
+      "full_name": "Lum1104/Understand-Anything",
+      "html_url": "https://github.com/Lum1104/Understand-Anything",
+      "description": "Graphs that teach > graphs that impress. Turn any code into an interactive knowledge graph you can explore, search, and ask questions about. Works with Claude Code, Codex, Cursor, Copilot, Gemini CLI, and more.",
+      "readme_summary": "Understand Anything Turn any codebase, knowledge base, or docs into an interactive knowledge graph you can explore, search, and ask questions about. Works with Claude Code, Codex, Cursor, Copilot, Gemini CLI, and more.",
+      "category": "AI Agent",
+      "language": "TypeScript",
+      "stargazers_count": 26585,
+      "forks_count": 2282,
+      "star_growth": 0,
+      "score": 0.4452,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 7,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 7 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 26585，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-05-25.html"
+    },
+    {
+      "run_date": "2026-05-25",
+      "full_name": "CloakHQ/CloakBrowser",
+      "html_url": "https://github.com/CloakHQ/CloakBrowser",
+      "description": "Stealth Chromium that passes every bot detection test. Drop-in Playwright replacement with source-level fingerprint patches. 30/30 tests passed.",
+      "readme_summary": "Stealth Chromium that passes every bot detection test. Not a patched config. Not a JS injection.",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 20420,
+      "forks_count": 1613,
+      "star_growth": 6516,
+      "score": 0.5529,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 8,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 8 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 6516，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-05-25.html"
+    },
+    {
+      "run_date": "2026-05-25",
+      "full_name": "datawhalechina/easy-vibe",
+      "html_url": "https://github.com/datawhalechina/easy-vibe",
+      "description": "💻 vibe coding 2026 | Your first modern Coding course for beginners to master step by step.",
+      "readme_summary": "Jump right in and vibe together — if you can talk, you can build apps. 直接上手，一起 vibe！会说话就会做应用。 你好 · Hello · 哈囉 · こんにちは · 안녕하세요 · Hola · Bonjour · Hallo · مرحبا · Xin chào Stage 1 of our tutorial is now available in 10 languages.",
+      "category": "AI Agent",
+      "language": "JavaScript",
+      "stargazers_count": 14526,
+      "forks_count": 1383,
+      "star_growth": 3311,
+      "score": 0.5529,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 11,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 11 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 3311，近期热度上升。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发。",
+        "当前累计 Star 14526，具备一定社区关注度。"
+      ],
+      "security_flags": [
+        "未识别到许可证，复用代码前需要人工确认授权。"
+      ],
+      "security_score": 85,
+      "security_level": "low",
+      "quality_flags": [
+        "许可证元数据缺失，复用代码前需要确认授权。"
+      ],
+      "quality_score": 88,
+      "quality_level": "high",
+      "report_url": "weekly/2026-05-25.html"
+    },
+    {
+      "run_date": "2026-05-25",
+      "full_name": "NousResearch/hermes-agent",
+      "html_url": "https://github.com/NousResearch/hermes-agent",
+      "description": "The agent that grows with you",
+      "readme_summary": "The self-improving AI agent built by Nous Research.** It's the only agent with a built-in learning loop — it creates skills from experience, improves them during use, nudges itself to persist knowledge, searches its own past conversations, and builds a deepening model of who you are across sessions.",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 165820,
+      "forks_count": 27353,
+      "star_growth": 10845,
+      "score": 0.4784,
+      "sources": [
+        "github_search"
+      ],
+      "trending_rank": 0,
+      "selection_reasons": [
+        "较上次记录新增 Star 10845，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 165820，具备一定社区关注度。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库简介较短，项目定位信息有限。"
+      ],
+      "quality_score": 92,
+      "quality_level": "high",
+      "report_url": "weekly/2026-05-25.html"
+    },
+    {
+      "run_date": "2026-05-19",
+      "full_name": "CloakHQ/CloakBrowser",
+      "html_url": "https://github.com/CloakHQ/CloakBrowser",
+      "description": "Stealth Chromium that passes every bot detection test. Drop-in Playwright replacement with source-level fingerprint patches. 30/30 tests passed.",
+      "readme_summary": "Stealth Chromium that passes every bot detection test. Not a patched config. Not a JS injection.",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 15774,
+      "forks_count": 1237,
+      "star_growth": 1,
+      "score": 0.6885,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 1,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 1 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 1，近期热度上升。",
+        "当前累计 Star 15774，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-05-19.html"
+    },
+    {
+      "run_date": "2026-05-19",
+      "full_name": "rohitg00/agentmemory",
+      "html_url": "https://github.com/rohitg00/agentmemory",
+      "description": "#1 Persistent memory for AI coding agents based on real-world benchmarks",
+      "readme_summary": "Your coding agent remembers everything. No more re-explaining. Built on iii engine Persistent memory for Claude Code, Cursor, Gemini CLI, Codex CLI, Hermes, OpenClaw, pi, OpenCode, and any MCP client.",
+      "category": "AI Agent",
+      "language": "TypeScript",
+      "stargazers_count": 13390,
+      "forks_count": 1133,
+      "star_growth": 2,
+      "score": 0.7842,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 2,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 2 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 2，近期热度上升。",
+        "当前累计 Star 13390，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-05-19.html"
+    },
+    {
+      "run_date": "2026-05-19",
+      "full_name": "oven-sh/bun",
+      "html_url": "https://github.com/oven-sh/bun",
+      "description": "Incredibly fast JavaScript runtime, bundler, test runner, and package manager – all in one",
+      "readme_summary": "Bun &nbsp;&nbsp;•&nbsp;&nbsp; &nbsp;&nbsp;•&nbsp;&nbsp; &nbsp;&nbsp;•&nbsp;&nbsp; Bun is an all-in-one toolkit for JavaScript and TypeScript apps. It ships as a single executable called bun.",
+      "category": "Other",
+      "language": "Rust",
+      "stargazers_count": 91988,
+      "forks_count": 4599,
+      "star_growth": 0,
+      "score": 0.497,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 3,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 3 位，是本期最重要的热度信号。",
+        "当前累计 Star 91988，具备一定社区关注度。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-05-19.html"
+    },
+    {
+      "run_date": "2026-05-19",
+      "full_name": "Imbad0202/academic-research-skills",
+      "html_url": "https://github.com/Imbad0202/academic-research-skills",
+      "description": "Academic Research Skills for Claude Code: research → write → review → revise → finalize",
+      "readme_summary": "繁體中文版 A comprehensive suite of Claude Code skills for academic research, covering the full pipeline from research to publication.",
+      "category": "LLM Tooling",
+      "language": "Python",
+      "stargazers_count": 13008,
+      "forks_count": 1266,
+      "star_growth": 1,
+      "score": 0.5876,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 4,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 4 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 1，近期热度上升。",
+        "当前累计 Star 13008，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-05-19.html"
+    },
+    {
+      "run_date": "2026-05-19",
+      "full_name": "yikart/AiToEarn",
+      "html_url": "https://github.com/yikart/AiToEarn",
+      "description": "Let's use AI to Earn!",
+      "readme_summary": "简体中文 | English | 日本語 Monetize · Publish · Engage · Create —— 一站式平台。** AiToEarn 通过 **AI Agent自动化**，帮助 OPC（一人公司）、创作者、品牌与企业在全球主流平台上构建、分发并变现内容。 支持渠道： 抖音、小红书（Rednote）、快手、哔哩哔哩、视频号、TikTok、YouTube、Facebook、Instagram、Threads、Twitter（X）、Pinterest、LinkedIn 💡 **方式 ②③④ 都需要先获取 API Key**，请先看 如何获取 API Key。",
+      "category": "Other",
+      "language": "TypeScript",
+      "stargazers_count": 15351,
+      "forks_count": 2511,
+      "star_growth": 0,
+      "score": 0.3672,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 5,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 5 位，是本期最重要的热度信号。",
+        "当前累计 Star 15351，具备一定社区关注度。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库简介较短，项目定位信息有限。"
+      ],
+      "quality_score": 92,
+      "quality_level": "high",
+      "report_url": "weekly/2026-05-19.html"
+    },
+    {
+      "run_date": "2026-05-19",
+      "full_name": "mattpocock/skills",
+      "html_url": "https://github.com/mattpocock/skills",
+      "description": "Skills for Real Engineers. Straight from my .claude directory.",
+      "readme_summary": "My agent skills that I use every day to do real engineering - not vibe coding. Developing real applications is hard. Approaches like GSD, BMAD, and Spec-Kit try to help by owning the process.",
+      "category": "LLM Tooling",
+      "language": "Shell",
+      "stargazers_count": 92912,
+      "forks_count": 8161,
+      "star_growth": 0,
+      "score": 0.4099,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 7,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 7 位，是本期最重要的热度信号。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "当前累计 Star 92912，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+      ],
+      "quality_score": 92,
+      "quality_level": "high",
+      "report_url": "weekly/2026-05-19.html"
+    },
+    {
+      "run_date": "2026-05-19",
+      "full_name": "ruvnet/RuView",
+      "html_url": "https://github.com/ruvnet/RuView",
+      "description": "π RuView turns commodity WiFi signals into real-time spatial intelligence, vital sign monitoring, and presence detection — all without a single pixel of video.",
+      "readme_summary": "",
+      "category": "AI Agent",
+      "language": "Rust",
+      "stargazers_count": 60251,
+      "forks_count": 7849,
+      "star_growth": 0,
+      "score": 0.3282,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 8,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 8 位，是本期最重要的热度信号。",
+        "当前累计 Star 60251，具备一定社区关注度。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "README 摘要不足，后续理解项目价值时需要打开仓库人工确认。"
+      ],
+      "quality_score": 82,
+      "quality_level": "high",
+      "report_url": "weekly/2026-05-19.html"
+    },
+    {
+      "run_date": "2026-05-19",
+      "full_name": "colbymchenry/codegraph",
+      "html_url": "https://github.com/colbymchenry/codegraph",
+      "description": "Pre-indexed code knowledge graph for Claude Code, Codex, Cursor, and OpenCode — fewer tokens, fewer tool calls, 100% local",
+      "readme_summary": "",
+      "category": "LLM Tooling",
+      "language": "TypeScript",
+      "stargazers_count": 5510,
+      "forks_count": 378,
+      "star_growth": 1,
+      "score": 0.3344,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 10,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 10 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 1，近期热度上升。",
+        "当前累计 Star 5510，具备一定社区关注度。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "README 摘要不足，后续理解项目价值时需要打开仓库人工确认。",
+        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+      ],
+      "quality_score": 74,
+      "quality_level": "medium",
+      "report_url": "weekly/2026-05-19.html"
+    },
+    {
+      "run_date": "2026-05-19",
+      "full_name": "facebook/pyrefly",
+      "html_url": "https://github.com/facebook/pyrefly",
+      "description": "A fast type checker and language server for Python",
+      "readme_summary": "",
+      "category": "Other",
+      "language": "Rust",
+      "stargazers_count": 6238,
+      "forks_count": 370,
+      "star_growth": 1,
+      "score": 0.3181,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 12,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 12 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 1，近期热度上升。",
+        "当前累计 Star 6238，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "README 摘要不足，后续理解项目价值时需要打开仓库人工确认。"
+      ],
+      "quality_score": 82,
+      "quality_level": "high",
+      "report_url": "weekly/2026-05-19.html"
+    },
+    {
+      "run_date": "2026-05-19",
+      "full_name": "firecrawl/firecrawl",
+      "html_url": "https://github.com/firecrawl/firecrawl",
+      "description": "🔥 Search, scrape, and clean the web for AI agents.",
+      "readme_summary": "",
+      "category": "AI Agent",
+      "language": "TypeScript",
+      "stargazers_count": 121632,
+      "forks_count": 7407,
+      "star_growth": 2,
+      "score": 0.3087,
+      "sources": [
+        "github_search"
+      ],
+      "trending_rank": 0,
+      "selection_reasons": [
+        "较上次记录新增 Star 2，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "当前累计 Star 121632，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "README 摘要不足，后续理解项目价值时需要打开仓库人工确认。"
+      ],
+      "quality_score": 82,
+      "quality_level": "high",
+      "report_url": "weekly/2026-05-19.html"
+    },
     {
       "run_date": "2026-05-18",
       "full_name": "CloakHQ/CloakBrowser",

@@ -1,0 +1,131 @@
+{
+  "schema_version": 1,
+  "total_projects": 10,
+  "trending_project_count": 9,
+  "trending_top10_selected_count": 8,
+  "trending_selected_rate": 0.9,
+  "total_star_growth": 44092,
+  "top_languages": [
+    {
+      "name": "Python",
+      "count": 4
+    },
+    {
+      "name": "TypeScript",
+      "count": 3
+    },
+    {
+      "name": "Rust",
+      "count": 2
+    },
+    {
+      "name": "JavaScript",
+      "count": 1
+    }
+  ],
+  "top_categories": [
+    {
+      "name": "AI Agent",
+      "count": 8
+    },
+    {
+      "name": "Other",
+      "count": 1
+    },
+    {
+      "name": "LLM Tooling",
+      "count": 1
+    }
+  ],
+  "top_trending": [
+    {
+      "full_name": "colbymchenry/codegraph",
+      "html_url": "https://github.com/colbymchenry/codegraph",
+      "trending_rank": 1,
+      "stargazers_count": 22469,
+      "language": "TypeScript",
+      "category": "AI Agent"
+    },
+    {
+      "full_name": "tinyhumansai/openhuman",
+      "html_url": "https://github.com/tinyhumansai/openhuman",
+      "trending_rank": 2,
+      "stargazers_count": 27234,
+      "language": "Rust",
+      "category": "Other"
+    },
+    {
+      "full_name": "Imbad0202/academic-research-skills",
+      "html_url": "https://github.com/Imbad0202/academic-research-skills",
+      "trending_rank": 3,
+      "stargazers_count": 20701,
+      "language": "Python",
+      "category": "LLM Tooling"
+    },
+    {
+      "full_name": "rohitg00/ai-engineering-from-scratch",
+      "html_url": "https://github.com/rohitg00/ai-engineering-from-scratch",
+      "trending_rank": 4,
+      "stargazers_count": 16363,
+      "language": "Python",
+      "category": "AI Agent"
+    },
+    {
+      "full_name": "ruvnet/RuView",
+      "html_url": "https://github.com/ruvnet/RuView",
+      "trending_rank": 5,
+      "stargazers_count": 65464,
+      "language": "Rust",
+      "category": "AI Agent"
+    }
+  ],
+  "top_star_growth": [
+    {
+      "full_name": "Imbad0202/academic-research-skills",
+      "html_url": "https://github.com/Imbad0202/academic-research-skills",
+      "star_growth": 11215,
+      "stargazers_count": 20701,
+      "language": "Python",
+      "category": "LLM Tooling"
+    },
+    {
+      "full_name": "NousResearch/hermes-agent",
+      "html_url": "https://github.com/NousResearch/hermes-agent",
+      "star_growth": 10845,
+      "stargazers_count": 165820,
+      "language": "Python",
+      "category": "AI Agent"
+    },
+    {
+      "full_name": "CloakHQ/CloakBrowser",
+      "html_url": "https://github.com/CloakHQ/CloakBrowser",
+      "star_growth": 6516,
+      "stargazers_count": 20420,
+      "language": "Python",
+      "category": "AI Agent"
+    },
+    {
+      "full_name": "ruvnet/RuView",
+      "html_url": "https://github.com/ruvnet/RuView",
+      "star_growth": 6201,
+      "stargazers_count": 65464,
+      "language": "Rust",
+      "category": "AI Agent"
+    },
+    {
+      "full_name": "rohitg00/agentmemory",
+      "html_url": "https://github.com/rohitg00/agentmemory",
+      "star_growth": 6004,
+      "stargazers_count": 17417,
+      "language": "TypeScript",
+      "category": "AI Agent"
+    }
+  ],
+  "summary_points": [
+    "AI Agent 是本期最集中的方向，共 8 个项目。",
+    "Python 是本期出现最多的主要语言，共 4 个项目。",
+    "本期入选项目累计新增 Star 44092。",
+    "colbymchenry/codegraph 是本期 GitHub Trending 排名最高的项目，周榜排名 1。",
+    "Imbad0202/academic-research-skills 是本期新增 Star 最高的项目，新增 11215。"
+  ]
+}
