@@ -145,6 +145,11 @@
     "first_sent_at": "2026-05-05"
   },
   {
+    "full_name": "colbymchenry/codegraph",
+    "html_url": "https://github.com/colbymchenry/codegraph",
+    "first_sent_at": "2026-05-25"
+  },
+  {
     "full_name": "coleam00/Archon",
     "html_url": "https://github.com/coleam00/Archon",
     "first_sent_at": "2026-04-29"
@@ -178,6 +183,11 @@
     "full_name": "D4Vinci/Scrapling",
     "html_url": "https://github.com/D4Vinci/Scrapling",
     "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "datawhalechina/easy-vibe",
+    "html_url": "https://github.com/datawhalechina/easy-vibe",
+    "first_sent_at": "2026-05-25"
   },
   {
     "full_name": "datawhalechina/hello-agents",
@@ -350,6 +360,11 @@
     "first_sent_at": "2026-04-29"
   },
   {
+    "full_name": "Lum1104/Understand-Anything",
+    "html_url": "https://github.com/Lum1104/Understand-Anything",
+    "first_sent_at": "2026-05-25"
+  },
+  {
     "full_name": "mattpocock/skills",
     "html_url": "https://github.com/mattpocock/skills",
     "first_sent_at": "2026-04-29"
@@ -455,6 +470,11 @@
     "first_sent_at": "2026-05-15"
   },
   {
+    "full_name": "rohitg00/ai-engineering-from-scratch",
+    "html_url": "https://github.com/rohitg00/ai-engineering-from-scratch",
+    "first_sent_at": "2026-05-25"
+  },
+  {
     "full_name": "rtk-ai/rtk",
     "html_url": "https://github.com/rtk-ai/rtk",
     "first_sent_at": "2026-05-16"
@@ -528,6 +548,11 @@
     "full_name": "thedotmack/claude-mem",
     "html_url": "https://github.com/thedotmack/claude-mem",
     "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "tinyhumansai/openhuman",
+    "html_url": "https://github.com/tinyhumansai/openhuman",
+    "first_sent_at": "2026-05-25"
   },
   {
     "full_name": "torvalds/linux",
