@@ -30,6 +30,7 @@
 | `capabilities.database_facets` | 是否支持 SQLite 分面统计查询 |
 | `capabilities.project_search` | 是否支持项目语料搜索 |
 | `capabilities.project_similarity` | 是否支持相似项目候选召回 |
+| `capabilities.project_compare` | 是否支持项目横向对比 |
 | `capabilities.runs_query` | 是否支持运行记录 |
 | `capabilities.jobs_query` | 是否支持任务查询 |
 | `capabilities.job_events` | 是否支持任务审计事件查询 |
@@ -188,6 +189,28 @@
 | `search_engine` | 候选召回使用的检索引擎 |
 
 该接口是 RAG/个性化推荐的候选池层，不调用外部模型，不读写密钥。后续可以在该接口结果上增加 Embedding 重排、LangChain 编排、用户反馈权重和模型生成解释。
+
+### `GET /v1/projects/compare`
+
+对多个历史入选项目做结构化横向比较。接口通过 `repos` 参数接收逗号分隔的仓库全名，最多比较 8 个项目，并返回缺失项目列表。
+
+查询参数：
+
+| 参数 | 说明 |
+|---|---|
+| `repos` | 必填，逗号分隔的 `owner/repo` 列表 |
+
+响应字段：
+
+| 字段 | 说明 |
+|---|---|
+| `projects` | 项目基础信息、历史热度、质量和风险摘要 |
+| `matrix` | 按指标展开的对比矩阵 |
+| `best_by` | 不同指标下的领先项目 |
+| `missing` | 未找到的项目 |
+| `selection_summary` | 对比摘要 |
+
+该接口是项目对比页和 RAG 解释层的基础能力，不调用外部服务，不生成推送，不写入任务状态。后续可以在此基础上加入用户偏好权重、模型总结和前端可视化对比。
 
 ### `GET /v1/jobs`
 

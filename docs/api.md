@@ -230,6 +230,32 @@ http://127.0.0.1:8000/admin.html?api=1
 
 该接口只读取本地公开归档数据，不调用外部模型或外部服务。它是后续 RAG、向量检索、项目对比和个性化推荐重排的前置候选层。
 
+### `GET /v1/projects/compare`
+
+对多个历史入选项目做结构化横向比较。该接口读取单项目详情聚合结果，返回统一对比矩阵和基础结论，用于后续对比页、RAG 解释和个性化推荐重排。
+
+支持参数：
+
+| 参数 | 说明 |
+|---|---|
+| `repos` | 必填，逗号分隔的仓库全名，例如 `owner/a,owner/b`，最多 8 个 |
+
+返回内容包括：
+
+1. `projects`：每个项目的基础信息、历史热度、质量和风险摘要。
+2. `matrix`：按指标展开的对比矩阵。
+3. `best_by`：按累计新增 Star、最近新增 Star、质量分、Trending 排名等维度给出的领先项目。
+4. `missing`：未找到的项目。
+5. `selection_summary`：本次对比摘要。
+
+示例：
+
+```text
+/v1/projects/compare?repos=owner/agent,owner/agent-helper
+```
+
+该接口只读公开归档数据，不调用外部服务，不写入任务或推送状态。
+
 ### `GET /api/profiles`
 
 返回公开个性化方向，数据来源为 `docs/profiles.json`。

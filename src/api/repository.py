@@ -56,6 +56,7 @@ class ApiRepository:
                 "database_facets": True,
                 "project_search": True,
                 "project_similarity": True,
+                "project_compare": True,
                 "runs_query": True,
                 "jobs_query": True,
                 "job_events": True,
@@ -266,6 +267,23 @@ class ApiRepository:
             },
             "similar_projects": similar,
             "selection_summary": _similarity_summary(detail, similar),
+        }
+
+    def compare_projects(self, full_names: list[str] | str) -> dict[str, Any]:
+        requested = _normalize_project_list(full_names)
+        details = [self.project_detail(name) for name in requested]
+        found = [detail for detail in details if detail.get("found")]
+        missing = [detail.get("full_name") or name for detail, name in zip(details, requested) if not detail.get("found")]
+        projects = [_comparison_project(detail) for detail in found]
+        return {
+            "schema_version": 1,
+            "requested": requested,
+            "count": len(projects),
+            "missing": missing,
+            "projects": projects,
+            "matrix": _comparison_matrix(projects),
+            "best_by": _comparison_best_by(projects),
+            "selection_summary": _comparison_summary(projects, missing),
         }
 
     def subscription_recommendations(self, subscription_id: str, *, limit: int | None = None) -> dict[str, Any]:
@@ -1782,6 +1800,118 @@ def _similarity_summary(detail: dict[str, Any], similar: list[dict[str, Any]]) -
         f"优先匹配同语言 {language}、同方向 {category} 的历史入选项目。",
         f"当前最相似候选为 {top.get('full_name') or ''}，相似度分 {top.get('similarity_score') or 0}。",
     ]
+
+
+def _normalize_project_list(value: list[str] | str) -> list[str]:
+    raw_items = value if isinstance(value, list) else [value]
+    normalized = []
+    seen = set()
+    for item in raw_items:
+        for part in str(item or "").replace("\n", ",").split(","):
+            name = _normalize_full_name(part)
+            key = name.lower()
+            if name and "/" in name and key not in seen:
+                seen.add(key)
+                normalized.append(name)
+    return normalized[:8]
+
+
+def _comparison_project(detail: dict[str, Any]) -> dict[str, Any]:
+    history = detail.get("history") if isinstance(detail.get("history"), list) else []
+    latest = history[0] if history else detail
+    return {
+        "full_name": detail.get("full_name") or "",
+        "html_url": detail.get("html_url") or "",
+        "description": detail.get("description") or "",
+        "language": detail.get("language") or "",
+        "category": detail.get("category") or "",
+        "sources": detail.get("sources") or [],
+        "latest_run_date": detail.get("latest_run_date") or "",
+        "first_run_date": detail.get("first_run_date") or "",
+        "history_count": _int_value(detail.get("history_count")),
+        "total_star_growth": _int_value(detail.get("total_star_growth")),
+        "best_trending_rank": _int_value(detail.get("best_trending_rank")),
+        "latest_quality_score": _int_value(detail.get("latest_quality_score")),
+        "latest_quality_level": detail.get("latest_quality_level") or "unknown",
+        "security_flag_count": len(detail.get("security_flags") or []),
+        "quality_flag_count": len(detail.get("quality_flags") or []),
+        "latest_star_growth": _int_value(latest.get("star_growth")),
+        "latest_trending_rank": _int_value(latest.get("trending_rank")),
+        "selection_reasons": (detail.get("selection_reasons") or [])[:5],
+        "trend_summary": (detail.get("trend_summary") or [])[:5],
+    }
+
+
+def _comparison_matrix(projects: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    metrics = [
+        ("language", "主要语言"),
+        ("category", "项目方向"),
+        ("latest_run_date", "最近入选"),
+        ("history_count", "历史入选次数"),
+        ("total_star_growth", "累计新增 Star"),
+        ("latest_star_growth", "最近新增 Star"),
+        ("best_trending_rank", "最好 Trending 排名"),
+        ("latest_quality_score", "最新质量分"),
+        ("security_flag_count", "风险提示数量"),
+        ("quality_flag_count", "质量提示数量"),
+    ]
+    return [
+        {
+            "metric": key,
+            "label": label,
+            "values": {project.get("full_name") or "": project.get(key) for project in projects},
+        }
+        for key, label in metrics
+    ]
+
+
+def _comparison_best_by(projects: list[dict[str, Any]]) -> dict[str, str]:
+    if not projects:
+        return {}
+    return {
+        "most_history_count": _best_project(projects, "history_count"),
+        "highest_total_star_growth": _best_project(projects, "total_star_growth"),
+        "highest_latest_star_growth": _best_project(projects, "latest_star_growth"),
+        "highest_quality_score": _best_project(projects, "latest_quality_score"),
+        "best_trending_rank": _best_project(projects, "best_trending_rank", lower_positive=True),
+        "lowest_risk_flags": _best_project(projects, "security_flag_count", lower=True),
+    }
+
+
+def _best_project(
+    projects: list[dict[str, Any]],
+    key: str,
+    *,
+    lower: bool = False,
+    lower_positive: bool = False,
+) -> str:
+    candidates = [project for project in projects if project.get("full_name")]
+    if lower_positive:
+        positives = [project for project in candidates if _int_value(project.get(key)) > 0]
+        candidates = positives or candidates
+    if not candidates:
+        return ""
+    if lower or lower_positive:
+        return str(min(candidates, key=lambda project: _int_value(project.get(key))).get("full_name") or "")
+    return str(max(candidates, key=lambda project: _int_value(project.get(key))).get("full_name") or "")
+
+
+def _comparison_summary(projects: list[dict[str, Any]], missing: list[str]) -> list[str]:
+    if not projects:
+        return ["没有找到可对比的项目。"]
+    summary = [f"已找到 {len(projects)} 个可对比项目。"]
+    languages = _summary_text(_summary_counts(project.get("language") or "unknown" for project in projects))
+    categories = _summary_text(_summary_counts(project.get("category") or "Other" for project in projects))
+    summary.append(f"语言分布：{languages}。")
+    summary.append(f"方向分布：{categories}。")
+    best = _comparison_best_by(projects)
+    if best.get("highest_total_star_growth"):
+        summary.append(f"累计新增 Star 最高：{best['highest_total_star_growth']}。")
+    if best.get("best_trending_rank"):
+        summary.append(f"最好 Trending 排名：{best['best_trending_rank']}。")
+    if missing:
+        summary.append(f"未找到 {len(missing)} 个项目：{'、'.join(missing)}。")
+    return summary
 
 
 def _snippet(text: str, terms: list[str], size: int = 180) -> str:
