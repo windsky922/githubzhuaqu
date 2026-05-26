@@ -41,6 +41,7 @@
 - [本地管理首页](admin.html)
 - [项目筛选页](explorer.html)
 - [项目详情页](project.html)
+- [项目对比页](compare.html)
 - [运行状态面板](runs.html)
 - [任务状态面板](jobs.html)
 - [任务详情页](job.html)
