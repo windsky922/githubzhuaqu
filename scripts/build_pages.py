@@ -1923,6 +1923,7 @@ def _recommendations_content() -> str:
           <ul class="reasons">${reasonsHtml(project)}</ul>
           <div class="meta">
             <a class="button ghost" href="${escapeAttribute(projectDetailUrl(project))}">项目详情</a>
+            <a class="button ghost" href="${escapeAttribute(compareUrl([project.full_name]))}">加入对比</a>
             <a class="button ghost" href="${escapeAttribute(project.html_url || "#")}" target="_blank" rel="noreferrer">GitHub</a>
           </div>
         </article>
@@ -1945,6 +1946,14 @@ def _recommendations_content() -> str:
       next.set("repo", repo);
       if (params.get("api")) next.set("api", params.get("api"));
       return `project.html?${next.toString()}`;
+    }
+
+    function compareUrl(repos) {
+      const names = [...new Set(repos.filter(Boolean))];
+      const next = new URLSearchParams();
+      next.set("repos", names.join(","));
+      if (params.get("api")) next.set("api", params.get("api"));
+      return `compare.html?${next.toString()}`;
     }
 
     function number(value) {
@@ -2664,7 +2673,7 @@ def _explorer_content() -> str:
         <td class="num">${number(project.star_growth)}</td>
         <td>${quality}</td>
         <td>${riskText}</td>
-        <td><a href="${escapeAttribute(project.report_url || "#")}">周报</a><a href="${escapeAttribute(projectDetailUrl(project))}">详情页</a><button class="detail-toggle" type="button" data-detail="${escapeAttribute(detailId)}">展开</button></td>
+        <td><a href="${escapeAttribute(project.report_url || "#")}">周报</a><a href="${escapeAttribute(projectDetailUrl(project))}">详情页</a><a href="${escapeAttribute(compareUrl([project.full_name]))}">对比</a><button class="detail-toggle" type="button" data-detail="${escapeAttribute(detailId)}">展开</button></td>
       </tr>
       <tr class="detail-row"><td colspan="10">${detailPanel(project, detailId)}</td></tr>`;
     }
@@ -2683,7 +2692,7 @@ def _explorer_content() -> str:
         <div class="detail-grid">
           <div class="detail-block"><h3>项目指标</h3><p>综合分 ${escapeHtml(number(project.score).toFixed(3))}；质量分 ${escapeHtml(project.quality_score || 0)}；安全分 ${escapeHtml(project.security_score || 100)}；累计 Star ${escapeHtml(project.stargazers_count || 0)}；Fork ${escapeHtml(project.forks_count || 0)}</p></div>
           <div class="detail-block"><h3>来源</h3><p>${escapeHtml((project.sources || []).map(sourceLabel).join(" + ") || "-")}</p></div>
-          <div class="detail-block"><h3>完整链接</h3><p><a class="detail-link" href="${escapeAttribute(project.html_url)}" target="_blank" rel="noreferrer">${escapeHtml(project.html_url)}</a></p><p><a class="detail-link" href="${escapeAttribute(projectDetailUrl(project))}">打开项目详情页</a></p></div>
+          <div class="detail-block"><h3>完整链接</h3><p><a class="detail-link" href="${escapeAttribute(project.html_url)}" target="_blank" rel="noreferrer">${escapeHtml(project.html_url)}</a></p><p><a class="detail-link" href="${escapeAttribute(projectDetailUrl(project))}">打开项目详情页</a></p><p><a class="detail-link" href="${escapeAttribute(compareWithSimilarUrl(project))}">与相似项目对比</a></p></div>
         </div>
         <div class="detail-grid">
           <div class="detail-block"><h3>风险提示</h3>${risks}</div>
@@ -2698,7 +2707,7 @@ def _explorer_content() -> str:
       return `<ul class="similar-list">${matches.map(match => {
         const description = match.description ? `<span>${escapeHtml(match.description)}</span>` : "";
         const meta = [match.language || "Unknown", match.category || "Other", `新增 Star ${number(match.star_growth)}`].join(" / ");
-        return `<li><a href="${escapeAttribute(match.html_url)}" target="_blank" rel="noreferrer">${escapeHtml(match.full_name)}</a><span>${escapeHtml(meta)}</span>${description}</li>`;
+        return `<li><a href="${escapeAttribute(projectDetailUrl(match))}">${escapeHtml(match.full_name)}</a><span>${escapeHtml(meta)}</span>${description}<span><a href="${escapeAttribute(compareUrl([project.full_name, match.full_name]))}">与当前项目对比</a> · <a href="${escapeAttribute(match.html_url)}" target="_blank" rel="noreferrer">GitHub</a></span></li>`;
       }).join("")}</ul>`;
     }
 
@@ -2709,6 +2718,19 @@ def _explorer_content() -> str:
       params.set("repo", repo);
       if (apiMode === "1" || apiMode === "0") params.set("api", apiMode);
       return `project.html?${params.toString()}`;
+    }
+
+    function compareUrl(repos) {
+      const params = new URLSearchParams();
+      const names = [...new Set(repos.filter(Boolean))];
+      params.set("repos", names.join(","));
+      const apiMode = new URLSearchParams(window.location.search).get("api");
+      if (apiMode === "1" || apiMode === "0") params.set("api", apiMode);
+      return `compare.html?${params.toString()}`;
+    }
+
+    function compareWithSimilarUrl(project) {
+      return compareUrl([project.full_name, ...similarProjects(project).map(match => match.full_name)]);
     }
 
     function similarProjects(project) {
@@ -3464,6 +3486,7 @@ def _project_detail_content() -> str:
       <nav>
         <a href="index.html">周报归档</a>
         <a href="explorer.html">项目筛选</a>
+        <a href="compare.html">项目对比</a>
         <a href="projects.json">projects.json</a>
       </nav>
     </div>
@@ -3565,6 +3588,7 @@ def _project_detail_content() -> str:
             <span>${escapeHtml(detail.category || "Other")}</span>
             <span>来源：${escapeHtml(detail.data_source || "静态 JSON")}</span>
             ${detail.html_url ? `<a href="${escapeAttribute(detail.html_url)}" target="_blank" rel="noreferrer">${escapeHtml(detail.html_url)}</a>` : ""}
+            <a href="${escapeAttribute(compareUrl([detail.full_name, ...(detail.similar_projects || []).map(project => project.full_name)]))}">与相似项目对比</a>
           </div>
         </section>
         <section class="summary">
@@ -3580,7 +3604,7 @@ def _project_detail_content() -> str:
           <div class="section"><h2>风险提示</h2>${tags(detail.security_flags || [], "risk", "暂无风险提示")}</div>
           <div class="section"><h2>质量提示</h2>${tags(detail.quality_flags || [], "ok", "暂无质量扣分项")}</div>
           <div class="section"><h2>历史来源</h2>${tags(detail.sources || [], "", "暂无来源")}</div>
-          <div class="section"><h2>相似项目</h2>${similarHtml(detail.similar_projects || [], detail.similar_summary || [])}</div>
+          <div class="section"><h2>相似项目</h2>${similarHtml(detail.full_name, detail.similar_projects || [], detail.similar_summary || [])}</div>
         </section>
         <section class="section" style="margin-top:12px">
           <h2>历史趋势</h2>
@@ -3657,7 +3681,7 @@ def _project_detail_content() -> str:
       return summary;
     }
 
-    function similarHtml(projects, summary) {
+    function similarHtml(currentRepo, projects, summary) {
       if (!projects.length) return "<p>暂无相似历史项目。</p>";
       const summaryHtml = Array.isArray(summary) && summary.length ? `<p class="desc">${escapeHtml(summary[0])}</p>` : "";
       return `${summaryHtml}<ul>${projects.map(project => {
@@ -3665,7 +3689,7 @@ def _project_detail_content() -> str:
           ? `<br><span>${escapeHtml(project.similarity_reasons.join("；"))}</span>`
           : "";
         const score = project.similarity_score ? ` / 相似度 ${number(project.similarity_score)}` : "";
-        return `<li><a href="project.html?repo=${encodeURIComponent(project.full_name || "")}${shouldUseApi() ? "&api=1" : ""}">${escapeHtml(project.full_name || "")}</a> <span>${escapeHtml(project.language || "Unknown")} / ${escapeHtml(project.category || "Other")} / 新增 Star ${number(project.star_growth)}${score}</span>${reasons}</li>`;
+        return `<li><a href="project.html?repo=${encodeURIComponent(project.full_name || "")}${shouldUseApi() ? "&api=1" : ""}">${escapeHtml(project.full_name || "")}</a> <span>${escapeHtml(project.language || "Unknown")} / ${escapeHtml(project.category || "Other")} / 新增 Star ${number(project.star_growth)}${score}</span>${reasons}<br><span><a href="${escapeAttribute(compareUrl([currentRepo, project.full_name]))}">与当前项目对比</a></span></li>`;
       }).join("")}</ul>`;
     }
 
@@ -3724,6 +3748,15 @@ def _project_detail_content() -> str:
 
     function repoName() {
       return new URLSearchParams(window.location.search).get("repo") || "";
+    }
+
+    function compareUrl(repos) {
+      const params = new URLSearchParams();
+      const names = [...new Set(repos.filter(Boolean))];
+      params.set("repos", names.join(","));
+      const apiMode = new URLSearchParams(window.location.search).get("api");
+      if (apiMode === "1" || apiMode === "0") params.set("api", apiMode);
+      return `compare.html?${params.toString()}`;
     }
 
     function shouldUseApi() {

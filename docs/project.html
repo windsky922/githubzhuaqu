@@ -222,6 +222,7 @@
       <nav>
         <a href="index.html">周报归档</a>
         <a href="explorer.html">项目筛选</a>
+        <a href="compare.html">项目对比</a>
         <a href="projects.json">projects.json</a>
       </nav>
     </div>
@@ -323,6 +324,7 @@
             <span>${escapeHtml(detail.category || "Other")}</span>
             <span>来源：${escapeHtml(detail.data_source || "静态 JSON")}</span>
             ${detail.html_url ? `<a href="${escapeAttribute(detail.html_url)}" target="_blank" rel="noreferrer">${escapeHtml(detail.html_url)}</a>` : ""}
+            <a href="${escapeAttribute(compareUrl([detail.full_name, ...(detail.similar_projects || []).map(project => project.full_name)]))}">与相似项目对比</a>
           </div>
         </section>
         <section class="summary">
@@ -338,7 +340,7 @@
           <div class="section"><h2>风险提示</h2>${tags(detail.security_flags || [], "risk", "暂无风险提示")}</div>
           <div class="section"><h2>质量提示</h2>${tags(detail.quality_flags || [], "ok", "暂无质量扣分项")}</div>
           <div class="section"><h2>历史来源</h2>${tags(detail.sources || [], "", "暂无来源")}</div>
-          <div class="section"><h2>相似项目</h2>${similarHtml(detail.similar_projects || [], detail.similar_summary || [])}</div>
+          <div class="section"><h2>相似项目</h2>${similarHtml(detail.full_name, detail.similar_projects || [], detail.similar_summary || [])}</div>
         </section>
         <section class="section" style="margin-top:12px">
           <h2>历史趋势</h2>
@@ -415,7 +417,7 @@
       return summary;
     }
 
-    function similarHtml(projects, summary) {
+    function similarHtml(currentRepo, projects, summary) {
       if (!projects.length) return "<p>暂无相似历史项目。</p>";
       const summaryHtml = Array.isArray(summary) && summary.length ? `<p class="desc">${escapeHtml(summary[0])}</p>` : "";
       return `${summaryHtml}<ul>${projects.map(project => {
@@ -423,7 +425,7 @@
           ? `<br><span>${escapeHtml(project.similarity_reasons.join("；"))}</span>`
           : "";
         const score = project.similarity_score ? ` / 相似度 ${number(project.similarity_score)}` : "";
-        return `<li><a href="project.html?repo=${encodeURIComponent(project.full_name || "")}${shouldUseApi() ? "&api=1" : ""}">${escapeHtml(project.full_name || "")}</a> <span>${escapeHtml(project.language || "Unknown")} / ${escapeHtml(project.category || "Other")} / 新增 Star ${number(project.star_growth)}${score}</span>${reasons}</li>`;
+        return `<li><a href="project.html?repo=${encodeURIComponent(project.full_name || "")}${shouldUseApi() ? "&api=1" : ""}">${escapeHtml(project.full_name || "")}</a> <span>${escapeHtml(project.language || "Unknown")} / ${escapeHtml(project.category || "Other")} / 新增 Star ${number(project.star_growth)}${score}</span>${reasons}<br><span><a href="${escapeAttribute(compareUrl([currentRepo, project.full_name]))}">与当前项目对比</a></span></li>`;
       }).join("")}</ul>`;
     }
 
@@ -482,6 +484,15 @@
 
     function repoName() {
       return new URLSearchParams(window.location.search).get("repo") || "";
+    }
+
+    function compareUrl(repos) {
+      const params = new URLSearchParams();
+      const names = [...new Set(repos.filter(Boolean))];
+      params.set("repos", names.join(","));
+      const apiMode = new URLSearchParams(window.location.search).get("api");
+      if (apiMode === "1" || apiMode === "0") params.set("api", apiMode);
+      return `compare.html?${params.toString()}`;
     }
 
     function shouldUseApi() {
