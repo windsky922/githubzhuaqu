@@ -217,6 +217,7 @@
         projects: found,
         matrix: comparisonMatrix(found),
         best_by: bestBy(found),
+        recommendation: compareRecommendation(found, missing),
         selection_summary: comparisonSummary(found, missing)
       };
     }
@@ -257,6 +258,7 @@
         return;
       }
       content.className = "";
+      const recommendation = data.recommendation || compareRecommendation(data.projects || [], data.missing || []);
       content.innerHTML = `
         <section class="summary">
           ${metric("项目数量", data.count)}
@@ -264,6 +266,7 @@
           ${metric("质量分领先", valueLabel(data.best_by && data.best_by.highest_quality_score))}
           ${metric("最好 Trending", valueLabel(data.best_by && data.best_by.best_trending_rank))}
         </section>
+        <section class="panel"><h2>推荐结论</h2>${recommendationHtml(recommendation)}</section>
         <section class="panel"><h2>对比摘要</h2>${listHtml(data.selection_summary || [])}</section>
         <section class="panel">
           <h2>对比矩阵</h2>
@@ -335,6 +338,62 @@
       if (!candidates.length) return "";
       const sorted = [...candidates].sort((a, b) => lower ? number(a[key]) - number(b[key]) : number(b[key]) - number(a[key]));
       return sorted[0].full_name || "";
+    }
+
+    function compareRecommendation(projects, missing) {
+      if (!projects.length) {
+        return {
+          primary_project: "",
+          reasons: ["没有找到可对比项目，无法给出优先推荐。"],
+          cautions: missing && missing.length ? [`未找到项目：${missing.join(", ")}。`] : [],
+          next_actions: ["请从项目筛选页或项目详情页选择已归档项目进入对比。"],
+          scoring_model: "rule:v1"
+        };
+      }
+      const ranked = [...projects].sort((a, b) => compareScore(b) - compareScore(a));
+      const primary = ranked[0];
+      const cautions = [];
+      if (number(primary.security_flag_count)) cautions.push(`该项目仍有 ${number(primary.security_flag_count)} 条风险提示，需要人工复核。`);
+      if (primary.latest_quality_level && primary.latest_quality_level !== "good") cautions.push(`最新质量等级为 ${primary.latest_quality_level}，建议查看质量提示。`);
+      if (missing && missing.length) cautions.push(`未找到项目：${missing.join(", ")}。`);
+      return {
+        primary_project: primary.full_name || "",
+        score: Math.round(compareScore(primary) * 100) / 100,
+        reasons: [
+          `综合规则评分最高：${Math.round(compareScore(primary) * 100) / 100}。`,
+          `累计新增 Star ${number(primary.total_star_growth)}，最近一次新增 Star ${number(primary.latest_star_growth)}。`,
+          `历史入选 ${number(primary.history_count)} 次，最新质量分 ${number(primary.latest_quality_score)}。`,
+          ...(number(primary.best_trending_rank) ? [`最好 GitHub Trending 排名第 ${number(primary.best_trending_rank)} 位。`] : [])
+        ],
+        cautions: cautions.length ? cautions : ["暂未发现额外注意事项。"],
+        next_actions: [
+          `优先打开 ${primary.full_name || ""} 的详情页，确认 README 摘要、风险提示和历史趋势。`,
+          "如果当前需求更偏语言或方向匹配，再结合对比矩阵中的语言、方向和质量信号做二次筛选。"
+        ],
+        scoring_model: "rule:v1"
+      };
+    }
+
+    function compareScore(project) {
+      const trendingRank = number(project.best_trending_rank);
+      const trendingBonus = trendingRank ? Math.max(0, 60 - trendingRank) : 0;
+      return number(project.total_star_growth) * 2
+        + number(project.latest_star_growth) * 2
+        + number(project.latest_quality_score) * 1.5
+        + number(project.history_count) * 5
+        + trendingBonus
+        - number(project.security_flag_count) * 8;
+    }
+
+    function recommendationHtml(recommendation) {
+      const primary = recommendation && recommendation.primary_project ? recommendation.primary_project : "暂无";
+      const score = recommendation && recommendation.score !== undefined ? `，规则评分 ${recommendation.score}` : "";
+      return `
+        <p><strong>优先查看：${escapeHtml(primary)}</strong>${escapeHtml(score)}</p>
+        <h3>理由</h3>${listHtml(recommendation && recommendation.reasons || [])}
+        <h3>注意事项</h3>${listHtml(recommendation && recommendation.cautions || [])}
+        <h3>下一步</h3>${listHtml(recommendation && recommendation.next_actions || [])}
+      `;
     }
 
     function comparisonSummary(projects, missing) {

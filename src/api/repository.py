@@ -283,6 +283,7 @@ class ApiRepository:
             "projects": projects,
             "matrix": _comparison_matrix(projects),
             "best_by": _comparison_best_by(projects),
+            "recommendation": _comparison_recommendation(projects, missing),
             "selection_summary": _comparison_summary(projects, missing),
         }
 
@@ -1894,6 +1895,69 @@ def _best_project(
     if lower or lower_positive:
         return str(min(candidates, key=lambda project: _int_value(project.get(key))).get("full_name") or "")
     return str(max(candidates, key=lambda project: _int_value(project.get(key))).get("full_name") or "")
+
+
+def _comparison_recommendation(projects: list[dict[str, Any]], missing: list[str]) -> dict[str, Any]:
+    if not projects:
+        return {
+            "primary_project": "",
+            "reasons": ["没有找到可对比项目，无法给出优先推荐。"],
+            "cautions": [f"未找到项目：{', '.join(missing)}。"] if missing else [],
+            "next_actions": ["请从项目筛选页或项目详情页选择已归档项目进入对比。"],
+            "scoring_model": "rule:v1",
+        }
+
+    ranked = sorted(projects, key=_comparison_score, reverse=True)
+    primary = ranked[0]
+    reasons = _comparison_project_reasons(primary)
+    cautions = _comparison_project_cautions(primary, missing)
+    next_actions = [
+        f"优先打开 {primary.get('full_name') or ''} 的详情页，确认 README 摘要、风险提示和历史趋势。",
+        "如果当前需求更偏语言或方向匹配，再结合对比矩阵中的语言、方向和质量信号做二次筛选。",
+    ]
+    return {
+        "primary_project": primary.get("full_name") or "",
+        "score": round(_comparison_score(primary), 2),
+        "reasons": reasons,
+        "cautions": cautions,
+        "next_actions": next_actions,
+        "scoring_model": "rule:v1",
+    }
+
+
+def _comparison_score(project: dict[str, Any]) -> float:
+    trending_rank = _int_value(project.get("best_trending_rank"))
+    trending_bonus = max(0, 60 - trending_rank) if trending_rank else 0
+    return (
+        _int_value(project.get("total_star_growth")) * 2.0
+        + _int_value(project.get("latest_star_growth")) * 2.0
+        + _int_value(project.get("latest_quality_score")) * 1.5
+        + _int_value(project.get("history_count")) * 5.0
+        + trending_bonus
+        - _int_value(project.get("security_flag_count")) * 8.0
+    )
+
+
+def _comparison_project_reasons(project: dict[str, Any]) -> list[str]:
+    reasons = [
+        f"综合规则评分最高：{round(_comparison_score(project), 2)}。",
+        f"累计新增 Star {_int_value(project.get('total_star_growth'))}，最近一次新增 Star {_int_value(project.get('latest_star_growth'))}。",
+        f"历史入选 {_int_value(project.get('history_count'))} 次，最新质量分 {_int_value(project.get('latest_quality_score'))}。",
+    ]
+    if _int_value(project.get("best_trending_rank")):
+        reasons.append(f"最好 GitHub Trending 排名第 {_int_value(project.get('best_trending_rank'))} 位。")
+    return reasons
+
+
+def _comparison_project_cautions(project: dict[str, Any], missing: list[str]) -> list[str]:
+    cautions = []
+    if _int_value(project.get("security_flag_count")):
+        cautions.append(f"该项目仍有 {_int_value(project.get('security_flag_count'))} 条风险提示，需要人工复核。")
+    if project.get("latest_quality_level") and project.get("latest_quality_level") != "good":
+        cautions.append(f"最新质量等级为 {project.get('latest_quality_level')}，建议查看质量提示。")
+    if missing:
+        cautions.append(f"未找到项目：{', '.join(missing)}。")
+    return cautions or ["暂未发现额外注意事项。"]
 
 
 def _comparison_summary(projects: list[dict[str, Any]], missing: list[str]) -> list[str]:

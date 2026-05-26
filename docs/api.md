@@ -245,8 +245,9 @@ http://127.0.0.1:8000/admin.html?api=1
 1. `projects`：每个项目的基础信息、历史热度、质量和风险摘要。
 2. `matrix`：按指标展开的对比矩阵。
 3. `best_by`：按累计新增 Star、最近新增 Star、质量分、Trending 排名等维度给出的领先项目。
-4. `missing`：未找到的项目。
-5. `selection_summary`：本次对比摘要。
+4. `recommendation`：规则版推荐结论，包含优先查看项目、推荐理由、注意事项、下一步动作和 `scoring_model`。
+5. `missing`：未找到的项目。
+6. `selection_summary`：本次对比摘要。
 
 示例：
 

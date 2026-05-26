@@ -113,7 +113,7 @@ docs/weekly/YYYY-MM-DD.md
 
 `project.html` 是单项目详情页，支持 `project.html?repo=owner/name`，展示历史入选次数、首次和最近入选日期、累计新增 Star、最好 Trending 排名、质量提示、风险提示、历史趋势、历史入选记录和相似项目。本地后端或 URL 带 `api=1` 时会优先读取 `/api/projects/{owner}/{repo}`，否则使用 `projects.json` 静态聚合。
 
-`compare.html` 是项目对比页，支持 `compare.html?repos=owner/a,owner/b`。本地后端或 URL 带 `api=1` 时会优先读取 `/v1/projects/compare`，否则使用 `projects.json` 静态聚合，展示对比矩阵、领先指标和缺失项目。项目筛选页、推荐页和项目详情页会提供直接进入对比的入口。
+`compare.html` 是项目对比页，支持 `compare.html?repos=owner/a,owner/b`。本地后端或 URL 带 `api=1` 时会优先读取 `/v1/projects/compare`，否则使用 `projects.json` 静态聚合，展示推荐结论、对比矩阵、领先指标和缺失项目。项目筛选页、推荐页和项目详情页会提供直接进入对比的入口。
 
 `runs.html` 是运行状态面板，直接读取 `runs.json`，用于查看 Kimi/规则版生成状态、Telegram 推送状态、采集成功率、Trending Top10 命中率和 README 抓取率。
 

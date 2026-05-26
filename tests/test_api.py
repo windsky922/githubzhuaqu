@@ -263,6 +263,9 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(comparison["projects"][0]["full_name"], "owner/agent")
             self.assertIn("owner/agent", comparison["matrix"][0]["values"])
             self.assertEqual(comparison["best_by"]["highest_total_star_growth"], "owner/agent")
+            self.assertEqual(comparison["recommendation"]["primary_project"], "owner/agent")
+            self.assertEqual(comparison["recommendation"]["scoring_model"], "rule:v1")
+            self.assertTrue(comparison["recommendation"]["reasons"])
         finally:
             shutil.rmtree(root, ignore_errors=True)
 
@@ -398,6 +401,7 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(v1_similar.json()["similar_projects"][0]["full_name"], "owner/agent-helper")
             self.assertEqual(v1_compare.json()["count"], 2)
             self.assertEqual(v1_compare.json()["best_by"]["highest_total_star_growth"], "owner/agent")
+            self.assertEqual(v1_compare.json()["recommendation"]["primary_project"], "owner/agent")
             self.assertEqual(v1_projects.json()["projects"][0]["full_name"], "owner/agent")
             self.assertEqual(v1_recommendations.json()["recommendations"][0]["full_name"], "owner/agent")
             self.assertIn("profile=agent_development", v1_recommendations.json()["selection_summary"][0])

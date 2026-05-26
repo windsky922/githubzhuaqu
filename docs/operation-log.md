@@ -2,6 +2,24 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-05-26 追加：项目对比页新增推荐结论
+
+### 1. 开发目的
+
+项目对比页已经能展示矩阵和领先指标，但用户仍需要自己判断“先看哪个”。本次新增规则版推荐结论，让对比页直接给出优先查看项目、推荐理由、注意事项和下一步动作，为后续接入 Kimi、RAG 或 LangChain 解释层留下稳定字段。
+
+### 2. 修改内容
+
+1. `/v1/projects/compare` 和 `/api/projects/compare` 新增 `recommendation` 字段。
+2. `recommendation` 包含 `primary_project`、`score`、`reasons`、`cautions`、`next_actions` 和 `scoring_model`。
+3. 规则评分综合累计新增 Star、最近新增 Star、质量分、历史入选次数、Trending 排名和风险提示数量。
+4. `docs/compare.html` 新增“推荐结论”区块，静态模式和后端 API 模式保持一致。
+5. README、API 文档和测试已同步更新。
+
+### 3. 边界说明
+
+当前推荐结论是确定性规则，不调用外部模型，不替代人工判断。后续可以把该字段扩展为模型解释、用户偏好权重、RAG 证据引用和多场景推荐。
+
 ## 2026-05-26 追加：串联项目对比入口
 
 ### 1. 开发目的
