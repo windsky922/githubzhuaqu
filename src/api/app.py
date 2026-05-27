@@ -65,8 +65,20 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
         )
 
     @app.get("/api/projects/compare")
-    def project_compare(repos: str = Query(..., min_length=1)) -> dict[str, Any]:
-        return repository.compare_projects(repos)
+    def project_compare(
+        repos: str = Query(..., min_length=1),
+        profile: str | None = None,
+        language: str | None = None,
+        category: str | None = None,
+        query: str | None = None,
+    ) -> dict[str, Any]:
+        return repository.compare_projects(
+            repos,
+            profile=profile,
+            language=language,
+            category=category,
+            query=query,
+        )
 
     @app.get("/api/projects/{owner}/{repo}/similar")
     def project_similar(owner: str, repo: str, limit: int = Query(default=10, ge=1, le=50)) -> dict[str, Any]:
@@ -151,8 +163,20 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
         )
 
     @app.get("/v1/projects/compare")
-    def v1_project_compare(repos: str = Query(..., min_length=1)) -> dict[str, Any]:
-        return repository.compare_projects(repos)
+    def v1_project_compare(
+        repos: str = Query(..., min_length=1),
+        profile: str | None = None,
+        language: str | None = None,
+        category: str | None = None,
+        query: str | None = None,
+    ) -> dict[str, Any]:
+        return repository.compare_projects(
+            repos,
+            profile=profile,
+            language=language,
+            category=category,
+            query=query,
+        )
 
     @app.get("/v1/projects/{owner}/{repo}/similar")
     def v1_project_similar(owner: str, repo: str, limit: int = Query(default=10, ge=1, le=50)) -> dict[str, Any]:

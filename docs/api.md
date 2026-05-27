@@ -239,20 +239,25 @@ http://127.0.0.1:8000/admin.html?api=1
 | 参数 | 说明 |
 |---|---|
 | `repos` | 必填，逗号分隔的仓库全名，例如 `owner/a,owner/b`，最多 8 个 |
+| `profile` | 可选，当前个性化方向，例如 `agent_development`、`java`、`python` |
+| `language` | 可选，当前优先语言，例如 `Python`、`Java` |
+| `category` | 可选，当前优先方向，例如 `AI Agent`、`Backend` |
+| `query` | 可选，当前关键词，例如 `agent`、`spring`、`rag` |
 
 返回内容包括：
 
 1. `projects`：每个项目的基础信息、历史热度、质量和风险摘要。
 2. `matrix`：按指标展开的对比矩阵。
 3. `best_by`：按累计新增 Star、最近新增 Star、质量分、Trending 排名等维度给出的领先项目。
-4. `recommendation`：规则版推荐结论，包含优先查看项目、推荐理由、注意事项、下一步动作和 `scoring_model`。
-5. `missing`：未找到的项目。
-6. `selection_summary`：本次对比摘要。
+4. `preference`：本次对比使用的个性化偏好上下文。
+5. `recommendation`：规则版推荐结论，包含优先查看项目、推荐理由、注意事项、下一步动作和 `scoring_model`。没有偏好时为 `rule:v1`，传入 `profile`、`language`、`category` 或 `query` 后为 `rule:v2-preference`。
+6. `missing`：未找到的项目。
+7. `selection_summary`：本次对比摘要。
 
 示例：
 
 ```text
-/v1/projects/compare?repos=owner/agent,owner/agent-helper
+/v1/projects/compare?repos=owner/agent,owner/agent-helper&profile=agent_development&language=Python
 ```
 
 该接口只读公开归档数据，不调用外部服务，不写入任务或推送状态。

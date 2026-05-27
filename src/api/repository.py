@@ -269,21 +269,37 @@ class ApiRepository:
             "selection_summary": _similarity_summary(detail, similar),
         }
 
-    def compare_projects(self, full_names: list[str] | str) -> dict[str, Any]:
+    def compare_projects(
+        self,
+        full_names: list[str] | str,
+        *,
+        profile: str | None = None,
+        language: str | None = None,
+        category: str | None = None,
+        query: str | None = None,
+    ) -> dict[str, Any]:
         requested = _normalize_project_list(full_names)
         details = [self.project_detail(name) for name in requested]
         found = [detail for detail in details if detail.get("found")]
         missing = [detail.get("full_name") or name for detail, name in zip(details, requested) if not detail.get("found")]
         projects = [_comparison_project(detail) for detail in found]
+        preference = _comparison_preference(
+            self.profiles(),
+            profile=profile,
+            language=language,
+            category=category,
+            query=query,
+        )
         return {
             "schema_version": 1,
             "requested": requested,
             "count": len(projects),
             "missing": missing,
+            "preference": preference,
             "projects": projects,
             "matrix": _comparison_matrix(projects),
             "best_by": _comparison_best_by(projects),
-            "recommendation": _comparison_recommendation(projects, missing),
+            "recommendation": _comparison_recommendation(projects, missing, preference),
             "selection_summary": _comparison_summary(projects, missing),
         }
 
@@ -1897,35 +1913,114 @@ def _best_project(
     return str(max(candidates, key=lambda project: _int_value(project.get(key))).get("full_name") or "")
 
 
-def _comparison_recommendation(projects: list[dict[str, Any]], missing: list[str]) -> dict[str, Any]:
+def _comparison_preference(
+    profiles_data: dict[str, Any],
+    *,
+    profile: str | None,
+    language: str | None,
+    category: str | None,
+    query: str | None,
+) -> dict[str, Any]:
+    profile_name = _blank_to_none(profile) or ""
+    selected = _find_profile(profiles_data, profile_name)
+    preferred_languages = _unique_strings(
+        [
+            *(_as_list(selected.get("preferred_languages")) if selected else []),
+            *(_as_list(selected.get("search_languages")) if selected else []),
+            *([language] if _blank_to_none(language) else []),
+        ]
+    )
+    preferred_topics = _unique_strings(
+        [
+            *(_as_list(selected.get("preferred_topics")) if selected else []),
+            *(_as_list(selected.get("search_topics")) if selected else []),
+            *([category] if _blank_to_none(category) else []),
+            *(_query_terms(query)),
+        ]
+    )
+    return {
+        "profile": profile_name,
+        "profile_label": (selected.get("label") or selected.get("profile_label") or "") if selected else "",
+        "language": _blank_to_none(language) or "",
+        "category": _blank_to_none(category) or "",
+        "query": _blank_to_none(query) or "",
+        "preferred_languages": preferred_languages,
+        "preferred_topics": preferred_topics,
+        "active": bool(profile_name or preferred_languages or preferred_topics),
+    }
+
+
+def _find_profile(profiles_data: dict[str, Any], name: str) -> dict[str, Any]:
+    if not name:
+        return {}
+    key = name.lower()
+    for profile in profiles_data.get("profiles") or []:
+        names = [
+            profile.get("name"),
+            profile.get("profile"),
+            profile.get("id"),
+            profile.get("label"),
+            profile.get("profile_label"),
+        ]
+        if any(str(value or "").lower() == key for value in names):
+            return profile
+    return {}
+
+
+def _query_terms(value: str | None) -> list[str]:
+    text = _blank_to_none(value)
+    if not text:
+        return []
+    return [part.strip() for part in text.replace(",", " ").replace("，", " ").split() if part.strip()]
+
+
+def _as_list(value: Any) -> list[str]:
+    if isinstance(value, list):
+        return [str(item).strip() for item in value if str(item).strip()]
+    if isinstance(value, str) and value.strip():
+        return [value.strip()]
+    return []
+
+
+def _comparison_recommendation(
+    projects: list[dict[str, Any]],
+    missing: list[str],
+    preference: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    preference = preference or {}
     if not projects:
         return {
             "primary_project": "",
             "reasons": ["没有找到可对比项目，无法给出优先推荐。"],
             "cautions": [f"未找到项目：{', '.join(missing)}。"] if missing else [],
             "next_actions": ["请从项目筛选页或项目详情页选择已归档项目进入对比。"],
-            "scoring_model": "rule:v1",
+            "scoring_model": _comparison_model_name(preference),
         }
 
-    ranked = sorted(projects, key=_comparison_score, reverse=True)
+    ranked = sorted(projects, key=lambda project: _comparison_score(project, preference), reverse=True)
     primary = ranked[0]
-    reasons = _comparison_project_reasons(primary)
+    reasons = _comparison_project_reasons(primary, preference)
     cautions = _comparison_project_cautions(primary, missing)
     next_actions = [
         f"优先打开 {primary.get('full_name') or ''} 的详情页，确认 README 摘要、风险提示和历史趋势。",
-        "如果当前需求更偏语言或方向匹配，再结合对比矩阵中的语言、方向和质量信号做二次筛选。",
+        "如需进一步细分，请调整 profile、language、category 或 query 后重新对比。",
     ]
     return {
         "primary_project": primary.get("full_name") or "",
-        "score": round(_comparison_score(primary), 2),
+        "score": round(_comparison_score(primary, preference), 2),
         "reasons": reasons,
         "cautions": cautions,
         "next_actions": next_actions,
-        "scoring_model": "rule:v1",
+        "scoring_model": _comparison_model_name(preference),
     }
 
 
-def _comparison_score(project: dict[str, Any]) -> float:
+def _comparison_model_name(preference: dict[str, Any]) -> str:
+    return "rule:v2-preference" if preference.get("active") else "rule:v1"
+
+
+def _comparison_score(project: dict[str, Any], preference: dict[str, Any] | None = None) -> float:
+    preference = preference or {}
     trending_rank = _int_value(project.get("best_trending_rank"))
     trending_bonus = max(0, 60 - trending_rank) if trending_rank else 0
     return (
@@ -1935,17 +2030,62 @@ def _comparison_score(project: dict[str, Any]) -> float:
         + _int_value(project.get("history_count")) * 5.0
         + trending_bonus
         - _int_value(project.get("security_flag_count")) * 8.0
+        + _comparison_preference_bonus(project, preference)
     )
 
 
-def _comparison_project_reasons(project: dict[str, Any]) -> list[str]:
+def _comparison_preference_bonus(project: dict[str, Any], preference: dict[str, Any]) -> float:
+    if not preference.get("active"):
+        return 0
+    bonus = 0.0
+    languages = {value.lower() for value in preference.get("preferred_languages") or []}
+    topics = {value.lower() for value in preference.get("preferred_topics") or []}
+    if (project.get("language") or "").lower() in languages:
+        bonus += 80
+    text = _comparison_project_text(project)
+    matches = [topic for topic in topics if topic and topic in text]
+    bonus += min(len(matches), 5) * 20
+    return bonus
+
+
+def _comparison_project_text(project: dict[str, Any]) -> str:
+    values = [
+        project.get("full_name"),
+        project.get("description"),
+        project.get("language"),
+        project.get("category"),
+        *(project.get("sources") or []),
+        *(project.get("selection_reasons") or []),
+        *(project.get("trend_summary") or []),
+    ]
+    return " ".join(str(value or "") for value in values).lower()
+
+
+def _comparison_project_reasons(project: dict[str, Any], preference: dict[str, Any] | None = None) -> list[str]:
+    preference = preference or {}
     reasons = [
-        f"综合规则评分最高：{round(_comparison_score(project), 2)}。",
+        f"综合规则评分最高：{round(_comparison_score(project, preference), 2)}。",
         f"累计新增 Star {_int_value(project.get('total_star_growth'))}，最近一次新增 Star {_int_value(project.get('latest_star_growth'))}。",
         f"历史入选 {_int_value(project.get('history_count'))} 次，最新质量分 {_int_value(project.get('latest_quality_score'))}。",
     ]
     if _int_value(project.get("best_trending_rank")):
         reasons.append(f"最好 GitHub Trending 排名第 {_int_value(project.get('best_trending_rank'))} 位。")
+    preference_reasons = _comparison_preference_reasons(project, preference)
+    reasons.extend(preference_reasons)
+    return reasons
+
+
+def _comparison_preference_reasons(project: dict[str, Any], preference: dict[str, Any]) -> list[str]:
+    if not preference.get("active"):
+        return []
+    reasons = []
+    languages = {value.lower() for value in preference.get("preferred_languages") or []}
+    if (project.get("language") or "").lower() in languages:
+        reasons.append(f"语言匹配当前偏好：{project.get('language') or ''}。")
+    text = _comparison_project_text(project)
+    matched_topics = [topic for topic in preference.get("preferred_topics") or [] if topic and topic.lower() in text]
+    if matched_topics:
+        reasons.append(f"关键词匹配当前偏好：{', '.join(matched_topics[:5])}。")
     return reasons
 
 

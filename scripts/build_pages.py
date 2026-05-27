@@ -2976,6 +2976,10 @@ def _compare_content() -> str:
           仓库全名，逗号或换行分隔，最多 8 个
           <textarea id="repos" placeholder="owner/repo, owner/another"></textarea>
         </label>
+        <label>方向<input id="profile" placeholder="agent_development / java / python"></label>
+        <label>语言<input id="language" placeholder="Python / Java"></label>
+        <label>分类<input id="category" placeholder="AI Agent / Backend"></label>
+        <label>关键词<input id="query" placeholder="agent / spring / rag"></label>
         <button id="compareButton" type="button">对比</button>
       </div>
       <p class="muted" id="modeText"></p>
@@ -2987,21 +2991,35 @@ def _compare_content() -> str:
     const compareButton = document.getElementById("compareButton");
     const content = document.getElementById("content");
     const modeText = document.getElementById("modeText");
+    const preferenceControls = {
+      profile: document.getElementById("profile"),
+      language: document.getElementById("language"),
+      category: document.getElementById("category"),
+      query: document.getElementById("query")
+    };
 
     init();
 
     function init() {
       const params = new URLSearchParams(window.location.search);
       reposInput.value = params.get("repos") || params.get("repo") || "";
+      preferenceControls.profile.value = params.get("profile") || "";
+      preferenceControls.language.value = params.get("language") || "";
+      preferenceControls.category.value = params.get("category") || "";
+      preferenceControls.query.value = params.get("q") || params.get("query") || "";
       modeText.textContent = shouldUseApi()
         ? "当前优先读取本地后端 /v1/projects/compare。"
         : "当前使用静态 projects.json 聚合，GitHub Pages 可直接查看。";
       compareButton.addEventListener("click", runCompare);
+      Object.values(preferenceControls).forEach(control => control.addEventListener("keydown", event => {
+        if (event.key === "Enter") runCompare();
+      }));
       if (normalizeRepos(reposInput.value).length >= 2) runCompare();
     }
 
     function runCompare() {
       const repos = normalizeRepos(reposInput.value);
+      const preference = currentPreference();
       if (repos.length < 2) {
         content.className = "empty";
         content.textContent = "请输入至少 2 个 owner/repo。";
@@ -3009,11 +3027,15 @@ def _compare_content() -> str:
       }
       const params = new URLSearchParams(window.location.search);
       params.set("repos", repos.join(","));
+      setOptional(params, "profile", preference.profile);
+      setOptional(params, "language", preference.language);
+      setOptional(params, "category", preference.category);
+      setOptional(params, "q", preference.query);
       if (shouldUseApi()) params.set("api", "1");
       history.replaceState(null, "", `compare.html?${params.toString()}`);
       content.className = "empty";
       content.textContent = "加载中";
-      loadCompare(repos)
+      loadCompare(repos, preference)
         .then(renderCompare)
         .catch(error => {
           content.className = "empty";
@@ -3021,20 +3043,20 @@ def _compare_content() -> str:
         });
     }
 
-    function loadCompare(repos) {
-      if (!shouldUseApi()) return loadStaticCompare(repos);
-      return fetch(`/v1/projects/compare?repos=${encodeURIComponent(repos.join(","))}`, { cache: "no-store" })
+    function loadCompare(repos, preference) {
+      if (!shouldUseApi()) return loadStaticCompare(repos, preference);
+      return fetch(`/v1/projects/compare?${compareQuery(repos, preference)}`, { cache: "no-store" })
         .then(jsonOrThrow)
-        .catch(() => loadStaticCompare(repos));
+        .catch(() => loadStaticCompare(repos, preference));
     }
 
-    function loadStaticCompare(repos) {
+    function loadStaticCompare(repos, preference) {
       return fetch("projects.json", { cache: "no-store" })
         .then(jsonOrThrow)
-        .then(data => buildStaticCompare(repos, Array.isArray(data.projects) ? data.projects : []));
+        .then(data => buildStaticCompare(repos, Array.isArray(data.projects) ? data.projects : [], preference));
     }
 
-    function buildStaticCompare(repos, projects) {
+    function buildStaticCompare(repos, projects, preference) {
       const details = repos.map(repo => staticProject(repo, projects));
       const found = details.filter(Boolean);
       const missing = repos.filter(repo => !details.find(project => project && same(project.full_name, repo)));
@@ -3043,10 +3065,11 @@ def _compare_content() -> str:
         requested: repos,
         count: found.length,
         missing,
+        preference,
         projects: found,
         matrix: comparisonMatrix(found),
         best_by: bestBy(found),
-        recommendation: compareRecommendation(found, missing),
+        recommendation: compareRecommendation(found, missing, preference),
         selection_summary: comparisonSummary(found, missing)
       };
     }
@@ -3087,7 +3110,7 @@ def _compare_content() -> str:
         return;
       }
       content.className = "";
-      const recommendation = data.recommendation || compareRecommendation(data.projects || [], data.missing || []);
+      const recommendation = data.recommendation || compareRecommendation(data.projects || [], data.missing || [], data.preference || currentPreference());
       content.innerHTML = `
         <section class="summary">
           ${metric("项目数量", data.count)}
@@ -3169,17 +3192,18 @@ def _compare_content() -> str:
       return sorted[0].full_name || "";
     }
 
-    function compareRecommendation(projects, missing) {
+    function compareRecommendation(projects, missing, preference) {
+      preference = preference || currentPreference();
       if (!projects.length) {
         return {
           primary_project: "",
           reasons: ["没有找到可对比项目，无法给出优先推荐。"],
           cautions: missing && missing.length ? [`未找到项目：${missing.join(", ")}。`] : [],
           next_actions: ["请从项目筛选页或项目详情页选择已归档项目进入对比。"],
-          scoring_model: "rule:v1"
+          scoring_model: preference.active ? "rule:v2-preference" : "rule:v1"
         };
       }
-      const ranked = [...projects].sort((a, b) => compareScore(b) - compareScore(a));
+      const ranked = [...projects].sort((a, b) => compareScore(b, preference) - compareScore(a, preference));
       const primary = ranked[0];
       const cautions = [];
       if (number(primary.security_flag_count)) cautions.push(`该项目仍有 ${number(primary.security_flag_count)} 条风险提示，需要人工复核。`);
@@ -3187,23 +3211,24 @@ def _compare_content() -> str:
       if (missing && missing.length) cautions.push(`未找到项目：${missing.join(", ")}。`);
       return {
         primary_project: primary.full_name || "",
-        score: Math.round(compareScore(primary) * 100) / 100,
+        score: Math.round(compareScore(primary, preference) * 100) / 100,
         reasons: [
-          `综合规则评分最高：${Math.round(compareScore(primary) * 100) / 100}。`,
+          `综合规则评分最高：${Math.round(compareScore(primary, preference) * 100) / 100}。`,
           `累计新增 Star ${number(primary.total_star_growth)}，最近一次新增 Star ${number(primary.latest_star_growth)}。`,
           `历史入选 ${number(primary.history_count)} 次，最新质量分 ${number(primary.latest_quality_score)}。`,
-          ...(number(primary.best_trending_rank) ? [`最好 GitHub Trending 排名第 ${number(primary.best_trending_rank)} 位。`] : [])
+          ...(number(primary.best_trending_rank) ? [`最好 GitHub Trending 排名第 ${number(primary.best_trending_rank)} 位。`] : []),
+          ...preferenceReasons(primary, preference)
         ],
         cautions: cautions.length ? cautions : ["暂未发现额外注意事项。"],
         next_actions: [
           `优先打开 ${primary.full_name || ""} 的详情页，确认 README 摘要、风险提示和历史趋势。`,
-          "如果当前需求更偏语言或方向匹配，再结合对比矩阵中的语言、方向和质量信号做二次筛选。"
+          "如需进一步细分，请调整方向、语言、分类或关键词后重新对比。"
         ],
-        scoring_model: "rule:v1"
+        scoring_model: preference.active ? "rule:v2-preference" : "rule:v1"
       };
     }
 
-    function compareScore(project) {
+    function compareScore(project, preference) {
       const trendingRank = number(project.best_trending_rank);
       const trendingBonus = trendingRank ? Math.max(0, 60 - trendingRank) : 0;
       return number(project.total_star_growth) * 2
@@ -3211,7 +3236,42 @@ def _compare_content() -> str:
         + number(project.latest_quality_score) * 1.5
         + number(project.history_count) * 5
         + trendingBonus
-        - number(project.security_flag_count) * 8;
+        - number(project.security_flag_count) * 8
+        + preferenceBonus(project, preference || currentPreference());
+    }
+
+    function preferenceBonus(project, preference) {
+      if (!preference || !preference.active) return 0;
+      let bonus = 0;
+      const languages = new Set((preference.preferred_languages || []).map(value => String(value).toLowerCase()));
+      const topics = (preference.preferred_topics || []).map(value => String(value).toLowerCase()).filter(Boolean);
+      if (languages.has(String(project.language || "").toLowerCase())) bonus += 80;
+      const text = projectText(project);
+      bonus += Math.min(topics.filter(topic => text.includes(topic)).length, 5) * 20;
+      return bonus;
+    }
+
+    function preferenceReasons(project, preference) {
+      if (!preference || !preference.active) return [];
+      const reasons = [];
+      const languages = new Set((preference.preferred_languages || []).map(value => String(value).toLowerCase()));
+      if (languages.has(String(project.language || "").toLowerCase())) reasons.push(`语言匹配当前偏好：${project.language || ""}。`);
+      const text = projectText(project);
+      const topics = (preference.preferred_topics || []).filter(topic => topic && text.includes(String(topic).toLowerCase()));
+      if (topics.length) reasons.push(`关键词匹配当前偏好：${topics.slice(0, 5).join(", ")}。`);
+      return reasons;
+    }
+
+    function projectText(project) {
+      return [
+        project.full_name,
+        project.description,
+        project.language,
+        project.category,
+        ...(project.sources || []),
+        ...(project.selection_reasons || []),
+        ...(project.trend_summary || [])
+      ].join(" ").toLowerCase();
     }
 
     function recommendationHtml(recommendation) {
@@ -3223,6 +3283,42 @@ def _compare_content() -> str:
         <h3>注意事项</h3>${listHtml(recommendation && recommendation.cautions || [])}
         <h3>下一步</h3>${listHtml(recommendation && recommendation.next_actions || [])}
       `;
+    }
+
+    function currentPreference() {
+      const profile = preferenceControls.profile.value.trim();
+      const language = preferenceControls.language.value.trim();
+      const category = preferenceControls.category.value.trim();
+      const query = preferenceControls.query.value.trim();
+      const profileTopics = profile ? profile.split(/[_\\s-]+/).filter(Boolean) : [];
+      return {
+        profile,
+        language,
+        category,
+        query,
+        preferred_languages: language ? [language] : [],
+        preferred_topics: [...profileTopics, category, ...queryTerms(query)].filter(Boolean),
+        active: Boolean(profile || language || category || query)
+      };
+    }
+
+    function compareQuery(repos, preference) {
+      const params = new URLSearchParams();
+      params.set("repos", repos.join(","));
+      setOptional(params, "profile", preference.profile);
+      setOptional(params, "language", preference.language);
+      setOptional(params, "category", preference.category);
+      setOptional(params, "query", preference.query);
+      return params.toString();
+    }
+
+    function setOptional(params, key, value) {
+      if (value) params.set(key, value);
+      else params.delete(key);
+    }
+
+    function queryTerms(value) {
+      return String(value || "").replaceAll("，", " ").replaceAll(",", " ").split(/\\s+/).map(item => item.trim()).filter(Boolean);
     }
 
     function comparisonSummary(projects, missing) {

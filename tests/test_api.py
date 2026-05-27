@@ -116,6 +116,12 @@ class ApiRepositoryTest(unittest.TestCase):
             search = repository.search(query="agent workflow", language="Python", limit=5)
             similar = repository.similar_projects("owner/agent", limit=5)
             comparison = repository.compare_projects(["owner/agent", "owner/agent-helper", "missing/repo"])
+            preference_comparison = repository.compare_projects(
+                ["owner/agent", "owner/agent-helper"],
+                profile="agent_development",
+                language="Python",
+                query="agent",
+            )
 
             self.assertEqual(projects["schema_version"], 1)
             self.assertGreaterEqual(projects["count"], 1)
@@ -266,6 +272,9 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(comparison["recommendation"]["primary_project"], "owner/agent")
             self.assertEqual(comparison["recommendation"]["scoring_model"], "rule:v1")
             self.assertTrue(comparison["recommendation"]["reasons"])
+            self.assertTrue(preference_comparison["preference"]["active"])
+            self.assertEqual(preference_comparison["preference"]["language"], "Python")
+            self.assertEqual(preference_comparison["recommendation"]["scoring_model"], "rule:v2-preference")
         finally:
             shutil.rmtree(root, ignore_errors=True)
 
@@ -304,7 +313,12 @@ class ApiRepositoryTest(unittest.TestCase):
             v1_similar = client.get("/v1/projects/owner/agent/similar", params={"limit": 5})
             v1_compare = client.get(
                 "/v1/projects/compare",
-                params={"repos": "owner/agent,owner/agent-helper,missing/repo"},
+                params={
+                    "repos": "owner/agent,owner/agent-helper,missing/repo",
+                    "profile": "agent_development",
+                    "language": "Python",
+                    "query": "agent",
+                },
             )
             v1_projects = client.get("/v1/projects", params={"profile": "agent_development", "limit": 5})
             v1_recommendations = client.get(
@@ -402,6 +416,7 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(v1_compare.json()["count"], 2)
             self.assertEqual(v1_compare.json()["best_by"]["highest_total_star_growth"], "owner/agent")
             self.assertEqual(v1_compare.json()["recommendation"]["primary_project"], "owner/agent")
+            self.assertEqual(v1_compare.json()["recommendation"]["scoring_model"], "rule:v2-preference")
             self.assertEqual(v1_projects.json()["projects"][0]["full_name"], "owner/agent")
             self.assertEqual(v1_recommendations.json()["recommendations"][0]["full_name"], "owner/agent")
             self.assertIn("profile=agent_development", v1_recommendations.json()["selection_summary"][0])
