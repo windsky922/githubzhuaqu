@@ -57,7 +57,41 @@ def load_project_interests(root: Path = ROOT) -> dict:
 
     profiles = load_project_profiles(root)
     profile_names = selected_profile_names(interests, os.getenv("INTEREST_PROFILE", ""))
-    return apply_interest_profiles(interests, profiles, profile_names)
+    interests = apply_interest_profiles(interests, profiles, profile_names)
+    return apply_runtime_interest_overrides(interests)
+
+
+def apply_runtime_interest_overrides(interests: dict) -> dict:
+    """合并任务级偏好，不修改本地配置文件。"""
+    output = dict(interests)
+    languages = _list_env("INTEREST_LANGUAGE")
+    topics = [*_list_env("INTEREST_CATEGORY"), *_list_env("INTEREST_QUERY")]
+    if languages:
+        output["preferred_languages"] = _merge_unique(output.get("preferred_languages", []), languages)
+        output["search_languages"] = _merge_unique(output.get("search_languages", []), languages)
+    if topics:
+        output["preferred_topics"] = _merge_unique(output.get("preferred_topics", []), topics)
+        output["search_topics"] = _merge_unique(output.get("search_topics", []), topics)
+    return output
+
+
+def _list_env(name: str) -> list[str]:
+    value = os.getenv(name, "")
+    for char in "，,;/|":
+        value = value.replace(char, " ")
+    return [item.strip() for item in value.split() if item.strip()]
+
+
+def _merge_unique(existing: object, extra: list[str]) -> list[str]:
+    result = []
+    seen = set()
+    for item in [*(existing if isinstance(existing, list) else []), *extra]:
+        text = str(item).strip()
+        key = text.lower()
+        if text and key not in seen:
+            seen.add(key)
+            result.append(text)
+    return result
 
 
 def load_settings(run_date: str, since_date: str) -> Settings:

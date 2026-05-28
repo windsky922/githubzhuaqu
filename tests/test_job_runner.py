@@ -29,7 +29,17 @@ class JobRunnerTest(unittest.TestCase):
                     "kind": "weekly_report",
                     "status": "planned",
                     "submitted_at": "2026-05-11T00:00:00Z",
-                    "request": {"profile": "agent_development", "dry_run": True, "days_back": 3},
+                    "request": {
+                        "profile": "agent_development",
+                        "language": "Python",
+                        "category": "AI Agent",
+                        "query": "workflow",
+                        "limit": 8,
+                        "subscription_id": "sub:test",
+                        "subscription_name": "Agent 开发订阅",
+                        "dry_run": True,
+                        "days_back": 3,
+                    },
                 },
             )
             summary = RunSummary(
@@ -45,6 +55,10 @@ class JobRunnerTest(unittest.TestCase):
                 self.assertEqual(kwargs["days_back"], 3)
                 self.assertTrue(kwargs["skip_telegram_send"])
                 self.assertEqual(os.getenv("INTEREST_PROFILE"), "agent_development")
+                self.assertEqual(os.getenv("INTEREST_LANGUAGE"), "Python")
+                self.assertEqual(os.getenv("INTEREST_CATEGORY"), "AI Agent")
+                self.assertEqual(os.getenv("INTEREST_QUERY"), "workflow")
+                self.assertEqual(os.getenv("MAX_PROJECTS"), "8")
                 return summary
 
             with patch("src.job_runner.run_weekly_report", side_effect=fake_run) as run:
@@ -52,6 +66,9 @@ class JobRunnerTest(unittest.TestCase):
 
             self.assertTrue(result["executed"])
             self.assertEqual(result["status"], "succeeded")
+            self.assertEqual(result["result"]["request_context"]["subscription_id"], "sub:test")
+            self.assertEqual(result["result"]["request_context"]["language"], "Python")
+            self.assertEqual(result["result"]["request_context"]["limit"], 8)
             run.assert_called_once()
             job = _read_job(db_path, "preview:abc")
             self.assertEqual(job["status"], "succeeded")

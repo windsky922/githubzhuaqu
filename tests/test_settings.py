@@ -104,6 +104,32 @@ class SettingsTest(unittest.TestCase):
         finally:
             shutil.rmtree(root, ignore_errors=True)
 
+    def test_load_project_interests_applies_runtime_overrides(self):
+        root = Path.cwd() / f".tmp-settings-test-{uuid.uuid4().hex}"
+        try:
+            config_dir = root / "config"
+            config_dir.mkdir(parents=True)
+            (config_dir / "interests.example.json").write_text(
+                json.dumps({"preferred_topics": ["base"], "preferred_languages": ["Python"]}),
+                encoding="utf-8",
+            )
+
+            env = {
+                "INTEREST_PROFILE": "",
+                "INTEREST_LANGUAGE": "Java",
+                "INTEREST_CATEGORY": "Backend",
+                "INTEREST_QUERY": "spring workflow",
+            }
+            with patch.dict("os.environ", env):
+                interests = load_project_interests(root)
+
+            self.assertEqual(interests["preferred_languages"], ["Python", "Java"])
+            self.assertEqual(interests["search_languages"], ["Java"])
+            self.assertEqual(interests["preferred_topics"], ["base", "Backend", "spring", "workflow"])
+            self.assertEqual(interests["search_topics"], ["Backend", "spring", "workflow"])
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
 
 if __name__ == "__main__":
     unittest.main()

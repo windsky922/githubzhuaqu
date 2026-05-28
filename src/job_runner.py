@@ -41,6 +41,7 @@ def run_planned_job(root: Path = ROOT, db_path: Path | None = None, job_id: str 
         summary = _execute_weekly_report(request)
         finished_at = _now()
         result = _summary_result(summary)
+        result["request_context"] = _request_context(request)
         status = "failed" if summary.status == "failed" or summary.error else "succeeded"
         _save_job(
             database,
@@ -93,8 +94,27 @@ def _execute_weekly_report(request: dict[str, Any]) -> RunSummary:
     dry_run = bool(request.get("dry_run", True))
     days_back = _positive_int(request.get("days_back"))
     profile = str(request.get("profile") or "").strip()
-    with _temporary_env({"INTEREST_PROFILE": profile} if profile else {}):
+    limit = _positive_int(request.get("limit"))
+    env = _request_env(request, profile, limit)
+    with _temporary_env(env):
         return run_weekly_report(days_back=days_back, skip_telegram_send=True if dry_run else None)
+
+
+def _request_env(request: dict[str, Any], profile: str, limit: int | None) -> dict[str, str]:
+    env = {}
+    if profile:
+        env["INTEREST_PROFILE"] = profile
+    for key, env_name in (
+        ("language", "INTEREST_LANGUAGE"),
+        ("category", "INTEREST_CATEGORY"),
+        ("query", "INTEREST_QUERY"),
+    ):
+        value = str(request.get(key) or "").strip()
+        if value:
+            env[env_name] = value
+    if limit:
+        env["MAX_PROJECTS"] = str(limit)
+    return env
 
 
 def _load_planned_job(db_path: Path, job_id: str | None) -> dict[str, Any]:
@@ -196,6 +216,25 @@ def _summary_result(summary: RunSummary) -> dict[str, Any]:
         "sqlite_index_path": summary.sqlite_index_path,
         "sqlite_error": summary.sqlite_error,
         "error": summary.error,
+    }
+
+
+def _request_context(request: dict[str, Any]) -> dict[str, Any]:
+    return {
+        key: request.get(key)
+        for key in (
+            "profile",
+            "language",
+            "category",
+            "query",
+            "sort",
+            "limit",
+            "subscription_id",
+            "subscription_name",
+            "days_back",
+            "dry_run",
+        )
+        if request.get(key) not in (None, "", [])
     }
 
 

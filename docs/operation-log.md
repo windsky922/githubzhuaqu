@@ -2,6 +2,23 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-05-28 追加：任务执行器接收订阅筛选上下文
+
+### 1. 开发目的
+
+订阅已经能生成 planned 周报任务，但执行器此前主要使用 `profile` 和回看天数。为了让订阅中的语言、方向、关键词和数量真正影响后续任务执行，本次把订阅筛选上下文接入 job runner。
+
+### 2. 修改内容
+
+1. `src/job_runner.py` 执行任务时会把 `language`、`category`、`query` 和 `limit` 转换为临时环境变量。
+2. `src/settings.py` 会读取这些运行时变量，并合并到 `preferred_languages`、`search_languages`、`preferred_topics` 和 `search_topics`。
+3. 任务执行结果新增 `request_context`，记录本次任务使用的 profile、语言、方向、关键词、数量和订阅编号。
+4. 新增测试覆盖运行时偏好合并和 job runner 环境变量传递。
+
+### 3. 边界说明
+
+本次只让任务级筛选条件进入既有采集和评分配置，不改动密钥配置、不绕过 dry-run 保护，也不新增外部服务调用。`sort` 暂时保留在任务上下文里，后续可用于定向周报内部排序。
+
 ## 2026-05-28 追加：订阅生成 planned 周报任务
 
 ### 1. 开发目的
