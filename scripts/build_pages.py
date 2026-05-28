@@ -2925,6 +2925,23 @@ def _compare_content() -> str:
     .metric strong { display: block; margin-top: 6px; font-size: 17px; overflow-wrap: anywhere; }
     .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
     .muted { color: var(--muted); }
+    .profile-shortcuts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .profile-shortcuts button {
+      min-height: 32px;
+      border-color: var(--line);
+      background: #fff;
+      color: var(--accent);
+      font-size: 13px;
+    }
+    .profile-shortcuts button.active {
+      border-color: var(--accent);
+      background: #eff6ff;
+    }
     .tag {
       display: inline-block;
       border: 1px solid var(--line);
@@ -2983,6 +3000,7 @@ def _compare_content() -> str:
         <button id="compareButton" type="button">对比</button>
       </div>
       <p class="muted" id="modeText"></p>
+      <div class="profile-shortcuts" id="profileButtons"></div>
     </section>
     <section id="content" class="empty">请输入至少 2 个仓库后开始对比。</section>
   </main>
@@ -2991,6 +3009,7 @@ def _compare_content() -> str:
     const compareButton = document.getElementById("compareButton");
     const content = document.getElementById("content");
     const modeText = document.getElementById("modeText");
+    const profileButtons = document.getElementById("profileButtons");
     const preferenceControls = {
       profile: document.getElementById("profile"),
       language: document.getElementById("language"),
@@ -3014,7 +3033,62 @@ def _compare_content() -> str:
       Object.values(preferenceControls).forEach(control => control.addEventListener("keydown", event => {
         if (event.key === "Enter") runCompare();
       }));
+      loadProfiles();
       if (normalizeRepos(reposInput.value).length >= 2) runCompare();
+    }
+
+    function loadProfiles() {
+      fetch("profiles.json", { cache: "no-store" })
+        .then(jsonOrThrow)
+        .then(data => renderProfileButtons(Array.isArray(data.profiles) ? data.profiles : []))
+        .catch(() => renderProfileButtons(quickProfiles()));
+    }
+
+    function renderProfileButtons(profiles) {
+      const items = profiles.length ? profiles : quickProfiles();
+      profileButtons.innerHTML = "";
+      items.slice(0, 8).forEach(profile => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = profile.label || profile.profile_label || profile.name || "未命名方向";
+        button.dataset.profile = profile.name || "";
+        if (button.dataset.profile === preferenceControls.profile.value.trim()) {
+          button.classList.add("active");
+        }
+        button.addEventListener("click", () => applyProfile(profile));
+        profileButtons.appendChild(button);
+      });
+    }
+
+    function applyProfile(profile) {
+      const name = profile.name || "";
+      const languages = firstList(profile.search_languages, profile.preferred_languages);
+      const topics = firstList(profile.search_topics, profile.preferred_topics);
+      preferenceControls.profile.value = name;
+      preferenceControls.language.value = languages[0] || "";
+      preferenceControls.category.value = "";
+      preferenceControls.query.value = topics.slice(0, 4).join(" ");
+      profileButtons.querySelectorAll("button").forEach(button => {
+        button.classList.toggle("active", button.dataset.profile === name);
+      });
+      if (normalizeRepos(reposInput.value).length >= 2) runCompare();
+    }
+
+    function firstList(...values) {
+      for (const value of values) {
+        if (Array.isArray(value) && value.length) return value;
+      }
+      return [];
+    }
+
+    function quickProfiles() {
+      return [
+        { name: "agent_development", label: "Agent 开发", search_languages: ["Python"], search_topics: ["agent", "llm", "workflow"] },
+        { name: "python", label: "Python", search_languages: ["Python"], search_topics: ["python", "automation", "ai"] },
+        { name: "java", label: "Java", search_languages: ["Java"], search_topics: ["java", "spring-boot", "backend"] },
+        { name: "backend", label: "后端", search_languages: ["Java"], search_topics: ["backend", "api", "database"] },
+        { name: "developer_tools", label: "开发者工具", search_languages: [], search_topics: ["cli", "devtools", "automation"] }
+      ];
     }
 
     function runCompare() {
