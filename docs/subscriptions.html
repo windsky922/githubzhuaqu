@@ -239,6 +239,7 @@
           <div class="meta">
             <a class="button ghost" href="${escapeAttribute(recommendationUrl(item))}">查看推荐</a>
             <button class="ghost" data-preview="${escapeAttribute(item.subscription_id)}" data-target="${escapeAttribute(previewTargetId(item))}">预览推荐</button>
+            <button class="ghost" data-trigger="${escapeAttribute(item.subscription_id)}">生成任务</button>
             <button class="ghost" data-toggle="${escapeAttribute(item.subscription_id)}" data-status="${item.status === "enabled" ? "disabled" : "enabled"}">${item.status === "enabled" ? "停用" : "启用"}</button>
           </div>
           <div id="${escapeAttribute(previewTargetId(item))}" class="preview" hidden></div>
@@ -246,6 +247,36 @@
       `).join("");
       document.querySelectorAll("[data-toggle]").forEach(button => button.addEventListener("click", () => updateStatus(button.dataset.toggle, button.dataset.status)));
       document.querySelectorAll("[data-preview]").forEach(button => button.addEventListener("click", () => loadSubscriptionPreview(button.dataset.preview, button.dataset.target)));
+      document.querySelectorAll("[data-trigger]").forEach(button => button.addEventListener("click", () => triggerSubscription(button.dataset.trigger)));
+    }
+
+    async function triggerSubscription(id) {
+      if (!apiMode) {
+        setMessage("静态模式不能生成任务，请启动本地后端。", true);
+        return;
+      }
+      if (!window.confirm("生成一个 dry-run 计划任务？生成后需要在任务详情页确认执行。")) return;
+      try {
+        const response = await fetch(`/v1/subscriptions/${encodeURIComponent(id)}/trigger`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ dry_run: true, requested_by: "subscriptions_page" })
+        });
+        if (!response.ok) throw new Error(`生成任务失败：${response.status}`);
+        const data = await response.json();
+        if (!data.accepted && data.blockers && data.blockers.length) {
+          setMessage(data.blockers.join("；"), true);
+          return;
+        }
+        const jobId = data.job_id || data.duplicate_of || "";
+        if (jobId) {
+          location.href = `job.html?job=${encodeURIComponent(jobId)}&api=1`;
+          return;
+        }
+        setMessage("任务请求已提交，但没有返回任务编号。", true);
+      } catch (error) {
+        setMessage(error.message || String(error), true);
+      }
     }
 
     async function updateStatus(id, status) {

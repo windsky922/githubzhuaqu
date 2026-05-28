@@ -51,6 +51,7 @@ class ApiRepository:
                 "recommendations": True,
                 "subscriptions": True,
                 "subscription_recommendations": True,
+                "subscription_trigger": True,
                 "database_summary": True,
                 "database_trends": True,
                 "database_facets": True,
@@ -912,6 +913,17 @@ class ApiRepository:
     def trigger_run_preview(self, payload: dict[str, Any] | None = None) -> dict[str, Any]:
         payload = payload or {}
         profile = str(payload.get("profile") or payload.get("interest_profile") or "").strip()
+        language = str(payload.get("language") or "").strip()[:80]
+        category = str(payload.get("category") or "").strip()[:120]
+        query = str(payload.get("query") or payload.get("q") or "").strip()[:160]
+        sort = str(payload.get("sort") or "").strip()
+        if sort and sort not in {"recent", "position", "score", "star-growth", "trending", "quality"}:
+            sort = "score"
+        limit = _positive_int(payload.get("limit") or payload.get("limit_count"))
+        if limit is not None:
+            limit = max(1, min(limit, 50))
+        subscription_id = str(payload.get("subscription_id") or "").strip()[:120]
+        subscription_name = str(payload.get("subscription_name") or "").strip()[:120]
         sources = _list_strings(payload.get("sources"))
         requested_dry_run = _truthy(payload.get("dry_run", True))
         confirm_delivery = _truthy(payload.get("confirm_delivery"))
@@ -928,6 +940,12 @@ class ApiRepository:
             json.dumps(
                 {
                     "profile": profile,
+                    "language": language,
+                    "category": category,
+                    "query": query,
+                    "sort": sort,
+                    "limit": limit,
+                    "subscription_id": subscription_id,
                     "sources": sources,
                     "dry_run": dry_run,
                     "confirm_delivery": confirm_delivery,
@@ -941,6 +959,13 @@ class ApiRepository:
         ).hexdigest()[:12]
         request = {
             "profile": profile,
+            "language": language,
+            "category": category,
+            "query": query,
+            "sort": sort,
+            "limit": limit,
+            "subscription_id": subscription_id,
+            "subscription_name": subscription_name,
             "sources": sources,
             "dry_run": dry_run,
             "requested_dry_run": requested_dry_run,
@@ -1019,6 +1044,74 @@ class ApiRepository:
                 "dry_run=false 必须同时提供 confirm_delivery=true，避免误触发真实推送。",
             ],
         }
+
+    def trigger_subscription_run(self, subscription_id: str, payload: dict[str, Any] | None = None) -> dict[str, Any]:
+        self.ensure_sqlite_index()
+        payload = payload or {}
+        subscription = self._subscription_by_id(subscription_id)
+        actor = str(payload.get("requested_by") or "subscription").strip()[:120]
+        normalized_id = str(subscription_id or "").strip()
+        if not subscription:
+            return {
+                "schema_version": 1,
+                "found": False,
+                "accepted": False,
+                "planned_job_created": False,
+                "subscription_id": normalized_id,
+                "subscription": {},
+                "job_id": "",
+                "status": "",
+                "blockers": ["订阅不存在，无法生成计划任务。"],
+                "next_steps": ["先在订阅配置页保存订阅，再生成计划任务。"],
+            }
+        if subscription.get("status") != "enabled":
+            self._record_job_event(
+                f"subscription:{normalized_id}",
+                "subscription_trigger_blocked",
+                str(subscription.get("status") or "disabled"),
+                actor or "subscription",
+                "订阅未启用，未创建 planned 周报任务。",
+                {"subscription_id": normalized_id, "subscription": subscription},
+            )
+            return {
+                "schema_version": 1,
+                "found": True,
+                "accepted": False,
+                "planned_job_created": False,
+                "subscription_id": normalized_id,
+                "subscription": subscription,
+                "job_id": "",
+                "status": "",
+                "blockers": ["订阅当前不是 enabled 状态，不能生成计划任务。"],
+                "next_steps": ["先启用订阅，再生成计划任务。"],
+            }
+
+        request_payload = {
+            "profile": subscription.get("profile") or "",
+            "language": subscription.get("language") or "",
+            "category": subscription.get("category") or "",
+            "query": subscription.get("query") or "",
+            "sort": subscription.get("sort") or "",
+            "limit": subscription.get("limit") or "",
+            "subscription_id": normalized_id,
+            "subscription_name": subscription.get("name") or "",
+            "sources": _list_strings(payload.get("sources")) or ["github_trending"],
+            "days_back": _positive_int(payload.get("days_back")) or 7,
+            "dry_run": payload.get("dry_run", True),
+            "confirm_delivery": payload.get("confirm_delivery", False),
+            "trigger_source": "subscription",
+            "requested_by": actor,
+        }
+        result = self.trigger_run_preview(request_payload)
+        result.update(
+            {
+                "found": True,
+                "accepted": bool(result.get("planned_job_created") or result.get("duplicate_of")),
+                "subscription_id": normalized_id,
+                "subscription": subscription,
+            }
+        )
+        return result
 
     def profiles(self) -> dict[str, Any]:
         return _read_json_object(
@@ -2262,6 +2355,13 @@ def _job_search_text(job: dict[str, Any], request: dict[str, Any], result: dict[
         job.get("error"),
         job.get("report_url"),
         request.get("profile"),
+        request.get("language"),
+        request.get("category"),
+        request.get("query"),
+        request.get("sort"),
+        request.get("limit"),
+        request.get("subscription_id"),
+        request.get("subscription_name"),
         result.get("report_url"),
         result.get("telegram_report_url"),
         request.get("trigger_source"),
@@ -2276,6 +2376,12 @@ def _job_request_key(request: dict[str, Any]) -> str:
     return json.dumps(
         {
             "profile": str(request.get("profile") or "").strip(),
+            "language": str(request.get("language") or "").strip(),
+            "category": str(request.get("category") or "").strip(),
+            "query": str(request.get("query") or "").strip(),
+            "sort": str(request.get("sort") or "").strip(),
+            "limit": _positive_int(request.get("limit")),
+            "subscription_id": str(request.get("subscription_id") or "").strip(),
             "sources": sorted(_list_strings(request.get("sources"))),
             "dry_run": _truthy(request.get("dry_run", True)),
             "confirm_delivery": _truthy(request.get("confirm_delivery")),

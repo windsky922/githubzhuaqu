@@ -284,6 +284,7 @@ http://127.0.0.1:8000/admin.html?api=1
 2. `POST /v1/subscriptions`：创建订阅。
 3. `PATCH /v1/subscriptions/{subscription_id}`：更新订阅条件或启停状态。
 4. `GET /v1/subscriptions/{subscription_id}/recommendations`：按订阅编号预览推荐结果。
+5. `POST /v1/subscriptions/{subscription_id}/trigger`：把启用订阅转换成 planned 周报任务，默认 `dry_run=true`，不直接真实推送。
 
 订阅字段包括：
 
@@ -321,6 +322,21 @@ GET /v1/subscriptions/sub:xxxx/recommendations?limit=10
 ```
 
 该接口会复用 `/v1/recommendations` 的筛选和排序逻辑，只把订阅保存的 profile、语言、方向、关键词和排序条件作为输入，不读取任何推送密钥。
+
+按订阅生成计划任务：
+
+```text
+POST /v1/subscriptions/sub:xxxx/trigger
+```
+
+```json
+{
+  "dry_run": true,
+  "requested_by": "subscriptions_page"
+}
+```
+
+该接口只创建 planned 任务，不在 HTTP 请求里执行采集、生成或推送。订阅必须是 `enabled` 状态；如果传入 `dry_run=false`，仍需要 `confirm_delivery=true`，否则会自动降级为 `dry_run=true`。
 
 ### `/v1` 任务接口
 

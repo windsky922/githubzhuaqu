@@ -40,14 +40,22 @@ class ApiRepositoryTest(unittest.TestCase):
                 created_subscription["subscription"]["subscription_id"],
                 limit=5,
             )
+            subscription_trigger = repository.trigger_subscription_run(
+                created_subscription["subscription"]["subscription_id"],
+                {"requested_by": "unit-test-subscription", "sources": ["subscription"]},
+            )
             missing_subscription_recommendations = repository.subscription_recommendations("sub:missing")
             updated_subscription = repository.update_subscription(
                 created_subscription["subscription"]["subscription_id"],
                 {"status": "disabled", "query": "workflow"},
             )
+            disabled_subscription_trigger = repository.trigger_subscription_run(
+                created_subscription["subscription"]["subscription_id"],
+                {"requested_by": "unit-test-subscription"},
+            )
             latest = repository.latest_weekly()
             health = repository.v1_health()
-            jobs = repository.jobs()
+            jobs = repository.jobs(status="succeeded")
             job_detail = repository.job_detail("run:2026-05-09")
             trigger = repository.trigger_run_preview(
                 {
@@ -151,10 +159,18 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(subscription_recommendations["subscription"]["subscription_id"], created_subscription["subscription"]["subscription_id"])
             self.assertEqual(subscription_recommendations["recommendations"][0]["full_name"], "owner/agent")
             self.assertIn("订阅 Agent 开发订阅 当前状态为 enabled", subscription_recommendations["selection_summary"][0])
+            self.assertTrue(subscription_trigger["found"])
+            self.assertTrue(subscription_trigger["accepted"])
+            self.assertTrue(subscription_trigger["job_id"].startswith("preview:"))
+            self.assertEqual(subscription_trigger["request"]["subscription_id"], created_subscription["subscription"]["subscription_id"])
+            self.assertEqual(subscription_trigger["request"]["language"], "Python")
+            self.assertEqual(subscription_trigger["request"]["query"], "agent")
             self.assertFalse(missing_subscription_recommendations["found"])
             self.assertTrue(updated_subscription["updated"])
             self.assertEqual(updated_subscription["subscription"]["status"], "disabled")
             self.assertEqual(updated_subscription["subscription"]["query"], "workflow")
+            self.assertFalse(disabled_subscription_trigger["accepted"])
+            self.assertIn("不是 enabled 状态", " ".join(disabled_subscription_trigger["blockers"]))
             self.assertEqual(latest["run_date"], "2026-05-09")
             self.assertIn("owner/agent", latest["markdown"])
             self.assertTrue(health["capabilities"]["jobs_query"])
@@ -164,6 +180,7 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertTrue(health["capabilities"]["local_job_runner"])
             self.assertTrue(health["capabilities"]["run_trigger_execute"])
             self.assertTrue(health["capabilities"]["subscription_recommendations"])
+            self.assertTrue(health["capabilities"]["subscription_trigger"])
             self.assertTrue(health["capabilities"]["database_summary"])
             self.assertTrue(health["capabilities"]["database_trends"])
             self.assertTrue(health["capabilities"]["database_facets"])
@@ -341,6 +358,10 @@ class ApiRepositoryTest(unittest.TestCase):
                 f"/v1/subscriptions/{subscription_id}/recommendations",
                 params={"limit": 5},
             )
+            v1_subscription_trigger = client.post(
+                f"/v1/subscriptions/{subscription_id}/trigger",
+                json={"requested_by": "route-subscription", "sources": ["subscription"]},
+            )
             v1_update_subscription = client.patch(
                 f"/v1/subscriptions/{subscription_id}",
                 json={"status": "disabled"},
@@ -389,6 +410,7 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(v1_create_subscription.status_code, 201)
             self.assertEqual(v1_subscriptions.status_code, 200)
             self.assertEqual(v1_subscription_recommendations.status_code, 200)
+            self.assertEqual(v1_subscription_trigger.status_code, 202)
             self.assertEqual(v1_update_subscription.status_code, 200)
             self.assertEqual(v1_trigger.status_code, 202)
             self.assertEqual(v1_execution_check.status_code, 200)
@@ -425,6 +447,8 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(v1_create_subscription.json()["subscription"]["channels"], ["telegram"])
             self.assertTrue(v1_subscription_recommendations.json()["found"])
             self.assertEqual(v1_subscription_recommendations.json()["recommendations"][0]["full_name"], "owner/agent")
+            self.assertTrue(v1_subscription_trigger.json()["accepted"])
+            self.assertEqual(v1_subscription_trigger.json()["request"]["subscription_id"], subscription_id)
             self.assertEqual(v1_update_subscription.json()["subscription"]["status"], "disabled")
             self.assertFalse(v1_trigger.json()["execution_supported"])
             self.assertTrue(v1_execution_check.json()["executable"])

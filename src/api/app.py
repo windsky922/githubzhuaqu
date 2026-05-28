@@ -230,6 +230,13 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
     ) -> dict[str, Any]:
         return repository.subscription_recommendations(subscription_id, limit=limit)
 
+    @app.post("/v1/subscriptions/{subscription_id:path}/trigger", status_code=202)
+    def v1_trigger_subscription_run(
+        subscription_id: str,
+        payload: dict[str, Any] | None = Body(default=None),
+    ) -> dict[str, Any]:
+        return repository.trigger_subscription_run(subscription_id, payload)
+
     @app.post("/v1/subscriptions", status_code=201)
     def v1_create_subscription(payload: dict[str, Any] | None = Body(default=None)) -> dict[str, Any]:
         return repository.create_subscription(payload)
