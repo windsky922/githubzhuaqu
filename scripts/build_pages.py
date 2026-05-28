@@ -1395,6 +1395,9 @@ def _subscriptions_content() -> str:
     input, select { box-sizing: border-box; width: 100%; border: 1px solid #d0d7de; border-radius: 6px; padding: 9px 10px; font: inherit; background: #ffffff; }
     button, .button { border: 1px solid #0969da; background: #0969da; color: #ffffff; border-radius: 6px; padding: 9px 12px; font: inherit; font-weight: 700; cursor: pointer; text-decoration: none; text-align: center; }
     .ghost { background: #ffffff; color: #0969da; }
+    .quick { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+    .quick button { background: #ffffff; color: #0969da; padding: 7px 10px; }
+    .quick button.active { background: #ddf4ff; border-color: #0969da; }
     .list { display: grid; gap: 12px; }
     .item { border: 1px solid #d8dee4; border-radius: 8px; padding: 14px; display: grid; gap: 10px; }
     .title { font-weight: 800; font-size: 16px; }
@@ -1439,6 +1442,7 @@ def _subscriptions_content() -> str:
         <label>数量<input id="limit" type="number" min="1" max="50" value="20"></label>
         <label>推送通道<input id="channels" placeholder="telegram,feishu"></label>
       </div>
+      <div id="profileButtons" class="quick" aria-label="个性化方向快捷选择"></div>
       <p class="notice">这里只保存通道名称，不保存 Token、Chat ID 或 Webhook。真实密钥仍从环境变量或 GitHub Actions Secrets 读取。</p>
       <button id="save">保存订阅</button>
       <span id="message" class="notice"></span>
@@ -1468,7 +1472,75 @@ def _subscriptions_content() -> str:
       fields.category.value = params.get("category") || "";
       fields.query.value = params.get("q") || params.get("query") || "";
       document.getElementById("save").addEventListener("click", createSubscription);
+      loadProfiles();
       loadSubscriptions();
+    }
+
+    function loadProfiles() {
+      fetch("profiles.json", { cache: "no-store" })
+        .then(response => {
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          return response.json();
+        })
+        .then(data => renderProfileButtons(Array.isArray(data.profiles) ? data.profiles : []))
+        .catch(() => renderProfileButtons(quickProfiles()));
+    }
+
+    function renderProfileButtons(profiles) {
+      const target = document.getElementById("profileButtons");
+      const items = profiles.length ? profiles : quickProfiles();
+      target.innerHTML = "";
+      items.slice(0, 8).forEach(profile => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = profile.label || profile.profile_label || profile.name || "未命名方向";
+        button.dataset.profile = profile.name || "";
+        button.classList.toggle("active", button.dataset.profile === fields.profile.value.trim());
+        button.addEventListener("click", () => applyProfile(profile));
+        target.appendChild(button);
+      });
+    }
+
+    function applyProfile(profile) {
+      const label = profile.label || profile.profile_label || profile.name || "个性化";
+      const languages = firstList(profile.search_languages, profile.preferred_languages);
+      const topics = firstList(profile.search_topics, profile.preferred_topics);
+      if (!fields.name.value.trim()) fields.name.value = `${label}订阅`;
+      fields.profile.value = profile.name || "";
+      fields.language.value = languages[0] || "";
+      fields.query.value = topics.slice(0, 4).join(" ");
+      document.querySelectorAll("#profileButtons button").forEach(button => {
+        button.classList.toggle("active", button.dataset.profile === fields.profile.value.trim());
+      });
+      syncProfileParams();
+    }
+
+    function firstList(...values) {
+      for (const value of values) {
+        if (Array.isArray(value) && value.length) return value;
+      }
+      return [];
+    }
+
+    function quickProfiles() {
+      return [
+        { name: "agent_development", label: "Agent 开发", search_languages: ["Python"], search_topics: ["agent", "llm", "workflow"] },
+        { name: "python", label: "Python", search_languages: ["Python"], search_topics: ["python", "automation", "ai"] },
+        { name: "java", label: "Java", search_languages: ["Java"], search_topics: ["java", "spring-boot", "backend"] },
+        { name: "backend", label: "后端", search_languages: ["Java"], search_topics: ["backend", "api", "database"] },
+        { name: "developer_tools", label: "开发者工具", search_languages: [], search_topics: ["cli", "devtools", "automation"] }
+      ];
+    }
+
+    function syncProfileParams() {
+      const next = new URLSearchParams(location.search);
+      if (fields.profile.value.trim()) next.set("profile", fields.profile.value.trim());
+      else next.delete("profile");
+      if (fields.language.value.trim()) next.set("language", fields.language.value.trim());
+      else next.delete("language");
+      if (fields.query.value.trim()) next.set("q", fields.query.value.trim());
+      else next.delete("q");
+      history.replaceState(null, "", `subscriptions.html?${next.toString()}`);
     }
 
     async function loadSubscriptions() {
