@@ -70,6 +70,34 @@ CREATE VIRTUAL TABLE IF NOT EXISTS project_corpus_fts USING fts5(
   search_text
 );
 
+CREATE TABLE IF NOT EXISTS rag_chunks (
+  chunk_id TEXT PRIMARY KEY,
+  corpus_id TEXT NOT NULL DEFAULT '',
+  chunk_index INTEGER NOT NULL DEFAULT 0,
+  run_date TEXT NOT NULL DEFAULT '',
+  full_name TEXT NOT NULL DEFAULT '',
+  html_url TEXT NOT NULL DEFAULT '',
+  language TEXT NOT NULL DEFAULT '',
+  category TEXT NOT NULL DEFAULT '',
+  sources_json TEXT NOT NULL DEFAULT '[]',
+  chunk_text TEXT NOT NULL DEFAULT '',
+  token_estimate INTEGER NOT NULL DEFAULT 0,
+  payload_json TEXT NOT NULL DEFAULT '{}'
+);
+
+CREATE INDEX IF NOT EXISTS idx_rag_chunks_corpus_id ON rag_chunks(corpus_id);
+CREATE INDEX IF NOT EXISTS idx_rag_chunks_run_date ON rag_chunks(run_date);
+CREATE INDEX IF NOT EXISTS idx_rag_chunks_full_name ON rag_chunks(full_name);
+CREATE INDEX IF NOT EXISTS idx_rag_chunks_language_category ON rag_chunks(language, category);
+
+CREATE VIRTUAL TABLE IF NOT EXISTS rag_chunks_fts USING fts5(
+  chunk_id UNINDEXED,
+  full_name,
+  language,
+  category,
+  chunk_text
+);
+
 CREATE TABLE IF NOT EXISTS trend_summaries (
   run_date TEXT PRIMARY KEY,
   total_projects INTEGER NOT NULL DEFAULT 0,

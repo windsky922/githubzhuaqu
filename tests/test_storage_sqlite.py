@@ -22,6 +22,8 @@ class SqliteStorageTest(unittest.TestCase):
             self.assertEqual(counts["selections"], 2)
             self.assertEqual(counts["project_corpus"], 2)
             self.assertEqual(counts["project_corpus_fts"], 2)
+            self.assertGreaterEqual(counts["rag_chunks"], 2)
+            self.assertGreaterEqual(counts["rag_chunks_fts"], 2)
             self.assertEqual(counts["trend_summaries"], 1)
             self.assertEqual(counts["sent_repositories"], 1)
             self.assertEqual(counts["star_history"], 2)
@@ -32,6 +34,8 @@ class SqliteStorageTest(unittest.TestCase):
                 self.assertEqual(table_count(connection, "selections"), 2)
                 self.assertEqual(table_count(connection, "project_corpus"), 2)
                 self.assertEqual(table_count(connection, "project_corpus_fts"), 2)
+                self.assertGreaterEqual(table_count(connection, "rag_chunks"), 2)
+                self.assertGreaterEqual(table_count(connection, "rag_chunks_fts"), 2)
                 self.assertEqual(table_count(connection, "repositories"), 2)
                 self.assertEqual(table_count(connection, "jobs"), 1)
                 self.assertEqual(table_count(connection, "job_events"), 0)
@@ -49,6 +53,12 @@ class SqliteStorageTest(unittest.TestCase):
                 ).fetchone()
                 self.assertIn("owner/project", corpus["search_text"])
                 self.assertIn("AI Agent", corpus["search_text"])
+                chunk = connection.execute(
+                    "SELECT full_name, chunk_text FROM rag_chunks WHERE full_name = ?",
+                    ("owner/project",),
+                ).fetchone()
+                self.assertIn("owner/project", chunk["chunk_text"])
+                self.assertIn("AI Agent", chunk["chunk_text"])
             finally:
                 connection.close()
         finally:
@@ -69,6 +79,8 @@ class SqliteStorageTest(unittest.TestCase):
                 self.assertEqual(table_count(connection, "selections"), 2)
                 self.assertEqual(table_count(connection, "project_corpus"), 2)
                 self.assertEqual(table_count(connection, "project_corpus_fts"), 2)
+                self.assertGreaterEqual(table_count(connection, "rag_chunks"), 2)
+                self.assertGreaterEqual(table_count(connection, "rag_chunks_fts"), 2)
                 self.assertEqual(table_count(connection, "star_history"), 2)
                 self.assertEqual(table_count(connection, "jobs"), 1)
                 self.assertEqual(table_count(connection, "job_events"), 0)

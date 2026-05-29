@@ -32,6 +32,7 @@
 | `capabilities.project_similarity` | 是否支持相似项目候选召回 |
 | `capabilities.project_compare` | 是否支持项目横向对比 |
 | `capabilities.rag_corpus` | 是否支持 RAG-ready 语料输出 |
+| `capabilities.rag_retrieve` | 是否支持 RAG 短文本块检索 |
 | `capabilities.runs_query` | 是否支持运行记录 |
 | `capabilities.jobs_query` | 是否支持任务查询 |
 | `capabilities.job_events` | 是否支持任务审计事件查询 |
@@ -176,6 +177,14 @@
 支持参数包括 `q`、`language`、`category`、`source` 和 `limit`。传入 `q` 时优先使用 FTS5 检索，FTS 不可用时回退普通文本匹配；不传 `q` 时返回最新语料。
 
 该接口是数据库能力升级的核心出口。后续新增向量表、embedding 作业或 RAG 问答时，应复用这个语料契约。
+
+### `GET /v1/rag/retrieve`
+
+基于 SQLite `rag_chunks` 和 `rag_chunks_fts` 做短文本块检索。接口返回 `contexts`、`citations` 和 `prompt_context`，用于后续接入问答模型、LangChain retriever 或项目推荐解释层。
+
+支持参数包括 `q`、`language`、`category`、`source` 和 `limit`。当前优先使用 SQLite FTS5，失败时回退普通文本匹配。接口只读本地派生索引，不调用外部模型，不生成 embedding。
+
+该接口让 RAG 从“整项目语料输出”前进到“可引用证据块召回”。后续如果新增向量表，应保持 `contexts` 和 `citations` 字段稳定。
 
 ### `GET /v1/projects/{owner}/{repo}/similar`
 

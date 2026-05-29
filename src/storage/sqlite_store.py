@@ -33,6 +33,8 @@ def import_json_archive(root: Path, db_path: Path) -> dict[str, int]:
             "selections": selection_count,
             "project_corpus": corpus_count,
             "project_corpus_fts": corpus_count,
+            "rag_chunks": table_count(connection, "rag_chunks"),
+            "rag_chunks_fts": table_count(connection, "rag_chunks_fts"),
             "trend_summaries": import_trend_summaries(connection, root),
             "sent_repositories": import_sent_repositories(connection, root),
             "star_history": import_star_history(connection, root),
@@ -282,6 +284,8 @@ def upsert_trend_summary(connection: sqlite3.Connection, run_date: str, data: di
 
 
 def rebuild_project_corpus(connection: sqlite3.Connection) -> int:
+    connection.execute("DELETE FROM rag_chunks")
+    connection.execute("DELETE FROM rag_chunks_fts")
     connection.execute("DELETE FROM project_corpus")
     connection.execute("DELETE FROM project_corpus_fts")
     rows = connection.execute(
@@ -390,6 +394,89 @@ def upsert_project_corpus(connection: sqlite3.Connection, row: sqlite3.Row) -> N
             search_text,
         ),
     )
+    upsert_rag_chunks(
+        connection,
+        corpus_id=corpus_id,
+        run_date=run_date,
+        full_name=full_name,
+        html_url=html_url,
+        language=language,
+        category=category,
+        sources=sources,
+        search_text=search_text,
+        payload=payload,
+    )
+
+
+def upsert_rag_chunks(
+    connection: sqlite3.Connection,
+    *,
+    corpus_id: str,
+    run_date: str,
+    full_name: str,
+    html_url: str,
+    language: str,
+    category: str,
+    sources: list[Any],
+    search_text: str,
+    payload: dict[str, Any],
+) -> None:
+    connection.execute(
+        "DELETE FROM rag_chunks_fts WHERE chunk_id IN (SELECT chunk_id FROM rag_chunks WHERE corpus_id = ?)",
+        (corpus_id,),
+    )
+    connection.execute("DELETE FROM rag_chunks WHERE corpus_id = ?", (corpus_id,))
+    for index, chunk_text in enumerate(_chunk_text(search_text), start=1):
+        chunk_id = sha1(f"{corpus_id}:{index}".encode("utf-8")).hexdigest()
+        chunk_payload = {
+            **payload,
+            "corpus_id": corpus_id,
+            "chunk_index": index,
+            "token_estimate": _token_estimate(chunk_text),
+        }
+        connection.execute(
+            """
+            INSERT INTO rag_chunks(
+              chunk_id, corpus_id, chunk_index, run_date, full_name, html_url,
+              language, category, sources_json, chunk_text, token_estimate, payload_json
+            )
+            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(chunk_id) DO UPDATE SET
+              corpus_id = excluded.corpus_id,
+              chunk_index = excluded.chunk_index,
+              run_date = excluded.run_date,
+              full_name = excluded.full_name,
+              html_url = excluded.html_url,
+              language = excluded.language,
+              category = excluded.category,
+              sources_json = excluded.sources_json,
+              chunk_text = excluded.chunk_text,
+              token_estimate = excluded.token_estimate,
+              payload_json = excluded.payload_json
+            """,
+            (
+                chunk_id,
+                corpus_id,
+                index,
+                run_date,
+                full_name,
+                html_url,
+                language,
+                category,
+                _json_text(sources),
+                chunk_text,
+                _token_estimate(chunk_text),
+                _json_text(chunk_payload),
+            ),
+        )
+        connection.execute("DELETE FROM rag_chunks_fts WHERE chunk_id = ?", (chunk_id,))
+        connection.execute(
+            """
+            INSERT INTO rag_chunks_fts(chunk_id, full_name, language, category, chunk_text)
+            VALUES(?, ?, ?, ?, ?)
+            """,
+            (chunk_id, full_name, language, category, chunk_text),
+        )
 
 
 def upsert_job_from_run(connection: sqlite3.Connection, data: dict[str, Any]) -> None:
@@ -503,6 +590,8 @@ def table_count(connection: sqlite3.Connection, table_name: str) -> int:
         "selections",
         "project_corpus",
         "project_corpus_fts",
+        "rag_chunks",
+        "rag_chunks_fts",
         "trend_summaries",
         "sent_repositories",
         "star_history",
@@ -559,6 +648,33 @@ def _list_value(value: Any) -> list[Any]:
 
 def _clean_text(value: str) -> str:
     return " ".join(value.split())
+
+
+def _chunk_text(text: str, *, max_chars: int = 700, overlap: int = 120) -> list[str]:
+    cleaned = _clean_text(text)
+    if not cleaned:
+        return []
+    if len(cleaned) <= max_chars:
+        return [cleaned]
+    chunks = []
+    start = 0
+    while start < len(cleaned):
+        end = min(len(cleaned), start + max_chars)
+        if end < len(cleaned):
+            boundary = max(cleaned.rfind("。", start, end), cleaned.rfind(".", start, end), cleaned.rfind(" ", start, end))
+            if boundary > start + max_chars // 2:
+                end = boundary + 1
+        chunk = cleaned[start:end].strip()
+        if chunk:
+            chunks.append(chunk)
+        if end >= len(cleaned):
+            break
+        start = max(end - overlap, start + 1)
+    return chunks
+
+
+def _token_estimate(text: str) -> int:
+    return max(1, len(text) // 4)
 
 
 def _json_text(data: Any) -> str:

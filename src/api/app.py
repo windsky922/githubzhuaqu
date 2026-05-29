@@ -218,6 +218,22 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
             limit=limit,
         )
 
+    @app.get("/v1/rag/retrieve")
+    def v1_rag_retrieve(
+        q: str = Query(..., min_length=1),
+        language: str | None = None,
+        category: str | None = None,
+        source: str | None = None,
+        limit: int = Query(default=8, ge=1, le=30),
+    ) -> dict[str, Any]:
+        return repository.rag_retrieve(
+            query=q,
+            language=language,
+            category=category,
+            source=source,
+            limit=limit,
+        )
+
     @app.get("/v1/runs")
     def v1_runs() -> dict[str, Any]:
         return repository.runs()

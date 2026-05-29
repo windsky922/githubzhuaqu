@@ -235,6 +235,35 @@ http://127.0.0.1:8000/admin.html?api=1
 
 该接口是数据库能力升级到 RAG 能力的第一层稳定出口。后续如果接入 embedding 或 LangChain，应优先复用这个接口的字段，而不是重新解析 Markdown 周报或原始 README。
 
+### `GET /v1/rag/retrieve`
+
+基于 SQLite `rag_chunks` 语料块执行 RAG 检索，返回短文本上下文、引用列表和可直接交给后续问答链的 `prompt_context`。这个接口仍然不调用模型、不生成 embedding、不请求外部服务，先用 SQLite FTS5 提供稳定的本地检索能力，后续可以替换或叠加向量检索。
+
+支持参数：
+
+| 参数 | 说明 |
+|---|---|
+| `q` | 必填，用户问题或检索关键词 |
+| `language` | 可选，按语言过滤 |
+| `category` | 可选，按项目方向过滤 |
+| `source` | 可选，按来源过滤，例如 `github_trending` |
+| `limit` | 返回上下文数量，默认 8，最大 30 |
+
+返回内容包括：
+
+1. `contexts`：召回的 RAG 短文本块，包含 `text`、`metadata`、`evidence` 和规则分。
+2. `citations`：按上下文顺序生成的引用列表，包含项目名、GitHub 链接、入选日期和 chunk 编号。
+3. `prompt_context`：拼接后的上下文文本，供后续 Kimi、OpenAI 或 LangChain 问答链直接使用。
+4. `retrieval`：本次检索使用的模式，可能是 `fts5` 或 `like`。
+
+示例：
+
+```text
+/v1/rag/retrieve?q=agent%20workflow&language=Python&limit=8
+```
+
+该接口是后续“项目知识库问答”和“基于证据的推荐解释”的核心入口。当前阶段只做本地证据召回，避免过早绑定某个向量库或模型供应商。
+
 ### `GET /v1/projects/{owner}/{repo}/similar`
 
 基于单项目详情和 `project_corpus` 语料索引生成相似项目候选。该接口优先使用 SQLite FTS5 召回候选，再结合语言、方向、来源、关键词重合、Trending 排名和新增 Star 计算 `similarity_score`。

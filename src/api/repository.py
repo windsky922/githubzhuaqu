@@ -59,6 +59,7 @@ class ApiRepository:
                 "project_similarity": True,
                 "project_compare": True,
                 "rag_corpus": True,
+                "rag_retrieve": True,
                 "runs_query": True,
                 "jobs_query": True,
                 "job_events": True,
@@ -281,6 +282,81 @@ class ApiRepository:
             "rag_readiness": _rag_corpus_readiness(documents),
         }
 
+    def rag_retrieve(
+        self,
+        *,
+        query: str,
+        language: str | None = None,
+        category: str | None = None,
+        source: str | None = None,
+        limit: int = 8,
+    ) -> dict[str, Any]:
+        self.ensure_sqlite_index()
+        normalized_query = (_blank_to_none(query) or "").strip()
+        terms = _search_terms(normalized_query)
+        limit = max(1, min(int(limit or 8), 30))
+        normalized_language = _blank_to_none(language)
+        normalized_category = _blank_to_none(category)
+        normalized_source = _blank_to_none(source)
+        if not terms:
+            return {
+                "schema_version": 1,
+                "query": normalized_query,
+                "count": 0,
+                "contexts": [],
+                "citations": [],
+                "retrieval": {"mode": "", "terms": [], "limit": limit},
+                "prompt_context": "",
+                "summary": ["请输入用于 RAG 检索的问题或关键词。"],
+            }
+
+        connection = connect(self.db_path)
+        retrieval_mode = "fts5"
+        try:
+            initialize(connection)
+            try:
+                rows = _rag_chunk_rows_fts(
+                    connection,
+                    terms=terms,
+                    language=normalized_language,
+                    category=normalized_category,
+                    source=normalized_source,
+                    limit=limit * 3,
+                )
+            except sqlite3.Error:
+                rows = _rag_chunk_rows_like(
+                    connection,
+                    terms=terms,
+                    language=normalized_language,
+                    category=normalized_category,
+                    source=normalized_source,
+                    limit=limit * 3,
+                )
+                retrieval_mode = "like"
+        finally:
+            connection.close()
+
+        contexts = _dedupe_rag_contexts(
+            sorted(
+                [_rag_context(row, terms) for row in rows],
+                key=lambda item: (item["score"], item["metadata"]["run_date"], item["metadata"]["full_name"]),
+                reverse=True,
+            )
+        )[:limit]
+        return {
+            "schema_version": 1,
+            "query": normalized_query,
+            "language": normalized_language or "",
+            "category": normalized_category or "",
+            "source": normalized_source or "",
+            "count": len(contexts),
+            "contexts": contexts,
+            "citations": _rag_citations(contexts),
+            "retrieval": {"mode": retrieval_mode, "terms": terms, "limit": limit},
+            "prompt_context": _rag_prompt_context(contexts),
+            "summary": _rag_retrieve_summary(contexts, terms),
+        }
+
     def similar_projects(self, full_name: str, *, limit: int = 10) -> dict[str, Any]:
         detail = self.project_detail(full_name)
         normalized = _normalize_full_name(full_name)
@@ -485,6 +561,8 @@ class ApiRepository:
                 "selections",
                 "project_corpus",
                 "project_corpus_fts",
+                "rag_chunks",
+                "rag_chunks_fts",
                 "trend_summaries",
                 "jobs",
                 "job_events",
@@ -547,8 +625,11 @@ class ApiRepository:
                 "selection_records": table_counts.get("selections", 0),
                 "corpus_records": table_counts.get("project_corpus", 0),
                 "fts_records": table_counts.get("project_corpus_fts", 0),
+                "chunk_records": table_counts.get("rag_chunks", 0),
+                "chunk_fts_records": table_counts.get("rag_chunks_fts", 0),
                 "event_records": table_counts.get("job_events", 0),
                 "ready_for_text_index": table_counts.get("project_corpus_fts", 0) > 0,
+                "ready_for_chunk_retrieval": table_counts.get("rag_chunks_fts", 0) > 0,
             },
         }
 
@@ -1286,6 +1367,8 @@ class ApiRepository:
             not self._sqlite_table_exists("subscriptions")
             or not self._sqlite_table_exists("project_corpus")
             or not self._sqlite_table_exists("project_corpus_fts")
+            or not self._sqlite_table_exists("rag_chunks")
+            or not self._sqlite_table_exists("rag_chunks_fts")
         ):
             connection = connect(self.db_path)
             try:
@@ -1296,6 +1379,8 @@ class ApiRepository:
             self._sqlite_table_exists("selections")
             and self._sqlite_table_exists("project_corpus")
             and self._sqlite_table_exists("project_corpus_fts")
+            and self._sqlite_table_exists("rag_chunks")
+            and self._sqlite_table_exists("rag_chunks_fts")
         ):
             connection = connect(self.db_path)
             try:
@@ -1303,6 +1388,8 @@ class ApiRepository:
                 if (
                     table_count(connection, "project_corpus") == 0
                     or table_count(connection, "project_corpus_fts") == 0
+                    or table_count(connection, "rag_chunks") == 0
+                    or table_count(connection, "rag_chunks_fts") == 0
                 ) and table_count(connection, "selections") > 0:
                     rebuild_project_corpus(connection)
                     connection.commit()
@@ -1848,6 +1935,76 @@ def _corpus_rows_latest(
     return connection.execute(sql, parameters).fetchall()
 
 
+def _rag_chunk_rows_fts(
+    connection: Any,
+    *,
+    terms: list[str],
+    language: str | None,
+    category: str | None,
+    source: str | None,
+    limit: int,
+) -> list[Any]:
+    conditions = ["rag_chunks_fts MATCH ?"]
+    parameters: list[Any] = [_fts_query(terms)]
+    if language:
+        conditions.append("c.language = ?")
+        parameters.append(language)
+    if category:
+        conditions.append("c.category = ?")
+        parameters.append(category)
+    if source:
+        conditions.append("c.sources_json LIKE ?")
+        parameters.append(f"%{source}%")
+    parameters.append(limit)
+    return connection.execute(
+        f"""
+        SELECT c.chunk_id, c.corpus_id, c.chunk_index, c.run_date, c.full_name, c.html_url,
+               c.language, c.category, c.sources_json, c.chunk_text, c.token_estimate, c.payload_json
+        FROM rag_chunks c
+        JOIN rag_chunks_fts f ON f.chunk_id = c.chunk_id
+        WHERE {" AND ".join(conditions)}
+        ORDER BY bm25(rag_chunks_fts), c.run_date DESC, c.full_name ASC, c.chunk_index ASC
+        LIMIT ?
+        """,
+        parameters,
+    ).fetchall()
+
+
+def _rag_chunk_rows_like(
+    connection: Any,
+    *,
+    terms: list[str],
+    language: str | None,
+    category: str | None,
+    source: str | None,
+    limit: int,
+) -> list[Any]:
+    conditions = []
+    parameters: list[Any] = []
+    if language:
+        conditions.append("language = ?")
+        parameters.append(language)
+    if category:
+        conditions.append("category = ?")
+        parameters.append(category)
+    if source:
+        conditions.append("sources_json LIKE ?")
+        parameters.append(f"%{source}%")
+    for term in terms:
+        conditions.append("LOWER(chunk_text) LIKE ?")
+        parameters.append(f"%{term.lower()}%")
+    sql = """
+        SELECT chunk_id, corpus_id, chunk_index, run_date, full_name, html_url,
+               language, category, sources_json, chunk_text, token_estimate, payload_json
+        FROM rag_chunks
+    """
+    if conditions:
+        sql += " WHERE " + " AND ".join(conditions)
+    sql += " ORDER BY run_date DESC, full_name ASC, chunk_index ASC LIMIT ?"
+    parameters.append(limit)
+    return connection.execute(sql, parameters).fetchall()
+
+
 def _fts_query(terms: list[str]) -> str:
     quoted_terms = []
     for term in terms:
@@ -1926,6 +2083,98 @@ def _rag_corpus_readiness(documents: list[dict[str, Any]]) -> dict[str, Any]:
             else ["先运行周报生成并同步 SQLite 语料。"]
         ),
     }
+
+
+def _rag_context(row: Any, terms: list[str]) -> dict[str, Any]:
+    text = str(row["chunk_text"] or "").strip()
+    lower_text = text.lower()
+    score = 0
+    for term in terms:
+        term_lower = term.lower()
+        score += lower_text.count(term_lower) * 10
+        if str(row["full_name"] or "").lower().find(term_lower) >= 0:
+            score += 15
+        if str(row["category"] or "").lower().find(term_lower) >= 0:
+            score += 8
+        if str(row["language"] or "").lower().find(term_lower) >= 0:
+            score += 5
+    payload = _json_object(row["payload_json"])
+    return {
+        "chunk_id": row["chunk_id"],
+        "corpus_id": row["corpus_id"],
+        "text": text,
+        "score": score,
+        "evidence": _rag_evidence(text, terms),
+        "metadata": {
+            "chunk_index": _int_value(row["chunk_index"]),
+            "run_date": row["run_date"],
+            "full_name": row["full_name"],
+            "html_url": row["html_url"],
+            "language": row["language"],
+            "category": row["category"],
+            "sources": _list_strings(_json_list(row["sources_json"])),
+            "token_estimate": _int_value(row["token_estimate"]),
+            "quality_level": payload.get("quality_level") or "",
+            "trending_rank": _int_value(payload.get("trending_rank")),
+            "star_growth": _int_value(payload.get("star_growth")),
+        },
+    }
+
+
+def _dedupe_rag_contexts(contexts: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    seen = set()
+    deduped = []
+    for context in contexts:
+        key = (
+            str(context.get("metadata", {}).get("full_name") or "").lower(),
+            _int_value(context.get("metadata", {}).get("chunk_index")),
+        )
+        if not key[0] or key in seen:
+            continue
+        seen.add(key)
+        deduped.append(context)
+    return deduped
+
+
+def _rag_citations(contexts: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    citations = []
+    for index, context in enumerate(contexts, start=1):
+        metadata = context.get("metadata", {})
+        citations.append(
+            {
+                "index": index,
+                "full_name": metadata.get("full_name") or "",
+                "html_url": metadata.get("html_url") or "",
+                "run_date": metadata.get("run_date") or "",
+                "chunk_id": context.get("chunk_id") or "",
+            }
+        )
+    return citations
+
+
+def _rag_prompt_context(contexts: list[dict[str, Any]]) -> str:
+    parts = []
+    for index, context in enumerate(contexts, start=1):
+        metadata = context.get("metadata", {})
+        parts.append(
+            "\n".join(
+                [
+                    f"[{index}] {metadata.get('full_name') or ''} ({metadata.get('run_date') or ''})",
+                    str(context.get("text") or ""),
+                ]
+            )
+        )
+    return "\n\n".join(parts)
+
+
+def _rag_retrieve_summary(contexts: list[dict[str, Any]], terms: list[str]) -> list[str]:
+    if not contexts:
+        return [f"没有找到匹配 {'、'.join(terms)} 的 RAG 语料块。"]
+    repositories = _unique_strings(context.get("metadata", {}).get("full_name") or "" for context in contexts)
+    return [
+        f"召回 {len(contexts)} 个 RAG 语料块，关键词：{'、'.join(terms)}。",
+        f"覆盖 {len(repositories)} 个项目：{'、'.join(repositories[:5])}。",
+    ]
 
 
 def _dedupe_search_results(results: list[dict[str, Any]]) -> list[dict[str, Any]]:

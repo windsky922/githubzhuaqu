@@ -2,6 +2,25 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-05-29 追加：新增 RAG 短文本块检索
+
+### 1. 开发目的
+
+上一步已经提供 `/v1/rag/corpus`，但它输出的是项目级语料。真正接入 RAG、embedding 或 LangChain 时，需要更短、更稳定、可引用的证据块。本次优先升级数据库层和 RAG 检索层，继续避免过早绑定外部模型或复杂框架。
+
+### 2. 修改内容
+
+1. SQLite 新增 `rag_chunks` 和 `rag_chunks_fts`，从 `project_corpus` 自动拆分短文本块。
+2. JSON 归档导入和 SQLite 自动重建时会同步重建 RAG chunk 索引。
+3. 新增 `GET /v1/rag/retrieve`，支持按关键词、语言、方向和来源召回 RAG 证据块。
+4. 检索结果返回 `contexts`、`citations` 和 `prompt_context`，后续可以直接接入问答模型或 LangChain retriever。
+5. 数据库概览增加 chunk 计数和 `ready_for_chunk_retrieval` 状态。
+6. README、API 文档、v1 规划、数据契约和测试已同步更新。
+
+### 3. 边界说明
+
+本次仍然不调用外部模型、不生成 embedding、不写入用户隐私，也不改变周报主流程。当前实现是 RAG 的本地证据召回层；下一步可以在此基础上增加可选的 embedding 构建命令和向量检索表。
+
 ## 2026-05-29 追加：新增 RAG 语料输出接口
 
 ### 1. 开发目的
