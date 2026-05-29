@@ -203,6 +203,18 @@ SQLITE_COLUMNS = {
         "category",
         "chunk_text",
     },
+    "rag_embeddings": {
+        "chunk_id",
+        "corpus_id",
+        "run_date",
+        "full_name",
+        "html_url",
+        "embedding_model",
+        "dimensions",
+        "vector_json",
+        "payload_json",
+        "updated_at",
+    },
     "trend_summaries": {
         "run_date",
         "total_projects",

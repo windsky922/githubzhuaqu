@@ -9,6 +9,7 @@ from typing import Any
 
 from scripts.query_archive import query_archive
 from src.job_runner import run_planned_job
+from src.rag.embeddings import MODEL_NAME, build_rag_embeddings, cosine_similarity, hash_embedding, vector_from_json
 from src.storage.sqlite_store import (
     connect,
     import_json_archive,
@@ -60,6 +61,7 @@ class ApiRepository:
                 "project_compare": True,
                 "rag_corpus": True,
                 "rag_retrieve": True,
+                "rag_vector_search": True,
                 "runs_query": True,
                 "jobs_query": True,
                 "job_events": True,
@@ -357,6 +359,72 @@ class ApiRepository:
             "summary": _rag_retrieve_summary(contexts, terms),
         }
 
+    def rag_vector_search(
+        self,
+        *,
+        query: str,
+        language: str | None = None,
+        category: str | None = None,
+        source: str | None = None,
+        limit: int = 8,
+        model: str = MODEL_NAME,
+        auto_build: bool = False,
+    ) -> dict[str, Any]:
+        self.ensure_sqlite_index()
+        normalized_query = (_blank_to_none(query) or "").strip()
+        terms = _search_terms(normalized_query)
+        limit = max(1, min(int(limit or 8), 30))
+        model = _blank_to_none(model) or MODEL_NAME
+        if not terms:
+            return {
+                "schema_version": 1,
+                "query": normalized_query,
+                "count": 0,
+                "contexts": [],
+                "citations": [],
+                "retrieval": {"mode": "vector", "model": model, "limit": limit, "auto_build": bool(auto_build)},
+                "prompt_context": "",
+                "summary": ["请输入用于向量检索的问题或关键词。"],
+            }
+
+        if auto_build and self._embedding_count(model) == 0:
+            build_rag_embeddings(self.db_path, model=model)
+
+        query_vector = hash_embedding(normalized_query)
+        rows = self._embedding_rows(model)
+        contexts = []
+        for row in rows:
+            payload = _json_object(row["payload_json"])
+            if language and str(payload.get("language") or "") != language:
+                continue
+            if category and str(payload.get("category") or "") != category:
+                continue
+            sources = _list_strings(payload.get("sources") or [])
+            if source and source not in sources:
+                continue
+            score = cosine_similarity(query_vector, vector_from_json(row["vector_json"]))
+            if score <= 0:
+                continue
+            contexts.append(_vector_context(row, payload, score, terms))
+        contexts = sorted(
+            contexts,
+            key=lambda item: (item["score"], item["metadata"]["run_date"], item["metadata"]["full_name"]),
+            reverse=True,
+        )[:limit]
+        return {
+            "schema_version": 1,
+            "query": normalized_query,
+            "language": _blank_to_none(language) or "",
+            "category": _blank_to_none(category) or "",
+            "source": _blank_to_none(source) or "",
+            "count": len(contexts),
+            "contexts": contexts,
+            "citations": _rag_citations(contexts),
+            "retrieval": {"mode": "vector", "model": model, "limit": limit, "auto_build": bool(auto_build)},
+            "prompt_context": _rag_prompt_context(contexts),
+            "summary": _rag_vector_summary(contexts, model),
+        }
+
     def similar_projects(self, full_name: str, *, limit: int = 10) -> dict[str, Any]:
         detail = self.project_detail(full_name)
         normalized = _normalize_full_name(full_name)
@@ -563,6 +631,7 @@ class ApiRepository:
                 "project_corpus_fts",
                 "rag_chunks",
                 "rag_chunks_fts",
+                "rag_embeddings",
                 "trend_summaries",
                 "jobs",
                 "job_events",
@@ -627,9 +696,11 @@ class ApiRepository:
                 "fts_records": table_counts.get("project_corpus_fts", 0),
                 "chunk_records": table_counts.get("rag_chunks", 0),
                 "chunk_fts_records": table_counts.get("rag_chunks_fts", 0),
+                "embedding_records": table_counts.get("rag_embeddings", 0),
                 "event_records": table_counts.get("job_events", 0),
                 "ready_for_text_index": table_counts.get("project_corpus_fts", 0) > 0,
                 "ready_for_chunk_retrieval": table_counts.get("rag_chunks_fts", 0) > 0,
+                "ready_for_vector_search": table_counts.get("rag_embeddings", 0) > 0,
             },
         }
 
@@ -1369,6 +1440,7 @@ class ApiRepository:
             or not self._sqlite_table_exists("project_corpus_fts")
             or not self._sqlite_table_exists("rag_chunks")
             or not self._sqlite_table_exists("rag_chunks_fts")
+            or not self._sqlite_table_exists("rag_embeddings")
         ):
             connection = connect(self.db_path)
             try:
@@ -1381,6 +1453,7 @@ class ApiRepository:
             and self._sqlite_table_exists("project_corpus_fts")
             and self._sqlite_table_exists("rag_chunks")
             and self._sqlite_table_exists("rag_chunks_fts")
+            and self._sqlite_table_exists("rag_embeddings")
         ):
             connection = connect(self.db_path)
             try:
@@ -1395,6 +1468,37 @@ class ApiRepository:
                     connection.commit()
             finally:
                 connection.close()
+
+    def _embedding_count(self, model: str) -> int:
+        connection = connect(self.db_path)
+        try:
+            initialize(connection)
+            row = connection.execute(
+                "SELECT COUNT(*) AS count FROM rag_embeddings WHERE embedding_model = ?",
+                (model,),
+            ).fetchone()
+            return _int_value(row["count"] if row else 0)
+        finally:
+            connection.close()
+
+    def _embedding_rows(self, model: str) -> list[Any]:
+        connection = connect(self.db_path)
+        try:
+            initialize(connection)
+            return connection.execute(
+                """
+                SELECT e.chunk_id, e.corpus_id, e.run_date, e.full_name, e.html_url,
+                       e.embedding_model, e.dimensions, e.vector_json, e.payload_json,
+                       c.chunk_index, c.chunk_text, c.language, c.category, c.sources_json
+                FROM rag_embeddings e
+                LEFT JOIN rag_chunks c ON c.chunk_id = e.chunk_id
+                WHERE e.embedding_model = ?
+                ORDER BY e.run_date DESC, e.full_name ASC
+                """,
+                (model,),
+            ).fetchall()
+        finally:
+            connection.close()
 
     def _jobs_from_sqlite(self, limit: int) -> list[dict[str, Any]]:
         connection = connect(self.db_path)
@@ -2173,6 +2277,43 @@ def _rag_retrieve_summary(contexts: list[dict[str, Any]], terms: list[str]) -> l
     repositories = _unique_strings(context.get("metadata", {}).get("full_name") or "" for context in contexts)
     return [
         f"召回 {len(contexts)} 个 RAG 语料块，关键词：{'、'.join(terms)}。",
+        f"覆盖 {len(repositories)} 个项目：{'、'.join(repositories[:5])}。",
+    ]
+
+
+def _vector_context(row: Any, payload: dict[str, Any], score: float, terms: list[str]) -> dict[str, Any]:
+    text = str(row["chunk_text"] or "")
+    sources = _list_strings(payload.get("sources") or _json_list(row["sources_json"]))
+    return {
+        "chunk_id": row["chunk_id"],
+        "corpus_id": row["corpus_id"],
+        "text": text,
+        "score": round(float(score), 6),
+        "evidence": _rag_evidence(text, terms),
+        "metadata": {
+            "chunk_index": _int_value(row["chunk_index"]),
+            "run_date": row["run_date"],
+            "full_name": row["full_name"],
+            "html_url": row["html_url"],
+            "language": payload.get("language") or row["language"] or "",
+            "category": payload.get("category") or row["category"] or "",
+            "sources": sources,
+            "token_estimate": _int_value(payload.get("token_estimate")),
+            "quality_level": payload.get("quality_level") or "",
+            "trending_rank": _int_value(payload.get("trending_rank")),
+            "star_growth": _int_value(payload.get("star_growth")),
+            "embedding_model": row["embedding_model"],
+            "dimensions": _int_value(row["dimensions"]),
+        },
+    }
+
+
+def _rag_vector_summary(contexts: list[dict[str, Any]], model: str) -> list[str]:
+    if not contexts:
+        return [f"本地向量索引未命中；请确认已运行 build_rag_embeddings.py，当前模型：{model}。"]
+    repositories = _unique_strings(context.get("metadata", {}).get("full_name") or "" for context in contexts)
+    return [
+        f"本地向量索引召回 {len(contexts)} 个证据块，模型：{model}。",
         f"覆盖 {len(repositories)} 个项目：{'、'.join(repositories[:5])}。",
     ]
 

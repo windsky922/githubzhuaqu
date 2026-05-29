@@ -98,6 +98,24 @@ CREATE VIRTUAL TABLE IF NOT EXISTS rag_chunks_fts USING fts5(
   chunk_text
 );
 
+CREATE TABLE IF NOT EXISTS rag_embeddings (
+  chunk_id TEXT NOT NULL DEFAULT '',
+  corpus_id TEXT NOT NULL DEFAULT '',
+  run_date TEXT NOT NULL DEFAULT '',
+  full_name TEXT NOT NULL DEFAULT '',
+  html_url TEXT NOT NULL DEFAULT '',
+  embedding_model TEXT NOT NULL DEFAULT '',
+  dimensions INTEGER NOT NULL DEFAULT 0,
+  vector_json TEXT NOT NULL DEFAULT '[]',
+  payload_json TEXT NOT NULL DEFAULT '{}',
+  updated_at TEXT NOT NULL DEFAULT '',
+  PRIMARY KEY (chunk_id, embedding_model)
+);
+
+CREATE INDEX IF NOT EXISTS idx_rag_embeddings_model ON rag_embeddings(embedding_model);
+CREATE INDEX IF NOT EXISTS idx_rag_embeddings_full_name ON rag_embeddings(full_name);
+CREATE INDEX IF NOT EXISTS idx_rag_embeddings_run_date ON rag_embeddings(run_date);
+
 CREATE TABLE IF NOT EXISTS trend_summaries (
   run_date TEXT PRIMARY KEY,
   total_projects INTEGER NOT NULL DEFAULT 0,

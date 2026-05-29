@@ -35,6 +35,7 @@ def import_json_archive(root: Path, db_path: Path) -> dict[str, int]:
             "project_corpus_fts": corpus_count,
             "rag_chunks": table_count(connection, "rag_chunks"),
             "rag_chunks_fts": table_count(connection, "rag_chunks_fts"),
+            "rag_embeddings": table_count(connection, "rag_embeddings"),
             "trend_summaries": import_trend_summaries(connection, root),
             "sent_repositories": import_sent_repositories(connection, root),
             "star_history": import_star_history(connection, root),
@@ -286,6 +287,7 @@ def upsert_trend_summary(connection: sqlite3.Connection, run_date: str, data: di
 def rebuild_project_corpus(connection: sqlite3.Connection) -> int:
     connection.execute("DELETE FROM rag_chunks")
     connection.execute("DELETE FROM rag_chunks_fts")
+    connection.execute("DELETE FROM rag_embeddings")
     connection.execute("DELETE FROM project_corpus")
     connection.execute("DELETE FROM project_corpus_fts")
     rows = connection.execute(
@@ -592,6 +594,7 @@ def table_count(connection: sqlite3.Connection, table_name: str) -> int:
         "project_corpus_fts",
         "rag_chunks",
         "rag_chunks_fts",
+        "rag_embeddings",
         "trend_summaries",
         "sent_repositories",
         "star_history",

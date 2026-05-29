@@ -6,6 +6,7 @@ import uuid
 from pathlib import Path
 
 from scripts.verify_migration import _json_counts
+from src.rag.embeddings import build_rag_embeddings
 from src.storage.sqlite_store import connect, import_json_archive, table_count
 
 
@@ -24,6 +25,7 @@ class SqliteStorageTest(unittest.TestCase):
             self.assertEqual(counts["project_corpus_fts"], 2)
             self.assertGreaterEqual(counts["rag_chunks"], 2)
             self.assertGreaterEqual(counts["rag_chunks_fts"], 2)
+            self.assertEqual(counts["rag_embeddings"], 0)
             self.assertEqual(counts["trend_summaries"], 1)
             self.assertEqual(counts["sent_repositories"], 1)
             self.assertEqual(counts["star_history"], 2)
@@ -36,6 +38,7 @@ class SqliteStorageTest(unittest.TestCase):
                 self.assertEqual(table_count(connection, "project_corpus_fts"), 2)
                 self.assertGreaterEqual(table_count(connection, "rag_chunks"), 2)
                 self.assertGreaterEqual(table_count(connection, "rag_chunks_fts"), 2)
+                self.assertEqual(table_count(connection, "rag_embeddings"), 0)
                 self.assertEqual(table_count(connection, "repositories"), 2)
                 self.assertEqual(table_count(connection, "jobs"), 1)
                 self.assertEqual(table_count(connection, "job_events"), 0)
@@ -81,9 +84,35 @@ class SqliteStorageTest(unittest.TestCase):
                 self.assertEqual(table_count(connection, "project_corpus_fts"), 2)
                 self.assertGreaterEqual(table_count(connection, "rag_chunks"), 2)
                 self.assertGreaterEqual(table_count(connection, "rag_chunks_fts"), 2)
+                self.assertEqual(table_count(connection, "rag_embeddings"), 0)
                 self.assertEqual(table_count(connection, "star_history"), 2)
                 self.assertEqual(table_count(connection, "jobs"), 1)
                 self.assertEqual(table_count(connection, "job_events"), 0)
+            finally:
+                connection.close()
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
+    def test_builds_local_rag_embeddings(self):
+        root = Path.cwd() / f".tmp-sqlite-test-{uuid.uuid4().hex}"
+        try:
+            _write_sample_archive(root)
+            db_path = root / "data" / "github_weekly.sqlite"
+            import_json_archive(root, db_path)
+
+            result = build_rag_embeddings(db_path)
+
+            connection = connect(db_path)
+            try:
+                self.assertGreaterEqual(result["embedding_count"], 2)
+                self.assertEqual(table_count(connection, "rag_embeddings"), result["embedding_count"])
+                row = connection.execute(
+                    "SELECT full_name, embedding_model, dimensions, vector_json FROM rag_embeddings WHERE full_name = ?",
+                    ("owner/project",),
+                ).fetchone()
+                self.assertEqual(row["embedding_model"], "local-hash-v1")
+                self.assertEqual(row["dimensions"], 64)
+                self.assertIn("[", row["vector_json"])
             finally:
                 connection.close()
         finally:

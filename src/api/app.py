@@ -234,6 +234,26 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
             limit=limit,
         )
 
+    @app.get("/v1/rag/vector-search")
+    def v1_rag_vector_search(
+        q: str = Query(..., min_length=1),
+        language: str | None = None,
+        category: str | None = None,
+        source: str | None = None,
+        limit: int = Query(default=8, ge=1, le=30),
+        model: str | None = None,
+        auto_build: bool = False,
+    ) -> dict[str, Any]:
+        return repository.rag_vector_search(
+            query=q,
+            language=language,
+            category=category,
+            source=source,
+            limit=limit,
+            model=model or "local-hash-v1",
+            auto_build=auto_build,
+        )
+
     @app.get("/v1/runs")
     def v1_runs() -> dict[str, Any]:
         return repository.runs()

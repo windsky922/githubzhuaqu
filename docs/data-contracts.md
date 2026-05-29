@@ -178,6 +178,7 @@ GET /api/weekly/latest
 GET /v1/search
 GET /v1/rag/corpus
 GET /v1/rag/retrieve
+GET /v1/rag/vector-search
 ```
 
 `/api/projects` 复用历史归档查询能力，支持按语言、方向、profile、来源、风险提示、质量分、Trending 排名和关键词筛选。返回结构保持为：
@@ -222,6 +223,7 @@ project_corpus
 project_corpus_fts
 rag_chunks
 rag_chunks_fts
+rag_embeddings
 trend_summaries
 sent_repositories
 star_history
@@ -240,13 +242,14 @@ migration_meta
 5. `project_corpus_fts` 保存 `project_corpus` 的 SQLite FTS5 搜索索引，可由派生语料重建。
 6. `rag_chunks` 保存从 `project_corpus` 拆分出的短文本证据块，用于 RAG 检索、引用和后续 embedding。
 7. `rag_chunks_fts` 保存 `rag_chunks` 的 SQLite FTS5 搜索索引，可由派生语料重建。
-8. `trend_summaries` 保存趋势摘要。
-9. `sent_repositories` 保存已推送仓库状态。
-10. `star_history` 保存 Star 历史。
-11. `jobs` 保存历史周报任务和触发预览任务状态。
-12. `job_events` 保存任务创建、重复命中、执行请求、执行阻止和执行完成等审计事件。
-13. `subscriptions` 保存本地订阅偏好，只记录筛选条件和通道名称，不记录 Token、Chat ID 或 Webhook。
-14. `migration_meta` 保存迁移元数据。
+8. `rag_embeddings` 保存从 `rag_chunks` 派生的本地 embedding 向量索引；当前默认模型为 `local-hash-v1`，可重建，不保存密钥。
+9. `trend_summaries` 保存趋势摘要。
+10. `sent_repositories` 保存已推送仓库状态。
+11. `star_history` 保存 Star 历史。
+12. `jobs` 保存历史周报任务和触发预览任务状态。
+13. `job_events` 保存任务创建、重复命中、执行请求、执行阻止和执行完成等审计事件。
+14. `subscriptions` 保存本地订阅偏好，只记录筛选条件和通道名称，不记录 Token、Chat ID 或 Webhook。
+15. `migration_meta` 保存迁移元数据。
 
 当前只读查询入口位于：
 

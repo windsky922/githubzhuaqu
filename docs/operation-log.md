@@ -2,6 +2,25 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-05-29 追加：新增本地 RAG embedding 索引
+
+### 1. 开发目的
+
+RAG 已经具备项目级语料和短文本块检索，但后续要接入向量库、LangChain retriever 或真实 embedding 模型，还需要先把“向量索引表、构建命令、向量检索 API”这条链路打通。本次优先建设本地可验证底座，不引入外部模型依赖。
+
+### 2. 修改内容
+
+1. SQLite 新增 `rag_embeddings` 表，保存从 `rag_chunks` 派生的本地 embedding 向量。
+2. 新增 `src/rag/embeddings.py`，提供确定性 `local-hash-v1` 向量生成、归一化和相似度计算。
+3. 新增 `scripts/build_rag_embeddings.py`，可手动构建本地 RAG embedding 索引。
+4. 新增 `GET /v1/rag/vector-search`，支持按问题、语言、方向和来源做本地向量检索。
+5. 数据库概览增加 embedding 计数和 `ready_for_vector_search` 状态。
+6. README、API 文档、v1 规划、数据契约和测试已同步更新。
+
+### 3. 边界说明
+
+当前 `local-hash-v1` 只用于打通数据表和 API 契约，不代表最终推荐质量。它不调用外部模型、不需要密钥、不改变周报主流程。后续可以替换为真实 embedding 模型或向量数据库，同时保持 `/v1/rag/vector-search` 的响应结构稳定。
+
 ## 2026-05-29 追加：新增 RAG 短文本块检索
 
 ### 1. 开发目的

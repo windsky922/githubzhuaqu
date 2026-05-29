@@ -264,6 +264,38 @@ http://127.0.0.1:8000/admin.html?api=1
 
 该接口是后续“项目知识库问答”和“基于证据的推荐解释”的核心入口。当前阶段只做本地证据召回，避免过早绑定某个向量库或模型供应商。
 
+### `GET /v1/rag/vector-search`
+
+基于本地 `rag_embeddings` 表执行向量检索，返回与用户问题最接近的 RAG 证据块。当前默认模型为确定性 `local-hash-v1`，用于打通向量索引表、构建命令和检索 API；它不调用外部模型、不需要密钥，后续可替换为真实 embedding 模型。
+
+使用前先构建本地索引：
+
+```powershell
+py scripts\build_rag_embeddings.py
+```
+
+支持参数：
+
+| 参数 | 说明 |
+|---|---|
+| `q` | 必填，用户问题或检索关键词 |
+| `language` | 可选，按语言过滤 |
+| `category` | 可选，按项目方向过滤 |
+| `source` | 可选，按来源过滤，例如 `github_trending` |
+| `limit` | 返回上下文数量，默认 8，最大 30 |
+| `model` | 可选，默认 `local-hash-v1` |
+| `auto_build` | 可选，为 `true` 且索引为空时自动构建本地索引 |
+
+返回内容与 `/v1/rag/retrieve` 接近，包含 `contexts`、`citations`、`prompt_context` 和 `retrieval`。差异在于 `retrieval.mode` 为 `vector`，排序依据为本地向量相似度。
+
+示例：
+
+```text
+/v1/rag/vector-search?q=agent%20workflow&language=Python&limit=8&auto_build=true
+```
+
+该接口是后续真正接入 embedding、向量库和 LangChain retriever 的预留层。当前实现只建设稳定数据边界，不改变周报采集、生成和推送流程。
+
 ### `GET /v1/projects/{owner}/{repo}/similar`
 
 基于单项目详情和 `project_corpus` 语料索引生成相似项目候选。该接口优先使用 SQLite FTS5 召回候选，再结合语言、方向、来源、关键词重合、Trending 排名和新增 Star 计算 `similarity_score`。
