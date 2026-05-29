@@ -31,6 +31,7 @@
 | `capabilities.project_search` | 是否支持项目语料搜索 |
 | `capabilities.project_similarity` | 是否支持相似项目候选召回 |
 | `capabilities.project_compare` | 是否支持项目横向对比 |
+| `capabilities.rag_corpus` | 是否支持 RAG-ready 语料输出 |
 | `capabilities.runs_query` | 是否支持运行记录 |
 | `capabilities.jobs_query` | 是否支持任务查询 |
 | `capabilities.job_events` | 是否支持任务审计事件查询 |
@@ -167,6 +168,14 @@
 基于 SQLite `project_corpus` 派生语料表搜索历史入选项目。当前优先使用 SQLite FTS5，FTS 不可用时自动回退到普通文本匹配。参数包括 `q`、`language`、`category`、`source` 和 `limit`。
 
 该接口是 RAG 的前置层：先把 README 摘要、项目描述、推荐理由、语言、方向和来源统一成可检索语料，再逐步升级到 Embedding、向量库或 LangChain 编排。当前版本不调用外部模型，也不写入密钥。
+
+### `GET /v1/rag/corpus`
+
+面向后续 RAG、向量检索和 LangChain 编排的语料出口。接口读取 SQLite `project_corpus`，返回 `documents[].text`、`documents[].metadata` 和 `documents[].evidence`，不调用模型、不生成 embedding、不写入外部服务。
+
+支持参数包括 `q`、`language`、`category`、`source` 和 `limit`。传入 `q` 时优先使用 FTS5 检索，FTS 不可用时回退普通文本匹配；不传 `q` 时返回最新语料。
+
+该接口是数据库能力升级的核心出口。后续新增向量表、embedding 作业或 RAG 问答时，应复用这个语料契约。
 
 ### `GET /v1/projects/{owner}/{repo}/similar`
 

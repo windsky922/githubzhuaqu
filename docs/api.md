@@ -205,6 +205,36 @@ http://127.0.0.1:8000/admin.html?api=1
 /v1/search?q=agent%20workflow&language=Python&limit=10
 ```
 
+### `GET /v1/rag/corpus`
+
+读取 SQLite 派生的 `project_corpus` 语料表，输出可直接进入 RAG 管道的文档列表。这个接口不会调用模型、不会生成 embedding、不会请求外部服务，只负责把历史项目语料整理成稳定的 `text + metadata + evidence` 数据契约，方便后续接入向量库、LangChain 或其他检索增强组件。
+
+支持参数：
+
+| 参数 | 说明 |
+|---|---|
+| `q` | 可选，关键词检索；传入后优先使用 SQLite FTS5，失败时回退普通文本匹配 |
+| `language` | 可选，按语言过滤 |
+| `category` | 可选，按项目方向过滤 |
+| `source` | 可选，按来源过滤，例如 `github_trending` |
+| `limit` | 返回文档数量，默认 20，最大 100 |
+
+返回内容包括：
+
+1. `documents`：RAG 文档数组，每条包含 `id`、`text`、`metadata` 和 `evidence`。
+2. `metadata`：包含仓库全名、GitHub 链接、入选日期、语言、方向、来源、质量等级、Trending 排名和新增 Star。
+3. `evidence`：从语料文本中抽取的证据片段，用于后续回答时引用或解释。
+4. `retrieval`：本次读取使用的模式，可能是 `fts5`、`like` 或 `latest`。
+5. `rag_readiness`：提示当前结果是否已经具备 embedding、检索器和 RAG 编排的基础条件。
+
+示例：
+
+```text
+/v1/rag/corpus?q=agent%20workflow&language=Python&limit=10
+```
+
+该接口是数据库能力升级到 RAG 能力的第一层稳定出口。后续如果接入 embedding 或 LangChain，应优先复用这个接口的字段，而不是重新解析 Markdown 周报或原始 README。
+
 ### `GET /v1/projects/{owner}/{repo}/similar`
 
 基于单项目详情和 `project_corpus` 语料索引生成相似项目候选。该接口优先使用 SQLite FTS5 召回候选，再结合语言、方向、来源、关键词重合、Trending 排名和新增 Star 计算 `similarity_score`。

@@ -58,6 +58,7 @@ class ApiRepository:
                 "project_search": True,
                 "project_similarity": True,
                 "project_compare": True,
+                "rag_corpus": True,
                 "runs_query": True,
                 "jobs_query": True,
                 "job_events": True,
@@ -208,6 +209,76 @@ class ApiRepository:
             "count": len(results),
             "results": results,
             "summary": _search_summary(results, terms),
+        }
+
+    def rag_corpus(
+        self,
+        *,
+        query: str | None = None,
+        language: str | None = None,
+        category: str | None = None,
+        source: str | None = None,
+        limit: int = 20,
+    ) -> dict[str, Any]:
+        self.ensure_sqlite_index()
+        normalized_query = (_blank_to_none(query) or "").strip()
+        terms = _search_terms(normalized_query)
+        limit = max(1, min(int(limit or 20), 100))
+        normalized_language = _blank_to_none(language)
+        normalized_category = _blank_to_none(category)
+        normalized_source = _blank_to_none(source)
+
+        connection = connect(self.db_path)
+        retrieval_mode = "latest"
+        try:
+            initialize(connection)
+            if terms:
+                try:
+                    rows = _search_rows_fts(
+                        connection,
+                        terms=terms,
+                        language=normalized_language,
+                        category=normalized_category,
+                        source=normalized_source,
+                        limit=limit,
+                    )
+                    retrieval_mode = "fts5"
+                except sqlite3.Error:
+                    rows = _search_rows_like(
+                        connection,
+                        terms=terms,
+                        language=normalized_language,
+                        category=normalized_category,
+                        source=normalized_source,
+                        limit=limit,
+                    )
+                    retrieval_mode = "like"
+            else:
+                rows = _corpus_rows_latest(
+                    connection,
+                    language=normalized_language,
+                    category=normalized_category,
+                    source=normalized_source,
+                    limit=limit,
+                )
+        finally:
+            connection.close()
+
+        documents = [_rag_document(row, terms) for row in rows]
+        return {
+            "schema_version": 1,
+            "query": normalized_query,
+            "language": normalized_language or "",
+            "category": normalized_category or "",
+            "source": normalized_source or "",
+            "count": len(documents),
+            "documents": documents,
+            "retrieval": {
+                "mode": retrieval_mode,
+                "terms": terms,
+                "limit": limit,
+            },
+            "rag_readiness": _rag_corpus_readiness(documents),
         }
 
     def similar_projects(self, full_name: str, *, limit: int = 10) -> dict[str, Any]:
@@ -1746,6 +1817,37 @@ def _search_rows_like(
     return connection.execute(sql, parameters).fetchall()
 
 
+def _corpus_rows_latest(
+    connection: Any,
+    *,
+    language: str | None,
+    category: str | None,
+    source: str | None,
+    limit: int,
+) -> list[Any]:
+    conditions = []
+    parameters: list[Any] = []
+    if language:
+        conditions.append("language = ?")
+        parameters.append(language)
+    if category:
+        conditions.append("category = ?")
+        parameters.append(category)
+    if source:
+        conditions.append("sources_json LIKE ?")
+        parameters.append(f"%{source}%")
+    sql = """
+        SELECT corpus_id, run_date, full_name, html_url, title, language, category,
+               sources_json, search_text, payload_json
+        FROM project_corpus
+    """
+    if conditions:
+        sql += " WHERE " + " AND ".join(conditions)
+    sql += " ORDER BY run_date DESC, full_name ASC LIMIT ?"
+    parameters.append(limit)
+    return connection.execute(sql, parameters).fetchall()
+
+
 def _fts_query(terms: list[str]) -> str:
     quoted_terms = []
     for term in terms:
@@ -1783,6 +1885,46 @@ def _search_result(row: Any, terms: list[str]) -> dict[str, Any]:
         "quality_level": payload.get("quality_level") or "",
         "trending_rank": _int_value(payload.get("trending_rank")),
         "star_growth": _int_value(payload.get("star_growth")),
+    }
+
+
+def _rag_document(row: Any, terms: list[str]) -> dict[str, Any]:
+    text = str(row["search_text"] or "").strip()
+    payload = _json_object(row["payload_json"])
+    return {
+        "id": row["corpus_id"],
+        "text": text,
+        "metadata": {
+            "run_date": row["run_date"],
+            "full_name": row["full_name"],
+            "html_url": row["html_url"],
+            "title": row["title"],
+            "language": row["language"],
+            "category": row["category"],
+            "sources": _list_strings(_json_list(row["sources_json"])),
+            "quality_level": payload.get("quality_level") or "",
+            "trending_rank": _int_value(payload.get("trending_rank")),
+            "star_growth": _int_value(payload.get("star_growth")),
+        },
+        "evidence": _rag_evidence(text, terms),
+    }
+
+
+def _rag_evidence(text: str, terms: list[str]) -> list[str]:
+    snippet = _snippet(text, terms, size=260) if terms else _snippet(text, [], size=260)
+    return [snippet] if snippet else []
+
+
+def _rag_corpus_readiness(documents: list[dict[str, Any]]) -> dict[str, Any]:
+    return {
+        "ready_for_embedding": bool(documents),
+        "has_metadata": all(bool(document.get("metadata", {}).get("full_name")) for document in documents),
+        "has_evidence": any(bool(document.get("evidence")) for document in documents),
+        "next_steps": (
+            ["接入 embedding 生成向量索引。", "把 documents 写入 LangChain retriever 或其他 RAG 检索器。"]
+            if documents
+            else ["先运行周报生成并同步 SQLite 语料。"]
+        ),
     }
 
 

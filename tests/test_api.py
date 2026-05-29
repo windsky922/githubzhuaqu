@@ -122,6 +122,8 @@ class ApiRepositoryTest(unittest.TestCase):
             database_trends = repository.database_trends(limit=5)
             database_facets = repository.database_facets(limit=5)
             search = repository.search(query="agent workflow", language="Python", limit=5)
+            rag_corpus = repository.rag_corpus(query="agent workflow", language="Python", limit=5)
+            latest_rag_corpus = repository.rag_corpus(language="Python", limit=5)
             similar = repository.similar_projects("owner/agent", limit=5)
             comparison = repository.compare_projects(["owner/agent", "owner/agent-helper", "missing/repo"])
             preference_comparison = repository.compare_projects(
@@ -187,6 +189,7 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertTrue(health["capabilities"]["project_search"])
             self.assertTrue(health["capabilities"]["project_similarity"])
             self.assertTrue(health["capabilities"]["project_compare"])
+            self.assertTrue(health["capabilities"]["rag_corpus"])
             self.assertEqual(jobs["jobs"][0]["job_id"], "run:2026-05-09")
             self.assertTrue(job_detail["found"])
             self.assertEqual(job_detail["run_summary"]["run_date"], "2026-05-09")
@@ -274,6 +277,15 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertGreaterEqual(search["count"], 1)
             self.assertIn("owner/agent", [item["full_name"] for item in search["results"]])
             self.assertIn("agent", search["results"][0]["snippet"].lower())
+            self.assertEqual(rag_corpus["schema_version"], 1)
+            self.assertEqual(rag_corpus["retrieval"]["mode"], "fts5")
+            self.assertGreaterEqual(rag_corpus["count"], 1)
+            self.assertIn("owner/agent", [item["metadata"]["full_name"] for item in rag_corpus["documents"]])
+            self.assertTrue(rag_corpus["documents"][0]["text"])
+            self.assertTrue(rag_corpus["documents"][0]["evidence"])
+            self.assertTrue(rag_corpus["rag_readiness"]["ready_for_embedding"])
+            self.assertEqual(latest_rag_corpus["retrieval"]["mode"], "latest")
+            self.assertGreaterEqual(latest_rag_corpus["count"], 1)
             self.assertTrue(similar["found"])
             self.assertIn("fts5", similar["search_engine"])
             self.assertGreaterEqual(similar["count"], 1)
@@ -327,6 +339,10 @@ class ApiRepositoryTest(unittest.TestCase):
             v1_database_trends = client.get("/v1/database/trends", params={"limit": 5})
             v1_database_facets = client.get("/v1/database/facets", params={"limit": 5})
             v1_search = client.get("/v1/search", params={"q": "agent workflow", "language": "Python", "limit": 5})
+            v1_rag_corpus = client.get(
+                "/v1/rag/corpus",
+                params={"q": "agent workflow", "language": "Python", "limit": 5},
+            )
             v1_similar = client.get("/v1/projects/owner/agent/similar", params={"limit": 5})
             v1_compare = client.get(
                 "/v1/projects/compare",
@@ -402,6 +418,7 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(v1_database_trends.status_code, 200)
             self.assertEqual(v1_database_facets.status_code, 200)
             self.assertEqual(v1_search.status_code, 200)
+            self.assertEqual(v1_rag_corpus.status_code, 200)
             self.assertEqual(v1_similar.status_code, 200)
             self.assertEqual(v1_compare.status_code, 200)
             self.assertEqual(v1_projects.status_code, 200)
@@ -434,6 +451,8 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(v1_database_facets.json()["languages"][0]["name"], "Python")
             self.assertEqual(v1_database_facets.json()["sources"][0]["name"], "github_trending")
             self.assertIn("owner/agent", [item["full_name"] for item in v1_search.json()["results"]])
+            self.assertIn("owner/agent", [item["metadata"]["full_name"] for item in v1_rag_corpus.json()["documents"]])
+            self.assertTrue(v1_rag_corpus.json()["rag_readiness"]["ready_for_embedding"])
             self.assertEqual(v1_similar.json()["similar_projects"][0]["full_name"], "owner/agent-helper")
             self.assertEqual(v1_compare.json()["count"], 2)
             self.assertEqual(v1_compare.json()["best_by"]["highest_total_star_growth"], "owner/agent")
