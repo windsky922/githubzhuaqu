@@ -188,6 +188,7 @@
     }
     input,
     select,
+    textarea,
     button {
       height: 38px;
       border: 1px solid var(--line);
@@ -196,6 +197,11 @@
       color: var(--text);
       font: inherit;
       padding: 0 10px;
+    }
+    textarea {
+      min-height: 120px;
+      padding: 10px;
+      resize: vertical;
     }
     button {
       cursor: pointer;
@@ -425,6 +431,22 @@
         <button id="runCorpusSearch" type="button">搜索</button>
       </div>
       <div id="corpusSearchResults" class="search-results"></div>
+      <div class="search-form">
+        <label>RAG 问题
+          <input id="ragQuery" type="text" placeholder="哪些 Agent 项目适合学习工作流？">
+        </label>
+        <label>检索方式
+          <select id="ragMode">
+            <option value="retrieve">FTS 证据检索</option>
+            <option value="vector">本地向量检索</option>
+          </select>
+        </label>
+        <label>语言
+          <input id="ragLanguage" type="text" placeholder="Python">
+        </label>
+        <button id="runRagSearch" type="button">检索</button>
+      </div>
+      <div id="ragSearchResults" class="search-results"></div>
     </section>
     <section class="panel">
       <h2>核心工作流</h2>
@@ -511,6 +533,7 @@
     const databaseFacets = document.getElementById("databaseFacets");
     const databaseTrends = document.getElementById("databaseTrends");
     const corpusSearchResults = document.getElementById("corpusSearchResults");
+    const ragSearchResults = document.getElementById("ragSearchResults");
     const adminState = { jobs: [], jobFilter: "attention" };
     const createControls = {
       profile: document.getElementById("taskProfile"),
@@ -527,12 +550,19 @@
       category: document.getElementById("corpusCategory"),
       button: document.getElementById("runCorpusSearch"),
     };
+    const ragControls = {
+      query: document.getElementById("ragQuery"),
+      mode: document.getElementById("ragMode"),
+      language: document.getElementById("ragLanguage"),
+      button: document.getElementById("runRagSearch"),
+    };
 
     loadHealth();
     loadOverview();
     loadDatabaseInsights();
     setupCreateTask();
     setupCorpusSearch();
+    setupRagSearch();
     bindWorkbenchFilters();
     jobWorkbench.addEventListener("click", handleWorkbenchAction);
 
@@ -567,6 +597,18 @@
       });
     }
 
+    function setupRagSearch() {
+      if (!shouldUseApi()) {
+        ragControls.button.disabled = true;
+        ragSearchResults.innerHTML = '<p>RAG 检索需要本地后端或 api=1 模式。</p>';
+        return;
+      }
+      ragControls.button.addEventListener("click", runRagSearch);
+      ragControls.query.addEventListener("keydown", event => {
+        if (event.key === "Enter") runRagSearch();
+      });
+    }
+
     function runCorpusSearch() {
       const query = searchControls.query.value.trim();
       if (!query) {
@@ -590,6 +632,34 @@
         })
         .finally(() => {
           searchControls.button.disabled = false;
+        });
+    }
+
+    function runRagSearch() {
+      const query = ragControls.query.value.trim();
+      if (!query) {
+        ragSearchResults.innerHTML = '<p>请输入 RAG 问题或关键词。</p>';
+        return;
+      }
+      const params = new URLSearchParams();
+      params.set("q", query);
+      params.set("limit", "6");
+      if (ragControls.language.value.trim()) params.set("language", ragControls.language.value.trim());
+      const mode = ragControls.mode.value || "retrieve";
+      if (mode === "vector") params.set("auto_build", "true");
+      const endpoint = mode === "vector" ? "/v1/rag/vector-search" : "/v1/rag/retrieve";
+      ragControls.button.disabled = true;
+      ragSearchResults.innerHTML = '<p>检索中...</p>';
+      fetch(`${endpoint}?${params.toString()}`, { cache: "no-store" })
+        .then(jsonOrThrow)
+        .then(data => {
+          ragSearchResults.innerHTML = ragSearchHtml(data);
+        })
+        .catch(error => {
+          ragSearchResults.innerHTML = `<p>RAG 检索失败：${escapeHtml(error.message || error)}</p>`;
+        })
+        .finally(() => {
+          ragControls.button.disabled = false;
         });
     }
 
@@ -936,6 +1006,26 @@
         <span>${escapeHtml(result.language || "-")} · ${escapeHtml(result.category || "-")} · 分数 ${escapeHtml(result.score || 0)}</span>
         <p>${escapeHtml(result.snippet || result.title || "")}</p>
       </article>`).join("")}`;
+    }
+
+    function ragSearchHtml(data) {
+      const summary = (data.summary || []).map(item => `<p>${escapeHtml(item)}</p>`).join("");
+      const contexts = data.contexts || [];
+      const citations = data.citations || [];
+      const promptContext = data.prompt_context || "";
+      const retrieval = data.retrieval || {};
+      if (!contexts.length) return `${summary}<p>没有召回 RAG 证据块。</p>`;
+      const contextHtml = contexts.map((context, index) => {
+        const meta = context.metadata || {};
+        const citation = citations[index] || {};
+        return `<article class="search-row">
+          <strong><a href="${escapeAttribute(projectDetailUrl({ full_name: meta.full_name }))}">${escapeHtml(meta.full_name || "-")}</a></strong>
+          <span>${escapeHtml(meta.language || "-")} · ${escapeHtml(meta.category || "-")} · ${escapeHtml(retrieval.mode || "-")} · 分数 ${escapeHtml(context.score || 0)}</span>
+          <p>${escapeHtml((context.evidence || [context.text || ""])[0] || "")}</p>
+          <span>引用：${escapeHtml(citation.chunk_id || context.chunk_id || "-")} · ${escapeHtml(meta.run_date || "-")}</span>
+        </article>`;
+      }).join("");
+      return `${summary}${contextHtml}<label>Prompt Context<textarea readonly>${escapeHtml(promptContext)}</textarea></label>`;
     }
 
     function facetRow(name, value, detail) {
