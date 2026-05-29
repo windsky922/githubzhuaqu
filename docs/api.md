@@ -464,7 +464,8 @@ explorer.html?api=0&profile=python
 
 1. 默认通过 `project.html?repo=owner/name` 读取静态 `projects.json` 并在浏览器中聚合详情。
 2. 在本地后端或 URL 带 `api=1` 时，优先读取 `/api/projects/{owner}/{repo}`。
-3. API 不可用时自动回退到静态 `projects.json`。
+3. API 模式下会额外调用 `/v1/rag/retrieve`，展示该项目相关的 RAG 证据块、引用和 `prompt_context`。
+4. API 不可用时自动回退到静态 `projects.json`。
 
 示例：
 

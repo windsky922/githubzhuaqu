@@ -3795,6 +3795,9 @@ def _project_detail_content() -> str:
       grid-template-columns: 1fr 1fr;
       gap: 12px;
     }
+    .wide {
+      grid-column: 1 / -1;
+    }
     .section {
       padding: 14px;
       min-width: 0;
@@ -3865,6 +3868,42 @@ def _project_detail_content() -> str:
       color: var(--text);
       font-variant-numeric: tabular-nums;
       white-space: nowrap;
+    }
+    .evidence-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .evidence-item {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 10px;
+      background: #f8fafc;
+    }
+    .evidence-item strong,
+    .evidence-item span {
+      display: block;
+    }
+    .evidence-item span {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 2px;
+    }
+    .evidence-item p {
+      margin: 8px 0 0;
+      line-height: 1.55;
+    }
+    .prompt-context {
+      white-space: pre-wrap;
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 10px;
+      background: #0f172a;
+      color: #e2e8f0;
+      font-size: 12px;
+      line-height: 1.5;
+      margin: 10px 0 0;
     }
     table {
       width: 100%;
@@ -3939,13 +3978,22 @@ def _project_detail_content() -> str:
     }
 
     function enrichApiDetail(repo, detail) {
-      return fetch(`/api/projects/${encodeURIComponentOwnerRepo(repo)}/similar?limit=8`, { cache: "no-store" })
-        .then(jsonOrThrow)
-        .then(data => ({
+      return Promise.all([
+        fetch(`/api/projects/${encodeURIComponentOwnerRepo(repo)}/similar?limit=8`, { cache: "no-store" })
+          .then(jsonOrThrow)
+          .catch(() => ({})),
+        loadProjectRag(repo, detail),
+      ])
+        .then(([data, rag]) => ({
           ...detail,
           similar_projects: Array.isArray(data.similar_projects) ? data.similar_projects : detail.similar_projects || [],
           similar_summary: Array.isArray(data.selection_summary) ? data.selection_summary : [],
-          similar_search_engine: data.search_engine || ""
+          similar_search_engine: data.search_engine || "",
+          rag_contexts: Array.isArray(rag.contexts) ? rag.contexts : [],
+          rag_citations: Array.isArray(rag.citations) ? rag.citations : [],
+          rag_summary: Array.isArray(rag.summary) ? rag.summary : [],
+          rag_prompt_context: rag.prompt_context || "",
+          rag_retrieval: rag.retrieval || {},
         }))
         .catch(() => detail);
     }
@@ -3961,7 +4009,7 @@ def _project_detail_content() -> str:
         .filter(project => String(project.full_name || "").toLowerCase() === repo.toLowerCase())
         .sort((a, b) => String(b.run_date || "").localeCompare(String(a.run_date || "")));
       if (!history.length) {
-        return { schema_version: 1, found: false, full_name: repo, history: [], selection_reasons: [], trend_summary: [], similar_projects: [], data_source: "静态 JSON" };
+        return { schema_version: 1, found: false, full_name: repo, history: [], selection_reasons: [], trend_summary: [], similar_projects: [], rag_contexts: [], rag_citations: [], rag_summary: [], data_source: "静态 JSON" };
       }
       const latest = history[0];
       return {
@@ -3987,6 +4035,9 @@ def _project_detail_content() -> str:
         latest_quality_level: latest.quality_level || "unknown",
         history,
         similar_projects: similarProjects(latest, projects),
+        rag_contexts: [],
+        rag_citations: [],
+        rag_summary: ["RAG 证据需要本地后端或 URL 带 api=1 后读取。"],
         data_source: "静态 JSON"
       };
     }
@@ -4027,6 +4078,7 @@ def _project_detail_content() -> str:
           <div class="section"><h2>质量提示</h2>${tags(detail.quality_flags || [], "ok", "暂无质量扣分项")}</div>
           <div class="section"><h2>历史来源</h2>${tags(detail.sources || [], "", "暂无来源")}</div>
           <div class="section"><h2>相似项目</h2>${similarHtml(detail.full_name, detail.similar_projects || [], detail.similar_summary || [])}</div>
+          <div class="section wide"><h2>RAG 证据</h2>${ragEvidenceHtml(detail)}</div>
         </section>
         <section class="section" style="margin-top:12px">
           <h2>历史趋势</h2>
@@ -4101,6 +4153,69 @@ def _project_detail_content() -> str:
         }
       }
       return summary;
+    }
+
+    function loadProjectRag(repo, detail) {
+      if (!shouldUseApi()) {
+        return Promise.resolve({
+          contexts: [],
+          citations: [],
+          summary: ["RAG 证据需要本地后端或 URL 带 api=1 后读取。"],
+          prompt_context: "",
+        });
+      }
+      const params = new URLSearchParams();
+      params.set("q", ragQuery(repo, detail));
+      params.set("limit", "6");
+      if (detail.language) params.set("language", detail.language);
+      if (detail.category) params.set("category", detail.category);
+      return fetch(`/v1/rag/retrieve?${params.toString()}`, { cache: "no-store" })
+        .then(jsonOrThrow)
+        .catch(() => ({
+          contexts: [],
+          citations: [],
+          summary: ["RAG 证据读取失败，请确认本地后端和 SQLite 索引可用。"],
+          prompt_context: "",
+        }));
+    }
+
+    function ragQuery(repo, detail) {
+      const repoName = String(repo || detail.full_name || "").split("/").pop() || "";
+      return unique([repoName, detail.category || "", detail.language || ""])
+        .filter(Boolean)
+        .join(" ");
+    }
+
+    function ragEvidenceHtml(detail) {
+      const contexts = Array.isArray(detail.rag_contexts) ? detail.rag_contexts : [];
+      const summary = Array.isArray(detail.rag_summary) ? detail.rag_summary : [];
+      const summaryHtml = summary.length ? `<p class="desc">${escapeHtml(summary.join(" "))}</p>` : "";
+      if (!contexts.length) {
+        return `${summaryHtml || "<p>暂无 RAG 证据块。</p>"}`;
+      }
+      const citations = Array.isArray(detail.rag_citations) ? detail.rag_citations : [];
+      const contextHtml = contexts.map((context, index) => {
+        const metadata = context.metadata || {};
+        const citation = citations[index] || {};
+        const title = metadata.full_name || citation.full_name || detail.full_name || "";
+        const meta = [
+          metadata.language || "",
+          metadata.category || "",
+          metadata.run_date || "",
+          metadata.source || "",
+        ].filter(Boolean).join(" / ");
+        const chunkLabel = citation.chunk_id ? `引用：${citation.chunk_id}` : `证据块 ${index + 1}`;
+        return `<div class="evidence-item">
+          <strong>${escapeHtml(title)}</strong>
+          <span>${escapeHtml(meta || chunkLabel)}</span>
+          <p>${escapeHtml(context.text || "")}</p>
+          <span>${escapeHtml(chunkLabel)}</span>
+        </div>`;
+      }).join("");
+      const prompt = detail.rag_prompt_context
+        ? `<details><summary>查看 prompt_context</summary><pre class="prompt-context">${escapeHtml(detail.rag_prompt_context)}</pre></details>`
+        : "";
+      return `${summaryHtml}<div class="evidence-list">${contextHtml}</div>${prompt}`;
     }
 
     function similarHtml(currentRepo, projects, summary) {

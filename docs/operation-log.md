@@ -2,6 +2,20 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-05-29 追加：项目详情页接入 RAG 证据
+
+### 1. 开发目的
+RAG 检索已经有后端 API 和管理首页入口，但单个项目详情页还不能直接展示“为什么这个项目值得看”的证据块。本次把项目详情页接到 `/v1/rag/retrieve`，让用户在查看某个仓库时直接看到可引用的历史语料。
+
+### 2. 修改内容
+1. `project.html` 在本地后端或 `api=1` 模式下读取项目详情后，会额外调用 `/v1/rag/retrieve`。
+2. 项目详情页新增“RAG 证据”模块，展示召回摘要、证据块、引用 ID 和可展开的 `prompt_context`。
+3. 静态 GitHub Pages 模式继续只读取 `projects.json`，不调用后端，也不会阻塞页面渲染。
+4. 更新 README、API 文档和页面构建测试，记录详情页的 RAG 读取策略。
+
+### 3. 验证
+待运行 `python scripts/build_pages.py`、`python -m unittest discover -q`、`python scripts/security_check.py` 和 `git diff --check`。
+
 ## 2026-05-29 追加：管理首页新增 RAG 检索入口
 
 ### 1. 开发目的
