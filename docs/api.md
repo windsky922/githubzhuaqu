@@ -42,7 +42,7 @@ http://127.0.0.1:8000/admin.html?api=1
 
 根路径 `http://127.0.0.1:8000/` 会跳转到管理首页。`/v1/*` 路径是 JSON API，例如 `/v1/jobs?limit=50` 返回机器可读任务数据，不是 HTML 页面。
 
-管理首页中的 RAG 检索区会调用 `/v1/rag/retrieve` 和 `/v1/rag/vector-search`，用于查看证据块、引用和 `prompt_context`。向量检索会在 `auto_build=true` 时自动构建本地 `local-hash-v1` 索引，也可以先手动运行 `py scripts\build_rag_embeddings.py`。
+管理首页中的 RAG 检索区会调用 `/v1/rag/retrieve` 和 `/v1/rag/vector-search`，用于查看证据块、引用和 `prompt_context`；RAG 质量概览会调用 `/v1/rag/quality-summary`，用于查看解释数量、质量分布、改进建议和低质量样本。向量检索会在 `auto_build=true` 时自动构建本地 `local-hash-v1` 索引，也可以先手动运行 `py scripts\build_rag_embeddings.py`。
 
 如果本地没有 `data/github_weekly.sqlite`，查询项目接口会从 `data/` 下的 JSON 归档自动重建 SQLite 派生索引。
 

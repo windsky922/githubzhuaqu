@@ -447,6 +447,7 @@
         <button id="runRagSearch" type="button">检索</button>
       </div>
       <div id="ragSearchResults" class="search-results"></div>
+      <div id="ragQualitySummary" class="search-results"></div>
     </section>
     <section class="panel">
       <h2>核心工作流</h2>
@@ -534,6 +535,7 @@
     const databaseTrends = document.getElementById("databaseTrends");
     const corpusSearchResults = document.getElementById("corpusSearchResults");
     const ragSearchResults = document.getElementById("ragSearchResults");
+    const ragQualitySummary = document.getElementById("ragQualitySummary");
     const adminState = { jobs: [], jobFilter: "attention" };
     const createControls = {
       profile: document.getElementById("taskProfile"),
@@ -741,14 +743,16 @@
         databaseOverview.innerHTML = metric("数据库模式", "静态");
         databaseFacets.innerHTML = '<p>启动本地后端或添加 api=1 后显示数据库分面。</p>';
         databaseTrends.innerHTML = '<p>启动本地后端或添加 api=1 后显示运行趋势。</p>';
+        ragQualitySummary.innerHTML = '<p>启动本地后端或添加 api=1 后显示 RAG 质量概览。</p>';
         return;
       }
       Promise.all([
         fetch("/v1/database/summary", { cache: "no-store" }).then(jsonOrThrow),
         fetch("/v1/database/facets?limit=6", { cache: "no-store" }).then(jsonOrThrow),
         fetch("/v1/database/trends?limit=8", { cache: "no-store" }).then(jsonOrThrow),
+        fetch("/v1/rag/quality-summary?limit=5", { cache: "no-store" }).then(jsonOrThrow),
       ])
-        .then(([summary, facets, trends]) => {
+        .then(([summary, facets, trends, qualitySummary]) => {
           const counts = summary.table_counts || {};
           databaseOverview.innerHTML = [
             metric("仓库记录", counts.repositories || 0),
@@ -758,11 +762,13 @@
           ].join("");
           databaseFacets.innerHTML = databaseFacetsHtml(facets);
           databaseTrends.innerHTML = databaseTrendsHtml(trends);
+          ragQualitySummary.innerHTML = ragQualitySummaryHtml(qualitySummary);
         })
         .catch(error => {
           databaseOverview.innerHTML = metric("数据库状态", "读取失败");
           databaseFacets.innerHTML = `<p>数据库分面读取失败：${escapeHtml(error.message || error)}</p>`;
           databaseTrends.innerHTML = "";
+          ragQualitySummary.innerHTML = "";
         });
     }
 
@@ -994,6 +1000,40 @@
         facetRow("总入选", summary.total_selected_count || 0, `新增 Star ${summary.total_star_growth || 0}`),
         facetRow("Trending 命中率", percent(summary.average_trending_selected_rate), `Top10 ${latest.trending_top10_count || 0}`),
         facetRow("推送成功", summary.telegram_sent_count || 0, `降级 ${summary.fallback_run_count || 0}`),
+      ].join("");
+    }
+
+    function ragQualitySummaryHtml(data) {
+      const levels = data.quality_levels || {};
+      const lowItems = data.recent_low_quality || [];
+      const recommendations = data.recommendations || [];
+      const levelRows = Object.keys(levels).length
+        ? Object.entries(levels).map(([name, count]) => facetRow(name, `${count} 条解释`, "质量等级"))
+        : [facetRow("暂无质量分布", "-", "-")];
+      const recommendationHtml = recommendations.length
+        ? recommendations.map(item => `<p>${escapeHtml(item)}</p>`).join("")
+        : "<p>暂无质量建议。</p>";
+      const lowHtml = lowItems.length
+        ? lowItems.slice(0, 3).map(item => `<article class="search-row">
+          <strong>${escapeHtml(item.query || "-")}</strong>
+          <span>${escapeHtml(item.quality_level || "-")} · ${escapeHtml(item.quality_score || 0)} 分 · ${escapeHtml(item.mode || "-")}</span>
+          <p>${escapeHtml(item.answer || "")}</p>
+        </article>`).join("")
+        : "<p>暂无低质量解释。</p>";
+      return [
+        "<h3>RAG 质量概览</h3>",
+        `<div class="overview">${[
+          metric("解释总数", data.total_count || 0),
+          metric("平均质量分", data.average_quality_score || 0),
+          metric("最高质量分", data.max_quality_score || 0),
+          metric("最低质量分", data.min_quality_score || 0),
+        ].join("")}</div>`,
+        "<h4>质量分布</h4>",
+        ...levelRows,
+        "<h4>改进建议</h4>",
+        recommendationHtml,
+        "<h4>最近低质量解释</h4>",
+        lowHtml,
       ].join("");
     }
 

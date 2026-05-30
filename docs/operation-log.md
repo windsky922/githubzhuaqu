@@ -2,6 +2,21 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-05-30 追加：管理首页接入 RAG 质量概览
+
+### 1. 开发目的
+后端已经提供 RAG 质量概览接口，但管理首页还没有可视入口。为了让数据库和 RAG 能力更容易被检查，本次把质量统计接入 `admin.html`，让用户不用直接看 JSON 也能判断解释质量、低质量样本和下一步优化重点。
+
+### 2. 修改内容
+1. `admin.html` 的“数据库与语料”区域新增 RAG 质量概览展示容器。
+2. API 模式读取 `/v1/rag/quality-summary?limit=5`。
+3. 展示解释总数、平均质量分、最高/最低质量分、质量分布、改进建议和最近低质量解释。
+4. 静态模式提示需要启动本地后端或添加 `api=1`。
+5. 更新 README、API 文档和页面构建测试。
+
+### 3. 验证
+已运行 `python scripts\build_pages.py`、`python -m unittest discover -q`、`python scripts\security_check.py` 和 `git diff --check`。
+
 ## 2026-05-30 追加：新增 RAG 质量概览接口
 
 ### 1. 开发目的
