@@ -346,7 +346,9 @@ py scripts\build_rag_embeddings.py
 | `q` | 可选，按 query 或 answer 做模糊过滤 |
 | `limit` | 返回数量，默认 20，最大 100 |
 
-返回字段包含 `explanation_id`、`query`、`mode`、`model`、`confidence`、`answer`、`repositories`、`citations`、`explanation`、`retrieval` 和 `created_at`。
+返回字段包含 `explanation_id`、`query`、`mode`、`model`、`confidence`、`quality_score`、`quality_level`、`quality`、`answer`、`repositories`、`citations`、`explanation`、`retrieval` 和 `created_at`。
+
+`quality` 是规则版质量评估，当前会统计证据块数量、引用数量、覆盖项目数量、解释依据数量、风险数量和是否包含 `prompt_context`。它用于判断解释是否足够可靠，不代表项目本身质量分。
 
 示例：
 

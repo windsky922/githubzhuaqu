@@ -2,6 +2,21 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-05-30 追加：新增 RAG 解释质量评估
+
+### 1. 开发目的
+RAG 解释结果已经能够写入 SQLite，但后续要判断解释是否可靠、是否需要补语料或替换 embedding，不能只看文本答案。本次为每条解释增加规则版质量评估，让数据库能直接记录证据覆盖和引用完整度。
+
+### 2. 修改内容
+1. `rag_explanations` 新增 `quality_score`、`quality_level` 和 `quality_json` 字段。
+2. `initialize` 会为旧版本地 SQLite 自动补齐质量字段，避免旧库升级时报错。
+3. `/v1/rag/explain` 响应新增 `quality`，统计证据块、引用、覆盖项目、解释依据、风险数量和 `prompt_context`。
+4. `/v1/rag/explanations` 返回历史解释的质量分和质量等级。
+5. 更新 README、API 文档、数据契约和测试。
+
+### 3. 验证
+待运行 `python -m unittest discover -q`、`python scripts/security_check.py` 和 `git diff --check`。
+
 ## 2026-05-30 追加：RAG 解释结果写入 SQLite
 
 ### 1. 开发目的

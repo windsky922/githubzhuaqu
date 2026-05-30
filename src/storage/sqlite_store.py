@@ -19,7 +19,19 @@ def connect(db_path: Path) -> sqlite3.Connection:
 
 def initialize(connection: sqlite3.Connection) -> None:
     connection.executescript(SCHEMA_PATH.read_text(encoding="utf-8"))
+    _ensure_rag_explanation_columns(connection)
     connection.commit()
+
+
+def _ensure_rag_explanation_columns(connection: sqlite3.Connection) -> None:
+    columns = {row["name"] for row in connection.execute("PRAGMA table_info(rag_explanations)").fetchall()}
+    for name, definition in {
+        "quality_score": "INTEGER NOT NULL DEFAULT 0",
+        "quality_level": "TEXT NOT NULL DEFAULT ''",
+        "quality_json": "TEXT NOT NULL DEFAULT '{}'",
+    }.items():
+        if name not in columns:
+            connection.execute(f"ALTER TABLE rag_explanations ADD COLUMN {name} {definition}")
 
 
 def import_json_archive(root: Path, db_path: Path) -> dict[str, int]:

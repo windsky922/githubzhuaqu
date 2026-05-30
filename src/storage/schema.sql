@@ -126,6 +126,9 @@ CREATE TABLE IF NOT EXISTS rag_explanations (
   model TEXT NOT NULL DEFAULT '',
   context_count INTEGER NOT NULL DEFAULT 0,
   confidence TEXT NOT NULL DEFAULT '',
+  quality_score INTEGER NOT NULL DEFAULT 0,
+  quality_level TEXT NOT NULL DEFAULT '',
+  quality_json TEXT NOT NULL DEFAULT '{}',
   answer TEXT NOT NULL DEFAULT '',
   repositories_json TEXT NOT NULL DEFAULT '[]',
   citations_json TEXT NOT NULL DEFAULT '[]',
@@ -139,6 +142,7 @@ CREATE TABLE IF NOT EXISTS rag_explanations (
 CREATE INDEX IF NOT EXISTS idx_rag_explanations_created_at ON rag_explanations(created_at);
 CREATE INDEX IF NOT EXISTS idx_rag_explanations_query ON rag_explanations(query);
 CREATE INDEX IF NOT EXISTS idx_rag_explanations_confidence ON rag_explanations(confidence);
+CREATE INDEX IF NOT EXISTS idx_rag_explanations_quality ON rag_explanations(quality_score, quality_level);
 
 CREATE TABLE IF NOT EXISTS trend_summaries (
   run_date TEXT PRIMARY KEY,

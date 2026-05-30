@@ -460,6 +460,13 @@ class ApiRepository:
             )
         contexts = retrieval.get("contexts") if isinstance(retrieval.get("contexts"), list) else []
         citations = retrieval.get("citations") if isinstance(retrieval.get("citations"), list) else []
+        prompt_context = str(retrieval.get("prompt_context") or "")
+        explanation = _rag_explanation(
+            query=str(retrieval.get("query") or query or ""),
+            contexts=contexts,
+            citations=citations,
+            retrieval=retrieval.get("retrieval") or {},
+        )
         result = {
             "schema_version": 1,
             "query": retrieval.get("query") or (_blank_to_none(query) or ""),
@@ -471,12 +478,13 @@ class ApiRepository:
             "citations": citations,
             "retrieval": retrieval.get("retrieval") or {},
             "summary": retrieval.get("summary") or [],
-            "prompt_context": retrieval.get("prompt_context") or "",
-            "explanation": _rag_explanation(
-                query=str(retrieval.get("query") or query or ""),
+            "prompt_context": prompt_context,
+            "explanation": explanation,
+            "quality": _rag_explanation_quality(
                 contexts=contexts,
                 citations=citations,
-                retrieval=retrieval.get("retrieval") or {},
+                explanation=explanation,
+                prompt_context=prompt_context,
             ),
         }
         return self._persist_rag_explanation(result)
@@ -497,7 +505,8 @@ class ApiRepository:
             rows = connection.execute(
                 f"""
                 SELECT explanation_id, query, language, category, source, mode, model,
-                       context_count, confidence, answer, repositories_json, citations_json,
+                       context_count, confidence, quality_score, quality_level, quality_json,
+                       answer, repositories_json, citations_json,
                        explanation_json, retrieval_json, created_at
                 FROM rag_explanations
                 {where}
@@ -519,6 +528,7 @@ class ApiRepository:
 
     def _persist_rag_explanation(self, result: dict[str, Any]) -> dict[str, Any]:
         explanation = result.get("explanation") if isinstance(result.get("explanation"), dict) else {}
+        quality = result.get("quality") if isinstance(result.get("quality"), dict) else {}
         retrieval = result.get("retrieval") if isinstance(result.get("retrieval"), dict) else {}
         citations = result.get("citations") if isinstance(result.get("citations"), list) else []
         contexts = result.get("contexts") if isinstance(result.get("contexts"), list) else []
@@ -539,10 +549,11 @@ class ApiRepository:
                 """
                 INSERT INTO rag_explanations(
                   explanation_id, query, language, category, source, mode, model,
-                  context_count, confidence, answer, repositories_json, citations_json,
+                  context_count, confidence, quality_score, quality_level, quality_json,
+                  answer, repositories_json, citations_json,
                   explanation_json, retrieval_json, prompt_context, payload_json, created_at
                 )
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(explanation_id) DO UPDATE SET
                   query = excluded.query,
                   language = excluded.language,
@@ -552,6 +563,9 @@ class ApiRepository:
                   model = excluded.model,
                   context_count = excluded.context_count,
                   confidence = excluded.confidence,
+                  quality_score = excluded.quality_score,
+                  quality_level = excluded.quality_level,
+                  quality_json = excluded.quality_json,
                   answer = excluded.answer,
                   repositories_json = excluded.repositories_json,
                   citations_json = excluded.citations_json,
@@ -571,6 +585,9 @@ class ApiRepository:
                     str(retrieval.get("model") or ""),
                     len(contexts),
                     str(explanation.get("confidence") or ""),
+                    _int_value(quality.get("score")),
+                    str(quality.get("level") or ""),
+                    json.dumps(quality, ensure_ascii=False, sort_keys=True),
                     str(explanation.get("answer") or ""),
                     json.dumps(repositories, ensure_ascii=False, sort_keys=True),
                     json.dumps(citations, ensure_ascii=False, sort_keys=True),
@@ -2585,6 +2602,45 @@ def _rag_explanation(
     }
 
 
+def _rag_explanation_quality(
+    *,
+    contexts: list[dict[str, Any]],
+    citations: list[dict[str, Any]],
+    explanation: dict[str, Any],
+    prompt_context: str,
+) -> dict[str, Any]:
+    coverage = explanation.get("coverage") if isinstance(explanation.get("coverage"), dict) else {}
+    repositories = _list_strings(coverage.get("repositories") or [])
+    evidence = explanation.get("evidence") if isinstance(explanation.get("evidence"), list) else []
+    risks = explanation.get("risks") if isinstance(explanation.get("risks"), list) else []
+    why = explanation.get("why_recommended") if isinstance(explanation.get("why_recommended"), list) else []
+    context_score = min(30, len(contexts) * 6)
+    citation_score = min(20, len(citations) * 4)
+    repository_score = min(15, len(repositories) * 5)
+    evidence_score = min(15, len(evidence) * 3)
+    explanation_score = min(10, len(why) * 2)
+    prompt_score = 10 if prompt_context.strip() else 0
+    risk_penalty = min(20, len(risks) * 5)
+    score = max(0, min(100, context_score + citation_score + repository_score + evidence_score + explanation_score + prompt_score - risk_penalty))
+    level = "high" if score >= 80 else "medium" if score >= 55 else "low"
+    return {
+        "score": score,
+        "level": level,
+        "metrics": {
+            "context_count": len(contexts),
+            "citation_count": len(citations),
+            "repository_count": len(repositories),
+            "evidence_count": len(evidence),
+            "why_count": len(why),
+            "risk_count": len(risks),
+            "has_prompt_context": bool(prompt_context.strip()),
+        },
+        "penalties": {
+            "risk_penalty": risk_penalty,
+        },
+    }
+
+
 def _rag_explanation_id(result: dict[str, Any]) -> str:
     retrieval = result.get("retrieval") if isinstance(result.get("retrieval"), dict) else {}
     contexts = result.get("contexts") if isinstance(result.get("contexts"), list) else []
@@ -2607,6 +2663,7 @@ def _rag_explanation_id(result: dict[str, Any]) -> str:
 def _rag_explanation_row(row: Any) -> dict[str, Any]:
     explanation = _json_object(row["explanation_json"])
     retrieval = _json_object(row["retrieval_json"])
+    quality = _json_object(row["quality_json"])
     return {
         "explanation_id": row["explanation_id"],
         "query": row["query"],
@@ -2617,6 +2674,9 @@ def _rag_explanation_row(row: Any) -> dict[str, Any]:
         "model": row["model"],
         "context_count": _int_value(row["context_count"]),
         "confidence": row["confidence"],
+        "quality_score": _int_value(row["quality_score"]),
+        "quality_level": row["quality_level"],
+        "quality": quality,
         "answer": row["answer"],
         "repositories": _list_strings(_json_list(row["repositories_json"])),
         "citations": _json_list(row["citations_json"]),

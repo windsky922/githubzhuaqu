@@ -244,7 +244,7 @@ migration_meta
 6. `rag_chunks` 保存从 `project_corpus` 拆分出的短文本证据块，用于 RAG 检索、引用和后续 embedding。
 7. `rag_chunks_fts` 保存 `rag_chunks` 的 SQLite FTS5 搜索索引，可由派生语料重建。
 8. `rag_embeddings` 保存从 `rag_chunks` 派生的本地 embedding 向量索引；当前默认模型为 `local-hash-v1`，可重建，不保存密钥。
-9. `rag_explanations` 保存 RAG 解释结果、引用、检索参数和解释摘要，用于后续质量评估和模型替换对比；不保存密钥。
+9. `rag_explanations` 保存 RAG 解释结果、引用、检索参数、解释摘要和规则版质量评估，用于后续质量评估和模型替换对比；不保存密钥。
 10. `trend_summaries` 保存趋势摘要。
 11. `sent_repositories` 保存已推送仓库状态。
 12. `star_history` 保存 Star 历史。
