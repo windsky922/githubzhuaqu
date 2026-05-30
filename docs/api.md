@@ -298,6 +298,43 @@ py scripts\build_rag_embeddings.py
 
 该接口是后续真正接入 embedding、向量库和 LangChain retriever 的预留层。当前实现只建设稳定数据边界，不改变周报采集、生成和推送流程。
 
+### `GET /v1/rag/explain`
+
+基于 `/v1/rag/retrieve` 或 `/v1/rag/vector-search` 的召回结果生成规则版 RAG 解释。该接口不调用外部模型，不请求 GitHub/Kimi/Telegram，只把已有证据块整理为“推荐解释、证据引用、风险提示、下一步动作”，用于后续接入模型总结、项目详情页解释和 LangChain 编排。
+
+支持参数：
+
+| 参数 | 说明 |
+|---|---|
+| `q` | 必填，用户问题或检索关键词 |
+| `language` | 可选，按语言过滤 |
+| `category` | 可选，按项目方向过滤 |
+| `source` | 可选，按来源过滤，例如 `github_trending` |
+| `limit` | 返回上下文数量，默认 8，最大 30 |
+| `mode` | 可选，默认 `fts5`；传 `vector` 时走本地向量检索 |
+| `model` | 可选，向量模式下默认 `local-hash-v1` |
+| `auto_build` | 可选，向量模式下索引为空时自动构建本地索引 |
+
+返回字段包含：
+
+1. `contexts`：参与解释的 RAG 证据块。
+2. `citations`：可引用的项目、日期和 chunk ID。
+3. `prompt_context`：后续交给模型时可复用的上下文。
+4. `explanation.answer`：规则版结论。
+5. `explanation.why_recommended`：推荐依据。
+6. `explanation.evidence`：裁剪后的证据摘要。
+7. `explanation.risks`：证据缺口或人工复核提示。
+8. `explanation.next_steps`：后续动作。
+
+示例：
+
+```text
+/v1/rag/explain?q=agent%20workflow&language=Python&limit=8
+/v1/rag/explain?q=agent%20workflow&mode=vector&auto_build=true
+```
+
+这是当前 RAG 从“召回证据”升级到“解释输出”的第一层接口。后续如果接入真实 LLM，应优先复用 `citations` 和 `prompt_context`，并要求模型按引用编号回答。
+
 ### `GET /v1/projects/{owner}/{repo}/similar`
 
 基于单项目详情和 `project_corpus` 语料索引生成相似项目候选。该接口优先使用 SQLite FTS5 召回候选，再结合语言、方向、来源、关键词重合、Trending 排名和新增 Star 计算 `similarity_score`。

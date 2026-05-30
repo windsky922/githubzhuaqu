@@ -62,6 +62,7 @@ class ApiRepository:
                 "rag_corpus": True,
                 "rag_retrieve": True,
                 "rag_vector_search": True,
+                "rag_explain": True,
                 "runs_query": True,
                 "jobs_query": True,
                 "job_events": True,
@@ -423,6 +424,59 @@ class ApiRepository:
             "retrieval": {"mode": "vector", "model": model, "limit": limit, "auto_build": bool(auto_build)},
             "prompt_context": _rag_prompt_context(contexts),
             "summary": _rag_vector_summary(contexts, model),
+        }
+
+    def rag_explain(
+        self,
+        *,
+        query: str,
+        language: str | None = None,
+        category: str | None = None,
+        source: str | None = None,
+        limit: int = 8,
+        mode: str = "fts5",
+        model: str = MODEL_NAME,
+        auto_build: bool = False,
+    ) -> dict[str, Any]:
+        normalized_mode = (_blank_to_none(mode) or "fts5").lower()
+        if normalized_mode in {"vector", "embedding", "semantic"}:
+            retrieval = self.rag_vector_search(
+                query=query,
+                language=language,
+                category=category,
+                source=source,
+                limit=limit,
+                model=model,
+                auto_build=auto_build,
+            )
+        else:
+            retrieval = self.rag_retrieve(
+                query=query,
+                language=language,
+                category=category,
+                source=source,
+                limit=limit,
+            )
+        contexts = retrieval.get("contexts") if isinstance(retrieval.get("contexts"), list) else []
+        citations = retrieval.get("citations") if isinstance(retrieval.get("citations"), list) else []
+        return {
+            "schema_version": 1,
+            "query": retrieval.get("query") or (_blank_to_none(query) or ""),
+            "language": retrieval.get("language") or "",
+            "category": retrieval.get("category") or "",
+            "source": retrieval.get("source") or "",
+            "count": len(contexts),
+            "contexts": contexts,
+            "citations": citations,
+            "retrieval": retrieval.get("retrieval") or {},
+            "summary": retrieval.get("summary") or [],
+            "prompt_context": retrieval.get("prompt_context") or "",
+            "explanation": _rag_explanation(
+                query=str(retrieval.get("query") or query or ""),
+                contexts=contexts,
+                citations=citations,
+                retrieval=retrieval.get("retrieval") or {},
+            ),
         }
 
     def similar_projects(self, full_name: str, *, limit: int = 10) -> dict[str, Any]:
@@ -2316,6 +2370,109 @@ def _rag_vector_summary(contexts: list[dict[str, Any]], model: str) -> list[str]
         f"本地向量索引召回 {len(contexts)} 个证据块，模型：{model}。",
         f"覆盖 {len(repositories)} 个项目：{'、'.join(repositories[:5])}。",
     ]
+
+
+def _rag_explanation(
+    *,
+    query: str,
+    contexts: list[dict[str, Any]],
+    citations: list[dict[str, Any]],
+    retrieval: dict[str, Any],
+) -> dict[str, Any]:
+    if not contexts:
+        return {
+            "scoring_model": "rule:rag-explain-v1",
+            "confidence": "low",
+            "answer": "当前没有足够 RAG 证据支撑推荐解释。",
+            "why_recommended": [],
+            "evidence": [],
+            "risks": ["证据块为空，需要扩大关键词、放宽语言/方向过滤，或先构建 RAG 索引。"],
+            "next_steps": [
+                "检查 /v1/rag/retrieve 是否能召回语料。",
+                "如使用向量模式，先运行 scripts/build_rag_embeddings.py 或设置 auto_build=true。",
+            ],
+        }
+
+    repositories = _unique_strings(context.get("metadata", {}).get("full_name") or "" for context in contexts)
+    languages = _unique_strings(context.get("metadata", {}).get("language") or "" for context in contexts)
+    categories = _unique_strings(context.get("metadata", {}).get("category") or "" for context in contexts)
+    sources = _unique_strings(
+        source
+        for context in contexts
+        for source in _list_strings(context.get("metadata", {}).get("sources") or [])
+    )
+    top_context = contexts[0]
+    top_metadata = top_context.get("metadata", {})
+    top_repo = str(top_metadata.get("full_name") or (repositories[0] if repositories else ""))
+    top_rank = _int_value(top_metadata.get("trending_rank"))
+    top_growth = _int_value(top_metadata.get("star_growth"))
+    quality_level = str(top_metadata.get("quality_level") or "")
+
+    why = [
+        f"当前问题“{query}”召回了 {len(contexts)} 个证据块，覆盖 {len(repositories)} 个历史热点项目。",
+        f"优先关注 {top_repo}，它在当前证据中排序最高。",
+    ]
+    if languages:
+        why.append(f"主要语言覆盖：{'、'.join(languages[:5])}。")
+    if categories:
+        why.append(f"主要方向覆盖：{'、'.join(categories[:5])}。")
+    if top_rank:
+        why.append(f"{top_repo} 曾进入 GitHub Trending 第 {top_rank} 位。")
+    if top_growth:
+        why.append(f"{top_repo} 对应记录的新增 Star 为 {top_growth}。")
+    if quality_level:
+        why.append(f"{top_repo} 的质量等级为 {quality_level}。")
+
+    evidence = []
+    for index, context in enumerate(contexts[:5], start=1):
+        metadata = context.get("metadata", {})
+        text = str(context.get("text") or "").strip()
+        evidence.append(
+            {
+                "index": index,
+                "full_name": metadata.get("full_name") or "",
+                "run_date": metadata.get("run_date") or "",
+                "chunk_id": context.get("chunk_id") or "",
+                "quote": text[:260],
+                "matched_evidence": _list_strings(context.get("evidence") or []),
+            }
+        )
+
+    risks = []
+    if len(contexts) < 3:
+        risks.append("证据块数量偏少，解释置信度有限。")
+    if not any(_int_value(context.get("metadata", {}).get("trending_rank")) for context in contexts):
+        risks.append("召回证据缺少 Trending 排名字段，需要结合项目详情页继续判断热度。")
+    if not sources:
+        risks.append("召回证据缺少来源字段，需要检查语料入库质量。")
+    if not risks:
+        risks.append("当前未发现明显证据缺口，但仍需人工打开项目 README 和许可证确认。")
+
+    confidence = "high" if len(contexts) >= 5 else "medium" if len(contexts) >= 2 else "low"
+    answer = (
+        f"基于 {retrieval.get('mode') or 'rag'} 检索，{top_repo} 是当前最值得优先查看的项目；"
+        f"证据覆盖 {len(repositories)} 个项目，来源包括 {('、'.join(sources[:5]) if sources else '未标明来源')}。"
+    )
+    return {
+        "scoring_model": "rule:rag-explain-v1",
+        "confidence": confidence,
+        "answer": answer,
+        "why_recommended": why,
+        "evidence": evidence,
+        "risks": risks,
+        "next_steps": [
+            "先打开 citations 中排名靠前的项目链接，核对 README、许可证和维护状态。",
+            "把 prompt_context 交给后续模型总结时，要求模型必须引用 citation index。",
+            "如果解释不够准确，优先补充 README 摘要和真实 embedding，而不是先改前端样式。",
+        ],
+        "coverage": {
+            "repositories": repositories,
+            "languages": languages,
+            "categories": categories,
+            "sources": sources,
+            "citation_count": len(citations),
+        },
+    }
 
 
 def _dedupe_search_results(results: list[dict[str, Any]]) -> list[dict[str, Any]]:

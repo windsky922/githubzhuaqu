@@ -131,6 +131,7 @@ class ApiRepositoryTest(unittest.TestCase):
                 limit=5,
                 auto_build=True,
             )
+            rag_explain = repository.rag_explain(query="agent workflow", language="Python", limit=5)
             similar = repository.similar_projects("owner/agent", limit=5)
             comparison = repository.compare_projects(["owner/agent", "owner/agent-helper", "missing/repo"])
             preference_comparison = repository.compare_projects(
@@ -199,6 +200,7 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertTrue(health["capabilities"]["rag_corpus"])
             self.assertTrue(health["capabilities"]["rag_retrieve"])
             self.assertTrue(health["capabilities"]["rag_vector_search"])
+            self.assertTrue(health["capabilities"]["rag_explain"])
             self.assertEqual(jobs["jobs"][0]["job_id"], "run:2026-05-09")
             self.assertTrue(job_detail["found"])
             self.assertEqual(job_detail["run_summary"]["run_date"], "2026-05-09")
@@ -309,6 +311,13 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertGreaterEqual(rag_vector_search["count"], 1)
             self.assertIn("owner/agent", [item["metadata"]["full_name"] for item in rag_vector_search["contexts"]])
             self.assertTrue(rag_vector_search["citations"])
+            self.assertEqual(rag_explain["schema_version"], 1)
+            self.assertGreaterEqual(rag_explain["count"], 1)
+            self.assertEqual(rag_explain["explanation"]["scoring_model"], "rule:rag-explain-v1")
+            self.assertIn("owner/agent", rag_explain["explanation"]["answer"])
+            self.assertTrue(rag_explain["explanation"]["why_recommended"])
+            self.assertTrue(rag_explain["explanation"]["evidence"])
+            self.assertTrue(rag_explain["explanation"]["next_steps"])
             self.assertTrue(similar["found"])
             self.assertIn("fts5", similar["search_engine"])
             self.assertGreaterEqual(similar["count"], 1)
@@ -373,6 +382,10 @@ class ApiRepositoryTest(unittest.TestCase):
             v1_rag_vector_search = client.get(
                 "/v1/rag/vector-search",
                 params={"q": "agent workflow", "language": "Python", "limit": 5, "auto_build": True},
+            )
+            v1_rag_explain = client.get(
+                "/v1/rag/explain",
+                params={"q": "agent workflow", "language": "Python", "limit": 5},
             )
             v1_similar = client.get("/v1/projects/owner/agent/similar", params={"limit": 5})
             v1_compare = client.get(
@@ -452,6 +465,7 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(v1_rag_corpus.status_code, 200)
             self.assertEqual(v1_rag_retrieve.status_code, 200)
             self.assertEqual(v1_rag_vector_search.status_code, 200)
+            self.assertEqual(v1_rag_explain.status_code, 200)
             self.assertEqual(v1_similar.status_code, 200)
             self.assertEqual(v1_compare.status_code, 200)
             self.assertEqual(v1_projects.status_code, 200)
@@ -491,6 +505,8 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertTrue(v1_rag_retrieve.json()["citations"])
             self.assertIn("owner/agent", [item["metadata"]["full_name"] for item in v1_rag_vector_search.json()["contexts"]])
             self.assertTrue(v1_rag_vector_search.json()["citations"])
+            self.assertEqual(v1_rag_explain.json()["explanation"]["scoring_model"], "rule:rag-explain-v1")
+            self.assertIn("owner/agent", v1_rag_explain.json()["explanation"]["answer"])
             self.assertEqual(v1_similar.json()["similar_projects"][0]["full_name"], "owner/agent-helper")
             self.assertEqual(v1_compare.json()["count"], 2)
             self.assertEqual(v1_compare.json()["best_by"]["highest_total_star_growth"], "owner/agent")

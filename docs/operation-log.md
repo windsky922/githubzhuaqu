@@ -2,6 +2,21 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-05-30 追加：新增 RAG 解释层接口
+
+### 1. 开发目的
+当前数据库和 RAG 已经能输出语料、证据块和本地向量检索结果，但还缺少面向产品功能的解释层。后续项目详情、推荐理由、问答和 LangChain 编排都需要一个稳定的“证据到解释”接口，因此本次优先建设后端核心能力，而不是继续优化末端页面样式。
+
+### 2. 修改内容
+1. 新增 `GET /v1/rag/explain`，支持 `fts5` 和 `vector` 两种模式。
+2. 新增 `repository.rag_explain`，复用已有 `/v1/rag/retrieve` 与 `/v1/rag/vector-search` 的召回结果。
+3. 新增规则版解释结构，包含 `answer`、`why_recommended`、`evidence`、`risks`、`next_steps` 和 `coverage`。
+4. `/v1/health` 新增 `rag_explain` 能力标识。
+5. 更新 README、API 文档和后端测试。
+
+### 3. 验证
+待运行 `python -m unittest discover -q`、`python scripts/security_check.py` 和 `git diff --check`。
+
 ## 2026-05-29 追加：项目详情页接入 RAG 证据
 
 ### 1. 开发目的
