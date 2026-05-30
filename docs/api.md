@@ -359,6 +359,33 @@ py scripts\build_rag_embeddings.py
 
 该接口只读取 SQLite 中的解释历史，不触发新的检索、不调用外部模型，也不包含密钥。
 
+### `GET /v1/rag/quality-summary`
+
+汇总 SQLite 中 RAG 解释历史的质量状态，用于判断当前 RAG 数据是否足够支撑模型总结、项目详情解释和后续 LangChain 编排。该接口只读 `rag_explanations`，不触发新检索。
+
+支持参数：
+
+| 参数 | 说明 |
+|---|---|
+| `limit` | 返回最近低质量样本和最近解释数量，默认 10，最大 50 |
+
+返回字段包含：
+
+1. `total_count`：解释历史总数。
+2. `average_quality_score`：平均质量分。
+3. `quality_levels`：高/中/低质量解释数量。
+4. `confidence_levels`：解释置信度分布。
+5. `modes`：FTS、向量等检索模式分布。
+6. `recent_low_quality`：最近低质量解释样本。
+7. `latest`：最近解释样本。
+8. `recommendations`：下一步改进建议。
+
+示例：
+
+```text
+/v1/rag/quality-summary?limit=10
+```
+
 ### `GET /v1/projects/{owner}/{repo}/similar`
 
 基于单项目详情和 `project_corpus` 语料索引生成相似项目候选。该接口优先使用 SQLite FTS5 召回候选，再结合语言、方向、来源、关键词重合、Trending 排名和新增 Star 计算 `similarity_score`。

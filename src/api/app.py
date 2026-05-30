@@ -283,6 +283,10 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
     ) -> dict[str, Any]:
         return repository.rag_explanations(query=q, limit=limit)
 
+    @app.get("/v1/rag/quality-summary")
+    def v1_rag_quality_summary(limit: int = Query(default=10, ge=1, le=50)) -> dict[str, Any]:
+        return repository.rag_quality_summary(limit=limit)
+
     @app.get("/v1/runs")
     def v1_runs() -> dict[str, Any]:
         return repository.runs()

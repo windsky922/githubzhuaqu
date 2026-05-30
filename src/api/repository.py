@@ -64,6 +64,7 @@ class ApiRepository:
                 "rag_vector_search": True,
                 "rag_explain": True,
                 "rag_explanations": True,
+                "rag_quality_summary": True,
                 "runs_query": True,
                 "jobs_query": True,
                 "job_events": True,
@@ -524,6 +525,68 @@ class ApiRepository:
             "count": len(explanations),
             "query": normalized_query or "",
             "explanations": explanations,
+        }
+
+    def rag_quality_summary(self, *, limit: int = 10) -> dict[str, Any]:
+        self.ensure_sqlite_index()
+        limit = max(1, min(int(limit or 10), 50))
+        connection = connect(self.db_path)
+        try:
+            initialize(connection)
+            summary_row = connection.execute(
+                """
+                SELECT COUNT(*) AS total_count,
+                       AVG(quality_score) AS average_quality_score,
+                       MIN(quality_score) AS min_quality_score,
+                       MAX(quality_score) AS max_quality_score
+                FROM rag_explanations
+                """
+            ).fetchone()
+            quality_levels = _group_counts(connection, "rag_explanations", "quality_level")
+            confidence_levels = _group_counts(connection, "rag_explanations", "confidence")
+            modes = _group_counts(connection, "rag_explanations", "mode")
+            recent_low_quality_rows = connection.execute(
+                """
+                SELECT explanation_id, query, language, category, source, mode, model,
+                       context_count, confidence, quality_score, quality_level, quality_json,
+                       answer, repositories_json, citations_json,
+                       explanation_json, retrieval_json, created_at
+                FROM rag_explanations
+                WHERE quality_level = 'low' OR quality_score < 55
+                ORDER BY created_at DESC, quality_score ASC, explanation_id DESC
+                LIMIT ?
+                """,
+                (limit,),
+            ).fetchall()
+            latest_rows = connection.execute(
+                """
+                SELECT explanation_id, query, language, category, source, mode, model,
+                       context_count, confidence, quality_score, quality_level, quality_json,
+                       answer, repositories_json, citations_json,
+                       explanation_json, retrieval_json, created_at
+                FROM rag_explanations
+                ORDER BY created_at DESC, explanation_id DESC
+                LIMIT ?
+                """,
+                (limit,),
+            ).fetchall()
+        finally:
+            connection.close()
+
+        total_count = _int_value(summary_row["total_count"] if summary_row else 0)
+        average_quality_score = round(float(summary_row["average_quality_score"] or 0), 2) if summary_row else 0
+        return {
+            "schema_version": 1,
+            "total_count": total_count,
+            "average_quality_score": average_quality_score,
+            "min_quality_score": _int_value(summary_row["min_quality_score"] if summary_row else 0),
+            "max_quality_score": _int_value(summary_row["max_quality_score"] if summary_row else 0),
+            "quality_levels": quality_levels,
+            "confidence_levels": confidence_levels,
+            "modes": modes,
+            "recent_low_quality": [_rag_explanation_row(row) for row in recent_low_quality_rows],
+            "latest": [_rag_explanation_row(row) for row in latest_rows],
+            "recommendations": _rag_quality_recommendations(total_count, average_quality_score, quality_levels),
         }
 
     def _persist_rag_explanation(self, result: dict[str, Any]) -> dict[str, Any]:
@@ -2639,6 +2702,24 @@ def _rag_explanation_quality(
             "risk_penalty": risk_penalty,
         },
     }
+
+
+def _rag_quality_recommendations(total_count: int, average_quality_score: float, quality_levels: dict[str, int]) -> list[str]:
+    if total_count <= 0:
+        return ["暂无 RAG 解释历史；先调用 /v1/rag/explain 生成可评估样本。"]
+    recommendations = []
+    low_count = _int_value(quality_levels.get("low"))
+    if low_count:
+        recommendations.append(f"存在 {low_count} 条低质量解释，优先检查关键词、语料覆盖和引用完整度。")
+    if average_quality_score < 55:
+        recommendations.append("平均质量分偏低，建议补充 README 摘要并扩大 RAG 证据召回。")
+    elif average_quality_score < 80:
+        recommendations.append("平均质量分中等，适合继续对比 FTS 与向量检索效果。")
+    else:
+        recommendations.append("平均质量分较高，可以开始评估接入模型总结或 LangChain 编排。")
+    if not quality_levels.get("high"):
+        recommendations.append("暂未形成高质量解释样本，后续应增加更多引用和更完整 prompt_context。")
+    return recommendations
 
 
 def _rag_explanation_id(result: dict[str, Any]) -> str:
