@@ -116,6 +116,30 @@ CREATE INDEX IF NOT EXISTS idx_rag_embeddings_model ON rag_embeddings(embedding_
 CREATE INDEX IF NOT EXISTS idx_rag_embeddings_full_name ON rag_embeddings(full_name);
 CREATE INDEX IF NOT EXISTS idx_rag_embeddings_run_date ON rag_embeddings(run_date);
 
+CREATE TABLE IF NOT EXISTS rag_explanations (
+  explanation_id TEXT PRIMARY KEY,
+  query TEXT NOT NULL DEFAULT '',
+  language TEXT NOT NULL DEFAULT '',
+  category TEXT NOT NULL DEFAULT '',
+  source TEXT NOT NULL DEFAULT '',
+  mode TEXT NOT NULL DEFAULT '',
+  model TEXT NOT NULL DEFAULT '',
+  context_count INTEGER NOT NULL DEFAULT 0,
+  confidence TEXT NOT NULL DEFAULT '',
+  answer TEXT NOT NULL DEFAULT '',
+  repositories_json TEXT NOT NULL DEFAULT '[]',
+  citations_json TEXT NOT NULL DEFAULT '[]',
+  explanation_json TEXT NOT NULL DEFAULT '{}',
+  retrieval_json TEXT NOT NULL DEFAULT '{}',
+  prompt_context TEXT NOT NULL DEFAULT '',
+  payload_json TEXT NOT NULL DEFAULT '{}',
+  created_at TEXT NOT NULL DEFAULT ''
+);
+
+CREATE INDEX IF NOT EXISTS idx_rag_explanations_created_at ON rag_explanations(created_at);
+CREATE INDEX IF NOT EXISTS idx_rag_explanations_query ON rag_explanations(query);
+CREATE INDEX IF NOT EXISTS idx_rag_explanations_confidence ON rag_explanations(confidence);
+
 CREATE TABLE IF NOT EXISTS trend_summaries (
   run_date TEXT PRIMARY KEY,
   total_projects INTEGER NOT NULL DEFAULT 0,

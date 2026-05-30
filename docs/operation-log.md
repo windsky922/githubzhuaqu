@@ -2,6 +2,21 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-05-30 追加：RAG 解释结果写入 SQLite
+
+### 1. 开发目的
+RAG 解释接口已经能把证据块整理成推荐解释，但如果解释结果不入库，后续无法追踪“某次问题召回了什么、解释质量如何、FTS 与向量模式差异在哪里”。本次继续优先建设数据库和 RAG 核心能力，把解释结果变成可查询、可复用、可评估的数据资产。
+
+### 2. 修改内容
+1. SQLite 新增 `rag_explanations` 表，保存解释 ID、query、过滤条件、检索模式、模型、命中数量、置信度、答案、引用和完整解释 JSON。
+2. `/v1/rag/explain` 每次生成解释后会写入或更新 `rag_explanations`。
+3. 新增 `GET /v1/rag/explanations`，用于查询历史解释结果。
+4. 数据库概览新增 `rag_explanations` 表计数和 `ready_for_explanation_history` 状态。
+5. 更新 README、API 文档、数据契约和测试。
+
+### 3. 验证
+待运行 `python -m unittest discover -q`、`python scripts/security_check.py` 和 `git diff --check`。
+
 ## 2026-05-30 追加：新增 RAG 解释层接口
 
 ### 1. 开发目的

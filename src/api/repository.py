@@ -63,6 +63,7 @@ class ApiRepository:
                 "rag_retrieve": True,
                 "rag_vector_search": True,
                 "rag_explain": True,
+                "rag_explanations": True,
                 "runs_query": True,
                 "jobs_query": True,
                 "job_events": True,
@@ -459,7 +460,7 @@ class ApiRepository:
             )
         contexts = retrieval.get("contexts") if isinstance(retrieval.get("contexts"), list) else []
         citations = retrieval.get("citations") if isinstance(retrieval.get("citations"), list) else []
-        return {
+        result = {
             "schema_version": 1,
             "query": retrieval.get("query") or (_blank_to_none(query) or ""),
             "language": retrieval.get("language") or "",
@@ -478,6 +479,112 @@ class ApiRepository:
                 retrieval=retrieval.get("retrieval") or {},
             ),
         }
+        return self._persist_rag_explanation(result)
+
+    def rag_explanations(self, *, limit: int = 20, query: str | None = None) -> dict[str, Any]:
+        self.ensure_sqlite_index()
+        limit = max(1, min(int(limit or 20), 100))
+        normalized_query = _blank_to_none(query)
+        connection = connect(self.db_path)
+        try:
+            initialize(connection)
+            params: list[Any] = []
+            where = ""
+            if normalized_query:
+                where = "WHERE query LIKE ? OR answer LIKE ?"
+                like = f"%{normalized_query}%"
+                params.extend([like, like])
+            rows = connection.execute(
+                f"""
+                SELECT explanation_id, query, language, category, source, mode, model,
+                       context_count, confidence, answer, repositories_json, citations_json,
+                       explanation_json, retrieval_json, created_at
+                FROM rag_explanations
+                {where}
+                ORDER BY created_at DESC, explanation_id DESC
+                LIMIT ?
+                """,
+                (*params, limit),
+            ).fetchall()
+        finally:
+            connection.close()
+
+        explanations = [_rag_explanation_row(row) for row in rows]
+        return {
+            "schema_version": 1,
+            "count": len(explanations),
+            "query": normalized_query or "",
+            "explanations": explanations,
+        }
+
+    def _persist_rag_explanation(self, result: dict[str, Any]) -> dict[str, Any]:
+        explanation = result.get("explanation") if isinstance(result.get("explanation"), dict) else {}
+        retrieval = result.get("retrieval") if isinstance(result.get("retrieval"), dict) else {}
+        citations = result.get("citations") if isinstance(result.get("citations"), list) else []
+        contexts = result.get("contexts") if isinstance(result.get("contexts"), list) else []
+        coverage = explanation.get("coverage") if isinstance(explanation.get("coverage"), dict) else {}
+        repositories = _list_strings(coverage.get("repositories") or [])
+        created_at = datetime.now(UTC).isoformat().replace("+00:00", "Z")
+        explanation_id = _rag_explanation_id(result)
+        enriched = {
+            **result,
+            "explanation_id": explanation_id,
+            "created_at": created_at,
+            "cached": True,
+        }
+        connection = connect(self.db_path)
+        try:
+            initialize(connection)
+            connection.execute(
+                """
+                INSERT INTO rag_explanations(
+                  explanation_id, query, language, category, source, mode, model,
+                  context_count, confidence, answer, repositories_json, citations_json,
+                  explanation_json, retrieval_json, prompt_context, payload_json, created_at
+                )
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(explanation_id) DO UPDATE SET
+                  query = excluded.query,
+                  language = excluded.language,
+                  category = excluded.category,
+                  source = excluded.source,
+                  mode = excluded.mode,
+                  model = excluded.model,
+                  context_count = excluded.context_count,
+                  confidence = excluded.confidence,
+                  answer = excluded.answer,
+                  repositories_json = excluded.repositories_json,
+                  citations_json = excluded.citations_json,
+                  explanation_json = excluded.explanation_json,
+                  retrieval_json = excluded.retrieval_json,
+                  prompt_context = excluded.prompt_context,
+                  payload_json = excluded.payload_json,
+                  created_at = excluded.created_at
+                """,
+                (
+                    explanation_id,
+                    str(result.get("query") or ""),
+                    str(result.get("language") or ""),
+                    str(result.get("category") or ""),
+                    str(result.get("source") or ""),
+                    str(retrieval.get("mode") or ""),
+                    str(retrieval.get("model") or ""),
+                    len(contexts),
+                    str(explanation.get("confidence") or ""),
+                    str(explanation.get("answer") or ""),
+                    json.dumps(repositories, ensure_ascii=False, sort_keys=True),
+                    json.dumps(citations, ensure_ascii=False, sort_keys=True),
+                    json.dumps(explanation, ensure_ascii=False, sort_keys=True),
+                    json.dumps(retrieval, ensure_ascii=False, sort_keys=True),
+                    str(result.get("prompt_context") or ""),
+                    json.dumps(enriched, ensure_ascii=False, sort_keys=True),
+                    created_at,
+                ),
+            )
+            connection.commit()
+        finally:
+            connection.close()
+        return enriched
 
     def similar_projects(self, full_name: str, *, limit: int = 10) -> dict[str, Any]:
         detail = self.project_detail(full_name)
@@ -686,6 +793,7 @@ class ApiRepository:
                 "rag_chunks",
                 "rag_chunks_fts",
                 "rag_embeddings",
+                "rag_explanations",
                 "trend_summaries",
                 "jobs",
                 "job_events",
@@ -751,10 +859,12 @@ class ApiRepository:
                 "chunk_records": table_counts.get("rag_chunks", 0),
                 "chunk_fts_records": table_counts.get("rag_chunks_fts", 0),
                 "embedding_records": table_counts.get("rag_embeddings", 0),
+                "explanation_records": table_counts.get("rag_explanations", 0),
                 "event_records": table_counts.get("job_events", 0),
                 "ready_for_text_index": table_counts.get("project_corpus_fts", 0) > 0,
                 "ready_for_chunk_retrieval": table_counts.get("rag_chunks_fts", 0) > 0,
                 "ready_for_vector_search": table_counts.get("rag_embeddings", 0) > 0,
+                "ready_for_explanation_history": table_counts.get("rag_explanations", 0) > 0,
             },
         }
 
@@ -2472,6 +2582,47 @@ def _rag_explanation(
             "sources": sources,
             "citation_count": len(citations),
         },
+    }
+
+
+def _rag_explanation_id(result: dict[str, Any]) -> str:
+    retrieval = result.get("retrieval") if isinstance(result.get("retrieval"), dict) else {}
+    contexts = result.get("contexts") if isinstance(result.get("contexts"), list) else []
+    text = json.dumps(
+        {
+            "query": result.get("query") or "",
+            "language": result.get("language") or "",
+            "category": result.get("category") or "",
+            "source": result.get("source") or "",
+            "mode": retrieval.get("mode") or "",
+            "model": retrieval.get("model") or "",
+            "chunks": [context.get("chunk_id") or "" for context in contexts],
+        },
+        ensure_ascii=False,
+        sort_keys=True,
+    )
+    return "ragx:" + sha1(text.encode("utf-8")).hexdigest()[:16]
+
+
+def _rag_explanation_row(row: Any) -> dict[str, Any]:
+    explanation = _json_object(row["explanation_json"])
+    retrieval = _json_object(row["retrieval_json"])
+    return {
+        "explanation_id": row["explanation_id"],
+        "query": row["query"],
+        "language": row["language"],
+        "category": row["category"],
+        "source": row["source"],
+        "mode": row["mode"],
+        "model": row["model"],
+        "context_count": _int_value(row["context_count"]),
+        "confidence": row["confidence"],
+        "answer": row["answer"],
+        "repositories": _list_strings(_json_list(row["repositories_json"])),
+        "citations": _json_list(row["citations_json"]),
+        "explanation": explanation,
+        "retrieval": retrieval,
+        "created_at": row["created_at"],
     }
 
 

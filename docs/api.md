@@ -335,6 +335,28 @@ py scripts\build_rag_embeddings.py
 
 这是当前 RAG 从“召回证据”升级到“解释输出”的第一层接口。后续如果接入真实 LLM，应优先复用 `citations` 和 `prompt_context`，并要求模型按引用编号回答。
 
+### `GET /v1/rag/explanations`
+
+查询已经写入 SQLite 的 RAG 解释历史。每次调用 `/v1/rag/explain` 都会把解释结果写入 `rag_explanations` 表，便于后续查看解释质量、比较 FTS 与向量模式、评估模型替换效果。
+
+支持参数：
+
+| 参数 | 说明 |
+|---|---|
+| `q` | 可选，按 query 或 answer 做模糊过滤 |
+| `limit` | 返回数量，默认 20，最大 100 |
+
+返回字段包含 `explanation_id`、`query`、`mode`、`model`、`confidence`、`answer`、`repositories`、`citations`、`explanation`、`retrieval` 和 `created_at`。
+
+示例：
+
+```text
+/v1/rag/explanations?limit=20
+/v1/rag/explanations?q=agent
+```
+
+该接口只读取 SQLite 中的解释历史，不触发新的检索、不调用外部模型，也不包含密钥。
+
 ### `GET /v1/projects/{owner}/{repo}/similar`
 
 基于单项目详情和 `project_corpus` 语料索引生成相似项目候选。该接口优先使用 SQLite FTS5 召回候选，再结合语言、方向、来源、关键词重合、Trending 排名和新增 Star 计算 `similarity_score`。

@@ -132,6 +132,8 @@ class ApiRepositoryTest(unittest.TestCase):
                 auto_build=True,
             )
             rag_explain = repository.rag_explain(query="agent workflow", language="Python", limit=5)
+            rag_explanations = repository.rag_explanations(query="agent", limit=5)
+            database_summary_after_explain = repository.database_summary()
             similar = repository.similar_projects("owner/agent", limit=5)
             comparison = repository.compare_projects(["owner/agent", "owner/agent-helper", "missing/repo"])
             preference_comparison = repository.compare_projects(
@@ -312,12 +314,19 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertIn("owner/agent", [item["metadata"]["full_name"] for item in rag_vector_search["contexts"]])
             self.assertTrue(rag_vector_search["citations"])
             self.assertEqual(rag_explain["schema_version"], 1)
+            self.assertTrue(rag_explain["explanation_id"].startswith("ragx:"))
+            self.assertTrue(rag_explain["cached"])
             self.assertGreaterEqual(rag_explain["count"], 1)
             self.assertEqual(rag_explain["explanation"]["scoring_model"], "rule:rag-explain-v1")
             self.assertIn("owner/agent", rag_explain["explanation"]["answer"])
             self.assertTrue(rag_explain["explanation"]["why_recommended"])
             self.assertTrue(rag_explain["explanation"]["evidence"])
             self.assertTrue(rag_explain["explanation"]["next_steps"])
+            self.assertGreaterEqual(rag_explanations["count"], 1)
+            self.assertEqual(rag_explanations["explanations"][0]["explanation_id"], rag_explain["explanation_id"])
+            self.assertIn("owner/agent", rag_explanations["explanations"][0]["answer"])
+            self.assertGreaterEqual(database_summary_after_explain["table_counts"]["rag_explanations"], 1)
+            self.assertTrue(database_summary_after_explain["rag_readiness"]["ready_for_explanation_history"])
             self.assertTrue(similar["found"])
             self.assertIn("fts5", similar["search_engine"])
             self.assertGreaterEqual(similar["count"], 1)
@@ -386,6 +395,10 @@ class ApiRepositoryTest(unittest.TestCase):
             v1_rag_explain = client.get(
                 "/v1/rag/explain",
                 params={"q": "agent workflow", "language": "Python", "limit": 5},
+            )
+            v1_rag_explanations = client.get(
+                "/v1/rag/explanations",
+                params={"q": "agent", "limit": 5},
             )
             v1_similar = client.get("/v1/projects/owner/agent/similar", params={"limit": 5})
             v1_compare = client.get(
@@ -466,6 +479,7 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(v1_rag_retrieve.status_code, 200)
             self.assertEqual(v1_rag_vector_search.status_code, 200)
             self.assertEqual(v1_rag_explain.status_code, 200)
+            self.assertEqual(v1_rag_explanations.status_code, 200)
             self.assertEqual(v1_similar.status_code, 200)
             self.assertEqual(v1_compare.status_code, 200)
             self.assertEqual(v1_projects.status_code, 200)
@@ -506,7 +520,10 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertIn("owner/agent", [item["metadata"]["full_name"] for item in v1_rag_vector_search.json()["contexts"]])
             self.assertTrue(v1_rag_vector_search.json()["citations"])
             self.assertEqual(v1_rag_explain.json()["explanation"]["scoring_model"], "rule:rag-explain-v1")
+            self.assertTrue(v1_rag_explain.json()["explanation_id"].startswith("ragx:"))
             self.assertIn("owner/agent", v1_rag_explain.json()["explanation"]["answer"])
+            self.assertGreaterEqual(v1_rag_explanations.json()["count"], 1)
+            self.assertIn("owner/agent", v1_rag_explanations.json()["explanations"][0]["answer"])
             self.assertEqual(v1_similar.json()["similar_projects"][0]["full_name"], "owner/agent-helper")
             self.assertEqual(v1_compare.json()["count"], 2)
             self.assertEqual(v1_compare.json()["best_by"]["highest_total_star_growth"], "owner/agent")
