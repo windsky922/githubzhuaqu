@@ -420,6 +420,42 @@ python scripts/backfill_rag_explanations.py --dry-run
 python scripts/backfill_rag_explanations.py --limit 10
 ```
 
+### `POST /v1/rag/backfill-explanations`
+
+按 `/v1/rag/coverage` 的缺口结果，为缺少解释历史的项目批量生成规则版 RAG 解释。该接口只使用本地 SQLite 和现有 RAG 检索逻辑，不调用外部模型、不请求 GitHub/Kimi/Telegram。
+
+为避免误写数据库，接口默认 `dry_run=true`。如果请求中传入 `dry_run=false` 但没有同时传入 `confirm_execution=true`，后端会自动改回预览模式，并在 `safety_warnings` 中说明原因。
+
+请求 JSON 支持字段：
+
+| 字段 | 说明 |
+|---|---|
+| `limit` | 回填项目数量，默认 10，最大 100 |
+| `rag_limit` | 每个项目解释时召回的证据块数量，默认 8，最大 30 |
+| `mode` | 检索模式，支持 `fts5` 或 `vector` |
+| `model` | 向量模式使用的 embedding 模型名，默认 `local-hash-v1` |
+| `auto_build` | 向量模式缺少索引时是否自动构建本地索引 |
+| `dry_run` | 是否只预览，不写入 SQLite；API 默认 `true` |
+| `confirm_execution` | API 写库确认开关；只有 `dry_run=false` 且该字段为 `true` 才会创建解释历史 |
+
+返回字段包含：
+
+1. `accepted`：请求是否被后端接受处理。
+2. `dry_run`：本次实际执行模式。
+3. `safety_warnings`：安全降级提示。
+4. `coverage_before`：回填前的覆盖概况。
+5. `processed`：本次计划或创建的项目记录。
+
+示例：
+
+```text
+POST /v1/rag/backfill-explanations
+{"limit": 3, "dry_run": true}
+
+POST /v1/rag/backfill-explanations
+{"limit": 3, "dry_run": false, "confirm_execution": true}
+```
+
 ### `GET /v1/projects/{owner}/{repo}/rag`
 
 返回单个项目的 RAG 聚合包，用于项目详情页、后续 Agent 工具调用和 LangChain/RAG 编排。该接口会读取项目详情、执行本地 RAG 检索，并合并该项目已经入库的解释历史，不调用外部模型、不请求 GitHub/Kimi/Telegram。

@@ -2,6 +2,21 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-06-01 追加：新增 RAG 解释回填 API
+
+### 1. 开发目的
+RAG 解释回填已经有脚本入口，但后端和后续管理页、Agent 工具调用还不能直接复用同一能力。本次把回填逻辑下沉到 `ApiRepository`，并增加受控 API 入口，让数据库补库从“脚本能力”升级为“后端能力”。
+
+### 2. 修改内容
+1. 新增 `ApiRepository.backfill_rag_explanations`，作为脚本和 API 的共用回填逻辑。
+2. 新增 `POST /v1/rag/backfill-explanations`。
+3. API 默认 `dry_run=true`；如果未传入 `confirm_execution=true`，即使请求 `dry_run=false` 也会自动改回预览模式。
+4. `scripts/backfill_rag_explanations.py` 改为复用后端仓库层，减少重复逻辑。
+5. 更新 API 文档、README 和单元测试。
+
+### 3. 验证
+已运行 `python -m unittest discover -q`、`python scripts\security_check.py` 和 `git diff --check`。
+
 ## 2026-06-01 追加：新增 RAG 解释回填脚本
 
 ### 1. 开发目的

@@ -24,6 +24,11 @@ class RagBackfillTest(unittest.TestCase):
             self.assertTrue(dry_run["processed"][0]["dry_run"])
             self.assertEqual(dry_run["processed"][0]["status"], "planned")
 
+            unsafe_api_run = repository.backfill_rag_explanations_from_payload({"limit": 1, "dry_run": False})
+            self.assertTrue(unsafe_api_run["dry_run"])
+            self.assertTrue(unsafe_api_run["safety_warnings"])
+            self.assertEqual(unsafe_api_run["processed"][0]["status"], "planned")
+
             result = backfill_rag_explanations(root=root, db_path=db_path, limit=1)
             self.assertEqual(result["status"], "ok")
             self.assertEqual(result["processed_count"], 1)

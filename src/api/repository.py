@@ -68,6 +68,7 @@ class ApiRepository:
                 "rag_project_bundle": True,
                 "rag_quality_summary": True,
                 "rag_coverage": True,
+                "rag_backfill_explanations": True,
                 "runs_query": True,
                 "jobs_query": True,
                 "job_events": True,
@@ -720,6 +721,115 @@ class ApiRepository:
             "gaps": gaps[:limit],
             "recommendations": _rag_coverage_recommendations(total_projects, healthy_count, gaps),
         }
+
+    def backfill_rag_explanations(
+        self,
+        *,
+        limit: int = 10,
+        rag_limit: int = 8,
+        mode: str = "fts5",
+        model: str = "local-hash-v1",
+        auto_build: bool = False,
+        dry_run: bool = False,
+    ) -> dict[str, Any]:
+        limit = max(1, min(_int_value(limit) or 10, 100))
+        rag_limit = max(1, min(_int_value(rag_limit) or 8, 30))
+        mode_value = str(mode or "fts5").lower()
+        if mode_value not in {"fts5", "vector"}:
+            mode_value = "fts5"
+        model_value = str(model or "local-hash-v1")
+
+        coverage = self.rag_coverage(limit=100)
+        candidates = [
+            item
+            for item in coverage.get("gaps", [])
+            if _int_value(item.get("explanation_count")) <= 0 and item.get("full_name")
+        ][:limit]
+
+        processed = []
+        for item in candidates:
+            full_name = str(item["full_name"])
+            bundle = self.project_rag_bundle(
+                full_name,
+                limit=rag_limit,
+                explanation_limit=1,
+                mode=mode_value,
+                model=model_value,
+                auto_build=auto_build,
+            )
+            project = bundle.get("project") if isinstance(bundle.get("project"), dict) else {}
+            record = {
+                "full_name": full_name,
+                "query": bundle.get("query") or full_name,
+                "dry_run": dry_run,
+                "status": "planned" if dry_run else "created",
+                "previous_gap_reasons": item.get("gap_reasons") or [],
+            }
+            if not dry_run:
+                explanation = self.rag_explain(
+                    query=str(record["query"]),
+                    language=str(project.get("language") or item.get("language") or "") or None,
+                    category=str(project.get("category") or item.get("category") or "") or None,
+                    limit=rag_limit,
+                    mode=mode_value,
+                    model=model_value,
+                    auto_build=auto_build,
+                )
+                record.update(
+                    {
+                        "explanation_id": explanation.get("explanation_id") or "",
+                        "quality_score": explanation.get("quality", {}).get("score", 0),
+                        "quality_level": explanation.get("quality", {}).get("level", ""),
+                        "context_count": explanation.get("count", 0),
+                    }
+                )
+            processed.append(record)
+
+        return {
+            "schema_version": 1,
+            "status": "ok",
+            "dry_run": dry_run,
+            "requested_limit": limit,
+            "candidate_count": len(candidates),
+            "processed_count": len(processed),
+            "processed": processed,
+            "coverage_before": {
+                "total_projects": coverage.get("total_projects", 0),
+                "healthy_project_count": coverage.get("healthy_project_count", 0),
+                "coverage_rate": coverage.get("coverage_rate", 0),
+                "gap_count": coverage.get("gap_count", 0),
+            },
+        }
+
+    def backfill_rag_explanations_from_payload(self, payload: dict[str, Any] | None) -> dict[str, Any]:
+        payload = payload if isinstance(payload, dict) else {}
+        dry_run = _bool_value(payload.get("dry_run"), True)
+        confirm_execution = _bool_value(payload.get("confirm_execution"), False)
+        safety_warnings = []
+        if not dry_run and not confirm_execution:
+            dry_run = True
+            safety_warnings.append("未传入 confirm_execution=true，API 已自动改为 dry_run=true。")
+
+        result = self.backfill_rag_explanations(
+            limit=_int_value(payload.get("limit")) or 10,
+            rag_limit=_int_value(payload.get("rag_limit")) or 8,
+            mode=str(payload.get("mode") or "fts5"),
+            model=str(payload.get("model") or "local-hash-v1"),
+            auto_build=_bool_value(payload.get("auto_build"), False),
+            dry_run=dry_run,
+        )
+        result["accepted"] = True
+        result["safety_warnings"] = safety_warnings
+        result["request"] = {
+            "limit": result["requested_limit"],
+            "rag_limit": _int_value(payload.get("rag_limit")) or 8,
+            "mode": str(payload.get("mode") or "fts5"),
+            "model": str(payload.get("model") or "local-hash-v1"),
+            "auto_build": _bool_value(payload.get("auto_build"), False),
+            "dry_run": dry_run,
+            "confirm_execution": confirm_execution,
+        }
+        return result
 
     def project_rag_bundle(
         self,
@@ -3681,6 +3791,21 @@ def _int_value(value: Any) -> int:
         return int(value or 0)
     except (TypeError, ValueError):
         return 0
+
+
+def _bool_value(value: Any, default: bool = False) -> bool:
+    if isinstance(value, bool):
+        return value
+    if value is None:
+        return default
+    if isinstance(value, (int, float)):
+        return bool(value)
+    normalized = str(value).strip().lower()
+    if normalized in {"1", "true", "yes", "y", "on"}:
+        return True
+    if normalized in {"0", "false", "no", "n", "off"}:
+        return False
+    return default
 
 
 def _positive_int(value: Any) -> int | None:

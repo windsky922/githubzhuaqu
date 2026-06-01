@@ -25,68 +25,14 @@ def backfill_rag_explanations(
     dry_run: bool = False,
 ) -> dict[str, Any]:
     repository = ApiRepository(root=root, db_path=db_path)
-    limit = max(1, min(int(limit or 10), 100))
-    rag_limit = max(1, min(int(rag_limit or 8), 30))
-    coverage = repository.rag_coverage(limit=100)
-    candidates = [
-        item
-        for item in coverage.get("gaps", [])
-        if int(item.get("explanation_count") or 0) <= 0 and item.get("full_name")
-    ][:limit]
-
-    processed = []
-    for item in candidates:
-        full_name = str(item["full_name"])
-        bundle = repository.project_rag_bundle(
-            full_name,
-            limit=rag_limit,
-            explanation_limit=1,
-            mode=mode,
-            model=model,
-            auto_build=auto_build,
-        )
-        project = bundle.get("project") if isinstance(bundle.get("project"), dict) else {}
-        record = {
-            "full_name": full_name,
-            "query": bundle.get("query") or full_name,
-            "dry_run": dry_run,
-            "status": "planned" if dry_run else "created",
-            "previous_gap_reasons": item.get("gap_reasons") or [],
-        }
-        if not dry_run:
-            explanation = repository.rag_explain(
-                query=str(record["query"]),
-                language=str(project.get("language") or item.get("language") or "") or None,
-                category=str(project.get("category") or item.get("category") or "") or None,
-                limit=rag_limit,
-                mode=mode,
-                model=model,
-                auto_build=auto_build,
-            )
-            record.update(
-                {
-                    "explanation_id": explanation.get("explanation_id") or "",
-                    "quality_score": explanation.get("quality", {}).get("score", 0),
-                    "quality_level": explanation.get("quality", {}).get("level", ""),
-                    "context_count": explanation.get("count", 0),
-                }
-            )
-        processed.append(record)
-
-    return {
-        "status": "ok",
-        "dry_run": dry_run,
-        "requested_limit": limit,
-        "candidate_count": len(candidates),
-        "processed_count": len(processed),
-        "processed": processed,
-        "coverage_before": {
-            "total_projects": coverage.get("total_projects", 0),
-            "healthy_project_count": coverage.get("healthy_project_count", 0),
-            "coverage_rate": coverage.get("coverage_rate", 0),
-            "gap_count": coverage.get("gap_count", 0),
-        },
-    }
+    return repository.backfill_rag_explanations(
+        limit=limit,
+        rag_limit=rag_limit,
+        mode=mode,
+        model=model,
+        auto_build=auto_build,
+        dry_run=dry_run,
+    )
 
 
 def main() -> int:
