@@ -448,6 +448,18 @@
       </div>
       <div id="ragSearchResults" class="search-results"></div>
       <div id="ragQualitySummary" class="search-results"></div>
+      <div class="search-form">
+        <label>回填数量
+          <input id="ragBackfillLimit" type="number" min="1" max="100" value="5">
+        </label>
+        <button id="previewRagBackfill" type="button">预览回填</button>
+        <label>
+          <input id="confirmRagBackfill" type="checkbox">
+          确认写入 SQLite
+        </label>
+        <button id="runRagBackfill" type="button">执行回填</button>
+      </div>
+      <div id="ragBackfillResults" class="search-results"></div>
     </section>
     <section class="panel">
       <h2>核心工作流</h2>
@@ -536,6 +548,7 @@
     const corpusSearchResults = document.getElementById("corpusSearchResults");
     const ragSearchResults = document.getElementById("ragSearchResults");
     const ragQualitySummary = document.getElementById("ragQualitySummary");
+    const ragBackfillResults = document.getElementById("ragBackfillResults");
     const adminState = { jobs: [], jobFilter: "attention" };
     const createControls = {
       profile: document.getElementById("taskProfile"),
@@ -558,6 +571,12 @@
       language: document.getElementById("ragLanguage"),
       button: document.getElementById("runRagSearch"),
     };
+    const ragBackfillControls = {
+      limit: document.getElementById("ragBackfillLimit"),
+      previewButton: document.getElementById("previewRagBackfill"),
+      confirm: document.getElementById("confirmRagBackfill"),
+      runButton: document.getElementById("runRagBackfill"),
+    };
 
     loadHealth();
     loadOverview();
@@ -565,6 +584,7 @@
     setupCreateTask();
     setupCorpusSearch();
     setupRagSearch();
+    setupRagBackfill();
     bindWorkbenchFilters();
     jobWorkbench.addEventListener("click", handleWorkbenchAction);
 
@@ -609,6 +629,18 @@
       ragControls.query.addEventListener("keydown", event => {
         if (event.key === "Enter") runRagSearch();
       });
+    }
+
+    function setupRagBackfill() {
+      if (!shouldUseApi()) {
+        ragBackfillControls.previewButton.disabled = true;
+        ragBackfillControls.runButton.disabled = true;
+        ragBackfillResults.innerHTML = '<p>RAG 回填需要本地后端或 api=1 模式。</p>';
+        return;
+      }
+      ragBackfillResults.innerHTML = '<p>先预览缺少解释历史的项目，再确认是否写入 SQLite。</p>';
+      ragBackfillControls.previewButton.addEventListener("click", () => runRagBackfill(true));
+      ragBackfillControls.runButton.addEventListener("click", () => runRagBackfill(false));
     }
 
     function runCorpusSearch() {
@@ -662,6 +694,39 @@
         })
         .finally(() => {
           ragControls.button.disabled = false;
+        });
+    }
+
+    function runRagBackfill(dryRun) {
+      const limit = Math.max(1, Math.min(Number(ragBackfillControls.limit.value || 5), 100));
+      if (!dryRun && !ragBackfillControls.confirm.checked) {
+        ragBackfillResults.innerHTML = '<p>执行写入前需要勾选“确认写入 SQLite”。</p>';
+        return;
+      }
+      const payload = {
+        limit,
+        dry_run: dryRun,
+        confirm_execution: !dryRun && ragBackfillControls.confirm.checked,
+      };
+      ragBackfillControls.previewButton.disabled = true;
+      ragBackfillControls.runButton.disabled = true;
+      ragBackfillResults.innerHTML = dryRun ? '<p>正在预览 RAG 回填...</p>' : '<p>正在写入 RAG 解释历史...</p>';
+      fetch("/v1/rag/backfill-explanations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+        .then(jsonOrThrow)
+        .then(data => {
+          ragBackfillResults.innerHTML = ragBackfillHtml(data);
+          if (!data.dry_run) loadDatabaseInsights();
+        })
+        .catch(error => {
+          ragBackfillResults.innerHTML = `<p>RAG 回填失败：${escapeHtml(error.message || error)}</p>`;
+        })
+        .finally(() => {
+          ragBackfillControls.previewButton.disabled = false;
+          ragBackfillControls.runButton.disabled = false;
         });
     }
 
@@ -1034,6 +1099,33 @@
         recommendationHtml,
         "<h4>最近低质量解释</h4>",
         lowHtml,
+      ].join("");
+    }
+
+    function ragBackfillHtml(data) {
+      const warnings = data.safety_warnings || [];
+      const processed = data.processed || [];
+      const coverage = data.coverage_before || {};
+      const warningHtml = warnings.length
+        ? warnings.map(item => `<p>${escapeHtml(item)}</p>`).join("")
+        : "";
+      const rows = processed.length
+        ? processed.slice(0, 8).map(item => `<article class="search-row">
+          <strong><a href="${escapeAttribute(projectDetailUrl({ full_name: item.full_name }))}">${escapeHtml(item.full_name || "-")}</a></strong>
+          <span>${escapeHtml(item.status || "-")} · ${escapeHtml(item.dry_run ? "预览" : "已写入")} · 证据 ${escapeHtml(item.context_count || 0)}</span>
+          <p>${escapeHtml((item.previous_gap_reasons || []).join("；") || item.query || "")}</p>
+        </article>`).join("")
+        : "<p>当前没有需要回填解释历史的项目。</p>";
+      return [
+        "<h3>RAG 解释回填</h3>",
+        `<div class="overview">${[
+          metric("执行模式", data.dry_run ? "预览" : "写入"),
+          metric("候选项目", data.candidate_count || 0),
+          metric("处理项目", data.processed_count || 0),
+          metric("回填前缺口", coverage.gap_count || 0),
+        ].join("")}</div>`,
+        warningHtml,
+        rows,
       ].join("");
     }
 

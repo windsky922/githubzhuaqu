@@ -2,6 +2,21 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-06-01 追加：管理首页接入 RAG 解释回填
+
+### 1. 开发目的
+后端已经提供受控 RAG 解释回填接口，但用户仍需要手动调用 API 或脚本。为了让数据库补库能力进入本地管理闭环，本次把回填入口接入 `admin.html`，支持先预览再确认写入。
+
+### 2. 修改内容
+1. `admin.html` 新增 RAG 回填数量输入、预览按钮、确认写入复选框和执行按钮。
+2. 新增 `setupRagBackfill`、`runRagBackfill` 和 `ragBackfillHtml`。
+3. 前端调用 `POST /v1/rag/backfill-explanations`，默认预览；执行写库前必须勾选“确认写入 SQLite”。
+4. 回填完成后刷新数据库/RAG 概览，便于查看解释历史覆盖变化。
+5. 更新 README、API 文档和页面构建测试。
+
+### 3. 验证
+已运行 `python -m unittest discover -q`、`python scripts\security_check.py`、`git diff --check` 和 `docs/admin.html` 结构校验。浏览器直接打开本地页面时被客户端策略拦截，未继续绕过。
+
 ## 2026-06-01 追加：新增 RAG 解释回填 API
 
 ### 1. 开发目的
