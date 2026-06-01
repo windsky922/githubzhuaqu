@@ -182,6 +182,25 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
     def v1_project_similar(owner: str, repo: str, limit: int = Query(default=10, ge=1, le=50)) -> dict[str, Any]:
         return repository.similar_projects(f"{owner}/{repo}", limit=limit)
 
+    @app.get("/v1/projects/{owner}/{repo}/rag")
+    def v1_project_rag(
+        owner: str,
+        repo: str,
+        limit: int = Query(default=8, ge=1, le=30),
+        explanation_limit: int = Query(default=5, ge=1, le=50),
+        mode: str = "fts5",
+        model: str | None = None,
+        auto_build: bool = False,
+    ) -> dict[str, Any]:
+        return repository.project_rag_bundle(
+            f"{owner}/{repo}",
+            limit=limit,
+            explanation_limit=explanation_limit,
+            mode=mode,
+            model=model or "local-hash-v1",
+            auto_build=auto_build,
+        )
+
     @app.get("/v1/projects/{owner}/{repo}")
     def v1_project_detail(owner: str, repo: str) -> dict[str, Any]:
         return repository.project_detail(f"{owner}/{repo}")

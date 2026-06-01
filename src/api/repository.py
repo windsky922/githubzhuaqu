@@ -65,6 +65,7 @@ class ApiRepository:
                 "rag_explain": True,
                 "rag_explanations": True,
                 "rag_project_explanations": True,
+                "rag_project_bundle": True,
                 "rag_quality_summary": True,
                 "runs_query": True,
                 "jobs_query": True,
@@ -600,6 +601,82 @@ class ApiRepository:
             "recent_low_quality": [_rag_explanation_row(row) for row in recent_low_quality_rows],
             "latest": [_rag_explanation_row(row) for row in latest_rows],
             "recommendations": _rag_quality_recommendations(total_count, average_quality_score, quality_levels),
+        }
+
+    def project_rag_bundle(
+        self,
+        full_name: str,
+        *,
+        limit: int = 8,
+        explanation_limit: int = 5,
+        mode: str = "fts5",
+        model: str = "local-hash-v1",
+        auto_build: bool = False,
+    ) -> dict[str, Any]:
+        detail = self.project_detail(full_name)
+        normalized = _normalize_full_name(full_name)
+        if not detail.get("found"):
+            return {
+                "schema_version": 1,
+                "found": False,
+                "full_name": normalized,
+                "query": "",
+                "retrieval": {},
+                "contexts": [],
+                "citations": [],
+                "prompt_context": "",
+                "explanations": [],
+                "explanation_summary": {
+                    "count": 0,
+                    "average_quality_score": 0,
+                    "quality_levels": {},
+                    "recommendations": ["未找到该项目的历史入选记录，暂不能构建项目级 RAG 包。"],
+                },
+            }
+
+        limit = max(1, min(int(limit or 8), 30))
+        explanation_limit = max(1, min(int(explanation_limit or 5), 50))
+        query = _project_rag_query(detail)
+        if str(mode or "").lower() == "vector":
+            retrieval = self.rag_vector_search(
+                query=query,
+                language=detail.get("language") or None,
+                category=detail.get("category") or None,
+                limit=limit,
+                model=model,
+                auto_build=auto_build,
+            )
+        else:
+            retrieval = self.rag_retrieve(
+                query=query,
+                language=detail.get("language") or None,
+                category=detail.get("category") or None,
+                limit=limit,
+            )
+        explanations = self.rag_explanations(repo=detail.get("full_name") or normalized, limit=explanation_limit)
+        explanation_items = explanations.get("explanations") if isinstance(explanations.get("explanations"), list) else []
+        return {
+            "schema_version": 1,
+            "found": True,
+            "full_name": detail.get("full_name") or normalized,
+            "query": query,
+            "project": {
+                "full_name": detail.get("full_name") or normalized,
+                "html_url": detail.get("html_url") or "",
+                "description": detail.get("description") or "",
+                "language": detail.get("language") or "",
+                "category": detail.get("category") or "",
+                "history_count": _int_value(detail.get("history_count")),
+                "total_star_growth": _int_value(detail.get("total_star_growth")),
+                "best_trending_rank": _int_value(detail.get("best_trending_rank")),
+            },
+            "retrieval": retrieval.get("retrieval") if isinstance(retrieval.get("retrieval"), dict) else {},
+            "contexts": retrieval.get("contexts") if isinstance(retrieval.get("contexts"), list) else [],
+            "citations": retrieval.get("citations") if isinstance(retrieval.get("citations"), list) else [],
+            "prompt_context": retrieval.get("prompt_context") or "",
+            "summary": retrieval.get("summary") if isinstance(retrieval.get("summary"), list) else [],
+            "explanations": explanation_items,
+            "explanation_summary": _project_rag_explanation_summary(explanation_items),
         }
 
     def _persist_rag_explanation(self, result: dict[str, Any]) -> dict[str, Any]:
@@ -2733,6 +2810,46 @@ def _rag_quality_recommendations(total_count: int, average_quality_score: float,
     if not quality_levels.get("high"):
         recommendations.append("暂未形成高质量解释样本，后续应增加更多引用和更完整 prompt_context。")
     return recommendations
+
+
+def _project_rag_query(detail: dict[str, Any]) -> str:
+    repo_name = str(detail.get("full_name") or "").split("/")[-1]
+    values = _unique_strings(
+        value
+        for value in [
+            repo_name,
+            detail.get("category") or "",
+            detail.get("language") or "",
+            detail.get("description") or "",
+        ]
+        if value
+    )
+    return " ".join(values) or str(detail.get("full_name") or "")
+
+
+def _project_rag_explanation_summary(explanations: list[dict[str, Any]]) -> dict[str, Any]:
+    levels: dict[str, int] = {}
+    scores = []
+    for item in explanations:
+        level = str(item.get("quality_level") or "unknown")
+        levels[level] = levels.get(level, 0) + 1
+        scores.append(_int_value(item.get("quality_score")))
+    average = round(sum(scores) / len(scores), 2) if scores else 0
+    recommendations = []
+    if not explanations:
+        recommendations.append("暂无该项目的 RAG 解释历史，可先调用 /v1/rag/explain 生成解释样本。")
+    elif levels.get("low", 0):
+        recommendations.append("存在低质量解释，建议补充项目语料或对比 FTS 与向量检索结果。")
+    elif average < 75:
+        recommendations.append("项目解释质量中等，建议增加引用覆盖并检查 prompt_context。")
+    else:
+        recommendations.append("项目解释质量较稳定，可以作为后续模型总结或项目对比的输入。")
+    return {
+        "count": len(explanations),
+        "average_quality_score": average,
+        "quality_levels": levels,
+        "recommendations": recommendations,
+    }
 
 
 def _rag_explanation_id(result: dict[str, Any]) -> str:

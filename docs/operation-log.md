@@ -2,6 +2,21 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-06-01 追加：新增单项目 RAG 聚合接口
+
+### 1. 开发目的
+项目详情页和后续 Agent/RAG 编排需要同时读取项目摘要、证据块、引用、解释历史和解释质量。如果继续由前端分别调用多个接口，后续接入 LangChain 或工具调用会重复拼装数据。本次新增单项目 RAG 聚合接口，把项目级 RAG 数据收束成稳定后端能力。
+
+### 2. 修改内容
+1. 新增 `GET /v1/projects/{owner}/{repo}/rag`。
+2. `ApiRepository.project_rag_bundle` 聚合项目摘要、RAG 检索结果、引用、`prompt_context`、项目解释历史和项目级解释质量摘要。
+3. 支持 `mode=fts5` 和 `mode=vector`，向量模式继续复用本地 `local-hash-v1` 能力。
+4. `/v1/health` 能力声明新增 `rag_project_bundle`。
+5. 更新 README、API 文档和后端测试。
+
+### 3. 验证
+已运行 `python -m unittest discover -q`、`python scripts\security_check.py` 和 `git diff --check`。
+
 ## 2026-06-01 追加：项目详情页展示 RAG 解释历史
 
 ### 1. 开发目的

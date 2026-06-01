@@ -388,6 +388,34 @@ py scripts\build_rag_embeddings.py
 /v1/rag/quality-summary?limit=10
 ```
 
+### `GET /v1/projects/{owner}/{repo}/rag`
+
+返回单个项目的 RAG 聚合包，用于项目详情页、后续 Agent 工具调用和 LangChain/RAG 编排。该接口会读取项目详情、执行本地 RAG 检索，并合并该项目已经入库的解释历史，不调用外部模型、不请求 GitHub/Kimi/Telegram。
+
+支持参数：
+
+| 参数 | 说明 |
+|---|---|
+| `limit` | 证据块数量，默认 8，最大 30 |
+| `explanation_limit` | 解释历史数量，默认 5，最大 50 |
+| `mode` | 检索模式，默认 `fts5`；传 `vector` 时使用本地向量检索 |
+| `model` | 向量模型名称，默认 `local-hash-v1` |
+| `auto_build` | 向量检索时是否自动构建本地 embedding 索引 |
+
+返回字段包含：
+
+1. `project`：项目摘要，包含语言、方向、历史入选次数、新增 Star 和最好 Trending 排名。
+2. `contexts`、`citations`、`prompt_context`：可直接交给后续问答链的证据与引用。
+3. `explanations`：该项目已入库的 RAG 解释历史。
+4. `explanation_summary`：该项目解释数量、平均质量分、质量等级分布和改进建议。
+
+示例：
+
+```text
+/v1/projects/owner/agent/rag?limit=8&explanation_limit=5
+/v1/projects/owner/agent/rag?mode=vector&auto_build=true
+```
+
 ### `GET /v1/projects/{owner}/{repo}/similar`
 
 基于单项目详情和 `project_corpus` 语料索引生成相似项目候选。该接口优先使用 SQLite FTS5 召回候选，再结合语言、方向、来源、关键词重合、Trending 排名和新增 Star 计算 `similarity_score`。
