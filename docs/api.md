@@ -388,6 +388,31 @@ py scripts\build_rag_embeddings.py
 /v1/rag/quality-summary?limit=10
 ```
 
+### `GET /v1/rag/coverage`
+
+检查历史项目的 RAG 覆盖缺口，用于判断哪些项目缺少证据块、embedding 或解释历史。该接口只读 SQLite，不触发外部请求，适合作为后续补库脚本、Agent 自动优化和管理页健康检查的数据源。
+
+支持参数：
+
+| 参数 | 说明 |
+|---|---|
+| `limit` | 返回缺口项目数量，默认 20，最大 100 |
+
+返回字段包含：
+
+1. `total_projects`：项目语料中覆盖的项目数量。
+2. `healthy_project_count`：证据块、embedding 和解释历史均具备的项目数量。
+3. `coverage_rate`：健康项目占比。
+4. `gap_count`：存在 RAG 覆盖缺口的项目数量。
+5. `gaps`：缺口项目列表，每项包含 `chunk_count`、`embedding_count`、`explanation_count`、`average_quality_score` 和 `gap_reasons`。
+6. `recommendations`：下一步补库建议。
+
+示例：
+
+```text
+/v1/rag/coverage?limit=20
+```
+
 ### `GET /v1/projects/{owner}/{repo}/rag`
 
 返回单个项目的 RAG 聚合包，用于项目详情页、后续 Agent 工具调用和 LangChain/RAG 编排。该接口会读取项目详情、执行本地 RAG 检索，并合并该项目已经入库的解释历史，不调用外部模型、不请求 GitHub/Kimi/Telegram。

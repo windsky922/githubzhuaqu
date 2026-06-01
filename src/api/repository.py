@@ -67,6 +67,7 @@ class ApiRepository:
                 "rag_project_explanations": True,
                 "rag_project_bundle": True,
                 "rag_quality_summary": True,
+                "rag_coverage": True,
                 "runs_query": True,
                 "jobs_query": True,
                 "job_events": True,
@@ -601,6 +602,123 @@ class ApiRepository:
             "recent_low_quality": [_rag_explanation_row(row) for row in recent_low_quality_rows],
             "latest": [_rag_explanation_row(row) for row in latest_rows],
             "recommendations": _rag_quality_recommendations(total_count, average_quality_score, quality_levels),
+        }
+
+    def rag_coverage(self, *, limit: int = 20) -> dict[str, Any]:
+        self.ensure_sqlite_index()
+        limit = max(1, min(int(limit or 20), 100))
+        connection = connect(self.db_path)
+        try:
+            initialize(connection)
+            project_rows = connection.execute(
+                """
+                SELECT full_name, html_url, language, category, run_date
+                FROM project_corpus
+                WHERE full_name <> ''
+                ORDER BY run_date DESC, full_name ASC
+                """
+            ).fetchall()
+            chunk_counts = {
+                row["full_name"]: _int_value(row["count"])
+                for row in connection.execute(
+                    """
+                    SELECT full_name, COUNT(*) AS count
+                    FROM rag_chunks
+                    WHERE full_name <> ''
+                    GROUP BY full_name
+                    """
+                ).fetchall()
+            }
+            embedding_counts = {
+                row["full_name"]: _int_value(row["count"])
+                for row in connection.execute(
+                    """
+                    SELECT full_name, COUNT(*) AS count
+                    FROM rag_embeddings
+                    WHERE full_name <> ''
+                    GROUP BY full_name
+                    """
+                ).fetchall()
+            }
+            explanation_rows = connection.execute(
+                """
+                SELECT repositories_json, quality_score
+                FROM rag_explanations
+                """
+            ).fetchall()
+        finally:
+            connection.close()
+
+        latest_projects: dict[str, dict[str, Any]] = {}
+        for row in project_rows:
+            full_name = row["full_name"]
+            if full_name not in latest_projects:
+                latest_projects[full_name] = {
+                    "full_name": full_name,
+                    "html_url": row["html_url"],
+                    "language": row["language"],
+                    "category": row["category"],
+                    "latest_run_date": row["run_date"],
+                }
+
+        explanation_counts: dict[str, int] = {}
+        explanation_scores: dict[str, list[int]] = {}
+        for row in explanation_rows:
+            score = _int_value(row["quality_score"])
+            for full_name in _list_strings(_json_list(row["repositories_json"])):
+                explanation_counts[full_name] = explanation_counts.get(full_name, 0) + 1
+                explanation_scores.setdefault(full_name, []).append(score)
+
+        gaps = []
+        healthy_count = 0
+        for full_name, project in latest_projects.items():
+            chunk_count = chunk_counts.get(full_name, 0)
+            embedding_count = embedding_counts.get(full_name, 0)
+            explanation_count = explanation_counts.get(full_name, 0)
+            scores = explanation_scores.get(full_name, [])
+            average_quality = round(sum(scores) / len(scores), 2) if scores else 0
+            gap_reasons = []
+            if chunk_count <= 0:
+                gap_reasons.append("缺少 RAG 证据块，需要重建 project_corpus/rag_chunks。")
+            if embedding_count <= 0:
+                gap_reasons.append("缺少本地 embedding，向量检索无法覆盖该项目。")
+            if explanation_count <= 0:
+                gap_reasons.append("缺少 RAG 解释历史，项目详情页无法展示解释质量。")
+            elif average_quality < 75:
+                gap_reasons.append("解释平均质量分偏低，建议补充语料或扩大召回。")
+            if not gap_reasons:
+                healthy_count += 1
+            gaps.append(
+                {
+                    **project,
+                    "chunk_count": chunk_count,
+                    "embedding_count": embedding_count,
+                    "explanation_count": explanation_count,
+                    "average_quality_score": average_quality,
+                    "gap_reasons": gap_reasons,
+                }
+            )
+
+        gaps.sort(
+            key=lambda item: (
+                0 if item["gap_reasons"] else 1,
+                item["chunk_count"] > 0,
+                item["explanation_count"] > 0,
+                item["embedding_count"] > 0,
+                -len(item["gap_reasons"]),
+                item["full_name"],
+            )
+        )
+        total_projects = len(latest_projects)
+        coverage_rate = round(healthy_count / total_projects, 4) if total_projects else 0
+        return {
+            "schema_version": 1,
+            "total_projects": total_projects,
+            "healthy_project_count": healthy_count,
+            "coverage_rate": coverage_rate,
+            "gap_count": total_projects - healthy_count,
+            "gaps": gaps[:limit],
+            "recommendations": _rag_coverage_recommendations(total_projects, healthy_count, gaps),
         }
 
     def project_rag_bundle(
@@ -2809,6 +2927,26 @@ def _rag_quality_recommendations(total_count: int, average_quality_score: float,
         recommendations.append("平均质量分较高，可以开始评估接入模型总结或 LangChain 编排。")
     if not quality_levels.get("high"):
         recommendations.append("暂未形成高质量解释样本，后续应增加更多引用和更完整 prompt_context。")
+    return recommendations
+
+
+def _rag_coverage_recommendations(total_projects: int, healthy_count: int, gaps: list[dict[str, Any]]) -> list[str]:
+    if total_projects <= 0:
+        return ["暂无项目语料，建议先运行主流程或导入历史归档以生成 SQLite 索引。"]
+    missing_chunks = sum(1 for item in gaps if item["chunk_count"] <= 0)
+    missing_embeddings = sum(1 for item in gaps if item["embedding_count"] <= 0)
+    missing_explanations = sum(1 for item in gaps if item["explanation_count"] <= 0)
+    recommendations = []
+    if missing_chunks:
+        recommendations.append(f"有 {missing_chunks} 个项目缺少 RAG 证据块，优先重建语料索引。")
+    if missing_embeddings:
+        recommendations.append(f"有 {missing_embeddings} 个项目缺少本地 embedding，向量检索覆盖不足。")
+    if missing_explanations:
+        recommendations.append(f"有 {missing_explanations} 个项目缺少解释历史，可批量调用项目 RAG 聚合后生成解释样本。")
+    if healthy_count == total_projects:
+        recommendations.append("所有项目已具备基础 RAG 覆盖，可以继续做模型总结或自动重排。")
+    if not recommendations:
+        recommendations.append("当前项目已具备部分 RAG 覆盖，建议继续补齐低质量解释和向量索引。")
     return recommendations
 
 
