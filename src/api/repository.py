@@ -69,6 +69,7 @@ class ApiRepository:
                 "rag_quality_summary": True,
                 "rag_coverage": True,
                 "rag_backfill_explanations": True,
+                "rag_backfill_jobs": True,
                 "runs_query": True,
                 "jobs_query": True,
                 "job_events": True,
@@ -810,25 +811,106 @@ class ApiRepository:
             dry_run = True
             safety_warnings.append("未传入 confirm_execution=true，API 已自动改为 dry_run=true。")
 
-        result = self.backfill_rag_explanations(
-            limit=_int_value(payload.get("limit")) or 10,
-            rag_limit=_int_value(payload.get("rag_limit")) or 8,
-            mode=str(payload.get("mode") or "fts5"),
-            model=str(payload.get("model") or "local-hash-v1"),
-            auto_build=_bool_value(payload.get("auto_build"), False),
-            dry_run=dry_run,
-        )
-        result["accepted"] = True
-        result["safety_warnings"] = safety_warnings
-        result["request"] = {
-            "limit": result["requested_limit"],
+        request = {
+            "limit": _int_value(payload.get("limit")) or 10,
             "rag_limit": _int_value(payload.get("rag_limit")) or 8,
             "mode": str(payload.get("mode") or "fts5"),
             "model": str(payload.get("model") or "local-hash-v1"),
             "auto_build": _bool_value(payload.get("auto_build"), False),
             "dry_run": dry_run,
             "confirm_execution": confirm_execution,
+            "trigger_source": str(payload.get("trigger_source") or "rag_backfill_api"),
+            "requested_by": str(payload.get("requested_by") or "api"),
+            "safety_warnings": safety_warnings,
         }
+        submitted_at = datetime.now(UTC).isoformat().replace("+00:00", "Z")
+        run_date = submitted_at[:10]
+        job_id = _rag_backfill_job_id(submitted_at, request)
+        actor = request["requested_by"]
+
+        running_job = {
+            "job_id": job_id,
+            "kind": "rag_backfill",
+            "status": "running",
+            "run_date": run_date,
+            "submitted_at": submitted_at,
+            "started_at": submitted_at,
+            "finished_at": "",
+            "request": request,
+            "result": {},
+            "error": "",
+        }
+        self._persist_preview_job(running_job)
+        self._record_job_event(
+            job_id,
+            "rag_backfill_started",
+            "running",
+            actor,
+            "RAG 解释回填已开始。",
+            {"request": request},
+        )
+
+        try:
+            result = self.backfill_rag_explanations(
+                limit=request["limit"],
+                rag_limit=request["rag_limit"],
+                mode=request["mode"],
+                model=request["model"],
+                auto_build=request["auto_build"],
+                dry_run=dry_run,
+            )
+        except Exception as exc:  # pragma: no cover - defensive audit path
+            finished_at = datetime.now(UTC).isoformat().replace("+00:00", "Z")
+            failed_job = {
+                **running_job,
+                "status": "failed",
+                "finished_at": finished_at,
+                "error": str(exc),
+                "result": {"dry_run": dry_run, "safety_warnings": safety_warnings},
+            }
+            self._persist_preview_job(failed_job)
+            self._record_job_event(
+                job_id,
+                "rag_backfill_failed",
+                "failed",
+                actor,
+                "RAG 解释回填失败。",
+                {"error": str(exc)},
+            )
+            return {
+                "schema_version": 1,
+                "accepted": False,
+                "status": "failed",
+                "job_id": job_id,
+                "dry_run": dry_run,
+                "error": str(exc),
+                "request": request,
+                "safety_warnings": safety_warnings,
+            }
+
+        result["accepted"] = True
+        result["safety_warnings"] = safety_warnings
+        result["request"] = {**request, "limit": result["requested_limit"]}
+        result["job_id"] = job_id
+
+        finished_at = datetime.now(UTC).isoformat().replace("+00:00", "Z")
+        job_result = _rag_backfill_job_result(result)
+        succeeded_job = {
+            **running_job,
+            "status": "succeeded",
+            "finished_at": finished_at,
+            "result": job_result,
+        }
+        self._persist_preview_job(succeeded_job)
+        self._record_job_event(
+            job_id,
+            "rag_backfill_completed",
+            "succeeded",
+            actor,
+            "RAG 解释回填已完成。",
+            {"result": job_result},
+        )
+        result["job"] = succeeded_job
         return result
 
     def project_rag_bundle(
@@ -2301,6 +2383,38 @@ def _job_from_row(row: Any) -> dict[str, Any]:
         "kimi_used": bool(result.get("kimi_used")),
         "telegram_sent": bool(result.get("telegram_sent")),
         "report_url": result.get("report_url") or result.get("telegram_report_url") or payload.get("report_url") or "",
+    }
+
+
+def _rag_backfill_job_id(submitted_at: str, request: dict[str, Any]) -> str:
+    compact_time = submitted_at.replace("-", "").replace(":", "").replace(".", "").replace("Z", "")
+    fingerprint = json.dumps(request, ensure_ascii=False, sort_keys=True)
+    digest = sha1(fingerprint.encode("utf-8")).hexdigest()[:10]
+    return f"rag-backfill:{compact_time}:{digest}"
+
+
+def _rag_backfill_job_result(result: dict[str, Any]) -> dict[str, Any]:
+    processed = result.get("processed") if isinstance(result.get("processed"), list) else []
+    processed_repositories = [
+        {
+            "full_name": item.get("full_name") or "",
+            "status": item.get("status") or "",
+            "dry_run": bool(item.get("dry_run")),
+            "quality_score": _int_value(item.get("quality_score")),
+            "quality_level": item.get("quality_level") or "",
+            "explanation_id": item.get("explanation_id") or "",
+        }
+        for item in processed
+        if isinstance(item, dict)
+    ]
+    return {
+        "dry_run": bool(result.get("dry_run")),
+        "requested_limit": _int_value(result.get("requested_limit")),
+        "candidate_count": _int_value(result.get("candidate_count")),
+        "processed_count": _int_value(result.get("processed_count")),
+        "coverage_before": result.get("coverage_before") if isinstance(result.get("coverage_before"), dict) else {},
+        "processed_repositories": processed_repositories,
+        "safety_warnings": result.get("safety_warnings") if isinstance(result.get("safety_warnings"), list) else [],
     }
 
 

@@ -2,6 +2,21 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-06-01 追加：RAG 回填接入任务审计
+
+### 1. 开发目的
+RAG 回填已经具备脚本、后端 API 和管理页入口，但每次补库动作还没有进入任务审计体系。为了让数据库维护能力可追踪、可复盘，并为后续 Agent 自动补库预留统一任务模型，本次把 RAG 回填 API 接入 `jobs` 与 `job_events`。
+
+### 2. 修改内容
+1. `POST /v1/rag/backfill-explanations` 每次调用都会创建 `kind=rag_backfill` 的任务记录。
+2. 回填开始、完成和失败会写入 `job_events`，可通过 `/v1/jobs/{job_id}/events` 查询。
+3. `/v1/jobs` 的 `kind` 筛选支持 `rag_backfill`。
+4. 回填响应新增 `job_id` 和精简任务结果，便于前端或 Agent 继续追踪。
+5. 更新 README、API 文档、数据契约和后端测试。
+
+### 3. 验证
+已运行 `python -m unittest discover -q`、`python scripts\security_check.py` 和 `git diff --check`。
+
 ## 2026-06-01 追加：管理首页接入 RAG 解释回填
 
 ### 1. 开发目的

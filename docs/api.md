@@ -437,14 +437,19 @@ python scripts/backfill_rag_explanations.py --limit 10
 | `auto_build` | 向量模式缺少索引时是否自动构建本地索引 |
 | `dry_run` | 是否只预览，不写入 SQLite；API 默认 `true` |
 | `confirm_execution` | API 写库确认开关；只有 `dry_run=false` 且该字段为 `true` 才会创建解释历史 |
+| `trigger_source` | 可选调用来源，默认 `rag_backfill_api` |
+| `requested_by` | 可选调用者标识，默认 `api` |
 
 返回字段包含：
 
 1. `accepted`：请求是否被后端接受处理。
 2. `dry_run`：本次实际执行模式。
-3. `safety_warnings`：安全降级提示。
-4. `coverage_before`：回填前的覆盖概况。
-5. `processed`：本次计划或创建的项目记录。
+3. `job_id`：本次回填任务编号，可用于查询任务详情和事件。
+4. `safety_warnings`：安全降级提示。
+5. `coverage_before`：回填前的覆盖概况。
+6. `processed`：本次计划或创建的项目记录。
+
+每次 API 调用都会写入一个 `kind=rag_backfill` 的任务记录。可以通过 `GET /v1/jobs?kind=rag_backfill` 查看最近回填任务，通过 `GET /v1/jobs/{job_id}/events` 查看 `rag_backfill_started` 和 `rag_backfill_completed` 等审计事件。脚本入口 `scripts/backfill_rag_explanations.py` 仍只执行补库逻辑，不额外写入任务审计。
 
 示例：
 

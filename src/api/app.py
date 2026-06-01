@@ -322,7 +322,7 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
     @app.get("/v1/jobs")
     def v1_jobs(
         status: str | None = Query(default=None, pattern="^(planned|running|succeeded|failed)?$"),
-        kind: str | None = Query(default=None, pattern="^(weekly_report)?$"),
+        kind: str | None = Query(default=None, pattern="^(weekly_report|rag_backfill)?$"),
         profile: str | None = None,
         query: str | None = None,
         limit: int = Query(default=20, ge=1, le=200),

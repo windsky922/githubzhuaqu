@@ -138,6 +138,8 @@ class ApiRepositoryTest(unittest.TestCase):
             rag_quality_summary = repository.rag_quality_summary(limit=5)
             rag_coverage = repository.rag_coverage(limit=5)
             rag_backfill_preview = repository.backfill_rag_explanations_from_payload({"limit": 1, "dry_run": True})
+            rag_backfill_jobs = repository.jobs(kind="rag_backfill", status="succeeded", limit=5)
+            rag_backfill_events = repository.job_events(rag_backfill_preview["job_id"])
             database_summary_after_explain = repository.database_summary()
             similar = repository.similar_projects("owner/agent", limit=5)
             comparison = repository.compare_projects(["owner/agent", "owner/agent-helper", "missing/repo"])
@@ -358,7 +360,15 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(rag_backfill_preview["schema_version"], 1)
             self.assertTrue(rag_backfill_preview["accepted"])
             self.assertTrue(rag_backfill_preview["dry_run"])
+            self.assertTrue(rag_backfill_preview["job_id"].startswith("rag-backfill:"))
             self.assertLessEqual(rag_backfill_preview["processed_count"], 1)
+            self.assertEqual(rag_backfill_jobs["jobs"][0]["kind"], "rag_backfill")
+            self.assertEqual(rag_backfill_jobs["jobs"][0]["status"], "succeeded")
+            self.assertEqual(rag_backfill_jobs["jobs"][0]["job_id"], rag_backfill_preview["job_id"])
+            self.assertEqual(
+                [event["event_type"] for event in rag_backfill_events["events"]],
+                ["rag_backfill_started", "rag_backfill_completed"],
+            )
             self.assertGreaterEqual(database_summary_after_explain["table_counts"]["rag_explanations"], 1)
             self.assertTrue(database_summary_after_explain["rag_readiness"]["ready_for_explanation_history"])
             self.assertTrue(similar["found"])
@@ -445,6 +455,14 @@ class ApiRepositoryTest(unittest.TestCase):
             v1_rag_quality_summary = client.get("/v1/rag/quality-summary", params={"limit": 5})
             v1_rag_coverage = client.get("/v1/rag/coverage", params={"limit": 5})
             v1_rag_backfill = client.post("/v1/rag/backfill-explanations", json={"limit": 1, "dry_run": True})
+            v1_rag_backfill_jobs = client.get(
+                "/v1/jobs",
+                params={"status": "succeeded", "kind": "rag_backfill", "limit": 5},
+            )
+            v1_rag_backfill_events = client.get(
+                f"/v1/jobs/{v1_rag_backfill.json()['job_id']}/events",
+                params={"limit": 5},
+            )
             v1_similar = client.get("/v1/projects/owner/agent/similar", params={"limit": 5})
             v1_compare = client.get(
                 "/v1/projects/compare",
@@ -530,6 +548,8 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(v1_rag_quality_summary.status_code, 200)
             self.assertEqual(v1_rag_coverage.status_code, 200)
             self.assertEqual(v1_rag_backfill.status_code, 202)
+            self.assertEqual(v1_rag_backfill_jobs.status_code, 200)
+            self.assertEqual(v1_rag_backfill_events.status_code, 200)
             self.assertEqual(v1_similar.status_code, 200)
             self.assertEqual(v1_compare.status_code, 200)
             self.assertEqual(v1_projects.status_code, 200)
@@ -587,7 +607,11 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertIn("coverage_rate", v1_rag_coverage.json())
             self.assertTrue(v1_rag_backfill.json()["accepted"])
             self.assertTrue(v1_rag_backfill.json()["dry_run"])
+            self.assertTrue(v1_rag_backfill.json()["job_id"].startswith("rag-backfill:"))
             self.assertLessEqual(v1_rag_backfill.json()["processed_count"], 1)
+            self.assertEqual(v1_rag_backfill_jobs.json()["jobs"][0]["kind"], "rag_backfill")
+            self.assertEqual(v1_rag_backfill_jobs.json()["jobs"][0]["job_id"], v1_rag_backfill.json()["job_id"])
+            self.assertEqual(v1_rag_backfill_events.json()["events"][-1]["event_type"], "rag_backfill_completed")
             self.assertEqual(v1_similar.json()["similar_projects"][0]["full_name"], "owner/agent-helper")
             self.assertEqual(v1_compare.json()["count"], 2)
             self.assertEqual(v1_compare.json()["best_by"]["highest_total_star_growth"], "owner/agent")

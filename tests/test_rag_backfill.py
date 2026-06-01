@@ -28,6 +28,11 @@ class RagBackfillTest(unittest.TestCase):
             self.assertTrue(unsafe_api_run["dry_run"])
             self.assertTrue(unsafe_api_run["safety_warnings"])
             self.assertEqual(unsafe_api_run["processed"][0]["status"], "planned")
+            self.assertTrue(unsafe_api_run["job_id"].startswith("rag-backfill:"))
+            unsafe_events = repository.job_events(unsafe_api_run["job_id"])
+            self.assertEqual(unsafe_events["count"], 2)
+            self.assertEqual(unsafe_events["events"][0]["event_type"], "rag_backfill_started")
+            self.assertEqual(unsafe_events["events"][1]["event_type"], "rag_backfill_completed")
 
             result = backfill_rag_explanations(root=root, db_path=db_path, limit=1)
             self.assertEqual(result["status"], "ok")
