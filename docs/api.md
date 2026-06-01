@@ -413,6 +413,13 @@ py scripts\build_rag_embeddings.py
 /v1/rag/coverage?limit=20
 ```
 
+可用 `scripts/backfill_rag_explanations.py` 按该接口的缺口结果批量生成规则版解释：
+
+```text
+python scripts/backfill_rag_explanations.py --dry-run
+python scripts/backfill_rag_explanations.py --limit 10
+```
+
 ### `GET /v1/projects/{owner}/{repo}/rag`
 
 返回单个项目的 RAG 聚合包，用于项目详情页、后续 Agent 工具调用和 LangChain/RAG 编排。该接口会读取项目详情、执行本地 RAG 检索，并合并该项目已经入库的解释历史，不调用外部模型、不请求 GitHub/Kimi/Telegram。

@@ -71,6 +71,7 @@ GitHub Actions
 | `src/job_runner.py` | 执行 SQLite jobs 表中的计划任务 |
 | `scripts/build_pages.py` | 生成 GitHub Pages 归档页面 |
 | `scripts/build_rag_embeddings.py` | 从 `rag_chunks` 构建本地 RAG embedding 索引 |
+| `scripts/backfill_rag_explanations.py` | 为缺少解释历史的项目批量生成规则版 RAG 解释 |
 | `scripts/create_planned_job.py` | 创建 planned 周报任务 |
 | `scripts/migrate_json_to_sqlite.py` | 将历史 JSON 归档导入 SQLite 派生索引 |
 | `scripts/verify_migration.py` | 校验 SQLite 派生索引和 JSON 归档计数 |
@@ -333,6 +334,15 @@ python scripts/build_rag_embeddings.py
 ```
 
 当前 embedding 使用本地确定性 `local-hash-v1`，不调用外部模型、不需要密钥。它用于打通向量索引表和检索 API，后续可以替换为真实 embedding 模型。
+
+回填缺少解释历史的项目：
+
+```bash
+python scripts/backfill_rag_explanations.py --dry-run
+python scripts/backfill_rag_explanations.py --limit 10
+```
+
+该脚本会读取 `/v1/rag/coverage` 同源逻辑，优先为缺少 RAG 解释历史的项目生成规则版解释并写入 SQLite。
 
 执行 planned 周报任务：
 

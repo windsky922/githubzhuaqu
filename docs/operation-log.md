@@ -2,6 +2,21 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-06-01 追加：新增 RAG 解释回填脚本
+
+### 1. 开发目的
+RAG 覆盖缺口接口已经能找出缺少解释历史的项目，但还需要一个可执行的补库入口。本次新增回填脚本，把“发现缺口”推进到“批量生成规则版解释并写入 SQLite”，继续补齐数据库与 RAG 核心闭环。
+
+### 2. 修改内容
+1. 新增 `scripts/backfill_rag_explanations.py`。
+2. 脚本读取 RAG 覆盖缺口，优先选择 `explanation_count=0` 的项目。
+3. 支持 `--dry-run` 预览、`--limit` 控制数量、`--mode vector` 和 `--auto-build`。
+4. 执行模式会调用现有 `rag_explain`，生成规则版解释并写入 `rag_explanations`。
+5. 更新 README、API 文档和脚本测试。
+
+### 3. 验证
+已运行 `python -m unittest discover -q`、`python scripts\security_check.py` 和 `git diff --check`。
+
 ## 2026-06-01 追加：新增 RAG 覆盖缺口接口
 
 ### 1. 开发目的
