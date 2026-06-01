@@ -287,7 +287,7 @@ docs/projects.md
 docs/weekly/YYYY-MM-DD.html
 ```
 
-说明：`weekly-archive` 是 GitHub Actions 自动维护的归档分支。代码开发继续提交到 `main`，每周生成的 `docs/`、`reports/` 和 `data/` 会发布到 `weekly-archive`，这样 Actions 不会再频繁把 `main` 往前推进，日常开发提交冲突会明显减少。
+说明：`weekly-archive` 是 GitHub Actions 自动维护的归档分支。代码开发继续提交到 `main`，每周生成的 `docs/`、`reports/` 和 `data/` 会发布到 `weekly-archive`，这样 Actions 不会再频繁把 `main` 往前推进，日常开发提交冲突会明显减少。每次周报任务执行后，Actions 会按 RAG 覆盖缺口自动创建维护计划任务，再生成归档页面；可以在手动触发时把 `plan_rag_maintenance` 设为 `false` 跳过。
 
 默认周报链接格式：
 

@@ -2,6 +2,21 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-06-01 追加：GitHub Actions 接入 RAG 维护计划
+
+### 1. 开发目的
+RAG 维护计划已经能在本地或 API 中创建补库任务，但自动化周报链路还没有调用它。为了让数据库/RAG 核心闭环进入持续运行流程，本次把维护计划接入每周工作流。
+
+### 2. 修改内容
+1. `.github/workflows/weekly.yml` 新增 `plan_rag_maintenance` 手动触发参数，默认启用。
+2. 周报任务执行后、归档页面生成前，自动运行 `scripts/plan_rag_maintenance.py`。
+3. 新增 `RAG_MAINTENANCE_LIMIT`、`RAG_MAINTENANCE_COVERAGE_LIMIT` 和 `RAG_MAINTENANCE_MIN_GAP_COUNT` 变量入口。
+4. 维护计划写入 jobs 表后再运行 `scripts/build_pages.py`，确保公开任务 JSON 能看到最新计划任务。
+5. 更新 README、workflow 测试和操作日志。
+
+### 3. 验证
+已运行 `python -m unittest discover -q`、`python scripts\security_check.py` 和 `git diff --check`。
+
 ## 2026-06-01 追加：RAG 维护计划自动创建回填任务
 
 ### 1. 开发目的

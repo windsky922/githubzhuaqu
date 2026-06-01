@@ -17,6 +17,7 @@ class WorkflowTest(unittest.TestCase):
         self.assertIn("profile:", workflow)
         self.assertIn("days_back:", workflow)
         self.assertIn("skip_main_delivery:", workflow)
+        self.assertIn("plan_rag_maintenance:", workflow)
         self.assertIn("ARCHIVE_BRANCH: weekly-archive", workflow)
         self.assertIn("scripts/publish_archive_branch.py", workflow)
         self.assertIn("git checkout \"origin/$ARCHIVE_BRANCH\" -- data reports || true", workflow)
@@ -37,6 +38,14 @@ class WorkflowTest(unittest.TestCase):
         self.assertIn("--output .weekly-job.json", workflow)
         self.assertIn("scripts/run_planned_job.py --job-file .weekly-job.json", workflow)
         self.assertIn("inputs.send_link == 'true'", workflow)
+
+    def test_weekly_workflow_creates_rag_maintenance_plan_before_pages(self) -> None:
+        workflow = (ROOT / ".github" / "workflows" / "weekly.yml").read_text(encoding="utf-8")
+
+        self.assertIn("scripts/plan_rag_maintenance.py", workflow)
+        self.assertIn("RAG_MAINTENANCE_LIMIT", workflow)
+        self.assertIn("--requested-by \"github_actions\"", workflow)
+        self.assertLess(workflow.index("scripts/plan_rag_maintenance.py"), workflow.index("scripts/build_pages.py"))
 
     def test_archive_branch_publish_scope_is_limited_to_generated_archive(self) -> None:
         script = (ROOT / "scripts" / "publish_archive_branch.py").read_text(encoding="utf-8")

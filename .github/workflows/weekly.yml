@@ -19,6 +19,10 @@ on:
         description: "生成后是否推送 GitHub Pages 周报链接"
         required: false
         default: "true"
+      plan_rag_maintenance:
+        description: "是否根据 RAG 覆盖缺口创建维护计划任务"
+        required: false
+        default: "true"
   schedule:
     - cron: "0 0 * * 1"
 
@@ -93,6 +97,23 @@ jobs:
           REPORT_BASE_URL: ${{ vars.REPORT_BASE_URL || secrets.REPORT_BASE_URL }}
           DELIVERY_CHANNELS: ${{ vars.DELIVERY_CHANNELS }}
         run: python scripts/run_planned_job.py --job-file .weekly-job.json
+
+      - name: 创建 RAG 维护计划
+        env:
+          WORKFLOW_PLAN_RAG_MAINTENANCE: ${{ inputs.plan_rag_maintenance || 'true' }}
+          RAG_MAINTENANCE_LIMIT: ${{ vars.RAG_MAINTENANCE_LIMIT || '10' }}
+          RAG_MAINTENANCE_COVERAGE_LIMIT: ${{ vars.RAG_MAINTENANCE_COVERAGE_LIMIT || '100' }}
+          RAG_MAINTENANCE_MIN_GAP_COUNT: ${{ vars.RAG_MAINTENANCE_MIN_GAP_COUNT || '1' }}
+        run: |
+          if [ "$WORKFLOW_PLAN_RAG_MAINTENANCE" != "true" ]; then
+            echo "已跳过 RAG 维护计划。"
+            exit 0
+          fi
+          python scripts/plan_rag_maintenance.py \
+            --limit "$RAG_MAINTENANCE_LIMIT" \
+            --coverage-limit "$RAG_MAINTENANCE_COVERAGE_LIMIT" \
+            --min-gap-count "$RAG_MAINTENANCE_MIN_GAP_COUNT" \
+            --requested-by "github_actions"
 
       - name: 生成周报归档页面
         run: python scripts/build_pages.py
