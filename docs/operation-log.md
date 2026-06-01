@@ -2,6 +2,20 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-06-01 追加：项目详情页展示 RAG 解释历史
+
+### 1. 开发目的
+后端已经支持按项目过滤 RAG 解释历史，但项目详情页仍只展示证据块。为了让单个项目的“证据、解释、质量”形成闭环，本次把项目级解释历史接入 `project.html`。
+
+### 2. 修改内容
+1. `project.html` 在 API 模式下读取 `/v1/rag/explanations?repo=owner/name&limit=5`。
+2. 项目详情页新增“RAG 解释历史”区域，展示问题、检索模式、质量等级、质量分、引用数量和解释答案。
+3. 静态模式保留提示，不触发本地后端专属查询。
+4. 更新 README 和页面构建测试。
+
+### 3. 验证
+已运行 `python scripts\build_pages.py`、`python -m unittest discover -q`、`python scripts\security_check.py` 和 `git diff --check`。
+
 ## 2026-06-01 追加：RAG 解释历史支持按项目过滤
 
 ### 1. 开发目的

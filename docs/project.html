@@ -308,6 +308,8 @@
           rag_summary: Array.isArray(rag.summary) ? rag.summary : [],
           rag_prompt_context: rag.prompt_context || "",
           rag_retrieval: rag.retrieval || {},
+          rag_explanations: Array.isArray(rag.rag_explanations) ? rag.rag_explanations : [],
+          rag_explanation_count: number(rag.rag_explanation_count),
         }))
         .catch(() => detail);
     }
@@ -352,6 +354,8 @@
         rag_contexts: [],
         rag_citations: [],
         rag_summary: ["RAG 证据需要本地后端或 URL 带 api=1 后读取。"],
+        rag_explanations: [],
+        rag_explanation_count: 0,
         data_source: "静态 JSON"
       };
     }
@@ -393,6 +397,7 @@
           <div class="section"><h2>历史来源</h2>${tags(detail.sources || [], "", "暂无来源")}</div>
           <div class="section"><h2>相似项目</h2>${similarHtml(detail.full_name, detail.similar_projects || [], detail.similar_summary || [])}</div>
           <div class="section wide"><h2>RAG 证据</h2>${ragEvidenceHtml(detail)}</div>
+          <div class="section wide"><h2>RAG 解释历史</h2>${ragExplanationsHtml(detail)}</div>
         </section>
         <section class="section" style="margin-top:12px">
           <h2>历史趋势</h2>
@@ -476,6 +481,8 @@
           citations: [],
           summary: ["RAG 证据需要本地后端或 URL 带 api=1 后读取。"],
           prompt_context: "",
+          rag_explanations: [],
+          rag_explanation_count: 0,
         });
       }
       const params = new URLSearchParams();
@@ -483,14 +490,26 @@
       params.set("limit", "6");
       if (detail.language) params.set("language", detail.language);
       if (detail.category) params.set("category", detail.category);
-      return fetch(`/v1/rag/retrieve?${params.toString()}`, { cache: "no-store" })
-        .then(jsonOrThrow)
-        .catch(() => ({
-          contexts: [],
-          citations: [],
-          summary: ["RAG 证据读取失败，请确认本地后端和 SQLite 索引可用。"],
-          prompt_context: "",
-        }));
+      const historyParams = new URLSearchParams();
+      historyParams.set("repo", repo);
+      historyParams.set("limit", "5");
+      return Promise.all([
+        fetch(`/v1/rag/retrieve?${params.toString()}`, { cache: "no-store" })
+          .then(jsonOrThrow)
+          .catch(() => ({
+            contexts: [],
+            citations: [],
+            summary: ["RAG 证据读取失败，请确认本地后端和 SQLite 索引可用。"],
+            prompt_context: "",
+          })),
+        fetch(`/v1/rag/explanations?${historyParams.toString()}`, { cache: "no-store" })
+          .then(jsonOrThrow)
+          .catch(() => ({ explanations: [], count: 0 })),
+      ]).then(([rag, history]) => ({
+        ...rag,
+        rag_explanations: Array.isArray(history.explanations) ? history.explanations : [],
+        rag_explanation_count: history.count || 0,
+      }));
     }
 
     function ragQuery(repo, detail) {
@@ -530,6 +549,31 @@
         ? `<details><summary>查看 prompt_context</summary><pre class="prompt-context">${escapeHtml(detail.rag_prompt_context)}</pre></details>`
         : "";
       return `${summaryHtml}<div class="evidence-list">${contextHtml}</div>${prompt}`;
+    }
+
+    function ragExplanationsHtml(detail) {
+      const explanations = Array.isArray(detail.rag_explanations) ? detail.rag_explanations : [];
+      if (!shouldUseApi()) {
+        return "<p>RAG 解释历史需要本地后端或 URL 带 api=1 后读取。</p>";
+      }
+      if (!explanations.length) {
+        return "<p>暂无该项目的 RAG 解释历史。可先通过 /v1/rag/explain 生成解释。</p>";
+      }
+      return `<div class="evidence-list">${explanations.map(item => {
+        const citationCount = Array.isArray(item.citations) ? item.citations.length : 0;
+        const meta = [
+          item.mode || "",
+          item.quality_level ? `质量 ${item.quality_level}` : "",
+          `质量分 ${number(item.quality_score)}`,
+          `引用 ${citationCount}`,
+          item.created_at || "",
+        ].filter(Boolean).join(" / ");
+        return `<div class="evidence-item">
+          <strong>${escapeHtml(item.query || "-")}</strong>
+          <span>${escapeHtml(meta)}</span>
+          <p>${escapeHtml(item.answer || "")}</p>
+        </div>`;
+      }).join("")}</div>`;
     }
 
     function similarHtml(currentRepo, projects, summary) {

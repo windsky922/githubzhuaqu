@@ -121,7 +121,7 @@ docs/weekly/YYYY-MM-DD.md
 
 `subscriptions.html` 是订阅配置页，支持在本地后端模式下保存、查看、启用和停用订阅偏好。页面会读取 `profiles.json` 生成 Java、Python、Agent 开发等快捷方向按钮，点击后自动填充订阅名称、profile、语言和关键词。订阅列表支持把已启用订阅生成 planned 周报任务，生成后仍需要在任务详情页确认执行。订阅只保存 profile、语言、方向、关键词、排序、数量和通道名称，不保存 Token、Chat ID 或 Webhook。
 
-`project.html` 是单项目详情页，支持 `project.html?repo=owner/name`，展示历史入选次数、首次和最近入选日期、累计新增 Star、最好 Trending 排名、质量提示、风险提示、历史趋势、历史入选记录和相似项目。本地后端或 URL 带 `api=1` 时会优先读取 `/api/projects/{owner}/{repo}`，并通过 `/v1/rag/retrieve` 展示该项目相关 RAG 证据块；否则使用 `projects.json` 静态聚合。
+`project.html` 是单项目详情页，支持 `project.html?repo=owner/name`，展示历史入选次数、首次和最近入选日期、累计新增 Star、最好 Trending 排名、质量提示、风险提示、历史趋势、历史入选记录和相似项目。本地后端或 URL 带 `api=1` 时会优先读取 `/api/projects/{owner}/{repo}`，并通过 `/v1/rag/retrieve` 展示该项目相关 RAG 证据块，通过 `/v1/rag/explanations?repo=owner/name` 展示该项目的 RAG 解释历史；否则使用 `projects.json` 静态聚合。
 
 `compare.html` 是项目对比页，支持 `compare.html?repos=owner/a,owner/b`，也支持追加 `profile`、`language`、`category` 和 `q` 做个性化加权。页面会读取 `profiles.json` 生成 Java、Python、Agent 开发等快捷方向按钮。本地后端或 URL 带 `api=1` 时会优先读取 `/v1/projects/compare`，否则使用 `projects.json` 静态聚合，展示推荐结论、对比矩阵、领先指标和缺失项目。项目筛选页、推荐页和项目详情页会提供直接进入对比的入口。
 
