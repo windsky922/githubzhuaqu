@@ -461,6 +461,17 @@ POST /v1/rag/backfill-explanations
 {"limit": 3, "dry_run": false, "confirm_execution": true}
 ```
 
+### `POST /v1/rag/backfill-plan`
+
+创建一个 `kind=rag_backfill`、`status=planned` 的 RAG 回填计划任务，但不立即执行。请求字段与 `/v1/rag/backfill-explanations` 一致。接口会返回 `job_id`，后续可调用：
+
+```text
+GET /v1/job-execution-check?job_id=...
+POST /v1/jobs/{job_id}/execute
+```
+
+执行时必须传入 `confirm_execution=true`。如果计划任务自身为 `dry_run=false`，创建计划时也必须传入 `confirm_execution=true`，否则后端会自动改为 `dry_run=true`，避免误写 SQLite。
+
 ### `GET /v1/projects/{owner}/{repo}/rag`
 
 返回单个项目的 RAG 聚合包，用于项目详情页、后续 Agent 工具调用和 LangChain/RAG 编排。该接口会读取项目详情、执行本地 RAG 检索，并合并该项目已经入库的解释历史，不调用外部模型、不请求 GitHub/Kimi/Telegram。

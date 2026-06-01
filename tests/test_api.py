@@ -140,6 +140,12 @@ class ApiRepositoryTest(unittest.TestCase):
             rag_backfill_preview = repository.backfill_rag_explanations_from_payload({"limit": 1, "dry_run": True})
             rag_backfill_jobs = repository.jobs(kind="rag_backfill", status="succeeded", limit=5)
             rag_backfill_events = repository.job_events(rag_backfill_preview["job_id"])
+            rag_backfill_plan = repository.plan_rag_backfill({"limit": 1, "dry_run": True, "requested_by": "test"})
+            rag_backfill_precheck = repository.job_execution_check(rag_backfill_plan["job_id"])
+            rag_backfill_execute = repository.execute_job(
+                rag_backfill_plan["job_id"],
+                {"confirm_execution": True, "requested_by": "test"},
+            )
             database_summary_after_explain = repository.database_summary()
             similar = repository.similar_projects("owner/agent", limit=5)
             comparison = repository.compare_projects(["owner/agent", "owner/agent-helper", "missing/repo"])
@@ -369,6 +375,12 @@ class ApiRepositoryTest(unittest.TestCase):
                 [event["event_type"] for event in rag_backfill_events["events"]],
                 ["rag_backfill_started", "rag_backfill_completed"],
             )
+            self.assertTrue(rag_backfill_plan["job_id"].startswith("rag-backfill-plan:"))
+            self.assertTrue(rag_backfill_precheck["executable"])
+            self.assertEqual(rag_backfill_precheck["kind"], "rag_backfill")
+            self.assertTrue(rag_backfill_execute["executed"])
+            self.assertEqual(rag_backfill_execute["status"], "succeeded")
+            self.assertIn("processed_count", rag_backfill_execute["runner_result"]["result"])
             self.assertGreaterEqual(database_summary_after_explain["table_counts"]["rag_explanations"], 1)
             self.assertTrue(database_summary_after_explain["rag_readiness"]["ready_for_explanation_history"])
             self.assertTrue(similar["found"])
@@ -455,6 +467,18 @@ class ApiRepositoryTest(unittest.TestCase):
             v1_rag_quality_summary = client.get("/v1/rag/quality-summary", params={"limit": 5})
             v1_rag_coverage = client.get("/v1/rag/coverage", params={"limit": 5})
             v1_rag_backfill = client.post("/v1/rag/backfill-explanations", json={"limit": 1, "dry_run": True})
+            v1_rag_backfill_plan = client.post(
+                "/v1/rag/backfill-plan",
+                json={"limit": 1, "dry_run": True, "requested_by": "test"},
+            )
+            v1_rag_backfill_plan_check = client.get(
+                "/v1/job-execution-check",
+                params={"job_id": v1_rag_backfill_plan.json()["job_id"]},
+            )
+            v1_rag_backfill_plan_execute = client.post(
+                f"/v1/jobs/{v1_rag_backfill_plan.json()['job_id']}/execute",
+                json={"confirm_execution": True, "requested_by": "test"},
+            )
             v1_rag_backfill_jobs = client.get(
                 "/v1/jobs",
                 params={"status": "succeeded", "kind": "rag_backfill", "limit": 5},
@@ -548,6 +572,9 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(v1_rag_quality_summary.status_code, 200)
             self.assertEqual(v1_rag_coverage.status_code, 200)
             self.assertEqual(v1_rag_backfill.status_code, 202)
+            self.assertEqual(v1_rag_backfill_plan.status_code, 202)
+            self.assertEqual(v1_rag_backfill_plan_check.status_code, 200)
+            self.assertEqual(v1_rag_backfill_plan_execute.status_code, 200)
             self.assertEqual(v1_rag_backfill_jobs.status_code, 200)
             self.assertEqual(v1_rag_backfill_events.status_code, 200)
             self.assertEqual(v1_similar.status_code, 200)
@@ -609,8 +636,15 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertTrue(v1_rag_backfill.json()["dry_run"])
             self.assertTrue(v1_rag_backfill.json()["job_id"].startswith("rag-backfill:"))
             self.assertLessEqual(v1_rag_backfill.json()["processed_count"], 1)
+            self.assertTrue(v1_rag_backfill_plan.json()["job_id"].startswith("rag-backfill-plan:"))
+            self.assertTrue(v1_rag_backfill_plan_check.json()["executable"])
+            self.assertTrue(v1_rag_backfill_plan_execute.json()["executed"])
+            self.assertEqual(v1_rag_backfill_plan_execute.json()["status"], "succeeded")
             self.assertEqual(v1_rag_backfill_jobs.json()["jobs"][0]["kind"], "rag_backfill")
-            self.assertEqual(v1_rag_backfill_jobs.json()["jobs"][0]["job_id"], v1_rag_backfill.json()["job_id"])
+            self.assertIn(
+                v1_rag_backfill.json()["job_id"],
+                [job["job_id"] for job in v1_rag_backfill_jobs.json()["jobs"]],
+            )
             self.assertEqual(v1_rag_backfill_events.json()["events"][-1]["event_type"], "rag_backfill_completed")
             self.assertEqual(v1_similar.json()["similar_projects"][0]["full_name"], "owner/agent-helper")
             self.assertEqual(v1_compare.json()["count"], 2)

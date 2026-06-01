@@ -209,7 +209,7 @@ error
 report_url
 ```
 
-`kind` 当前支持 `weekly_report` 和 `rag_backfill`。`weekly_report` 表示周报任务，`rag_backfill` 表示通过后端 API 发起的 RAG 解释回填任务。
+`kind` 当前支持 `weekly_report` 和 `rag_backfill`。`weekly_report` 表示周报任务，`rag_backfill` 表示通过后端 API 发起或计划执行的 RAG 解释回填任务。
 
 `request` 只公开 `profile`、`sources`、`dry_run`、`requested_dry_run`、`confirm_delivery`、`delivery_allowed`、`days_back`、`trigger_source`、`requested_by`、`safety_warnings`、`limit`、`rag_limit`、`mode`、`model`、`auto_build` 和 `confirm_execution`。这些字段用于任务审计和受控推送/补库确认，不应包含 Token、Chat ID、Webhook 或其他密钥。
 

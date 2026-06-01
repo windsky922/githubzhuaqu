@@ -315,6 +315,10 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
     def v1_rag_backfill_explanations(payload: dict[str, Any] | None = Body(default=None)) -> dict[str, Any]:
         return repository.backfill_rag_explanations_from_payload(payload)
 
+    @app.post("/v1/rag/backfill-plan", status_code=202)
+    def v1_rag_backfill_plan(payload: dict[str, Any] | None = Body(default=None)) -> dict[str, Any]:
+        return repository.plan_rag_backfill(payload)
+
     @app.get("/v1/runs")
     def v1_runs() -> dict[str, Any]:
         return repository.runs()

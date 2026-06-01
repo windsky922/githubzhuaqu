@@ -69,6 +69,7 @@ class ApiRepository:
                 "rag_quality_summary": True,
                 "rag_coverage": True,
                 "rag_backfill_explanations": True,
+                "rag_backfill_plan": True,
                 "rag_backfill_jobs": True,
                 "runs_query": True,
                 "jobs_query": True,
@@ -802,7 +803,47 @@ class ApiRepository:
             },
         }
 
-    def backfill_rag_explanations_from_payload(self, payload: dict[str, Any] | None) -> dict[str, Any]:
+    def plan_rag_backfill(self, payload: dict[str, Any] | None) -> dict[str, Any]:
+        request = self._rag_backfill_request_from_payload(payload, default_trigger_source="rag_backfill_plan_api")
+        submitted_at = datetime.now(UTC).isoformat().replace("+00:00", "Z")
+        job_id = _rag_backfill_plan_job_id(submitted_at, request)
+        job = {
+            "job_id": job_id,
+            "kind": "rag_backfill",
+            "status": "planned",
+            "run_date": "",
+            "submitted_at": submitted_at,
+            "started_at": "",
+            "finished_at": "",
+            "request": request,
+            "result": {},
+            "error": "",
+        }
+        self._persist_preview_job(job)
+        self._record_job_event(
+            job_id,
+            "job_created",
+            "planned",
+            str(request.get("requested_by") or "api"),
+            "已创建 RAG 回填 planned 任务。",
+            {"request": request},
+        )
+        return {
+            "schema_version": 1,
+            "accepted": True,
+            "job_id": job_id,
+            "status": "planned",
+            "request": request,
+            "safety_warnings": request.get("safety_warnings") or [],
+            "job": job,
+        }
+
+    def _rag_backfill_request_from_payload(
+        self,
+        payload: dict[str, Any] | None,
+        *,
+        default_trigger_source: str,
+    ) -> dict[str, Any]:
         payload = payload if isinstance(payload, dict) else {}
         dry_run = _bool_value(payload.get("dry_run"), True)
         confirm_execution = _bool_value(payload.get("confirm_execution"), False)
@@ -819,10 +860,16 @@ class ApiRepository:
             "auto_build": _bool_value(payload.get("auto_build"), False),
             "dry_run": dry_run,
             "confirm_execution": confirm_execution,
-            "trigger_source": str(payload.get("trigger_source") or "rag_backfill_api"),
+            "trigger_source": str(payload.get("trigger_source") or default_trigger_source),
             "requested_by": str(payload.get("requested_by") or "api"),
             "safety_warnings": safety_warnings,
         }
+        return request
+
+    def backfill_rag_explanations_from_payload(self, payload: dict[str, Any] | None) -> dict[str, Any]:
+        request = self._rag_backfill_request_from_payload(payload, default_trigger_source="rag_backfill_api")
+        dry_run = _truthy(request.get("dry_run", True))
+        safety_warnings = list(request.get("safety_warnings") or [])
         submitted_at = datetime.now(UTC).isoformat().replace("+00:00", "Z")
         run_date = submitted_at[:10]
         job_id = _rag_backfill_job_id(submitted_at, request)
@@ -1557,16 +1604,23 @@ class ApiRepository:
 
         job = detail.get("job") if isinstance(detail.get("job"), dict) else {}
         request = job.get("request") if isinstance(job.get("request"), dict) else {}
+        kind = str(job.get("kind") or "")
         blockers = []
         warnings = []
-        if job.get("kind") != "weekly_report":
-            blockers.append("当前执行器只支持 weekly_report 任务。")
+        if kind not in {"weekly_report", "rag_backfill"}:
+            blockers.append("当前执行器只支持 weekly_report 和 rag_backfill 任务。")
         if job.get("status") != "planned":
             blockers.append(f"任务状态为 {job.get('status') or 'unknown'}，只有 planned 任务可以被执行器消费。")
-        if not _truthy(request.get("dry_run", True)) and not _truthy(request.get("confirm_delivery")):
-            blockers.append("dry_run=false 但缺少 confirm_delivery=true，不能进入真实推送执行。")
-        if not _truthy(request.get("dry_run", True)):
-            warnings.append("该任务允许真实推送，执行前请确认 Telegram/飞书/微信等推送配置正确。")
+        if kind == "weekly_report":
+            if not _truthy(request.get("dry_run", True)) and not _truthy(request.get("confirm_delivery")):
+                blockers.append("dry_run=false 但缺少 confirm_delivery=true，不能进入真实推送执行。")
+            if not _truthy(request.get("dry_run", True)):
+                warnings.append("该任务允许真实推送，执行前请确认 Telegram/飞书/微信等推送配置正确。")
+        if kind == "rag_backfill":
+            if not _truthy(request.get("dry_run", True)) and not _truthy(request.get("confirm_execution")):
+                blockers.append("dry_run=false 但缺少 confirm_execution=true，不能进入真实补库执行。")
+            if not _truthy(request.get("dry_run", True)):
+                warnings.append("该任务允许写入 RAG 解释历史，执行前请确认 SQLite 数据库状态正确。")
 
         executable = not blockers
         return {
@@ -1583,6 +1637,12 @@ class ApiRepository:
                 "dry_run": _truthy(request.get("dry_run", True)),
                 "confirm_delivery": _truthy(request.get("confirm_delivery")),
                 "days_back": _positive_int(request.get("days_back")),
+                "limit": _positive_int(request.get("limit")),
+                "rag_limit": _positive_int(request.get("rag_limit")),
+                "mode": request.get("mode") or "",
+                "model": request.get("model") or "",
+                "auto_build": _truthy(request.get("auto_build")),
+                "confirm_execution": _truthy(request.get("confirm_execution")),
                 "trigger_source": request.get("trigger_source") or "",
                 "requested_by": request.get("requested_by") or "",
             },
@@ -1667,8 +1727,8 @@ class ApiRepository:
         blockers = []
         if not detail.get("found"):
             blockers.append("任务不存在，不能重试。")
-        if job and job.get("kind") != "weekly_report":
-            blockers.append("当前只支持 weekly_report 任务重试。")
+        if job and job.get("kind") not in {"weekly_report", "rag_backfill"}:
+            blockers.append("当前只支持 weekly_report 和 rag_backfill 任务重试。")
         if job and job.get("status") != "failed":
             blockers.append(f"任务状态为 {job.get('status') or 'unknown'}，只有 failed 任务可以重试。")
 
@@ -1739,7 +1799,7 @@ class ApiRepository:
         ).hexdigest()[:12]
         retry_job = {
             "job_id": f"retry:{fingerprint}",
-            "kind": "weekly_report",
+            "kind": job.get("kind") or "weekly_report",
             "status": "planned",
             "run_date": "",
             "submitted_at": submitted_at,
@@ -2391,6 +2451,13 @@ def _rag_backfill_job_id(submitted_at: str, request: dict[str, Any]) -> str:
     fingerprint = json.dumps(request, ensure_ascii=False, sort_keys=True)
     digest = sha1(fingerprint.encode("utf-8")).hexdigest()[:10]
     return f"rag-backfill:{compact_time}:{digest}"
+
+
+def _rag_backfill_plan_job_id(submitted_at: str, request: dict[str, Any]) -> str:
+    compact_time = submitted_at.replace("-", "").replace(":", "").replace(".", "").replace("Z", "")
+    fingerprint = json.dumps(request, ensure_ascii=False, sort_keys=True)
+    digest = sha1(fingerprint.encode("utf-8")).hexdigest()[:10]
+    return f"rag-backfill-plan:{compact_time}:{digest}"
 
 
 def _rag_backfill_job_result(result: dict[str, Any]) -> dict[str, Any]:

@@ -2,6 +2,21 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-06-01 追加：RAG 回填支持 planned 任务执行
+
+### 1. 开发目的
+RAG 回填已经能写入任务审计，但仍主要是即时 API 动作。为了把数据库补库纳入统一任务模型，本次新增 RAG 回填计划任务入口，并让本地 job runner 能执行 `rag_backfill` 任务。
+
+### 2. 修改内容
+1. 新增 `POST /v1/rag/backfill-plan`，用于创建 `kind=rag_backfill`、`status=planned` 的计划任务。
+2. `/v1/job-execution-check` 支持检查 `rag_backfill` 任务，真实写库仍要求 `confirm_execution=true`。
+3. `/v1/jobs/{job_id}/execute` 可执行 planned RAG 回填任务，并写入 runner 事件和精简执行结果。
+4. `scripts/run_planned_job.py` 扩展为通用 planned 任务执行入口，当前支持周报任务和 RAG 回填任务。
+5. 更新 README、API 文档、数据契约和后端测试。
+
+### 3. 验证
+已运行 `python -m unittest discover -q`、`python scripts\security_check.py` 和 `git diff --check`。
+
 ## 2026-06-01 追加：RAG 回填接入任务审计
 
 ### 1. 开发目的

@@ -38,21 +38,20 @@ def run_planned_job(root: Path = ROOT, db_path: Path | None = None, job_id: str 
 
     try:
         request = job.get("request") or {}
-        summary = _execute_weekly_report(request)
+        kind = str(job.get("kind") or "weekly_report")
         finished_at = _now()
-        result = _summary_result(summary)
-        result["request_context"] = _request_context(request)
-        status = "failed" if summary.status == "failed" or summary.error else "succeeded"
+        result = _execute_job_by_kind(root=root, db_path=database, kind=kind, request=request)
+        status = "failed" if result.get("status") == "failed" or result.get("error") else "succeeded"
         _save_job(
             database,
             {
                 **job,
                 "status": status,
-                "run_date": summary.run_date,
+                "run_date": str(result.get("run_date") or job.get("run_date") or ""),
                 "started_at": started_at,
                 "finished_at": finished_at,
                 "result": result,
-                "error": summary.error,
+                "error": str(result.get("error") or ""),
                 "payload": {"request": request, "result": result},
             },
         )
@@ -90,6 +89,17 @@ def run_planned_job(root: Path = ROOT, db_path: Path | None = None, job_id: str 
         return {"executed": True, "job_id": job["job_id"], "status": "failed", "error": message}
 
 
+def _execute_job_by_kind(root: Path, db_path: Path, kind: str, request: dict[str, Any]) -> dict[str, Any]:
+    if kind == "weekly_report":
+        summary = _execute_weekly_report(request)
+        result = _summary_result(summary)
+        result["request_context"] = _request_context(request)
+        return result
+    if kind == "rag_backfill":
+        return _execute_rag_backfill(root=root, db_path=db_path, request=request)
+    raise ValueError(f"不支持的任务类型：{kind}")
+
+
 def _execute_weekly_report(request: dict[str, Any]) -> RunSummary:
     dry_run = bool(request.get("dry_run", True))
     days_back = _positive_int(request.get("days_back"))
@@ -98,6 +108,43 @@ def _execute_weekly_report(request: dict[str, Any]) -> RunSummary:
     env = _request_env(request, profile, limit)
     with _temporary_env(env):
         return run_weekly_report(days_back=days_back, skip_telegram_send=True if dry_run else None)
+
+
+def _execute_rag_backfill(root: Path, db_path: Path, request: dict[str, Any]) -> dict[str, Any]:
+    from src.api.repository import ApiRepository
+
+    repository = ApiRepository(root=root, db_path=db_path)
+    result = repository.backfill_rag_explanations(
+        limit=_positive_int(request.get("limit")) or 10,
+        rag_limit=_positive_int(request.get("rag_limit")) or 8,
+        mode=str(request.get("mode") or "fts5"),
+        model=str(request.get("model") or "local-hash-v1"),
+        auto_build=_bool_value(request.get("auto_build"), False),
+        dry_run=_bool_value(request.get("dry_run", True), True),
+    )
+    processed = result.get("processed") if isinstance(result.get("processed"), list) else []
+    return {
+        "run_date": _now()[:10],
+        "status": result.get("status") or "ok",
+        "dry_run": bool(result.get("dry_run")),
+        "requested_limit": result.get("requested_limit") or 0,
+        "candidate_count": result.get("candidate_count") or 0,
+        "processed_count": result.get("processed_count") or 0,
+        "coverage_before": result.get("coverage_before") if isinstance(result.get("coverage_before"), dict) else {},
+        "processed_repositories": [
+            {
+                "full_name": item.get("full_name") or "",
+                "status": item.get("status") or "",
+                "dry_run": bool(item.get("dry_run")),
+                "quality_score": item.get("quality_score") or 0,
+                "quality_level": item.get("quality_level") or "",
+                "explanation_id": item.get("explanation_id") or "",
+            }
+            for item in processed
+            if isinstance(item, dict)
+        ],
+        "request_context": _request_context(request),
+    }
 
 
 def _request_env(request: dict[str, Any], profile: str, limit: int | None) -> dict[str, str]:
@@ -233,6 +280,11 @@ def _request_context(request: dict[str, Any]) -> dict[str, Any]:
             "subscription_name",
             "days_back",
             "dry_run",
+            "rag_limit",
+            "mode",
+            "model",
+            "auto_build",
+            "confirm_execution",
         )
         if request.get(key) not in (None, "", [])
     }
@@ -252,6 +304,21 @@ def _positive_int(value: Any) -> int | None:
     except (TypeError, ValueError):
         return None
     return number if number > 0 else None
+
+
+def _bool_value(value: Any, default: bool = False) -> bool:
+    if isinstance(value, bool):
+        return value
+    if value is None:
+        return default
+    if isinstance(value, (int, float)):
+        return bool(value)
+    normalized = str(value).strip().lower()
+    if normalized in {"1", "true", "yes", "y", "on"}:
+        return True
+    if normalized in {"0", "false", "no", "n", "off"}:
+        return False
+    return default
 
 
 @contextmanager
