@@ -64,6 +64,7 @@ class ApiRepository:
                 "rag_vector_search": True,
                 "rag_explain": True,
                 "rag_explanations": True,
+                "rag_project_explanations": True,
                 "rag_quality_summary": True,
                 "runs_query": True,
                 "jobs_query": True,
@@ -490,19 +491,30 @@ class ApiRepository:
         }
         return self._persist_rag_explanation(result)
 
-    def rag_explanations(self, *, limit: int = 20, query: str | None = None) -> dict[str, Any]:
+    def rag_explanations(
+        self,
+        *,
+        limit: int = 20,
+        query: str | None = None,
+        repo: str | None = None,
+    ) -> dict[str, Any]:
         self.ensure_sqlite_index()
         limit = max(1, min(int(limit or 20), 100))
         normalized_query = _blank_to_none(query)
+        normalized_repo = _blank_to_none(repo)
         connection = connect(self.db_path)
         try:
             initialize(connection)
             params: list[Any] = []
-            where = ""
+            filters: list[str] = []
             if normalized_query:
-                where = "WHERE query LIKE ? OR answer LIKE ?"
+                filters.append("(query LIKE ? OR answer LIKE ?)")
                 like = f"%{normalized_query}%"
                 params.extend([like, like])
+            if normalized_repo:
+                filters.append("repositories_json LIKE ?")
+                params.append(f"%{normalized_repo}%")
+            where = f"WHERE {' AND '.join(filters)}" if filters else ""
             rows = connection.execute(
                 f"""
                 SELECT explanation_id, query, language, category, source, mode, model,
@@ -524,6 +536,7 @@ class ApiRepository:
             "schema_version": 1,
             "count": len(explanations),
             "query": normalized_query or "",
+            "repo": normalized_repo or "",
             "explanations": explanations,
         }
 

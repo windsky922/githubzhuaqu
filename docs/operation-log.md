@@ -2,6 +2,20 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-06-01 追加：RAG 解释历史支持按项目过滤
+
+### 1. 开发目的
+RAG 解释已经能写入 SQLite 并做质量汇总，但项目详情、后续前端管理页和 LangChain/RAG 编排还缺少“某个项目关联了哪些历史解释”的查询入口。本次把解释历史和具体仓库关联起来，继续补齐数据库与 RAG 的核心闭环。
+
+### 2. 修改内容
+1. `/v1/rag/explanations` 新增 `repo=owner/name` 过滤参数。
+2. `ApiRepository.rag_explanations` 支持同时按问题关键词和覆盖仓库过滤。
+3. `/v1/health` 能力声明新增 `rag_project_explanations`。
+4. 更新 README、API 文档和后端测试。
+
+### 3. 验证
+已运行 `python -m unittest discover -q`、`python scripts\security_check.py` 和 `git diff --check`。
+
 ## 2026-05-30 追加：管理首页接入 RAG 质量概览
 
 ### 1. 开发目的
