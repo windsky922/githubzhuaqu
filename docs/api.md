@@ -42,6 +42,8 @@ http://127.0.0.1:8000/admin.html?api=1
 
 根路径 `http://127.0.0.1:8000/` 会跳转到管理首页。`/v1/*` 路径是 JSON API，例如 `/v1/jobs?limit=50` 返回机器可读任务数据，不是 HTML 页面。
 
+管理首页中的 RAG 检索区会调用 `/v1/rag/retrieve` 和 `/v1/rag/vector-search`，用于查看证据块、引用和 `prompt_context`；RAG 质量概览会调用 `/v1/rag/quality-summary`，用于查看解释数量、质量分布、改进建议和低质量样本。向量检索会在 `auto_build=true` 时自动构建本地 `local-hash-v1` 索引，也可以先手动运行 `py scripts\build_rag_embeddings.py`。
+
 如果本地没有 `data/github_weekly.sqlite`，查询项目接口会从 `data/` 下的 JSON 归档自动重建 SQLite 派生索引。
 
 ## 三、接口
@@ -205,6 +207,187 @@ http://127.0.0.1:8000/admin.html?api=1
 /v1/search?q=agent%20workflow&language=Python&limit=10
 ```
 
+### `GET /v1/rag/corpus`
+
+读取 SQLite 派生的 `project_corpus` 语料表，输出可直接进入 RAG 管道的文档列表。这个接口不会调用模型、不会生成 embedding、不会请求外部服务，只负责把历史项目语料整理成稳定的 `text + metadata + evidence` 数据契约，方便后续接入向量库、LangChain 或其他检索增强组件。
+
+支持参数：
+
+| 参数 | 说明 |
+|---|---|
+| `q` | 可选，关键词检索；传入后优先使用 SQLite FTS5，失败时回退普通文本匹配 |
+| `language` | 可选，按语言过滤 |
+| `category` | 可选，按项目方向过滤 |
+| `source` | 可选，按来源过滤，例如 `github_trending` |
+| `limit` | 返回文档数量，默认 20，最大 100 |
+
+返回内容包括：
+
+1. `documents`：RAG 文档数组，每条包含 `id`、`text`、`metadata` 和 `evidence`。
+2. `metadata`：包含仓库全名、GitHub 链接、入选日期、语言、方向、来源、质量等级、Trending 排名和新增 Star。
+3. `evidence`：从语料文本中抽取的证据片段，用于后续回答时引用或解释。
+4. `retrieval`：本次读取使用的模式，可能是 `fts5`、`like` 或 `latest`。
+5. `rag_readiness`：提示当前结果是否已经具备 embedding、检索器和 RAG 编排的基础条件。
+
+示例：
+
+```text
+/v1/rag/corpus?q=agent%20workflow&language=Python&limit=10
+```
+
+该接口是数据库能力升级到 RAG 能力的第一层稳定出口。后续如果接入 embedding 或 LangChain，应优先复用这个接口的字段，而不是重新解析 Markdown 周报或原始 README。
+
+### `GET /v1/rag/retrieve`
+
+基于 SQLite `rag_chunks` 语料块执行 RAG 检索，返回短文本上下文、引用列表和可直接交给后续问答链的 `prompt_context`。这个接口仍然不调用模型、不生成 embedding、不请求外部服务，先用 SQLite FTS5 提供稳定的本地检索能力，后续可以替换或叠加向量检索。
+
+支持参数：
+
+| 参数 | 说明 |
+|---|---|
+| `q` | 必填，用户问题或检索关键词 |
+| `language` | 可选，按语言过滤 |
+| `category` | 可选，按项目方向过滤 |
+| `source` | 可选，按来源过滤，例如 `github_trending` |
+| `limit` | 返回上下文数量，默认 8，最大 30 |
+
+返回内容包括：
+
+1. `contexts`：召回的 RAG 短文本块，包含 `text`、`metadata`、`evidence` 和规则分。
+2. `citations`：按上下文顺序生成的引用列表，包含项目名、GitHub 链接、入选日期和 chunk 编号。
+3. `prompt_context`：拼接后的上下文文本，供后续 Kimi、OpenAI 或 LangChain 问答链直接使用。
+4. `retrieval`：本次检索使用的模式，可能是 `fts5` 或 `like`。
+
+示例：
+
+```text
+/v1/rag/retrieve?q=agent%20workflow&language=Python&limit=8
+```
+
+该接口是后续“项目知识库问答”和“基于证据的推荐解释”的核心入口。当前阶段只做本地证据召回，避免过早绑定某个向量库或模型供应商。
+
+### `GET /v1/rag/vector-search`
+
+基于本地 `rag_embeddings` 表执行向量检索，返回与用户问题最接近的 RAG 证据块。当前默认模型为确定性 `local-hash-v1`，用于打通向量索引表、构建命令和检索 API；它不调用外部模型、不需要密钥，后续可替换为真实 embedding 模型。
+
+使用前先构建本地索引：
+
+```powershell
+py scripts\build_rag_embeddings.py
+```
+
+支持参数：
+
+| 参数 | 说明 |
+|---|---|
+| `q` | 必填，用户问题或检索关键词 |
+| `language` | 可选，按语言过滤 |
+| `category` | 可选，按项目方向过滤 |
+| `source` | 可选，按来源过滤，例如 `github_trending` |
+| `limit` | 返回上下文数量，默认 8，最大 30 |
+| `model` | 可选，默认 `local-hash-v1` |
+| `auto_build` | 可选，为 `true` 且索引为空时自动构建本地索引 |
+
+返回内容与 `/v1/rag/retrieve` 接近，包含 `contexts`、`citations`、`prompt_context` 和 `retrieval`。差异在于 `retrieval.mode` 为 `vector`，排序依据为本地向量相似度。
+
+示例：
+
+```text
+/v1/rag/vector-search?q=agent%20workflow&language=Python&limit=8&auto_build=true
+```
+
+该接口是后续真正接入 embedding、向量库和 LangChain retriever 的预留层。当前实现只建设稳定数据边界，不改变周报采集、生成和推送流程。
+
+### `GET /v1/rag/explain`
+
+基于 `/v1/rag/retrieve` 或 `/v1/rag/vector-search` 的召回结果生成规则版 RAG 解释。该接口不调用外部模型，不请求 GitHub/Kimi/Telegram，只把已有证据块整理为“推荐解释、证据引用、风险提示、下一步动作”，用于后续接入模型总结、项目详情页解释和 LangChain 编排。
+
+支持参数：
+
+| 参数 | 说明 |
+|---|---|
+| `q` | 必填，用户问题或检索关键词 |
+| `language` | 可选，按语言过滤 |
+| `category` | 可选，按项目方向过滤 |
+| `source` | 可选，按来源过滤，例如 `github_trending` |
+| `limit` | 返回上下文数量，默认 8，最大 30 |
+| `mode` | 可选，默认 `fts5`；传 `vector` 时走本地向量检索 |
+| `model` | 可选，向量模式下默认 `local-hash-v1` |
+| `auto_build` | 可选，向量模式下索引为空时自动构建本地索引 |
+
+返回字段包含：
+
+1. `contexts`：参与解释的 RAG 证据块。
+2. `citations`：可引用的项目、日期和 chunk ID。
+3. `prompt_context`：后续交给模型时可复用的上下文。
+4. `explanation.answer`：规则版结论。
+5. `explanation.why_recommended`：推荐依据。
+6. `explanation.evidence`：裁剪后的证据摘要。
+7. `explanation.risks`：证据缺口或人工复核提示。
+8. `explanation.next_steps`：后续动作。
+
+示例：
+
+```text
+/v1/rag/explain?q=agent%20workflow&language=Python&limit=8
+/v1/rag/explain?q=agent%20workflow&mode=vector&auto_build=true
+```
+
+这是当前 RAG 从“召回证据”升级到“解释输出”的第一层接口。后续如果接入真实 LLM，应优先复用 `citations` 和 `prompt_context`，并要求模型按引用编号回答。
+
+### `GET /v1/rag/explanations`
+
+查询已经写入 SQLite 的 RAG 解释历史。每次调用 `/v1/rag/explain` 都会把解释结果写入 `rag_explanations` 表，便于后续查看解释质量、比较 FTS 与向量模式、评估模型替换效果。
+
+支持参数：
+
+| 参数 | 说明 |
+|---|---|
+| `q` | 可选，按 query 或 answer 做模糊过滤 |
+| `repo` | 可选，按解释覆盖的仓库过滤，格式为 `owner/name` |
+| `limit` | 返回数量，默认 20，最大 100 |
+
+返回字段包含 `query`、`repo`、`explanations`。每条解释包含 `explanation_id`、`query`、`mode`、`model`、`confidence`、`quality_score`、`quality_level`、`quality`、`answer`、`repositories`、`citations`、`explanation`、`retrieval` 和 `created_at`。
+
+`quality` 是规则版质量评估，当前会统计证据块数量、引用数量、覆盖项目数量、解释依据数量、风险数量和是否包含 `prompt_context`。它用于判断解释是否足够可靠，不代表项目本身质量分。
+
+示例：
+
+```text
+/v1/rag/explanations?limit=20
+/v1/rag/explanations?q=agent
+/v1/rag/explanations?repo=owner/agent
+```
+
+该接口只读取 SQLite 中的解释历史，不触发新的检索、不调用外部模型，也不包含密钥。
+
+### `GET /v1/rag/quality-summary`
+
+汇总 SQLite 中 RAG 解释历史的质量状态，用于判断当前 RAG 数据是否足够支撑模型总结、项目详情解释和后续 LangChain 编排。该接口只读 `rag_explanations`，不触发新检索。
+
+支持参数：
+
+| 参数 | 说明 |
+|---|---|
+| `limit` | 返回最近低质量样本和最近解释数量，默认 10，最大 50 |
+
+返回字段包含：
+
+1. `total_count`：解释历史总数。
+2. `average_quality_score`：平均质量分。
+3. `quality_levels`：高/中/低质量解释数量。
+4. `confidence_levels`：解释置信度分布。
+5. `modes`：FTS、向量等检索模式分布。
+6. `recent_low_quality`：最近低质量解释样本。
+7. `latest`：最近解释样本。
+8. `recommendations`：下一步改进建议。
+
+示例：
+
+```text
+/v1/rag/quality-summary?limit=10
+```
+
 ### `GET /v1/projects/{owner}/{repo}/similar`
 
 基于单项目详情和 `project_corpus` 语料索引生成相似项目候选。该接口优先使用 SQLite FTS5 召回候选，再结合语言、方向、来源、关键词重合、Trending 排名和新增 Star 计算 `similarity_score`。
@@ -230,6 +413,38 @@ http://127.0.0.1:8000/admin.html?api=1
 
 该接口只读取本地公开归档数据，不调用外部模型或外部服务。它是后续 RAG、向量检索、项目对比和个性化推荐重排的前置候选层。
 
+### `GET /v1/projects/compare`
+
+对多个历史入选项目做结构化横向比较。该接口读取单项目详情聚合结果，返回统一对比矩阵和基础结论，用于后续对比页、RAG 解释和个性化推荐重排。
+
+支持参数：
+
+| 参数 | 说明 |
+|---|---|
+| `repos` | 必填，逗号分隔的仓库全名，例如 `owner/a,owner/b`，最多 8 个 |
+| `profile` | 可选，当前个性化方向，例如 `agent_development`、`java`、`python` |
+| `language` | 可选，当前优先语言，例如 `Python`、`Java` |
+| `category` | 可选，当前优先方向，例如 `AI Agent`、`Backend` |
+| `query` | 可选，当前关键词，例如 `agent`、`spring`、`rag` |
+
+返回内容包括：
+
+1. `projects`：每个项目的基础信息、历史热度、质量和风险摘要。
+2. `matrix`：按指标展开的对比矩阵。
+3. `best_by`：按累计新增 Star、最近新增 Star、质量分、Trending 排名等维度给出的领先项目。
+4. `preference`：本次对比使用的个性化偏好上下文。
+5. `recommendation`：规则版推荐结论，包含优先查看项目、推荐理由、注意事项、下一步动作和 `scoring_model`。没有偏好时为 `rule:v1`，传入 `profile`、`language`、`category` 或 `query` 后为 `rule:v2-preference`。
+6. `missing`：未找到的项目。
+7. `selection_summary`：本次对比摘要。
+
+示例：
+
+```text
+/v1/projects/compare?repos=owner/agent,owner/agent-helper&profile=agent_development&language=Python
+```
+
+该接口只读公开归档数据，不调用外部服务，不写入任务或推送状态。
+
 ### `GET /api/profiles`
 
 返回公开个性化方向，数据来源为 `docs/profiles.json`。
@@ -252,6 +467,7 @@ http://127.0.0.1:8000/admin.html?api=1
 2. `POST /v1/subscriptions`：创建订阅。
 3. `PATCH /v1/subscriptions/{subscription_id}`：更新订阅条件或启停状态。
 4. `GET /v1/subscriptions/{subscription_id}/recommendations`：按订阅编号预览推荐结果。
+5. `POST /v1/subscriptions/{subscription_id}/trigger`：把启用订阅转换成 planned 周报任务，默认 `dry_run=true`，不直接真实推送。
 
 订阅字段包括：
 
@@ -290,6 +506,21 @@ GET /v1/subscriptions/sub:xxxx/recommendations?limit=10
 
 该接口会复用 `/v1/recommendations` 的筛选和排序逻辑，只把订阅保存的 profile、语言、方向、关键词和排序条件作为输入，不读取任何推送密钥。
 
+按订阅生成计划任务：
+
+```text
+POST /v1/subscriptions/sub:xxxx/trigger
+```
+
+```json
+{
+  "dry_run": true,
+  "requested_by": "subscriptions_page"
+}
+```
+
+该接口只创建 planned 任务，不在 HTTP 请求里执行采集、生成或推送。订阅必须是 `enabled` 状态；如果传入 `dry_run=false`，仍需要 `confirm_delivery=true`，否则会自动降级为 `dry_run=true`。
+
 ### `/v1` 任务接口
 
 `/v1` 是后端服务化入口，当前已经支持：
@@ -323,7 +554,8 @@ explorer.html?api=0&profile=python
 
 1. 默认通过 `project.html?repo=owner/name` 读取静态 `projects.json` 并在浏览器中聚合详情。
 2. 在本地后端或 URL 带 `api=1` 时，优先读取 `/api/projects/{owner}/{repo}`。
-3. API 不可用时自动回退到静态 `projects.json`。
+3. API 模式下会额外调用 `/v1/rag/retrieve`，展示该项目相关的 RAG 证据块、引用和 `prompt_context`。
+4. API 不可用时自动回退到静态 `projects.json`。
 
 示例：
 

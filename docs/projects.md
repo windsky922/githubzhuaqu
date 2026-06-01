@@ -4,6 +4,16 @@
 
 | 日期 | 项目 | 来源 | Trending 排名 | 方向 | 语言 | Star | 新增 Star | 风险提示 | 链接 |
 |---|---|---|---:|---|---|---:|---:|---:|---|
+| 2026-06-01 | harry0703/MoneyPrinterTurbo | GitHub Search + GitHub Trending | 1 | LLM Tooling | Python | 74799 | 17058 | 0 | [https://github.com/harry0703/MoneyPrinterTurbo](https://github.com/harry0703/MoneyPrinterTurbo) |
+| 2026-06-01 | Lum1104/Understand-Anything | GitHub Trending | 2 | AI Agent | TypeScript | 47473 | 20888 | 0 | [https://github.com/Lum1104/Understand-Anything](https://github.com/Lum1104/Understand-Anything) |
+| 2026-06-01 | anthropics/knowledge-work-plugins | GitHub Trending | 3 | LLM Tooling | Python | 18472 | 0 | 0 | [https://github.com/anthropics/knowledge-work-plugins](https://github.com/anthropics/knowledge-work-plugins) |
+| 2026-06-01 | rohitg00/ai-engineering-from-scratch | GitHub Trending | 4 | AI Agent | Python | 25977 | 9614 | 0 | [https://github.com/rohitg00/ai-engineering-from-scratch](https://github.com/rohitg00/ai-engineering-from-scratch) |
+| 2026-06-01 | microsoft/markitdown | GitHub Search + GitHub Trending | 6 | LLM Tooling | Python | 135361 | 10371 | 0 | [https://github.com/microsoft/markitdown](https://github.com/microsoft/markitdown) |
+| 2026-06-01 | Leonxlnx/taste-skill | GitHub Search + GitHub Trending | 7 | AI Agent | Shell | 30023 | 0 | 0 | [https://github.com/Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) |
+| 2026-06-01 | colbymchenry/codegraph | GitHub Trending | 8 | AI Agent | TypeScript | 35622 | 13153 | 0 | [https://github.com/colbymchenry/codegraph](https://github.com/colbymchenry/codegraph) |
+| 2026-06-01 | affaan-m/ECC | GitHub Search + GitHub Trending | 10 | AI Agent | JavaScript | 200793 | 9945 | 0 | [https://github.com/affaan-m/ECC](https://github.com/affaan-m/ECC) |
+| 2026-06-01 | mukul975/Anthropic-Cybersecurity-Skills | GitHub Trending | 9 | AI Agent | Python | 12999 | 0 | 1 | [https://github.com/mukul975/Anthropic-Cybersecurity-Skills](https://github.com/mukul975/Anthropic-Cybersecurity-Skills) |
+| 2026-06-01 | p-e-w/heretic | GitHub Trending | 13 | LLM Tooling | Python | 22773 | 0 | 0 | [https://github.com/p-e-w/heretic](https://github.com/p-e-w/heretic) |
 | 2026-05-25 | colbymchenry/codegraph | GitHub Trending | 1 | AI Agent | TypeScript | 22469 | 0 | 0 | [https://github.com/colbymchenry/codegraph](https://github.com/colbymchenry/codegraph) |
 | 2026-05-25 | tinyhumansai/openhuman | GitHub Trending | 2 | Other | Rust | 27234 | 0 | 0 | [https://github.com/tinyhumansai/openhuman](https://github.com/tinyhumansai/openhuman) |
 | 2026-05-25 | Imbad0202/academic-research-skills | GitHub Trending | 3 | LLM Tooling | Python | 20701 | 11215 | 0 | [https://github.com/Imbad0202/academic-research-skills](https://github.com/Imbad0202/academic-research-skills) |

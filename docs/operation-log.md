@@ -2,6 +2,348 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-06-01 追加：RAG 解释历史支持按项目过滤
+
+### 1. 开发目的
+RAG 解释已经能写入 SQLite 并做质量汇总，但项目详情、后续前端管理页和 LangChain/RAG 编排还缺少“某个项目关联了哪些历史解释”的查询入口。本次把解释历史和具体仓库关联起来，继续补齐数据库与 RAG 的核心闭环。
+
+### 2. 修改内容
+1. `/v1/rag/explanations` 新增 `repo=owner/name` 过滤参数。
+2. `ApiRepository.rag_explanations` 支持同时按问题关键词和覆盖仓库过滤。
+3. `/v1/health` 能力声明新增 `rag_project_explanations`。
+4. 更新 README、API 文档和后端测试。
+
+### 3. 验证
+已运行 `python -m unittest discover -q`、`python scripts\security_check.py` 和 `git diff --check`。
+
+## 2026-05-30 追加：管理首页接入 RAG 质量概览
+
+### 1. 开发目的
+后端已经提供 RAG 质量概览接口，但管理首页还没有可视入口。为了让数据库和 RAG 能力更容易被检查，本次把质量统计接入 `admin.html`，让用户不用直接看 JSON 也能判断解释质量、低质量样本和下一步优化重点。
+
+### 2. 修改内容
+1. `admin.html` 的“数据库与语料”区域新增 RAG 质量概览展示容器。
+2. API 模式读取 `/v1/rag/quality-summary?limit=5`。
+3. 展示解释总数、平均质量分、最高/最低质量分、质量分布、改进建议和最近低质量解释。
+4. 静态模式提示需要启动本地后端或添加 `api=1`。
+5. 更新 README、API 文档和页面构建测试。
+
+### 3. 验证
+已运行 `python scripts\build_pages.py`、`python -m unittest discover -q`、`python scripts\security_check.py` 和 `git diff --check`。
+
+## 2026-05-30 追加：新增 RAG 质量概览接口
+
+### 1. 开发目的
+RAG 解释已经有质量分和历史入库，但还缺少聚合视角。后续管理页、自动优化和模型替换评估需要快速知道当前解释整体质量如何、低质量样本有哪些、应该优先补语料还是调整检索模式。
+
+### 2. 修改内容
+1. 新增 `GET /v1/rag/quality-summary`。
+2. 后端汇总 `rag_explanations` 的总数、平均质量分、最高/最低质量分、质量等级分布、置信度分布和检索模式分布。
+3. 返回最近低质量解释和最近解释样本，方便后续管理页定位问题。
+4. 返回规则版 `recommendations`，提示下一步应补充语料、对比 FTS/向量检索或接入模型总结。
+5. 更新 README、API 文档和后端测试。
+
+### 3. 验证
+已运行 `python -m unittest discover -q`、`python scripts/security_check.py` 和 `git diff --check`。
+
+## 2026-05-30 追加：新增 RAG 解释质量评估
+
+### 1. 开发目的
+RAG 解释结果已经能够写入 SQLite，但后续要判断解释是否可靠、是否需要补语料或替换 embedding，不能只看文本答案。本次为每条解释增加规则版质量评估，让数据库能直接记录证据覆盖和引用完整度。
+
+### 2. 修改内容
+1. `rag_explanations` 新增 `quality_score`、`quality_level` 和 `quality_json` 字段。
+2. `initialize` 会为旧版本地 SQLite 自动补齐质量字段，避免旧库升级时报错。
+3. `/v1/rag/explain` 响应新增 `quality`，统计证据块、引用、覆盖项目、解释依据、风险数量和 `prompt_context`。
+4. `/v1/rag/explanations` 返回历史解释的质量分和质量等级。
+5. 更新 README、API 文档、数据契约和测试。
+
+### 3. 验证
+待运行 `python -m unittest discover -q`、`python scripts/security_check.py` 和 `git diff --check`。
+
+## 2026-05-30 追加：RAG 解释结果写入 SQLite
+
+### 1. 开发目的
+RAG 解释接口已经能把证据块整理成推荐解释，但如果解释结果不入库，后续无法追踪“某次问题召回了什么、解释质量如何、FTS 与向量模式差异在哪里”。本次继续优先建设数据库和 RAG 核心能力，把解释结果变成可查询、可复用、可评估的数据资产。
+
+### 2. 修改内容
+1. SQLite 新增 `rag_explanations` 表，保存解释 ID、query、过滤条件、检索模式、模型、命中数量、置信度、答案、引用和完整解释 JSON。
+2. `/v1/rag/explain` 每次生成解释后会写入或更新 `rag_explanations`。
+3. 新增 `GET /v1/rag/explanations`，用于查询历史解释结果。
+4. 数据库概览新增 `rag_explanations` 表计数和 `ready_for_explanation_history` 状态。
+5. 更新 README、API 文档、数据契约和测试。
+
+### 3. 验证
+待运行 `python -m unittest discover -q`、`python scripts/security_check.py` 和 `git diff --check`。
+
+## 2026-05-30 追加：新增 RAG 解释层接口
+
+### 1. 开发目的
+当前数据库和 RAG 已经能输出语料、证据块和本地向量检索结果，但还缺少面向产品功能的解释层。后续项目详情、推荐理由、问答和 LangChain 编排都需要一个稳定的“证据到解释”接口，因此本次优先建设后端核心能力，而不是继续优化末端页面样式。
+
+### 2. 修改内容
+1. 新增 `GET /v1/rag/explain`，支持 `fts5` 和 `vector` 两种模式。
+2. 新增 `repository.rag_explain`，复用已有 `/v1/rag/retrieve` 与 `/v1/rag/vector-search` 的召回结果。
+3. 新增规则版解释结构，包含 `answer`、`why_recommended`、`evidence`、`risks`、`next_steps` 和 `coverage`。
+4. `/v1/health` 新增 `rag_explain` 能力标识。
+5. 更新 README、API 文档和后端测试。
+
+### 3. 验证
+待运行 `python -m unittest discover -q`、`python scripts/security_check.py` 和 `git diff --check`。
+
+## 2026-05-29 追加：项目详情页接入 RAG 证据
+
+### 1. 开发目的
+RAG 检索已经有后端 API 和管理首页入口，但单个项目详情页还不能直接展示“为什么这个项目值得看”的证据块。本次把项目详情页接到 `/v1/rag/retrieve`，让用户在查看某个仓库时直接看到可引用的历史语料。
+
+### 2. 修改内容
+1. `project.html` 在本地后端或 `api=1` 模式下读取项目详情后，会额外调用 `/v1/rag/retrieve`。
+2. 项目详情页新增“RAG 证据”模块，展示召回摘要、证据块、引用 ID 和可展开的 `prompt_context`。
+3. 静态 GitHub Pages 模式继续只读取 `projects.json`，不调用后端，也不会阻塞页面渲染。
+4. 更新 README、API 文档和页面构建测试，记录详情页的 RAG 读取策略。
+
+### 3. 验证
+待运行 `python scripts/build_pages.py`、`python -m unittest discover -q`、`python scripts/security_check.py` 和 `git diff --check`。
+
+## 2026-05-29 追加：管理首页新增 RAG 检索入口
+
+### 1. 开发目的
+
+数据库和 RAG 后端已经具备语料、证据块和本地向量检索接口，但用户还需要一个网页入口直接查看召回结果。本次把 RAG 检索放进本地管理首页，先实现必要前端入口，不做复杂前端工程化。
+
+### 2. 修改内容
+
+1. `admin.html` 的“数据库与语料”区域新增 RAG 问题输入、检索方式选择和语言过滤。
+2. 支持调用 `/v1/rag/retrieve` 做 FTS 证据检索。
+3. 支持调用 `/v1/rag/vector-search` 做本地向量检索，并在需要时通过 `auto_build=true` 自动构建本地索引。
+4. 页面会展示召回证据块、引用 chunk、项目详情链接和 `Prompt Context`。
+5. README、API 文档和页面构建测试已同步更新。
+
+### 3. 边界说明
+
+该入口只在本地后端或 `api=1` 模式下启用；静态 GitHub Pages 仍只展示归档入口。页面不保存问题、不调用外部模型、不读取密钥，只复用已有后端 RAG API。
+
+## 2026-05-29 追加：新增本地 RAG embedding 索引
+
+### 1. 开发目的
+
+RAG 已经具备项目级语料和短文本块检索，但后续要接入向量库、LangChain retriever 或真实 embedding 模型，还需要先把“向量索引表、构建命令、向量检索 API”这条链路打通。本次优先建设本地可验证底座，不引入外部模型依赖。
+
+### 2. 修改内容
+
+1. SQLite 新增 `rag_embeddings` 表，保存从 `rag_chunks` 派生的本地 embedding 向量。
+2. 新增 `src/rag/embeddings.py`，提供确定性 `local-hash-v1` 向量生成、归一化和相似度计算。
+3. 新增 `scripts/build_rag_embeddings.py`，可手动构建本地 RAG embedding 索引。
+4. 新增 `GET /v1/rag/vector-search`，支持按问题、语言、方向和来源做本地向量检索。
+5. 数据库概览增加 embedding 计数和 `ready_for_vector_search` 状态。
+6. README、API 文档、v1 规划、数据契约和测试已同步更新。
+
+### 3. 边界说明
+
+当前 `local-hash-v1` 只用于打通数据表和 API 契约，不代表最终推荐质量。它不调用外部模型、不需要密钥、不改变周报主流程。后续可以替换为真实 embedding 模型或向量数据库，同时保持 `/v1/rag/vector-search` 的响应结构稳定。
+
+## 2026-05-29 追加：新增 RAG 短文本块检索
+
+### 1. 开发目的
+
+上一步已经提供 `/v1/rag/corpus`，但它输出的是项目级语料。真正接入 RAG、embedding 或 LangChain 时，需要更短、更稳定、可引用的证据块。本次优先升级数据库层和 RAG 检索层，继续避免过早绑定外部模型或复杂框架。
+
+### 2. 修改内容
+
+1. SQLite 新增 `rag_chunks` 和 `rag_chunks_fts`，从 `project_corpus` 自动拆分短文本块。
+2. JSON 归档导入和 SQLite 自动重建时会同步重建 RAG chunk 索引。
+3. 新增 `GET /v1/rag/retrieve`，支持按关键词、语言、方向和来源召回 RAG 证据块。
+4. 检索结果返回 `contexts`、`citations` 和 `prompt_context`，后续可以直接接入问答模型或 LangChain retriever。
+5. 数据库概览增加 chunk 计数和 `ready_for_chunk_retrieval` 状态。
+6. README、API 文档、v1 规划、数据契约和测试已同步更新。
+
+### 3. 边界说明
+
+本次仍然不调用外部模型、不生成 embedding、不写入用户隐私，也不改变周报主流程。当前实现是 RAG 的本地证据召回层；下一步可以在此基础上增加可选的 embedding 构建命令和向量检索表。
+
+## 2026-05-29 追加：新增 RAG 语料输出接口
+
+### 1. 开发目的
+
+当前项目已经具备 SQLite 派生索引和 `project_corpus` 文本语料，但后续接入 embedding、向量库或 LangChain 时，还需要一个稳定的数据出口。本次优先补齐 RAG 底座，而不是继续优化末端页面交互。
+
+### 2. 修改内容
+
+1. 新增 `GET /v1/rag/corpus`，从 SQLite `project_corpus` 输出 RAG-ready 文档。
+2. 每条文档包含 `text`、`metadata` 和 `evidence`，后续可以直接进入 embedding 或检索器。
+3. 支持 `q`、`language`、`category`、`source` 和 `limit` 参数；有关键词时优先使用 FTS5，失败时回退普通文本匹配，没有关键词时返回最新语料。
+4. `/v1/health` 新增 `rag_corpus` 能力标识。
+5. README、后端 API 文档和后端测试已同步更新。
+
+### 3. 边界说明
+
+本次只建设数据库到 RAG 的稳定语料出口，不新增外部模型调用、不生成 embedding、不保存用户隐私，也不改变周报采集、评分、推送和订阅任务执行链路。下一步可以在这个接口之上构建向量索引、RAG 问答和项目知识库检索。
+
+## 2026-05-28 追加：任务执行器接收订阅筛选上下文
+
+### 1. 开发目的
+
+订阅已经能生成 planned 周报任务，但执行器此前主要使用 `profile` 和回看天数。为了让订阅中的语言、方向、关键词和数量真正影响后续任务执行，本次把订阅筛选上下文接入 job runner。
+
+### 2. 修改内容
+
+1. `src/job_runner.py` 执行任务时会把 `language`、`category`、`query` 和 `limit` 转换为临时环境变量。
+2. `src/settings.py` 会读取这些运行时变量，并合并到 `preferred_languages`、`search_languages`、`preferred_topics` 和 `search_topics`。
+3. 任务执行结果新增 `request_context`，记录本次任务使用的 profile、语言、方向、关键词、数量和订阅编号。
+4. 新增测试覆盖运行时偏好合并和 job runner 环境变量传递。
+
+### 3. 边界说明
+
+本次只让任务级筛选条件进入既有采集和评分配置，不改动密钥配置、不绕过 dry-run 保护，也不新增外部服务调用。`sort` 暂时保留在任务上下文里，后续可用于定向周报内部排序。
+
+## 2026-05-28 追加：订阅生成 planned 周报任务
+
+### 1. 开发目的
+
+订阅页已经能保存 Java、Python、Agent 开发等偏好，但还没有进入任务执行链路。为了让个性化订阅真正成为后续定向周报和定向推送的入口，本次新增“按订阅生成计划任务”能力。
+
+### 2. 修改内容
+
+1. 新增 `POST /v1/subscriptions/{subscription_id}/trigger`。
+2. 接口会读取启用订阅的 profile、语言、方向、关键词、排序和数量，转换成 planned 周报任务。
+3. 订阅列表新增“生成任务”按钮，生成后跳转到任务详情页继续人工确认。
+4. 生成任务默认 `dry_run=true`，不会直接真实推送。
+5. 如果订阅未启用或不存在，接口会返回 blockers，不创建任务。
+6. API 文档、README、前端构建测试和后端路由测试已同步更新。
+
+### 3. 边界说明
+
+本次只打通订阅到任务模型的受控入口，不绕过 job runner，不绕过 `confirm_execution`，也不保存任何密钥。真实推送仍依赖后续任务执行确认和环境变量/GitHub Actions Secrets。
+
+## 2026-05-28 追加：订阅配置页接入个性化方向快捷选择
+
+### 1. 开发目的
+
+项目已经具备订阅配置、个性化推荐和多渠道推送入口，但订阅页仍需要手动填写 `profile`、语言和关键词。为了让 Java、Python、Agent 开发等方向真正成为可用的精准推送入口，本次把公开个性化画像接入订阅配置页。
+
+### 2. 修改内容
+
+1. `docs/subscriptions.html` 新增个性化方向快捷按钮区域，由 `profiles.json` 动态生成。
+2. 点击方向按钮后自动填充订阅名称、profile、主要语言和关键词。
+3. 快捷选择会同步到 URL 参数，方便分享或复现当前订阅输入。
+4. `profiles.json` 读取失败时使用内置备用方向，保证本地后端和静态页面都能展示基本入口。
+5. README 和页面构建测试已同步更新。
+
+### 3. 边界说明
+
+本次只优化订阅创建入口，不保存任何密钥，不触发真实推送，也不新增用户登录系统。后续可以继续把订阅配置接入更完整的任务执行器、RAG 重排和多渠道精准推送。
+
+## 2026-05-28 追加：项目对比页接入个性化方向快捷选择
+
+### 1. 开发目的
+
+项目对比页已经支持手动输入 `profile`、`language`、`category` 和 `q` 做个性化加权，但真实使用时用户更需要直接选择 Java、Python、Agent 开发等方向。本次把公开个性化画像接入对比页，让对比功能更接近“选择当前需求后比较项目”的核心使用方式。
+
+### 2. 修改内容
+
+1. `docs/compare.html` 新增个性化方向快捷按钮区域，由 `profiles.json` 动态生成。
+2. 点击方向按钮后会自动填入方向、语言和关键词，并在已有至少两个仓库时立即重新对比。
+3. 当 `profiles.json` 不可读取时，页面会使用内置的最小备用方向，保证静态页面仍可操作。
+4. 静态 GitHub Pages 模式和本地后端 API 模式共用同一套偏好参数。
+5. README 和页面构建测试已同步更新，避免后续重构时丢失该入口。
+
+### 3. 边界说明
+
+本次只做前端入口和确定性偏好传参，不新增数据库写入、外部模型调用或推送逻辑。后续可以把这些快捷选择继续接入订阅数据库、RAG 重排和多用户个性化推荐。
+
+## 2026-05-27 追加：项目对比推荐支持个性化加权
+
+### 1. 开发目的
+
+项目对比页已经能给出规则版推荐结论，但不同用户当前目标不同，例如 Java、Python、Agent 开发或后端方向。本次把用户偏好接入对比评分，让同一组项目能根据当前需求重新排序。
+
+### 2. 修改内容
+
+1. `/v1/projects/compare` 和 `/api/projects/compare` 新增 `profile`、`language`、`category`、`query` 可选参数。
+2. 响应新增 `preference` 字段，记录本次对比使用的偏好上下文。
+3. 推荐结论在存在偏好时使用 `rule:v2-preference`，对语言匹配和关键词命中加权。
+4. `docs/compare.html` 新增方向、语言、分类和关键词输入框，并把偏好同步到 URL。
+5. 静态 GitHub Pages 模式也支持相同的偏好加权逻辑。
+6. README、API 文档和测试已同步更新。
+
+### 3. 边界说明
+
+当前仍是确定性规则评分，不调用外部模型。后续可以把 `preference` 作为 RAG 检索、Embedding 重排和 Kimi 解释生成的稳定输入。
+
+## 2026-05-26 追加：项目对比页新增推荐结论
+
+### 1. 开发目的
+
+项目对比页已经能展示矩阵和领先指标，但用户仍需要自己判断“先看哪个”。本次新增规则版推荐结论，让对比页直接给出优先查看项目、推荐理由、注意事项和下一步动作，为后续接入 Kimi、RAG 或 LangChain 解释层留下稳定字段。
+
+### 2. 修改内容
+
+1. `/v1/projects/compare` 和 `/api/projects/compare` 新增 `recommendation` 字段。
+2. `recommendation` 包含 `primary_project`、`score`、`reasons`、`cautions`、`next_actions` 和 `scoring_model`。
+3. 规则评分综合累计新增 Star、最近新增 Star、质量分、历史入选次数、Trending 排名和风险提示数量。
+4. `docs/compare.html` 新增“推荐结论”区块，静态模式和后端 API 模式保持一致。
+5. README、API 文档和测试已同步更新。
+
+### 3. 边界说明
+
+当前推荐结论是确定性规则，不调用外部模型，不替代人工判断。后续可以把该字段扩展为模型解释、用户偏好权重、RAG 证据引用和多场景推荐。
+
+## 2026-05-26 追加：串联项目对比入口
+
+### 1. 开发目的
+
+项目对比页已经可以单独访问，但如果用户仍需要手动拼 `repos=` 参数，功能链路不够顺畅。本次把对比入口接入筛选页、个性化推荐页和项目详情页，让用户从正在浏览的项目直接进入横向对比。
+
+### 2. 修改内容
+
+1. `docs/explorer.html` 的项目列表操作区新增“对比”入口。
+2. `docs/recommendations.html` 的推荐卡片新增“加入对比”入口。
+3. `docs/project.html` 的详情面板新增“与相似项目对比”入口。
+4. 相似项目列表从只跳 GitHub 改为同时提供项目详情、GitHub 和“与当前项目对比”。
+5. 页面构建测试补充对比入口断言，避免后续页面重构时丢失关键入口。
+
+### 3. 边界说明
+
+本次只串联已有只读数据和已有对比接口，不新增采集、推送、外部模型调用或写入型后端能力。下一步可以继续把对比结果接入模型解释或用户偏好权重。
+
+## 2026-05-26 追加：新增项目对比页
+
+### 1. 开发目的
+
+项目对比 API 已经完成，但用户需要在网页里直接查看多个项目的横向差异。本次新增项目对比页，把后端对比能力做成可见入口，也让 GitHub Pages 静态模式继续可用。
+
+### 2. 修改内容
+
+1. 新增 `docs/compare.html`，由 `scripts/build_pages.py` 生成。
+2. 页面支持 `compare.html?repos=owner/a,owner/b`，可输入逗号或换行分隔的仓库全名。
+3. 本地后端或 `api=1` 模式优先读取 `/v1/projects/compare`。
+4. 静态模式读取 `projects.json` 并在前端聚合对比数据。
+5. 页面展示项目数量、领先项目、对比摘要、对比矩阵、项目卡片和未找到项目。
+6. 周报首页、README 和页面构建测试已补充对比页入口。
+
+### 3. 边界说明
+
+该页面只读公开归档和本地后端只读接口，不触发采集、任务执行或推送。它是后续 RAG 解释、项目筛选决策和个性化推荐重排的前端基础。
+
+## 2026-05-25 追加：新增项目对比接口
+
+### 1. 开发目的
+
+相似项目候选已经能找到可横向参考的项目，但用户还需要快速判断“哪个更值得看”。本次新增项目对比接口，把多个仓库的历史热度、质量、风险和基础属性整理成统一结构，为后续前端对比页、RAG 解释和个性化推荐重排打基础。
+
+### 2. 修改内容
+
+1. 后端新增 `GET /v1/projects/compare?repos=owner/a,owner/b`。
+2. 兼容新增 `GET /api/projects/compare?repos=owner/a,owner/b`。
+3. 支持一次传入最多 8 个 `owner/repo`，自动去重并返回缺失项目列表。
+4. 响应包含 `projects`、`matrix`、`best_by` 和 `selection_summary`。
+5. 对比指标包含语言、方向、历史入选次数、累计新增 Star、最近新增 Star、最好 Trending 排名、最新质量分、风险提示数量和质量提示数量。
+6. `/v1/health` 新增 `project_compare` 能力标识。
+
+### 3. 边界说明
+
+该接口只读取公开归档和本地 SQLite 派生索引，不调用外部模型或推送服务。当前只做结构化对比和基础结论，后续可以接入前端对比页、用户偏好权重、Embedding 重排和模型生成解释。
+
 ## 2026-05-21 追加：项目详情页接入后端相似项目候选
 
 ### 1. 开发目的

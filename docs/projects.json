@@ -1,7 +1,317 @@
 {
   "schema_version": 1,
-  "count": 140,
+  "count": 150,
   "projects": [
+    {
+      "run_date": "2026-06-01",
+      "full_name": "harry0703/MoneyPrinterTurbo",
+      "html_url": "https://github.com/harry0703/MoneyPrinterTurbo",
+      "description": "利用AI大模型，一键生成高清短视频 Generate short videos with one click using AI LLM.",
+      "readme_summary": "MoneyPrinterTurbo 💸 简体中文 | English | العربية 只需提供一个视频 主题 或 关键词 ，就可以全自动生成视频文案、视频素材、视频字幕、视频背景音乐，然后合成一个高清的短视频。",
+      "category": "LLM Tooling",
+      "language": "Python",
+      "stargazers_count": 74799,
+      "forks_count": 10653,
+      "star_growth": 17058,
+      "score": 0.9134,
+      "sources": [
+        "github_search",
+        "github_trending"
+      ],
+      "trending_rank": 1,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 1 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 17058，近期热度上升。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 74799，具备一定社区关注度。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-01.html"
+    },
+    {
+      "run_date": "2026-06-01",
+      "full_name": "Lum1104/Understand-Anything",
+      "html_url": "https://github.com/Lum1104/Understand-Anything",
+      "description": "Graphs that teach > graphs that impress. Turn any code into an interactive knowledge graph you can explore, search, and ask questions about. Works with Claude Code, Codex, Cursor, Copilot, Gemini CLI, and more.",
+      "readme_summary": "Understand Anything Turn any codebase, knowledge base, or docs into an interactive knowledge graph you can explore, search, and ask questions about. Works with Claude Code, Codex, Cursor, Copilot, Gemini CLI, and more.",
+      "category": "AI Agent",
+      "language": "TypeScript",
+      "stargazers_count": 47473,
+      "forks_count": 3863,
+      "star_growth": 20888,
+      "score": 0.7248,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 2,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 2 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 20888，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-01.html"
+    },
+    {
+      "run_date": "2026-06-01",
+      "full_name": "anthropics/knowledge-work-plugins",
+      "html_url": "https://github.com/anthropics/knowledge-work-plugins",
+      "description": "Open source repository of plugins primarily intended for knowledge workers to use in Claude Cowork",
+      "readme_summary": "Plugins that turn Claude into a specialist for your role, team, and company. Built for Claude Cowork, also compatible with Claude Code. Cowork lets you set the goal and Claude delivers finished, professional work.",
+      "category": "LLM Tooling",
+      "language": "Python",
+      "stargazers_count": 18472,
+      "forks_count": 2173,
+      "star_growth": 0,
+      "score": 0.5406,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 3,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 3 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 18472，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+      ],
+      "quality_score": 92,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-01.html"
+    },
+    {
+      "run_date": "2026-06-01",
+      "full_name": "rohitg00/ai-engineering-from-scratch",
+      "html_url": "https://github.com/rohitg00/ai-engineering-from-scratch",
+      "description": "Learn it. Build it. Ship it for others.",
+      "readme_summary": "% of students already use AI tools. Only 18% feel prepared to use them professionally.** This curriculum closes that gap. Python, TypeScript, Rust, Julia.",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 25977,
+      "forks_count": 4218,
+      "star_growth": 9614,
+      "score": 0.7117,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 4,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 4 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 9614，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-01.html"
+    },
+    {
+      "run_date": "2026-06-01",
+      "full_name": "microsoft/markitdown",
+      "html_url": "https://github.com/microsoft/markitdown",
+      "description": "Python tool for converting files and office documents to Markdown.",
+      "readme_summary": "[!IMPORTANT] MarkItDown performs I/O with the privileges of the current process. Like open() or requests.get(), it will access resources that the process itself can access.",
+      "category": "LLM Tooling",
+      "language": "Python",
+      "stargazers_count": 135361,
+      "forks_count": 9244,
+      "star_growth": 10371,
+      "score": 0.5336,
+      "sources": [
+        "github_search",
+        "github_trending"
+      ],
+      "trending_rank": 6,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 6 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 10371，近期热度上升。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 135361，具备一定社区关注度。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-01.html"
+    },
+    {
+      "run_date": "2026-06-01",
+      "full_name": "Leonxlnx/taste-skill",
+      "html_url": "https://github.com/Leonxlnx/taste-skill",
+      "description": "Taste-Skill - gives your AI good taste. stops the AI from generating boring, generic slop ",
+      "readme_summary": "The Anti-Slop Frontend Framework for AI Agents Portable **Agent Skills** that upgrade AI-built interfaces: stronger layout, typography, motion, and spacing instead of boilerplate-looking UIs. This repo also includes **image-generation skills** for reference boards (web, mobile, brand kits).",
+      "category": "AI Agent",
+      "language": "Shell",
+      "stargazers_count": 30023,
+      "forks_count": 2229,
+      "star_growth": 0,
+      "score": 0.5311,
+      "sources": [
+        "github_search",
+        "github_trending"
+      ],
+      "trending_rank": 7,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 7 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发。",
+        "当前累计 Star 30023，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-01.html"
+    },
+    {
+      "run_date": "2026-06-01",
+      "full_name": "colbymchenry/codegraph",
+      "html_url": "https://github.com/colbymchenry/codegraph",
+      "description": "Pre-indexed code knowledge graph for Claude Code, Codex, Gemini, Cursor, OpenCode, AntiGravity, Kiro, and Hermes Agent — fewer tokens, fewer tool calls, 100% local",
+      "readme_summary": "~25% cheaper · ~62% fewer tool calls · 100% local** No Node.js required** — one command grabs the right build for your OS: Already have Node? Use npm instead (works on any version): CodeGraph bundles its own runtime — nothing to compile, no native build, works the same everywhere.",
+      "category": "AI Agent",
+      "language": "TypeScript",
+      "stargazers_count": 35622,
+      "forks_count": 2214,
+      "star_growth": 13153,
+      "score": 0.5107,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 8,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 8 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 13153，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Agent 开发、开发者工具。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+      ],
+      "quality_score": 92,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-01.html"
+    },
+    {
+      "run_date": "2026-06-01",
+      "full_name": "affaan-m/ECC",
+      "html_url": "https://github.com/affaan-m/ECC",
+      "description": "The agent harness performance optimization system. Skills, instincts, memory, security, and research-first development for Claude Code, Codex, Opencode, Cursor and beyond.",
+      "readme_summary": "Language:** English | Português (Brasil) | 简体中文 | 繁體中文 | 日本語 | 한국어 | Türkçe | Русский | Tiếng Việt | ไทย | Deutsch K+ stars** | **28K+ forks** | **170+ contributors** | **12+ language ecosystems** | **Cross-harness agent workflows** Language / 语言 / 語言 / Dil / Язык / Ngôn ngữ** English** | Português (Brasil) | 简体中文 | 繁體中文 | 日本語 | 한국어 | Türkçe | Русский | Tiếng Việt | ไทย | Deutsch The harness-native operator system for agentic work.",
+      "category": "AI Agent",
+      "language": "JavaScript",
+      "stargazers_count": 200793,
+      "forks_count": 30813,
+      "star_growth": 9945,
+      "score": 0.5921,
+      "sources": [
+        "github_search",
+        "github_trending"
+      ],
+      "trending_rank": 10,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 10 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 9945，近期热度上升。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 200793，具备一定社区关注度。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-01.html"
+    },
+    {
+      "run_date": "2026-06-01",
+      "full_name": "mukul975/Anthropic-Cybersecurity-Skills",
+      "html_url": "https://github.com/mukul975/Anthropic-Cybersecurity-Skills",
+      "description": "754 structured cybersecurity skills for AI agents · Mapped to 5 frameworks: MITRE ATT&CK, NIST CSF 2.0, MITRE ATLAS, D3FEND & NIST AI RMF · agentskills.io standard · Works with Claude Code, GitHub Copilot, Codex CLI, Cursor, Gemini CLI & 20+ platforms · 26 security domains · Apache 2.0",
+      "readme_summary": "production-grade cybersecurity skills · 26 security domains · 5 framework mappings · 26+ AI platforms** Get Started · What's Inside · Frameworks · Platforms · Contributing ⚠️ **Community Project** — This is an independent, community-created project. Not affiliated with Anthropic PBC.",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 12999,
+      "forks_count": 1520,
+      "star_growth": 0,
+      "score": 0.473,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 9,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 9 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 12999，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [
+        "包含恶意软件相关表述，需人工确认项目用途。"
+      ],
+      "security_score": 65,
+      "security_level": "medium",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-01.html"
+    },
+    {
+      "run_date": "2026-06-01",
+      "full_name": "p-e-w/heretic",
+      "html_url": "https://github.com/p-e-w/heretic",
+      "description": "Fully automatic censorship removal for language models",
+      "readme_summary": "Heretic is a tool that removes censorship (aka \"safety alignment\") from transformer-based language models without expensive post-training. It combines an advanced implementation of directional ablation, also known as \"abliteration\" (Arditi et al.",
+      "category": "LLM Tooling",
+      "language": "Python",
+      "stargazers_count": 22773,
+      "forks_count": 2435,
+      "star_growth": 0,
+      "score": 0.4038,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 13,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 13 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 22773，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-01.html"
+    },
     {
       "run_date": "2026-05-25",
       "full_name": "colbymchenry/codegraph",
@@ -2827,10 +3137,11 @@
       "security_score": 100,
       "security_level": "low",
       "quality_flags": [
-        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+        "仓库主题标签较少，垂直方向判断可能不够稳定。",
+        "最近维护时间超过 30 天，建议关注维护连续性。"
       ],
-      "quality_score": 92,
-      "quality_level": "high",
+      "quality_score": 74,
+      "quality_level": "medium",
       "report_url": "weekly/2026-05-05.html"
     },
     {
@@ -3138,10 +3449,11 @@
       "security_score": 100,
       "security_level": "low",
       "quality_flags": [
-        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+        "仓库主题标签较少，垂直方向判断可能不够稳定。",
+        "最近维护时间超过 30 天，建议关注维护连续性。"
       ],
-      "quality_score": 92,
-      "quality_level": "high",
+      "quality_score": 74,
+      "quality_level": "medium",
       "report_url": "weekly/2026-05-04.html"
     },
     {
@@ -3203,10 +3515,11 @@
       "security_score": 100,
       "security_level": "low",
       "quality_flags": [
-        "许可证元数据缺失，复用代码前需要确认授权。"
+        "许可证元数据缺失，复用代码前需要确认授权。",
+        "最近维护时间超过 30 天，建议关注维护连续性。"
       ],
-      "quality_score": 88,
-      "quality_level": "high",
+      "quality_score": 70,
+      "quality_level": "medium",
       "report_url": "weekly/2026-05-04.html"
     },
     {
@@ -3451,10 +3764,11 @@
       "security_score": 100,
       "security_level": "low",
       "quality_flags": [
-        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+        "仓库主题标签较少，垂直方向判断可能不够稳定。",
+        "最近维护时间超过 30 天，建议关注维护连续性。"
       ],
-      "quality_score": 92,
-      "quality_level": "high",
+      "quality_score": 74,
+      "quality_level": "medium",
       "report_url": "weekly/2026-05-03.html"
     },
     {
@@ -3516,10 +3830,11 @@
       "security_score": 100,
       "security_level": "low",
       "quality_flags": [
-        "许可证元数据缺失，复用代码前需要确认授权。"
+        "许可证元数据缺失，复用代码前需要确认授权。",
+        "最近维护时间超过 30 天，建议关注维护连续性。"
       ],
-      "quality_score": 88,
-      "quality_level": "high",
+      "quality_score": 70,
+      "quality_level": "medium",
       "report_url": "weekly/2026-05-03.html"
     },
     {
@@ -3731,8 +4046,10 @@
       "security_flags": [],
       "security_score": 100,
       "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
+      "quality_flags": [
+        "最近维护时间超过 30 天，建议关注维护连续性。"
+      ],
+      "quality_score": 82,
       "quality_level": "high",
       "report_url": "weekly/2026-05-03.html"
     },
@@ -3762,10 +4079,11 @@
       "security_score": 100,
       "security_level": "low",
       "quality_flags": [
-        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+        "仓库主题标签较少，垂直方向判断可能不够稳定。",
+        "最近维护时间超过 30 天，建议关注维护连续性。"
       ],
-      "quality_score": 92,
-      "quality_level": "high",
+      "quality_score": 74,
+      "quality_level": "medium",
       "report_url": "weekly/2026-04-30.html"
     },
     {
@@ -3794,10 +4112,11 @@
       "security_score": 100,
       "security_level": "low",
       "quality_flags": [
-        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+        "仓库主题标签较少，垂直方向判断可能不够稳定。",
+        "最近维护时间超过 30 天，建议关注维护连续性。"
       ],
-      "quality_score": 92,
-      "quality_level": "high",
+      "quality_score": 74,
+      "quality_level": "medium",
       "report_url": "weekly/2026-04-30.html"
     },
     {
@@ -3829,10 +4148,11 @@
       "security_level": "low",
       "quality_flags": [
         "许可证元数据缺失，复用代码前需要确认授权。",
-        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+        "仓库主题标签较少，垂直方向判断可能不够稳定。",
+        "最近维护时间超过 30 天，建议关注维护连续性。"
       ],
-      "quality_score": 80,
-      "quality_level": "high",
+      "quality_score": 62,
+      "quality_level": "medium",
       "report_url": "weekly/2026-04-30.html"
     },
     {
@@ -3860,8 +4180,10 @@
       "security_flags": [],
       "security_score": 100,
       "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
+      "quality_flags": [
+        "最近维护时间超过 30 天，建议关注维护连续性。"
+      ],
+      "quality_score": 82,
       "quality_level": "high",
       "report_url": "weekly/2026-04-30.html"
     },
@@ -3890,8 +4212,10 @@
       "security_flags": [],
       "security_score": 100,
       "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
+      "quality_flags": [
+        "最近维护时间超过 30 天，建议关注维护连续性。"
+      ],
+      "quality_score": 82,
       "quality_level": "high",
       "report_url": "weekly/2026-04-30.html"
     },
@@ -3923,10 +4247,11 @@
       "security_score": 100,
       "security_level": "low",
       "quality_flags": [
-        "许可证元数据缺失，复用代码前需要确认授权。"
+        "许可证元数据缺失，复用代码前需要确认授权。",
+        "最近维护时间超过 30 天，建议关注维护连续性。"
       ],
-      "quality_score": 88,
-      "quality_level": "high",
+      "quality_score": 70,
+      "quality_level": "medium",
       "report_url": "weekly/2026-04-30.html"
     },
     {
@@ -3954,8 +4279,10 @@
       "security_flags": [],
       "security_score": 100,
       "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
+      "quality_flags": [
+        "最近维护时间超过 30 天，建议关注维护连续性。"
+      ],
+      "quality_score": 82,
       "quality_level": "high",
       "report_url": "weekly/2026-04-30.html"
     },
@@ -3985,10 +4312,11 @@
       "security_score": 100,
       "security_level": "low",
       "quality_flags": [
-        "仓库简介较短，项目定位信息有限。"
+        "仓库简介较短，项目定位信息有限。",
+        "最近维护时间超过 30 天，建议关注维护连续性。"
       ],
-      "quality_score": 92,
-      "quality_level": "high",
+      "quality_score": 74,
+      "quality_level": "medium",
       "report_url": "weekly/2026-04-30.html"
     },
     {
@@ -4016,8 +4344,10 @@
       "security_flags": [],
       "security_score": 100,
       "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
+      "quality_flags": [
+        "最近维护时间超过 30 天，建议关注维护连续性。"
+      ],
+      "quality_score": 82,
       "quality_level": "high",
       "report_url": "weekly/2026-04-30.html"
     },
@@ -4046,8 +4376,10 @@
       "security_flags": [],
       "security_score": 100,
       "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
+      "quality_flags": [
+        "最近维护时间超过 30 天，建议关注维护连续性。"
+      ],
+      "quality_score": 82,
       "quality_level": "high",
       "report_url": "weekly/2026-04-30.html"
     },
@@ -4077,10 +4409,11 @@
       "security_score": 100,
       "security_level": "low",
       "quality_flags": [
-        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+        "仓库主题标签较少，垂直方向判断可能不够稳定。",
+        "最近维护时间超过 30 天，建议关注维护连续性。"
       ],
-      "quality_score": 92,
-      "quality_level": "high",
+      "quality_score": 74,
+      "quality_level": "medium",
       "report_url": "weekly/2026-04-29.html"
     },
     {
@@ -4112,10 +4445,11 @@
       "security_level": "low",
       "quality_flags": [
         "许可证元数据缺失，复用代码前需要确认授权。",
-        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+        "仓库主题标签较少，垂直方向判断可能不够稳定。",
+        "最近维护时间超过 30 天，建议关注维护连续性。"
       ],
-      "quality_score": 80,
-      "quality_level": "high",
+      "quality_score": 62,
+      "quality_level": "medium",
       "report_url": "weekly/2026-04-29.html"
     },
     {
@@ -4144,10 +4478,11 @@
       "security_score": 100,
       "security_level": "low",
       "quality_flags": [
-        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+        "仓库主题标签较少，垂直方向判断可能不够稳定。",
+        "最近维护时间超过 30 天，建议关注维护连续性。"
       ],
-      "quality_score": 92,
-      "quality_level": "high",
+      "quality_score": 74,
+      "quality_level": "medium",
       "report_url": "weekly/2026-04-29.html"
     },
     {
@@ -4175,8 +4510,10 @@
       "security_flags": [],
       "security_score": 100,
       "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
+      "quality_flags": [
+        "最近维护时间超过 30 天，建议关注维护连续性。"
+      ],
+      "quality_score": 82,
       "quality_level": "high",
       "report_url": "weekly/2026-04-29.html"
     },
@@ -4205,8 +4542,10 @@
       "security_flags": [],
       "security_score": 100,
       "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
+      "quality_flags": [
+        "最近维护时间超过 30 天，建议关注维护连续性。"
+      ],
+      "quality_score": 82,
       "quality_level": "high",
       "report_url": "weekly/2026-04-29.html"
     },
@@ -4235,8 +4574,10 @@
       "security_flags": [],
       "security_score": 100,
       "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
+      "quality_flags": [
+        "最近维护时间超过 30 天，建议关注维护连续性。"
+      ],
+      "quality_score": 82,
       "quality_level": "high",
       "report_url": "weekly/2026-04-29.html"
     },
@@ -4268,10 +4609,11 @@
       "security_score": 100,
       "security_level": "low",
       "quality_flags": [
-        "许可证元数据缺失，复用代码前需要确认授权。"
+        "许可证元数据缺失，复用代码前需要确认授权。",
+        "最近维护时间超过 30 天，建议关注维护连续性。"
       ],
-      "quality_score": 88,
-      "quality_level": "high",
+      "quality_score": 70,
+      "quality_level": "medium",
       "report_url": "weekly/2026-04-29.html"
     },
     {
@@ -4299,8 +4641,10 @@
       "security_flags": [],
       "security_score": 100,
       "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
+      "quality_flags": [
+        "最近维护时间超过 30 天，建议关注维护连续性。"
+      ],
+      "quality_score": 82,
       "quality_level": "high",
       "report_url": "weekly/2026-04-29.html"
     },
@@ -4329,8 +4673,10 @@
       "security_flags": [],
       "security_score": 100,
       "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
+      "quality_flags": [
+        "最近维护时间超过 30 天，建议关注维护连续性。"
+      ],
+      "quality_score": 82,
       "quality_level": "high",
       "report_url": "weekly/2026-04-29.html"
     },
@@ -4358,8 +4704,10 @@
       "security_flags": [],
       "security_score": 100,
       "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
+      "quality_flags": [
+        "最近维护时间超过 30 天，建议关注维护连续性。"
+      ],
+      "quality_score": 82,
       "quality_level": "high",
       "report_url": "weekly/2026-04-29.html"
     }

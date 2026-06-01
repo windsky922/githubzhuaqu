@@ -266,6 +266,7 @@
           <ul class="reasons">${reasonsHtml(project)}</ul>
           <div class="meta">
             <a class="button ghost" href="${escapeAttribute(projectDetailUrl(project))}">项目详情</a>
+            <a class="button ghost" href="${escapeAttribute(compareUrl([project.full_name]))}">加入对比</a>
             <a class="button ghost" href="${escapeAttribute(project.html_url || "#")}" target="_blank" rel="noreferrer">GitHub</a>
           </div>
         </article>
@@ -288,6 +289,14 @@
       next.set("repo", repo);
       if (params.get("api")) next.set("api", params.get("api"));
       return `project.html?${next.toString()}`;
+    }
+
+    function compareUrl(repos) {
+      const names = [...new Set(repos.filter(Boolean))];
+      const next = new URLSearchParams();
+      next.set("repos", names.join(","));
+      if (params.get("api")) next.set("api", params.get("api"));
+      return `compare.html?${next.toString()}`;
     }
 
     function number(value) {

@@ -30,6 +30,10 @@
 | `capabilities.database_facets` | 是否支持 SQLite 分面统计查询 |
 | `capabilities.project_search` | 是否支持项目语料搜索 |
 | `capabilities.project_similarity` | 是否支持相似项目候选召回 |
+| `capabilities.project_compare` | 是否支持项目横向对比 |
+| `capabilities.rag_corpus` | 是否支持 RAG-ready 语料输出 |
+| `capabilities.rag_retrieve` | 是否支持 RAG 短文本块检索 |
+| `capabilities.rag_vector_search` | 是否支持本地向量检索 |
 | `capabilities.runs_query` | 是否支持运行记录 |
 | `capabilities.jobs_query` | 是否支持任务查询 |
 | `capabilities.job_events` | 是否支持任务审计事件查询 |
@@ -167,6 +171,30 @@
 
 该接口是 RAG 的前置层：先把 README 摘要、项目描述、推荐理由、语言、方向和来源统一成可检索语料，再逐步升级到 Embedding、向量库或 LangChain 编排。当前版本不调用外部模型，也不写入密钥。
 
+### `GET /v1/rag/corpus`
+
+面向后续 RAG、向量检索和 LangChain 编排的语料出口。接口读取 SQLite `project_corpus`，返回 `documents[].text`、`documents[].metadata` 和 `documents[].evidence`，不调用模型、不生成 embedding、不写入外部服务。
+
+支持参数包括 `q`、`language`、`category`、`source` 和 `limit`。传入 `q` 时优先使用 FTS5 检索，FTS 不可用时回退普通文本匹配；不传 `q` 时返回最新语料。
+
+该接口是数据库能力升级的核心出口。后续新增向量表、embedding 作业或 RAG 问答时，应复用这个语料契约。
+
+### `GET /v1/rag/retrieve`
+
+基于 SQLite `rag_chunks` 和 `rag_chunks_fts` 做短文本块检索。接口返回 `contexts`、`citations` 和 `prompt_context`，用于后续接入问答模型、LangChain retriever 或项目推荐解释层。
+
+支持参数包括 `q`、`language`、`category`、`source` 和 `limit`。当前优先使用 SQLite FTS5，失败时回退普通文本匹配。接口只读本地派生索引，不调用外部模型，不生成 embedding。
+
+该接口让 RAG 从“整项目语料输出”前进到“可引用证据块召回”。后续如果新增向量表，应保持 `contexts` 和 `citations` 字段稳定。
+
+### `GET /v1/rag/vector-search`
+
+基于本地 `rag_embeddings` 表执行向量检索。当前默认模型为 `local-hash-v1`，由 `scripts/build_rag_embeddings.py` 从 `rag_chunks` 构建，不调用外部模型、不需要密钥。
+
+支持参数包括 `q`、`language`、`category`、`source`、`limit`、`model` 和 `auto_build`。返回结构继续保持 `contexts`、`citations` 和 `prompt_context`，区别是排序依据为本地向量相似度。
+
+该接口是向量库和真实 embedding 模型的占位层。后续如果接入 OpenAI、Kimi 或本地 embedding 模型，应优先替换构建逻辑，保持 API 响应字段稳定。
+
 ### `GET /v1/projects/{owner}/{repo}/similar`
 
 基于项目详情和 `project_corpus` 语料索引生成相似项目候选。接口会自动提取项目名称、简介、方向和历史入选信息中的关键词，优先通过 SQLite FTS5 召回候选，再综合同语言、同方向、同来源、关键词重合、Trending 排名和新增 Star 生成可解释排序。
@@ -188,6 +216,28 @@
 | `search_engine` | 候选召回使用的检索引擎 |
 
 该接口是 RAG/个性化推荐的候选池层，不调用外部模型，不读写密钥。后续可以在该接口结果上增加 Embedding 重排、LangChain 编排、用户反馈权重和模型生成解释。
+
+### `GET /v1/projects/compare`
+
+对多个历史入选项目做结构化横向比较。接口通过 `repos` 参数接收逗号分隔的仓库全名，最多比较 8 个项目，并返回缺失项目列表。
+
+查询参数：
+
+| 参数 | 说明 |
+|---|---|
+| `repos` | 必填，逗号分隔的 `owner/repo` 列表 |
+
+响应字段：
+
+| 字段 | 说明 |
+|---|---|
+| `projects` | 项目基础信息、历史热度、质量和风险摘要 |
+| `matrix` | 按指标展开的对比矩阵 |
+| `best_by` | 不同指标下的领先项目 |
+| `missing` | 未找到的项目 |
+| `selection_summary` | 对比摘要 |
+
+该接口是项目对比页和 RAG 解释层的基础能力，不调用外部服务，不生成推送，不写入任务状态。后续可以在此基础上加入用户偏好权重、模型总结和前端可视化对比。
 
 ### `GET /v1/jobs`
 

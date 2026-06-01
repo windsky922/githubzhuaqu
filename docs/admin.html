@@ -188,6 +188,7 @@
     }
     input,
     select,
+    textarea,
     button {
       height: 38px;
       border: 1px solid var(--line);
@@ -196,6 +197,11 @@
       color: var(--text);
       font: inherit;
       padding: 0 10px;
+    }
+    textarea {
+      min-height: 120px;
+      padding: 10px;
+      resize: vertical;
     }
     button {
       cursor: pointer;
@@ -425,6 +431,23 @@
         <button id="runCorpusSearch" type="button">搜索</button>
       </div>
       <div id="corpusSearchResults" class="search-results"></div>
+      <div class="search-form">
+        <label>RAG 问题
+          <input id="ragQuery" type="text" placeholder="哪些 Agent 项目适合学习工作流？">
+        </label>
+        <label>检索方式
+          <select id="ragMode">
+            <option value="retrieve">FTS 证据检索</option>
+            <option value="vector">本地向量检索</option>
+          </select>
+        </label>
+        <label>语言
+          <input id="ragLanguage" type="text" placeholder="Python">
+        </label>
+        <button id="runRagSearch" type="button">检索</button>
+      </div>
+      <div id="ragSearchResults" class="search-results"></div>
+      <div id="ragQualitySummary" class="search-results"></div>
     </section>
     <section class="panel">
       <h2>核心工作流</h2>
@@ -511,6 +534,8 @@
     const databaseFacets = document.getElementById("databaseFacets");
     const databaseTrends = document.getElementById("databaseTrends");
     const corpusSearchResults = document.getElementById("corpusSearchResults");
+    const ragSearchResults = document.getElementById("ragSearchResults");
+    const ragQualitySummary = document.getElementById("ragQualitySummary");
     const adminState = { jobs: [], jobFilter: "attention" };
     const createControls = {
       profile: document.getElementById("taskProfile"),
@@ -527,12 +552,19 @@
       category: document.getElementById("corpusCategory"),
       button: document.getElementById("runCorpusSearch"),
     };
+    const ragControls = {
+      query: document.getElementById("ragQuery"),
+      mode: document.getElementById("ragMode"),
+      language: document.getElementById("ragLanguage"),
+      button: document.getElementById("runRagSearch"),
+    };
 
     loadHealth();
     loadOverview();
     loadDatabaseInsights();
     setupCreateTask();
     setupCorpusSearch();
+    setupRagSearch();
     bindWorkbenchFilters();
     jobWorkbench.addEventListener("click", handleWorkbenchAction);
 
@@ -567,6 +599,18 @@
       });
     }
 
+    function setupRagSearch() {
+      if (!shouldUseApi()) {
+        ragControls.button.disabled = true;
+        ragSearchResults.innerHTML = '<p>RAG 检索需要本地后端或 api=1 模式。</p>';
+        return;
+      }
+      ragControls.button.addEventListener("click", runRagSearch);
+      ragControls.query.addEventListener("keydown", event => {
+        if (event.key === "Enter") runRagSearch();
+      });
+    }
+
     function runCorpusSearch() {
       const query = searchControls.query.value.trim();
       if (!query) {
@@ -590,6 +634,34 @@
         })
         .finally(() => {
           searchControls.button.disabled = false;
+        });
+    }
+
+    function runRagSearch() {
+      const query = ragControls.query.value.trim();
+      if (!query) {
+        ragSearchResults.innerHTML = '<p>请输入 RAG 问题或关键词。</p>';
+        return;
+      }
+      const params = new URLSearchParams();
+      params.set("q", query);
+      params.set("limit", "6");
+      if (ragControls.language.value.trim()) params.set("language", ragControls.language.value.trim());
+      const mode = ragControls.mode.value || "retrieve";
+      if (mode === "vector") params.set("auto_build", "true");
+      const endpoint = mode === "vector" ? "/v1/rag/vector-search" : "/v1/rag/retrieve";
+      ragControls.button.disabled = true;
+      ragSearchResults.innerHTML = '<p>检索中...</p>';
+      fetch(`${endpoint}?${params.toString()}`, { cache: "no-store" })
+        .then(jsonOrThrow)
+        .then(data => {
+          ragSearchResults.innerHTML = ragSearchHtml(data);
+        })
+        .catch(error => {
+          ragSearchResults.innerHTML = `<p>RAG 检索失败：${escapeHtml(error.message || error)}</p>`;
+        })
+        .finally(() => {
+          ragControls.button.disabled = false;
         });
     }
 
@@ -671,14 +743,16 @@
         databaseOverview.innerHTML = metric("数据库模式", "静态");
         databaseFacets.innerHTML = '<p>启动本地后端或添加 api=1 后显示数据库分面。</p>';
         databaseTrends.innerHTML = '<p>启动本地后端或添加 api=1 后显示运行趋势。</p>';
+        ragQualitySummary.innerHTML = '<p>启动本地后端或添加 api=1 后显示 RAG 质量概览。</p>';
         return;
       }
       Promise.all([
         fetch("/v1/database/summary", { cache: "no-store" }).then(jsonOrThrow),
         fetch("/v1/database/facets?limit=6", { cache: "no-store" }).then(jsonOrThrow),
         fetch("/v1/database/trends?limit=8", { cache: "no-store" }).then(jsonOrThrow),
+        fetch("/v1/rag/quality-summary?limit=5", { cache: "no-store" }).then(jsonOrThrow),
       ])
-        .then(([summary, facets, trends]) => {
+        .then(([summary, facets, trends, qualitySummary]) => {
           const counts = summary.table_counts || {};
           databaseOverview.innerHTML = [
             metric("仓库记录", counts.repositories || 0),
@@ -688,11 +762,13 @@
           ].join("");
           databaseFacets.innerHTML = databaseFacetsHtml(facets);
           databaseTrends.innerHTML = databaseTrendsHtml(trends);
+          ragQualitySummary.innerHTML = ragQualitySummaryHtml(qualitySummary);
         })
         .catch(error => {
           databaseOverview.innerHTML = metric("数据库状态", "读取失败");
           databaseFacets.innerHTML = `<p>数据库分面读取失败：${escapeHtml(error.message || error)}</p>`;
           databaseTrends.innerHTML = "";
+          ragQualitySummary.innerHTML = "";
         });
     }
 
@@ -927,6 +1003,40 @@
       ].join("");
     }
 
+    function ragQualitySummaryHtml(data) {
+      const levels = data.quality_levels || {};
+      const lowItems = data.recent_low_quality || [];
+      const recommendations = data.recommendations || [];
+      const levelRows = Object.keys(levels).length
+        ? Object.entries(levels).map(([name, count]) => facetRow(name, `${count} 条解释`, "质量等级"))
+        : [facetRow("暂无质量分布", "-", "-")];
+      const recommendationHtml = recommendations.length
+        ? recommendations.map(item => `<p>${escapeHtml(item)}</p>`).join("")
+        : "<p>暂无质量建议。</p>";
+      const lowHtml = lowItems.length
+        ? lowItems.slice(0, 3).map(item => `<article class="search-row">
+          <strong>${escapeHtml(item.query || "-")}</strong>
+          <span>${escapeHtml(item.quality_level || "-")} · ${escapeHtml(item.quality_score || 0)} 分 · ${escapeHtml(item.mode || "-")}</span>
+          <p>${escapeHtml(item.answer || "")}</p>
+        </article>`).join("")
+        : "<p>暂无低质量解释。</p>";
+      return [
+        "<h3>RAG 质量概览</h3>",
+        `<div class="overview">${[
+          metric("解释总数", data.total_count || 0),
+          metric("平均质量分", data.average_quality_score || 0),
+          metric("最高质量分", data.max_quality_score || 0),
+          metric("最低质量分", data.min_quality_score || 0),
+        ].join("")}</div>`,
+        "<h4>质量分布</h4>",
+        ...levelRows,
+        "<h4>改进建议</h4>",
+        recommendationHtml,
+        "<h4>最近低质量解释</h4>",
+        lowHtml,
+      ].join("");
+    }
+
     function corpusSearchHtml(data) {
       const summary = (data.summary || []).map(item => `<p>${escapeHtml(item)}</p>`).join("");
       const results = data.results || [];
@@ -936,6 +1046,26 @@
         <span>${escapeHtml(result.language || "-")} · ${escapeHtml(result.category || "-")} · 分数 ${escapeHtml(result.score || 0)}</span>
         <p>${escapeHtml(result.snippet || result.title || "")}</p>
       </article>`).join("")}`;
+    }
+
+    function ragSearchHtml(data) {
+      const summary = (data.summary || []).map(item => `<p>${escapeHtml(item)}</p>`).join("");
+      const contexts = data.contexts || [];
+      const citations = data.citations || [];
+      const promptContext = data.prompt_context || "";
+      const retrieval = data.retrieval || {};
+      if (!contexts.length) return `${summary}<p>没有召回 RAG 证据块。</p>`;
+      const contextHtml = contexts.map((context, index) => {
+        const meta = context.metadata || {};
+        const citation = citations[index] || {};
+        return `<article class="search-row">
+          <strong><a href="${escapeAttribute(projectDetailUrl({ full_name: meta.full_name }))}">${escapeHtml(meta.full_name || "-")}</a></strong>
+          <span>${escapeHtml(meta.language || "-")} · ${escapeHtml(meta.category || "-")} · ${escapeHtml(retrieval.mode || "-")} · 分数 ${escapeHtml(context.score || 0)}</span>
+          <p>${escapeHtml((context.evidence || [context.text || ""])[0] || "")}</p>
+          <span>引用：${escapeHtml(citation.chunk_id || context.chunk_id || "-")} · ${escapeHtml(meta.run_date || "-")}</span>
+        </article>`;
+      }).join("");
+      return `${summary}${contextHtml}<label>Prompt Context<textarea readonly>${escapeHtml(promptContext)}</textarea></label>`;
     }
 
     function facetRow(name, value, detail) {
