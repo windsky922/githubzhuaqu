@@ -2,6 +2,20 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-06-01 追加：项目详情页改用单项目 RAG 聚合接口
+
+### 1. 开发目的
+后端已经提供 `/v1/projects/{owner}/{repo}/rag`，但项目详情页仍分别调用 RAG 检索和解释历史接口。为了减少前端拼装逻辑，并让后续 Agent/RAG 编排复用统一数据包，本次把项目详情页切换到单项目 RAG 聚合接口。
+
+### 2. 修改内容
+1. `project.html` 的 `loadProjectRag` 改为读取 `/v1/projects/{owner}/{repo}/rag?limit=6&explanation_limit=5`。
+2. 移除项目详情页中不再需要的前端 RAG 查询拼装逻辑。
+3. 保留“RAG 证据”和“RAG 解释历史”展示，但数据来源改为聚合接口。
+4. 更新 README、API 文档和页面构建测试。
+
+### 3. 验证
+已运行 `python scripts\build_pages.py`、`python -m unittest discover -q`、`python scripts\security_check.py` 和 `git diff --check`。
+
 ## 2026-06-01 追加：新增单项目 RAG 聚合接口
 
 ### 1. 开发目的

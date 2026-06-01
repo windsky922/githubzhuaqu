@@ -4034,8 +4034,9 @@ def _project_detail_content() -> str:
           rag_summary: Array.isArray(rag.summary) ? rag.summary : [],
           rag_prompt_context: rag.prompt_context || "",
           rag_retrieval: rag.retrieval || {},
-          rag_explanations: Array.isArray(rag.rag_explanations) ? rag.rag_explanations : [],
-          rag_explanation_count: number(rag.rag_explanation_count),
+          rag_explanations: Array.isArray(rag.explanations) ? rag.explanations : [],
+          rag_explanation_count: number((rag.explanation_summary || {}).count),
+          rag_explanation_summary: rag.explanation_summary || {},
         }))
         .catch(() => detail);
     }
@@ -4082,6 +4083,7 @@ def _project_detail_content() -> str:
         rag_summary: ["RAG 证据需要本地后端或 URL 带 api=1 后读取。"],
         rag_explanations: [],
         rag_explanation_count: 0,
+        rag_explanation_summary: {},
         data_source: "静态 JSON"
       };
     }
@@ -4212,37 +4214,18 @@ def _project_detail_content() -> str:
         });
       }
       const params = new URLSearchParams();
-      params.set("q", ragQuery(repo, detail));
       params.set("limit", "6");
-      if (detail.language) params.set("language", detail.language);
-      if (detail.category) params.set("category", detail.category);
-      const historyParams = new URLSearchParams();
-      historyParams.set("repo", repo);
-      historyParams.set("limit", "5");
-      return Promise.all([
-        fetch(`/v1/rag/retrieve?${params.toString()}`, { cache: "no-store" })
-          .then(jsonOrThrow)
-          .catch(() => ({
-            contexts: [],
-            citations: [],
-            summary: ["RAG 证据读取失败，请确认本地后端和 SQLite 索引可用。"],
-            prompt_context: "",
-          })),
-        fetch(`/v1/rag/explanations?${historyParams.toString()}`, { cache: "no-store" })
-          .then(jsonOrThrow)
-          .catch(() => ({ explanations: [], count: 0 })),
-      ]).then(([rag, history]) => ({
-        ...rag,
-        rag_explanations: Array.isArray(history.explanations) ? history.explanations : [],
-        rag_explanation_count: history.count || 0,
-      }));
-    }
-
-    function ragQuery(repo, detail) {
-      const repoName = String(repo || detail.full_name || "").split("/").pop() || "";
-      return unique([repoName, detail.category || "", detail.language || ""])
-        .filter(Boolean)
-        .join(" ");
+      params.set("explanation_limit", "5");
+      return fetch(`/v1/projects/${encodeURIComponentOwnerRepo(repo)}/rag?${params.toString()}`, { cache: "no-store" })
+        .then(jsonOrThrow)
+        .catch(() => ({
+          contexts: [],
+          citations: [],
+          summary: ["RAG 聚合包读取失败，请确认本地后端和 SQLite 索引可用。"],
+          prompt_context: "",
+          explanations: [],
+          explanation_summary: { count: 0, recommendations: [] },
+        }));
     }
 
     function ragEvidenceHtml(detail) {
