@@ -2,6 +2,21 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-06-01 追加：RAG 维护计划自动创建回填任务
+
+### 1. 开发目的
+RAG 回填已经支持 planned 任务执行，但仍需要人工判断是否存在覆盖缺口。为了把“覆盖缺口检测 -> 创建补库任务 -> 执行补库”串成维护闭环，本次新增 RAG 维护计划入口，自动按覆盖缺口决定是否创建回填任务。
+
+### 2. 修改内容
+1. 新增 `POST /v1/rag/maintenance-plan`，先检查 RAG 覆盖缺口，再按需创建 `rag_backfill` planned 任务。
+2. 如果缺口数低于阈值，接口只返回健康状态，不创建任务。
+3. 如果已存在相同参数的 active `rag_backfill` 任务，接口返回 `duplicate_of`，避免重复补库。
+4. 新增 `scripts/plan_rag_maintenance.py`，用于本地或后续 GitHub Actions 调度时创建维护计划。
+5. 更新 README、API 文档、数据契约和后端测试。
+
+### 3. 验证
+已运行 `python -m unittest discover -q`、`python scripts\security_check.py` 和 `git diff --check`。
+
 ## 2026-06-01 追加：RAG 回填支持 planned 任务执行
 
 ### 1. 开发目的

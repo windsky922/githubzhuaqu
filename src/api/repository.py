@@ -70,6 +70,7 @@ class ApiRepository:
                 "rag_coverage": True,
                 "rag_backfill_explanations": True,
                 "rag_backfill_plan": True,
+                "rag_maintenance_plan": True,
                 "rag_backfill_jobs": True,
                 "runs_query": True,
                 "jobs_query": True,
@@ -805,6 +806,19 @@ class ApiRepository:
 
     def plan_rag_backfill(self, payload: dict[str, Any] | None) -> dict[str, Any]:
         request = self._rag_backfill_request_from_payload(payload, default_trigger_source="rag_backfill_plan_api")
+        duplicate = self._find_active_duplicate_job(request, kind="rag_backfill")
+        if duplicate:
+            return {
+                "schema_version": 1,
+                "accepted": True,
+                "planned_job_created": False,
+                "job_id": duplicate.get("job_id") or "",
+                "status": duplicate.get("status") or "",
+                "request": request,
+                "safety_warnings": request.get("safety_warnings") or [],
+                "duplicate_of": duplicate.get("job_id") or "",
+                "job": duplicate,
+            }
         submitted_at = datetime.now(UTC).isoformat().replace("+00:00", "Z")
         job_id = _rag_backfill_plan_job_id(submitted_at, request)
         job = {
@@ -831,11 +845,47 @@ class ApiRepository:
         return {
             "schema_version": 1,
             "accepted": True,
+            "planned_job_created": True,
             "job_id": job_id,
             "status": "planned",
             "request": request,
             "safety_warnings": request.get("safety_warnings") or [],
             "job": job,
+        }
+
+    def plan_rag_maintenance(self, payload: dict[str, Any] | None) -> dict[str, Any]:
+        payload = payload if isinstance(payload, dict) else {}
+        coverage_limit = max(1, min(_int_value(payload.get("coverage_limit")) or 100, 500))
+        coverage = self.rag_coverage(limit=coverage_limit)
+        gap_count = _int_value(coverage.get("gap_count"))
+        min_gap_count = max(1, _int_value(payload.get("min_gap_count")) or 1)
+        if gap_count < min_gap_count:
+            return {
+                "schema_version": 1,
+                "accepted": True,
+                "planned_job_created": False,
+                "reason": "rag_coverage_healthy",
+                "gap_count": gap_count,
+                "min_gap_count": min_gap_count,
+                "coverage": coverage,
+                "job_id": "",
+                "job": {},
+            }
+
+        plan_payload = {
+            **payload,
+            "limit": max(1, min(_int_value(payload.get("limit")) or min(gap_count, 10), gap_count, 100)),
+            "dry_run": _bool_value(payload.get("dry_run"), True),
+            "trigger_source": str(payload.get("trigger_source") or "rag_maintenance_api"),
+            "requested_by": str(payload.get("requested_by") or "api"),
+        }
+        plan = self.plan_rag_backfill(plan_payload)
+        return {
+            **plan,
+            "reason": "rag_coverage_gap_detected",
+            "gap_count": gap_count,
+            "min_gap_count": min_gap_count,
+            "coverage": coverage,
         }
 
     def _rag_backfill_request_from_payload(
@@ -1767,7 +1817,7 @@ class ApiRepository:
             "requested_by": actor,
             "retry_of": normalized,
         }
-        duplicate = self._find_active_duplicate_job(retry_request)
+        duplicate = self._find_active_duplicate_job(retry_request, kind=str(job.get("kind") or "weekly_report"))
         if duplicate:
             self._record_job_event(
                 normalized,
@@ -2221,9 +2271,10 @@ class ApiRepository:
             connection.close()
         return [_job_from_row(row) for row in rows]
 
-    def _find_active_duplicate_job(self, request: dict[str, Any]) -> dict[str, Any]:
+    def _find_active_duplicate_job(self, request: dict[str, Any], *, kind: str = "weekly_report") -> dict[str, Any]:
         self.ensure_sqlite_index()
         target_key = _job_request_key(request)
+        normalized_kind = kind if kind in {"weekly_report", "rag_backfill"} else "weekly_report"
         connection = connect(self.db_path)
         try:
             rows = connection.execute(
@@ -2231,10 +2282,11 @@ class ApiRepository:
                 SELECT job_id, kind, status, run_date, submitted_at, started_at, finished_at,
                        request_json, result_json, error, payload_json
                 FROM jobs
-                WHERE kind = 'weekly_report' AND status IN ('planned', 'running')
+                WHERE kind = ? AND status IN ('planned', 'running')
                 ORDER BY COALESCE(NULLIF(submitted_at, ''), run_date) DESC, job_id DESC
                 LIMIT 200
-                """
+                """,
+                (normalized_kind,),
             ).fetchall()
         finally:
             connection.close()
@@ -3925,7 +3977,12 @@ def _job_request_key(request: dict[str, Any]) -> str:
             "sources": sorted(_list_strings(request.get("sources"))),
             "dry_run": _truthy(request.get("dry_run", True)),
             "confirm_delivery": _truthy(request.get("confirm_delivery")),
+            "confirm_execution": _truthy(request.get("confirm_execution")),
             "days_back": _positive_int(request.get("days_back")),
+            "rag_limit": _positive_int(request.get("rag_limit")),
+            "mode": str(request.get("mode") or "").strip(),
+            "model": str(request.get("model") or "").strip(),
+            "auto_build": _truthy(request.get("auto_build")),
         },
         ensure_ascii=False,
         sort_keys=True,

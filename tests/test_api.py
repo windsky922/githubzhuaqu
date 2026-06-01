@@ -146,6 +146,12 @@ class ApiRepositoryTest(unittest.TestCase):
                 rag_backfill_plan["job_id"],
                 {"confirm_execution": True, "requested_by": "test"},
             )
+            rag_maintenance_plan = repository.plan_rag_maintenance(
+                {"limit": 1, "dry_run": True, "requested_by": "test"}
+            )
+            rag_maintenance_duplicate = repository.plan_rag_maintenance(
+                {"limit": 1, "dry_run": True, "requested_by": "test"}
+            )
             database_summary_after_explain = repository.database_summary()
             similar = repository.similar_projects("owner/agent", limit=5)
             comparison = repository.compare_projects(["owner/agent", "owner/agent-helper", "missing/repo"])
@@ -221,6 +227,7 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertTrue(health["capabilities"]["rag_quality_summary"])
             self.assertTrue(health["capabilities"]["rag_coverage"])
             self.assertTrue(health["capabilities"]["rag_backfill_explanations"])
+            self.assertTrue(health["capabilities"]["rag_maintenance_plan"])
             self.assertEqual(jobs["jobs"][0]["job_id"], "run:2026-05-09")
             self.assertTrue(job_detail["found"])
             self.assertEqual(job_detail["run_summary"]["run_date"], "2026-05-09")
@@ -381,6 +388,11 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertTrue(rag_backfill_execute["executed"])
             self.assertEqual(rag_backfill_execute["status"], "succeeded")
             self.assertIn("processed_count", rag_backfill_execute["runner_result"]["result"])
+            self.assertEqual(rag_maintenance_plan["reason"], "rag_coverage_gap_detected")
+            self.assertTrue(rag_maintenance_plan["planned_job_created"])
+            self.assertEqual(rag_maintenance_plan["job"]["kind"], "rag_backfill")
+            self.assertFalse(rag_maintenance_duplicate["planned_job_created"])
+            self.assertEqual(rag_maintenance_duplicate["duplicate_of"], rag_maintenance_plan["job_id"])
             self.assertGreaterEqual(database_summary_after_explain["table_counts"]["rag_explanations"], 1)
             self.assertTrue(database_summary_after_explain["rag_readiness"]["ready_for_explanation_history"])
             self.assertTrue(similar["found"])
@@ -479,6 +491,10 @@ class ApiRepositoryTest(unittest.TestCase):
                 f"/v1/jobs/{v1_rag_backfill_plan.json()['job_id']}/execute",
                 json={"confirm_execution": True, "requested_by": "test"},
             )
+            v1_rag_maintenance_plan = client.post(
+                "/v1/rag/maintenance-plan",
+                json={"limit": 1, "dry_run": True, "requested_by": "test"},
+            )
             v1_rag_backfill_jobs = client.get(
                 "/v1/jobs",
                 params={"status": "succeeded", "kind": "rag_backfill", "limit": 5},
@@ -575,6 +591,7 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(v1_rag_backfill_plan.status_code, 202)
             self.assertEqual(v1_rag_backfill_plan_check.status_code, 200)
             self.assertEqual(v1_rag_backfill_plan_execute.status_code, 200)
+            self.assertEqual(v1_rag_maintenance_plan.status_code, 202)
             self.assertEqual(v1_rag_backfill_jobs.status_code, 200)
             self.assertEqual(v1_rag_backfill_events.status_code, 200)
             self.assertEqual(v1_similar.status_code, 200)
@@ -640,6 +657,8 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertTrue(v1_rag_backfill_plan_check.json()["executable"])
             self.assertTrue(v1_rag_backfill_plan_execute.json()["executed"])
             self.assertEqual(v1_rag_backfill_plan_execute.json()["status"], "succeeded")
+            self.assertTrue(v1_rag_maintenance_plan.json()["accepted"])
+            self.assertEqual(v1_rag_maintenance_plan.json()["reason"], "rag_coverage_gap_detected")
             self.assertEqual(v1_rag_backfill_jobs.json()["jobs"][0]["kind"], "rag_backfill")
             self.assertIn(
                 v1_rag_backfill.json()["job_id"],

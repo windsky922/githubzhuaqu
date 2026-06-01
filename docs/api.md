@@ -472,6 +472,27 @@ POST /v1/jobs/{job_id}/execute
 
 执行时必须传入 `confirm_execution=true`。如果计划任务自身为 `dry_run=false`，创建计划时也必须传入 `confirm_execution=true`，否则后端会自动改为 `dry_run=true`，避免误写 SQLite。
 
+### `POST /v1/rag/maintenance-plan`
+
+检查 RAG 覆盖缺口，并按需创建 RAG 回填 planned 任务。该接口会先调用覆盖缺口逻辑；如果 `gap_count` 小于 `min_gap_count`，只返回健康状态，不创建任务；如果已经存在相同参数的 active `rag_backfill` 任务，则返回 `duplicate_of`，避免重复补库。
+
+常用请求字段：
+
+| 字段 | 说明 |
+|---|---|
+| `limit` | 本次计划回填项目数量，默认不超过缺口数和 10 |
+| `coverage_limit` | 覆盖缺口检查数量，默认 100，最大 500 |
+| `min_gap_count` | 至少发现多少缺口才创建任务，默认 1 |
+| `dry_run` | 创建的任务是否只预览，默认 `true` |
+| `confirm_execution` | 如果 `dry_run=false`，必须显式确认 |
+
+本地脚本入口：
+
+```text
+python scripts/plan_rag_maintenance.py
+python scripts/plan_rag_maintenance.py --limit 20 --coverage-limit 200
+```
+
 ### `GET /v1/projects/{owner}/{repo}/rag`
 
 返回单个项目的 RAG 聚合包，用于项目详情页、后续 Agent 工具调用和 LangChain/RAG 编排。该接口会读取项目详情、执行本地 RAG 检索，并合并该项目已经入库的解释历史，不调用外部模型、不请求 GitHub/Kimi/Telegram。

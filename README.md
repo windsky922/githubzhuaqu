@@ -73,6 +73,7 @@ GitHub Actions
 | `scripts/build_pages.py` | 生成 GitHub Pages 归档页面 |
 | `scripts/build_rag_embeddings.py` | 从 `rag_chunks` 构建本地 RAG embedding 索引 |
 | `scripts/backfill_rag_explanations.py` | 为缺少解释历史的项目批量生成规则版 RAG 解释 |
+| `scripts/plan_rag_maintenance.py` | 检查 RAG 覆盖缺口，并按需创建回填 planned 任务 |
 | `scripts/create_planned_job.py` | 创建 planned 周报任务 |
 | `scripts/migrate_json_to_sqlite.py` | 将历史 JSON 归档导入 SQLite 派生索引 |
 | `scripts/verify_migration.py` | 校验 SQLite 派生索引和 JSON 归档计数 |
@@ -346,6 +347,13 @@ python scripts/backfill_rag_explanations.py --limit 10
 该脚本会读取 `/v1/rag/coverage` 同源逻辑，优先为缺少 RAG 解释历史的项目生成规则版解释并写入 SQLite。
 本地后端也提供同源接口 `POST /v1/rag/backfill-explanations`。接口默认只预览；如果要通过 API 真正写库，需要同时传入 `dry_run=false` 和 `confirm_execution=true`。
 该接口会返回 `job_id`，并把本次预览或写库记录到 `/v1/jobs?kind=rag_backfill` 和 `/v1/jobs/{job_id}/events`。如果希望先创建计划任务，再人工确认执行，可以调用 `POST /v1/rag/backfill-plan`，随后通过 `POST /v1/jobs/{job_id}/execute` 执行。
+
+自动检查缺口并按需创建 RAG 回填计划任务：
+
+```bash
+python scripts/plan_rag_maintenance.py
+python scripts/plan_rag_maintenance.py --limit 20 --coverage-limit 200
+```
 
 执行 planned 任务：
 
