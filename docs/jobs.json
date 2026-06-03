@@ -105,7 +105,7 @@
         "collected_count": 321,
         "kimi_used": true,
         "fallback_used": false,
-        "telegram_sent": false,
+        "telegram_sent": true,
         "telegram_error": "",
         "report_path": "reports/2026-06-03.md",
         "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-06-03.html",
