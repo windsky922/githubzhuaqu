@@ -1,19 +1,19 @@
 {
   "schema_version": 1,
-  "count": 150,
+  "count": 120,
   "projects": [
     {
-      "run_date": "2026-06-01",
+      "run_date": "2026-06-03",
       "full_name": "harry0703/MoneyPrinterTurbo",
       "html_url": "https://github.com/harry0703/MoneyPrinterTurbo",
       "description": "利用AI大模型，一键生成高清短视频 Generate short videos with one click using AI LLM.",
-      "readme_summary": "MoneyPrinterTurbo 💸 简体中文 | English | العربية 只需提供一个视频 主题 或 关键词 ，就可以全自动生成视频文案、视频素材、视频字幕、视频背景音乐，然后合成一个高清的短视频。",
+      "readme_summary": "MoneyPrinterTurbo 💸 简体中文 | English | العربية 只需提供一个视频 主题 或 关键词 ，就可以全自动生成视频文案、视频素材、视频字幕、视频背景音乐，然后合成一个高清的短视频。 感谢 AIHubMix 对本项目的赞助。AIHubMix 深度适配 OpenAI、Claude、Gemini、DeepSeek、智谱、千问等全球顶级最新模型，一站式快速接入 GPT-5.5、deepseek-v4-flash 等 700+ 模型（含多个免费模型），提供企业级生产稳定性保障。",
       "category": "LLM Tooling",
       "language": "Python",
-      "stargazers_count": 74799,
-      "forks_count": 10653,
-      "star_growth": 17058,
-      "score": 0.9134,
+      "stargazers_count": 78190,
+      "forks_count": 11099,
+      "star_growth": 20,
+      "score": 0.7868,
       "sources": [
         "github_search",
         "github_trending"
@@ -21,39 +21,9 @@
       "trending_rank": 1,
       "selection_reasons": [
         "进入 GitHub Trending 周榜第 1 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 17058，近期热度上升。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
-        "当前累计 Star 74799，具备一定社区关注度。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
-      "quality_level": "high",
-      "report_url": "weekly/2026-06-01.html"
-    },
-    {
-      "run_date": "2026-06-01",
-      "full_name": "Lum1104/Understand-Anything",
-      "html_url": "https://github.com/Lum1104/Understand-Anything",
-      "description": "Graphs that teach > graphs that impress. Turn any code into an interactive knowledge graph you can explore, search, and ask questions about. Works with Claude Code, Codex, Cursor, Copilot, Gemini CLI, and more.",
-      "readme_summary": "Understand Anything Turn any codebase, knowledge base, or docs into an interactive knowledge graph you can explore, search, and ask questions about. Works with Claude Code, Codex, Cursor, Copilot, Gemini CLI, and more.",
-      "category": "AI Agent",
-      "language": "TypeScript",
-      "stargazers_count": 47473,
-      "forks_count": 3863,
-      "star_growth": 20888,
-      "score": 0.7248,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 2,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 2 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 20888，近期热度上升。",
+        "较上次记录新增 Star 20，近期热度上升。",
         "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
+        "当前累计 Star 78190，具备一定社区关注度。"
       ],
       "security_flags": [],
       "security_score": 100,
@@ -61,61 +31,59 @@
       "quality_flags": [],
       "quality_score": 100,
       "quality_level": "high",
-      "report_url": "weekly/2026-06-01.html"
+      "report_url": "weekly/2026-06-03.html"
     },
     {
-      "run_date": "2026-06-01",
-      "full_name": "anthropics/knowledge-work-plugins",
-      "html_url": "https://github.com/anthropics/knowledge-work-plugins",
-      "description": "Open source repository of plugins primarily intended for knowledge workers to use in Claude Cowork",
-      "readme_summary": "Plugins that turn Claude into a specialist for your role, team, and company. Built for Claude Cowork, also compatible with Claude Code. Cowork lets you set the goal and Claude delivers finished, professional work.",
-      "category": "LLM Tooling",
+      "run_date": "2026-06-03",
+      "full_name": "chopratejas/headroom",
+      "html_url": "https://github.com/chopratejas/headroom",
+      "description": "Compress tool outputs, logs, files, and RAG chunks before they reach the LLM. 60-95% fewer tokens, same answers. Library, proxy, MCP server.",
+      "readme_summary": "AI agents / LLMs: read /llms.txt here, or fetch the live index / full docs blob . Headroom compresses everything your AI agent reads — tool outputs, logs, RAG chunks, files, and conversation history — before it reaches the LLM. Same answers, fraction of the tokens.",
+      "category": "AI Agent",
       "language": "Python",
-      "stargazers_count": 18472,
-      "forks_count": 2173,
-      "star_growth": 0,
-      "score": 0.5406,
+      "stargazers_count": 7060,
+      "forks_count": 488,
+      "star_growth": 64,
+      "score": 0.9051,
       "sources": [
         "github_trending"
       ],
       "trending_rank": 3,
       "selection_reasons": [
         "进入 GitHub Trending 周榜第 3 位，是本期最重要的热度信号。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
-        "当前累计 Star 18472，具备一定社区关注度。",
-        "仓库主题、语言或名称与关注方向匹配。"
+        "较上次记录新增 Star 64，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "当前累计 Star 7060，具备一定社区关注度。"
       ],
       "security_flags": [],
       "security_score": 100,
       "security_level": "low",
-      "quality_flags": [
-        "仓库主题标签较少，垂直方向判断可能不够稳定。"
-      ],
-      "quality_score": 92,
+      "quality_flags": [],
+      "quality_score": 100,
       "quality_level": "high",
-      "report_url": "weekly/2026-06-01.html"
+      "report_url": "weekly/2026-06-03.html"
     },
     {
-      "run_date": "2026-06-01",
-      "full_name": "rohitg00/ai-engineering-from-scratch",
-      "html_url": "https://github.com/rohitg00/ai-engineering-from-scratch",
-      "description": "Learn it. Build it. Ship it for others.",
-      "readme_summary": "% of students already use AI tools. Only 18% feel prepared to use them professionally.** This curriculum closes that gap. Python, TypeScript, Rust, Julia.",
+      "run_date": "2026-06-03",
+      "full_name": "Lum1104/Understand-Anything",
+      "html_url": "https://github.com/Lum1104/Understand-Anything",
+      "description": "Graphs that teach > graphs that impress. Turn any code into an interactive knowledge graph you can explore, search, and ask questions about. Works with Claude Code, Codex, Cursor, Copilot, Gemini CLI, and more.",
+      "readme_summary": "Understand Anything Turn any codebase, knowledge base, or docs into an interactive knowledge graph you can explore, search, and ask questions about. Works with Claude Code, Codex, Cursor, Copilot, Gemini CLI, and more.",
       "category": "AI Agent",
-      "language": "Python",
-      "stargazers_count": 25977,
-      "forks_count": 4218,
-      "star_growth": 9614,
-      "score": 0.7117,
+      "language": "TypeScript",
+      "stargazers_count": 50355,
+      "forks_count": 4101,
+      "star_growth": 21,
+      "score": 0.6275,
       "sources": [
         "github_trending"
       ],
       "trending_rank": 4,
       "selection_reasons": [
         "进入 GitHub Trending 周榜第 4 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 9614，近期热度上升。",
+        "较上次记录新增 Star 21，近期热度上升。",
         "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
+        "当前累计 Star 50355，具备一定社区关注度。"
       ],
       "security_flags": [],
       "security_score": 100,
@@ -123,61 +91,29 @@
       "quality_flags": [],
       "quality_score": 100,
       "quality_level": "high",
-      "report_url": "weekly/2026-06-01.html"
+      "report_url": "weekly/2026-06-03.html"
     },
     {
-      "run_date": "2026-06-01",
-      "full_name": "microsoft/markitdown",
-      "html_url": "https://github.com/microsoft/markitdown",
-      "description": "Python tool for converting files and office documents to Markdown.",
-      "readme_summary": "[!IMPORTANT] MarkItDown performs I/O with the privileges of the current process. Like open() or requests.get(), it will access resources that the process itself can access.",
-      "category": "LLM Tooling",
-      "language": "Python",
-      "stargazers_count": 135361,
-      "forks_count": 9244,
-      "star_growth": 10371,
-      "score": 0.5336,
-      "sources": [
-        "github_search",
-        "github_trending"
-      ],
-      "trending_rank": 6,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 6 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 10371，近期热度上升。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
-        "当前累计 Star 135361，具备一定社区关注度。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
-      "quality_level": "high",
-      "report_url": "weekly/2026-06-01.html"
-    },
-    {
-      "run_date": "2026-06-01",
-      "full_name": "Leonxlnx/taste-skill",
-      "html_url": "https://github.com/Leonxlnx/taste-skill",
-      "description": "Taste-Skill - gives your AI good taste. stops the AI from generating boring, generic slop ",
-      "readme_summary": "The Anti-Slop Frontend Framework for AI Agents Portable **Agent Skills** that upgrade AI-built interfaces: stronger layout, typography, motion, and spacing instead of boilerplate-looking UIs. This repo also includes **image-generation skills** for reference boards (web, mobile, brand kits).",
+      "run_date": "2026-06-03",
+      "full_name": "revfactory/harness",
+      "html_url": "https://github.com/revfactory/harness",
+      "description": "A meta-skill that designs domain-specific agent teams, defines specialized agents, and generates the skills they use.",
+      "readme_summary": "English** | 한국어 | 日本語 Harness is a team-architecture factory for Claude Code.** Say **\"build a harness for this project\"** (English) or **\"하네스 구성해줘\"** (한국어) or **\"ハーネスを構成して\"** (日本語), and the plugin turns your domain description into an agent team and the skills they use — picked from six pre-defined team-architecture patterns.",
       "category": "AI Agent",
-      "language": "Shell",
-      "stargazers_count": 30023,
-      "forks_count": 2229,
-      "star_growth": 0,
-      "score": 0.5311,
+      "language": "HTML",
+      "stargazers_count": 5559,
+      "forks_count": 738,
+      "star_growth": 1,
+      "score": 0.3819,
       "sources": [
-        "github_search",
         "github_trending"
       ],
       "trending_rank": 7,
       "selection_reasons": [
         "进入 GitHub Trending 周榜第 7 位，是本期最重要的热度信号。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发。",
-        "当前累计 Star 30023，具备一定社区关注度。",
-        "仓库主题、语言或名称与关注方向匹配。"
+        "较上次记录新增 Star 1，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "当前累计 Star 5559，具备一定社区关注度。"
       ],
       "security_flags": [],
       "security_score": 100,
@@ -185,29 +121,59 @@
       "quality_flags": [],
       "quality_score": 100,
       "quality_level": "high",
-      "report_url": "weekly/2026-06-01.html"
+      "report_url": "weekly/2026-06-03.html"
     },
     {
-      "run_date": "2026-06-01",
-      "full_name": "colbymchenry/codegraph",
-      "html_url": "https://github.com/colbymchenry/codegraph",
-      "description": "Pre-indexed code knowledge graph for Claude Code, Codex, Gemini, Cursor, OpenCode, AntiGravity, Kiro, and Hermes Agent — fewer tokens, fewer tool calls, 100% local",
-      "readme_summary": "~25% cheaper · ~62% fewer tool calls · 100% local** No Node.js required** — one command grabs the right build for your OS: Already have Node? Use npm instead (works on any version): CodeGraph bundles its own runtime — nothing to compile, no native build, works the same everywhere.",
+      "run_date": "2026-06-03",
+      "full_name": "rohitg00/ai-engineering-from-scratch",
+      "html_url": "https://github.com/rohitg00/ai-engineering-from-scratch",
+      "description": "Learn it. Build it. Ship it for others.",
+      "readme_summary": "% of students already use AI tools. Only 18% feel prepared to use them professionally.** This curriculum closes that gap. Python, TypeScript, Rust, Julia.",
       "category": "AI Agent",
-      "language": "TypeScript",
-      "stargazers_count": 35622,
-      "forks_count": 2214,
-      "star_growth": 13153,
-      "score": 0.5107,
+      "language": "Python",
+      "stargazers_count": 27484,
+      "forks_count": 4461,
+      "star_growth": 11,
+      "score": 0.6024,
       "sources": [
         "github_trending"
       ],
       "trending_rank": 8,
       "selection_reasons": [
         "进入 GitHub Trending 周榜第 8 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 13153，近期热度上升。",
+        "较上次记录新增 Star 11，近期热度上升。",
         "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Agent 开发、开发者工具。"
+        "当前累计 Star 27484，具备一定社区关注度。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-03.html"
+    },
+    {
+      "run_date": "2026-06-03",
+      "full_name": "colbymchenry/codegraph",
+      "html_url": "https://github.com/colbymchenry/codegraph",
+      "description": "Pre-indexed code knowledge graph for Claude Code, Codex, Gemini, Cursor, OpenCode, AntiGravity, Kiro, and Hermes Agent — fewer tokens, fewer tool calls, 100% local",
+      "readme_summary": "~16% cheaper · ~58% fewer tool calls · 100% local** No Node.js required** — one command grabs the right build for your OS: Already have Node? Use npm instead (works on any version): CodeGraph bundles its own runtime — nothing to compile, no native build, works the same everywhere.",
+      "category": "AI Agent",
+      "language": "TypeScript",
+      "stargazers_count": 38302,
+      "forks_count": 2372,
+      "star_growth": 14,
+      "score": 0.4449,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 9,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 9 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 14，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "当前累计 Star 38302，具备一定社区关注度。"
       ],
       "security_flags": [],
       "security_score": 100,
@@ -217,60 +183,29 @@
       ],
       "quality_score": 92,
       "quality_level": "high",
-      "report_url": "weekly/2026-06-01.html"
+      "report_url": "weekly/2026-06-03.html"
     },
     {
-      "run_date": "2026-06-01",
-      "full_name": "affaan-m/ECC",
-      "html_url": "https://github.com/affaan-m/ECC",
-      "description": "The agent harness performance optimization system. Skills, instincts, memory, security, and research-first development for Claude Code, Codex, Opencode, Cursor and beyond.",
-      "readme_summary": "Language:** English | Português (Brasil) | 简体中文 | 繁體中文 | 日本語 | 한국어 | Türkçe | Русский | Tiếng Việt | ไทย | Deutsch K+ stars** | **28K+ forks** | **170+ contributors** | **12+ language ecosystems** | **Cross-harness agent workflows** Language / 语言 / 語言 / Dil / Язык / Ngôn ngữ** English** | Português (Brasil) | 简体中文 | 繁體中文 | 日本語 | 한국어 | Türkçe | Русский | Tiếng Việt | ไทย | Deutsch The harness-native operator system for agentic work.",
-      "category": "AI Agent",
-      "language": "JavaScript",
-      "stargazers_count": 200793,
-      "forks_count": 30813,
-      "star_growth": 9945,
-      "score": 0.5921,
-      "sources": [
-        "github_search",
-        "github_trending"
-      ],
-      "trending_rank": 10,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 10 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 9945，近期热度上升。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
-        "当前累计 Star 200793，具备一定社区关注度。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
-      "quality_level": "high",
-      "report_url": "weekly/2026-06-01.html"
-    },
-    {
-      "run_date": "2026-06-01",
+      "run_date": "2026-06-03",
       "full_name": "mukul975/Anthropic-Cybersecurity-Skills",
       "html_url": "https://github.com/mukul975/Anthropic-Cybersecurity-Skills",
       "description": "754 structured cybersecurity skills for AI agents · Mapped to 5 frameworks: MITRE ATT&CK, NIST CSF 2.0, MITRE ATLAS, D3FEND & NIST AI RMF · agentskills.io standard · Works with Claude Code, GitHub Copilot, Codex CLI, Cursor, Gemini CLI & 20+ platforms · 26 security domains · Apache 2.0",
       "readme_summary": "production-grade cybersecurity skills · 26 security domains · 5 framework mappings · 26+ AI platforms** Get Started · What's Inside · Frameworks · Platforms · Contributing ⚠️ **Community Project** — This is an independent, community-created project. Not affiliated with Anthropic PBC.",
       "category": "AI Agent",
       "language": "Python",
-      "stargazers_count": 12999,
-      "forks_count": 1520,
-      "star_growth": 0,
-      "score": 0.473,
+      "stargazers_count": 13673,
+      "forks_count": 1602,
+      "star_growth": 11,
+      "score": 0.4968,
       "sources": [
         "github_trending"
       ],
-      "trending_rank": 9,
+      "trending_rank": 10,
       "selection_reasons": [
-        "进入 GitHub Trending 周榜第 9 位，是本期最重要的热度信号。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
-        "当前累计 Star 12999，具备一定社区关注度。",
-        "仓库主题、语言或名称与关注方向匹配。"
+        "进入 GitHub Trending 周榜第 10 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 11，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "当前累计 Star 13673，具备一定社区关注度。"
       ],
       "security_flags": [
         "包含恶意软件相关表述，需人工确认项目用途。"
@@ -280,337 +215,90 @@
       "quality_flags": [],
       "quality_score": 100,
       "quality_level": "high",
-      "report_url": "weekly/2026-06-01.html"
+      "report_url": "weekly/2026-06-03.html"
     },
     {
-      "run_date": "2026-06-01",
-      "full_name": "p-e-w/heretic",
-      "html_url": "https://github.com/p-e-w/heretic",
-      "description": "Fully automatic censorship removal for language models",
-      "readme_summary": "Heretic is a tool that removes censorship (aka \"safety alignment\") from transformer-based language models without expensive post-training. It combines an advanced implementation of directional ablation, also known as \"abliteration\" (Arditi et al.",
-      "category": "LLM Tooling",
-      "language": "Python",
-      "stargazers_count": 22773,
-      "forks_count": 2435,
-      "star_growth": 0,
-      "score": 0.4038,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 13,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 13 位，是本期最重要的热度信号。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
-        "当前累计 Star 22773，具备一定社区关注度。",
-        "仓库主题、语言或名称与关注方向匹配。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
-      "quality_level": "high",
-      "report_url": "weekly/2026-06-01.html"
-    },
-    {
-      "run_date": "2026-05-25",
-      "full_name": "colbymchenry/codegraph",
-      "html_url": "https://github.com/colbymchenry/codegraph",
-      "description": "Pre-indexed code knowledge graph for Claude Code, Codex, Cursor, OpenCode, and Hermes Agent — fewer tokens, fewer tool calls, 100% local",
-      "readme_summary": "~35% cheaper · ~70% fewer tool calls · 100% local** No Node.js required** — one command grabs the right build for your OS: Already have Node? Use npm instead (works on any version): CodeGraph bundles its own runtime — nothing to compile, no native build, works the same everywhere.",
-      "category": "AI Agent",
-      "language": "TypeScript",
-      "stargazers_count": 22469,
-      "forks_count": 1242,
-      "star_growth": 0,
-      "score": 0.5131,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 1,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 1 位，是本期最重要的热度信号。",
-        "匹配当前个性化方向：Agent 开发、开发者工具。",
-        "当前累计 Star 22469，具备一定社区关注度。",
-        "最近一周仍有更新或维护活动。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [
-        "仓库主题标签较少，垂直方向判断可能不够稳定。"
-      ],
-      "quality_score": 92,
-      "quality_level": "high",
-      "report_url": "weekly/2026-05-25.html"
-    },
-    {
-      "run_date": "2026-05-25",
-      "full_name": "tinyhumansai/openhuman",
-      "html_url": "https://github.com/tinyhumansai/openhuman",
-      "description": "Your Personal AI super intelligence. Private, Simple and extremely powerful.",
-      "readme_summary": "OpenHuman OpenHuman is your Personal AI super intelligence: local memory, managed services where needed, simple and powerful. 🇺🇸 English | 🇨🇳 简体中文 | 🇯🇵 日本語 | 🇰🇷 한국어 | 🇩🇪 Deutsch Early Beta**: Under active development. Expect rough edges.",
-      "category": "Other",
-      "language": "Rust",
-      "stargazers_count": 27234,
-      "forks_count": 2526,
-      "star_growth": 0,
-      "score": 0.4904,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 2,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 2 位，是本期最重要的热度信号。",
-        "匹配当前个性化方向：Python 工具与应用开发、开发者工具。",
-        "当前累计 Star 27234，具备一定社区关注度。",
-        "最近一周仍有更新或维护活动。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [
-        "仓库主题标签较少，垂直方向判断可能不够稳定。"
-      ],
-      "quality_score": 92,
-      "quality_level": "high",
-      "report_url": "weekly/2026-05-25.html"
-    },
-    {
-      "run_date": "2026-05-25",
-      "full_name": "Imbad0202/academic-research-skills",
-      "html_url": "https://github.com/Imbad0202/academic-research-skills",
-      "description": "Academic Research Skills for Claude Code: research → write → review → revise → finalize",
-      "readme_summary": "简体中文版 | 繁體中文版 | 日本語版 A comprehensive suite of Claude Code skills for academic research, covering the full pipeline from research to publication.",
-      "category": "LLM Tooling",
-      "language": "Python",
-      "stargazers_count": 20701,
-      "forks_count": 1763,
-      "star_growth": 11215,
-      "score": 0.7644,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 3,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 3 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 11215，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
-      "quality_level": "high",
-      "report_url": "weekly/2026-05-25.html"
-    },
-    {
-      "run_date": "2026-05-25",
-      "full_name": "rohitg00/ai-engineering-from-scratch",
-      "html_url": "https://github.com/rohitg00/ai-engineering-from-scratch",
-      "description": "Learn it. Build it. Ship it for others.",
-      "readme_summary": "% of students already use AI tools. Only 18% feel prepared to use them professionally.** This curriculum closes that gap. Python, TypeScript, Rust, Julia.",
-      "category": "AI Agent",
-      "language": "Python",
-      "stargazers_count": 16363,
-      "forks_count": 2887,
-      "star_growth": 0,
-      "score": 0.6396,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 4,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 4 位，是本期最重要的热度信号。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
-        "当前累计 Star 16363，具备一定社区关注度。",
-        "仓库主题、语言或名称与关注方向匹配。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
-      "quality_level": "high",
-      "report_url": "weekly/2026-05-25.html"
-    },
-    {
-      "run_date": "2026-05-25",
-      "full_name": "ruvnet/RuView",
-      "html_url": "https://github.com/ruvnet/RuView",
-      "description": "π RuView turns commodity WiFi signals into real-time spatial intelligence, vital sign monitoring, and presence detection — all without a single pixel of video.",
-      "readme_summary": "Beta Software** — Under active development. APIs and firmware may change.",
-      "category": "AI Agent",
-      "language": "Rust",
-      "stargazers_count": 65464,
-      "forks_count": 8656,
-      "star_growth": 6201,
-      "score": 0.6209,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 5,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 5 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 6201，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
-      "quality_level": "high",
-      "report_url": "weekly/2026-05-25.html"
-    },
-    {
-      "run_date": "2026-05-25",
-      "full_name": "rohitg00/agentmemory",
-      "html_url": "https://github.com/rohitg00/agentmemory",
-      "description": "#1 Persistent memory for AI coding agents based on real-world benchmarks",
-      "readme_summary": "Your coding agent remembers everything. No more re-explaining. Built on iii engine Persistent memory for Claude Code, Cursor, Gemini CLI, Codex CLI, Hermes, OpenClaw, pi, OpenCode, and any MCP client.",
-      "category": "AI Agent",
-      "language": "TypeScript",
-      "stargazers_count": 17417,
-      "forks_count": 1424,
-      "star_growth": 6004,
-      "score": 0.7004,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 6,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 6 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 6004，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
-      "quality_level": "high",
-      "report_url": "weekly/2026-05-25.html"
-    },
-    {
-      "run_date": "2026-05-25",
-      "full_name": "Lum1104/Understand-Anything",
-      "html_url": "https://github.com/Lum1104/Understand-Anything",
-      "description": "Graphs that teach > graphs that impress. Turn any code into an interactive knowledge graph you can explore, search, and ask questions about. Works with Claude Code, Codex, Cursor, Copilot, Gemini CLI, and more.",
-      "readme_summary": "Understand Anything Turn any codebase, knowledge base, or docs into an interactive knowledge graph you can explore, search, and ask questions about. Works with Claude Code, Codex, Cursor, Copilot, Gemini CLI, and more.",
-      "category": "AI Agent",
-      "language": "TypeScript",
-      "stargazers_count": 26585,
-      "forks_count": 2282,
-      "star_growth": 0,
-      "score": 0.4452,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 7,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 7 位，是本期最重要的热度信号。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
-        "当前累计 Star 26585，具备一定社区关注度。",
-        "仓库主题、语言或名称与关注方向匹配。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
-      "quality_level": "high",
-      "report_url": "weekly/2026-05-25.html"
-    },
-    {
-      "run_date": "2026-05-25",
-      "full_name": "CloakHQ/CloakBrowser",
-      "html_url": "https://github.com/CloakHQ/CloakBrowser",
-      "description": "Stealth Chromium that passes every bot detection test. Drop-in Playwright replacement with source-level fingerprint patches. 30/30 tests passed.",
-      "readme_summary": "Stealth Chromium that passes every bot detection test. Not a patched config. Not a JS injection.",
-      "category": "AI Agent",
-      "language": "Python",
-      "stargazers_count": 20420,
-      "forks_count": 1613,
-      "star_growth": 6516,
-      "score": 0.5529,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 8,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 8 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 6516，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
-      "quality_level": "high",
-      "report_url": "weekly/2026-05-25.html"
-    },
-    {
-      "run_date": "2026-05-25",
-      "full_name": "datawhalechina/easy-vibe",
-      "html_url": "https://github.com/datawhalechina/easy-vibe",
-      "description": "💻 vibe coding 2026 | Your first modern Coding course for beginners to master step by step.",
-      "readme_summary": "Jump right in and vibe together — if you can talk, you can build apps. 直接上手，一起 vibe！会说话就会做应用。 你好 · Hello · 哈囉 · こんにちは · 안녕하세요 · Hola · Bonjour · Hallo · مرحبا · Xin chào Stage 1 of our tutorial is now available in 10 languages.",
+      "run_date": "2026-06-03",
+      "full_name": "affaan-m/ECC",
+      "html_url": "https://github.com/affaan-m/ECC",
+      "description": "The agent harness performance optimization system. Skills, instincts, memory, security, and research-first development for Claude Code, Codex, Opencode, Cursor and beyond.",
+      "readme_summary": "Language:** English | Português (Brasil) | 简体中文 | 繁體中文 | 日本語 | 한국어 | Türkçe | Русский | Tiếng Việt | ไทย | Deutsch K+ stars** | **28K+ forks** | **170+ contributors** | **12+ language ecosystems** | **Cross-harness agent workflows** Language / 语言 / 語言 / Dil / Язык / Ngôn ngữ** English** | Português (Brasil) | 简体中文 | 繁體中文 | 日本語 | 한국어 | Türkçe | Русский | Tiếng Việt | ไทย | Deutsch The harness-native operator system for agentic work.",
       "category": "AI Agent",
       "language": "JavaScript",
-      "stargazers_count": 14526,
-      "forks_count": 1383,
-      "star_growth": 3311,
-      "score": 0.5529,
+      "stargazers_count": 204317,
+      "forks_count": 31343,
+      "star_growth": 34,
+      "score": 0.4675,
       "sources": [
+        "github_search",
         "github_trending"
       ],
       "trending_rank": 11,
       "selection_reasons": [
         "进入 GitHub Trending 周榜第 11 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 3311，近期热度上升。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发。",
-        "当前累计 Star 14526，具备一定社区关注度。"
+        "较上次记录新增 Star 34，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "当前累计 Star 204317，具备一定社区关注度。"
       ],
-      "security_flags": [
-        "未识别到许可证，复用代码前需要人工确认授权。"
-      ],
-      "security_score": 85,
+      "security_flags": [],
+      "security_score": 100,
       "security_level": "low",
-      "quality_flags": [
-        "许可证元数据缺失，复用代码前需要确认授权。"
-      ],
-      "quality_score": 88,
+      "quality_flags": [],
+      "quality_score": 100,
       "quality_level": "high",
-      "report_url": "weekly/2026-05-25.html"
+      "report_url": "weekly/2026-06-03.html"
     },
     {
-      "run_date": "2026-05-25",
+      "run_date": "2026-06-03",
+      "full_name": "microsoft/agent-governance-toolkit",
+      "html_url": "https://github.com/microsoft/agent-governance-toolkit",
+      "description": "AI Agent Governance Toolkit — Policy enforcement, zero-trust identity, execution sandboxing, and reliability engineering for autonomous AI agents. Covers 10/10 OWASP Agentic Top 10.",
+      "readme_summary": "🌍 English | 日本語 | 简体中文 | 한국어 🚀 Quick Start · 📋 Specifications · 📦 PyPI · 📝 Changelog [!IMPORTANT] Public Preview** -- production-quality, Microsoft-signed releases. May have breaking changes before GA. Policy enforcement, identity, sandboxing, and SRE for autonomous AI agents.",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 3838,
+      "forks_count": 534,
+      "star_growth": 2,
+      "score": 0.3231,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 15,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 15 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 2，近期热度上升。",
+        "当前累计 Star 3838，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-03.html"
+    },
+    {
+      "run_date": "2026-06-03",
       "full_name": "NousResearch/hermes-agent",
       "html_url": "https://github.com/NousResearch/hermes-agent",
       "description": "The agent that grows with you",
       "readme_summary": "The self-improving AI agent built by Nous Research.** It's the only agent with a built-in learning loop — it creates skills from experience, improves them during use, nudges itself to persist knowledge, searches its own past conversations, and builds a deepening model of who you are across sessions.",
       "category": "AI Agent",
       "language": "Python",
-      "stargazers_count": 165820,
-      "forks_count": 27353,
-      "star_growth": 10845,
-      "score": 0.4784,
+      "stargazers_count": 177677,
+      "forks_count": 30407,
+      "star_growth": 23,
+      "score": 0.29,
       "sources": [
         "github_search"
       ],
       "trending_rank": 0,
       "selection_reasons": [
-        "较上次记录新增 Star 10845，近期热度上升。",
+        "较上次记录新增 Star 23，近期热度上升。",
         "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
-        "当前累计 Star 165820，具备一定社区关注度。"
+        "当前累计 Star 177677，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
       ],
       "security_flags": [],
       "security_score": 100,
@@ -620,7 +308,317 @@
       ],
       "quality_score": 92,
       "quality_level": "high",
-      "report_url": "weekly/2026-05-25.html"
+      "report_url": "weekly/2026-06-03.html"
+    },
+    {
+      "run_date": "2026-06-02",
+      "full_name": "harry0703/MoneyPrinterTurbo",
+      "html_url": "https://github.com/harry0703/MoneyPrinterTurbo",
+      "description": "利用AI大模型，一键生成高清短视频 Generate short videos with one click using AI LLM.",
+      "readme_summary": "MoneyPrinterTurbo 💸 简体中文 | English | العربية 只需提供一个视频 主题 或 关键词 ，就可以全自动生成视频文案、视频素材、视频字幕、视频背景音乐，然后合成一个高清的短视频。 感谢 AIHubMix 对本项目的赞助。AIHubMix 深度适配 OpenAI、Claude、Gemini、DeepSeek、智谱、千问等全球顶级最新模型，一站式快速接入 GPT-5.5、deepseek-v4-flash 等 700+ 模型（含多个免费模型），提供企业级生产稳定性保障。",
+      "category": "LLM Tooling",
+      "language": "Python",
+      "stargazers_count": 77276,
+      "forks_count": 10968,
+      "star_growth": 12,
+      "score": 0.7112,
+      "sources": [
+        "github_search",
+        "github_trending"
+      ],
+      "trending_rank": 1,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 1 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 12，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "当前累计 Star 77276，具备一定社区关注度。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-02.html"
+    },
+    {
+      "run_date": "2026-06-02",
+      "full_name": "Lum1104/Understand-Anything",
+      "html_url": "https://github.com/Lum1104/Understand-Anything",
+      "description": "Graphs that teach > graphs that impress. Turn any code into an interactive knowledge graph you can explore, search, and ask questions about. Works with Claude Code, Codex, Cursor, Copilot, Gemini CLI, and more.",
+      "readme_summary": "Understand Anything Turn any codebase, knowledge base, or docs into an interactive knowledge graph you can explore, search, and ask questions about. Works with Claude Code, Codex, Cursor, Copilot, Gemini CLI, and more.",
+      "category": "AI Agent",
+      "language": "TypeScript",
+      "stargazers_count": 49263,
+      "forks_count": 4013,
+      "star_growth": 0,
+      "score": 0.5885,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 2,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 2 位，是本期最重要的热度信号。",
+        "当前累计 Star 49263，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-02.html"
+    },
+    {
+      "run_date": "2026-06-02",
+      "full_name": "microsoft/markitdown",
+      "html_url": "https://github.com/microsoft/markitdown",
+      "description": "Python tool for converting files and office documents to Markdown.",
+      "readme_summary": "[!IMPORTANT] MarkItDown performs I/O with the privileges of the current process. Like open() or requests.get(), it will access resources that the process itself can access.",
+      "category": "LLM Tooling",
+      "language": "Python",
+      "stargazers_count": 139402,
+      "forks_count": 9493,
+      "star_growth": 23,
+      "score": 0.4902,
+      "sources": [
+        "github_search",
+        "github_trending"
+      ],
+      "trending_rank": 3,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 3 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 23，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "当前累计 Star 139402，具备一定社区关注度。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-02.html"
+    },
+    {
+      "run_date": "2026-06-02",
+      "full_name": "rohitg00/ai-engineering-from-scratch",
+      "html_url": "https://github.com/rohitg00/ai-engineering-from-scratch",
+      "description": "Learn it. Build it. Ship it for others.",
+      "readme_summary": "% of students already use AI tools. Only 18% feel prepared to use them professionally.** This curriculum closes that gap. Python, TypeScript, Rust, Julia.",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 26961,
+      "forks_count": 4378,
+      "star_growth": 0,
+      "score": 0.6189,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 5,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 5 位，是本期最重要的热度信号。",
+        "当前累计 Star 26961，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-02.html"
+    },
+    {
+      "run_date": "2026-06-02",
+      "full_name": "Leonxlnx/taste-skill",
+      "html_url": "https://github.com/Leonxlnx/taste-skill",
+      "description": "Taste-Skill - gives your AI good taste. stops the AI from generating boring, generic slop ",
+      "readme_summary": "The Anti-Slop Frontend Framework for AI Agents Portable **Agent Skills** that upgrade AI-built interfaces: stronger layout, typography, motion, and spacing instead of boilerplate-looking UIs. This repo also includes **image-generation skills** for reference boards (web, mobile, brand kits).",
+      "category": "AI Agent",
+      "language": "Shell",
+      "stargazers_count": 31223,
+      "forks_count": 2314,
+      "star_growth": 7,
+      "score": 0.5135,
+      "sources": [
+        "github_search",
+        "github_trending"
+      ],
+      "trending_rank": 6,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 6 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 7，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "当前累计 Star 31223，具备一定社区关注度。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-02.html"
+    },
+    {
+      "run_date": "2026-06-02",
+      "full_name": "anthropics/knowledge-work-plugins",
+      "html_url": "https://github.com/anthropics/knowledge-work-plugins",
+      "description": "Open source repository of plugins primarily intended for knowledge workers to use in Claude Cowork",
+      "readme_summary": "Plugins that turn Claude into a specialist for your role, team, and company. Built for Claude Cowork, also compatible with Claude Code. Cowork lets you set the goal and Claude delivers finished, professional work.",
+      "category": "LLM Tooling",
+      "language": "Python",
+      "stargazers_count": 18722,
+      "forks_count": 2193,
+      "star_growth": 0,
+      "score": 0.4747,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 7,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 7 位，是本期最重要的热度信号。",
+        "当前累计 Star 18722，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+      ],
+      "quality_score": 92,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-02.html"
+    },
+    {
+      "run_date": "2026-06-02",
+      "full_name": "colbymchenry/codegraph",
+      "html_url": "https://github.com/colbymchenry/codegraph",
+      "description": "Pre-indexed code knowledge graph for Claude Code, Codex, Gemini, Cursor, OpenCode, AntiGravity, Kiro, and Hermes Agent — fewer tokens, fewer tool calls, 100% local",
+      "readme_summary": "~25% cheaper · ~62% fewer tool calls · 100% local** No Node.js required** — one command grabs the right build for your OS: Already have Node? Use npm instead (works on any version): CodeGraph bundles its own runtime — nothing to compile, no native build, works the same everywhere.",
+      "category": "AI Agent",
+      "language": "TypeScript",
+      "stargazers_count": 37207,
+      "forks_count": 2314,
+      "star_growth": 31697,
+      "score": 0.6481,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 8,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 8 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 31697，近期热度上升。",
+        "当前累计 Star 37207，具备一定社区关注度。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+      ],
+      "quality_score": 92,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-02.html"
+    },
+    {
+      "run_date": "2026-06-02",
+      "full_name": "mukul975/Anthropic-Cybersecurity-Skills",
+      "html_url": "https://github.com/mukul975/Anthropic-Cybersecurity-Skills",
+      "description": "754 structured cybersecurity skills for AI agents · Mapped to 5 frameworks: MITRE ATT&CK, NIST CSF 2.0, MITRE ATLAS, D3FEND & NIST AI RMF · agentskills.io standard · Works with Claude Code, GitHub Copilot, Codex CLI, Cursor, Gemini CLI & 20+ platforms · 26 security domains · Apache 2.0",
+      "readme_summary": "production-grade cybersecurity skills · 26 security domains · 5 framework mappings · 26+ AI platforms** Get Started · What's Inside · Frameworks · Platforms · Contributing ⚠️ **Community Project** — This is an independent, community-created project. Not affiliated with Anthropic PBC.",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 13359,
+      "forks_count": 1567,
+      "star_growth": 0,
+      "score": 0.4814,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 9,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 9 位，是本期最重要的热度信号。",
+        "当前累计 Star 13359，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [
+        "包含恶意软件相关表述，需人工确认项目用途。"
+      ],
+      "security_score": 65,
+      "security_level": "medium",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-02.html"
+    },
+    {
+      "run_date": "2026-06-02",
+      "full_name": "p-e-w/heretic",
+      "html_url": "https://github.com/p-e-w/heretic",
+      "description": "Fully automatic censorship removal for language models",
+      "readme_summary": "Heretic is a tool that removes censorship (aka \"safety alignment\") from transformer-based language models without expensive post-training. It combines an advanced implementation of directional ablation, also known as \"abliteration\" (Arditi et al.",
+      "category": "LLM Tooling",
+      "language": "Python",
+      "stargazers_count": 23138,
+      "forks_count": 2470,
+      "star_growth": 0,
+      "score": 0.4028,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 12,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 12 位，是本期最重要的热度信号。",
+        "当前累计 Star 23138，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-02.html"
+    },
+    {
+      "run_date": "2026-06-02",
+      "full_name": "affaan-m/ECC",
+      "html_url": "https://github.com/affaan-m/ECC",
+      "description": "The agent harness performance optimization system. Skills, instincts, memory, security, and research-first development for Claude Code, Codex, Opencode, Cursor and beyond.",
+      "readme_summary": "Language:** English | Português (Brasil) | 简体中文 | 繁體中文 | 日本語 | 한국어 | Türkçe | Русский | Tiếng Việt | ไทย | Deutsch K+ stars** | **28K+ forks** | **170+ contributors** | **12+ language ecosystems** | **Cross-harness agent workflows** Language / 语言 / 語言 / Dil / Язык / Ngôn ngữ** English** | Português (Brasil) | 简体中文 | 繁體中文 | 日本語 | 한국어 | Türkçe | Русский | Tiếng Việt | ไทย | Deutsch The harness-native operator system for agentic work.",
+      "category": "AI Agent",
+      "language": "JavaScript",
+      "stargazers_count": 202580,
+      "forks_count": 31077,
+      "star_growth": 5,
+      "score": 0.3809,
+      "sources": [
+        "github_search",
+        "github_trending"
+      ],
+      "trending_rank": 11,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 11 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 5，近期热度上升。",
+        "当前累计 Star 202580，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-02.html"
     },
     {
       "run_date": "2026-05-19",
@@ -940,19 +938,19 @@
       "readme_summary": "Stealth Chromium that passes every bot detection test. Not a patched config. Not a JS injection.",
       "category": "AI Agent",
       "language": "Python",
-      "stargazers_count": 13904,
-      "forks_count": 1084,
-      "star_growth": 1866,
-      "score": 0.6945,
+      "stargazers_count": 13914,
+      "forks_count": 1085,
+      "star_growth": 0,
+      "score": 0.6075,
       "sources": [
         "github_trending"
       ],
       "trending_rank": 1,
       "selection_reasons": [
         "进入 GitHub Trending 周榜第 1 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 1866，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
+        "当前累计 Star 13914，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。",
+        "最近一周仍有更新或维护活动。"
       ],
       "security_flags": [],
       "security_score": 100,
@@ -970,19 +968,19 @@
       "readme_summary": "Your coding agent remembers everything. No more re-explaining. Built on iii engine Persistent memory for Claude Code, Cursor, Gemini CLI, Codex CLI, Hermes, OpenClaw, pi, OpenCode, and any MCP client.",
       "category": "AI Agent",
       "language": "TypeScript",
-      "stargazers_count": 11413,
-      "forks_count": 961,
-      "star_growth": 1598,
-      "score": 0.792,
+      "stargazers_count": 11422,
+      "forks_count": 962,
+      "star_growth": 0,
+      "score": 0.6286,
       "sources": [
         "github_trending"
       ],
       "trending_rank": 2,
       "selection_reasons": [
         "进入 GitHub Trending 周榜第 2 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 1598，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
+        "当前累计 Star 11422，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。",
+        "最近一周仍有更新或维护活动。"
       ],
       "security_flags": [],
       "security_score": 100,
@@ -1000,19 +998,18 @@
       "readme_summary": "简体中文 | English | 日本語 Monetize · Publish · Engage · Create —— 一站式平台。** AiToEarn 通过 **AI Agent自动化**，帮助 OPC（一人公司）、创作者、品牌与企业在全球主流平台上构建、分发并变现内容。 支持渠道： 抖音、小红书（Rednote）、快手、哔哩哔哩、视频号、TikTok、YouTube、Facebook、Instagram、Threads、Twitter（X）、Pinterest、LinkedIn 💡 **方式 ②③④ 都需要先获取 API Key**，请先看 如何获取 API Key。",
       "category": "Other",
       "language": "TypeScript",
-      "stargazers_count": 14767,
+      "stargazers_count": 14771,
       "forks_count": 2457,
-      "star_growth": 642,
-      "score": 0.4745,
+      "star_growth": 0,
+      "score": 0.4747,
       "sources": [
         "github_trending"
       ],
       "trending_rank": 3,
       "selection_reasons": [
         "进入 GitHub Trending 周榜第 3 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 642，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
+        "当前累计 Star 14771，具备一定社区关注度。",
+        "最近一周仍有更新或维护活动。"
       ],
       "security_flags": [],
       "security_score": 100,
@@ -1032,18 +1029,17 @@
       "readme_summary": "Bun &nbsp;&nbsp;•&nbsp;&nbsp; &nbsp;&nbsp;•&nbsp;&nbsp; &nbsp;&nbsp;•&nbsp;&nbsp; Bun is an all-in-one toolkit for JavaScript and TypeScript apps. It ships as a single executable called bun.",
       "category": "Other",
       "language": "Rust",
-      "stargazers_count": 91748,
+      "stargazers_count": 91749,
       "forks_count": 4578,
       "star_growth": 0,
-      "score": 0.4209,
+      "score": 0.455,
       "sources": [
         "github_trending"
       ],
       "trending_rank": 5,
       "selection_reasons": [
         "进入 GitHub Trending 周榜第 5 位，是本期最重要的热度信号。",
-        "匹配当前个性化方向：开发者工具。",
-        "当前累计 Star 91748，具备一定社区关注度。",
+        "当前累计 Star 91749，具备一定社区关注度。",
         "最近一周仍有更新或维护活动。"
       ],
       "security_flags": [],
@@ -1062,19 +1058,19 @@
       "readme_summary": "繁體中文版 A comprehensive suite of Claude Code skills for academic research, covering the full pipeline from research to publication.",
       "category": "LLM Tooling",
       "language": "Python",
-      "stargazers_count": 9486,
-      "forks_count": 1043,
+      "stargazers_count": 9505,
+      "forks_count": 1046,
       "star_growth": 0,
-      "score": 0.4599,
+      "score": 0.4707,
       "sources": [
         "github_trending"
       ],
       "trending_rank": 6,
       "selection_reasons": [
         "进入 GitHub Trending 周榜第 6 位，是本期最重要的热度信号。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
-        "当前累计 Star 9486，具备一定社区关注度。",
-        "仓库主题、语言或名称与关注方向匹配。"
+        "当前累计 Star 9505，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。",
+        "最近一周仍有更新或维护活动。"
       ],
       "security_flags": [],
       "security_score": 100,
@@ -1092,19 +1088,19 @@
       "readme_summary": "My agent skills that I use every day to do real engineering - not vibe coding. Developing real applications is hard. Approaches like GSD, BMAD, and Spec-Kit try to help by owning the process.",
       "category": "LLM Tooling",
       "language": "Shell",
-      "stargazers_count": 89265,
-      "forks_count": 7806,
-      "star_growth": 3825,
-      "score": 0.6116,
+      "stargazers_count": 89290,
+      "forks_count": 7808,
+      "star_growth": 21656,
+      "score": 0.6346,
       "sources": [
         "github_trending"
       ],
       "trending_rank": 7,
       "selection_reasons": [
         "进入 GitHub Trending 周榜第 7 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 3825，近期热度上升。",
+        "较上次记录新增 Star 21656，近期热度上升。",
         "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "当前累计 Star 89265，具备一定社区关注度。"
+        "当前累计 Star 89290，具备一定社区关注度。"
       ],
       "security_flags": [],
       "security_score": 100,
@@ -1124,57 +1120,24 @@
       "readme_summary": "Beta Software** — Under active development. APIs and firmware may change.",
       "category": "AI Agent",
       "language": "Rust",
-      "stargazers_count": 59263,
+      "stargazers_count": 59267,
       "forks_count": 7735,
-      "star_growth": 1588,
-      "score": 0.4398,
+      "star_growth": 0,
+      "score": 0.3722,
       "sources": [
         "github_trending"
       ],
       "trending_rank": 8,
       "selection_reasons": [
         "进入 GitHub Trending 周榜第 8 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 1588，近期热度上升。",
-        "匹配当前个性化方向：Python 工具与应用开发、开发者工具。",
-        "当前累计 Star 59263，具备一定社区关注度。"
+        "当前累计 Star 59267，具备一定社区关注度。",
+        "最近一周仍有更新或维护活动。"
       ],
       "security_flags": [],
       "security_score": 100,
       "security_level": "low",
       "quality_flags": [],
       "quality_score": 100,
-      "quality_level": "high",
-      "report_url": "weekly/2026-05-18.html"
-    },
-    {
-      "run_date": "2026-05-18",
-      "full_name": "NousResearch/hermes-agent",
-      "html_url": "https://github.com/NousResearch/hermes-agent",
-      "description": "The agent that grows with you",
-      "readme_summary": "The self-improving AI agent built by Nous Research.** It's the only agent with a built-in learning loop — it creates skills from experience, improves them during use, nudges itself to persist knowledge, searches its own past conversations, and builds a deepening model of who you are across sessions.",
-      "category": "AI Agent",
-      "language": "Python",
-      "stargazers_count": 154975,
-      "forks_count": 24838,
-      "star_growth": 2575,
-      "score": 0.4106,
-      "sources": [
-        "github_search"
-      ],
-      "trending_rank": 0,
-      "selection_reasons": [
-        "较上次记录新增 Star 2575，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
-        "当前累计 Star 154975，具备一定社区关注度。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [
-        "仓库简介较短，项目定位信息有限。"
-      ],
-      "quality_score": 92,
       "quality_level": "high",
       "report_url": "weekly/2026-05-18.html"
     },
@@ -1188,8 +1151,8 @@
       "language": "TypeScript",
       "stargazers_count": 34449,
       "forks_count": 3449,
-      "star_growth": 312,
-      "score": 0.3792,
+      "star_growth": 4826,
+      "score": 0.4172,
       "sources": [
         "github_search",
         "github_trending"
@@ -1197,9 +1160,9 @@
       "trending_rank": 9,
       "selection_reasons": [
         "进入 GitHub Trending 周榜第 9 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 312，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
+        "较上次记录新增 Star 4826，近期热度上升。",
+        "当前累计 Star 34449，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
       ],
       "security_flags": [],
       "security_score": 100,
@@ -1217,19 +1180,19 @@
       "readme_summary": "Never stop coding. Use in your CLI tool:** That's it!** Start coding with FREE AI models. Alternative: run from source (this repository):** This repository package is private (9router-app), so source/Docker execution is the expected local development path.",
       "category": "AI Agent",
       "language": "JavaScript",
-      "stargazers_count": 11665,
+      "stargazers_count": 11671,
       "forks_count": 1777,
-      "star_growth": 885,
-      "score": 0.378,
+      "star_growth": 5444,
+      "score": 0.3641,
       "sources": [
         "github_trending"
       ],
       "trending_rank": 11,
       "selection_reasons": [
         "进入 GitHub Trending 周榜第 11 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 885，近期热度上升。",
+        "较上次记录新增 Star 5444，近期热度上升。",
         "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
+        "当前累计 Star 11671，具备一定社区关注度。"
       ],
       "security_flags": [],
       "security_score": 100,
@@ -1240,940 +1203,36 @@
       "report_url": "weekly/2026-05-18.html"
     },
     {
-      "run_date": "2026-05-16",
-      "full_name": "CloakHQ/CloakBrowser",
-      "html_url": "https://github.com/CloakHQ/CloakBrowser",
-      "description": "Stealth Chromium that passes every bot detection test. Drop-in Playwright replacement with source-level fingerprint patches. 30/30 tests passed.",
-      "readme_summary": "Stealth Chromium that passes every bot detection test. Not a patched config. Not a JS injection.",
-      "category": "AI Agent",
-      "language": "Python",
-      "stargazers_count": 12038,
-      "forks_count": 916,
-      "star_growth": 859,
-      "score": 0.6353,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 2,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 2 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 859，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
-      "quality_level": "high",
-      "report_url": "weekly/2026-05-16.html"
-    },
-    {
-      "run_date": "2026-05-16",
-      "full_name": "yikart/AiToEarn",
-      "html_url": "https://github.com/yikart/AiToEarn",
-      "description": "Let's use AI to Earn!",
-      "readme_summary": "简体中文 | English | 日本語 Monetize · Publish · Engage · Create —— 一站式平台。** AiToEarn 通过 **AI Agent自动化**，帮助 OPC（一人公司）、创作者、品牌与企业在全球主流平台上构建、分发并变现内容。 支持渠道： 抖音、小红书（Rednote）、快手、哔哩哔哩、视频号、TikTok、YouTube、Facebook、Instagram、Threads、Twitter（X）、Pinterest、LinkedIn 💡 **方式 ②③④ 都需要先获取 API Key**，请先看 如何获取 API Key。",
-      "category": "Other",
-      "language": "TypeScript",
-      "stargazers_count": 14125,
-      "forks_count": 2377,
-      "star_growth": 262,
-      "score": 0.4672,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 3,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 3 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 262，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [
-        "仓库简介较短，项目定位信息有限。"
-      ],
-      "quality_score": 92,
-      "quality_level": "high",
-      "report_url": "weekly/2026-05-16.html"
-    },
-    {
-      "run_date": "2026-05-16",
-      "full_name": "rohitg00/agentmemory",
-      "html_url": "https://github.com/rohitg00/agentmemory",
-      "description": "#1 Persistent memory for AI coding agents based on real-world benchmarks",
-      "readme_summary": "Your coding agent remembers everything. No more re-explaining. Built on iii engine Persistent memory for Claude Code, Cursor, Gemini CLI, Codex CLI, Hermes, OpenClaw, pi, OpenCode, and any MCP client.",
-      "category": "AI Agent",
-      "language": "TypeScript",
-      "stargazers_count": 9815,
-      "forks_count": 815,
-      "star_growth": 650,
-      "score": 0.6975,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 4,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 4 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 650，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
-      "quality_level": "high",
-      "report_url": "weekly/2026-05-16.html"
-    },
-    {
-      "run_date": "2026-05-16",
-      "full_name": "bytedance/UI-TARS-desktop",
-      "html_url": "https://github.com/bytedance/UI-TARS-desktop",
-      "description": "The Open-Source Multimodal AI Agent Stack: Connecting Cutting-Edge AI Models and Agent Infra",
-      "readme_summary": "English | 简体中文 TARS \\* is a Multimodal AI Agent stack, currently shipping two projects: Agent TARS and UI-TARS-desktop: Agent TARS UI-TARS-desktop Agent TARS is a general multimodal AI Agent stack, it brings the power of GUI Agent and Vision into your terminal, computer, browser and product.",
-      "category": "AI Agent",
-      "language": "TypeScript",
-      "stargazers_count": 34137,
-      "forks_count": 3399,
-      "star_growth": 175,
-      "score": 0.4753,
-      "sources": [
-        "github_search",
-        "github_trending"
-      ],
-      "trending_rank": 5,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 5 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 175，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
-      "quality_level": "high",
-      "report_url": "weekly/2026-05-16.html"
-    },
-    {
-      "run_date": "2026-05-16",
-      "full_name": "decolua/9router",
-      "html_url": "https://github.com/decolua/9router",
-      "description": "Unlimited FREE AI coding. Connect Claude Code, Codex, Cursor, Cline, Copilot, Antigravity to FREE Claude/GPT/Gemini via 40+ providers. Auto-fallback, RTK -40% tokens, never hit limits.",
-      "readme_summary": "Never stop coding. Use in your CLI tool:** That's it!** Start coding with FREE AI models. Alternative: run from source (this repository):** This repository package is private (9router-app), so source/Docker execution is the expected local development path.",
-      "category": "AI Agent",
-      "language": "JavaScript",
-      "stargazers_count": 10780,
-      "forks_count": 1663,
-      "star_growth": 406,
-      "score": 0.5494,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 6,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 6 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 406，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
-      "quality_level": "high",
-      "report_url": "weekly/2026-05-16.html"
-    },
-    {
-      "run_date": "2026-05-16",
-      "full_name": "Hmbown/DeepSeek-TUI",
-      "html_url": "https://github.com/Hmbown/DeepSeek-TUI",
-      "description": "Coding agent for DeepSeek models that runs in your terminal",
-      "readme_summary": "Terminal coding agent for DeepSeek V4. It runs from the deepseek command, streams reasoning blocks, edits local workspaces with approval gates, and includes an auto mode that chooses both model and thinking level per turn.",
-      "category": "AI Agent",
-      "language": "Rust",
-      "stargazers_count": 30036,
-      "forks_count": 2506,
-      "star_growth": 764,
-      "score": 0.5556,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 7,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 7 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 764，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
-      "quality_level": "high",
-      "report_url": "weekly/2026-05-16.html"
-    },
-    {
-      "run_date": "2026-05-16",
-      "full_name": "HKUDS/AI-Trader",
-      "html_url": "https://github.com/HKUDS/AI-Trader",
-      "description": "\"AI-Trader: 100% Fully-Automated Agent-Native Trading\"  ",
-      "readme_summary": "Just like humans have their trading platforms, **AI agents need their own**. AI-Trader** is an **Agent-Native Trading Platform**: Exchange ideas and sharpen trading skills through AI agents! Any AI agent joins the **AI-Trader** platform in seconds -- Simply send this message to your agent.",
-      "category": "AI Agent",
-      "language": "Python",
-      "stargazers_count": 17429,
-      "forks_count": 2686,
-      "star_growth": 170,
-      "score": 0.3697,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 8,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 8 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 170，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
-      ],
-      "security_flags": [
-        "未识别到许可证，复用代码前需要人工确认授权。"
-      ],
-      "security_score": 85,
-      "security_level": "low",
-      "quality_flags": [
-        "许可证元数据缺失，复用代码前需要确认授权。",
-        "仓库主题标签较少，垂直方向判断可能不够稳定。"
-      ],
-      "quality_score": 80,
-      "quality_level": "high",
-      "report_url": "weekly/2026-05-16.html"
-    },
-    {
-      "run_date": "2026-05-16",
-      "full_name": "mattpocock/skills",
-      "html_url": "https://github.com/mattpocock/skills",
-      "description": "Skills for Real Engineers. Straight from my .claude directory.",
-      "readme_summary": "My agent skills that I use every day to do real engineering - not vibe coding. Developing real applications is hard. Approaches like GSD, BMAD, and Spec-Kit try to help by owning the process.",
-      "category": "LLM Tooling",
-      "language": "Shell",
-      "stargazers_count": 85440,
-      "forks_count": 7405,
-      "star_growth": 2439,
-      "score": 0.5604,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 9,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 9 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 2439，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "当前累计 Star 85440，具备一定社区关注度。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [
-        "仓库主题标签较少，垂直方向判断可能不够稳定。"
-      ],
-      "quality_score": 92,
-      "quality_level": "high",
-      "report_url": "weekly/2026-05-16.html"
-    },
-    {
-      "run_date": "2026-05-16",
+      "run_date": "2026-05-18",
       "full_name": "NousResearch/hermes-agent",
       "html_url": "https://github.com/NousResearch/hermes-agent",
       "description": "The agent that grows with you",
       "readme_summary": "The self-improving AI agent built by Nous Research.** It's the only agent with a built-in learning loop — it creates skills from experience, improves them during use, nudges itself to persist knowledge, searches its own past conversations, and builds a deepening model of who you are across sessions.",
       "category": "AI Agent",
       "language": "Python",
-      "stargazers_count": 152400,
-      "forks_count": 24219,
-      "star_growth": 1617,
-      "score": 0.4079,
+      "stargazers_count": 154981,
+      "forks_count": 24838,
+      "star_growth": 14543,
+      "score": 0.363,
       "sources": [
         "github_search"
       ],
       "trending_rank": 0,
       "selection_reasons": [
-        "较上次记录新增 Star 1617，近期热度上升。",
+        "较上次记录新增 Star 14543，近期热度上升。",
         "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
-        "当前累计 Star 152400，具备一定社区关注度。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [
-        "仓库简介较短，项目定位信息有限。"
-      ],
-      "quality_score": 92,
-      "quality_level": "high",
-      "report_url": "weekly/2026-05-16.html"
-    },
-    {
-      "run_date": "2026-05-16",
-      "full_name": "rtk-ai/rtk",
-      "html_url": "https://github.com/rtk-ai/rtk",
-      "description": "CLI proxy that reduces LLM token consumption by 60-90% on common dev commands. Single Rust binary, zero dependencies",
-      "readme_summary": "High-performance CLI proxy that reduces LLM token consumption by 60-90% rtk filters and compresses command outputs before they reach your LLM context.",
-      "category": "AI Agent",
-      "language": "Rust",
-      "stargazers_count": 48629,
-      "forks_count": 2954,
-      "star_growth": 513,
-      "score": 0.3761,
-      "sources": [
-        "github_search"
-      ],
-      "trending_rank": 0,
-      "selection_reasons": [
-        "较上次记录新增 Star 513，近期热度上升。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
-        "当前累计 Star 48629，具备一定社区关注度。",
+        "当前累计 Star 154981，具备一定社区关注度。",
         "仓库主题、语言或名称与关注方向匹配。"
       ],
       "security_flags": [],
       "security_score": 100,
       "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
-      "quality_level": "high",
-      "report_url": "weekly/2026-05-16.html"
-    },
-    {
-      "run_date": "2026-05-15",
-      "full_name": "CloakHQ/CloakBrowser",
-      "html_url": "https://github.com/CloakHQ/CloakBrowser",
-      "description": "Stealth Chromium that passes every bot detection test. Drop-in Playwright replacement with source-level fingerprint patches. 30/30 tests passed.",
-      "readme_summary": "Stealth Chromium that passes every bot detection test. Not a patched config. Not a JS injection.",
-      "category": "AI Agent",
-      "language": "Python",
-      "stargazers_count": 11179,
-      "forks_count": 835,
-      "star_growth": 0,
-      "score": 0.5439,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 2,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 2 位，是本期最重要的热度信号。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
-        "当前累计 Star 11179，具备一定社区关注度。",
-        "仓库主题、语言或名称与关注方向匹配。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
-      "quality_level": "high",
-      "report_url": "weekly/2026-05-15.html"
-    },
-    {
-      "run_date": "2026-05-15",
-      "full_name": "bytedance/UI-TARS-desktop",
-      "html_url": "https://github.com/bytedance/UI-TARS-desktop",
-      "description": "The Open-Source Multimodal AI Agent Stack: Connecting Cutting-Edge AI Models and Agent Infra",
-      "readme_summary": "English | 简体中文 TARS \\* is a Multimodal AI Agent stack, currently shipping two projects: Agent TARS and UI-TARS-desktop: Agent TARS UI-TARS-desktop Agent TARS is a general multimodal AI Agent stack, it brings the power of GUI Agent and Vision into your terminal, computer, browser and product.",
-      "category": "AI Agent",
-      "language": "TypeScript",
-      "stargazers_count": 33962,
-      "forks_count": 3374,
-      "star_growth": 1441,
-      "score": 0.558,
-      "sources": [
-        "github_search",
-        "github_trending"
-      ],
-      "trending_rank": 3,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 3 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 1441，近期热度上升。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
-        "当前累计 Star 33962，具备一定社区关注度。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
-      "quality_level": "high",
-      "report_url": "weekly/2026-05-15.html"
-    },
-    {
-      "run_date": "2026-05-15",
-      "full_name": "Hmbown/DeepSeek-TUI",
-      "html_url": "https://github.com/Hmbown/DeepSeek-TUI",
-      "description": "Coding agent for DeepSeek models that runs in your terminal",
-      "readme_summary": "Terminal coding agent for DeepSeek V4. It runs from the deepseek command, streams reasoning blocks, edits local workspaces with approval gates, and includes an auto mode that chooses both model and thinking level per turn.",
-      "category": "AI Agent",
-      "language": "Rust",
-      "stargazers_count": 29272,
-      "forks_count": 2442,
-      "star_growth": 4722,
-      "score": 0.6573,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 4,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 4 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 4722，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
-      "quality_level": "high",
-      "report_url": "weekly/2026-05-15.html"
-    },
-    {
-      "run_date": "2026-05-15",
-      "full_name": "rohitg00/agentmemory",
-      "html_url": "https://github.com/rohitg00/agentmemory",
-      "description": "#1 Persistent memory for AI coding agents based on real-world benchmarks",
-      "readme_summary": "Your coding agent remembers everything. No more re-explaining. Built on iii engine Persistent memory for Claude Code, Cursor, Gemini CLI, Codex CLI, Hermes, OpenClaw, pi, OpenCode, and any MCP client.",
-      "category": "AI Agent",
-      "language": "TypeScript",
-      "stargazers_count": 9165,
-      "forks_count": 761,
-      "star_growth": 0,
-      "score": 0.6164,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 5,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 5 位，是本期最重要的热度信号。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
-        "当前累计 Star 9165，具备一定社区关注度。",
-        "仓库主题、语言或名称与关注方向匹配。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
-      "quality_level": "high",
-      "report_url": "weekly/2026-05-15.html"
-    },
-    {
-      "run_date": "2026-05-15",
-      "full_name": "yikart/AiToEarn",
-      "html_url": "https://github.com/yikart/AiToEarn",
-      "description": "Let's use AI to Earn!",
-      "readme_summary": "简体中文 | English | 日本語 Monetize · Publish · Engage · Create —— 一站式平台。** AiToEarn 通过 **AI Agent自动化**，帮助 OPC（一人公司）、创作者、品牌与企业在全球主流平台上构建、分发并变现内容。 支持渠道： 抖音、小红书（Rednote）、快手、哔哩哔哩、视频号、微信公众号、TikTok、YouTube、Facebook、Instagram、Threads、Twitter（X）、Pinterest、LinkedIn 💡 **方式 ②③④ 都需要先获取 API Key**，请先看 如何获取 API Key。",
-      "category": "Other",
-      "language": "TypeScript",
-      "stargazers_count": 13863,
-      "forks_count": 2346,
-      "star_growth": 0,
-      "score": 0.3809,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 6,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 6 位，是本期最重要的热度信号。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
-        "当前累计 Star 13863，具备一定社区关注度。",
-        "最近一周仍有更新或维护活动。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
       "quality_flags": [
         "仓库简介较短，项目定位信息有限。"
       ],
       "quality_score": 92,
       "quality_level": "high",
-      "report_url": "weekly/2026-05-15.html"
-    },
-    {
-      "run_date": "2026-05-15",
-      "full_name": "decolua/9router",
-      "html_url": "https://github.com/decolua/9router",
-      "description": "Unlimited FREE AI coding. Connect Claude Code, Codex, Cursor, Cline, Copilot, Antigravity to FREE Claude/GPT/Gemini via 40+ providers. Auto-fallback, RTK -40% tokens, never hit limits.",
-      "readme_summary": "Never stop coding. Use in your CLI tool:** That's it!** Start coding with FREE AI models. Alternative: run from source (this repository):** This repository package is private (9router-app), so source/Docker execution is the expected local development path.",
-      "category": "AI Agent",
-      "language": "JavaScript",
-      "stargazers_count": 10374,
-      "forks_count": 1585,
-      "star_growth": 2749,
-      "score": 0.5425,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 7,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 7 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 2749，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
-      "quality_level": "high",
-      "report_url": "weekly/2026-05-15.html"
-    },
-    {
-      "run_date": "2026-05-15",
-      "full_name": "HKUDS/AI-Trader",
-      "html_url": "https://github.com/HKUDS/AI-Trader",
-      "description": "\"AI-Trader: 100% Fully-Automated Agent-Native Trading\"  ",
-      "readme_summary": "Just like humans have their trading platforms, **AI agents need their own**. AI-Trader** is an **Agent-Native Trading Platform**: Exchange ideas and sharpen trading skills through AI agents! Any AI agent joins the **AI-Trader** platform in seconds -- Simply send this message to your agent.",
-      "category": "AI Agent",
-      "language": "Python",
-      "stargazers_count": 17259,
-      "forks_count": 2661,
-      "star_growth": 0,
-      "score": 0.3806,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 8,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 8 位，是本期最重要的热度信号。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
-        "当前累计 Star 17259，具备一定社区关注度。",
-        "仓库主题、语言或名称与关注方向匹配。"
-      ],
-      "security_flags": [
-        "未识别到许可证，复用代码前需要人工确认授权。"
-      ],
-      "security_score": 85,
-      "security_level": "low",
-      "quality_flags": [
-        "许可证元数据缺失，复用代码前需要确认授权。",
-        "仓库主题标签较少，垂直方向判断可能不够稳定。"
-      ],
-      "quality_score": 80,
-      "quality_level": "high",
-      "report_url": "weekly/2026-05-15.html"
-    },
-    {
-      "run_date": "2026-05-15",
-      "full_name": "mattpocock/skills",
-      "html_url": "https://github.com/mattpocock/skills",
-      "description": "Skills for Real Engineers. Straight from my .claude directory.",
-      "readme_summary": "My agent skills that I use every day to do real engineering - not vibe coding. Developing real applications is hard. Approaches like GSD, BMAD, and Spec-Kit try to help by owning the process.",
-      "category": "LLM Tooling",
-      "language": "Shell",
-      "stargazers_count": 83001,
-      "forks_count": 7183,
-      "star_growth": 13022,
-      "score": 0.456,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 11,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 11 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 13022，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "当前累计 Star 83001，具备一定社区关注度。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [
-        "仓库主题标签较少，垂直方向判断可能不够稳定。"
-      ],
-      "quality_score": 92,
-      "quality_level": "high",
-      "report_url": "weekly/2026-05-15.html"
-    },
-    {
-      "run_date": "2026-05-15",
-      "full_name": "addyosmani/agent-skills",
-      "html_url": "https://github.com/addyosmani/agent-skills",
-      "description": "Production-grade engineering skills for AI coding agents.",
-      "readme_summary": "Production-grade engineering skills for AI coding agents.** Skills encode the workflows, quality gates, and best practices that senior engineers use when building software. These ones are packaged so AI agents follow them consistently across every phase of development.",
-      "category": "AI Agent",
-      "language": "Shell",
-      "stargazers_count": 41693,
-      "forks_count": 4578,
-      "star_growth": 2744,
-      "score": 0.4094,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 9,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 9 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 2744，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
-      "quality_level": "high",
-      "report_url": "weekly/2026-05-15.html"
-    },
-    {
-      "run_date": "2026-05-15",
-      "full_name": "NousResearch/hermes-agent",
-      "html_url": "https://github.com/NousResearch/hermes-agent",
-      "description": "The agent that grows with you",
-      "readme_summary": "The self-improving AI agent built by Nous Research.** It's the only agent with a built-in learning loop — it creates skills from experience, improves them during use, nudges itself to persist knowledge, searches its own past conversations, and builds a deepening model of who you are across sessions.",
-      "category": "AI Agent",
-      "language": "Python",
-      "stargazers_count": 150783,
-      "forks_count": 23890,
-      "star_growth": 7525,
-      "score": 0.3888,
-      "sources": [
-        "github_search"
-      ],
-      "trending_rank": 0,
-      "selection_reasons": [
-        "较上次记录新增 Star 7525，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
-        "当前累计 Star 150783，具备一定社区关注度。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [
-        "仓库简介较短，项目定位信息有限。"
-      ],
-      "quality_score": 92,
-      "quality_level": "high",
-      "report_url": "weekly/2026-05-15.html"
-    },
-    {
-      "run_date": "2026-05-11",
-      "full_name": "Hmbown/DeepSeek-TUI",
-      "html_url": "https://github.com/Hmbown/DeepSeek-TUI",
-      "description": "Coding agent for DeepSeek models that runs in your terminal",
-      "readme_summary": "Terminal coding agent for DeepSeek V4. It runs from the deepseek command, streams reasoning blocks, edits local workspaces with approval gates, and includes an auto mode that chooses both model and thinking level per turn.",
-      "category": "AI Agent",
-      "language": "Rust",
-      "stargazers_count": 24550,
-      "forks_count": 2013,
-      "star_growth": 63,
-      "score": 0.7898,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 1,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 1 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 63，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
-      "quality_level": "high",
-      "report_url": "weekly/2026-05-11.html"
-    },
-    {
-      "run_date": "2026-05-11",
-      "full_name": "ruvnet/ruflo",
-      "html_url": "https://github.com/ruvnet/ruflo",
-      "description": "🌊 The leading agent orchestration platform for Claude. Deploy intelligent multi-agent swarms, coordinate autonomous workflows, and build conversational AI systems. Features    enterprise-grade architecture, self-learning swarm intelligence, RAG integration, and native Claude Code / Codex Integration",
-      "readme_summary": "Multi-agent AI orchestration for Claude Code** Orchestrate 100+ specialized AI agents across machines, teams, and trust boundaries. Ruflo adds coordinated swarms, self-learning memory, federated comms, and enterprise security to Claude Code — so agents don't just run, they collaborate.",
-      "category": "AI Agent",
-      "language": "TypeScript",
-      "stargazers_count": 48665,
-      "forks_count": 5392,
-      "star_growth": 21,
-      "score": 0.6598,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 3,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 3 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 21，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
-      "quality_level": "high",
-      "report_url": "weekly/2026-05-11.html"
-    },
-    {
-      "run_date": "2026-05-11",
-      "full_name": "docusealco/docuseal",
-      "html_url": "https://github.com/docusealco/docuseal",
-      "description": "Open source DocuSign alternative. Create, fill, and sign digital documents ✍️",
-      "readme_summary": "DocuSeal Open source document filling and signing DocuSeal is an open source platform that provides secure and efficient digital document signing and processing. Create PDF forms to have them filled and signed online on any device with an easy-to-use, mobile-optimized web tool.",
-      "category": "Other",
-      "language": "Ruby",
-      "stargazers_count": 16286,
-      "forks_count": 1477,
-      "star_growth": 8,
-      "score": 0.4428,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 4,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 4 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 8，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "当前累计 Star 16286，具备一定社区关注度。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
-      "quality_level": "high",
-      "report_url": "weekly/2026-05-11.html"
-    },
-    {
-      "run_date": "2026-05-11",
-      "full_name": "TauricResearch/TradingAgents",
-      "html_url": "https://github.com/TauricResearch/TradingAgents",
-      "description": "TradingAgents: Multi-Agents LLM Financial Trading Framework",
-      "readme_summary": "[2026-04] **TradingAgents v0.2.4** released with structured-output agents (Research Manager, Trader, Portfolio Manager), LangGraph checkpoint resume, persistent decision log, DeepSeek/Qwen/GLM/Azure provider support, Docker, and a Windows UTF-8 encoding fix. See CHANGELOG.md for the full list.",
-      "category": "AI Agent",
-      "language": "Python",
-      "stargazers_count": 73418,
-      "forks_count": 14307,
-      "star_growth": 21,
-      "score": 0.6912,
-      "sources": [
-        "github_search",
-        "github_trending"
-      ],
-      "trending_rank": 5,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 5 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 21，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
-      "quality_level": "high",
-      "report_url": "weekly/2026-05-11.html"
-    },
-    {
-      "run_date": "2026-05-11",
-      "full_name": "LearningCircuit/local-deep-research",
-      "html_url": "https://github.com/LearningCircuit/local-deep-research",
-      "description": " ~95% on SimpleQA (e.g. Qwen3.6-27B on a 3090). Supports all local and cloud LLMs (llama.cpp, Ollama, Google, ...). 10+ search engines - arXiv, PubMed, your private documents. Everything Local & Encrypted.",
-      "readme_summary": "AI-powered research assistant for deep, agentic research** Performs deep, agentic research using multiple LLMs and search engines with proper citations* 🧪 **First open-source project — fully-local on a single RTX 3090 (Qwen3.6-27B) — to report ~95% SimpleQA (n=500) and 77% xbench-DeepSearch (n=100) on local hardware.** See the r/LocalLLaMA announcement and the benchmark dataset.",
-      "category": "LLM Tooling",
-      "language": "Python",
-      "stargazers_count": 7131,
-      "forks_count": 631,
-      "star_growth": 6,
-      "score": 0.4922,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 6,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 6 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 6，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
-      "quality_level": "high",
-      "report_url": "weekly/2026-05-11.html"
-    },
-    {
-      "run_date": "2026-05-11",
-      "full_name": "virattt/dexter",
-      "html_url": "https://github.com/virattt/dexter",
-      "description": "An autonomous agent for deep financial research",
-      "readme_summary": "Dexter is an autonomous financial research agent that thinks, plans, and learns as it works. It performs analysis using task planning, self-reflection, and real-time market data. Think Claude Code, but built specifically for financial research.",
-      "category": "AI Agent",
-      "language": "TypeScript",
-      "stargazers_count": 25214,
-      "forks_count": 3074,
-      "star_growth": 6,
-      "score": 0.3981,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 7,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 7 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 6，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Agent 开发、开发者工具。"
-      ],
-      "security_flags": [
-        "未识别到许可证，复用代码前需要人工确认授权。"
-      ],
-      "security_score": 85,
-      "security_level": "low",
-      "quality_flags": [
-        "许可证元数据缺失，复用代码前需要确认授权。",
-        "仓库主题标签较少，垂直方向判断可能不够稳定。"
-      ],
-      "quality_score": 80,
-      "quality_level": "high",
-      "report_url": "weekly/2026-05-11.html"
-    },
-    {
-      "run_date": "2026-05-11",
-      "full_name": "decolua/9router",
-      "html_url": "https://github.com/decolua/9router",
-      "description": "Unlimited FREE AI coding. Connect Claude Code, Codex, Cursor, Cline, Copilot, Antigravity to FREE Claude/GPT/Gemini via 40+ providers. Auto-fallback, RTK -40% tokens, never hit limits.",
-      "readme_summary": "Never stop coding. Use in your CLI tool:** That's it!** Start coding with FREE AI models. Alternative: run from source (this repository):** This repository package is private (9router-app), so source/Docker execution is the expected local development path.",
-      "category": "AI Agent",
-      "language": "JavaScript",
-      "stargazers_count": 7625,
-      "forks_count": 1262,
-      "star_growth": 30,
-      "score": 0.5716,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 8,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 8 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 30，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
-      "quality_level": "high",
-      "report_url": "weekly/2026-05-11.html"
-    },
-    {
-      "run_date": "2026-05-11",
-      "full_name": "1jehuang/jcode",
-      "html_url": "https://github.com/1jehuang/jcode",
-      "description": "Coding Agent Harness",
-      "readme_summary": "The next generation coding agent harness to raise the skill ceiling. Built for multi-session workflows, infinite customizability, and performance.",
-      "category": "AI Agent",
-      "language": "Rust",
-      "stargazers_count": 5637,
-      "forks_count": 574,
-      "star_growth": 12,
-      "score": 0.5786,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 9,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 9 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 12，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [
-        "仓库简介较短，项目定位信息有限。"
-      ],
-      "quality_score": 92,
-      "quality_level": "high",
-      "report_url": "weekly/2026-05-11.html"
-    },
-    {
-      "run_date": "2026-05-11",
-      "full_name": "NousResearch/hermes-agent",
-      "html_url": "https://github.com/NousResearch/hermes-agent",
-      "description": "The agent that grows with you",
-      "readme_summary": "The self-improving AI agent built by Nous Research.** It's the only agent with a built-in learning loop — it creates skills from experience, improves them during use, nudges itself to persist knowledge, searches its own past conversations, and builds a deepening model of who you are across sessions.",
-      "category": "AI Agent",
-      "language": "Python",
-      "stargazers_count": 143257,
-      "forks_count": 22353,
-      "star_growth": 105,
-      "score": 0.4832,
-      "sources": [
-        "github_search"
-      ],
-      "trending_rank": 0,
-      "selection_reasons": [
-        "较上次记录新增 Star 105，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
-        "当前累计 Star 143257，具备一定社区关注度。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [
-        "仓库简介较短，项目定位信息有限。"
-      ],
-      "quality_score": 92,
-      "quality_level": "high",
-      "report_url": "weekly/2026-05-11.html"
-    },
-    {
-      "run_date": "2026-05-11",
-      "full_name": "mattpocock/skills",
-      "html_url": "https://github.com/mattpocock/skills",
-      "description": "Skills for Real Engineers. Straight from my .claude directory.",
-      "readme_summary": "My agent skills that I use every day to do real engineering - not vibe coding. Developing real applications is hard. Approaches like GSD, BMAD, and Spec-Kit try to help by owning the process.",
-      "category": "LLM Tooling",
-      "language": "Shell",
-      "stargazers_count": 69979,
-      "forks_count": 6053,
-      "star_growth": 104,
-      "score": 0.4801,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 13,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 13 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 104，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "当前累计 Star 69979，具备一定社区关注度。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [
-        "仓库主题标签较少，垂直方向判断可能不够稳定。"
-      ],
-      "quality_score": 92,
-      "quality_level": "high",
-      "report_url": "weekly/2026-05-11.html"
+      "report_url": "weekly/2026-05-18.html"
     },
     {
       "run_date": "2026-05-09",
@@ -2183,17 +1242,17 @@
       "readme_summary": "Multi-agent AI orchestration for Claude Code** Orchestrate 100+ specialized AI agents across machines, teams, and trust boundaries. Ruflo adds coordinated swarms, self-learning memory, federated comms, and enterprise security to Claude Code — so agents don't just run, they collaborate.",
       "category": "AI Agent",
       "language": "TypeScript",
-      "stargazers_count": 47493,
-      "forks_count": 5260,
-      "star_growth": 23,
-      "score": 0.7584,
+      "stargazers_count": 47470,
+      "forks_count": 5256,
+      "star_growth": 16,
+      "score": 0.688,
       "sources": [
         "github_trending"
       ],
       "trending_rank": 2,
       "selection_reasons": [
         "进入 GitHub Trending 周榜第 2 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 23，近期热度上升。",
+        "较上次记录新增 Star 16，近期热度上升。",
         "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
         "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
       ],
@@ -2213,19 +1272,19 @@
       "readme_summary": "DocuSeal Open source document filling and signing DocuSeal is an open source platform that provides secure and efficient digital document signing and processing. Create PDF forms to have them filled and signed online on any device with an easy-to-use, mobile-optimized web tool.",
       "category": "Other",
       "language": "Ruby",
-      "stargazers_count": 16017,
+      "stargazers_count": 16012,
       "forks_count": 1446,
-      "star_growth": 5,
-      "score": 0.4549,
+      "star_growth": 1,
+      "score": 0.4308,
       "sources": [
         "github_trending"
       ],
       "trending_rank": 4,
       "selection_reasons": [
         "进入 GitHub Trending 周榜第 4 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 5，近期热度上升。",
+        "较上次记录新增 Star 1，近期热度上升。",
         "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "当前累计 Star 16017，具备一定社区关注度。"
+        "当前累计 Star 16012，具备一定社区关注度。"
       ],
       "security_flags": [],
       "security_score": 100,
@@ -2243,19 +1302,19 @@
       "readme_summary": "Dexter is an autonomous financial research agent that thinks, plans, and learns as it works. It performs analysis using task planning, self-reflection, and real-time market data. Think Claude Code, but built specifically for financial research.",
       "category": "AI Agent",
       "language": "TypeScript",
-      "stargazers_count": 24992,
-      "forks_count": 3043,
-      "star_growth": 4,
-      "score": 0.4333,
+      "stargazers_count": 24988,
+      "forks_count": 3042,
+      "star_growth": 0,
+      "score": 0.4112,
       "sources": [
         "github_trending"
       ],
       "trending_rank": 5,
       "selection_reasons": [
         "进入 GitHub Trending 周榜第 5 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 4，近期热度上升。",
         "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Agent 开发、开发者工具。"
+        "匹配当前个性化方向：Agent 开发、开发者工具。",
+        "当前累计 Star 24988，具备一定社区关注度。"
       ],
       "security_flags": [
         "未识别到许可证，复用代码前需要人工确认授权。"
@@ -2278,10 +1337,10 @@
       "readme_summary": "English · 简体中文 Maigret** collects a dossier on a person **by username only**, checking for accounts on a huge number of sites and gathering all the available information from web pages. No API keys required.",
       "category": "Developer Tools",
       "language": "Python",
-      "stargazers_count": 26917,
-      "forks_count": 1888,
+      "stargazers_count": 26908,
+      "forks_count": 1886,
       "star_growth": 9,
-      "score": 0.5799,
+      "score": 0.5621,
       "sources": [
         "github_trending"
       ],
@@ -2308,17 +1367,17 @@
       "readme_summary": "The next generation coding agent harness to raise the skill ceiling. Built for multi-session workflows, infinite customizability, and performance.",
       "category": "AI Agent",
       "language": "Rust",
-      "stargazers_count": 5264,
+      "stargazers_count": 5260,
       "forks_count": 523,
-      "star_growth": 4,
-      "score": 0.5795,
+      "star_growth": 1,
+      "score": 0.561,
       "sources": [
         "github_trending"
       ],
       "trending_rank": 7,
       "selection_reasons": [
         "进入 GitHub Trending 周榜第 7 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 4，近期热度上升。",
+        "较上次记录新增 Star 1，近期热度上升。",
         "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
         "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
       ],
@@ -2340,17 +1399,17 @@
       "readme_summary": "Your agents deserve fresh context.",
       "category": "AI Agent",
       "language": "Python",
-      "stargazers_count": 9269,
+      "stargazers_count": 9262,
       "forks_count": 692,
-      "star_growth": 7,
-      "score": 0.5873,
+      "star_growth": 2,
+      "score": 0.5557,
       "sources": [
         "github_trending"
       ],
       "trending_rank": 8,
       "selection_reasons": [
         "进入 GitHub Trending 周榜第 8 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 7，近期热度上升。",
+        "较上次记录新增 Star 2，近期热度上升。",
         "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
         "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
       ],
@@ -2370,10 +1429,10 @@
       "readme_summary": "✅ **2026-01-26**: 新增「动作迁移」模块，上传参考视频和图片进行动作迁移 ✅ **2026-01-14**: 新增「数字人口播」和「图生视频」流水线，新增多语言 TTS 音色支持 ✅ **2026-01-06**: 新增 RunningHub 48G 显存机器调用支持 ✅ **2025-12-28**: 支持 RunningHub 并发限制可配置，优化 LLM 返回结构化数据的逻辑 ✅ **2025-12-17**: 支持 ComfyUI API Key 配置，支持 Nano Banana 模型调用，API 接口支持模板自定义参数 ✅ **2025-12-10**: 侧边栏内置 FAQ，锁定 edge-tts 版本修复 TTS 服务不稳定问题 ✅ **2025-12-08**: 支持固定脚本多种分割方式(段落/行/句子)，优化模板选择交互逻辑支持直接预览选择 ✅ **2025-12-06**: 修复视频生成 API 返回 URL 路径处理，支持跨平台兼容 ✅ **2025-12-05**: 新增 Windows 整合包下载，优化图片与视频反推工作流 ✅ **2025-12-04**: 新增「自定义素材」功能，支持用户上传自己的照片和视频，AI 智能分析生成脚本 ✅ **2025-11-18**: 优化 RunningHub 服务调用支持并行处理，新增历史记录页面，支持批量创建视频任务 ✅ **全自动生成** - 输入主题，自动生成完整视频 ✅ **AI 智能文案** - 根据主题智能创作解说词，无需自己写脚本 ✅ **AI 生成配图** - 每句话都配上精美的 AI 插图 ✅ **AI 生成视频** - 支持使用 AI 视频生成模型（如 WAN 2.1）创建动态视频内容 ✅ **AI 生成语音** - 支持 Edge-TTS、Index-TTS 等众多主流 TTS 方案 ✅ **背景音乐** - 支持添加 BGM，让视频更有氛围 ✅ **视觉风格** - 多种模板可选，打造独特视频风格 ✅ **灵活尺寸** - 支持竖屏、横屏等多种视频尺寸 ✅ **多种 AI 模型** - 支持 GPT、通义千问、DeepSeek、Ollama 等 ✅ **原子能力灵活组合** - 基于 ComfyUI 架构，可使用预置工作流，也可自定义任意能力（如替换生图模型为 FLUX、替换 TTS 为 ChatTTS 等） Pixelle-Video 采用模块化设计，整个视频生成流程清晰简洁： 从输入文本到最终视频输出，整个流程简洁清晰：**文案生成 → 配图规划 → 逐帧处理 → 视频合成** 每个环节都支持灵活定制，可选择不同的 AI 模型、音频引擎、视觉风格等，满足个性化创作需求。",
       "category": "Other",
       "language": "Python",
-      "stargazers_count": 14085,
+      "stargazers_count": 14078,
       "forks_count": 2085,
       "star_growth": 7,
-      "score": 0.3844,
+      "score": 0.3705,
       "sources": [
         "github_trending"
       ],
@@ -2400,19 +1459,19 @@
       "readme_summary": "The self-improving AI agent built by Nous Research.** It's the only agent with a built-in learning loop — it creates skills from experience, improves them during use, nudges itself to persist knowledge, searches its own past conversations, and builds a deepening model of who you are across sessions.",
       "category": "AI Agent",
       "language": "Python",
-      "stargazers_count": 140479,
-      "forks_count": 21779,
-      "star_growth": 41,
+      "stargazers_count": 140438,
+      "forks_count": 21774,
+      "star_growth": 64,
       "score": 0.4829,
       "sources": [
         "github_search"
       ],
       "trending_rank": 0,
       "selection_reasons": [
-        "较上次记录新增 Star 41，近期热度上升。",
+        "较上次记录新增 Star 64，近期热度上升。",
         "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
         "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
-        "当前累计 Star 140479，具备一定社区关注度。"
+        "当前累计 Star 140438，具备一定社区关注度。"
       ],
       "security_flags": [],
       "security_score": 100,
@@ -2432,19 +1491,19 @@
       "readme_summary": "My agent skills that I use every day to do real engineering - not vibe coding. Developing real applications is hard. Approaches like GSD, BMAD, and Spec-Kit try to help by owning the process.",
       "category": "LLM Tooling",
       "language": "Shell",
-      "stargazers_count": 67653,
-      "forks_count": 5824,
-      "star_growth": 19,
-      "score": 0.441,
+      "stargazers_count": 67634,
+      "forks_count": 5819,
+      "star_growth": 23,
+      "score": 0.4174,
       "sources": [
         "github_trending"
       ],
       "trending_rank": 10,
       "selection_reasons": [
         "进入 GitHub Trending 周榜第 10 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 19，近期热度上升。",
+        "较上次记录新增 Star 23，近期热度上升。",
         "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "当前累计 Star 67653，具备一定社区关注度。"
+        "当前累计 Star 67634，具备一定社区关注度。"
       ],
       "security_flags": [],
       "security_score": 100,
@@ -2458,25 +1517,25 @@
     },
     {
       "run_date": "2026-05-09",
-      "full_name": "decolua/9router",
-      "html_url": "https://github.com/decolua/9router",
-      "description": "Unlimited FREE AI coding. Connect Claude Code, Codex, Cursor, Cline, Copilot, Antigravity to FREE Claude/GPT/Gemini via 40+ providers. Auto-fallback, RTK -40% tokens, never hit limits.",
-      "readme_summary": "Never stop coding. Use in your CLI tool:** That's it!** Start coding with FREE AI models. Alternative: run from source (this repository):** This repository package is private (9router-app), so source/Docker execution is the expected local development path.",
+      "full_name": "datawhalechina/hello-agents",
+      "html_url": "https://github.com/datawhalechina/hello-agents",
+      "description": "📚 《从零开始构建智能体》——从零开始的智能体原理与实践教程",
+      "readme_summary": "Hello-Agents 🤖 《从零开始构建智能体》 从基础理论到实际应用，全面掌握智能体系统的设计与实现 &emsp;&emsp;如果说 2024 年是\"百模大战\"的元年，那么 2025 年无疑开启了\"Agent 元年\"。技术的焦点正从训练更大的基础模型，转向构建更聪明的智能体应用。然而，当前系统性、重实践的教程却极度匮乏。为此，我们发起了 Hello-Agents 项目，希望能为社区提供一本从零开始、理论与实战并重的智能体系统构建指南。",
       "category": "AI Agent",
-      "language": "JavaScript",
-      "stargazers_count": 6244,
-      "forks_count": 1133,
-      "star_growth": 17,
-      "score": 0.3943,
+      "language": "Python",
+      "stargazers_count": 45494,
+      "forks_count": 5514,
+      "star_growth": 43,
+      "score": 0.3877,
       "sources": [
-        "github_trending"
+        "github_search"
       ],
-      "trending_rank": 12,
+      "trending_rank": 0,
       "selection_reasons": [
-        "进入 GitHub Trending 周榜第 12 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 17，近期热度上升。",
+        "较上次记录新增 Star 43，近期热度上升。",
         "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 45494，具备一定社区关注度。"
       ],
       "security_flags": [],
       "security_score": 100,
@@ -3170,8 +2229,10 @@
       "security_flags": [],
       "security_score": 100,
       "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
+      "quality_flags": [
+        "最近维护时间超过 30 天，建议关注维护连续性。"
+      ],
+      "quality_score": 82,
       "quality_level": "high",
       "report_url": "weekly/2026-05-05.html"
     },
@@ -3482,8 +2543,10 @@
       "security_flags": [],
       "security_score": 100,
       "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
+      "quality_flags": [
+        "最近维护时间超过 30 天，建议关注维护连续性。"
+      ],
+      "quality_score": 82,
       "quality_level": "high",
       "report_url": "weekly/2026-05-04.html"
     },
@@ -3733,8 +2796,10 @@
       "security_flags": [],
       "security_score": 100,
       "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
+      "quality_flags": [
+        "最近维护时间超过 30 天，建议关注维护连续性。"
+      ],
+      "quality_score": 82,
       "quality_level": "high",
       "report_url": "weekly/2026-05-04.html"
     },
@@ -3797,8 +2862,10 @@
       "security_flags": [],
       "security_score": 100,
       "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
+      "quality_flags": [
+        "最近维护时间超过 30 天，建议关注维护连续性。"
+      ],
+      "quality_score": 82,
       "quality_level": "high",
       "report_url": "weekly/2026-05-03.html"
     },
@@ -3863,10 +2930,11 @@
       "security_score": 100,
       "security_level": "low",
       "quality_flags": [
-        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+        "仓库主题标签较少，垂直方向判断可能不够稳定。",
+        "最近维护时间超过 30 天，建议关注维护连续性。"
       ],
-      "quality_score": 92,
-      "quality_level": "high",
+      "quality_score": 74,
+      "quality_level": "medium",
       "report_url": "weekly/2026-05-03.html"
     },
     {
@@ -3954,8 +3022,10 @@
       "security_flags": [],
       "security_score": 100,
       "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
+      "quality_flags": [
+        "最近维护时间超过 30 天，建议关注维护连续性。"
+      ],
+      "quality_score": 82,
       "quality_level": "high",
       "report_url": "weekly/2026-05-03.html"
     },
@@ -4016,8 +3086,10 @@
       "security_flags": [],
       "security_score": 100,
       "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
+      "quality_flags": [
+        "最近维护时间超过 30 天，建议关注维护连续性。"
+      ],
+      "quality_score": 82,
       "quality_level": "high",
       "report_url": "weekly/2026-05-03.html"
     },

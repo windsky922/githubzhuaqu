@@ -4,26 +4,26 @@
 
 | 日期 | 项目 | 来源 | Trending 排名 | 方向 | 语言 | Star | 新增 Star | 风险提示 | 链接 |
 |---|---|---|---:|---|---|---:|---:|---:|---|
-| 2026-06-01 | harry0703/MoneyPrinterTurbo | GitHub Search + GitHub Trending | 1 | LLM Tooling | Python | 74799 | 17058 | 0 | [https://github.com/harry0703/MoneyPrinterTurbo](https://github.com/harry0703/MoneyPrinterTurbo) |
-| 2026-06-01 | Lum1104/Understand-Anything | GitHub Trending | 2 | AI Agent | TypeScript | 47473 | 20888 | 0 | [https://github.com/Lum1104/Understand-Anything](https://github.com/Lum1104/Understand-Anything) |
-| 2026-06-01 | anthropics/knowledge-work-plugins | GitHub Trending | 3 | LLM Tooling | Python | 18472 | 0 | 0 | [https://github.com/anthropics/knowledge-work-plugins](https://github.com/anthropics/knowledge-work-plugins) |
-| 2026-06-01 | rohitg00/ai-engineering-from-scratch | GitHub Trending | 4 | AI Agent | Python | 25977 | 9614 | 0 | [https://github.com/rohitg00/ai-engineering-from-scratch](https://github.com/rohitg00/ai-engineering-from-scratch) |
-| 2026-06-01 | microsoft/markitdown | GitHub Search + GitHub Trending | 6 | LLM Tooling | Python | 135361 | 10371 | 0 | [https://github.com/microsoft/markitdown](https://github.com/microsoft/markitdown) |
-| 2026-06-01 | Leonxlnx/taste-skill | GitHub Search + GitHub Trending | 7 | AI Agent | Shell | 30023 | 0 | 0 | [https://github.com/Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) |
-| 2026-06-01 | colbymchenry/codegraph | GitHub Trending | 8 | AI Agent | TypeScript | 35622 | 13153 | 0 | [https://github.com/colbymchenry/codegraph](https://github.com/colbymchenry/codegraph) |
-| 2026-06-01 | affaan-m/ECC | GitHub Search + GitHub Trending | 10 | AI Agent | JavaScript | 200793 | 9945 | 0 | [https://github.com/affaan-m/ECC](https://github.com/affaan-m/ECC) |
-| 2026-06-01 | mukul975/Anthropic-Cybersecurity-Skills | GitHub Trending | 9 | AI Agent | Python | 12999 | 0 | 1 | [https://github.com/mukul975/Anthropic-Cybersecurity-Skills](https://github.com/mukul975/Anthropic-Cybersecurity-Skills) |
-| 2026-06-01 | p-e-w/heretic | GitHub Trending | 13 | LLM Tooling | Python | 22773 | 0 | 0 | [https://github.com/p-e-w/heretic](https://github.com/p-e-w/heretic) |
-| 2026-05-25 | colbymchenry/codegraph | GitHub Trending | 1 | AI Agent | TypeScript | 22469 | 0 | 0 | [https://github.com/colbymchenry/codegraph](https://github.com/colbymchenry/codegraph) |
-| 2026-05-25 | tinyhumansai/openhuman | GitHub Trending | 2 | Other | Rust | 27234 | 0 | 0 | [https://github.com/tinyhumansai/openhuman](https://github.com/tinyhumansai/openhuman) |
-| 2026-05-25 | Imbad0202/academic-research-skills | GitHub Trending | 3 | LLM Tooling | Python | 20701 | 11215 | 0 | [https://github.com/Imbad0202/academic-research-skills](https://github.com/Imbad0202/academic-research-skills) |
-| 2026-05-25 | rohitg00/ai-engineering-from-scratch | GitHub Trending | 4 | AI Agent | Python | 16363 | 0 | 0 | [https://github.com/rohitg00/ai-engineering-from-scratch](https://github.com/rohitg00/ai-engineering-from-scratch) |
-| 2026-05-25 | ruvnet/RuView | GitHub Trending | 5 | AI Agent | Rust | 65464 | 6201 | 0 | [https://github.com/ruvnet/RuView](https://github.com/ruvnet/RuView) |
-| 2026-05-25 | rohitg00/agentmemory | GitHub Trending | 6 | AI Agent | TypeScript | 17417 | 6004 | 0 | [https://github.com/rohitg00/agentmemory](https://github.com/rohitg00/agentmemory) |
-| 2026-05-25 | Lum1104/Understand-Anything | GitHub Trending | 7 | AI Agent | TypeScript | 26585 | 0 | 0 | [https://github.com/Lum1104/Understand-Anything](https://github.com/Lum1104/Understand-Anything) |
-| 2026-05-25 | CloakHQ/CloakBrowser | GitHub Trending | 8 | AI Agent | Python | 20420 | 6516 | 0 | [https://github.com/CloakHQ/CloakBrowser](https://github.com/CloakHQ/CloakBrowser) |
-| 2026-05-25 | datawhalechina/easy-vibe | GitHub Trending | 11 | AI Agent | JavaScript | 14526 | 3311 | 1 | [https://github.com/datawhalechina/easy-vibe](https://github.com/datawhalechina/easy-vibe) |
-| 2026-05-25 | NousResearch/hermes-agent | GitHub Search | - | AI Agent | Python | 165820 | 10845 | 0 | [https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) |
+| 2026-06-03 | harry0703/MoneyPrinterTurbo | GitHub Search + GitHub Trending | 1 | LLM Tooling | Python | 78190 | 20 | 0 | [https://github.com/harry0703/MoneyPrinterTurbo](https://github.com/harry0703/MoneyPrinterTurbo) |
+| 2026-06-03 | chopratejas/headroom | GitHub Trending | 3 | AI Agent | Python | 7060 | 64 | 0 | [https://github.com/chopratejas/headroom](https://github.com/chopratejas/headroom) |
+| 2026-06-03 | Lum1104/Understand-Anything | GitHub Trending | 4 | AI Agent | TypeScript | 50355 | 21 | 0 | [https://github.com/Lum1104/Understand-Anything](https://github.com/Lum1104/Understand-Anything) |
+| 2026-06-03 | revfactory/harness | GitHub Trending | 7 | AI Agent | HTML | 5559 | 1 | 0 | [https://github.com/revfactory/harness](https://github.com/revfactory/harness) |
+| 2026-06-03 | rohitg00/ai-engineering-from-scratch | GitHub Trending | 8 | AI Agent | Python | 27484 | 11 | 0 | [https://github.com/rohitg00/ai-engineering-from-scratch](https://github.com/rohitg00/ai-engineering-from-scratch) |
+| 2026-06-03 | colbymchenry/codegraph | GitHub Trending | 9 | AI Agent | TypeScript | 38302 | 14 | 0 | [https://github.com/colbymchenry/codegraph](https://github.com/colbymchenry/codegraph) |
+| 2026-06-03 | mukul975/Anthropic-Cybersecurity-Skills | GitHub Trending | 10 | AI Agent | Python | 13673 | 11 | 1 | [https://github.com/mukul975/Anthropic-Cybersecurity-Skills](https://github.com/mukul975/Anthropic-Cybersecurity-Skills) |
+| 2026-06-03 | affaan-m/ECC | GitHub Search + GitHub Trending | 11 | AI Agent | JavaScript | 204317 | 34 | 0 | [https://github.com/affaan-m/ECC](https://github.com/affaan-m/ECC) |
+| 2026-06-03 | microsoft/agent-governance-toolkit | GitHub Trending | 15 | AI Agent | Python | 3838 | 2 | 0 | [https://github.com/microsoft/agent-governance-toolkit](https://github.com/microsoft/agent-governance-toolkit) |
+| 2026-06-03 | NousResearch/hermes-agent | GitHub Search | - | AI Agent | Python | 177677 | 23 | 0 | [https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) |
+| 2026-06-02 | harry0703/MoneyPrinterTurbo | GitHub Search + GitHub Trending | 1 | LLM Tooling | Python | 77276 | 12 | 0 | [https://github.com/harry0703/MoneyPrinterTurbo](https://github.com/harry0703/MoneyPrinterTurbo) |
+| 2026-06-02 | Lum1104/Understand-Anything | GitHub Trending | 2 | AI Agent | TypeScript | 49263 | 0 | 0 | [https://github.com/Lum1104/Understand-Anything](https://github.com/Lum1104/Understand-Anything) |
+| 2026-06-02 | microsoft/markitdown | GitHub Search + GitHub Trending | 3 | LLM Tooling | Python | 139402 | 23 | 0 | [https://github.com/microsoft/markitdown](https://github.com/microsoft/markitdown) |
+| 2026-06-02 | rohitg00/ai-engineering-from-scratch | GitHub Trending | 5 | AI Agent | Python | 26961 | 0 | 0 | [https://github.com/rohitg00/ai-engineering-from-scratch](https://github.com/rohitg00/ai-engineering-from-scratch) |
+| 2026-06-02 | Leonxlnx/taste-skill | GitHub Search + GitHub Trending | 6 | AI Agent | Shell | 31223 | 7 | 0 | [https://github.com/Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) |
+| 2026-06-02 | anthropics/knowledge-work-plugins | GitHub Trending | 7 | LLM Tooling | Python | 18722 | 0 | 0 | [https://github.com/anthropics/knowledge-work-plugins](https://github.com/anthropics/knowledge-work-plugins) |
+| 2026-06-02 | colbymchenry/codegraph | GitHub Trending | 8 | AI Agent | TypeScript | 37207 | 31697 | 0 | [https://github.com/colbymchenry/codegraph](https://github.com/colbymchenry/codegraph) |
+| 2026-06-02 | mukul975/Anthropic-Cybersecurity-Skills | GitHub Trending | 9 | AI Agent | Python | 13359 | 0 | 1 | [https://github.com/mukul975/Anthropic-Cybersecurity-Skills](https://github.com/mukul975/Anthropic-Cybersecurity-Skills) |
+| 2026-06-02 | p-e-w/heretic | GitHub Trending | 12 | LLM Tooling | Python | 23138 | 0 | 0 | [https://github.com/p-e-w/heretic](https://github.com/p-e-w/heretic) |
+| 2026-06-02 | affaan-m/ECC | GitHub Search + GitHub Trending | 11 | AI Agent | JavaScript | 202580 | 5 | 0 | [https://github.com/affaan-m/ECC](https://github.com/affaan-m/ECC) |
 | 2026-05-19 | CloakHQ/CloakBrowser | GitHub Trending | 1 | AI Agent | Python | 15774 | 1 | 0 | [https://github.com/CloakHQ/CloakBrowser](https://github.com/CloakHQ/CloakBrowser) |
 | 2026-05-19 | rohitg00/agentmemory | GitHub Trending | 2 | AI Agent | TypeScript | 13390 | 2 | 0 | [https://github.com/rohitg00/agentmemory](https://github.com/rohitg00/agentmemory) |
 | 2026-05-19 | oven-sh/bun | GitHub Trending | 3 | Other | Rust | 91988 | 0 | 0 | [https://github.com/oven-sh/bun](https://github.com/oven-sh/bun) |
@@ -34,56 +34,26 @@
 | 2026-05-19 | colbymchenry/codegraph | GitHub Trending | 10 | LLM Tooling | TypeScript | 5510 | 1 | 0 | [https://github.com/colbymchenry/codegraph](https://github.com/colbymchenry/codegraph) |
 | 2026-05-19 | facebook/pyrefly | GitHub Trending | 12 | Other | Rust | 6238 | 1 | 0 | [https://github.com/facebook/pyrefly](https://github.com/facebook/pyrefly) |
 | 2026-05-19 | firecrawl/firecrawl | GitHub Search | - | AI Agent | TypeScript | 121632 | 2 | 0 | [https://github.com/firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) |
-| 2026-05-18 | CloakHQ/CloakBrowser | GitHub Trending | 1 | AI Agent | Python | 13904 | 1866 | 0 | [https://github.com/CloakHQ/CloakBrowser](https://github.com/CloakHQ/CloakBrowser) |
-| 2026-05-18 | rohitg00/agentmemory | GitHub Trending | 2 | AI Agent | TypeScript | 11413 | 1598 | 0 | [https://github.com/rohitg00/agentmemory](https://github.com/rohitg00/agentmemory) |
-| 2026-05-18 | yikart/AiToEarn | GitHub Trending | 3 | Other | TypeScript | 14767 | 642 | 0 | [https://github.com/yikart/AiToEarn](https://github.com/yikart/AiToEarn) |
-| 2026-05-18 | oven-sh/bun | GitHub Trending | 5 | Other | Rust | 91748 | 0 | 0 | [https://github.com/oven-sh/bun](https://github.com/oven-sh/bun) |
-| 2026-05-18 | Imbad0202/academic-research-skills | GitHub Trending | 6 | LLM Tooling | Python | 9486 | 0 | 0 | [https://github.com/Imbad0202/academic-research-skills](https://github.com/Imbad0202/academic-research-skills) |
-| 2026-05-18 | mattpocock/skills | GitHub Trending | 7 | LLM Tooling | Shell | 89265 | 3825 | 0 | [https://github.com/mattpocock/skills](https://github.com/mattpocock/skills) |
-| 2026-05-18 | ruvnet/RuView | GitHub Trending | 8 | AI Agent | Rust | 59263 | 1588 | 0 | [https://github.com/ruvnet/RuView](https://github.com/ruvnet/RuView) |
-| 2026-05-18 | NousResearch/hermes-agent | GitHub Search | - | AI Agent | Python | 154975 | 2575 | 0 | [https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) |
-| 2026-05-18 | bytedance/UI-TARS-desktop | GitHub Search + GitHub Trending | 9 | AI Agent | TypeScript | 34449 | 312 | 0 | [https://github.com/bytedance/UI-TARS-desktop](https://github.com/bytedance/UI-TARS-desktop) |
-| 2026-05-18 | decolua/9router | GitHub Trending | 11 | AI Agent | JavaScript | 11665 | 885 | 0 | [https://github.com/decolua/9router](https://github.com/decolua/9router) |
-| 2026-05-16 | CloakHQ/CloakBrowser | GitHub Trending | 2 | AI Agent | Python | 12038 | 859 | 0 | [https://github.com/CloakHQ/CloakBrowser](https://github.com/CloakHQ/CloakBrowser) |
-| 2026-05-16 | yikart/AiToEarn | GitHub Trending | 3 | Other | TypeScript | 14125 | 262 | 0 | [https://github.com/yikart/AiToEarn](https://github.com/yikart/AiToEarn) |
-| 2026-05-16 | rohitg00/agentmemory | GitHub Trending | 4 | AI Agent | TypeScript | 9815 | 650 | 0 | [https://github.com/rohitg00/agentmemory](https://github.com/rohitg00/agentmemory) |
-| 2026-05-16 | bytedance/UI-TARS-desktop | GitHub Search + GitHub Trending | 5 | AI Agent | TypeScript | 34137 | 175 | 0 | [https://github.com/bytedance/UI-TARS-desktop](https://github.com/bytedance/UI-TARS-desktop) |
-| 2026-05-16 | decolua/9router | GitHub Trending | 6 | AI Agent | JavaScript | 10780 | 406 | 0 | [https://github.com/decolua/9router](https://github.com/decolua/9router) |
-| 2026-05-16 | Hmbown/DeepSeek-TUI | GitHub Trending | 7 | AI Agent | Rust | 30036 | 764 | 0 | [https://github.com/Hmbown/DeepSeek-TUI](https://github.com/Hmbown/DeepSeek-TUI) |
-| 2026-05-16 | HKUDS/AI-Trader | GitHub Trending | 8 | AI Agent | Python | 17429 | 170 | 1 | [https://github.com/HKUDS/AI-Trader](https://github.com/HKUDS/AI-Trader) |
-| 2026-05-16 | mattpocock/skills | GitHub Trending | 9 | LLM Tooling | Shell | 85440 | 2439 | 0 | [https://github.com/mattpocock/skills](https://github.com/mattpocock/skills) |
-| 2026-05-16 | NousResearch/hermes-agent | GitHub Search | - | AI Agent | Python | 152400 | 1617 | 0 | [https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) |
-| 2026-05-16 | rtk-ai/rtk | GitHub Search | - | AI Agent | Rust | 48629 | 513 | 0 | [https://github.com/rtk-ai/rtk](https://github.com/rtk-ai/rtk) |
-| 2026-05-15 | CloakHQ/CloakBrowser | GitHub Trending | 2 | AI Agent | Python | 11179 | 0 | 0 | [https://github.com/CloakHQ/CloakBrowser](https://github.com/CloakHQ/CloakBrowser) |
-| 2026-05-15 | bytedance/UI-TARS-desktop | GitHub Search + GitHub Trending | 3 | AI Agent | TypeScript | 33962 | 1441 | 0 | [https://github.com/bytedance/UI-TARS-desktop](https://github.com/bytedance/UI-TARS-desktop) |
-| 2026-05-15 | Hmbown/DeepSeek-TUI | GitHub Trending | 4 | AI Agent | Rust | 29272 | 4722 | 0 | [https://github.com/Hmbown/DeepSeek-TUI](https://github.com/Hmbown/DeepSeek-TUI) |
-| 2026-05-15 | rohitg00/agentmemory | GitHub Trending | 5 | AI Agent | TypeScript | 9165 | 0 | 0 | [https://github.com/rohitg00/agentmemory](https://github.com/rohitg00/agentmemory) |
-| 2026-05-15 | yikart/AiToEarn | GitHub Trending | 6 | Other | TypeScript | 13863 | 0 | 0 | [https://github.com/yikart/AiToEarn](https://github.com/yikart/AiToEarn) |
-| 2026-05-15 | decolua/9router | GitHub Trending | 7 | AI Agent | JavaScript | 10374 | 2749 | 0 | [https://github.com/decolua/9router](https://github.com/decolua/9router) |
-| 2026-05-15 | HKUDS/AI-Trader | GitHub Trending | 8 | AI Agent | Python | 17259 | 0 | 1 | [https://github.com/HKUDS/AI-Trader](https://github.com/HKUDS/AI-Trader) |
-| 2026-05-15 | mattpocock/skills | GitHub Trending | 11 | LLM Tooling | Shell | 83001 | 13022 | 0 | [https://github.com/mattpocock/skills](https://github.com/mattpocock/skills) |
-| 2026-05-15 | addyosmani/agent-skills | GitHub Trending | 9 | AI Agent | Shell | 41693 | 2744 | 0 | [https://github.com/addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) |
-| 2026-05-15 | NousResearch/hermes-agent | GitHub Search | - | AI Agent | Python | 150783 | 7525 | 0 | [https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) |
-| 2026-05-11 | Hmbown/DeepSeek-TUI | GitHub Trending | 1 | AI Agent | Rust | 24550 | 63 | 0 | [https://github.com/Hmbown/DeepSeek-TUI](https://github.com/Hmbown/DeepSeek-TUI) |
-| 2026-05-11 | ruvnet/ruflo | GitHub Trending | 3 | AI Agent | TypeScript | 48665 | 21 | 0 | [https://github.com/ruvnet/ruflo](https://github.com/ruvnet/ruflo) |
-| 2026-05-11 | docusealco/docuseal | GitHub Trending | 4 | Other | Ruby | 16286 | 8 | 0 | [https://github.com/docusealco/docuseal](https://github.com/docusealco/docuseal) |
-| 2026-05-11 | TauricResearch/TradingAgents | GitHub Search + GitHub Trending | 5 | AI Agent | Python | 73418 | 21 | 0 | [https://github.com/TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents) |
-| 2026-05-11 | LearningCircuit/local-deep-research | GitHub Trending | 6 | LLM Tooling | Python | 7131 | 6 | 0 | [https://github.com/LearningCircuit/local-deep-research](https://github.com/LearningCircuit/local-deep-research) |
-| 2026-05-11 | virattt/dexter | GitHub Trending | 7 | AI Agent | TypeScript | 25214 | 6 | 1 | [https://github.com/virattt/dexter](https://github.com/virattt/dexter) |
-| 2026-05-11 | decolua/9router | GitHub Trending | 8 | AI Agent | JavaScript | 7625 | 30 | 0 | [https://github.com/decolua/9router](https://github.com/decolua/9router) |
-| 2026-05-11 | 1jehuang/jcode | GitHub Trending | 9 | AI Agent | Rust | 5637 | 12 | 0 | [https://github.com/1jehuang/jcode](https://github.com/1jehuang/jcode) |
-| 2026-05-11 | NousResearch/hermes-agent | GitHub Search | - | AI Agent | Python | 143257 | 105 | 0 | [https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) |
-| 2026-05-11 | mattpocock/skills | GitHub Trending | 13 | LLM Tooling | Shell | 69979 | 104 | 0 | [https://github.com/mattpocock/skills](https://github.com/mattpocock/skills) |
-| 2026-05-09 | ruvnet/ruflo | GitHub Trending | 2 | AI Agent | TypeScript | 47493 | 23 | 0 | [https://github.com/ruvnet/ruflo](https://github.com/ruvnet/ruflo) |
-| 2026-05-09 | docusealco/docuseal | GitHub Trending | 4 | Other | Ruby | 16017 | 5 | 0 | [https://github.com/docusealco/docuseal](https://github.com/docusealco/docuseal) |
-| 2026-05-09 | virattt/dexter | GitHub Trending | 5 | AI Agent | TypeScript | 24992 | 4 | 1 | [https://github.com/virattt/dexter](https://github.com/virattt/dexter) |
-| 2026-05-09 | soxoj/maigret | GitHub Trending | 6 | Developer Tools | Python | 26917 | 9 | 0 | [https://github.com/soxoj/maigret](https://github.com/soxoj/maigret) |
-| 2026-05-09 | 1jehuang/jcode | GitHub Trending | 7 | AI Agent | Rust | 5264 | 4 | 0 | [https://github.com/1jehuang/jcode](https://github.com/1jehuang/jcode) |
-| 2026-05-09 | cocoindex-io/cocoindex | GitHub Trending | 8 | AI Agent | Python | 9269 | 7 | 0 | [https://github.com/cocoindex-io/cocoindex](https://github.com/cocoindex-io/cocoindex) |
-| 2026-05-09 | AIDC-AI/Pixelle-Video | GitHub Trending | 9 | Other | Python | 14085 | 7 | 0 | [https://github.com/AIDC-AI/Pixelle-Video](https://github.com/AIDC-AI/Pixelle-Video) |
-| 2026-05-09 | NousResearch/hermes-agent | GitHub Search | - | AI Agent | Python | 140479 | 41 | 0 | [https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) |
-| 2026-05-09 | mattpocock/skills | GitHub Trending | 10 | LLM Tooling | Shell | 67653 | 19 | 0 | [https://github.com/mattpocock/skills](https://github.com/mattpocock/skills) |
-| 2026-05-09 | decolua/9router | GitHub Trending | 12 | AI Agent | JavaScript | 6244 | 17 | 0 | [https://github.com/decolua/9router](https://github.com/decolua/9router) |
+| 2026-05-18 | CloakHQ/CloakBrowser | GitHub Trending | 1 | AI Agent | Python | 13914 | 0 | 0 | [https://github.com/CloakHQ/CloakBrowser](https://github.com/CloakHQ/CloakBrowser) |
+| 2026-05-18 | rohitg00/agentmemory | GitHub Trending | 2 | AI Agent | TypeScript | 11422 | 0 | 0 | [https://github.com/rohitg00/agentmemory](https://github.com/rohitg00/agentmemory) |
+| 2026-05-18 | yikart/AiToEarn | GitHub Trending | 3 | Other | TypeScript | 14771 | 0 | 0 | [https://github.com/yikart/AiToEarn](https://github.com/yikart/AiToEarn) |
+| 2026-05-18 | oven-sh/bun | GitHub Trending | 5 | Other | Rust | 91749 | 0 | 0 | [https://github.com/oven-sh/bun](https://github.com/oven-sh/bun) |
+| 2026-05-18 | Imbad0202/academic-research-skills | GitHub Trending | 6 | LLM Tooling | Python | 9505 | 0 | 0 | [https://github.com/Imbad0202/academic-research-skills](https://github.com/Imbad0202/academic-research-skills) |
+| 2026-05-18 | mattpocock/skills | GitHub Trending | 7 | LLM Tooling | Shell | 89290 | 21656 | 0 | [https://github.com/mattpocock/skills](https://github.com/mattpocock/skills) |
+| 2026-05-18 | ruvnet/RuView | GitHub Trending | 8 | AI Agent | Rust | 59267 | 0 | 0 | [https://github.com/ruvnet/RuView](https://github.com/ruvnet/RuView) |
+| 2026-05-18 | bytedance/UI-TARS-desktop | GitHub Search + GitHub Trending | 9 | AI Agent | TypeScript | 34449 | 4826 | 0 | [https://github.com/bytedance/UI-TARS-desktop](https://github.com/bytedance/UI-TARS-desktop) |
+| 2026-05-18 | decolua/9router | GitHub Trending | 11 | AI Agent | JavaScript | 11671 | 5444 | 0 | [https://github.com/decolua/9router](https://github.com/decolua/9router) |
+| 2026-05-18 | NousResearch/hermes-agent | GitHub Search | - | AI Agent | Python | 154981 | 14543 | 0 | [https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) |
+| 2026-05-09 | ruvnet/ruflo | GitHub Trending | 2 | AI Agent | TypeScript | 47470 | 16 | 0 | [https://github.com/ruvnet/ruflo](https://github.com/ruvnet/ruflo) |
+| 2026-05-09 | docusealco/docuseal | GitHub Trending | 4 | Other | Ruby | 16012 | 1 | 0 | [https://github.com/docusealco/docuseal](https://github.com/docusealco/docuseal) |
+| 2026-05-09 | virattt/dexter | GitHub Trending | 5 | AI Agent | TypeScript | 24988 | 0 | 1 | [https://github.com/virattt/dexter](https://github.com/virattt/dexter) |
+| 2026-05-09 | soxoj/maigret | GitHub Trending | 6 | Developer Tools | Python | 26908 | 9 | 0 | [https://github.com/soxoj/maigret](https://github.com/soxoj/maigret) |
+| 2026-05-09 | 1jehuang/jcode | GitHub Trending | 7 | AI Agent | Rust | 5260 | 1 | 0 | [https://github.com/1jehuang/jcode](https://github.com/1jehuang/jcode) |
+| 2026-05-09 | cocoindex-io/cocoindex | GitHub Trending | 8 | AI Agent | Python | 9262 | 2 | 0 | [https://github.com/cocoindex-io/cocoindex](https://github.com/cocoindex-io/cocoindex) |
+| 2026-05-09 | AIDC-AI/Pixelle-Video | GitHub Trending | 9 | Other | Python | 14078 | 7 | 0 | [https://github.com/AIDC-AI/Pixelle-Video](https://github.com/AIDC-AI/Pixelle-Video) |
+| 2026-05-09 | NousResearch/hermes-agent | GitHub Search | - | AI Agent | Python | 140438 | 64 | 0 | [https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) |
+| 2026-05-09 | mattpocock/skills | GitHub Trending | 10 | LLM Tooling | Shell | 67634 | 23 | 0 | [https://github.com/mattpocock/skills](https://github.com/mattpocock/skills) |
+| 2026-05-09 | datawhalechina/hello-agents | GitHub Search | - | AI Agent | Python | 45494 | 43 | 0 | [https://github.com/datawhalechina/hello-agents](https://github.com/datawhalechina/hello-agents) |
 | 2026-05-07 | TauricResearch/TradingAgents | GitHub Search + GitHub Trending | 1 | AI Agent | Python | 70782 | 464 | 0 | [https://github.com/TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents) |
 | 2026-05-07 | ruvnet/ruflo | GitHub Trending | 2 | AI Agent | TypeScript | 45746 | 497 | 0 | [https://github.com/ruvnet/ruflo](https://github.com/ruvnet/ruflo) |
 | 2026-05-07 | mattpocock/skills | GitHub Trending | 3 | LLM Tooling | Shell | 64037 | 1040 | 0 | [https://github.com/mattpocock/skills](https://github.com/mattpocock/skills) |

@@ -2,6 +2,169 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-06-01 追加：GitHub Actions 接入 RAG 维护计划
+
+### 1. 开发目的
+RAG 维护计划已经能在本地或 API 中创建补库任务，但自动化周报链路还没有调用它。为了让数据库/RAG 核心闭环进入持续运行流程，本次把维护计划接入每周工作流。
+
+### 2. 修改内容
+1. `.github/workflows/weekly.yml` 新增 `plan_rag_maintenance` 手动触发参数，默认启用。
+2. 周报任务执行后、归档页面生成前，自动运行 `scripts/plan_rag_maintenance.py`。
+3. 新增 `RAG_MAINTENANCE_LIMIT`、`RAG_MAINTENANCE_COVERAGE_LIMIT` 和 `RAG_MAINTENANCE_MIN_GAP_COUNT` 变量入口。
+4. 维护计划写入 jobs 表后再运行 `scripts/build_pages.py`，确保公开任务 JSON 能看到最新计划任务。
+5. 更新 README、workflow 测试和操作日志。
+
+### 3. 验证
+已运行 `python -m unittest discover -q`、`python scripts\security_check.py` 和 `git diff --check`。
+
+## 2026-06-01 追加：RAG 维护计划自动创建回填任务
+
+### 1. 开发目的
+RAG 回填已经支持 planned 任务执行，但仍需要人工判断是否存在覆盖缺口。为了把“覆盖缺口检测 -> 创建补库任务 -> 执行补库”串成维护闭环，本次新增 RAG 维护计划入口，自动按覆盖缺口决定是否创建回填任务。
+
+### 2. 修改内容
+1. 新增 `POST /v1/rag/maintenance-plan`，先检查 RAG 覆盖缺口，再按需创建 `rag_backfill` planned 任务。
+2. 如果缺口数低于阈值，接口只返回健康状态，不创建任务。
+3. 如果已存在相同参数的 active `rag_backfill` 任务，接口返回 `duplicate_of`，避免重复补库。
+4. 新增 `scripts/plan_rag_maintenance.py`，用于本地或后续 GitHub Actions 调度时创建维护计划。
+5. 更新 README、API 文档、数据契约和后端测试。
+
+### 3. 验证
+已运行 `python -m unittest discover -q`、`python scripts\security_check.py` 和 `git diff --check`。
+
+## 2026-06-01 追加：RAG 回填支持 planned 任务执行
+
+### 1. 开发目的
+RAG 回填已经能写入任务审计，但仍主要是即时 API 动作。为了把数据库补库纳入统一任务模型，本次新增 RAG 回填计划任务入口，并让本地 job runner 能执行 `rag_backfill` 任务。
+
+### 2. 修改内容
+1. 新增 `POST /v1/rag/backfill-plan`，用于创建 `kind=rag_backfill`、`status=planned` 的计划任务。
+2. `/v1/job-execution-check` 支持检查 `rag_backfill` 任务，真实写库仍要求 `confirm_execution=true`。
+3. `/v1/jobs/{job_id}/execute` 可执行 planned RAG 回填任务，并写入 runner 事件和精简执行结果。
+4. `scripts/run_planned_job.py` 扩展为通用 planned 任务执行入口，当前支持周报任务和 RAG 回填任务。
+5. 更新 README、API 文档、数据契约和后端测试。
+
+### 3. 验证
+已运行 `python -m unittest discover -q`、`python scripts\security_check.py` 和 `git diff --check`。
+
+## 2026-06-01 追加：RAG 回填接入任务审计
+
+### 1. 开发目的
+RAG 回填已经具备脚本、后端 API 和管理页入口，但每次补库动作还没有进入任务审计体系。为了让数据库维护能力可追踪、可复盘，并为后续 Agent 自动补库预留统一任务模型，本次把 RAG 回填 API 接入 `jobs` 与 `job_events`。
+
+### 2. 修改内容
+1. `POST /v1/rag/backfill-explanations` 每次调用都会创建 `kind=rag_backfill` 的任务记录。
+2. 回填开始、完成和失败会写入 `job_events`，可通过 `/v1/jobs/{job_id}/events` 查询。
+3. `/v1/jobs` 的 `kind` 筛选支持 `rag_backfill`。
+4. 回填响应新增 `job_id` 和精简任务结果，便于前端或 Agent 继续追踪。
+5. 更新 README、API 文档、数据契约和后端测试。
+
+### 3. 验证
+已运行 `python -m unittest discover -q`、`python scripts\security_check.py` 和 `git diff --check`。
+
+## 2026-06-01 追加：管理首页接入 RAG 解释回填
+
+### 1. 开发目的
+后端已经提供受控 RAG 解释回填接口，但用户仍需要手动调用 API 或脚本。为了让数据库补库能力进入本地管理闭环，本次把回填入口接入 `admin.html`，支持先预览再确认写入。
+
+### 2. 修改内容
+1. `admin.html` 新增 RAG 回填数量输入、预览按钮、确认写入复选框和执行按钮。
+2. 新增 `setupRagBackfill`、`runRagBackfill` 和 `ragBackfillHtml`。
+3. 前端调用 `POST /v1/rag/backfill-explanations`，默认预览；执行写库前必须勾选“确认写入 SQLite”。
+4. 回填完成后刷新数据库/RAG 概览，便于查看解释历史覆盖变化。
+5. 更新 README、API 文档和页面构建测试。
+
+### 3. 验证
+已运行 `python -m unittest discover -q`、`python scripts\security_check.py`、`git diff --check` 和 `docs/admin.html` 结构校验。浏览器直接打开本地页面时被客户端策略拦截，未继续绕过。
+
+## 2026-06-01 追加：新增 RAG 解释回填 API
+
+### 1. 开发目的
+RAG 解释回填已经有脚本入口，但后端和后续管理页、Agent 工具调用还不能直接复用同一能力。本次把回填逻辑下沉到 `ApiRepository`，并增加受控 API 入口，让数据库补库从“脚本能力”升级为“后端能力”。
+
+### 2. 修改内容
+1. 新增 `ApiRepository.backfill_rag_explanations`，作为脚本和 API 的共用回填逻辑。
+2. 新增 `POST /v1/rag/backfill-explanations`。
+3. API 默认 `dry_run=true`；如果未传入 `confirm_execution=true`，即使请求 `dry_run=false` 也会自动改回预览模式。
+4. `scripts/backfill_rag_explanations.py` 改为复用后端仓库层，减少重复逻辑。
+5. 更新 API 文档、README 和单元测试。
+
+### 3. 验证
+已运行 `python -m unittest discover -q`、`python scripts\security_check.py` 和 `git diff --check`。
+
+## 2026-06-01 追加：新增 RAG 解释回填脚本
+
+### 1. 开发目的
+RAG 覆盖缺口接口已经能找出缺少解释历史的项目，但还需要一个可执行的补库入口。本次新增回填脚本，把“发现缺口”推进到“批量生成规则版解释并写入 SQLite”，继续补齐数据库与 RAG 核心闭环。
+
+### 2. 修改内容
+1. 新增 `scripts/backfill_rag_explanations.py`。
+2. 脚本读取 RAG 覆盖缺口，优先选择 `explanation_count=0` 的项目。
+3. 支持 `--dry-run` 预览、`--limit` 控制数量、`--mode vector` 和 `--auto-build`。
+4. 执行模式会调用现有 `rag_explain`，生成规则版解释并写入 `rag_explanations`。
+5. 更新 README、API 文档和脚本测试。
+
+### 3. 验证
+已运行 `python -m unittest discover -q`、`python scripts\security_check.py` 和 `git diff --check`。
+
+## 2026-06-01 追加：新增 RAG 覆盖缺口接口
+
+### 1. 开发目的
+当前 RAG 已经具备语料、证据块、embedding、解释历史和项目级聚合能力，但还缺少“哪些项目没有被 RAG 充分覆盖”的健康检查入口。本次新增覆盖缺口接口，用于后续补库脚本、Agent 自动优化和管理页健康检查。
+
+### 2. 修改内容
+1. 新增 `GET /v1/rag/coverage`。
+2. 后端统计项目语料、证据块、embedding 和解释历史覆盖情况。
+3. 返回缺口项目列表，包含证据块数量、embedding 数量、解释数量、平均质量分和缺口原因。
+4. 返回整体覆盖率、健康项目数量和补库建议。
+5. 更新 README、API 文档和后端测试。
+
+### 3. 验证
+已运行 `python -m unittest discover -q`、`python scripts\security_check.py` 和 `git diff --check`。首次测试发现覆盖建议可能为空，已补充默认建议后复测通过。
+
+## 2026-06-01 追加：项目详情页改用单项目 RAG 聚合接口
+
+### 1. 开发目的
+后端已经提供 `/v1/projects/{owner}/{repo}/rag`，但项目详情页仍分别调用 RAG 检索和解释历史接口。为了减少前端拼装逻辑，并让后续 Agent/RAG 编排复用统一数据包，本次把项目详情页切换到单项目 RAG 聚合接口。
+
+### 2. 修改内容
+1. `project.html` 的 `loadProjectRag` 改为读取 `/v1/projects/{owner}/{repo}/rag?limit=6&explanation_limit=5`。
+2. 移除项目详情页中不再需要的前端 RAG 查询拼装逻辑。
+3. 保留“RAG 证据”和“RAG 解释历史”展示，但数据来源改为聚合接口。
+4. 更新 README、API 文档和页面构建测试。
+
+### 3. 验证
+已运行 `python scripts\build_pages.py`、`python -m unittest discover -q`、`python scripts\security_check.py` 和 `git diff --check`。
+
+## 2026-06-01 追加：新增单项目 RAG 聚合接口
+
+### 1. 开发目的
+项目详情页和后续 Agent/RAG 编排需要同时读取项目摘要、证据块、引用、解释历史和解释质量。如果继续由前端分别调用多个接口，后续接入 LangChain 或工具调用会重复拼装数据。本次新增单项目 RAG 聚合接口，把项目级 RAG 数据收束成稳定后端能力。
+
+### 2. 修改内容
+1. 新增 `GET /v1/projects/{owner}/{repo}/rag`。
+2. `ApiRepository.project_rag_bundle` 聚合项目摘要、RAG 检索结果、引用、`prompt_context`、项目解释历史和项目级解释质量摘要。
+3. 支持 `mode=fts5` 和 `mode=vector`，向量模式继续复用本地 `local-hash-v1` 能力。
+4. `/v1/health` 能力声明新增 `rag_project_bundle`。
+5. 更新 README、API 文档和后端测试。
+
+### 3. 验证
+已运行 `python -m unittest discover -q`、`python scripts\security_check.py` 和 `git diff --check`。
+
+## 2026-06-01 追加：项目详情页展示 RAG 解释历史
+
+### 1. 开发目的
+后端已经支持按项目过滤 RAG 解释历史，但项目详情页仍只展示证据块。为了让单个项目的“证据、解释、质量”形成闭环，本次把项目级解释历史接入 `project.html`。
+
+### 2. 修改内容
+1. `project.html` 在 API 模式下读取 `/v1/rag/explanations?repo=owner/name&limit=5`。
+2. 项目详情页新增“RAG 解释历史”区域，展示问题、检索模式、质量等级、质量分、引用数量和解释答案。
+3. 静态模式保留提示，不触发本地后端专属查询。
+4. 更新 README 和页面构建测试。
+
+### 3. 验证
+已运行 `python scripts\build_pages.py`、`python -m unittest discover -q`、`python scripts\security_check.py` 和 `git diff --check`。
+
 ## 2026-06-01 追加：RAG 解释历史支持按项目过滤
 
 ### 1. 开发目的

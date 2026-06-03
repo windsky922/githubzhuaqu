@@ -2,9 +2,9 @@
   "schema_version": 1,
   "total_projects": 10,
   "trending_project_count": 10,
-  "trending_top10_selected_count": 9,
+  "trending_top10_selected_count": 8,
   "trending_selected_rate": 1.0,
-  "total_star_growth": 81029,
+  "total_star_growth": 31744,
   "top_languages": [
     {
       "name": "Python",
@@ -38,7 +38,7 @@
       "full_name": "harry0703/MoneyPrinterTurbo",
       "html_url": "https://github.com/harry0703/MoneyPrinterTurbo",
       "trending_rank": 1,
-      "stargazers_count": 74799,
+      "stargazers_count": 77276,
       "language": "Python",
       "category": "LLM Tooling"
     },
@@ -46,73 +46,73 @@
       "full_name": "Lum1104/Understand-Anything",
       "html_url": "https://github.com/Lum1104/Understand-Anything",
       "trending_rank": 2,
-      "stargazers_count": 47473,
+      "stargazers_count": 49263,
       "language": "TypeScript",
       "category": "AI Agent"
     },
     {
-      "full_name": "anthropics/knowledge-work-plugins",
-      "html_url": "https://github.com/anthropics/knowledge-work-plugins",
+      "full_name": "microsoft/markitdown",
+      "html_url": "https://github.com/microsoft/markitdown",
       "trending_rank": 3,
-      "stargazers_count": 18472,
+      "stargazers_count": 139402,
       "language": "Python",
       "category": "LLM Tooling"
     },
     {
       "full_name": "rohitg00/ai-engineering-from-scratch",
       "html_url": "https://github.com/rohitg00/ai-engineering-from-scratch",
-      "trending_rank": 4,
-      "stargazers_count": 25977,
+      "trending_rank": 5,
+      "stargazers_count": 26961,
       "language": "Python",
       "category": "AI Agent"
     },
     {
-      "full_name": "microsoft/markitdown",
-      "html_url": "https://github.com/microsoft/markitdown",
+      "full_name": "Leonxlnx/taste-skill",
+      "html_url": "https://github.com/Leonxlnx/taste-skill",
       "trending_rank": 6,
-      "stargazers_count": 135361,
-      "language": "Python",
-      "category": "LLM Tooling"
+      "stargazers_count": 31223,
+      "language": "Shell",
+      "category": "AI Agent"
     }
   ],
   "top_star_growth": [
     {
-      "full_name": "Lum1104/Understand-Anything",
-      "html_url": "https://github.com/Lum1104/Understand-Anything",
-      "star_growth": 20888,
-      "stargazers_count": 47473,
-      "language": "TypeScript",
-      "category": "AI Agent"
-    },
-    {
-      "full_name": "harry0703/MoneyPrinterTurbo",
-      "html_url": "https://github.com/harry0703/MoneyPrinterTurbo",
-      "star_growth": 17058,
-      "stargazers_count": 74799,
-      "language": "Python",
-      "category": "LLM Tooling"
-    },
-    {
       "full_name": "colbymchenry/codegraph",
       "html_url": "https://github.com/colbymchenry/codegraph",
-      "star_growth": 13153,
-      "stargazers_count": 35622,
+      "star_growth": 31697,
+      "stargazers_count": 37207,
       "language": "TypeScript",
       "category": "AI Agent"
     },
     {
       "full_name": "microsoft/markitdown",
       "html_url": "https://github.com/microsoft/markitdown",
-      "star_growth": 10371,
-      "stargazers_count": 135361,
+      "star_growth": 23,
+      "stargazers_count": 139402,
       "language": "Python",
       "category": "LLM Tooling"
     },
     {
+      "full_name": "harry0703/MoneyPrinterTurbo",
+      "html_url": "https://github.com/harry0703/MoneyPrinterTurbo",
+      "star_growth": 12,
+      "stargazers_count": 77276,
+      "language": "Python",
+      "category": "LLM Tooling"
+    },
+    {
+      "full_name": "Leonxlnx/taste-skill",
+      "html_url": "https://github.com/Leonxlnx/taste-skill",
+      "star_growth": 7,
+      "stargazers_count": 31223,
+      "language": "Shell",
+      "category": "AI Agent"
+    },
+    {
       "full_name": "affaan-m/ECC",
       "html_url": "https://github.com/affaan-m/ECC",
-      "star_growth": 9945,
-      "stargazers_count": 200793,
+      "star_growth": 5,
+      "stargazers_count": 202580,
       "language": "JavaScript",
       "category": "AI Agent"
     }
@@ -120,8 +120,8 @@
   "summary_points": [
     "AI Agent 是本期最集中的方向，共 6 个项目。",
     "Python 是本期出现最多的主要语言，共 6 个项目。",
-    "本期入选项目累计新增 Star 81029。",
+    "本期入选项目累计新增 Star 31744。",
     "harry0703/MoneyPrinterTurbo 是本期 GitHub Trending 排名最高的项目，周榜排名 1。",
-    "Lum1104/Understand-Anything 是本期新增 Star 最高的项目，新增 20888。"
+    "colbymchenry/codegraph 是本期新增 Star 最高的项目，新增 31697。"
   ]
 }

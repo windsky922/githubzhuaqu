@@ -1,14 +1,14 @@
 {
   "schema_version": 1,
   "total_projects": 10,
-  "trending_project_count": 9,
+  "trending_project_count": 8,
   "trending_top10_selected_count": 8,
-  "trending_selected_rate": 0.9,
-  "total_star_growth": 136,
+  "trending_selected_rate": 0.8,
+  "total_star_growth": 166,
   "top_languages": [
     {
       "name": "Python",
-      "count": 4
+      "count": 5
     },
     {
       "name": "TypeScript",
@@ -24,10 +24,6 @@
     },
     {
       "name": "Shell",
-      "count": 1
-    },
-    {
-      "name": "JavaScript",
       "count": 1
     }
   ],
@@ -54,7 +50,7 @@
       "full_name": "ruvnet/ruflo",
       "html_url": "https://github.com/ruvnet/ruflo",
       "trending_rank": 2,
-      "stargazers_count": 47493,
+      "stargazers_count": 47470,
       "language": "TypeScript",
       "category": "AI Agent"
     },
@@ -62,7 +58,7 @@
       "full_name": "docusealco/docuseal",
       "html_url": "https://github.com/docusealco/docuseal",
       "trending_rank": 4,
-      "stargazers_count": 16017,
+      "stargazers_count": 16012,
       "language": "Ruby",
       "category": "Other"
     },
@@ -70,7 +66,7 @@
       "full_name": "virattt/dexter",
       "html_url": "https://github.com/virattt/dexter",
       "trending_rank": 5,
-      "stargazers_count": 24992,
+      "stargazers_count": 24988,
       "language": "TypeScript",
       "category": "AI Agent"
     },
@@ -78,7 +74,7 @@
       "full_name": "soxoj/maigret",
       "html_url": "https://github.com/soxoj/maigret",
       "trending_rank": 6,
-      "stargazers_count": 26917,
+      "stargazers_count": 26908,
       "language": "Python",
       "category": "Developer Tools"
     },
@@ -86,7 +82,7 @@
       "full_name": "1jehuang/jcode",
       "html_url": "https://github.com/1jehuang/jcode",
       "trending_rank": 7,
-      "stargazers_count": 5264,
+      "stargazers_count": 5260,
       "language": "Rust",
       "category": "AI Agent"
     }
@@ -95,49 +91,49 @@
     {
       "full_name": "NousResearch/hermes-agent",
       "html_url": "https://github.com/NousResearch/hermes-agent",
-      "star_growth": 41,
-      "stargazers_count": 140479,
+      "star_growth": 64,
+      "stargazers_count": 140438,
       "language": "Python",
       "category": "AI Agent"
     },
     {
-      "full_name": "ruvnet/ruflo",
-      "html_url": "https://github.com/ruvnet/ruflo",
-      "star_growth": 23,
-      "stargazers_count": 47493,
-      "language": "TypeScript",
+      "full_name": "datawhalechina/hello-agents",
+      "html_url": "https://github.com/datawhalechina/hello-agents",
+      "star_growth": 43,
+      "stargazers_count": 45494,
+      "language": "Python",
       "category": "AI Agent"
     },
     {
       "full_name": "mattpocock/skills",
       "html_url": "https://github.com/mattpocock/skills",
-      "star_growth": 19,
-      "stargazers_count": 67653,
+      "star_growth": 23,
+      "stargazers_count": 67634,
       "language": "Shell",
       "category": "LLM Tooling"
     },
     {
-      "full_name": "decolua/9router",
-      "html_url": "https://github.com/decolua/9router",
-      "star_growth": 17,
-      "stargazers_count": 6244,
-      "language": "JavaScript",
+      "full_name": "ruvnet/ruflo",
+      "html_url": "https://github.com/ruvnet/ruflo",
+      "star_growth": 16,
+      "stargazers_count": 47470,
+      "language": "TypeScript",
       "category": "AI Agent"
     },
     {
       "full_name": "soxoj/maigret",
       "html_url": "https://github.com/soxoj/maigret",
       "star_growth": 9,
-      "stargazers_count": 26917,
+      "stargazers_count": 26908,
       "language": "Python",
       "category": "Developer Tools"
     }
   ],
   "summary_points": [
     "AI Agent 是本期最集中的方向，共 6 个项目。",
-    "Python 是本期出现最多的主要语言，共 4 个项目。",
-    "本期入选项目累计新增 Star 136。",
+    "Python 是本期出现最多的主要语言，共 5 个项目。",
+    "本期入选项目累计新增 Star 166。",
     "ruvnet/ruflo 是本期 GitHub Trending 排名最高的项目，周榜排名 2。",
-    "NousResearch/hermes-agent 是本期新增 Star 最高的项目，新增 41。"
+    "NousResearch/hermes-agent 是本期新增 Star 最高的项目，新增 64。"
   ]
 }

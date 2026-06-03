@@ -42,7 +42,7 @@ http://127.0.0.1:8000/admin.html?api=1
 
 根路径 `http://127.0.0.1:8000/` 会跳转到管理首页。`/v1/*` 路径是 JSON API，例如 `/v1/jobs?limit=50` 返回机器可读任务数据，不是 HTML 页面。
 
-管理首页中的 RAG 检索区会调用 `/v1/rag/retrieve` 和 `/v1/rag/vector-search`，用于查看证据块、引用和 `prompt_context`；RAG 质量概览会调用 `/v1/rag/quality-summary`，用于查看解释数量、质量分布、改进建议和低质量样本。向量检索会在 `auto_build=true` 时自动构建本地 `local-hash-v1` 索引，也可以先手动运行 `py scripts\build_rag_embeddings.py`。
+管理首页中的 RAG 检索区会调用 `/v1/rag/retrieve` 和 `/v1/rag/vector-search`，用于查看证据块、引用和 `prompt_context`；RAG 质量概览会调用 `/v1/rag/quality-summary`，用于查看解释数量、质量分布、改进建议和低质量样本；RAG 回填区会调用 `/v1/rag/backfill-explanations`，先预览缺口项目，确认后再写入 SQLite。向量检索会在 `auto_build=true` 时自动构建本地 `local-hash-v1` 索引，也可以先手动运行 `py scripts\build_rag_embeddings.py`。
 
 如果本地没有 `data/github_weekly.sqlite`，查询项目接口会从 `data/` 下的 JSON 归档自动重建 SQLite 派生索引。
 
@@ -388,6 +388,139 @@ py scripts\build_rag_embeddings.py
 /v1/rag/quality-summary?limit=10
 ```
 
+### `GET /v1/rag/coverage`
+
+检查历史项目的 RAG 覆盖缺口，用于判断哪些项目缺少证据块、embedding 或解释历史。该接口只读 SQLite，不触发外部请求，适合作为后续补库脚本、Agent 自动优化和管理页健康检查的数据源。
+
+支持参数：
+
+| 参数 | 说明 |
+|---|---|
+| `limit` | 返回缺口项目数量，默认 20，最大 100 |
+
+返回字段包含：
+
+1. `total_projects`：项目语料中覆盖的项目数量。
+2. `healthy_project_count`：证据块、embedding 和解释历史均具备的项目数量。
+3. `coverage_rate`：健康项目占比。
+4. `gap_count`：存在 RAG 覆盖缺口的项目数量。
+5. `gaps`：缺口项目列表，每项包含 `chunk_count`、`embedding_count`、`explanation_count`、`average_quality_score` 和 `gap_reasons`。
+6. `recommendations`：下一步补库建议。
+
+示例：
+
+```text
+/v1/rag/coverage?limit=20
+```
+
+可用 `scripts/backfill_rag_explanations.py` 按该接口的缺口结果批量生成规则版解释：
+
+```text
+python scripts/backfill_rag_explanations.py --dry-run
+python scripts/backfill_rag_explanations.py --limit 10
+```
+
+### `POST /v1/rag/backfill-explanations`
+
+按 `/v1/rag/coverage` 的缺口结果，为缺少解释历史的项目批量生成规则版 RAG 解释。该接口只使用本地 SQLite 和现有 RAG 检索逻辑，不调用外部模型、不请求 GitHub/Kimi/Telegram。
+
+为避免误写数据库，接口默认 `dry_run=true`。如果请求中传入 `dry_run=false` 但没有同时传入 `confirm_execution=true`，后端会自动改回预览模式，并在 `safety_warnings` 中说明原因。
+
+请求 JSON 支持字段：
+
+| 字段 | 说明 |
+|---|---|
+| `limit` | 回填项目数量，默认 10，最大 100 |
+| `rag_limit` | 每个项目解释时召回的证据块数量，默认 8，最大 30 |
+| `mode` | 检索模式，支持 `fts5` 或 `vector` |
+| `model` | 向量模式使用的 embedding 模型名，默认 `local-hash-v1` |
+| `auto_build` | 向量模式缺少索引时是否自动构建本地索引 |
+| `dry_run` | 是否只预览，不写入 SQLite；API 默认 `true` |
+| `confirm_execution` | API 写库确认开关；只有 `dry_run=false` 且该字段为 `true` 才会创建解释历史 |
+| `trigger_source` | 可选调用来源，默认 `rag_backfill_api` |
+| `requested_by` | 可选调用者标识，默认 `api` |
+
+返回字段包含：
+
+1. `accepted`：请求是否被后端接受处理。
+2. `dry_run`：本次实际执行模式。
+3. `job_id`：本次回填任务编号，可用于查询任务详情和事件。
+4. `safety_warnings`：安全降级提示。
+5. `coverage_before`：回填前的覆盖概况。
+6. `processed`：本次计划或创建的项目记录。
+
+每次 API 调用都会写入一个 `kind=rag_backfill` 的任务记录。可以通过 `GET /v1/jobs?kind=rag_backfill` 查看最近回填任务，通过 `GET /v1/jobs/{job_id}/events` 查看 `rag_backfill_started` 和 `rag_backfill_completed` 等审计事件。脚本入口 `scripts/backfill_rag_explanations.py` 仍只执行补库逻辑，不额外写入任务审计。
+
+示例：
+
+```text
+POST /v1/rag/backfill-explanations
+{"limit": 3, "dry_run": true}
+
+POST /v1/rag/backfill-explanations
+{"limit": 3, "dry_run": false, "confirm_execution": true}
+```
+
+### `POST /v1/rag/backfill-plan`
+
+创建一个 `kind=rag_backfill`、`status=planned` 的 RAG 回填计划任务，但不立即执行。请求字段与 `/v1/rag/backfill-explanations` 一致。接口会返回 `job_id`，后续可调用：
+
+```text
+GET /v1/job-execution-check?job_id=...
+POST /v1/jobs/{job_id}/execute
+```
+
+执行时必须传入 `confirm_execution=true`。如果计划任务自身为 `dry_run=false`，创建计划时也必须传入 `confirm_execution=true`，否则后端会自动改为 `dry_run=true`，避免误写 SQLite。
+
+### `POST /v1/rag/maintenance-plan`
+
+检查 RAG 覆盖缺口，并按需创建 RAG 回填 planned 任务。该接口会先调用覆盖缺口逻辑；如果 `gap_count` 小于 `min_gap_count`，只返回健康状态，不创建任务；如果已经存在相同参数的 active `rag_backfill` 任务，则返回 `duplicate_of`，避免重复补库。
+
+常用请求字段：
+
+| 字段 | 说明 |
+|---|---|
+| `limit` | 本次计划回填项目数量，默认不超过缺口数和 10 |
+| `coverage_limit` | 覆盖缺口检查数量，默认 100，最大 500 |
+| `min_gap_count` | 至少发现多少缺口才创建任务，默认 1 |
+| `dry_run` | 创建的任务是否只预览，默认 `true` |
+| `confirm_execution` | 如果 `dry_run=false`，必须显式确认 |
+
+本地脚本入口：
+
+```text
+python scripts/plan_rag_maintenance.py
+python scripts/plan_rag_maintenance.py --limit 20 --coverage-limit 200
+```
+
+### `GET /v1/projects/{owner}/{repo}/rag`
+
+返回单个项目的 RAG 聚合包，用于项目详情页、后续 Agent 工具调用和 LangChain/RAG 编排。该接口会读取项目详情、执行本地 RAG 检索，并合并该项目已经入库的解释历史，不调用外部模型、不请求 GitHub/Kimi/Telegram。
+
+支持参数：
+
+| 参数 | 说明 |
+|---|---|
+| `limit` | 证据块数量，默认 8，最大 30 |
+| `explanation_limit` | 解释历史数量，默认 5，最大 50 |
+| `mode` | 检索模式，默认 `fts5`；传 `vector` 时使用本地向量检索 |
+| `model` | 向量模型名称，默认 `local-hash-v1` |
+| `auto_build` | 向量检索时是否自动构建本地 embedding 索引 |
+
+返回字段包含：
+
+1. `project`：项目摘要，包含语言、方向、历史入选次数、新增 Star 和最好 Trending 排名。
+2. `contexts`、`citations`、`prompt_context`：可直接交给后续问答链的证据与引用。
+3. `explanations`：该项目已入库的 RAG 解释历史。
+4. `explanation_summary`：该项目解释数量、平均质量分、质量等级分布和改进建议。
+
+示例：
+
+```text
+/v1/projects/owner/agent/rag?limit=8&explanation_limit=5
+/v1/projects/owner/agent/rag?mode=vector&auto_build=true
+```
+
 ### `GET /v1/projects/{owner}/{repo}/similar`
 
 基于单项目详情和 `project_corpus` 语料索引生成相似项目候选。该接口优先使用 SQLite FTS5 召回候选，再结合语言、方向、来源、关键词重合、Trending 排名和新增 Star 计算 `similarity_score`。
@@ -554,7 +687,7 @@ explorer.html?api=0&profile=python
 
 1. 默认通过 `project.html?repo=owner/name` 读取静态 `projects.json` 并在浏览器中聚合详情。
 2. 在本地后端或 URL 带 `api=1` 时，优先读取 `/api/projects/{owner}/{repo}`。
-3. API 模式下会额外调用 `/v1/rag/retrieve`，展示该项目相关的 RAG 证据块、引用和 `prompt_context`。
+3. API 模式下会额外调用 `/v1/projects/{owner}/{repo}/rag`，一次展示该项目相关的 RAG 证据块、引用、`prompt_context`、解释历史和解释质量摘要。
 4. API 不可用时自动回退到静态 `projects.json`。
 
 示例：
