@@ -964,11 +964,11 @@ def _admin_dashboard_content() -> str:
           </select>
         </label>
         <label class="check-label">
-          <input id="taskDryRun" type="checkbox" checked>
-          dry_run
+          <input id="taskPreviewMode" name="taskDeliveryMode" type="radio" value="preview" checked>
+          预览，不推送
         </label>
         <label class="check-label">
-          <input id="taskConfirmDelivery" type="checkbox">
+          <input id="taskDeliveryMode" name="taskDeliveryMode" type="radio" value="delivery">
           确认真实推送
         </label>
         <button id="createTask" type="button">创建任务</button>
@@ -1036,8 +1036,8 @@ def _admin_dashboard_content() -> str:
       profile: document.getElementById("taskProfile"),
       daysBack: document.getElementById("taskDaysBack"),
       source: document.getElementById("taskSource"),
-      dryRun: document.getElementById("taskDryRun"),
-      confirmDelivery: document.getElementById("taskConfirmDelivery"),
+      previewMode: document.getElementById("taskPreviewMode"),
+      deliveryMode: document.getElementById("taskDeliveryMode"),
       button: document.getElementById("createTask"),
       status: document.getElementById("createTaskStatus"),
     };
@@ -1219,8 +1219,8 @@ def _admin_dashboard_content() -> str:
       const payload = {
         profile: createControls.profile.value.trim(),
         sources: source ? [source] : [],
-        dry_run: createControls.dryRun.checked,
-        confirm_delivery: createControls.confirmDelivery.checked,
+        dry_run: createControls.previewMode.checked,
+        confirm_delivery: createControls.deliveryMode.checked,
         days_back: number(createControls.daysBack.value) || 7,
         trigger_source: "admin_page",
         requested_by: "local-admin",
@@ -5496,11 +5496,11 @@ def _jobs_dashboard_content() -> str:
           </select>
         </label>
         <label class="check-label">
-          <input id="createDryRun" type="checkbox" checked>
-          <span>dry_run</span>
+          <input id="createPreviewMode" name="createDeliveryMode" type="radio" value="preview" checked>
+          <span>预览，不推送</span>
         </label>
         <label class="check-label">
-          <input id="createConfirmDelivery" type="checkbox">
+          <input id="createDeliveryMode" name="createDeliveryMode" type="radio" value="delivery">
           <span>确认推送</span>
         </label>
         <button id="createTask" type="button">创建任务</button>
@@ -5540,8 +5540,8 @@ def _jobs_dashboard_content() -> str:
       profile: document.getElementById("createProfile"),
       daysBack: document.getElementById("createDaysBack"),
       source: document.getElementById("createSource"),
-      dryRun: document.getElementById("createDryRun"),
-      confirmDelivery: document.getElementById("createConfirmDelivery"),
+      previewMode: document.getElementById("createPreviewMode"),
+      deliveryMode: document.getElementById("createDeliveryMode"),
       button: document.getElementById("createTask"),
       status: document.getElementById("createTaskStatus"),
     };
@@ -5595,8 +5595,8 @@ def _jobs_dashboard_content() -> str:
       const payload = {
         profile: createControls.profile.value.trim(),
         sources: source ? [source] : [],
-        dry_run: createControls.dryRun.checked,
-        confirm_delivery: createControls.confirmDelivery.checked,
+        dry_run: createControls.previewMode.checked,
+        confirm_delivery: createControls.deliveryMode.checked,
         days_back: number(createControls.daysBack.value) || 7,
         trigger_source: "jobs_page",
         requested_by: "local-ui",
