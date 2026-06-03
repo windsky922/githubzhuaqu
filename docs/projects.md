@@ -4,6 +4,16 @@
 
 | 日期 | 项目 | 来源 | Trending 排名 | 方向 | 语言 | Star | 新增 Star | 风险提示 | 链接 |
 |---|---|---|---:|---|---|---:|---:|---:|---|
+| 2026-06-02 | harry0703/MoneyPrinterTurbo | GitHub Search + GitHub Trending | 1 | LLM Tooling | Python | 77276 | 12 | 0 | [https://github.com/harry0703/MoneyPrinterTurbo](https://github.com/harry0703/MoneyPrinterTurbo) |
+| 2026-06-02 | Lum1104/Understand-Anything | GitHub Trending | 2 | AI Agent | TypeScript | 49263 | 0 | 0 | [https://github.com/Lum1104/Understand-Anything](https://github.com/Lum1104/Understand-Anything) |
+| 2026-06-02 | microsoft/markitdown | GitHub Search + GitHub Trending | 3 | LLM Tooling | Python | 139402 | 23 | 0 | [https://github.com/microsoft/markitdown](https://github.com/microsoft/markitdown) |
+| 2026-06-02 | rohitg00/ai-engineering-from-scratch | GitHub Trending | 5 | AI Agent | Python | 26961 | 0 | 0 | [https://github.com/rohitg00/ai-engineering-from-scratch](https://github.com/rohitg00/ai-engineering-from-scratch) |
+| 2026-06-02 | Leonxlnx/taste-skill | GitHub Search + GitHub Trending | 6 | AI Agent | Shell | 31223 | 7 | 0 | [https://github.com/Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) |
+| 2026-06-02 | anthropics/knowledge-work-plugins | GitHub Trending | 7 | LLM Tooling | Python | 18722 | 0 | 0 | [https://github.com/anthropics/knowledge-work-plugins](https://github.com/anthropics/knowledge-work-plugins) |
+| 2026-06-02 | colbymchenry/codegraph | GitHub Trending | 8 | AI Agent | TypeScript | 37207 | 31697 | 0 | [https://github.com/colbymchenry/codegraph](https://github.com/colbymchenry/codegraph) |
+| 2026-06-02 | mukul975/Anthropic-Cybersecurity-Skills | GitHub Trending | 9 | AI Agent | Python | 13359 | 0 | 1 | [https://github.com/mukul975/Anthropic-Cybersecurity-Skills](https://github.com/mukul975/Anthropic-Cybersecurity-Skills) |
+| 2026-06-02 | p-e-w/heretic | GitHub Trending | 12 | LLM Tooling | Python | 23138 | 0 | 0 | [https://github.com/p-e-w/heretic](https://github.com/p-e-w/heretic) |
+| 2026-06-02 | affaan-m/ECC | GitHub Search + GitHub Trending | 11 | AI Agent | JavaScript | 202580 | 5 | 0 | [https://github.com/affaan-m/ECC](https://github.com/affaan-m/ECC) |
 | 2026-05-19 | CloakHQ/CloakBrowser | GitHub Trending | 1 | AI Agent | Python | 15774 | 1 | 0 | [https://github.com/CloakHQ/CloakBrowser](https://github.com/CloakHQ/CloakBrowser) |
 | 2026-05-19 | rohitg00/agentmemory | GitHub Trending | 2 | AI Agent | TypeScript | 13390 | 2 | 0 | [https://github.com/rohitg00/agentmemory](https://github.com/rohitg00/agentmemory) |
 | 2026-05-19 | oven-sh/bun | GitHub Trending | 3 | Other | Rust | 91988 | 0 | 0 | [https://github.com/oven-sh/bun](https://github.com/oven-sh/bun) |

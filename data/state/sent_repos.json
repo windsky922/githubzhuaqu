@@ -20,6 +20,11 @@
     "first_sent_at": "2026-05-03"
   },
   {
+    "full_name": "affaan-m/ECC",
+    "html_url": "https://github.com/affaan-m/ECC",
+    "first_sent_at": "2026-06-02"
+  },
+  {
     "full_name": "affaan-m/everything-claude-code",
     "html_url": "https://github.com/affaan-m/everything-claude-code",
     "first_sent_at": "2026-04-29"
@@ -58,6 +63,11 @@
     "full_name": "anomalyco/opencode",
     "html_url": "https://github.com/anomalyco/opencode",
     "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "anthropics/knowledge-work-plugins",
+    "html_url": "https://github.com/anthropics/knowledge-work-plugins",
+    "first_sent_at": "2026-06-02"
   },
   {
     "full_name": "anthropics/skills",
@@ -105,6 +115,11 @@
     "first_sent_at": "2026-04-29"
   },
   {
+    "full_name": "chopratejas/headroom",
+    "html_url": "https://github.com/chopratejas/headroom",
+    "first_sent_at": "2026-06-03"
+  },
+  {
     "full_name": "CJackHwang/ds2api",
     "html_url": "https://github.com/CJackHwang/ds2api",
     "first_sent_at": "2026-04-29"
@@ -128,6 +143,11 @@
     "full_name": "codecentric/spring-boot-admin",
     "html_url": "https://github.com/codecentric/spring-boot-admin",
     "first_sent_at": "2026-05-05"
+  },
+  {
+    "full_name": "colbymchenry/codegraph",
+    "html_url": "https://github.com/colbymchenry/codegraph",
+    "first_sent_at": "2026-06-02"
   },
   {
     "full_name": "coleam00/Archon",
@@ -200,6 +220,11 @@
     "first_sent_at": "2026-04-28"
   },
   {
+    "full_name": "EveryInc/compound-engineering-plugin",
+    "html_url": "https://github.com/EveryInc/compound-engineering-plugin",
+    "first_sent_at": "2026-06-03"
+  },
+  {
     "full_name": "f/prompts.chat",
     "html_url": "https://github.com/f/prompts.chat",
     "first_sent_at": "2026-04-28"
@@ -245,9 +270,19 @@
     "first_sent_at": "2026-04-29"
   },
   {
+    "full_name": "google/adk-python",
+    "html_url": "https://github.com/google/adk-python",
+    "first_sent_at": "2026-06-03"
+  },
+  {
     "full_name": "hacksider/Deep-Live-Cam",
     "html_url": "https://github.com/hacksider/Deep-Live-Cam",
     "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "harry0703/MoneyPrinterTurbo",
+    "html_url": "https://github.com/harry0703/MoneyPrinterTurbo",
+    "first_sent_at": "2026-06-02"
   },
   {
     "full_name": "hesreallyhim/awesome-claude-code",
@@ -268,6 +303,21 @@
     "full_name": "huggingface/transformers",
     "html_url": "https://github.com/huggingface/transformers",
     "first_sent_at": "2026-04-28"
+  },
+  {
+    "full_name": "huginn/huginn",
+    "html_url": "https://github.com/huginn/huginn",
+    "first_sent_at": "2026-06-03"
+  },
+  {
+    "full_name": "infiniflow/ragflow",
+    "html_url": "https://github.com/infiniflow/ragflow",
+    "first_sent_at": "2026-06-02"
+  },
+  {
+    "full_name": "JCodesMore/ai-website-cloner-template",
+    "html_url": "https://github.com/JCodesMore/ai-website-cloner-template",
+    "first_sent_at": "2026-06-02"
   },
   {
     "full_name": "jeecgboot/JeecgBoot",
@@ -305,6 +355,11 @@
     "first_sent_at": "2026-04-29"
   },
   {
+    "full_name": "Leonxlnx/taste-skill",
+    "html_url": "https://github.com/Leonxlnx/taste-skill",
+    "first_sent_at": "2026-06-02"
+  },
+  {
     "full_name": "lobehub/lobehub",
     "html_url": "https://github.com/lobehub/lobehub",
     "first_sent_at": "2026-04-29"
@@ -313,6 +368,11 @@
     "full_name": "lsdefine/GenericAgent",
     "html_url": "https://github.com/lsdefine/GenericAgent",
     "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "Lum1104/Understand-Anything",
+    "html_url": "https://github.com/Lum1104/Understand-Anything",
+    "first_sent_at": "2026-06-02"
   },
   {
     "full_name": "mattpocock/skills",
@@ -330,6 +390,16 @@
     "first_sent_at": "2026-04-29"
   },
   {
+    "full_name": "microsoft/agent-governance-toolkit",
+    "html_url": "https://github.com/microsoft/agent-governance-toolkit",
+    "first_sent_at": "2026-06-03"
+  },
+  {
+    "full_name": "microsoft/markitdown",
+    "html_url": "https://github.com/microsoft/markitdown",
+    "first_sent_at": "2026-06-02"
+  },
+  {
     "full_name": "mksglu/context-mode",
     "html_url": "https://github.com/mksglu/context-mode",
     "first_sent_at": "2026-04-29"
@@ -340,14 +410,29 @@
     "first_sent_at": "2026-04-30"
   },
   {
+    "full_name": "mukul975/Anthropic-Cybersecurity-Skills",
+    "html_url": "https://github.com/mukul975/Anthropic-Cybersecurity-Skills",
+    "first_sent_at": "2026-06-02"
+  },
+  {
     "full_name": "n8n-io/n8n",
     "html_url": "https://github.com/n8n-io/n8n",
     "first_sent_at": "2026-04-28"
   },
   {
+    "full_name": "netdata/netdata",
+    "html_url": "https://github.com/netdata/netdata",
+    "first_sent_at": "2026-06-02"
+  },
+  {
     "full_name": "nilbuild/developer-roadmap",
     "html_url": "https://github.com/nilbuild/developer-roadmap",
     "first_sent_at": "2026-04-28"
+  },
+  {
+    "full_name": "NirDiamant/agents-towards-production",
+    "html_url": "https://github.com/NirDiamant/agents-towards-production",
+    "first_sent_at": "2026-06-02"
   },
   {
     "full_name": "NousResearch/hermes-agent",
@@ -358,6 +443,11 @@
     "full_name": "obra/superpowers",
     "html_url": "https://github.com/obra/superpowers",
     "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "ogulcancelik/herdr",
+    "html_url": "https://github.com/ogulcancelik/herdr",
+    "first_sent_at": "2026-06-03"
   },
   {
     "full_name": "ollama/ollama",
@@ -390,14 +480,39 @@
     "first_sent_at": "2026-04-29"
   },
   {
+    "full_name": "p-e-w/heretic",
+    "html_url": "https://github.com/p-e-w/heretic",
+    "first_sent_at": "2026-06-02"
+  },
+  {
+    "full_name": "PaddlePaddle/PaddleOCR",
+    "html_url": "https://github.com/PaddlePaddle/PaddleOCR",
+    "first_sent_at": "2026-06-02"
+  },
+  {
+    "full_name": "pingcap/tidb",
+    "html_url": "https://github.com/pingcap/tidb",
+    "first_sent_at": "2026-06-03"
+  },
+  {
     "full_name": "PrefectHQ/prefect",
     "html_url": "https://github.com/PrefectHQ/prefect",
     "first_sent_at": "2026-04-30"
   },
   {
+    "full_name": "public-apis/public-apis",
+    "html_url": "https://github.com/public-apis/public-apis",
+    "first_sent_at": "2026-06-02"
+  },
+  {
     "full_name": "pytorch/pytorch",
     "html_url": "https://github.com/pytorch/pytorch",
     "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "rasbt/LLMs-from-scratch",
+    "html_url": "https://github.com/rasbt/LLMs-from-scratch",
+    "first_sent_at": "2026-06-03"
   },
   {
     "full_name": "ray-project/ray",
@@ -408,6 +523,16 @@
     "full_name": "refactoringhq/tolaria",
     "html_url": "https://github.com/refactoringhq/tolaria",
     "first_sent_at": "2026-05-04"
+  },
+  {
+    "full_name": "revfactory/harness",
+    "html_url": "https://github.com/revfactory/harness",
+    "first_sent_at": "2026-06-03"
+  },
+  {
+    "full_name": "rohitg00/ai-engineering-from-scratch",
+    "html_url": "https://github.com/rohitg00/ai-engineering-from-scratch",
+    "first_sent_at": "2026-06-02"
   },
   {
     "full_name": "run-llama/llama_index",
@@ -430,6 +555,11 @@
     "first_sent_at": "2026-04-29"
   },
   {
+    "full_name": "shareAI-lab/learn-claude-code",
+    "html_url": "https://github.com/shareAI-lab/learn-claude-code",
+    "first_sent_at": "2026-06-02"
+  },
+  {
     "full_name": "Significant-Gravitas/AutoGPT",
     "html_url": "https://github.com/Significant-Gravitas/AutoGPT",
     "first_sent_at": "2026-04-28"
@@ -438,6 +568,11 @@
     "full_name": "simstudioai/sim",
     "html_url": "https://github.com/simstudioai/sim",
     "first_sent_at": "2026-04-30"
+  },
+  {
+    "full_name": "sindresorhus/awesome",
+    "html_url": "https://github.com/sindresorhus/awesome",
+    "first_sent_at": "2026-06-03"
   },
   {
     "full_name": "Skyvern-AI/skyvern",
@@ -458,6 +593,11 @@
     "full_name": "spring-projects/spring-boot",
     "html_url": "https://github.com/spring-projects/spring-boot",
     "first_sent_at": "2026-04-30"
+  },
+  {
+    "full_name": "SWE-agent/SWE-agent",
+    "html_url": "https://github.com/SWE-agent/SWE-agent",
+    "first_sent_at": "2026-06-03"
   },
   {
     "full_name": "TauricResearch/TradingAgents",
@@ -520,9 +660,19 @@
     "first_sent_at": "2026-05-06"
   },
   {
+    "full_name": "wshobson/agents",
+    "html_url": "https://github.com/wshobson/agents",
+    "first_sent_at": "2026-06-03"
+  },
+  {
     "full_name": "Yeachan-Heo/oh-my-claudecode",
     "html_url": "https://github.com/Yeachan-Heo/oh-my-claudecode",
     "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "zeroclaw-labs/zeroclaw",
+    "html_url": "https://github.com/zeroclaw-labs/zeroclaw",
+    "first_sent_at": "2026-06-02"
   },
   {
     "full_name": "zhayujie/CowAgent",

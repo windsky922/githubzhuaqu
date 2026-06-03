@@ -4,26 +4,27 @@
 
 ## 最新周报
 
-- [2026-05-19](weekly/2026-05-19.html)
+- [2026-06-02](weekly/2026-06-02.html)
 
 ## 最新运行摘要
 
 - 入选项目：10 个
-- 采集候选：103 个
+- 采集候选：230 个
 - 生成方式：降级模板
-- Telegram：未推送
-- 采集错误：4 条
+- Telegram：已推送
+- 采集错误：0 条
 
 ## 最新趋势要点
 
-- AI Agent 是本期最集中的方向，共 4 个项目。
-- TypeScript 是本期出现最多的主要语言，共 4 个项目。
-- 本期入选项目累计新增 Star 8。
-- CloakHQ/CloakBrowser 是本期 GitHub Trending 排名最高的项目，周榜排名 1。
-- rohitg00/agentmemory 是本期新增 Star 最高的项目，新增 2。
+- AI Agent 是本期最集中的方向，共 6 个项目。
+- Python 是本期出现最多的主要语言，共 6 个项目。
+- 本期入选项目累计新增 Star 31744。
+- harry0703/MoneyPrinterTurbo 是本期 GitHub Trending 排名最高的项目，周榜排名 1。
+- colbymchenry/codegraph 是本期新增 Star 最高的项目，新增 31697。
 
 ## 全部周报
 
+- [2026-06-02](weekly/2026-06-02.html)：10 个项目，降级模板，Telegram 已推送，主语言 Python，主方向 AI Agent，新增 Star 31744，Trending 项目 10
 - [2026-05-19](weekly/2026-05-19.html)：10 个项目，降级模板，Telegram 未推送，主语言 TypeScript，主方向 AI Agent，新增 Star 8，Trending 项目 9
 - [2026-05-18](weekly/2026-05-18.html)：10 个项目，降级模板，Telegram 未推送，主语言 Python，主方向 AI Agent，新增 Star 46469，Trending 项目 9
 - [2026-05-09](weekly/2026-05-09.html)：10 个项目，Kimi，Telegram 已推送，主语言 Python，主方向 AI Agent，新增 Star 166，Trending 项目 8
