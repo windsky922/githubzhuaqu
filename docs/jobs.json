@@ -1,7 +1,45 @@
 {
   "schema_version": 1,
-  "count": 19,
+  "count": 20,
   "jobs": [
+    {
+      "job_id": "run:2026-06-03",
+      "kind": "weekly_report",
+      "status": "succeeded",
+      "run_date": "2026-06-03",
+      "submitted_at": "2026-06-03",
+      "started_at": "",
+      "finished_at": "2026-06-03",
+      "request": {
+        "profile": "",
+        "sources": [],
+        "dry_run": false,
+        "requested_dry_run": false,
+        "confirm_delivery": false,
+        "delivery_allowed": false,
+        "days_back": 0,
+        "trigger_source": "",
+        "requested_by": "",
+        "safety_warnings": []
+      },
+      "result": {
+        "run_date": "",
+        "status": "",
+        "selected_count": 10,
+        "collected_count": 231,
+        "kimi_used": true,
+        "fallback_used": false,
+        "telegram_sent": true,
+        "telegram_error": "",
+        "report_path": "reports/2026-06-03.md",
+        "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-06-03.html",
+        "sqlite_index_path": "",
+        "sqlite_error": "",
+        "error": ""
+      },
+      "error": "",
+      "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-06-03.html"
+    },
     {
       "job_id": "preview:bb14df6063af",
       "kind": "weekly_report",

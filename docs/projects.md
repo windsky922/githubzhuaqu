@@ -4,6 +4,16 @@
 
 | 日期 | 项目 | 来源 | Trending 排名 | 方向 | 语言 | Star | 新增 Star | 风险提示 | 链接 |
 |---|---|---|---:|---|---|---:|---:|---:|---|
+| 2026-06-03 | harry0703/MoneyPrinterTurbo | GitHub Search + GitHub Trending | 1 | LLM Tooling | Python | 78190 | 20 | 0 | [https://github.com/harry0703/MoneyPrinterTurbo](https://github.com/harry0703/MoneyPrinterTurbo) |
+| 2026-06-03 | chopratejas/headroom | GitHub Trending | 3 | AI Agent | Python | 7060 | 64 | 0 | [https://github.com/chopratejas/headroom](https://github.com/chopratejas/headroom) |
+| 2026-06-03 | Lum1104/Understand-Anything | GitHub Trending | 4 | AI Agent | TypeScript | 50355 | 21 | 0 | [https://github.com/Lum1104/Understand-Anything](https://github.com/Lum1104/Understand-Anything) |
+| 2026-06-03 | revfactory/harness | GitHub Trending | 7 | AI Agent | HTML | 5559 | 1 | 0 | [https://github.com/revfactory/harness](https://github.com/revfactory/harness) |
+| 2026-06-03 | rohitg00/ai-engineering-from-scratch | GitHub Trending | 8 | AI Agent | Python | 27484 | 11 | 0 | [https://github.com/rohitg00/ai-engineering-from-scratch](https://github.com/rohitg00/ai-engineering-from-scratch) |
+| 2026-06-03 | colbymchenry/codegraph | GitHub Trending | 9 | AI Agent | TypeScript | 38302 | 14 | 0 | [https://github.com/colbymchenry/codegraph](https://github.com/colbymchenry/codegraph) |
+| 2026-06-03 | mukul975/Anthropic-Cybersecurity-Skills | GitHub Trending | 10 | AI Agent | Python | 13673 | 11 | 1 | [https://github.com/mukul975/Anthropic-Cybersecurity-Skills](https://github.com/mukul975/Anthropic-Cybersecurity-Skills) |
+| 2026-06-03 | affaan-m/ECC | GitHub Search + GitHub Trending | 11 | AI Agent | JavaScript | 204317 | 34 | 0 | [https://github.com/affaan-m/ECC](https://github.com/affaan-m/ECC) |
+| 2026-06-03 | microsoft/agent-governance-toolkit | GitHub Trending | 15 | AI Agent | Python | 3838 | 2 | 0 | [https://github.com/microsoft/agent-governance-toolkit](https://github.com/microsoft/agent-governance-toolkit) |
+| 2026-06-03 | NousResearch/hermes-agent | GitHub Search | - | AI Agent | Python | 177677 | 23 | 0 | [https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) |
 | 2026-06-02 | harry0703/MoneyPrinterTurbo | GitHub Search + GitHub Trending | 1 | LLM Tooling | Python | 77276 | 12 | 0 | [https://github.com/harry0703/MoneyPrinterTurbo](https://github.com/harry0703/MoneyPrinterTurbo) |
 | 2026-06-02 | Lum1104/Understand-Anything | GitHub Trending | 2 | AI Agent | TypeScript | 49263 | 0 | 0 | [https://github.com/Lum1104/Understand-Anything](https://github.com/Lum1104/Understand-Anything) |
 | 2026-06-02 | microsoft/markitdown | GitHub Search + GitHub Trending | 3 | LLM Tooling | Python | 139402 | 23 | 0 | [https://github.com/microsoft/markitdown](https://github.com/microsoft/markitdown) |
