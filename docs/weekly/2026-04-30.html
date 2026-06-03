@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GitHub 周报 2026-04-30</title>
+  <style>
+    body { margin: 0; background: #f6f7f9; color: #1f2933; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height: 1.7; }
+    main { max-width: 960px; margin: 0 auto; padding: 32px 20px 56px; }
+    article { background: #fff; border: 1px solid #d8dee8; padding: 28px; }
+    h1, h2, h3, h4 { line-height: 1.3; }
+    a { color: #0969da; }
+    code { background: #eef2f7; padding: 2px 5px; }
+    hr { border: 0; border-top: 1px solid #d8dee8; margin: 24px 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <article>
+      <p><strong>GitHub 每周热点项目周报</strong></p>
+      <p>*统计周期：2026-04-23 至 2026-04-30*</p>
+
+      <hr>
+
+      <h3>1. 本周总体趋势</h3>
+
+      <p>本周 GitHub 社区持续聚焦 <strong>AI Agent</strong> 与 <strong>LLM 工具链</strong>的工程化落地。在入选的 10 个热点项目中，<strong>AI Agent 类别占据 5 席</strong>，LLM Tooling 占据 3 席，显示出从概念验证向生产级工具集成的明显趋势。</p>
+
+      <p><strong>Python</strong> 以 5 个项目的绝对优势成为主要开发语言，<strong>TypeScript、Go、Shell</strong> 等语言在特定场景（工作流编排、高性能网关、开发环境配置）中表现活跃。本周共有 <strong>7 个项目进入 GitHub Trending 周榜前 10</strong>，累计新增 Star 89 个，社区关注度保持稳定增长。</p>
+
+      <p>值得注意的是，本周出现多个针对 <strong>Claude Code</strong> 和 <strong>DeepSeek</strong> 的代理与网关工具，反映出开发者对主流 AI 编程助手私有化部署和成本优化的强烈需求。</p>
+
+      <hr>
+
+      <h3>2. 热点项目总览</h3>
+
+      <p>| 项目名称 | Trending 排名 | 新增 Star | 主要语言 | 项目类别 | 项目来源 |</p>
+      <p>|:---------|:-------------:|:---------:|:--------:|:--------:|:--------:|</p>
+      <p>| [Alishahryar1/free-claude-code](<a href="https://github.com/Alishahryar1/free-claude-code)">https://github.com/Alishahryar1/free-claude-code)</a> | <strong>第 1 位</strong> | +7 | Python | LLM Tooling | GitHub Trending |</p>
+      <p>| [mattpocock/skills](<a href="https://github.com/mattpocock/skills)">https://github.com/mattpocock/skills)</a> | <strong>第 2 位</strong> | +55 | Shell | LLM Tooling | GitHub Trending |</p>
+      <p>| [huggingface/ml-intern](<a href="https://github.com/huggingface/ml-intern)">https://github.com/huggingface/ml-intern)</a> | <strong>第 3 位</strong> | 0 | Python | Machine Learning | GitHub Trending |</p>
+      <p>| [CJackHwang/ds2api](<a href="https://github.com/CJackHwang/ds2api)">https://github.com/CJackHwang/ds2api)</a> | <strong>第 5 位</strong> | +1 | Go | LLM Tooling | GitHub Trending |</p>
+      <p>| [trycua/cua](<a href="https://github.com/trycua/cua)">https://github.com/trycua/cua)</a> | <strong>第 8 位</strong> | +1 | HTML | AI Agent | GitHub Trending |</p>
+      <p>| [Anil-matcha/Open-Generative-AI](<a href="https://github.com/Anil-matcha/Open-Generative-AI)">https://github.com/Anil-matcha/Open-Generative-AI)</a> | <strong>第 9 位</strong> | +4 | JavaScript | Other | GitHub Trending |</p>
+      <p>| [Fincept-Corporation/FinceptTerminal](<a href="https://github.com/Fincept-Corporation/FinceptTerminal)">https://github.com/Fincept-Corporation/FinceptTerminal)</a> | <strong>第 10 位</strong> | +3 | Python | AI Agent | GitHub Trending |</p>
+      <p>| [NousResearch/hermes-agent](<a href="https://github.com/NousResearch/hermes-agent)">https://github.com/NousResearch/hermes-agent)</a> | - | +15 | Python | AI Agent | GitHub Search |</p>
+      <p>| [n8n-io/n8n](<a href="https://github.com/n8n-io/n8n)">https://github.com/n8n-io/n8n)</a> | - | +2 | TypeScript | AI Agent | GitHub Search |</p>
+      <p>| [Significant-Gravitas/AutoGPT](<a href="https://github.com/Significant-Gravitas/AutoGPT)">https://github.com/Significant-Gravitas/AutoGPT)</a> | - | +1 | Python | AI Agent | GitHub Search |</p>
+
+      <hr>
+
+      <h3>3. 重点项目分析</h3>
+
+      <p><strong>Alishahryar1/free-claude-code</strong>（Trending 周榜第 1 位）</p>
+      <p>该项目通过构建 Anthropic 兼容的代理层，允许开发者将 Claude Code CLI、VS Code 扩展或 JetBrains ACP 的流量路由至 NVIDIA NIM、OpenRouter、DeepSeek、Ollama 等本地或第三方端点。作为本周 Trending 榜首，其核心亮点在于实现了 <strong>AI 编程助手的&quot;去中心化&quot;部署</strong>，支持语音交互与 Discord 机器人集成，适合希望在私有环境或低成本场景下使用 Claude Code 工作流的开发者。项目采用 MIT 许可证，社区 Fork 数达 2,692，生态活跃度较高。</p>
+
+      <p><strong>mattpocock/skills</strong>（Trending 周榜第 2 位，本周新增 Star 55）</p>
+      <p>由知名 TypeScript 教育者 Matt Pocock 开源的 <strong>Agent 技能库</strong>，强调&quot;真正的工程实践而非氛围编程&quot;。项目通过 GSD（Get Shit Done）、BMAD 等方法论，提供可直接放入 <code>.claude</code> 目录的提示词与工具集，帮助 AI Agent 处理复杂的真实应用开发流程。本周 55 个新增 Star 的增长势头显示出开发者对<strong>结构化 Agent 工作流</strong>的迫切需求，特别适合希望提升 AI 编程助手代码质量的工程团队参考。</p>
+
+      <p><strong>huggingface/ml-intern</strong>（Trending 周榜第 3 位）</p>
+      <p>Hugging Face 推出的<strong>自主机器学习工程师</strong>，能够自动阅读论文、训练模型并部署至生产环境。该 Agent 深度集成 Hugging Face 生态，具备访问文档、论文、数据集和云端算力的完整能力。<strong>风险提示：该项目未识别到开源许可证</strong>，在复用代码或商业化应用前需人工确认授权条款。尽管本周新增 Star 为 0，但其进入 Trending 前三表明社区对&quot;全自动 ML 工程&quot;的高度关注。</p>
+
+      <p><strong>NousResearch/hermes-agent</strong>（本周新增 Star 15）</p>
+      <p>Nous Research 构建的<strong>自进化 AI Agent</strong>，最大特点是内置学习循环：能够从经验中创建技能、在使用过程中持续改进、自动持久化知识，并构建跨会话的用户画像模型。作为累计 Star 超过 12.6 万的大型项目，其 15 个本周新增 Star 体现了长期技术积累的稳定吸引力。项目采用 MIT 许可证，适合研究<strong>长期记忆与个性化</strong>的 Agent 开发者深入分析。</p>
+
+      <p><strong>trycua/cua</strong>（Trending 周榜第 8 位）</p>
+      <p>专注于<strong>计算机使用代理（Computer-Use Agents）</strong>的开源基础设施，提供沙箱环境、SDK 和基准测试工具，支持 macOS、Linux、Windows 全桌面控制。核心技术亮点在于能够在后台无侵入地驱动原生应用（包括 Chromium 网页内容和 Blender、Figma 等画布工具），不占用光标焦点或桌面空间。这为自动化测试、RPA（机器人流程自动化）和跨应用工作流编排提供了新的技术路径。</p>
+
+      <p><strong>Fincept-Corporation/FinceptTerminal</strong>（Trending 周榜第 10 位）</p>
+      <p>面向金融领域的<strong>原生 C++20 桌面终端</strong>，集成 CFA 级别分析能力与 AI Agent 自动化功能。项目定位为开源版 Bloomberg Terminal，提供投资组合分析、股票研究、节点编辑器等模块。尽管主要语言标记为 Python，但其核心为 C++ 实现，适合关注<strong>金融科技与高性能桌面应用</strong>的开发者研究 AI 在专业垂直领域的落地模式。</p>
+
+      <hr>
+
+      <h3>4. 最适合用户学习的项目</h3>
+
+      <p>根据您关注的<strong>开发者工具</strong>、<strong>CLI 与自动化</strong>以及<strong>工程效率提升</strong>方向，本周推荐以下学习路径：</p>
+
+      <p><strong>入门级：mattpocock/skills</strong></p>
+      <p>如果您希望立即提升日常开发效率，建议研究此项目。它提供了可直接落地的 Agent 提示词工程范例，展示了如何通过结构化的&quot;技能&quot;定义，将 AI 从&quot;聊天模式&quot;转变为&quot;工程模式&quot;。适合学习如何为 Claude Code 等工具编写高质量的系统提示词。</p>
+
+      <p><strong>进阶级：Alishahryar1/free-claude-code</strong></p>
+      <p>对于希望深入理解<strong>API 代理与终端工具开发</strong>的开发者，该项目是优秀的参考案例。它展示了如何拦截并转换 Anthropic Messages API 流量，实现多后端路由与协议兼容。代码结构清晰，适合学习 Python 异步编程与 CLI 工具架构设计。</p>
+
+      <p><strong>架构级：trycua/cua</strong></p>
+      <p>如果您关注<strong>桌面自动化与计算机视觉</strong>在 Agent 中的应用，建议研究 cua 的沙箱实现与虚拟化框架。项目提供了跨平台桌面控制的工程化方案，特别适合需要构建端到端自动化测试或复杂工作流编排的开发者。</p>
+
+      <hr>
+
+      <h3>5. 本周结论</h3>
+
+      <p>本周 GitHub 热点呈现出 <strong>AI Agent 工程化</strong>的明确趋势：从单纯的 LLM 调用转向<strong>深度系统集成</strong>（如后台桌面控制、IDE 插件代理、金融终端嵌入）。开发者不再满足于&quot;氛围编程&quot;，而是追求<strong>可控、可部署、可扩展</strong>的 Agent 基础设施。</p>
+
+      <p><strong>技术趋势方面</strong>，Python 依然是 Agent 开发的首选语言，但 Go 在高性能 API 网关（如 ds2api）、TypeScript 在工作流编排（如 n8n）中展现出不可替代的优势。<strong>风险提醒方面</strong>，本周入选项目中 <strong>huggingface/ml-intern</strong> 与 <strong>Anil-matcha/Open-Generative-AI</strong> 未明确标识开源许可证，建议在商业使用或代码复用前仔细审查仓库的授权声明。</p>
+
+      <p>总体而言，AI 开发者工具正从&quot;玩具&quot;向&quot;生产工具&quot;快速演进，建议持续关注具备<strong>长期记忆</strong>、<strong>多工具集成</strong>和<strong>跨平台控制</strong>能力的项目。</p>
+
+      <h2>附录：项目链接与来源补全</h2>
+
+      <p>• Alishahryar1/free-claude-code；[<a href="https://github.com/Alishahryar1/free-claude-code](https://github.com/Alishahryar1/free-claude-code)；来源：GitHub">https://github.com/Alishahryar1/free-claude-code](https://github.com/Alishahryar1/free-claude-code)；来源：GitHub</a> Trending；Trending 排名：1</p>
+      <p>• mattpocock/skills；[<a href="https://github.com/mattpocock/skills](https://github.com/mattpocock/skills)；来源：GitHub">https://github.com/mattpocock/skills](https://github.com/mattpocock/skills)；来源：GitHub</a> Trending；Trending 排名：2</p>
+      <p>• huggingface/ml-intern；[<a href="https://github.com/huggingface/ml-intern](https://github.com/huggingface/ml-intern)；来源：GitHub">https://github.com/huggingface/ml-intern](https://github.com/huggingface/ml-intern)；来源：GitHub</a> Trending；Trending 排名：3；风险提示：未识别到许可证，复用代码前需要人工确认授权。</p>
+      <p>• CJackHwang/ds2api；[<a href="https://github.com/CJackHwang/ds2api](https://github.com/CJackHwang/ds2api)；来源：GitHub">https://github.com/CJackHwang/ds2api](https://github.com/CJackHwang/ds2api)；来源：GitHub</a> Trending；Trending 排名：5</p>
+      <p>• trycua/cua；[<a href="https://github.com/trycua/cua](https://github.com/trycua/cua)；来源：GitHub">https://github.com/trycua/cua](https://github.com/trycua/cua)；来源：GitHub</a> Trending；Trending 排名：8</p>
+      <p>• Anil-matcha/Open-Generative-AI；[<a href="https://github.com/Anil-matcha/Open-Generative-AI](https://github.com/Anil-matcha/Open-Generative-AI)；来源：GitHub">https://github.com/Anil-matcha/Open-Generative-AI](https://github.com/Anil-matcha/Open-Generative-AI)；来源：GitHub</a> Trending；Trending 排名：9；风险提示：未识别到许可证，复用代码前需要人工确认授权。</p>
+      <p>• Fincept-Corporation/FinceptTerminal；[<a href="https://github.com/Fincept-Corporation/FinceptTerminal](https://github.com/Fincept-Corporation/FinceptTerminal)；来源：GitHub">https://github.com/Fincept-Corporation/FinceptTerminal](https://github.com/Fincept-Corporation/FinceptTerminal)；来源：GitHub</a> Trending；Trending 排名：10</p>
+      <p>• NousResearch/hermes-agent；[<a href="https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)；来源：GitHub">https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)；来源：GitHub</a> Search</p>
+      <p>• n8n-io/n8n；[<a href="https://github.com/n8n-io/n8n](https://github.com/n8n-io/n8n)；来源：GitHub">https://github.com/n8n-io/n8n](https://github.com/n8n-io/n8n)；来源：GitHub</a> Search</p>
+      <p>• Significant-Gravitas/AutoGPT；[<a href="https://github.com/Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT)；来源：GitHub">https://github.com/Significant-Gravitas/AutoGPT](https://github.com/Significant-Gravitas/AutoGPT)；来源：GitHub</a> Search</p>
+    </article>
+  </main>
+</body>
+</html>
