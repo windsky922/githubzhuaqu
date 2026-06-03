@@ -308,11 +308,11 @@
           </select>
         </label>
         <label class="check-label">
-          <input id="createDryRun" type="checkbox" checked>
-          <span>dry_run</span>
+          <input id="createPreviewMode" name="createDeliveryMode" type="radio" value="preview" checked>
+          <span>预览，不推送</span>
         </label>
         <label class="check-label">
-          <input id="createConfirmDelivery" type="checkbox">
+          <input id="createDeliveryMode" name="createDeliveryMode" type="radio" value="delivery">
           <span>确认推送</span>
         </label>
         <button id="createTask" type="button">创建任务</button>
@@ -352,8 +352,8 @@
       profile: document.getElementById("createProfile"),
       daysBack: document.getElementById("createDaysBack"),
       source: document.getElementById("createSource"),
-      dryRun: document.getElementById("createDryRun"),
-      confirmDelivery: document.getElementById("createConfirmDelivery"),
+      previewMode: document.getElementById("createPreviewMode"),
+      deliveryMode: document.getElementById("createDeliveryMode"),
       button: document.getElementById("createTask"),
       status: document.getElementById("createTaskStatus"),
     };
@@ -407,8 +407,8 @@
       const payload = {
         profile: createControls.profile.value.trim(),
         sources: source ? [source] : [],
-        dry_run: createControls.dryRun.checked,
-        confirm_delivery: createControls.confirmDelivery.checked,
+        dry_run: createControls.previewMode.checked,
+        confirm_delivery: createControls.deliveryMode.checked,
         days_back: number(createControls.daysBack.value) || 7,
         trigger_source: "jobs_page",
         requested_by: "local-ui",

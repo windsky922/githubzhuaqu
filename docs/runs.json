@@ -8,14 +8,14 @@
       "run_schema_version": 1,
       "report_url": "weekly/2026-06-03.html",
       "selected_count": 10,
-      "collected_count": 231,
-      "previously_sent_selected_count": 9,
-      "previously_sent_selected_rate": 0.9,
-      "readme_fetched_count": 10,
-      "readme_fetch_rate": 1.0,
-      "star_history_updated_count": 162,
-      "kimi_used": true,
-      "fallback_used": false,
+      "collected_count": 210,
+      "previously_sent_selected_count": 8,
+      "previously_sent_selected_rate": 0.8,
+      "readme_fetched_count": 0,
+      "readme_fetch_rate": 0.0,
+      "star_history_updated_count": 143,
+      "kimi_used": false,
+      "fallback_used": true,
       "telegram_sent": true,
       "telegram_report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-06-03.html",
       "telegram_explorer_url": "https://windsky922.github.io/githubzhuaqu/explorer.html?date=2026-06-03",
@@ -28,53 +28,78 @@
           "skipped": false
         }
       ],
-      "collector_error_count": 0,
-      "collector_failed_count": 0,
-      "collector_error_kinds": [],
-      "collector_error_summary": [],
+      "collector_error_count": 21,
+      "collector_failed_count": 1,
+      "collector_error_kinds": [
+        "rate_limited"
+      ],
+      "collector_error_summary": [
+        {
+          "source": "github_trending",
+          "stage": "repository_detail",
+          "status": "partial",
+          "error_kind": "rate_limited",
+          "status_code": 403,
+          "retry_after": "",
+          "rate_limit_remaining": "0",
+          "rate_limit_reset": "1780475942",
+          "message": "harry0703/MoneyPrinterTurbo: GitHub API error 403 | rate_limited | rate_limit_remaining=0: API rate limit exceeded for 85.211.248.255. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation fo"
+        }
+      ],
       "collector_query_count": 8,
-      "collector_success_count": 8,
-      "collector_success_rate": 1.0,
+      "collector_success_count": 7,
+      "collector_success_rate": 0.875,
       "top_languages": [
         {
           "name": "Python",
-          "count": 6
-        },
-        {
-          "name": "TypeScript",
-          "count": 2
-        },
-        {
-          "name": "HTML",
-          "count": 1
+          "count": 5
         },
         {
           "name": "JavaScript",
+          "count": 1
+        },
+        {
+          "name": "Shell",
+          "count": 1
+        },
+        {
+          "name": "TypeScript",
+          "count": 1
+        },
+        {
+          "name": "Rust",
+          "count": 1
+        },
+        {
+          "name": "Jupyter Notebook",
           "count": 1
         }
       ],
       "top_categories": [
         {
           "name": "AI Agent",
-          "count": 9
+          "count": 7
         },
         {
           "name": "LLM Tooling",
+          "count": 2
+        },
+        {
+          "name": "Developer Tools",
           "count": 1
         }
       ],
-      "total_star_growth": 201,
-      "trending_project_count": 9,
-      "trending_top10_available_count": 10,
-      "trending_top10_selected_count": 7,
-      "trending_top10_fulfillment_rate": 1.0,
-      "trending_selected_rate": 0.9,
+      "total_star_growth": 336,
+      "trending_project_count": 0,
+      "trending_top10_available_count": 0,
+      "trending_top10_selected_count": 0,
+      "trending_top10_fulfillment_rate": 0.0,
+      "trending_selected_rate": 0.0,
       "summary_points": [
-        "AI Agent 是本期最集中的方向，共 9 个项目。",
-        "Python 是本期出现最多的主要语言，共 6 个项目。",
-        "本期入选项目累计新增 Star 201。",
-        "harry0703/MoneyPrinterTurbo 是本期 GitHub Trending 排名最高的项目，周榜排名 1。",
-        "chopratejas/headroom 是本期新增 Star 最高的项目，新增 64。"
+        "AI Agent 是本期最集中的方向，共 7 个项目。",
+        "Python 是本期出现最多的主要语言，共 5 个项目。",
+        "本期入选项目累计新增 Star 336。",
+        "obra/superpowers 是本期新增 Star 最高的项目，新增 65。"
       ]
     },
     {

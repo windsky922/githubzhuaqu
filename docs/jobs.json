@@ -1,11 +1,91 @@
 {
   "schema_version": 1,
-  "count": 20,
+  "count": 22,
   "jobs": [
+    {
+      "job_id": "preview:aa3a535c18c9",
+      "kind": "weekly_report",
+      "status": "succeeded",
+      "run_date": "2026-06-03",
+      "submitted_at": "2026-06-03T08:00:03.651029Z",
+      "started_at": "2026-06-03T08:00:06.335508Z",
+      "finished_at": "2026-06-03T08:00:06.361004Z",
+      "request": {
+        "profile": "",
+        "sources": [
+          "github_trending"
+        ],
+        "dry_run": false,
+        "requested_dry_run": false,
+        "confirm_delivery": true,
+        "delivery_allowed": true,
+        "days_back": 7,
+        "trigger_source": "admin_page",
+        "requested_by": "local-admin",
+        "safety_warnings": []
+      },
+      "result": {
+        "run_date": "2026-06-03",
+        "status": "success",
+        "selected_count": 10,
+        "collected_count": 210,
+        "kimi_used": false,
+        "fallback_used": true,
+        "telegram_sent": true,
+        "telegram_error": "",
+        "report_path": "reports/2026-06-03.md",
+        "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-06-03.html",
+        "sqlite_index_path": "data/github_weekly.sqlite",
+        "sqlite_error": "",
+        "error": ""
+      },
+      "error": "",
+      "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-06-03.html"
+    },
+    {
+      "job_id": "preview:b01971861f50",
+      "kind": "weekly_report",
+      "status": "succeeded",
+      "run_date": "2026-06-03",
+      "submitted_at": "2026-06-03T07:18:15.390707Z",
+      "started_at": "2026-06-03T07:18:19.803631Z",
+      "finished_at": "2026-06-03T07:18:19.826358Z",
+      "request": {
+        "profile": "",
+        "sources": [
+          "github_trending"
+        ],
+        "dry_run": true,
+        "requested_dry_run": true,
+        "confirm_delivery": true,
+        "delivery_allowed": false,
+        "days_back": 7,
+        "trigger_source": "admin_page",
+        "requested_by": "local-admin",
+        "safety_warnings": []
+      },
+      "result": {
+        "run_date": "2026-06-03",
+        "status": "success",
+        "selected_count": 10,
+        "collected_count": 210,
+        "kimi_used": true,
+        "fallback_used": false,
+        "telegram_sent": false,
+        "telegram_error": "Telegram send skipped",
+        "report_path": "reports/2026-06-03.md",
+        "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-06-03.html",
+        "sqlite_index_path": "data/github_weekly.sqlite",
+        "sqlite_error": "",
+        "error": ""
+      },
+      "error": "",
+      "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-06-03.html"
+    },
     {
       "job_id": "run:2026-06-03",
       "kind": "weekly_report",
-      "status": "succeeded",
+      "status": "failed",
       "run_date": "2026-06-03",
       "submitted_at": "2026-06-03",
       "started_at": "",
@@ -26,8 +106,8 @@
         "run_date": "",
         "status": "",
         "selected_count": 10,
-        "collected_count": 231,
-        "kimi_used": true,
+        "collected_count": 210,
+        "kimi_used": false,
         "fallback_used": false,
         "telegram_sent": true,
         "telegram_error": "",
@@ -37,7 +117,7 @@
         "sqlite_error": "",
         "error": ""
       },
-      "error": "",
+      "error": "Kimi API error 429: {\"error\":{\"message\":\"The engine is currently overloaded, please try again later\",\"type\":\"engine_overloaded_error\"}}; retry_after=1s; Kimi API error 429: {\"error\":{\"message\":\"The engine is currently overloaded, please try",
       "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-06-03.html"
     },
     {

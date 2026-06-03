@@ -65,6 +65,11 @@
     "first_sent_at": "2026-04-29"
   },
   {
+    "full_name": "anthropics/claude-code",
+    "html_url": "https://github.com/anthropics/claude-code",
+    "first_sent_at": "2026-06-03"
+  },
+  {
     "full_name": "anthropics/knowledge-work-plugins",
     "html_url": "https://github.com/anthropics/knowledge-work-plugins",
     "first_sent_at": "2026-06-02"
@@ -533,6 +538,11 @@
     "full_name": "rohitg00/ai-engineering-from-scratch",
     "html_url": "https://github.com/rohitg00/ai-engineering-from-scratch",
     "first_sent_at": "2026-06-02"
+  },
+  {
+    "full_name": "rtk-ai/rtk",
+    "html_url": "https://github.com/rtk-ai/rtk",
+    "first_sent_at": "2026-06-03"
   },
   {
     "full_name": "run-llama/llama_index",
