@@ -11,6 +11,9 @@
     h1, h2, h3, h4 { line-height: 1.3; }
     a { color: #0969da; }
     code { background: #eef2f7; padding: 2px 5px; }
+    table { width: 100%; border-collapse: collapse; margin: 18px 0; display: block; overflow-x: auto; }
+    th, td { border: 1px solid #d8dee8; padding: 8px 10px; text-align: left; vertical-align: top; }
+    th { background: #f1f4f8; }
     hr { border: 0; border-top: 1px solid #d8dee8; margin: 24px 0; }
   </style>
 </head>
@@ -18,79 +21,55 @@
   <main>
     <article>
       <h2>GitHub 每周热点项目周报（2026-04-27 至 2026-05-04）</h2>
-
       <h3>1. 本周总体趋势</h3>
-
       <p>本周开源社区热度聚焦于 <strong>AI Agent</strong> 与 <strong>LLM 工具链</strong> 领域。在纳入统计的 10 个活跃项目中，AI Agent 类项目占据 4 席，LLM Tooling 类占 3 席，形成明显的技术聚集效应。<strong>Python</strong> 以 6 个项目的绝对优势成为本周最活跃语言，TypeScript 与 Go 各占 2 席与 1 席。</p>
-
       <p>本周累计新增 Star 达 <strong>7,483</strong>，其中 8 个项目进入 GitHub Trending 周榜。值得注意的是，基于 Claude 与 Codex 生态的&quot;技能库&quot;（Skills）与代理编排工具成为新的热点方向，反映出开发者正从单一模型调用转向复杂的工程化 Agent 系统构建。</p>
-
       <hr>
-
       <h3>2. 热点项目总览</h3>
-
-      <p>| 项目名称 | 周榜排名 | 语言 | 类别 | Star 总数 | 本周新增 | 项目链接 |</p>
-      <p>|---------|---------|------|------|----------|---------|---------|</p>
-      <p>| mattpocock/skills | 1 | Shell | LLM Tooling | 57,250 | +1,236 | [<a href="https://github.com/mattpocock/skills](https://github.com/mattpocock/skills)">https://github.com/mattpocock/skills](https://github.com/mattpocock/skills)</a> |</p>
-      <p>| TauricResearch/TradingAgents | 2 | Python | AI Agent | 65,538 | +1,425 | [<a href="https://github.com/TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents)">https://github.com/TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents)</a> |</p>
-      <p>| ComposioHQ/awesome-codex-skills | 3 | Python | AI Agent | 6,213 | +226 | [<a href="https://github.com/ComposioHQ/awesome-codex-skills](https://github.com/ComposioHQ/awesome-codex-skills)">https://github.com/ComposioHQ/awesome-codex-skills](https://github.com/ComposioHQ/awesome-codex-skills)</a> |</p>
-      <p>| Alishahryar1/free-claude-code | 4 | Python | LLM Tooling | 20,771 | +299 | [<a href="https://github.com/Alishahryar1/free-claude-code](https://github.com/Alishahryar1/free-claude-code)">https://github.com/Alishahryar1/free-claude-code](https://github.com/Alishahryar1/free-claude-code)</a> |</p>
-      <p>| refactoringhq/tolaria | 5 | TypeScript | Other | 9,261 | - | [<a href="https://github.com/refactoringhq/tolaria](https://github.com/refactoringhq/tolaria)">https://github.com/refactoringhq/tolaria](https://github.com/refactoringhq/tolaria)</a> |</p>
-      <p>| soxoj/maigret | 6 | Python | Developer Tools | 23,937 | +692 | [<a href="https://github.com/soxoj/maigret](https://github.com/soxoj/maigret)">https://github.com/soxoj/maigret](https://github.com/soxoj/maigret)</a> |</p>
-      <p>| CJackHwang/ds2api | 8 | Go | LLM Tooling | 3,255 | +39 | [<a href="https://github.com/CJackHwang/ds2api](https://github.com/CJackHwang/ds2api)">https://github.com/CJackHwang/ds2api](https://github.com/CJackHwang/ds2api)</a> |</p>
-      <p>| ruvnet/ruflo | 9 | TypeScript | AI Agent | 39,262 | +1,674 | [<a href="https://github.com/ruvnet/ruflo](https://github.com/ruvnet/ruflo)">https://github.com/ruvnet/ruflo](https://github.com/ruvnet/ruflo)</a> |</p>
-      <p>| NousResearch/hermes-agent | - | Python | AI Agent | 131,396 | +942 | [<a href="https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)">https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)</a> |</p>
-      <p>| D4Vinci/Scrapling | - | Python | Developer Tools | 43,224 | +950 | [<a href="https://github.com/D4Vinci/Scrapling](https://github.com/D4Vinci/Scrapling)">https://github.com/D4Vinci/Scrapling](https://github.com/D4Vinci/Scrapling)</a> |</p>
-
+      <table>
+        <thead><tr><th>项目名称</th><th>周榜排名</th><th>语言</th><th>类别</th><th>Star 总数</th><th>本周新增</th><th>项目链接</th></tr></thead>
+        <tbody>
+        <tr><td>mattpocock/skills</td><td>1</td><td>Shell</td><td>LLM Tooling</td><td>57,250</td><td>+1,236</td><td><a href="https://github.com/mattpocock/skills">https://github.com/mattpocock/skills</a></td></tr>
+        <tr><td>TauricResearch/TradingAgents</td><td>2</td><td>Python</td><td>AI Agent</td><td>65,538</td><td>+1,425</td><td><a href="https://github.com/TauricResearch/TradingAgents">https://github.com/TauricResearch/TradingAgents</a></td></tr>
+        <tr><td>ComposioHQ/awesome-codex-skills</td><td>3</td><td>Python</td><td>AI Agent</td><td>6,213</td><td>+226</td><td><a href="https://github.com/ComposioHQ/awesome-codex-skills">https://github.com/ComposioHQ/awesome-codex-skills</a></td></tr>
+        <tr><td>Alishahryar1/free-claude-code</td><td>4</td><td>Python</td><td>LLM Tooling</td><td>20,771</td><td>+299</td><td><a href="https://github.com/Alishahryar1/free-claude-code">https://github.com/Alishahryar1/free-claude-code</a></td></tr>
+        <tr><td>refactoringhq/tolaria</td><td>5</td><td>TypeScript</td><td>Other</td><td>9,261</td><td>-</td><td><a href="https://github.com/refactoringhq/tolaria">https://github.com/refactoringhq/tolaria</a></td></tr>
+        <tr><td>soxoj/maigret</td><td>6</td><td>Python</td><td>Developer Tools</td><td>23,937</td><td>+692</td><td><a href="https://github.com/soxoj/maigret">https://github.com/soxoj/maigret</a></td></tr>
+        <tr><td>CJackHwang/ds2api</td><td>8</td><td>Go</td><td>LLM Tooling</td><td>3,255</td><td>+39</td><td><a href="https://github.com/CJackHwang/ds2api">https://github.com/CJackHwang/ds2api</a></td></tr>
+        <tr><td>ruvnet/ruflo</td><td>9</td><td>TypeScript</td><td>AI Agent</td><td>39,262</td><td>+1,674</td><td><a href="https://github.com/ruvnet/ruflo">https://github.com/ruvnet/ruflo</a></td></tr>
+        <tr><td>NousResearch/hermes-agent</td><td>-</td><td>Python</td><td>AI Agent</td><td>131,396</td><td>+942</td><td><a href="https://github.com/NousResearch/hermes-agent">https://github.com/NousResearch/hermes-agent</a></td></tr>
+        <tr><td>D4Vinci/Scrapling</td><td>-</td><td>Python</td><td>Developer Tools</td><td>43,224</td><td>+950</td><td><a href="https://github.com/D4Vinci/Scrapling">https://github.com/D4Vinci/Scrapling</a></td></tr>
+        </tbody>
+      </table>
       <hr>
-
       <h3>3. 重点项目分析</h3>
-
       <p><strong>mattpocock/skills</strong>（周榜第 1，新增 1,236 Star）</p>
       <p>该项目进入 GitHub Trending 周榜首位，是本期最重要的热度信号。作为 Shell 脚本集合，它提供了作者日常用于&quot;真实工程&quot;（Real Engineering）而非&quot;氛围编程&quot;（Vibe Coding）的 Agent 技能。项目包含 GSD、BMAD 和 Spec-Kit 等方法论实现，旨在帮助开发者通过结构化流程构建复杂应用。适合希望提升 AI 辅助编码工程化水平的开发者参考。</p>
-
       <p><strong>TauricResearch/TradingAgents</strong>（周榜第 2，新增 1,425 Star）</p>
       <p>进入周榜第 2 位，近期热度持续上升。这是一个基于 Python 的多智能体金融交易框架，采用 LangGraph 构建。最新 v0.2.4 版本引入了结构化输出代理（研究管理器、交易员、投资组合经理）、持久化决策日志以及对 DeepSeek、Qwen、GLM 等国产模型的支持。项目提供了 Docker 部署方案，适合对量化交易与 Agent 编排感兴趣的开发者学习。</p>
-
       <p><strong>ComposioHQ/awesome-codex-skills</strong>（周榜第 3，新增 226 Star）</p>
       <p>位列周榜第 3，是一个精选的 Codex 技能列表，用于在 Codex CLI 和 API 中自动化工作流。项目展示了如何让 Codex 执行超越文本生成的实际操作，如发送邮件、创建 Issue、发布到 Slack 等，覆盖 1000+ 应用集成。<strong>风险提示</strong>：该项目未识别到开源许可证，复用代码前需人工确认授权条款。</p>
-
       <p><strong>Alishahryar1/free-claude-code</strong>（周榜第 4，新增 299 Star）</p>
       <p>排名周榜第 4，提供 Claude Code 的免费替代方案。通过构建 Anthropic 兼容的代理层，将 Claude Code 的 API 流量路由至 NVIDIA NIM、OpenRouter、DeepSeek、Ollama 等后端。支持 CLI、VS Code、JetBrains ACP 及聊天机器人等多种接入方式，适合希望在本地或低成本环境中使用 Claude Code 功能的开发者。</p>
-
       <p><strong>refactoringhq/tolaria</strong>（周榜第 5）</p>
       <p>位列周榜第 5，是一款基于 TypeScript 的跨平台桌面应用，专注于 Markdown 知识库管理。支持 macOS、Windows 和 Linux 系统，为个人知识管理（PKM）提供本地化的编辑与组织方案。项目采用 AGPL-3.0 许可证，近期仍有活跃的维护更新。</p>
-
       <p><strong>ruvnet/ruflo</strong>（周榜第 9，新增 1,674 Star）</p>
       <p>本周新增 Star 数最高（1,674），进入周榜第 9。这是一个面向 Claude 的多智能体编排平台，支持部署 100+ 专业 AI 代理的协同集群。项目提供企业级架构、自学习群体智能、RAG 集成以及原生 Claude Code / Codex 集成，支持跨机器、跨团队的联邦通信与自主工作流协调。</p>
-
       <hr>
-
       <h3>4. 最适合用户学习的项目</h3>
-
       <p>根据您关注的 <strong>Python 工具开发</strong>、<strong>Agent 工程</strong> 与 <strong>开发者工具</strong> 方向，本周推荐以下学习路径：</p>
-
       <p>• <strong>入门 Agent 开发</strong>：推荐研究 <strong>TradingAgents</strong>（Python），其基于 LangGraph 的多代理架构（研究-交易-组合管理）提供了完整的金融场景工程实践，代码结构清晰，适合理解 Agent 间的状态流转与工具调用。</p>
-
       <p>• <strong>提升 CLI 效率</strong>：<strong>mattpocock/skills</strong>（Shell）提供了可直接落地的工程化提示词与脚本，适合学习如何将&quot;氛围编程&quot;转化为可维护的 Agent 工作流，特别是其 Spec-Kit 和 GSD 方法论。</p>
-
       <p>• <strong>Python 实战技能</strong>：<strong>D4Vinci/Scrapling</strong> 是一个自适应 Web 抓取框架，基于 Playwright 构建，支持 AI 驱动的数据提取。适合需要构建数据管道或自动化爬虫的开发者，项目展示了如何处理现代 Web 的防爬机制。</p>
-
       <p>• <strong>Agent 编排进阶</strong>：<strong>ruvnet/ruflo</strong>（TypeScript）展示了大规模多智能体系统的架构设计，包括记忆持久化、联邦通信和群体智能，适合对 Agent 系统工程化感兴趣的进阶学习者。</p>
-
       <hr>
-
       <h3>5. 本周结论</h3>
-
       <p>本周开源生态呈现出 <strong>&quot;Agent 工程化&quot;</strong> 的明确趋势：社区正从简单的 API 调用转向构建具备记忆、协作与工具使用能力的复杂代理系统。Claude/Codex 技能库（Skills）概念的爆发（如 mattpocock/skills、awesome-codex-skills）表明，开发者开始重视可复用、可维护的 Agent 能力模块。</p>
-
       <p><strong>技术栈方面</strong>，Python 在 Agent 开发领域保持统治地位，而 TypeScript 在编排层（如 ruflo）和桌面应用（如 tolaria）中表现活跃。<strong>建议关注</strong> 多智能体协作模式、结构化输出（Structured Output）在复杂工作流中的应用，以及 LLM 代理与传统软件工程（如爬虫、金融系统）的集成实践。对于生产环境使用，请特别注意部分项目（如 awesome-codex-skills）的许可证合规风险。</p>
-
       <h2>附录：项目链接与来源补全</h2>
-
-      <p>• TauricResearch/TradingAgents；[<a href="https://github.com/TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents)；来源：GitHub">https://github.com/TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents)；来源：GitHub</a> Search + GitHub Trending；Trending 排名：2</p>
-      <p>• NousResearch/hermes-agent；[<a href="https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)；来源：GitHub">https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)；来源：GitHub</a> Search</p>
-      <p>• D4Vinci/Scrapling；[<a href="https://github.com/D4Vinci/Scrapling](https://github.com/D4Vinci/Scrapling)；来源：GitHub">https://github.com/D4Vinci/Scrapling](https://github.com/D4Vinci/Scrapling)；来源：GitHub</a> Search</p>
+      <p>• TauricResearch/TradingAgents；<a href="https://github.com/TauricResearch/TradingAgents">https://github.com/TauricResearch/TradingAgents</a>；来源：GitHub Search + GitHub Trending；Trending 排名：2</p>
+      <p>• NousResearch/hermes-agent；<a href="https://github.com/NousResearch/hermes-agent">https://github.com/NousResearch/hermes-agent</a>；来源：GitHub Search</p>
+      <p>• D4Vinci/Scrapling；<a href="https://github.com/D4Vinci/Scrapling">https://github.com/D4Vinci/Scrapling</a>；来源：GitHub Search</p>
     </article>
   </main>
 </body>

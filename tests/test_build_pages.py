@@ -571,5 +571,27 @@ class BuildPagesTest(unittest.TestCase):
             shutil.rmtree(root, ignore_errors=True)
 
 
+    def test_weekly_html_converts_tables_and_links(self):
+        root = Path.cwd() / f".tmp-pages-test-{uuid.uuid4().hex}"
+        try:
+            (root / "reports").mkdir(parents=True)
+            (root / "reports" / "2026-06-03.md").write_text(
+                "# 周报\n\n"
+                "| 项目 | 链接 |\n"
+                "| --- | --- |\n"
+                "| repo | [https://github.com/a/b](https://github.com/a/b) |\n",
+                encoding="utf-8",
+            )
+
+            build_pages(root)
+
+            weekly_html = (root / "docs" / "weekly" / "2026-06-03.html").read_text(encoding="utf-8")
+            self.assertIn("<table>", weekly_html)
+            self.assertIn('<a href="https://github.com/a/b">https://github.com/a/b</a>', weekly_html)
+            self.assertNotIn("](https://github.com/a/b)", weekly_html)
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
+
 if __name__ == "__main__":
     unittest.main()

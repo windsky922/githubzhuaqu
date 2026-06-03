@@ -175,7 +175,7 @@ def _page_name(markdown_path: Path) -> str:
 
 
 def _weekly_html_content(markdown_text: str, title: str) -> str:
-    body = "\n".join(_markdown_line_to_html(line) for line in markdown_text.splitlines())
+    body = _weekly_html_body(markdown_text)
     return f"""<!doctype html>
 <html lang="zh-CN">
 <head>
@@ -189,6 +189,9 @@ def _weekly_html_content(markdown_text: str, title: str) -> str:
     h1, h2, h3, h4 {{ line-height: 1.3; }}
     a {{ color: #0969da; }}
     code {{ background: #eef2f7; padding: 2px 5px; }}
+    table {{ width: 100%; border-collapse: collapse; margin: 18px 0; display: block; overflow-x: auto; }}
+    th, td {{ border: 1px solid #d8dee8; padding: 8px 10px; text-align: left; vertical-align: top; }}
+    th {{ background: #f1f4f8; }}
     hr {{ border: 0; border-top: 1px solid #d8dee8; margin: 24px 0; }}
   </style>
 </head>
@@ -224,6 +227,87 @@ def _inline_markdown_to_html(text: str) -> str:
     escaped = re.sub(r"\*\*([^*]+)\*\*", r"<strong>\1</strong>", escaped)
     escaped = re.sub(
         r"(https?://[^\s<]+)",
+        lambda match: f'<a href="{match.group(1)}">{match.group(1)}</a>',
+        escaped,
+    )
+    return escaped
+
+
+def _weekly_html_body(markdown_text: str) -> str:
+    lines = markdown_text.splitlines()
+    blocks = []
+    index = 0
+    while index < len(lines):
+        line = lines[index]
+        if _is_markdown_table_row(line):
+            table_lines = []
+            while index < len(lines) and _is_markdown_table_row(lines[index]):
+                table_lines.append(lines[index])
+                index += 1
+            blocks.append(_markdown_table_to_html(table_lines))
+            continue
+        blocks.append(_markdown_line_to_html(line))
+        index += 1
+    return "\n".join(block for block in blocks if block)
+
+
+def _markdown_line_to_html(line: str) -> str:
+    stripped = line.strip()
+    if not stripped:
+        return ""
+    if stripped == "---":
+        return "      <hr>"
+    heading_match = re.match(r"^(#{1,4})\s+(.+)$", stripped)
+    if heading_match:
+        level = len(heading_match.group(1))
+        return f"      <h{level}>{_inline_markdown_to_html(heading_match.group(2))}</h{level}>"
+    if stripped.startswith("- "):
+        return f"      <p>• {_inline_markdown_to_html(stripped[2:])}</p>"
+    return f"      <p>{_inline_markdown_to_html(stripped)}</p>"
+
+
+def _is_markdown_table_row(line: str) -> bool:
+    stripped = line.strip()
+    return stripped.startswith("|") and stripped.endswith("|") and stripped.count("|") >= 2
+
+
+def _is_markdown_table_separator(line: str) -> bool:
+    return bool(re.fullmatch(r"[\s|:\-]+", line.strip()))
+
+
+def _markdown_table_to_html(lines: list[str]) -> str:
+    rows = [_markdown_table_cells(line) for line in lines if not _is_markdown_table_separator(line)]
+    if not rows:
+        return ""
+    header, body_rows = rows[0], rows[1:]
+    header_html = "".join(f"<th>{_inline_markdown_to_html(cell)}</th>" for cell in header)
+    body_html = "\n".join(
+        "        <tr>" + "".join(f"<td>{_inline_markdown_to_html(cell)}</td>" for cell in row) + "</tr>"
+        for row in body_rows
+    )
+    return f"""      <table>
+        <thead><tr>{header_html}</tr></thead>
+        <tbody>
+{body_html}
+        </tbody>
+      </table>"""
+
+
+def _markdown_table_cells(line: str) -> list[str]:
+    return [cell.strip() for cell in line.strip().strip("|").split("|")]
+
+
+def _inline_markdown_to_html(text: str) -> str:
+    escaped = html.escape(text)
+    escaped = re.sub(
+        r"\[([^\]]+)\]\((https?://[^)]+)\)",
+        lambda match: f'<a href="{html.escape(match.group(2), quote=True)}">{match.group(1)}</a>',
+        escaped,
+    )
+    escaped = re.sub(r"`([^`]+)`", r"<code>\1</code>", escaped)
+    escaped = re.sub(r"\*\*([^*]+)\*\*", r"<strong>\1</strong>", escaped)
+    escaped = re.sub(
+        r'(?<!href=")(?<!">)(https?://[^\s<]+)',
         lambda match: f'<a href="{match.group(1)}">{match.group(1)}</a>',
         escaped,
     )

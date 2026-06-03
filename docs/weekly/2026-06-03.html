@@ -11,6 +11,9 @@
     h1, h2, h3, h4 { line-height: 1.3; }
     a { color: #0969da; }
     code { background: #eef2f7; padding: 2px 5px; }
+    table { width: 100%; border-collapse: collapse; margin: 18px 0; display: block; overflow-x: auto; }
+    th, td { border: 1px solid #d8dee8; padding: 8px 10px; text-align: left; vertical-align: top; }
+    th { background: #f1f4f8; }
     hr { border: 0; border-top: 1px solid #d8dee8; margin: 24px 0; }
   </style>
 </head>
@@ -19,64 +22,47 @@
     <article>
       <p><strong>GitHub 每周热点项目周报</strong></p>
       <p>*统计周期：2026-05-27 至 2026-06-03*</p>
-
       <hr>
-
       <h3>1. 本周总体趋势</h3>
-
       <p>本期共收录 <strong>10</strong> 个活跃项目，其中 <strong>9</strong> 个来自 GitHub Trending 周榜，<strong>7</strong> 个进入 Top 10。<strong>AI Agent</strong> 是绝对主导方向，占据 90% 的入选项目，反映出开发者在智能体框架、工具链优化和垂直场景落地的集中投入。<strong>Python</strong> 以 6 个项目成为主要开发语言，TypeScript 次之。本周累计新增 Star 达 <strong>201</strong>，其中 <code>headroom</code> 以新增 64 Star 领跑增长榜，而 <code>MoneyPrinterTurbo</code> 稳居 Trending 榜首。值得注意的是，本期项目多来自 GitHub Trending 和 GitHub Search 双源验证，质量评分普遍较高（quality_level: high），但个别项目涉及安全领域需谨慎评估。</p>
-
       <hr>
-
       <h3>2. 热点项目总览</h3>
-
-      <p>| 项目名称 | 周榜排名 | 语言 | 本周新增 Star | 项目地址 |</p>
-      <p>|---------|---------|------|--------------|----------|</p>
-      <p>| MoneyPrinterTurbo | <strong>1</strong> | Python | 20 | [<a href="https://github.com/harry0703/MoneyPrinterTurbo](https://github.com/harry0703/MoneyPrinterTurbo)">https://github.com/harry0703/MoneyPrinterTurbo](https://github.com/harry0703/MoneyPrinterTurbo)</a> |</p>
-      <p>| headroom | <strong>3</strong> | Python | 64 | [<a href="https://github.com/chopratejas/headroom](https://github.com/chopratejas/headroom)">https://github.com/chopratejas/headroom](https://github.com/chopratejas/headroom)</a> |</p>
-      <p>| Understand-Anything | <strong>4</strong> | TypeScript | 21 | [<a href="https://github.com/Lum1104/Understand-Anything](https://github.com/Lum1104/Understand-Anything)">https://github.com/Lum1104/Understand-Anything](https://github.com/Lum1104/Understand-Anything)</a> |</p>
-      <p>| harness | <strong>7</strong> | HTML | 1 | [<a href="https://github.com/revfactory/harness](https://github.com/revfactory/harness)">https://github.com/revfactory/harness](https://github.com/revfactory/harness)</a> |</p>
-      <p>| ai-engineering-from-scratch | <strong>8</strong> | Python | 11 | [<a href="https://github.com/rohitg00/ai-engineering-from-scratch](https://github.com/rohitg00/ai-engineering-from-scratch)">https://github.com/rohitg00/ai-engineering-from-scratch](https://github.com/rohitg00/ai-engineering-from-scratch)</a> |</p>
-      <p>| codegraph | <strong>9</strong> | TypeScript | 14 | [<a href="https://github.com/colbymchenry/codegraph](https://github.com/colbymchenry/codegraph)">https://github.com/colbymchenry/codegraph](https://github.com/colbymchenry/codegraph)</a> |</p>
-      <p>| Anthropic-Cybersecurity-Skills | <strong>10</strong> | Python | 11 | [<a href="https://github.com/mukul975/Anthropic-Cybersecurity-Skills](https://github.com/mukul975/Anthropic-Cybersecurity-Skills)">https://github.com/mukul975/Anthropic-Cybersecurity-Skills](https://github.com/mukul975/Anthropic-Cybersecurity-Skills)</a> |</p>
-      <p>| ECC | <strong>11</strong> | JavaScript | 34 | [<a href="https://github.com/affaan-m/ECC](https://github.com/affaan-m/ECC)">https://github.com/affaan-m/ECC](https://github.com/affaan-m/ECC)</a> |</p>
-      <p>| agent-governance-toolkit | <strong>15</strong> | Python | 2 | [<a href="https://github.com/microsoft/agent-governance-toolkit](https://github.com/microsoft/agent-governance-toolkit)">https://github.com/microsoft/agent-governance-toolkit](https://github.com/microsoft/agent-governance-toolkit)</a> |</p>
-      <p>| hermes-agent | - | Python | 23 | [<a href="https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)">https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)</a> |</p>
-
+      <table>
+        <thead><tr><th>项目名称</th><th>周榜排名</th><th>语言</th><th>本周新增 Star</th><th>项目地址</th></tr></thead>
+        <tbody>
+        <tr><td>MoneyPrinterTurbo</td><td><strong>1</strong></td><td>Python</td><td>20</td><td><a href="https://github.com/harry0703/MoneyPrinterTurbo">https://github.com/harry0703/MoneyPrinterTurbo</a></td></tr>
+        <tr><td>headroom</td><td><strong>3</strong></td><td>Python</td><td>64</td><td><a href="https://github.com/chopratejas/headroom">https://github.com/chopratejas/headroom</a></td></tr>
+        <tr><td>Understand-Anything</td><td><strong>4</strong></td><td>TypeScript</td><td>21</td><td><a href="https://github.com/Lum1104/Understand-Anything">https://github.com/Lum1104/Understand-Anything</a></td></tr>
+        <tr><td>harness</td><td><strong>7</strong></td><td>HTML</td><td>1</td><td><a href="https://github.com/revfactory/harness">https://github.com/revfactory/harness</a></td></tr>
+        <tr><td>ai-engineering-from-scratch</td><td><strong>8</strong></td><td>Python</td><td>11</td><td><a href="https://github.com/rohitg00/ai-engineering-from-scratch">https://github.com/rohitg00/ai-engineering-from-scratch</a></td></tr>
+        <tr><td>codegraph</td><td><strong>9</strong></td><td>TypeScript</td><td>14</td><td><a href="https://github.com/colbymchenry/codegraph">https://github.com/colbymchenry/codegraph</a></td></tr>
+        <tr><td>Anthropic-Cybersecurity-Skills</td><td><strong>10</strong></td><td>Python</td><td>11</td><td><a href="https://github.com/mukul975/Anthropic-Cybersecurity-Skills">https://github.com/mukul975/Anthropic-Cybersecurity-Skills</a></td></tr>
+        <tr><td>ECC</td><td><strong>11</strong></td><td>JavaScript</td><td>34</td><td><a href="https://github.com/affaan-m/ECC">https://github.com/affaan-m/ECC</a></td></tr>
+        <tr><td>agent-governance-toolkit</td><td><strong>15</strong></td><td>Python</td><td>2</td><td><a href="https://github.com/microsoft/agent-governance-toolkit">https://github.com/microsoft/agent-governance-toolkit</a></td></tr>
+        <tr><td>hermes-agent</td><td>-</td><td>Python</td><td>23</td><td><a href="https://github.com/NousResearch/hermes-agent">https://github.com/NousResearch/hermes-agent</a></td></tr>
+        </tbody>
+      </table>
       <hr>
-
       <h3>3. 重点项目分析</h3>
-
       <p><strong>MoneyPrinterTurbo</strong></p>
       <p>进入 GitHub Trending 周榜第 1 位，是本期最重要的热度信号。该项目利用 AI 大模型实现短视频的自动化生成，只需提供主题或关键词即可自动完成文案、素材、字幕及背景音乐的合成。作为成熟的 LLM 工具链，其代码质量高（quality_score: 100），社区基础稳固（78K+ Star），本周新增 20 Star 显示持续关注度。适合内容创作者和自动化工作流开发者参考。</p>
-
       <p><strong>headroom</strong></p>
       <p>本周新增 Star 最高（+64），Trending 排名第 3。这是一个面向 AI Agent 的上下文压缩工具，可在工具输出、日志、RAG 块和文件进入 LLM 前进行压缩，实现 60-95% 的 Token 减少而不损失回答质量。项目提供 Library、Proxy 和 MCP Server 三种接入方式，与 Claude Code、Cursor 等主流工具兼容。其高热度反映出开发者对 Token 优化和上下文工程（Context Engineering）的迫切需求。</p>
-
       <p><strong>Understand-Anything</strong></p>
       <p>Trending 排名第 4，新增 21 Star。该项目将任意代码库转换为可交互的知识图谱，支持 Claude Code、Codex、Cursor 等主流 AI 编程助手。通过图谱化呈现代码结构，开发者可以进行探索、搜索和问答，显著降低大型代码库的理解门槛。项目强调&quot;教授式图谱&quot;而非&quot;展示式图谱&quot;，契合当前 AI 辅助编程的深层需求。</p>
-
       <p><strong>ai-engineering-from-scratch</strong></p>
       <p>Trending 排名第 8，定位为系统性学习资源。课程涵盖 Python、TypeScript、Rust 等多语言实现，主题包括 Transformers、计算机视觉、强化学习、MCP 和 Swarm Intelligence。针对&quot;68% 学生已使用 AI 工具但仅 18% 感觉具备专业能力&quot;的现状设计，适合希望从基础构建 AI 工程能力的开发者。项目质量完整（quality_score: 100），MIT 协议开放。</p>
-
       <p><strong>Anthropic-Cybersecurity-Skills</strong></p>
       <p>⚠️ <strong>风险提示</strong>：该项目包含恶意软件相关表述（malware-analysis），安全评分 65（medium 级别），需人工确认具体用途后再行使用。</p>
       <p>Trending 排名第 10，提供 754 个结构化网络安全技能，映射至 MITRE ATT&amp;CK、NIST CSF 2.0 等五大框架，支持 26 个安全领域。作为社区独立项目（非 Anthropic 官方），其 Apache 2.0 协议和标准化技能集（agentskills.io）对红队测试和安全自动化有参考价值，但建议谨慎评估其安全合规性。</p>
-
       <hr>
-
       <h3>4. 最适合用户学习的项目</h3>
-
       <p><strong>推荐：ai-engineering-from-scratch</strong></p>
       <p>该仓库是本期最系统化的学习资源，覆盖从基础到进阶的 AI 工程全链路，包含多语言实现（Python/TypeScript/Rust）和实战项目。课程结构针对当前 AI 工具使用与专业能力之间的差距设计，配备完整教程和代码示例，Star/Fork 比健康（27K/4.4K），社区活跃度高。对于希望建立扎实 AI 工程基础而非仅使用现成工具的开发者，这是本周最值得深入研究的资源。</p>
-
       <p><strong>备选：headroom</strong></p>
       <p>若您已具备基础，希望深入 AI Agent 的优化实践，<code>headroom</code> 提供了生产级的 Token 压缩方案，代码质量高且架构清晰，适合学习上下文工程和代理系统性能优化。</p>
-
       <hr>
-
       <h3>5. 本周结论</h3>
-
       <p>本周开源社区焦点高度集中于 <strong>AI Agent 基础设施</strong>：从视频生成（MoneyPrinterTurbo）、上下文压缩（headroom）、代码知识图谱（Understand-Anything/codegraph）到安全治理（agent-governance-toolkit），形成完整的工具链生态。Python 凭借其在 AI 领域的生态优势继续主导开发语言，而 TypeScript 在工具类项目中表现活跃。值得注意的是，<strong>Agent 技能标准化</strong>（如 harness、ECC、Anthropic-Cybersecurity-Skills）成为新趋势，表明行业正从单点工具向系统化、可复用的 Agent 能力体系演进。建议开发者关注 Token 优化和知识图谱技术，同时留意安全类项目的潜在风险。</p>
     </article>
   </main>
