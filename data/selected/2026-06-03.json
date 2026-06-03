@@ -3,11 +3,11 @@
     "full_name": "harry0703/MoneyPrinterTurbo",
     "html_url": "https://github.com/harry0703/MoneyPrinterTurbo",
     "description": "利用AI大模型，一键生成高清短视频 Generate short videos with one click using AI LLM.",
-    "stargazers_count": 78190,
-    "forks_count": 11099,
+    "stargazers_count": 78240,
+    "forks_count": 11102,
     "language": "Python",
     "created_at": "2024-03-11T02:57:34Z",
-    "updated_at": "2026-06-03T04:59:35Z",
+    "updated_at": "2026-06-03T05:53:25Z",
     "pushed_at": "2026-06-02T09:41:44Z",
     "topics": [
       "ai",
@@ -32,9 +32,9 @@
     "quality_level": "high",
     "selection_reasons": [
       "进入 GitHub Trending 周榜第 1 位，是本期最重要的热度信号。",
-      "较上次记录新增 Star 20，近期热度上升。",
+      "较上次记录新增 Star 50，近期热度上升。",
       "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-      "当前累计 Star 78190，具备一定社区关注度。"
+      "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
     ],
     "sources": [
       "github_search",
@@ -43,19 +43,19 @@
     "trending_rank": 1,
     "trending_period": "weekly",
     "source_priority": 100,
-    "star_growth": 20,
-    "score": 0.7868,
+    "star_growth": 50,
+    "score": 0.7409,
     "category": "LLM Tooling"
   },
   {
     "full_name": "chopratejas/headroom",
     "html_url": "https://github.com/chopratejas/headroom",
     "description": "Compress tool outputs, logs, files, and RAG chunks before they reach the LLM. 60-95% fewer tokens, same answers. Library, proxy, MCP server.",
-    "stargazers_count": 7060,
-    "forks_count": 488,
+    "stargazers_count": 7192,
+    "forks_count": 497,
     "language": "Python",
     "created_at": "2026-01-07T19:58:51Z",
-    "updated_at": "2026-06-03T04:59:39Z",
+    "updated_at": "2026-06-03T05:54:16Z",
     "pushed_at": "2026-06-03T01:22:18Z",
     "topics": [
       "agent",
@@ -81,7 +81,7 @@
     ],
     "archived": false,
     "fork": false,
-    "open_issues_count": 132,
+    "open_issues_count": 131,
     "license_name": "Apache-2.0",
     "readme_excerpt": "AI agents / LLMs: read /llms.txt here, or fetch the live index / full docs blob . Headroom compresses everything your AI agent reads — tool outputs, logs, RAG chunks, files, and conversation history — before it reaches the LLM. Same answers, fraction of the tokens.",
     "readme_summary": "AI agents / LLMs: read /llms.txt here, or fetch the live index / full docs blob . Headroom compresses everything your AI agent reads — tool outputs, logs, RAG chunks, files, and conversation history — before it reaches the LLM. Same answers, fraction of the tokens.",
@@ -93,9 +93,9 @@
     "quality_level": "high",
     "selection_reasons": [
       "进入 GitHub Trending 周榜第 3 位，是本期最重要的热度信号。",
-      "较上次记录新增 Star 64，近期热度上升。",
+      "较上次记录新增 Star 132，近期热度上升。",
       "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-      "当前累计 Star 7060，具备一定社区关注度。"
+      "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
     ],
     "sources": [
       "github_trending"
@@ -103,19 +103,19 @@
     "trending_rank": 3,
     "trending_period": "weekly",
     "source_priority": 100,
-    "star_growth": 64,
-    "score": 0.9051,
+    "star_growth": 132,
+    "score": 0.7167,
     "category": "AI Agent"
   },
   {
     "full_name": "Lum1104/Understand-Anything",
     "html_url": "https://github.com/Lum1104/Understand-Anything",
     "description": "Graphs that teach > graphs that impress. Turn any code into an interactive knowledge graph you can explore, search, and ask questions about. Works with Claude Code, Codex, Cursor, Copilot, Gemini CLI, and more.",
-    "stargazers_count": 50355,
-    "forks_count": 4101,
+    "stargazers_count": 50404,
+    "forks_count": 4105,
     "language": "TypeScript",
     "created_at": "2026-03-15T02:30:51Z",
-    "updated_at": "2026-06-03T04:58:54Z",
+    "updated_at": "2026-06-03T05:53:51Z",
     "pushed_at": "2026-06-02T09:49:02Z",
     "topics": [
       "antigravity-skills",
@@ -150,9 +150,9 @@
     "quality_level": "high",
     "selection_reasons": [
       "进入 GitHub Trending 周榜第 4 位，是本期最重要的热度信号。",
-      "较上次记录新增 Star 21，近期热度上升。",
+      "较上次记录新增 Star 49，近期热度上升。",
       "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-      "当前累计 Star 50355，具备一定社区关注度。"
+      "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
     ],
     "sources": [
       "github_trending"
@@ -160,19 +160,19 @@
     "trending_rank": 4,
     "trending_period": "weekly",
     "source_priority": 100,
-    "star_growth": 21,
-    "score": 0.6275,
+    "star_growth": 49,
+    "score": 0.5422,
     "category": "AI Agent"
   },
   {
     "full_name": "revfactory/harness",
     "html_url": "https://github.com/revfactory/harness",
     "description": "A meta-skill that designs domain-specific agent teams, defines specialized agents, and generates the skills they use.",
-    "stargazers_count": 5559,
-    "forks_count": 738,
+    "stargazers_count": 5566,
+    "forks_count": 740,
     "language": "HTML",
     "created_at": "2026-03-26T21:22:07Z",
-    "updated_at": "2026-06-03T04:56:44Z",
+    "updated_at": "2026-06-03T05:52:57Z",
     "pushed_at": "2026-05-29T17:04:20Z",
     "topics": [
       "claude-code",
@@ -182,7 +182,7 @@
     ],
     "archived": false,
     "fork": false,
-    "open_issues_count": 10,
+    "open_issues_count": 11,
     "license_name": "Apache-2.0",
     "readme_excerpt": "English** | 한국어 | 日本語 Harness is a team-architecture factory for Claude Code.** Say **\"build a harness for this project\"** (English) or **\"하네스 구성해줘\"** (한국어) or **\"ハーネスを構成して\"** (日本語), and the plugin turns your domain description into an agent team and the skills they use — picked from six pre-defined team-architecture patterns.",
     "readme_summary": "English** | 한국어 | 日本語 Harness is a team-architecture factory for Claude Code.** Say **\"build a harness for this project\"** (English) or **\"하네스 구성해줘\"** (한국어) or **\"ハーネスを構成して\"** (日本語), and the plugin turns your domain description into an agent team and the skills they use — picked from six pre-defined team-architecture patterns.",
@@ -194,9 +194,9 @@
     "quality_level": "high",
     "selection_reasons": [
       "进入 GitHub Trending 周榜第 7 位，是本期最重要的热度信号。",
-      "较上次记录新增 Star 1，近期热度上升。",
+      "较上次记录新增 Star 7，近期热度上升。",
       "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-      "当前累计 Star 5559，具备一定社区关注度。"
+      "匹配当前个性化方向：Agent 开发。"
     ],
     "sources": [
       "github_trending"
@@ -204,19 +204,19 @@
     "trending_rank": 7,
     "trending_period": "weekly",
     "source_priority": 100,
-    "star_growth": 1,
-    "score": 0.3819,
+    "star_growth": 7,
+    "score": 0.3489,
     "category": "AI Agent"
   },
   {
     "full_name": "rohitg00/ai-engineering-from-scratch",
     "html_url": "https://github.com/rohitg00/ai-engineering-from-scratch",
     "description": "Learn it. Build it. Ship it for others.",
-    "stargazers_count": 27484,
-    "forks_count": 4461,
+    "stargazers_count": 27505,
+    "forks_count": 4463,
     "language": "Python",
     "created_at": "2026-03-18T18:38:02Z",
-    "updated_at": "2026-06-03T05:00:12Z",
+    "updated_at": "2026-06-03T05:53:57Z",
     "pushed_at": "2026-06-03T00:12:38Z",
     "topics": [
       "agents",
@@ -254,9 +254,9 @@
     "quality_level": "high",
     "selection_reasons": [
       "进入 GitHub Trending 周榜第 8 位，是本期最重要的热度信号。",
-      "较上次记录新增 Star 11，近期热度上升。",
+      "较上次记录新增 Star 21，近期热度上升。",
       "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-      "当前累计 Star 27484，具备一定社区关注度。"
+      "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
     ],
     "sources": [
       "github_trending"
@@ -264,24 +264,24 @@
     "trending_rank": 8,
     "trending_period": "weekly",
     "source_priority": 100,
-    "star_growth": 11,
-    "score": 0.6024,
+    "star_growth": 21,
+    "score": 0.5971,
     "category": "AI Agent"
   },
   {
     "full_name": "colbymchenry/codegraph",
     "html_url": "https://github.com/colbymchenry/codegraph",
     "description": "Pre-indexed code knowledge graph for Claude Code, Codex, Gemini, Cursor, OpenCode, AntiGravity, Kiro, and Hermes Agent — fewer tokens, fewer tool calls, 100% local",
-    "stargazers_count": 38302,
-    "forks_count": 2372,
+    "stargazers_count": 38352,
+    "forks_count": 2375,
     "language": "TypeScript",
     "created_at": "2026-01-18T21:45:37Z",
-    "updated_at": "2026-06-03T04:58:41Z",
+    "updated_at": "2026-06-03T05:53:54Z",
     "pushed_at": "2026-06-03T02:44:28Z",
     "topics": [],
     "archived": false,
     "fork": false,
-    "open_issues_count": 185,
+    "open_issues_count": 186,
     "license_name": "MIT",
     "readme_excerpt": "~16% cheaper · ~58% fewer tool calls · 100% local** No Node.js required** — one command grabs the right build for your OS: Already have Node? Use npm instead (works on any version): CodeGraph bundles its own runtime — nothing to compile, no native build, works the same everywhere.",
     "readme_summary": "~16% cheaper · ~58% fewer tool calls · 100% local** No Node.js required** — one command grabs the right build for your OS: Already have Node? Use npm instead (works on any version): CodeGraph bundles its own runtime — nothing to compile, no native build, works the same everywhere.",
@@ -295,9 +295,9 @@
     "quality_level": "high",
     "selection_reasons": [
       "进入 GitHub Trending 周榜第 9 位，是本期最重要的热度信号。",
-      "较上次记录新增 Star 14，近期热度上升。",
+      "较上次记录新增 Star 50，近期热度上升。",
       "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-      "当前累计 Star 38302，具备一定社区关注度。"
+      "匹配当前个性化方向：Agent 开发、开发者工具。"
     ],
     "sources": [
       "github_trending"
@@ -305,19 +305,19 @@
     "trending_rank": 9,
     "trending_period": "weekly",
     "source_priority": 100,
-    "star_growth": 14,
-    "score": 0.4449,
+    "star_growth": 50,
+    "score": 0.3755,
     "category": "AI Agent"
   },
   {
     "full_name": "mukul975/Anthropic-Cybersecurity-Skills",
     "html_url": "https://github.com/mukul975/Anthropic-Cybersecurity-Skills",
     "description": "754 structured cybersecurity skills for AI agents · Mapped to 5 frameworks: MITRE ATT&CK, NIST CSF 2.0, MITRE ATLAS, D3FEND & NIST AI RMF · agentskills.io standard · Works with Claude Code, GitHub Copilot, Codex CLI, Cursor, Gemini CLI & 20+ platforms · 26 security domains · Apache 2.0",
-    "stargazers_count": 13673,
+    "stargazers_count": 13688,
     "forks_count": 1602,
     "language": "Python",
     "created_at": "2026-02-25T09:47:50Z",
-    "updated_at": "2026-06-03T05:00:15Z",
+    "updated_at": "2026-06-03T05:52:35Z",
     "pushed_at": "2026-06-01T10:15:48Z",
     "topics": [
       "ai-agents",
@@ -357,9 +357,9 @@
     "quality_level": "high",
     "selection_reasons": [
       "进入 GitHub Trending 周榜第 10 位，是本期最重要的热度信号。",
-      "较上次记录新增 Star 11，近期热度上升。",
+      "较上次记录新增 Star 15，近期热度上升。",
       "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-      "当前累计 Star 13673，具备一定社区关注度。"
+      "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
     ],
     "sources": [
       "github_trending"
@@ -367,19 +367,19 @@
     "trending_rank": 10,
     "trending_period": "weekly",
     "source_priority": 100,
-    "star_growth": 11,
-    "score": 0.4968,
+    "star_growth": 15,
+    "score": 0.4737,
     "category": "AI Agent"
   },
   {
     "full_name": "affaan-m/ECC",
     "html_url": "https://github.com/affaan-m/ECC",
     "description": "The agent harness performance optimization system. Skills, instincts, memory, security, and research-first development for Claude Code, Codex, Opencode, Cursor and beyond.",
-    "stargazers_count": 204317,
-    "forks_count": 31343,
+    "stargazers_count": 204388,
+    "forks_count": 31354,
     "language": "JavaScript",
     "created_at": "2026-01-18T00:51:51Z",
-    "updated_at": "2026-06-03T04:58:59Z",
+    "updated_at": "2026-06-03T05:52:00Z",
     "pushed_at": "2026-06-02T11:51:04Z",
     "topics": [
       "ai-agents",
@@ -405,9 +405,9 @@
     "quality_level": "high",
     "selection_reasons": [
       "进入 GitHub Trending 周榜第 11 位，是本期最重要的热度信号。",
-      "较上次记录新增 Star 34，近期热度上升。",
+      "较上次记录新增 Star 71，近期热度上升。",
       "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-      "当前累计 Star 204317，具备一定社区关注度。"
+      "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
     ],
     "sources": [
       "github_search",
@@ -416,40 +416,31 @@
     "trending_rank": 11,
     "trending_period": "weekly",
     "source_priority": 100,
-    "star_growth": 34,
-    "score": 0.4675,
+    "star_growth": 71,
+    "score": 0.4206,
     "category": "AI Agent"
   },
   {
-    "full_name": "microsoft/agent-governance-toolkit",
-    "html_url": "https://github.com/microsoft/agent-governance-toolkit",
-    "description": "AI Agent Governance Toolkit — Policy enforcement, zero-trust identity, execution sandboxing, and reliability engineering for autonomous AI agents. Covers 10/10 OWASP Agentic Top 10.",
-    "stargazers_count": 3838,
-    "forks_count": 534,
-    "language": "Python",
-    "created_at": "2026-03-02T22:11:47Z",
-    "updated_at": "2026-06-03T04:43:37Z",
-    "pushed_at": "2026-06-03T01:25:38Z",
+    "full_name": "NationalSecurityAgency/ghidra",
+    "html_url": "https://github.com/NationalSecurityAgency/ghidra",
+    "description": "Ghidra is a software reverse engineering (SRE) framework",
+    "stargazers_count": 69151,
+    "forks_count": 7599,
+    "language": "Java",
+    "created_at": "2019-03-01T03:27:48Z",
+    "updated_at": "2026-06-03T05:50:42Z",
+    "pushed_at": "2026-06-01T16:56:42Z",
     "topics": [
-      "agent-framework",
-      "ai-agents",
-      "ai-safety",
-      "compliance",
-      "governance",
-      "microsoft",
-      "owasp",
-      "policy-engine",
-      "python",
-      "security",
-      "trust",
-      "zero-trust"
+      "disassembler",
+      "reverse-engineering",
+      "software-analysis"
     ],
     "archived": false,
     "fork": false,
-    "open_issues_count": 38,
-    "license_name": "MIT",
-    "readme_excerpt": "🌍 English | 日本語 | 简体中文 | 한국어 🚀 Quick Start · 📋 Specifications · 📦 PyPI · 📝 Changelog [!IMPORTANT] Public Preview** -- production-quality, Microsoft-signed releases. May have breaking changes before GA. Policy enforcement, identity, sandboxing, and SRE for autonomous AI agents.",
-    "readme_summary": "🌍 English | 日本語 | 简体中文 | 한국어 🚀 Quick Start · 📋 Specifications · 📦 PyPI · 📝 Changelog [!IMPORTANT] Public Preview** -- production-quality, Microsoft-signed releases. May have breaking changes before GA. Policy enforcement, identity, sandboxing, and SRE for autonomous AI agents.",
+    "open_issues_count": 1905,
+    "license_name": "Apache-2.0",
+    "readme_excerpt": "Ghidra is a software reverse engineering (SRE) framework created and maintained by the [National Security Agency][nsa] Research Directorate.",
+    "readme_summary": "Ghidra is a software reverse engineering (SRE) framework created and maintained by the [National Security Agency][nsa] Research Directorate.",
     "security_flags": [],
     "security_score": 100,
     "security_level": "low",
@@ -457,67 +448,9 @@
     "quality_score": 100,
     "quality_level": "high",
     "selection_reasons": [
-      "进入 GitHub Trending 周榜第 15 位，是本期最重要的热度信号。",
-      "较上次记录新增 Star 2，近期热度上升。",
-      "当前累计 Star 3838，具备一定社区关注度。",
-      "仓库主题、语言或名称与关注方向匹配。"
-    ],
-    "sources": [
-      "github_trending"
-    ],
-    "trending_rank": 15,
-    "trending_period": "weekly",
-    "source_priority": 100,
-    "star_growth": 2,
-    "score": 0.3231,
-    "category": "AI Agent"
-  },
-  {
-    "full_name": "NousResearch/hermes-agent",
-    "html_url": "https://github.com/NousResearch/hermes-agent",
-    "description": "The agent that grows with you",
-    "stargazers_count": 177677,
-    "forks_count": 30407,
-    "language": "Python",
-    "created_at": "2025-07-22T22:22:28Z",
-    "updated_at": "2026-06-03T04:59:15Z",
-    "pushed_at": "2026-06-03T05:00:04Z",
-    "topics": [
-      "ai",
-      "ai-agent",
-      "ai-agents",
-      "anthropic",
-      "chatgpt",
-      "claude",
-      "claude-code",
-      "clawdbot",
-      "codex",
-      "hermes",
-      "hermes-agent",
-      "llm",
-      "moltbot",
-      "nous-research",
-      "openai",
-      "openclaw"
-    ],
-    "archived": false,
-    "fork": false,
-    "open_issues_count": 16780,
-    "license_name": "MIT",
-    "readme_excerpt": "The self-improving AI agent built by Nous Research.** It's the only agent with a built-in learning loop — it creates skills from experience, improves them during use, nudges itself to persist knowledge, searches its own past conversations, and builds a deepening model of who you are across sessions.",
-    "readme_summary": "The self-improving AI agent built by Nous Research.** It's the only agent with a built-in learning loop — it creates skills from experience, improves them during use, nudges itself to persist knowledge, searches its own past conversations, and builds a deepening model of who you are across sessions.",
-    "security_flags": [],
-    "security_score": 100,
-    "security_level": "low",
-    "quality_flags": [
-      "仓库简介较短，项目定位信息有限。"
-    ],
-    "quality_score": 92,
-    "quality_level": "high",
-    "selection_reasons": [
-      "较上次记录新增 Star 23，近期热度上升。",
-      "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-      "当前累计 Star 177677，具备一定社区关注度。",
+      "较上次记录新增 Star 917，近期热度上升。",
+      "匹配当前个性化方向：Java 后端与工程实践。",
+      "当前累计 Star 69151，具备一定社区关注度。",
       "仓库主题、语言或名称与关注方向匹配。"
     ],
     "sources": [
@@ -526,8 +459,66 @@
     "trending_rank": 0,
     "trending_period": "",
     "source_priority": 10,
-    "star_growth": 23,
-    "score": 0.29,
-    "category": "AI Agent"
+    "star_growth": 917,
+    "score": 0.4054,
+    "category": "Other"
+  },
+  {
+    "full_name": "dbeaver/dbeaver",
+    "html_url": "https://github.com/dbeaver/dbeaver",
+    "description": "Free universal database tool and SQL client",
+    "stargazers_count": 50371,
+    "forks_count": 4211,
+    "language": "Java",
+    "created_at": "2015-10-21T08:26:28Z",
+    "updated_at": "2026-06-03T05:34:12Z",
+    "pushed_at": "2026-06-02T17:19:51Z",
+    "topics": [
+      "ai",
+      "database",
+      "databricks",
+      "db2",
+      "dbeaver",
+      "erd",
+      "gui",
+      "java",
+      "jdbc",
+      "mysql",
+      "nosql",
+      "oracle",
+      "postgresql",
+      "redshift",
+      "snowflake",
+      "sql",
+      "sqlite",
+      "sqlserver"
+    ],
+    "archived": false,
+    "fork": false,
+    "open_issues_count": 3314,
+    "license_name": "Apache-2.0",
+    "readme_excerpt": "Free multi-platform database tool for developers, SQL programmers, database administrators and analysts.",
+    "readme_summary": "Free multi-platform database tool for developers, SQL programmers, database administrators and analysts.",
+    "security_flags": [],
+    "security_score": 100,
+    "security_level": "low",
+    "quality_flags": [],
+    "quality_score": 100,
+    "quality_level": "high",
+    "selection_reasons": [
+      "较上次记录新增 Star 415，近期热度上升。",
+      "匹配当前个性化方向：Java 后端与工程实践、Python 工具与应用开发。",
+      "当前累计 Star 50371，具备一定社区关注度。",
+      "仓库主题、语言或名称与关注方向匹配。"
+    ],
+    "sources": [
+      "github_search"
+    ],
+    "trending_rank": 0,
+    "trending_period": "",
+    "source_priority": 10,
+    "star_growth": 415,
+    "score": 0.3622,
+    "category": "Developer Tools"
   }
 ]
