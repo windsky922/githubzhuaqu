@@ -11,6 +11,9 @@
     h1, h2, h3, h4 { line-height: 1.3; }
     a { color: #0969da; }
     code { background: #eef2f7; padding: 2px 5px; }
+    table { width: 100%; border-collapse: collapse; margin: 18px 0; display: block; overflow-x: auto; }
+    th, td { border: 1px solid #d8dee8; padding: 8px 10px; text-align: left; vertical-align: top; }
+    th { background: #f1f4f8; }
     hr { border: 0; border-top: 1px solid #d8dee8; margin: 24px 0; }
   </style>
 </head>
@@ -18,36 +21,31 @@
   <main>
     <article>
       <h1>GitHub 每周热点项目周报 - 2026-05-19</h1>
-
       <h2>一、本周趋势</h2>
-
       <p>本周根据 GitHub Trending 与 GitHub Search 采集结果生成降级版周报。以下分析基于仓库名称、简介、README 摘要、语言、Star、Fork 和 Trending 排名；具体降级原因记录在本次运行摘要中。</p>
-
       <p>• AI Agent 是本期最集中的方向，共 4 个项目。</p>
       <p>• TypeScript 是本期出现最多的主要语言，共 4 个项目。</p>
       <p>• 本期入选项目累计新增 Star 8。</p>
       <p>• CloakHQ/CloakBrowser 是本期 GitHub Trending 排名最高的项目，周榜排名 1。</p>
       <p>• rohitg00/agentmemory 是本期新增 Star 最高的项目，新增 2。</p>
-
       <h2>二、热点项目总览</h2>
-
-      <p>| 序号 | 项目 | 来源 | Trending 排名 | 方向 | Star | 新增 Star | Fork | 语言 | 链接 |</p>
-      <p>|---:|---|---|---:|---|---:|---:|---:|---|---|</p>
-      <p>| 1 | CloakHQ/CloakBrowser | GitHub Trending | 1 | AI Agent | 15774 | 1 | 1237 | Python | [<a href="https://github.com/CloakHQ/CloakBrowser](https://github.com/CloakHQ/CloakBrowser)">https://github.com/CloakHQ/CloakBrowser](https://github.com/CloakHQ/CloakBrowser)</a> |</p>
-      <p>| 2 | rohitg00/agentmemory | GitHub Trending | 2 | AI Agent | 13390 | 2 | 1133 | TypeScript | [<a href="https://github.com/rohitg00/agentmemory](https://github.com/rohitg00/agentmemory)">https://github.com/rohitg00/agentmemory](https://github.com/rohitg00/agentmemory)</a> |</p>
-      <p>| 3 | oven-sh/bun | GitHub Trending | 3 | Other | 91988 | 0 | 4599 | Rust | [<a href="https://github.com/oven-sh/bun](https://github.com/oven-sh/bun)">https://github.com/oven-sh/bun](https://github.com/oven-sh/bun)</a> |</p>
-      <p>| 4 | Imbad0202/academic-research-skills | GitHub Trending | 4 | LLM Tooling | 13008 | 1 | 1266 | Python | [<a href="https://github.com/Imbad0202/academic-research-skills](https://github.com/Imbad0202/academic-research-skills)">https://github.com/Imbad0202/academic-research-skills](https://github.com/Imbad0202/academic-research-skills)</a> |</p>
-      <p>| 5 | yikart/AiToEarn | GitHub Trending | 5 | Other | 15351 | 0 | 2511 | TypeScript | [<a href="https://github.com/yikart/AiToEarn](https://github.com/yikart/AiToEarn)">https://github.com/yikart/AiToEarn](https://github.com/yikart/AiToEarn)</a> |</p>
-      <p>| 6 | mattpocock/skills | GitHub Trending | 7 | LLM Tooling | 92912 | 0 | 8161 | Shell | [<a href="https://github.com/mattpocock/skills](https://github.com/mattpocock/skills)">https://github.com/mattpocock/skills](https://github.com/mattpocock/skills)</a> |</p>
-      <p>| 7 | ruvnet/RuView | GitHub Trending | 8 | AI Agent | 60251 | 0 | 7849 | Rust | [<a href="https://github.com/ruvnet/RuView](https://github.com/ruvnet/RuView)">https://github.com/ruvnet/RuView](https://github.com/ruvnet/RuView)</a> |</p>
-      <p>| 8 | colbymchenry/codegraph | GitHub Trending | 10 | LLM Tooling | 5510 | 1 | 378 | TypeScript | [<a href="https://github.com/colbymchenry/codegraph](https://github.com/colbymchenry/codegraph)">https://github.com/colbymchenry/codegraph](https://github.com/colbymchenry/codegraph)</a> |</p>
-      <p>| 9 | facebook/pyrefly | GitHub Trending | 12 | Other | 6238 | 1 | 370 | Rust | [<a href="https://github.com/facebook/pyrefly](https://github.com/facebook/pyrefly)">https://github.com/facebook/pyrefly](https://github.com/facebook/pyrefly)</a> |</p>
-      <p>| 10 | firecrawl/firecrawl | GitHub Search | - | AI Agent | 121632 | 2 | 7407 | TypeScript | [<a href="https://github.com/firecrawl/firecrawl](https://github.com/firecrawl/firecrawl)">https://github.com/firecrawl/firecrawl](https://github.com/firecrawl/firecrawl)</a> |</p>
-
+      <table>
+        <thead><tr><th>序号</th><th>项目</th><th>来源</th><th>Trending 排名</th><th>方向</th><th>Star</th><th>新增 Star</th><th>Fork</th><th>语言</th><th>链接</th></tr></thead>
+        <tbody>
+        <tr><td>1</td><td>CloakHQ/CloakBrowser</td><td>GitHub Trending</td><td>1</td><td>AI Agent</td><td>15774</td><td>1</td><td>1237</td><td>Python</td><td><a href="https://github.com/CloakHQ/CloakBrowser">https://github.com/CloakHQ/CloakBrowser</a></td></tr>
+        <tr><td>2</td><td>rohitg00/agentmemory</td><td>GitHub Trending</td><td>2</td><td>AI Agent</td><td>13390</td><td>2</td><td>1133</td><td>TypeScript</td><td><a href="https://github.com/rohitg00/agentmemory">https://github.com/rohitg00/agentmemory</a></td></tr>
+        <tr><td>3</td><td>oven-sh/bun</td><td>GitHub Trending</td><td>3</td><td>Other</td><td>91988</td><td>0</td><td>4599</td><td>Rust</td><td><a href="https://github.com/oven-sh/bun">https://github.com/oven-sh/bun</a></td></tr>
+        <tr><td>4</td><td>Imbad0202/academic-research-skills</td><td>GitHub Trending</td><td>4</td><td>LLM Tooling</td><td>13008</td><td>1</td><td>1266</td><td>Python</td><td><a href="https://github.com/Imbad0202/academic-research-skills">https://github.com/Imbad0202/academic-research-skills</a></td></tr>
+        <tr><td>5</td><td>yikart/AiToEarn</td><td>GitHub Trending</td><td>5</td><td>Other</td><td>15351</td><td>0</td><td>2511</td><td>TypeScript</td><td><a href="https://github.com/yikart/AiToEarn">https://github.com/yikart/AiToEarn</a></td></tr>
+        <tr><td>6</td><td>mattpocock/skills</td><td>GitHub Trending</td><td>7</td><td>LLM Tooling</td><td>92912</td><td>0</td><td>8161</td><td>Shell</td><td><a href="https://github.com/mattpocock/skills">https://github.com/mattpocock/skills</a></td></tr>
+        <tr><td>7</td><td>ruvnet/RuView</td><td>GitHub Trending</td><td>8</td><td>AI Agent</td><td>60251</td><td>0</td><td>7849</td><td>Rust</td><td><a href="https://github.com/ruvnet/RuView">https://github.com/ruvnet/RuView</a></td></tr>
+        <tr><td>8</td><td>colbymchenry/codegraph</td><td>GitHub Trending</td><td>10</td><td>LLM Tooling</td><td>5510</td><td>1</td><td>378</td><td>TypeScript</td><td><a href="https://github.com/colbymchenry/codegraph">https://github.com/colbymchenry/codegraph</a></td></tr>
+        <tr><td>9</td><td>facebook/pyrefly</td><td>GitHub Trending</td><td>12</td><td>Other</td><td>6238</td><td>1</td><td>370</td><td>Rust</td><td><a href="https://github.com/facebook/pyrefly">https://github.com/facebook/pyrefly</a></td></tr>
+        <tr><td>10</td><td>firecrawl/firecrawl</td><td>GitHub Search</td><td>-</td><td>AI Agent</td><td>121632</td><td>2</td><td>7407</td><td>TypeScript</td><td><a href="https://github.com/firecrawl/firecrawl">https://github.com/firecrawl/firecrawl</a></td></tr>
+        </tbody>
+      </table>
       <h2>三、重点项目分析</h2>
-
       <h3>1. CloakHQ/CloakBrowser</h3>
-
       <p>• 项目定位：仅根据仓库名称和简介判断，属于 AI Agent 方向。</p>
       <p>• 简介：Stealth Chromium that passes every bot detection test. Drop-in Playwright replacement with source-level fingerprint patches. 30/30 tests passed.</p>
       <p>• README 摘要：Stealth Chromium that passes every bot detection test. Not a patched config. Not a JS injection.</p>
@@ -57,10 +55,8 @@
       <p>• 质量信号：高质量，质量分 100，暂未发现明显质量短板。</p>
       <p>• 风险提示：未发现明显元数据风险，但仍需自行审查代码和依赖。</p>
       <p>• 学习价值：可作为了解 AI Agent 相关开源实践的参考。</p>
-      <p>• 原链接：[<a href="https://github.com/CloakHQ/CloakBrowser](https://github.com/CloakHQ/CloakBrowser)">https://github.com/CloakHQ/CloakBrowser](https://github.com/CloakHQ/CloakBrowser)</a></p>
-
+      <p>• 原链接：<a href="https://github.com/CloakHQ/CloakBrowser">https://github.com/CloakHQ/CloakBrowser</a></p>
       <h3>2. rohitg00/agentmemory</h3>
-
       <p>• 项目定位：仅根据仓库名称和简介判断，属于 AI Agent 方向。</p>
       <p>• 简介：#1 Persistent memory for AI coding agents based on real-world benchmarks</p>
       <p>• README 摘要：Your coding agent remembers everything. No more re-explaining. Built on iii engine Persistent memory for Claude Code, Cursor, Gemini CLI, Codex CLI, Hermes, OpenClaw, pi, OpenCode, and any MCP client.</p>
@@ -70,10 +66,8 @@
       <p>• 质量信号：高质量，质量分 100，暂未发现明显质量短板。</p>
       <p>• 风险提示：未发现明显元数据风险，但仍需自行审查代码和依赖。</p>
       <p>• 学习价值：可作为了解 AI Agent 相关开源实践的参考。</p>
-      <p>• 原链接：[<a href="https://github.com/rohitg00/agentmemory](https://github.com/rohitg00/agentmemory)">https://github.com/rohitg00/agentmemory](https://github.com/rohitg00/agentmemory)</a></p>
-
+      <p>• 原链接：<a href="https://github.com/rohitg00/agentmemory">https://github.com/rohitg00/agentmemory</a></p>
       <h3>3. oven-sh/bun</h3>
-
       <p>• 项目定位：仅根据仓库名称和简介判断，属于 Other 方向。</p>
       <p>• 简介：Incredibly fast JavaScript runtime, bundler, test runner, and package manager – all in one</p>
       <p>• README 摘要：Bun &amp;nbsp;&amp;nbsp;•&amp;nbsp;&amp;nbsp; &amp;nbsp;&amp;nbsp;•&amp;nbsp;&amp;nbsp; &amp;nbsp;&amp;nbsp;•&amp;nbsp;&amp;nbsp; Bun is an all-in-one toolkit for JavaScript and TypeScript apps. It ships as a single executable called bun.</p>
@@ -83,10 +77,8 @@
       <p>• 质量信号：高质量，质量分 100，暂未发现明显质量短板。</p>
       <p>• 风险提示：未发现明显元数据风险，但仍需自行审查代码和依赖。</p>
       <p>• 学习价值：可作为了解 Other 相关开源实践的参考。</p>
-      <p>• 原链接：[<a href="https://github.com/oven-sh/bun](https://github.com/oven-sh/bun)">https://github.com/oven-sh/bun](https://github.com/oven-sh/bun)</a></p>
-
+      <p>• 原链接：<a href="https://github.com/oven-sh/bun">https://github.com/oven-sh/bun</a></p>
       <h3>4. Imbad0202/academic-research-skills</h3>
-
       <p>• 项目定位：仅根据仓库名称和简介判断，属于 LLM Tooling 方向。</p>
       <p>• 简介：Academic Research Skills for Claude Code: research → write → review → revise → finalize</p>
       <p>• README 摘要：繁體中文版 A comprehensive suite of Claude Code skills for academic research, covering the full pipeline from research to publication.</p>
@@ -96,10 +88,8 @@
       <p>• 质量信号：高质量，质量分 100，暂未发现明显质量短板。</p>
       <p>• 风险提示：未发现明显元数据风险，但仍需自行审查代码和依赖。</p>
       <p>• 学习价值：可作为了解 LLM Tooling 相关开源实践的参考。</p>
-      <p>• 原链接：[<a href="https://github.com/Imbad0202/academic-research-skills](https://github.com/Imbad0202/academic-research-skills)">https://github.com/Imbad0202/academic-research-skills](https://github.com/Imbad0202/academic-research-skills)</a></p>
-
+      <p>• 原链接：<a href="https://github.com/Imbad0202/academic-research-skills">https://github.com/Imbad0202/academic-research-skills</a></p>
       <h3>5. yikart/AiToEarn</h3>
-
       <p>• 项目定位：仅根据仓库名称和简介判断，属于 Other 方向。</p>
       <p>• 简介：Let&#x27;s use AI to Earn!</p>
       <p>• README 摘要：简体中文 | English | 日本語 Monetize · Publish · Engage · Create —— 一站式平台。<strong> AiToEarn 通过 </strong>AI Agent自动化<strong>，帮助 OPC（一人公司）、创作者、品牌与企业在全球主流平台上构建、分发并变现内容。 支持渠道： 抖音、小红书（Rednote）、快手、哔哩哔哩、视频号、TikTok、YouTube、Facebook、Instagram、Threads、Twitter（X）、Pinterest、LinkedIn 💡 </strong>方式 ②③④ 都需要先获取 API Key**，请先看 如何获取 API Key。</p>
@@ -109,10 +99,8 @@
       <p>• 质量信号：高质量，质量分 92；仓库简介较短，项目定位信息有限。</p>
       <p>• 风险提示：未发现明显元数据风险，但仍需自行审查代码和依赖。</p>
       <p>• 学习价值：可作为了解 Other 相关开源实践的参考。</p>
-      <p>• 原链接：[<a href="https://github.com/yikart/AiToEarn](https://github.com/yikart/AiToEarn)">https://github.com/yikart/AiToEarn](https://github.com/yikart/AiToEarn)</a></p>
-
+      <p>• 原链接：<a href="https://github.com/yikart/AiToEarn">https://github.com/yikart/AiToEarn</a></p>
       <h3>6. mattpocock/skills</h3>
-
       <p>• 项目定位：仅根据仓库名称和简介判断，属于 LLM Tooling 方向。</p>
       <p>• 简介：Skills for Real Engineers. Straight from my .claude directory.</p>
       <p>• README 摘要：My agent skills that I use every day to do real engineering - not vibe coding. Developing real applications is hard. Approaches like GSD, BMAD, and Spec-Kit try to help by owning the process.</p>
@@ -122,10 +110,8 @@
       <p>• 质量信号：高质量，质量分 92；仓库主题标签较少，垂直方向判断可能不够稳定。</p>
       <p>• 风险提示：未发现明显元数据风险，但仍需自行审查代码和依赖。</p>
       <p>• 学习价值：可作为了解 LLM Tooling 相关开源实践的参考。</p>
-      <p>• 原链接：[<a href="https://github.com/mattpocock/skills](https://github.com/mattpocock/skills)">https://github.com/mattpocock/skills](https://github.com/mattpocock/skills)</a></p>
-
+      <p>• 原链接：<a href="https://github.com/mattpocock/skills">https://github.com/mattpocock/skills</a></p>
       <h3>7. ruvnet/RuView</h3>
-
       <p>• 项目定位：仅根据仓库名称和简介判断，属于 AI Agent 方向。</p>
       <p>• 简介：π RuView turns commodity WiFi signals into real-time spatial intelligence, vital sign monitoring, and presence detection — all without a single pixel of video.</p>
       <p>• README 摘要：未获取到 README 内容。</p>
@@ -135,10 +121,8 @@
       <p>• 质量信号：高质量，质量分 82；README 摘要不足，后续理解项目价值时需要打开仓库人工确认。</p>
       <p>• 风险提示：未发现明显元数据风险，但仍需自行审查代码和依赖。</p>
       <p>• 学习价值：可作为了解 AI Agent 相关开源实践的参考。</p>
-      <p>• 原链接：[<a href="https://github.com/ruvnet/RuView](https://github.com/ruvnet/RuView)">https://github.com/ruvnet/RuView](https://github.com/ruvnet/RuView)</a></p>
-
+      <p>• 原链接：<a href="https://github.com/ruvnet/RuView">https://github.com/ruvnet/RuView</a></p>
       <h3>8. colbymchenry/codegraph</h3>
-
       <p>• 项目定位：仅根据仓库名称和简介判断，属于 LLM Tooling 方向。</p>
       <p>• 简介：Pre-indexed code knowledge graph for Claude Code, Codex, Cursor, and OpenCode — fewer tokens, fewer tool calls, 100% local</p>
       <p>• README 摘要：未获取到 README 内容。</p>
@@ -148,10 +132,8 @@
       <p>• 质量信号：中质量，质量分 74；README 摘要不足，后续理解项目价值时需要打开仓库人工确认。；仓库主题标签较少，垂直方向判断可能不够稳定。</p>
       <p>• 风险提示：未发现明显元数据风险，但仍需自行审查代码和依赖。</p>
       <p>• 学习价值：可作为了解 LLM Tooling 相关开源实践的参考。</p>
-      <p>• 原链接：[<a href="https://github.com/colbymchenry/codegraph](https://github.com/colbymchenry/codegraph)">https://github.com/colbymchenry/codegraph](https://github.com/colbymchenry/codegraph)</a></p>
-
+      <p>• 原链接：<a href="https://github.com/colbymchenry/codegraph">https://github.com/colbymchenry/codegraph</a></p>
       <h3>9. facebook/pyrefly</h3>
-
       <p>• 项目定位：仅根据仓库名称和简介判断，属于 Other 方向。</p>
       <p>• 简介：A fast type checker and language server for Python</p>
       <p>• README 摘要：未获取到 README 内容。</p>
@@ -161,10 +143,8 @@
       <p>• 质量信号：高质量，质量分 82；README 摘要不足，后续理解项目价值时需要打开仓库人工确认。</p>
       <p>• 风险提示：未发现明显元数据风险，但仍需自行审查代码和依赖。</p>
       <p>• 学习价值：可作为了解 Other 相关开源实践的参考。</p>
-      <p>• 原链接：[<a href="https://github.com/facebook/pyrefly](https://github.com/facebook/pyrefly)">https://github.com/facebook/pyrefly](https://github.com/facebook/pyrefly)</a></p>
-
+      <p>• 原链接：<a href="https://github.com/facebook/pyrefly">https://github.com/facebook/pyrefly</a></p>
       <h3>10. firecrawl/firecrawl</h3>
-
       <p>• 项目定位：仅根据仓库名称和简介判断，属于 AI Agent 方向。</p>
       <p>• 简介：🔥 Search, scrape, and clean the web for AI agents.</p>
       <p>• README 摘要：未获取到 README 内容。</p>
@@ -174,20 +154,14 @@
       <p>• 质量信号：高质量，质量分 82；README 摘要不足，后续理解项目价值时需要打开仓库人工确认。</p>
       <p>• 风险提示：未发现明显元数据风险，但仍需自行审查代码和依赖。</p>
       <p>• 学习价值：可作为了解 AI Agent 相关开源实践的参考。</p>
-      <p>• 原链接：[<a href="https://github.com/firecrawl/firecrawl](https://github.com/firecrawl/firecrawl)">https://github.com/firecrawl/firecrawl](https://github.com/firecrawl/firecrawl)</a></p>
-
+      <p>• 原链接：<a href="https://github.com/firecrawl/firecrawl">https://github.com/firecrawl/firecrawl</a></p>
       <h2>四、最适合关注的项目</h2>
-
-      <p>• CloakHQ/CloakBrowser：[<a href="https://github.com/CloakHQ/CloakBrowser](https://github.com/CloakHQ/CloakBrowser)">https://github.com/CloakHQ/CloakBrowser](https://github.com/CloakHQ/CloakBrowser)</a></p>
-      <p>• rohitg00/agentmemory：[<a href="https://github.com/rohitg00/agentmemory](https://github.com/rohitg00/agentmemory)">https://github.com/rohitg00/agentmemory](https://github.com/rohitg00/agentmemory)</a></p>
-      <p>• oven-sh/bun：[<a href="https://github.com/oven-sh/bun](https://github.com/oven-sh/bun)">https://github.com/oven-sh/bun](https://github.com/oven-sh/bun)</a></p>
-
+      <p>• CloakHQ/CloakBrowser：<a href="https://github.com/CloakHQ/CloakBrowser">https://github.com/CloakHQ/CloakBrowser</a></p>
+      <p>• rohitg00/agentmemory：<a href="https://github.com/rohitg00/agentmemory">https://github.com/rohitg00/agentmemory</a></p>
+      <p>• oven-sh/bun：<a href="https://github.com/oven-sh/bun">https://github.com/oven-sh/bun</a></p>
       <h2>五、本周结论</h2>
-
       <p>建议优先查看 Trending 排名靠前、近期增长明显且与个人兴趣关键词匹配的项目。复用或运行项目前，仍需人工审查代码、依赖和许可证。</p>
-
       <h2>附录：搜索条件与生成信息</h2>
-
       <p>• 生成日期：2026-05-19</p>
       <p>• 搜索起始日期：2026-05-12</p>
       <p>• 最低 Star：20</p>

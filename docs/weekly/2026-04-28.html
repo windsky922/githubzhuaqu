@@ -11,6 +11,9 @@
     h1, h2, h3, h4 { line-height: 1.3; }
     a { color: #0969da; }
     code { background: #eef2f7; padding: 2px 5px; }
+    table { width: 100%; border-collapse: collapse; margin: 18px 0; display: block; overflow-x: auto; }
+    th, td { border: 1px solid #d8dee8; padding: 8px 10px; text-align: left; vertical-align: top; }
+    th { background: #f1f4f8; }
     hr { border: 0; border-top: 1px solid #d8dee8; margin: 24px 0; }
   </style>
 </head>
@@ -18,135 +21,106 @@
   <main>
     <article>
       <h1>GitHub 每周热点项目周报 - 2026-04-28</h1>
-
       <h2>一、本周趋势</h2>
-
       <p>本周根据 GitHub Search API 结果生成降级版周报。以下分析基于仓库名称、简介、README 摘要、语言、Star 和 Fork 数据；具体降级原因记录在本次运行摘要中。</p>
-
       <p>• AI Agent 是本期最集中的方向，共 8 个项目。</p>
       <p>• Python 是本期出现最多的主要语言，共 6 个项目。</p>
       <p>• 本期入选项目累计新增 Star 32。</p>
       <p>• TauricResearch/TradingAgents 是本期新增 Star 最高的项目，新增 6。</p>
-
       <h2>二、热点项目总览</h2>
-
-      <p>| 序号 | 项目 | 方向 | Star | 新增 Star | Fork | 语言 | 链接 |</p>
-      <p>|---:|---|---|---:|---:|---:|---|---|</p>
-      <p>| 1 | TauricResearch/TradingAgents | AI Agent | 53978 | 6 | 9794 | Python | [<a href="https://github.com/TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents)">https://github.com/TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents)</a> |</p>
-      <p>| 2 | NousResearch/hermes-agent | AI Agent | 121076 | 3 | 18008 | Python | [<a href="https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)">https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)</a> |</p>
-      <p>| 3 | obra/superpowers | AI Agent | 170224 | 5 | 15029 | Shell | [<a href="https://github.com/obra/superpowers](https://github.com/obra/superpowers)">https://github.com/obra/superpowers](https://github.com/obra/superpowers)</a> |</p>
-      <p>| 4 | affaan-m/everything-claude-code | AI Agent | 168579 | 4 | 26131 | JavaScript | [<a href="https://github.com/affaan-m/everything-claude-code](https://github.com/affaan-m/everything-claude-code)">https://github.com/affaan-m/everything-claude-code](https://github.com/affaan-m/everything-claude-code)</a> |</p>
-      <p>| 5 | AstrBotDevs/AstrBot | AI Agent | 30846 | 3 | 2110 | Python | [<a href="https://github.com/AstrBotDevs/AstrBot](https://github.com/AstrBotDevs/AstrBot)">https://github.com/AstrBotDevs/AstrBot](https://github.com/AstrBotDevs/AstrBot)</a> |</p>
-      <p>| 6 | open-webui/open-webui | LLM Tooling | 134520 | 2 | 19120 | Python | [<a href="https://github.com/open-webui/open-webui](https://github.com/open-webui/open-webui)">https://github.com/open-webui/open-webui](https://github.com/open-webui/open-webui)</a> |</p>
-      <p>| 7 | vinta/awesome-python | Other | 294741 | 1 | 27785 | Python | [<a href="https://github.com/vinta/awesome-python](https://github.com/vinta/awesome-python)">https://github.com/vinta/awesome-python](https://github.com/vinta/awesome-python)</a> |</p>
-      <p>| 8 | langgenius/dify | AI Agent | 139407 | 1 | 21863 | TypeScript | [<a href="https://github.com/langgenius/dify](https://github.com/langgenius/dify)">https://github.com/langgenius/dify](https://github.com/langgenius/dify)</a> |</p>
-      <p>| 9 | thedotmack/claude-mem | AI Agent | 68717 | 4 | 5857 | TypeScript | [<a href="https://github.com/thedotmack/claude-mem](https://github.com/thedotmack/claude-mem)">https://github.com/thedotmack/claude-mem](https://github.com/thedotmack/claude-mem)</a> |</p>
-      <p>| 10 | anthropics/skills | AI Agent | 124973 | 3 | 14637 | Python | [<a href="https://github.com/anthropics/skills](https://github.com/anthropics/skills)">https://github.com/anthropics/skills](https://github.com/anthropics/skills)</a> |</p>
-
+      <table>
+        <thead><tr><th>序号</th><th>项目</th><th>方向</th><th>Star</th><th>新增 Star</th><th>Fork</th><th>语言</th><th>链接</th></tr></thead>
+        <tbody>
+        <tr><td>1</td><td>TauricResearch/TradingAgents</td><td>AI Agent</td><td>53978</td><td>6</td><td>9794</td><td>Python</td><td><a href="https://github.com/TauricResearch/TradingAgents">https://github.com/TauricResearch/TradingAgents</a></td></tr>
+        <tr><td>2</td><td>NousResearch/hermes-agent</td><td>AI Agent</td><td>121076</td><td>3</td><td>18008</td><td>Python</td><td><a href="https://github.com/NousResearch/hermes-agent">https://github.com/NousResearch/hermes-agent</a></td></tr>
+        <tr><td>3</td><td>obra/superpowers</td><td>AI Agent</td><td>170224</td><td>5</td><td>15029</td><td>Shell</td><td><a href="https://github.com/obra/superpowers">https://github.com/obra/superpowers</a></td></tr>
+        <tr><td>4</td><td>affaan-m/everything-claude-code</td><td>AI Agent</td><td>168579</td><td>4</td><td>26131</td><td>JavaScript</td><td><a href="https://github.com/affaan-m/everything-claude-code">https://github.com/affaan-m/everything-claude-code</a></td></tr>
+        <tr><td>5</td><td>AstrBotDevs/AstrBot</td><td>AI Agent</td><td>30846</td><td>3</td><td>2110</td><td>Python</td><td><a href="https://github.com/AstrBotDevs/AstrBot">https://github.com/AstrBotDevs/AstrBot</a></td></tr>
+        <tr><td>6</td><td>open-webui/open-webui</td><td>LLM Tooling</td><td>134520</td><td>2</td><td>19120</td><td>Python</td><td><a href="https://github.com/open-webui/open-webui">https://github.com/open-webui/open-webui</a></td></tr>
+        <tr><td>7</td><td>vinta/awesome-python</td><td>Other</td><td>294741</td><td>1</td><td>27785</td><td>Python</td><td><a href="https://github.com/vinta/awesome-python">https://github.com/vinta/awesome-python</a></td></tr>
+        <tr><td>8</td><td>langgenius/dify</td><td>AI Agent</td><td>139407</td><td>1</td><td>21863</td><td>TypeScript</td><td><a href="https://github.com/langgenius/dify">https://github.com/langgenius/dify</a></td></tr>
+        <tr><td>9</td><td>thedotmack/claude-mem</td><td>AI Agent</td><td>68717</td><td>4</td><td>5857</td><td>TypeScript</td><td><a href="https://github.com/thedotmack/claude-mem">https://github.com/thedotmack/claude-mem</a></td></tr>
+        <tr><td>10</td><td>anthropics/skills</td><td>AI Agent</td><td>124973</td><td>3</td><td>14637</td><td>Python</td><td><a href="https://github.com/anthropics/skills">https://github.com/anthropics/skills</a></td></tr>
+        </tbody>
+      </table>
       <h2>三、重点项目分析</h2>
-
       <h3>1. TauricResearch/TradingAgents</h3>
-
       <p>• 项目定位：仅根据仓库名称和简介判断，属于 AI Agent 方向。</p>
       <p>• 简介：TradingAgents: Multi-Agents LLM Financial Trading Framework</p>
       <p>• README 摘要：&lt;p align=&quot;center&quot;&gt; &lt;img src=&quot;assets/TauricResearch.png&quot; style=&quot;width: 60%; height: auto;&quot;&gt; &lt;/p&gt; &lt;div align=&quot;center&quot; style=&quot;line-height: 1;&quot;&gt; &lt;a href=&quot;<a href="https://arxiv.org/abs/2412.20138&quot;">https://arxiv.org/abs/2412.20138&quot;</a> target=&quot;_blank&quot;&gt;&lt;img alt=&quot;arXiv&quot; src=&quot;<a href="https://img.shields.io/badge/arXiv-2412.20138-B31B1B?logo=arxiv&quot;/&gt;&lt;/a&gt;">https://img.shields.io/badge/arXiv-2412.20138-B31B1B?logo=arxiv&quot;/&gt;&lt;/a&gt;</a> &lt;a href=&quot;<a href="https://discord.co...">https://discord.co...</a></p>
       <p>• 技术信息：主要语言 Python，Star 53978，Fork 9794，较上次记录新增 Star 6。</p>
       <p>• 学习价值：可作为了解 AI Agent 相关开源实践的参考。</p>
-      <p>• 原链接：[<a href="https://github.com/TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents)">https://github.com/TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents)</a></p>
-
+      <p>• 原链接：<a href="https://github.com/TauricResearch/TradingAgents">https://github.com/TauricResearch/TradingAgents</a></p>
       <h3>2. NousResearch/hermes-agent</h3>
-
       <p>• 项目定位：仅根据仓库名称和简介判断，属于 AI Agent 方向。</p>
       <p>• 简介：The agent that grows with you</p>
       <p>• README 摘要：&lt;p align=&quot;center&quot;&gt; &lt;img src=&quot;assets/banner.png&quot; alt=&quot;Hermes Agent&quot; width=&quot;100%&quot;&gt; &lt;/p&gt; # Hermes Agent ☤ &lt;p align=&quot;center&quot;&gt; &lt;a href=&quot;<a href="https://hermes-agent.nousresearch.com/docs/&quot;&gt;&lt;img">https://hermes-agent.nousresearch.com/docs/&quot;&gt;&lt;img</a> src=&quot;<a href="https://img.shields.io/badge/Docs-hermes--agent.nousresearch.com-FFD700?style=for-the-badge&quot;">https://img.shields.io/badge/Docs-hermes--agent.nousresearch.com-FFD700?style=for-the-badge&quot;</a> alt=&quot;Documentation&quot;&gt;&lt;/a&gt; &lt;a href=&quot;https:/...</p>
       <p>• 技术信息：主要语言 Python，Star 121076，Fork 18008，较上次记录新增 Star 3。</p>
       <p>• 学习价值：可作为了解 AI Agent 相关开源实践的参考。</p>
-      <p>• 原链接：[<a href="https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)">https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)</a></p>
-
+      <p>• 原链接：<a href="https://github.com/NousResearch/hermes-agent">https://github.com/NousResearch/hermes-agent</a></p>
       <h3>3. obra/superpowers</h3>
-
       <p>• 项目定位：仅根据仓库名称和简介判断，属于 AI Agent 方向。</p>
       <p>• 简介：An agentic skills framework &amp; software development methodology that works.</p>
       <p>• README 摘要：# Superpowers Superpowers is a complete software development methodology for your coding agents, built on top of a set of composable skills and some initial instructions that make sure your agent uses them. ## How it works It starts from the moment you fire up your coding agent. As soon as it sees that you&#x27;re building...</p>
       <p>• 技术信息：主要语言 Shell，Star 170224，Fork 15029，较上次记录新增 Star 5。</p>
       <p>• 学习价值：可作为了解 AI Agent 相关开源实践的参考。</p>
-      <p>• 原链接：[<a href="https://github.com/obra/superpowers](https://github.com/obra/superpowers)">https://github.com/obra/superpowers](https://github.com/obra/superpowers)</a></p>
-
+      <p>• 原链接：<a href="https://github.com/obra/superpowers">https://github.com/obra/superpowers</a></p>
       <h3>4. affaan-m/everything-claude-code</h3>
-
       <p>• 项目定位：仅根据仓库名称和简介判断，属于 AI Agent 方向。</p>
       <p>• 简介：The agent harness performance optimization system. Skills, instincts, memory, security, and research-first development for Claude Code, Codex, Opencode, Cursor and beyond.</p>
       <p>• README 摘要：<strong>Language:</strong> English | [Português (Brasil)](docs/pt-BR/README.md) | [简体中文](README.zh-CN.md) | [繁體中文](docs/zh-TW/README.md) | [日本語](docs/ja-JP/README.md) | [한국어](docs/ko-KR/README.md) | [Türkçe](docs/tr/README.md) # Everything Claude Code ![Everything Claude Code — the performance system for AI agent harnesses](assets/...</p>
       <p>• 技术信息：主要语言 JavaScript，Star 168579，Fork 26131，较上次记录新增 Star 4。</p>
       <p>• 学习价值：可作为了解 AI Agent 相关开源实践的参考。</p>
-      <p>• 原链接：[<a href="https://github.com/affaan-m/everything-claude-code](https://github.com/affaan-m/everything-claude-code)">https://github.com/affaan-m/everything-claude-code](https://github.com/affaan-m/everything-claude-code)</a></p>
-
+      <p>• 原链接：<a href="https://github.com/affaan-m/everything-claude-code">https://github.com/affaan-m/everything-claude-code</a></p>
       <h3>5. AstrBotDevs/AstrBot</h3>
-
       <p>• 项目定位：仅根据仓库名称和简介判断，属于 AI Agent 方向。</p>
       <p>• 简介：AI Agent Assistant that integrates lots of IM platforms, LLMs, plugins and AI feature, and can be your openclaw alternative. ✨</p>
-      <p>• README 摘要：![astrbot-github-banner-v2-light-0405_副本](<a href="https://github.com/user-attachments/assets/36fb04e4-cc75-4454-bd8b-049d11aa86f9)">https://github.com/user-attachments/assets/36fb04e4-cc75-4454-bd8b-049d11aa86f9)</a> &lt;div align=&quot;center&quot;&gt; &lt;a href=&quot;[<a href="https://github.com/AstrBotDevs/AstrBot](https://github.com/AstrBotDevs/AstrBot)/blob/master/README_zh.md&quot;&gt;简体中文&lt;/a&gt;">https://github.com/AstrBotDevs/AstrBot](https://github.com/AstrBotDevs/AstrBot)/blob/master/README_zh.md&quot;&gt;简体中文&lt;/a&gt;</a> ｜ &lt;a href=&quot;[<a href="https://github.com/AstrBotDevs/AstrBot](https://github.com/AstrBotDevs/AstrBot)/blob/master/README_zh-TW.md&quot;&gt;繁體中文&lt;/a&gt;">https://github.com/AstrBotDevs/AstrBot](https://github.com/AstrBotDevs/AstrBot)/blob/master/README_zh-TW.md&quot;&gt;繁體中文&lt;/a&gt;</a> ｜ &lt;a...</p>
+      <p>• README 摘要：!<a href="https://github.com/user-attachments/assets/36fb04e4-cc75-4454-bd8b-049d11aa86f9">astrbot-github-banner-v2-light-0405_副本</a> &lt;div align=&quot;center&quot;&gt; &lt;a href=&quot;<a href="https://github.com/AstrBotDevs/AstrBot">https://github.com/AstrBotDevs/AstrBot</a>/blob/master/README_zh.md&quot;&gt;简体中文&lt;/a&gt; ｜ &lt;a href=&quot;<a href="https://github.com/AstrBotDevs/AstrBot">https://github.com/AstrBotDevs/AstrBot</a>/blob/master/README_zh-TW.md&quot;&gt;繁體中文&lt;/a&gt; ｜ &lt;a...</p>
       <p>• 技术信息：主要语言 Python，Star 30846，Fork 2110，较上次记录新增 Star 3。</p>
       <p>• 学习价值：可作为了解 AI Agent 相关开源实践的参考。</p>
-      <p>• 原链接：[<a href="https://github.com/AstrBotDevs/AstrBot](https://github.com/AstrBotDevs/AstrBot)">https://github.com/AstrBotDevs/AstrBot](https://github.com/AstrBotDevs/AstrBot)</a></p>
-
+      <p>• 原链接：<a href="https://github.com/AstrBotDevs/AstrBot">https://github.com/AstrBotDevs/AstrBot</a></p>
       <h3>6. open-webui/open-webui</h3>
-
       <p>• 项目定位：仅根据仓库名称和简介判断，属于 LLM Tooling 方向。</p>
       <p>• 简介：User-friendly AI Interface (Supports Ollama, OpenAI API, ...)</p>
-      <p>• README 摘要：# Open WebUI 👋 ![GitHub stars](<a href="https://img.shields.io/github/stars/open-webui/open-webui?style=social)">https://img.shields.io/github/stars/open-webui/open-webui?style=social)</a> ![GitHub forks](<a href="https://img.shields.io/github/forks/open-webui/open-webui?style=social)">https://img.shields.io/github/forks/open-webui/open-webui?style=social)</a> ![GitHub watchers](<a href="https://img.shields.io/github/watchers/open-webui/open-webui?style=social)">https://img.shields.io/github/watchers/open-webui/open-webui?style=social)</a> ![GitHub repo size](<a href="https://img.shi...">https://img.shi...</a></p>
+      <p>• README 摘要：# Open WebUI 👋 !<a href="https://img.shields.io/github/stars/open-webui/open-webui?style=social">GitHub stars</a> !<a href="https://img.shields.io/github/forks/open-webui/open-webui?style=social">GitHub forks</a> !<a href="https://img.shields.io/github/watchers/open-webui/open-webui?style=social">GitHub watchers</a> ![GitHub repo size](<a href="https://img.shi...">https://img.shi...</a></p>
       <p>• 技术信息：主要语言 Python，Star 134520，Fork 19120，较上次记录新增 Star 2。</p>
       <p>• 学习价值：可作为了解 LLM Tooling 相关开源实践的参考。</p>
-      <p>• 原链接：[<a href="https://github.com/open-webui/open-webui](https://github.com/open-webui/open-webui)">https://github.com/open-webui/open-webui](https://github.com/open-webui/open-webui)</a></p>
-
+      <p>• 原链接：<a href="https://github.com/open-webui/open-webui">https://github.com/open-webui/open-webui</a></p>
       <h3>7. vinta/awesome-python</h3>
-
       <p>• 项目定位：仅根据仓库名称和简介判断，属于 Other 方向。</p>
       <p>• 简介：An opinionated list of Python frameworks, libraries, tools, and resources</p>
-      <p>• README 摘要：# Awesome Python An opinionated list of Python frameworks, libraries, tools, and resources. # <strong>Sponsors</strong> - <strong>[pyr](<a href="https://pyrun.dev)">https://pyrun.dev)</a></strong>: Zero-config Python project manager. Bootstraps its own runtime, app-convention, and working imports - out the box. &gt; The <strong>#10 most-starred repo on GitHub</strong>. Put your product in fro...</p>
+      <p>• README 摘要：# Awesome Python An opinionated list of Python frameworks, libraries, tools, and resources. # <strong>Sponsors</strong> - <strong><a href="https://pyrun.dev">pyr</a></strong>: Zero-config Python project manager. Bootstraps its own runtime, app-convention, and working imports - out the box. &gt; The <strong>#10 most-starred repo on GitHub</strong>. Put your product in fro...</p>
       <p>• 技术信息：主要语言 Python，Star 294741，Fork 27785，较上次记录新增 Star 1。</p>
       <p>• 学习价值：可作为了解 Other 相关开源实践的参考。</p>
-      <p>• 原链接：[<a href="https://github.com/vinta/awesome-python](https://github.com/vinta/awesome-python)">https://github.com/vinta/awesome-python](https://github.com/vinta/awesome-python)</a></p>
-
+      <p>• 原链接：<a href="https://github.com/vinta/awesome-python">https://github.com/vinta/awesome-python</a></p>
       <h3>8. langgenius/dify</h3>
-
       <p>• 项目定位：仅根据仓库名称和简介判断，属于 AI Agent 方向。</p>
       <p>• 简介：Production-ready platform for agentic workflow development.</p>
       <p>• README 摘要：![cover-v5-optimized](./images/GitHub_README_if.png) &lt;p align=&quot;center&quot;&gt; &lt;a href=&quot;<a href="https://cloud.dify.ai&quot;&gt;Dify">https://cloud.dify.ai&quot;&gt;Dify</a> Cloud&lt;/a&gt; · &lt;a href=&quot;<a href="https://docs.dify.ai/getting-started/install-self-hosted&quot;&gt;Self-hosting&lt;/a&gt;">https://docs.dify.ai/getting-started/install-self-hosted&quot;&gt;Self-hosting&lt;/a&gt;</a> · &lt;a href=&quot;<a href="https://docs.dify.ai&quot;&gt;Documentation&lt;/a&gt;">https://docs.dify.ai&quot;&gt;Documentation&lt;/a&gt;</a> · &lt;a href=&quot;<a href="https://dify.ai/pricing&quot;&gt;Dify">https://dify.ai/pricing&quot;&gt;Dify</a> edition overview&lt;/a&gt; &lt;/...</p>
       <p>• 技术信息：主要语言 TypeScript，Star 139407，Fork 21863，较上次记录新增 Star 1。</p>
       <p>• 学习价值：可作为了解 AI Agent 相关开源实践的参考。</p>
-      <p>• 原链接：[<a href="https://github.com/langgenius/dify](https://github.com/langgenius/dify)">https://github.com/langgenius/dify](https://github.com/langgenius/dify)</a></p>
-
+      <p>• 原链接：<a href="https://github.com/langgenius/dify">https://github.com/langgenius/dify</a></p>
       <h3>9. thedotmack/claude-mem</h3>
-
       <p>• 项目定位：仅根据仓库名称和简介判断，属于 AI Agent 方向。</p>
       <p>• 简介：A Claude Code plugin that automatically captures everything Claude does during your coding sessions, compresses it with AI (using Claude&#x27;s agent-sdk), and injects relevant context back into future sessions.</p>
-      <p>• README 摘要：&lt;h1 align=&quot;center&quot;&gt; &lt;br&gt; &lt;a href=&quot;[<a href="https://github.com/thedotmack/claude-mem](https://github.com/thedotmack/claude-mem)&quot;&gt;">https://github.com/thedotmack/claude-mem](https://github.com/thedotmack/claude-mem)&quot;&gt;</a> &lt;picture&gt; &lt;source media=&quot;(prefers-color-scheme: dark)&quot; srcset=&quot;<a href="https://raw.githubusercontent.com/thedotmack/claude-mem/main/docs/public/claude-mem-logo-for-dark-mode.webp&quot;&gt;">https://raw.githubusercontent.com/thedotmack/claude-mem/main/docs/public/claude-mem-logo-for-dark-mode.webp&quot;&gt;</a> &lt;source media=&quot;(prefers-color-scheme: light)&quot; srcset=&quot;<a href="https://raw.gith...">https://raw.gith...</a></p>
+      <p>• README 摘要：&lt;h1 align=&quot;center&quot;&gt; &lt;br&gt; &lt;a href=&quot;<a href="https://github.com/thedotmack/claude-mem">https://github.com/thedotmack/claude-mem</a>&quot;&gt; &lt;picture&gt; &lt;source media=&quot;(prefers-color-scheme: dark)&quot; srcset=&quot;<a href="https://raw.githubusercontent.com/thedotmack/claude-mem/main/docs/public/claude-mem-logo-for-dark-mode.webp&quot;&gt;">https://raw.githubusercontent.com/thedotmack/claude-mem/main/docs/public/claude-mem-logo-for-dark-mode.webp&quot;&gt;</a> &lt;source media=&quot;(prefers-color-scheme: light)&quot; srcset=&quot;<a href="https://raw.gith...">https://raw.gith...</a></p>
       <p>• 技术信息：主要语言 TypeScript，Star 68717，Fork 5857，较上次记录新增 Star 4。</p>
       <p>• 学习价值：可作为了解 AI Agent 相关开源实践的参考。</p>
-      <p>• 原链接：[<a href="https://github.com/thedotmack/claude-mem](https://github.com/thedotmack/claude-mem)">https://github.com/thedotmack/claude-mem](https://github.com/thedotmack/claude-mem)</a></p>
-
+      <p>• 原链接：<a href="https://github.com/thedotmack/claude-mem">https://github.com/thedotmack/claude-mem</a></p>
       <h3>10. anthropics/skills</h3>
-
       <p>• 项目定位：仅根据仓库名称和简介判断，属于 AI Agent 方向。</p>
       <p>• 简介：Public repository for Agent Skills</p>
-      <p>• README 摘要：&gt; <strong>Note:</strong> This repository contains Anthropic&#x27;s implementation of skills for Claude. For information about the Agent Skills standard, see [agentskills.io](<a href="http://agentskills.io).">http://agentskills.io).</a> # Skills Skills are folders of instructions, scripts, and resources that Claude loads dynamically to improve performance on specialized task...</p>
+      <p>• README 摘要：&gt; <strong>Note:</strong> This repository contains Anthropic&#x27;s implementation of skills for Claude. For information about the Agent Skills standard, see <a href="http://agentskills.io">agentskills.io</a>. # Skills Skills are folders of instructions, scripts, and resources that Claude loads dynamically to improve performance on specialized task...</p>
       <p>• 技术信息：主要语言 Python，Star 124973，Fork 14637，较上次记录新增 Star 3。</p>
       <p>• 学习价值：可作为了解 AI Agent 相关开源实践的参考。</p>
-      <p>• 原链接：[<a href="https://github.com/anthropics/skills](https://github.com/anthropics/skills)">https://github.com/anthropics/skills](https://github.com/anthropics/skills)</a></p>
-
+      <p>• 原链接：<a href="https://github.com/anthropics/skills">https://github.com/anthropics/skills</a></p>
       <h2>四、最适合关注的项目</h2>
-
-      <p>• TauricResearch/TradingAgents：[<a href="https://github.com/TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents)">https://github.com/TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents)</a></p>
-      <p>• NousResearch/hermes-agent：[<a href="https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)">https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)</a></p>
-      <p>• obra/superpowers：[<a href="https://github.com/obra/superpowers](https://github.com/obra/superpowers)">https://github.com/obra/superpowers](https://github.com/obra/superpowers)</a></p>
-
+      <p>• TauricResearch/TradingAgents：<a href="https://github.com/TauricResearch/TradingAgents">https://github.com/TauricResearch/TradingAgents</a></p>
+      <p>• NousResearch/hermes-agent：<a href="https://github.com/NousResearch/hermes-agent">https://github.com/NousResearch/hermes-agent</a></p>
+      <p>• obra/superpowers：<a href="https://github.com/obra/superpowers">https://github.com/obra/superpowers</a></p>
       <h2>五、本周结论</h2>
-
       <p>建议优先查看排名靠前且与个人兴趣关键词匹配的项目。后续版本会加入 README 深度分析和历史去重。</p>
-
       <h2>附录：搜索条件与生成信息</h2>
-
       <p>• 生成日期：2026-04-28</p>
       <p>• 搜索起始日期：2026-04-21</p>
       <p>• 最低 Star：20</p>

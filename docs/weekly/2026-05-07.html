@@ -11,6 +11,9 @@
     h1, h2, h3, h4 { line-height: 1.3; }
     a { color: #0969da; }
     code { background: #eef2f7; padding: 2px 5px; }
+    table { width: 100%; border-collapse: collapse; margin: 18px 0; display: block; overflow-x: auto; }
+    th, td { border: 1px solid #d8dee8; padding: 8px 10px; text-align: left; vertical-align: top; }
+    th { background: #f1f4f8; }
     hr { border: 0; border-top: 1px solid #d8dee8; margin: 24px 0; }
   </style>
 </head>
@@ -18,65 +21,48 @@
   <main>
     <article>
       <p>GitHub 每周热点项目周报（2026-04-30 至 2026-05-07）</p>
-
       <h2>1. 本周总体趋势</h2>
-
       <p>本周 GitHub Trending 周榜由 <strong>AI Agent</strong> 方向绝对主导，10 个入选项目中 6 个属于该领域，占比 60%。<strong>Python</strong> 以 5 个项目成为最活跃语言，<strong>TypeScript</strong> 与 <strong>Rust</strong> 各占 2 席。本周共有 <strong>9 个项目进入 GitHub Trending 周榜 Top 10</strong>，累计新增 Star <strong>5012</strong>，显示出极强的社区活跃度。</p>
-
       <p>特别值得注意的是，<strong>AI 编码助手与代理编排工具</strong>持续升温，从金融交易代理到多代理协同平台，从终端 AI 增强到自学习代理框架，开发者工具链的智能化转型已成为明确趋势。</p>
-
       <h2>2. 热点项目总览</h2>
-
-      <p>| 项目名称 | 周榜排名 | 主要语言 | 新增 Star | 项目链接 |</p>
-      <p>|---------|---------|---------|----------|----------|</p>
-      <p>| TradingAgents | <strong>第 1 位</strong> | Python | +464 | [<a href="https://github.com/TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents)">https://github.com/TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents)</a> |</p>
-      <p>| ruflo | <strong>第 2 位</strong> | TypeScript | +497 | [<a href="https://github.com/ruvnet/ruflo](https://github.com/ruvnet/ruflo)">https://github.com/ruvnet/ruflo](https://github.com/ruvnet/ruflo)</a> |</p>
-      <p>| skills | <strong>第 3 位</strong> | Shell | +1040 | [<a href="https://github.com/mattpocock/skills](https://github.com/mattpocock/skills)">https://github.com/mattpocock/skills](https://github.com/mattpocock/skills)</a> |</p>
-      <p>| maigret | <strong>第 4 位</strong> | Python | +185 | [<a href="https://github.com/soxoj/maigret](https://github.com/soxoj/maigret)">https://github.com/soxoj/maigret](https://github.com/soxoj/maigret)</a> |</p>
-      <p>| warp | <strong>第 5 位</strong> | Rust | +396 | [<a href="https://github.com/warpdotdev/warp](https://github.com/warpdotdev/warp)">https://github.com/warpdotdev/warp](https://github.com/warpdotdev/warp)</a> |</p>
-      <p>| jcode | <strong>第 6 位</strong> | Rust | +179 | [<a href="https://github.com/1jehuang/jcode](https://github.com/1jehuang/jcode)">https://github.com/1jehuang/jcode](https://github.com/1jehuang/jcode)</a> |</p>
-      <p>| dexter | <strong>第 7 位</strong> | TypeScript | +258 | [<a href="https://github.com/virattt/dexter](https://github.com/virattt/dexter)">https://github.com/virattt/dexter](https://github.com/virattt/dexter)</a> |</p>
-      <p>| Pixelle-Video | <strong>第 9 位</strong> | Python | +417 | [<a href="https://github.com/AIDC-AI/Pixelle-Video](https://github.com/AIDC-AI/Pixelle-Video)">https://github.com/AIDC-AI/Pixelle-Video](https://github.com/AIDC-AI/Pixelle-Video)</a> |</p>
-      <p>| Scrapling | <strong>第 10 位</strong> | Python | +611 | [<a href="https://github.com/D4Vinci/Scrapling](https://github.com/D4Vinci/Scrapling)">https://github.com/D4Vinci/Scrapling](https://github.com/D4Vinci/Scrapling)</a> |</p>
-      <p>| hermes-agent | 未入榜 | Python | +965 | [<a href="https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)">https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)</a> |</p>
-
+      <table>
+        <thead><tr><th>项目名称</th><th>周榜排名</th><th>主要语言</th><th>新增 Star</th><th>项目链接</th></tr></thead>
+        <tbody>
+        <tr><td>TradingAgents</td><td><strong>第 1 位</strong></td><td>Python</td><td>+464</td><td><a href="https://github.com/TauricResearch/TradingAgents">https://github.com/TauricResearch/TradingAgents</a></td></tr>
+        <tr><td>ruflo</td><td><strong>第 2 位</strong></td><td>TypeScript</td><td>+497</td><td><a href="https://github.com/ruvnet/ruflo">https://github.com/ruvnet/ruflo</a></td></tr>
+        <tr><td>skills</td><td><strong>第 3 位</strong></td><td>Shell</td><td>+1040</td><td><a href="https://github.com/mattpocock/skills">https://github.com/mattpocock/skills</a></td></tr>
+        <tr><td>maigret</td><td><strong>第 4 位</strong></td><td>Python</td><td>+185</td><td><a href="https://github.com/soxoj/maigret">https://github.com/soxoj/maigret</a></td></tr>
+        <tr><td>warp</td><td><strong>第 5 位</strong></td><td>Rust</td><td>+396</td><td><a href="https://github.com/warpdotdev/warp">https://github.com/warpdotdev/warp</a></td></tr>
+        <tr><td>jcode</td><td><strong>第 6 位</strong></td><td>Rust</td><td>+179</td><td><a href="https://github.com/1jehuang/jcode">https://github.com/1jehuang/jcode</a></td></tr>
+        <tr><td>dexter</td><td><strong>第 7 位</strong></td><td>TypeScript</td><td>+258</td><td><a href="https://github.com/virattt/dexter">https://github.com/virattt/dexter</a></td></tr>
+        <tr><td>Pixelle-Video</td><td><strong>第 9 位</strong></td><td>Python</td><td>+417</td><td><a href="https://github.com/AIDC-AI/Pixelle-Video">https://github.com/AIDC-AI/Pixelle-Video</a></td></tr>
+        <tr><td>Scrapling</td><td><strong>第 10 位</strong></td><td>Python</td><td>+611</td><td><a href="https://github.com/D4Vinci/Scrapling">https://github.com/D4Vinci/Scrapling</a></td></tr>
+        <tr><td>hermes-agent</td><td>未入榜</td><td>Python</td><td>+965</td><td><a href="https://github.com/NousResearch/hermes-agent">https://github.com/NousResearch/hermes-agent</a></td></tr>
+        </tbody>
+      </table>
       <p>*注：项目来自 GitHub Trending 周榜及 GitHub Search 多个来源，排名依据 2026-05-07 当周 Trending 数据。*</p>
-
       <h2>3. 重点项目分析</h2>
-
       <h3>TradingAgents —— 金融交易多代理框架</h3>
       <p>作为本周 <strong>GitHub Trending 周榜第 1 位</strong>，该项目是本期最重要的热度信号。这是一个基于大语言模型的金融交易多代理系统，采用 Apache-2.0 许可证，质量评分 100（高质量）。v0.2.4 版本近期发布，引入结构化输出代理（研究经理、交易员、投资组合经理）、LangGraph 检查点恢复机制，并支持 DeepSeek、Qwen、GLM、Azure 等多提供商接入。项目累计 Star 已超 7 万，新增 464 Star 显示持续关注度，适合对量化交易与 AI Agent 结合感兴趣的开发者研究。</p>
-
       <h3>ruflo —— Claude 代理编排平台</h3>
       <p>位居周榜 <strong>第 2 位</strong>，这是一个专为 Claude 设计的代理编排平台，使用 TypeScript 开发，MIT 许可证。项目支持协调 100+ 个专业 AI 代理跨机器、团队和信任边界工作，具备自学习记忆、联邦通信和企业级安全特性。作为此前已推送过的项目，本周新增 497 Star 证明其持续热度。项目与 Claude Code / Codex 深度集成，适合需要构建复杂多代理工作流的工程师关注。</p>
-
       <h3>skills —— 工程师的 Agent 技能库</h3>
       <p>本周 <strong>新增 Star 最高（+1040）</strong> 的项目，进入周榜第 3 位。由知名 TypeScript 教育者 Matt Pocock 维护，这是一套面向&quot;真实工程&quot;而非&quot;vibe coding&quot;的 Claude 技能集合。项目质量评分 92（高质量），包含 GSD、BMAD、Spec-Kit 等工程方法论的具体实现。对于希望提升开发效率、将 AI 代理融入实际工程流程的开发者，这是极具参考价值的学习资源。</p>
-
       <h3>Scrapling —— 自适应 Web 爬虫框架</h3>
       <p>位列周榜 <strong>第 10 位</strong>，本周新增 611 Star。这是一个 Python 编写的自适应网页爬虫框架，基于 Playwright 构建，支持从单请求到全站爬取的各种场景，具备 AI 增强的抓取能力。项目采用 BSD-3-Clause 许可证，质量评分 100，与 MCP（Model Context Protocol）协议兼容，可作为 AI 代理的数据获取基础设施。对于需要构建数据管道或自动化信息收集的开发者，这是成熟且功能完整的工具选择。</p>
-
       <h2>4. 最适合用户学习的项目</h2>
-
       <p>根据您&quot;提升开发效率&quot;、&quot;关注 CLI 与自动化工具&quot;、&quot;寻找可落地工程工具&quot;的学习目标，本周推荐以下项目：</p>
-
       <p><strong>首选：mattpocock/skills</strong></p>
       <p>• <strong>理由</strong>：直接提供可落地的工程方法论实践，包含具体的 Claude 技能配置，可立即应用于日常工作流提升效率。Shell 语言门槛低，适合各技术栈开发者参考。</p>
       <p>• <strong>质量</strong>：MIT 许可证，新增 1040 Star 显示社区高度认可。</p>
-
       <p><strong>次选：D4Vinci/Scrapling</strong></p>
       <p>• <strong>理由</strong>：Python 生态中成熟的自动化工具，模块化设计完善，支持 ComfyUI 架构扩展。适合学习如何构建生产级数据抓取与自动化管道。</p>
       <p>• <strong>注意</strong>：BSD-3-Clause 许可证，企业友好。</p>
-
       <p><strong>备选：soxoj/maigret</strong></p>
       <p>• <strong>理由</strong>：纯 CLI 的 OSINT 工具，代码结构清晰，展示如何构建跨 3000+ 站点的自动化调查工具。适合学习 Python 命令行工具开发与网络数据采集技术。</p>
-
       <h2>5. 本周结论</h2>
-
       <p><strong>趋势判断</strong>：AI Agent 已从概念验证进入<strong>工具化与垂直化</strong>阶段。本周项目中，金融交易（TradingAgents、dexter）、代码开发（warp、jcode）、内容创作（Pixelle-Video）等垂直场景的代理工具密集出现，表明市场正在寻找 AI 代理的具体落地场景。</p>
-
       <p><strong>风险提示</strong>：<strong>virattt/dexter</strong> 项目虽进入周榜第 7 位，但未识别到开源许可证（security_flags 提示），在复用代码前需人工确认授权条款，存在潜在合规风险。</p>
-
       <p><strong>行动建议</strong>：建议开发者重点关注<strong>代理编排（Orchestration）</strong>与<strong>技能固化（Skills）</strong>两个方向——前者解决多代理协同的工程问题（如 ruflo），后者解决代理能力沉淀与复用问题（如 skills）。这两个方向将是未来半年 AI 工程化的关键基础设施。</p>
     </article>
   </main>
