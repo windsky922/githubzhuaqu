@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GitHub 周报 2026-05-06</title>
+  <style>
+    body { margin: 0; background: #f6f7f9; color: #1f2933; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height: 1.7; }
+    main { max-width: 960px; margin: 0 auto; padding: 32px 20px 56px; }
+    article { background: #fff; border: 1px solid #d8dee8; padding: 28px; }
+    h1, h2, h3, h4 { line-height: 1.3; }
+    a { color: #0969da; }
+    code { background: #eef2f7; padding: 2px 5px; }
+    hr { border: 0; border-top: 1px solid #d8dee8; margin: 24px 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <article>
+      <p><strong>GitHub 每周热点项目周报</strong></p>
+      <p>*统计周期：2026-04-29 至 2026-05-06*</p>
+
+      <hr>
+
+      <h3>1. 本周总体趋势</h3>
+
+      <p>本期共收录 <strong>10</strong> 个活跃项目，其中 <strong>9</strong> 个进入 GitHub Trending 周榜，累计新增 Star <strong>47</strong>。技术趋势呈现以下特征：</p>
+
+      <p>• <strong>AI Agent 主导</strong>：60% 的项目集中在智能体（Agent）领域，涵盖金融交易、终端开发、视频生成等垂直场景，显示 Agent 技术正从概念验证走向工程落地。</p>
+      <p>• <strong>Python 生态强势</strong>：6 个项目以 Python 为主语言，仍是 Agent 开发与自动化工具的首选；Rust 在终端工具与高性能 Agent 框架中占据 2 席。</p>
+      <p>• <strong>多智能体协作升温</strong>：多个项目（如 TradingAgents、Ruflo）明确采用 Multi-Agent 架构，强调角色分工与流程编排，而非单一模型调用。</p>
+
+      <hr>
+
+      <h3>2. 热点项目总览</h3>
+
+      <p>| 项目 | 语言 | 简介 | Trending 排名 | 新增 Star | 来源 |</p>
+      <p>|------|------|------|---------------|-----------|------|</p>
+      <p>| [warpdotdev/warp](<a href="https://github.com/warpdotdev/warp)">https://github.com/warpdotdev/warp)</a> | Rust | Agentic 开发环境，基于终端的智能化工作流 | <strong>第 1 位</strong> | +3 | GitHub Trending |</p>
+      <p>| [TauricResearch/TradingAgents](<a href="https://github.com/TauricResearch/TradingAgents)">https://github.com/TauricResearch/TradingAgents)</a> | Python | 多智能体 LLM 金融交易框架 | <strong>第 2 位</strong> | +10 | GitHub Trending、GitHub Search |</p>
+      <p>| [mattpocock/skills](<a href="https://github.com/mattpocock/skills)">https://github.com/mattpocock/skills)</a> | Shell | 面向 Claude 的工程师技能库，强调工程化实践 | <strong>第 3 位</strong> | +9 | GitHub Trending |</p>
+      <p>| [ruvnet/ruflo](<a href="https://github.com/ruvnet/ruflo)">https://github.com/ruvnet/ruflo)</a> | TypeScript | Claude Code 的多智能体编排平台，支持 Swarm 架构 | <strong>第 4 位</strong> | +8 | GitHub Trending |</p>
+      <p>| [soxoj/maigret](<a href="https://github.com/soxoj/maigret)">https://github.com/soxoj/maigret)</a> | Python | 通过用户名在 3000+ 网站收集用户档案的 OSINT 工具 | <strong>第 5 位</strong> | 0 | GitHub Trending |</p>
+      <p>| [1jehuang/jcode](<a href="https://github.com/1jehuang/jcode)">https://github.com/1jehuang/jcode)</a> | Rust | 下一代编码智能体工具，支持多会话工作流 | <strong>第 6 位</strong> | +2 | GitHub Trending |</p>
+      <p>| [AIDC-AI/Pixelle-Video](<a href="https://github.com/AIDC-AI/Pixelle-Video)">https://github.com/AIDC-AI/Pixelle-Video)</a> | Python | AI 全自动短视频引擎，支持文案、配图、视频生成 | <strong>第 7 位</strong> | +2 | GitHub Trending |</p>
+      <p>| [ComposioHQ/awesome-codex-skills](<a href="https://github.com/ComposioHQ/awesome-codex-skills)">https://github.com/ComposioHQ/awesome-codex-skills)</a> | Python | Codex CLI/API 的实用技能合集 | <strong>第 9 位</strong> | +1 | GitHub Trending |</p>
+      <p>| [D4Vinci/Scrapling](<a href="https://github.com/D4Vinci/Scrapling)">https://github.com/D4Vinci/Scrapling)</a> | Python | 自适应 Web 爬虫框架，支持 AI 驱动提取 | <strong>第 10 位</strong> | +5 | GitHub Trending、GitHub Search |</p>
+      <p>| [NousResearch/hermes-agent](<a href="https://github.com/NousResearch/hermes-agent)">https://github.com/NousResearch/hermes-agent)</a> | Python | 具备内置学习循环的自我改进型 AI 智能体 | 未上榜 | +7 | GitHub Search |</p>
+
+      <hr>
+
+      <h3>3. 重点项目分析</h3>
+
+      <p><strong>[warpdotdev/warp](<a href="https://github.com/warpdotdev/warp)">https://github.com/warpdotdev/warp)</a></strong></p>
+      <p>本周 GitHub Trending <strong>排名第 1</strong>，由 OpenAI 赞助开源。该项目将传统终端升级为 Agentic 开发环境，支持基于 GPT 模型的智能工作流管理。采用 AGPL-3.0 许可证，质量评分 100/100。作为基础设施级工具，其意义在于将 AI Agent 能力嵌入开发者最常用的终端场景，而非作为独立应用存在。</p>
+
+      <p><strong>[TauricResearch/TradingAgents](<a href="https://github.com/TauricResearch/TradingAgents)">https://github.com/TauricResearch/TradingAgents)</a></strong></p>
+      <p>本周 <strong>新增 Star 最多（+10）</strong>，Trending 排名第 2。基于 LangGraph 构建的金融交易多智能体框架，定义了 Research Manager、Trader、Portfolio Manager 等结构化角色。支持 DeepSeek、Qwen、Azure 等多种模型接入，并提供 Docker 部署方案。项目采用 Apache-2.0 许可证，代码质量高，适合作为复杂 Agent 系统的架构参考。</p>
+
+      <p><strong>[mattpocock/skills](<a href="https://github.com/mattpocock/skills)">https://github.com/mattpocock/skills)</a></strong></p>
+      <p>Trending 排名第 3，本周新增 Star 9。这是一个面向 Claude 的&quot;技能库&quot;（Skills），强调&quot;Real Engineering&quot;而非&quot;Vibe Coding&quot;。通过 GSD、BMAD 等方法论，将复杂软件开发流程拆解为可复用的 Agent 指令集。作为工程化提示工程的实践合集，对构建可靠的生产级 Agent 工作流具有直接参考价值。</p>
+
+      <p><strong>[ruvnet/ruflo](<a href="https://github.com/ruvnet/ruflo)">https://github.com/ruvnet/ruflo)</a></strong></p>
+      <p>Trending 排名第 4，基于 TypeScript 的 Claude Code 多智能体编排平台。核心能力是协调 100+ 专业化 Agent 跨机器、跨团队运行，支持自学习记忆与联邦通信。与 Warp 类似，该项目专注于增强现有开发工具（Claude Code）的协作能力，而非替换编辑器，体现了&quot;Agent 即基础设施&quot;的趋势。</p>
+
+      <p><strong>[soxoj/maigret](<a href="https://github.com/soxoj/maigret)">https://github.com/soxoj/maigret)</a></strong></p>
+      <p>Trending 排名第 5，长期维护的 OSINT（开源情报）工具，支持通过单一用户名检索 3000+ 站点的用户档案。本周虽无新增 Star，但持续进入 Trending 反映网络安全与隐私领域的持续关注。项目采用 MIT 许可证，适合作为数据采集与反爬虫对抗的实战学习案例。</p>
+
+      <hr>
+
+      <h3>4. 最适合用户学习的项目</h3>
+
+      <p>根据您的技术栈（Java、Python、Agent 开发、开发者工具）与学习目标（提升开发效率、CLI 与自动化工具），推荐以下项目：</p>
+
+      <p><strong>入门首选：[mattpocock/skills](<a href="https://github.com/mattpocock/skills)">https://github.com/mattpocock/skills)</a></strong></p>
+      <p>若您关注 Agent 工程化实践，该项目提供了可直接应用于 Claude Code 的技能模板，涵盖需求分析、代码审查等场景，无需复杂环境配置即可学习&quot;如何与 AI 协作开发&quot;而非简单提示。</p>
+
+      <p><strong>进阶实践：[TauricResearch/TradingAgents](<a href="https://github.com/TauricResearch/TradingAgents)">https://github.com/TauricResearch/TradingAgents)</a></strong></p>
+      <p>对于 Python 开发者，这是研究多智能体架构的优质案例。项目展示了如何使用 LangGraph 实现状态持久化、角色分工与决策日志，适合学习 Agent 状态机设计与容错机制。</p>
+
+      <p><strong>基础设施：[warpdotdev/warp](<a href="https://github.com/warpdotdev/warp)">https://github.com/warpdotdev/warp)</a></strong></p>
+      <p>若您关注 Rust 与开发者工具，可研究其如何将 LLM 集成到终端输入输出流中，理解 Agent 与 Shell 环境的交互边界。注意该项目采用 AGPL-3.0 许可证，二次开发需遵守开源协议。</p>
+
+      <p><strong>风险提示：[ComposioHQ/awesome-codex-skills](<a href="https://github.com/ComposioHQ/awesome-codex-skills)">https://github.com/ComposioHQ/awesome-codex-skills)</a></strong></p>
+      <p>该项目虽进入 Trending 第 9，但<strong>未识别到开源许可证</strong>（security_flags 提示），复用代码前需人工确认授权条款，建议仅作为技术思路参考。</p>
+
+      <hr>
+
+      <h3>5. 本周结论</h3>
+
+      <p>本周开源社区呈现 <strong>&quot;Agent 工程化&quot;</strong> 的明确转向：从单一聊天机器人向多智能体协作系统演进，且深度集成到终端、IDE、金融系统等具体工作流中。Python 凭借丰富的 LLM 框架生态仍是 Agent 开发的主流语言，但 Rust 在高性能终端工具与系统级 Agent 中开始占据一席之地。</p>
+
+      <p>建议关注 <strong>Multi-Agent 编排</strong>（如 Ruflo、TradingAgents）与 <strong>Agent 技能标准化</strong>（如 mattpocock/skills）两大方向，前者解决复杂任务分解问题，后者解决 Agent 能力复用问题，均为当前工程落地的关键瓶颈。</p>
+
+      <h2>附录：项目链接与来源补全</h2>
+
+      <p>• warpdotdev/warp；[<a href="https://github.com/warpdotdev/warp](https://github.com/warpdotdev/warp)；来源：GitHub">https://github.com/warpdotdev/warp](https://github.com/warpdotdev/warp)；来源：GitHub</a> Trending；Trending 排名：1</p>
+      <p>• TauricResearch/TradingAgents；[<a href="https://github.com/TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents)；来源：GitHub">https://github.com/TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents)；来源：GitHub</a> Search + GitHub Trending；Trending 排名：2</p>
+      <p>• mattpocock/skills；[<a href="https://github.com/mattpocock/skills](https://github.com/mattpocock/skills)；来源：GitHub">https://github.com/mattpocock/skills](https://github.com/mattpocock/skills)；来源：GitHub</a> Trending；Trending 排名：3</p>
+      <p>• ruvnet/ruflo；[<a href="https://github.com/ruvnet/ruflo](https://github.com/ruvnet/ruflo)；来源：GitHub">https://github.com/ruvnet/ruflo](https://github.com/ruvnet/ruflo)；来源：GitHub</a> Trending；Trending 排名：4</p>
+      <p>• soxoj/maigret；[<a href="https://github.com/soxoj/maigret](https://github.com/soxoj/maigret)；来源：GitHub">https://github.com/soxoj/maigret](https://github.com/soxoj/maigret)；来源：GitHub</a> Trending；Trending 排名：5</p>
+      <p>• 1jehuang/jcode；[<a href="https://github.com/1jehuang/jcode](https://github.com/1jehuang/jcode)；来源：GitHub">https://github.com/1jehuang/jcode](https://github.com/1jehuang/jcode)；来源：GitHub</a> Trending；Trending 排名：6</p>
+      <p>• AIDC-AI/Pixelle-Video；[<a href="https://github.com/AIDC-AI/Pixelle-Video](https://github.com/AIDC-AI/Pixelle-Video)；来源：GitHub">https://github.com/AIDC-AI/Pixelle-Video](https://github.com/AIDC-AI/Pixelle-Video)；来源：GitHub</a> Trending；Trending 排名：7</p>
+      <p>• D4Vinci/Scrapling；[<a href="https://github.com/D4Vinci/Scrapling](https://github.com/D4Vinci/Scrapling)；来源：GitHub">https://github.com/D4Vinci/Scrapling](https://github.com/D4Vinci/Scrapling)；来源：GitHub</a> Search + GitHub Trending；Trending 排名：10</p>
+      <p>• ComposioHQ/awesome-codex-skills；[<a href="https://github.com/ComposioHQ/awesome-codex-skills](https://github.com/ComposioHQ/awesome-codex-skills)；来源：GitHub">https://github.com/ComposioHQ/awesome-codex-skills](https://github.com/ComposioHQ/awesome-codex-skills)；来源：GitHub</a> Trending；Trending 排名：9；风险提示：未识别到许可证，复用代码前需要人工确认授权。</p>
+      <p>• NousResearch/hermes-agent；[<a href="https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)；来源：GitHub">https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)；来源：GitHub</a> Search</p>
+    </article>
+  </main>
+</body>
+</html>

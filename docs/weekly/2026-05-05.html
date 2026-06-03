@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GitHub 周报 2026-05-05</title>
+  <style>
+    body { margin: 0; background: #f6f7f9; color: #1f2933; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height: 1.7; }
+    main { max-width: 960px; margin: 0 auto; padding: 32px 20px 56px; }
+    article { background: #fff; border: 1px solid #d8dee8; padding: 28px; }
+    h1, h2, h3, h4 { line-height: 1.3; }
+    a { color: #0969da; }
+    code { background: #eef2f7; padding: 2px 5px; }
+    hr { border: 0; border-top: 1px solid #d8dee8; margin: 24px 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <article>
+      <p><strong>GitHub 每周热点项目周报</strong></p>
+      <p>*统计周期：2026-04-28 至 2026-05-05*</p>
+
+      <hr>
+
+      <h3>1. 本周总体趋势</h3>
+
+      <p>本周 GitHub 生态呈现明显的 <strong>AI Agent 技能化与编排化</strong>趋势。在入选的 10 个活跃项目中，<strong>AI Agent</strong> 类别占据 5 席，<strong>LLM Tooling</strong> 占据 3 席，显示开发者正从单一模型调用转向多智能体协作与自动化工作流构建。</p>
+
+      <p><strong>Python</strong> 以 6 个项目的优势成为本周最活跃的语言，<strong>TypeScript、Go、Java、Shell</strong> 各有 1 个项目入围。本周入选项目累计新增 Star <strong>12,968</strong>，其中 7 个项目进入 GitHub Trending 周榜前 7 名，热度信号强劲。</p>
+
+      <p>值得关注的是，<strong>Agent Skills</strong>（智能体技能库）概念持续升温，多个项目聚焦于为 Claude、Codex 等编码代理提供可复用的工具链与编排能力。</p>
+
+      <hr>
+
+      <h3>2. 热点项目总览</h3>
+
+      <p>| 项目名称 | 语言 | 分类 | Trending 排名 | 本周新增 Star |</p>
+      <p>|---------|------|------|--------------|--------------|</p>
+      <p>| [mattpocock/skills](<a href="https://github.com/mattpocock/skills)">https://github.com/mattpocock/skills)</a> | Shell | LLM Tooling | <strong>第 1 位</strong> | +2,558 |</p>
+      <p>| [TauricResearch/TradingAgents](<a href="https://github.com/TauricResearch/TradingAgents)">https://github.com/TauricResearch/TradingAgents)</a> | Python | AI Agent | <strong>第 2 位</strong> | +2,908 |</p>
+      <p>| [soxoj/maigret](<a href="https://github.com/soxoj/maigret)">https://github.com/soxoj/maigret)</a> | Python | Developer Tools | <strong>第 3 位</strong> | +1,311 |</p>
+      <p>| [ComposioHQ/awesome-codex-skills](<a href="https://github.com/ComposioHQ/awesome-codex-skills)">https://github.com/ComposioHQ/awesome-codex-skills)</a> | Python | AI Agent | <strong>第 4 位</strong> | +454 |</p>
+      <p>| [ruvnet/ruflo](<a href="https://github.com/ruvnet/ruflo)">https://github.com/ruvnet/ruflo)</a> | TypeScript | AI Agent | <strong>第 5 位</strong> | +3,031 |</p>
+      <p>| [Alishahryar1/free-claude-code](<a href="https://github.com/Alishahryar1/free-claude-code)">https://github.com/Alishahryar1/free-claude-code)</a> | Python | LLM Tooling | <strong>第 6 位</strong> | +602 |</p>
+      <p>| [CJackHwang/ds2api](<a href="https://github.com/CJackHwang/ds2api)">https://github.com/CJackHwang/ds2api)</a> | Go | LLM Tooling | <strong>第 7 位</strong> | +180 |</p>
+      <p>| [NousResearch/hermes-agent](<a href="https://github.com/NousResearch/hermes-agent)">https://github.com/NousResearch/hermes-agent)</a> | Python | AI Agent | - | +1,909 |</p>
+      <p>| [run-llama/llama_index](<a href="https://github.com/run-llama/llama_index)">https://github.com/run-llama/llama_index)</a> | Python | AI Agent | - | +14 |</p>
+      <p>| [codecentric/spring-boot-admin](<a href="https://github.com/codecentric/spring-boot-admin)">https://github.com/codecentric/spring-boot-admin)</a> | Java | Other | - | +1 |</p>
+
+      <p>*数据来源：GitHub Trending 周榜、GitHub Search 多维度检索*</p>
+
+      <hr>
+
+      <h3>3. 重点项目分析</h3>
+
+      <p><strong>mattpocock/skills</strong></p>
+      <p>本周 GitHub Trending 周榜第 1 位，新增 Star 2,558。该项目是知名 TypeScript 教育者 Matt Pocock 开源的 <strong>Claude Code 技能库</strong>，直接来自其 <code>.claude</code> 工作目录。与&quot;vibe coding&quot;不同，该项目强调&quot;Real Engineering&quot;，提供 GSD、BMAD、Spec-Kit 等结构化方法论，帮助开发者通过代理完成真正的应用开发而非简单的代码生成。对于希望提升 AI 编码代理工程化能力的开发者具有直接参考价值。</p>
+
+      <p><strong>TauricResearch/TradingAgents</strong></p>
+      <p>位列 Trending 周榜第 2 位，新增 Star 2,908。这是一个基于多智能体 LLM 的金融交易框架，采用 Python 开发。最新 v0.2.4 版本引入了结构化输出代理（Research Manager、Trader、Portfolio Manager）、LangGraph 检查点恢复机制，并支持 DeepSeek、Qwen、GLM、Azure 等多家模型提供商。项目通过 Docker 部署，适合对量化交易与 AI Agent 编排感兴趣的开发者研究。</p>
+
+      <p><strong>ruvnet/ruflo</strong></p>
+      <p>本周新增 Star 最高（+3,031），Trending 周榜第 5 位。这是一个面向 Claude 的 <strong>TypeScript 多智能体编排平台</strong>，支持部署 100+ 个专业化的 AI 代理集群。核心特性包括自学习群体智能、RAG 集成、联邦通信机制以及企业级安全架构。项目与 Claude Code / Codex 原生集成，使代理不仅能独立运行，更能实现跨机器、跨团队的协作，代表了当前 Agent 基础设施向企业级编排演进的方向。</p>
+
+      <p><strong>soxoj/maigret</strong></p>
+      <p>Trending 周榜第 3 位，新增 Star 1,311。这是一款强大的 <strong>OSINT（开源情报）工具</strong>，仅通过用户名即可在 3,000+ 个网站上收集个人档案信息，无需 API 密钥。项目采用 Python 开发，适用于网络安全、数字取证和渗透测试场景。其话题标签涵盖 blueteam、redteam、cybersecurity 等，显示其在安全社区的广泛应用。</p>
+
+      <p><strong>ComposioHQ/awesome-codex-skills</strong></p>
+      <p>Trending 周榜第 4 位，收录实用的 Codex 技能用于自动化工作流。项目展示如何让 Codex 超越文本生成，实现发送邮件、创建 Issue、发布到 Slack 等跨 1,000+ 应用的操作。⚠️ <strong>风险提示</strong>：该项目目前<strong>未识别到开源许可证</strong>，在复用代码前需人工确认授权条款，避免潜在的法律风险。</p>
+
+      <p><strong>NousResearch/hermes-agent</strong></p>
+      <p>虽未进入本周 Trending 前 7，但凭借 133,305 累计 Star 和 1,909 周新增 Star 保持高关注度。这是 Nous Research 构建的<strong>自改进型 AI 代理</strong>，具备内置学习循环：能从经验中创建技能、在使用过程中持续优化、自动持久化知识，并建立跨会话的用户认知模型。对于研究 Agent 长期记忆与自我进化机制的开发者具有重要参考意义。</p>
+
+      <hr>
+
+      <h3>4. 最适合用户学习的项目</h3>
+
+      <p>根据您关注的 <strong>Java 后端、Python 工具、Agent 开发、开发者工具</strong> 方向，本周推荐以下学习路径：</p>
+
+      <p><strong>对于 Agent 开发者</strong>：</p>
+      <p>优先研究 <strong>[mattpocock/skills](<a href="https://github.com/mattpocock/skills)">https://github.com/mattpocock/skills)</a></strong>（Shell）和 <strong>[ruvnet/ruflo](<a href="https://github.com/ruvnet/ruflo)">https://github.com/ruvnet/ruflo)</a></strong>（TypeScript）。前者提供了工程化使用 Claude Code 的具体技能模板，后者展示了大规模多智能体系统的架构设计，两者结合可掌握从单代理技能到多代理编排的完整技术栈。</p>
+
+      <p><strong>对于 Python 工具开发者</strong>：</p>
+      <p><strong>[soxoj/maigret](<a href="https://github.com/soxoj/maigret)">https://github.com/soxoj/maigret)</a></strong> 是研究异步爬虫、数据聚合和 CLI 工具设计的优秀案例，其支持 3,000+ 站点的插件化架构值得深入学习。若对金融场景感兴趣，<strong>[TauricResearch/TradingAgents](<a href="https://github.com/TauricResearch/TradingAgents)">https://github.com/TauricResearch/TradingAgents)</a></strong> 展示了如何用 LangGraph 构建复杂的多代理决策工作流。</p>
+
+      <p><strong>对于 Java 后端工程师</strong>：</p>
+      <p><strong>[codecentric/spring-boot-admin](<a href="https://github.com/codecentric/spring-boot-admin)">https://github.com/codecentric/spring-boot-admin)</a></strong> 本周仍有活跃更新，作为 Spring Boot 生态的监控管理工具，其 Actuator 端点的聚合展示和微服务监控方案是企业级 Java 开发的实用参考。</p>
+
+      <hr>
+
+      <h3>5. 本周结论</h3>
+
+      <p>本周 GitHub 热点明确显示：<strong>AI Agent 正从概念验证走向工程化落地</strong>。开发者社区的关注焦点已从&quot;如何调用大模型&quot;转向&quot;如何编排多代理协作&quot;（如 ruflo、TradingAgents）和&quot;如何沉淀可复用的代理技能&quot;（如 skills、awesome-codex-skills）。</p>
+
+      <p><strong>Python</strong> 凭借其在 AI 生态的统治地位成为绝对主流语言，而 <strong>TypeScript</strong> 在 Agent 基础设施层（编排、工作流）的表现同样亮眼。建议开发者重点关注 <strong>Agent Skills</strong> 的标准化与 <strong>MCP（Model Context Protocol）</strong> 相关的工具集成模式，这可能是下一代开发者工具的核心交互界面。</p>
+
+      <p>同时需警惕无明确许可证的开源项目（如 awesome-codex-skills），在企业场景中引用前务必完成合规审查。</p>
+
+      <h2>附录：项目链接与来源补全</h2>
+
+      <p>• mattpocock/skills；[<a href="https://github.com/mattpocock/skills](https://github.com/mattpocock/skills)；来源：GitHub">https://github.com/mattpocock/skills](https://github.com/mattpocock/skills)；来源：GitHub</a> Trending；Trending 排名：1</p>
+      <p>• TauricResearch/TradingAgents；[<a href="https://github.com/TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents)；来源：GitHub">https://github.com/TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents)；来源：GitHub</a> Search + GitHub Trending；Trending 排名：2</p>
+      <p>• soxoj/maigret；[<a href="https://github.com/soxoj/maigret](https://github.com/soxoj/maigret)；来源：GitHub">https://github.com/soxoj/maigret](https://github.com/soxoj/maigret)；来源：GitHub</a> Trending；Trending 排名：3</p>
+      <p>• ComposioHQ/awesome-codex-skills；[<a href="https://github.com/ComposioHQ/awesome-codex-skills](https://github.com/ComposioHQ/awesome-codex-skills)；来源：GitHub">https://github.com/ComposioHQ/awesome-codex-skills](https://github.com/ComposioHQ/awesome-codex-skills)；来源：GitHub</a> Trending；Trending 排名：4；风险提示：未识别到许可证，复用代码前需要人工确认授权。</p>
+      <p>• ruvnet/ruflo；[<a href="https://github.com/ruvnet/ruflo](https://github.com/ruvnet/ruflo)；来源：GitHub">https://github.com/ruvnet/ruflo](https://github.com/ruvnet/ruflo)；来源：GitHub</a> Trending；Trending 排名：5</p>
+      <p>• Alishahryar1/free-claude-code；[<a href="https://github.com/Alishahryar1/free-claude-code](https://github.com/Alishahryar1/free-claude-code)；来源：GitHub">https://github.com/Alishahryar1/free-claude-code](https://github.com/Alishahryar1/free-claude-code)；来源：GitHub</a> Trending；Trending 排名：6</p>
+      <p>• CJackHwang/ds2api；[<a href="https://github.com/CJackHwang/ds2api](https://github.com/CJackHwang/ds2api)；来源：GitHub">https://github.com/CJackHwang/ds2api](https://github.com/CJackHwang/ds2api)；来源：GitHub</a> Trending；Trending 排名：7</p>
+      <p>• NousResearch/hermes-agent；[<a href="https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)；来源：GitHub">https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)；来源：GitHub</a> Search</p>
+      <p>• run-llama/llama_index；[<a href="https://github.com/run-llama/llama_index](https://github.com/run-llama/llama_index)；来源：GitHub">https://github.com/run-llama/llama_index](https://github.com/run-llama/llama_index)；来源：GitHub</a> Search</p>
+      <p>• codecentric/spring-boot-admin；[<a href="https://github.com/codecentric/spring-boot-admin](https://github.com/codecentric/spring-boot-admin)；来源：GitHub">https://github.com/codecentric/spring-boot-admin](https://github.com/codecentric/spring-boot-admin)；来源：GitHub</a> Search</p>
+    </article>
+  </main>
+</body>
+</html>

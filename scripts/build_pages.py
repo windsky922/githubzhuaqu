@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import html
+import re
 import sqlite3
 import sys
 from datetime import UTC, datetime
@@ -24,8 +26,12 @@ def build_pages(root: Path = ROOT) -> list[Path]:
     written = []
     for report in reports:
         target = weekly_dir / report.name
-        target.write_text(report.read_text(encoding="utf-8"), encoding="utf-8")
+        markdown_text = report.read_text(encoding="utf-8")
+        target.write_text(markdown_text, encoding="utf-8")
         written.append(target)
+        html_target = weekly_dir / _page_name(report)
+        html_target.write_text(_weekly_html_content(markdown_text, report.stem), encoding="utf-8")
+        written.append(html_target)
 
     index = root / "docs" / "index.md"
     index.write_text(_index_content(root, reports), encoding="utf-8")
@@ -166,6 +172,62 @@ def _report_line(root: Path, report: Path) -> str:
 
 def _page_name(markdown_path: Path) -> str:
     return markdown_path.with_suffix(".html").name
+
+
+def _weekly_html_content(markdown_text: str, title: str) -> str:
+    body = "\n".join(_markdown_line_to_html(line) for line in markdown_text.splitlines())
+    return f"""<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GitHub 周报 {html.escape(title)}</title>
+  <style>
+    body {{ margin: 0; background: #f6f7f9; color: #1f2933; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height: 1.7; }}
+    main {{ max-width: 960px; margin: 0 auto; padding: 32px 20px 56px; }}
+    article {{ background: #fff; border: 1px solid #d8dee8; padding: 28px; }}
+    h1, h2, h3, h4 {{ line-height: 1.3; }}
+    a {{ color: #0969da; }}
+    code {{ background: #eef2f7; padding: 2px 5px; }}
+    hr {{ border: 0; border-top: 1px solid #d8dee8; margin: 24px 0; }}
+  </style>
+</head>
+<body>
+  <main>
+    <article>
+{body}
+    </article>
+  </main>
+</body>
+</html>
+"""
+
+
+def _markdown_line_to_html(line: str) -> str:
+    stripped = line.strip()
+    if not stripped:
+        return ""
+    if stripped == "---":
+        return "      <hr>"
+    heading_match = re.match(r"^(#{1,4})\s+(.+)$", stripped)
+    if heading_match:
+        level = len(heading_match.group(1))
+        return f"      <h{level}>{_inline_markdown_to_html(heading_match.group(2))}</h{level}>"
+    if stripped.startswith("- "):
+        return f"      <p>• {_inline_markdown_to_html(stripped[2:])}</p>"
+    return f"      <p>{_inline_markdown_to_html(stripped)}</p>"
+
+
+def _inline_markdown_to_html(text: str) -> str:
+    escaped = html.escape(text)
+    escaped = re.sub(r"`([^`]+)`", r"<code>\1</code>", escaped)
+    escaped = re.sub(r"\*\*([^*]+)\*\*", r"<strong>\1</strong>", escaped)
+    escaped = re.sub(
+        r"(https?://[^\s<]+)",
+        lambda match: f'<a href="{match.group(1)}">{match.group(1)}</a>',
+        escaped,
+    )
+    return escaped
 
 
 def _run_summary(root: Path, run_date: str) -> dict:

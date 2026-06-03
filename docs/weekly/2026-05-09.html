@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GitHub 周报 2026-05-09</title>
+  <style>
+    body { margin: 0; background: #f6f7f9; color: #1f2933; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height: 1.7; }
+    main { max-width: 960px; margin: 0 auto; padding: 32px 20px 56px; }
+    article { background: #fff; border: 1px solid #d8dee8; padding: 28px; }
+    h1, h2, h3, h4 { line-height: 1.3; }
+    a { color: #0969da; }
+    code { background: #eef2f7; padding: 2px 5px; }
+    hr { border: 0; border-top: 1px solid #d8dee8; margin: 24px 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <article>
+      <p><strong>GitHub 每周热点项目周报</strong></p>
+      <p>统计周期：2026-05-02 至 2026-05-09</p>
+
+      <hr>
+
+      <h2>1. 本周总体趋势</h2>
+
+      <p>本周 AI Agent 方向持续主导开源社区热度，在入选的 10 个项目中占据 6 席。语言分布上，<strong>Python</strong> 以 5 个项目领先，<strong>TypeScript</strong> 次之（2 个），另有 <strong>Rust</strong>、<strong>Ruby</strong> 和 <strong>Shell</strong> 各 1 个。</p>
+
+      <p>本期项目主要来自 <strong>GitHub Trending 周榜</strong>（8 个项目进入 Top 10），另有 2 个通过搜索筛选入围。累计新增 Star 达 166 个，其中 <code>NousResearch/hermes-agent</code> 以单周新增 64 Star 领跑。值得注意的是，本周榜单中 Agent 框架呈现多样化趋势，涵盖金融研究、代码生成、多智能体编排及教学实践等多个垂直场景。</p>
+
+      <hr>
+
+      <h2>2. 热点项目总览</h2>
+
+      <p>| 排名/来源 | 项目名称 | 语言 | Star 总数 | 本周新增 | 项目链接 |</p>
+      <p>|:---|:---|:---|---:|---:|:---|</p>
+      <p>| Trending #2 | ruvnet/ruflo | TypeScript | 47,470 | +16 | [<a href="https://github.com/ruvnet/ruflo](https://github.com/ruvnet/ruflo)">https://github.com/ruvnet/ruflo](https://github.com/ruvnet/ruflo)</a> |</p>
+      <p>| Trending #4 | docusealco/docuseal | Ruby | 16,012 | +1 | [<a href="https://github.com/docusealco/docuseal](https://github.com/docusealco/docuseal)">https://github.com/docusealco/docuseal](https://github.com/docusealco/docuseal)</a> |</p>
+      <p>| Trending #5 | virattt/dexter | TypeScript | 24,988 | 0 | [<a href="https://github.com/virattt/dexter](https://github.com/virattt/dexter)">https://github.com/virattt/dexter](https://github.com/virattt/dexter)</a> |</p>
+      <p>| Trending #6 | soxoj/maigret | Python | 26,908 | +9 | [<a href="https://github.com/soxoj/maigret](https://github.com/soxoj/maigret)">https://github.com/soxoj/maigret](https://github.com/soxoj/maigret)</a> |</p>
+      <p>| Trending #7 | 1jehuang/jcode | Rust | 5,260 | +1 | [<a href="https://github.com/1jehuang/jcode](https://github.com/1jehuang/jcode)">https://github.com/1jehuang/jcode](https://github.com/1jehuang/jcode)</a> |</p>
+      <p>| Trending #8 | cocoindex-io/cocoindex | Python | 9,262 | +2 | [<a href="https://github.com/cocoindex-io/cocoindex](https://github.com/cocoindex-io/cocoindex)">https://github.com/cocoindex-io/cocoindex](https://github.com/cocoindex-io/cocoindex)</a> |</p>
+      <p>| Trending #9 | AIDC-AI/Pixelle-Video | Python | 14,078 | +7 | [<a href="https://github.com/AIDC-AI/Pixelle-Video](https://github.com/AIDC-AI/Pixelle-Video)">https://github.com/AIDC-AI/Pixelle-Video](https://github.com/AIDC-AI/Pixelle-Video)</a> |</p>
+      <p>| Search | NousResearch/hermes-agent | Python | 140,438 | +64 | [<a href="https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)">https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)</a> |</p>
+      <p>| Trending #10 | mattpocock/skills | Shell | 67,634 | +23 | [<a href="https://github.com/mattpocock/skills](https://github.com/mattpocock/skills)">https://github.com/mattpocock/skills](https://github.com/mattpocock/skills)</a> |</p>
+      <p>| Search | datawhalechina/hello-agents | Python | 45,494 | +43 | [<a href="https://github.com/datawhalechina/hello-agents](https://github.com/datawhalechina/hello-agents)">https://github.com/datawhalechina/hello-agents](https://github.com/datawhalechina/hello-agents)</a> |</p>
+
+      <hr>
+
+      <h2>3. 重点项目分析</h2>
+
+      <p><strong>ruvnet/ruflo</strong>（Trending #2）</p>
+      <p>该项目是一个面向 Claude 的多智能体编排平台，支持部署 100+ 专业化 AI Agent 集群，具备自学习记忆、联邦通信和企业级安全特性。基于 TypeScript 构建，深度集成 Claude Code 与 Codex，适用于需要跨机器、跨团队协作的复杂工作流场景。项目质量评分为 100（高成熟度），采用 MIT 许可证，近期新增 16 Star 保持热度。</p>
+
+      <p><strong>NousResearch/hermes-agent</strong>（新增 Star 最高：+64）</p>
+      <p>由 Nous Research 开发的自改进型 AI Agent，核心亮点是内置学习循环：能够从经验中创建技能、在使用中持续优化、持久化知识并跨会话构建用户模型。项目质量评级为&quot;高&quot;，但仓库简介较为简略。作为本周增长最快的项目，其 140K+ Star 的社区基础显示出较强的生态影响力。</p>
+
+      <p><strong>datawhalechina/hello-agents</strong>（新增 Star：+43）</p>
+      <p>中文社区推出的《从零开始构建智能体》教程项目，系统性地覆盖智能体从基础理论到工程实践的全流程。针对 2025 年&quot;Agent 元年&quot;背景下系统性教程匮乏的现状，提供理论与实战并重的学习路径。项目质量评分 100，适合中文开发者入门 Agent 开发。</p>
+
+      <p><strong>virattt/dexter</strong>（Trending #5）</p>
+      <p>专注于金融研究的自主型 Agent，通过任务规划、自我反思和实时市场数据分析执行深度研究。项目定位为&quot;专为金融研究打造的 Claude Code&quot;。<strong>风险提示</strong>：该项目未识别到开源许可证（security_flags），在复用代码前需人工确认授权条款。质量评分为 80，主题标签较少。</p>
+
+      <p><strong>mattpocock/skills</strong>（Trending #10）</p>
+      <p>知名 TypeScript 教育者 Matt Pocock 分享的 Claude Code 技能集，强调&quot;真实工程而非氛围编程&quot;（real engineering, not vibe coding）。包含 GSD、BMAD 和 Spec-Kit 等工程方法论实践，本周新增 23 Star，适合希望提升 AI 辅助编码效率的开发者参考。</p>
+
+      <p><strong>soxoj/maigret</strong>（Trending #6）</p>
+      <p>成熟的 OSINT（开源情报）工具，仅通过用户名即可在 3000+ 网站收集个人档案信息，无需 API 密钥。适用于网络安全、数字取证和蓝队防御场景。Python 实现，质量评分 100，安全等级为低，本周新增 9 Star。</p>
+
+      <hr>
+
+      <h2>4. 最适合用户学习的项目</h2>
+
+      <p>基于您关注的 <strong>Python 工具开发</strong>、<strong>Agent 工程</strong>与<strong>开发者工具</strong>方向，本周推荐以下学习资源：</p>
+
+      <p>1. <strong>datawhalechina/hello-agents</strong></p>
+      <p>中文语境下最系统的 Agent 入门教程，涵盖原理与实战，适合建立完整的知识体系。</p>
+
+      <p>2. <strong>mattpocock/skills</strong></p>
+      <p>直接可用的 Claude Code 技能配置，包含大量工程实践技巧，可立即应用于日常开发 workflow。</p>
+
+      <p>3. <strong>soxoj/maigret</strong></p>
+      <p>高质量的 Python CLI 工具范例，代码结构清晰，适合学习如何构建大规模网络爬虫与数据聚合应用。</p>
+
+      <hr>
+
+      <h2>5. 本周结论</h2>
+
+      <p>本周开源社区再次验证 AI Agent 从概念验证向工程化落地的转变：一方面，<code>ruflo</code>、<code>hermes-agent</code> 等框架强调多 Agent 协作与长期记忆能力；另一方面，<code>hello-agents</code> 等教育项目的火热反映出开发者对系统性学习资源的迫切需求。</p>
+
+      <p><strong>技术趋势</strong>：TypeScript 在 Agent 编排层（Orchestration）占据优势，Python 在算法实现与工具链中保持统治地位，Rust 则在性能敏感的编码 Agent（如 <code>jcode</code>）中崭露头角。</p>
+
+      <p><strong>风险提示</strong>：<code>dexter</code> 等项目存在许可证信息缺失问题，建议在商业使用前核实授权条款。总体而言，Agent 生态正从单点工具向&quot;多智能体协作基础设施&quot;演进，值得持续关注。</p>
+
+      <h2>附录：项目链接与来源补全</h2>
+
+      <p>• NousResearch/hermes-agent；[<a href="https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)；来源：GitHub">https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)；来源：GitHub</a> Search</p>
+      <p>• datawhalechina/hello-agents；[<a href="https://github.com/datawhalechina/hello-agents](https://github.com/datawhalechina/hello-agents)；来源：GitHub">https://github.com/datawhalechina/hello-agents](https://github.com/datawhalechina/hello-agents)；来源：GitHub</a> Search</p>
+    </article>
+  </main>
+</body>
+</html>
