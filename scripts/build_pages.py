@@ -222,6 +222,16 @@ def _markdown_line_to_html(line: str) -> str:
 
 
 def _inline_markdown_to_html(text: str) -> str:
+    text = html.unescape(text)
+    text = re.sub(r"<(?:img|source)\b[^>]*(?:>|$)", "", text, flags=re.IGNORECASE)
+    text = re.sub(
+        r'<a\s+[^>]*href=["\'](https?://[^"\']+)["\'][^>]*>(.*?)</a>',
+        lambda match: f"[{re.sub(r'<[^>]+>', '', match.group(2))}]({match.group(1)})",
+        text,
+        flags=re.IGNORECASE,
+    )
+    text = re.sub(r"<a\b[^>]*(?:>|$)", "", text, flags=re.IGNORECASE)
+    text = re.sub(r"<[^>]+>", "", text)
     escaped = html.escape(text)
     escaped = re.sub(r"`([^`]+)`", r"<code>\1</code>", escaped)
     escaped = re.sub(r"\*\*([^*]+)\*\*", r"<strong>\1</strong>", escaped)
@@ -299,19 +309,90 @@ def _markdown_table_cells(line: str) -> list[str]:
 
 def _inline_markdown_to_html(text: str) -> str:
     escaped = html.escape(text)
+    escaped = re.sub(r"!\[([^\]]*)\]\([^)]+\)", r"\1", escaped)
     escaped = re.sub(
-        r"\[([^\]]+)\]\((https?://[^)]+)\)",
-        lambda match: f'<a href="{html.escape(match.group(2), quote=True)}">{match.group(1)}</a>',
+        r"\[([^\]]+)\]\(([^)]+)\)",
+        lambda match: (
+            f'<a href="{html.escape(match.group(2), quote=True)}">{match.group(1)}</a>'
+            if match.group(2).startswith(("http://", "https://"))
+            else match.group(1)
+        ),
         escaped,
     )
     escaped = re.sub(r"`([^`]+)`", r"<code>\1</code>", escaped)
     escaped = re.sub(r"\*\*([^*]+)\*\*", r"<strong>\1</strong>", escaped)
     escaped = re.sub(
-        r'(?<!href=")(?<!">)(https?://[^\s<]+)',
+        r'(?<!href=")(?<!">)(?<!&quot;)(https?://[^\s<)&"]+)',
         lambda match: f'<a href="{match.group(1)}">{match.group(1)}</a>',
         escaped,
     )
+    escaped = re.sub(r"!\[([^\]]*)\]\([^)]*(?:\)|$)", r"\1", escaped)
+    escaped = re.sub(r'\[(<a href="[^"]+">[^<]+</a>)', r"\1", escaped)
     return escaped
+
+
+def _markdown_line_to_html(line: str) -> str:
+    stripped = line.strip()
+    if not stripped:
+        return ""
+    if stripped == "---":
+        return "      <hr>"
+    heading_match = re.match(r"^(#{1,4})\s+(.+)$", stripped)
+    if heading_match:
+        level = len(heading_match.group(1))
+        return f"      <h{level}>{_inline_markdown_to_html(heading_match.group(2))}</h{level}>"
+    if stripped.startswith("- "):
+        return f"      <p>• {_inline_markdown_to_html(stripped[2:])}</p>"
+    return f"      <p>{_inline_markdown_to_html(stripped)}</p>"
+
+
+def _inline_markdown_to_html(text: str) -> str:
+    text = html.unescape(text)
+    text = re.sub(r"<(?:img|source)\b[^>]*(?:>|$)", "", text, flags=re.IGNORECASE)
+    text = re.sub(
+        r'<a\s+[^>]*href=["\'](https?://[^"\']+)["\'][^>]*>(.*?)</a>',
+        lambda match: f"[{re.sub(r'<[^>]+>', '', match.group(2))}]({match.group(1)})",
+        text,
+        flags=re.IGNORECASE,
+    )
+    text = re.sub(r"<a\b[^>]*(?:>|$)", "", text, flags=re.IGNORECASE)
+    text = re.sub(r"<[^>]+>", "", text)
+    escaped = html.escape(text)
+    escaped = re.sub(r"!\[([^\]]*)\]\([^)]*(?:\)|$)", r"\1", escaped)
+    escaped = re.sub(
+        r"\[([^\]]+)\]\(([^)]+)\)",
+        lambda match: (
+            f'<a href="{html.escape(match.group(2), quote=True)}">{match.group(1)}</a>'
+            if match.group(2).startswith(("http://", "https://"))
+            else match.group(1)
+        ),
+        escaped,
+    )
+    escaped = re.sub(r"`([^`]+)`", r"<code>\1</code>", escaped)
+    escaped = re.sub(r"\*\*([^*]+)\*\*", r"<strong>\1</strong>", escaped)
+    escaped = re.sub(
+        r'(?<!href=")(?<!">)(?<!&quot;)(https?://[^\s<)&"]+)',
+        lambda match: f'<a href="{match.group(1)}">{match.group(1)}</a>',
+        escaped,
+    )
+    escaped = re.sub(r'\[\]\((<a href="[^"]+">[^<]+</a>)\)', r"\1", escaped)
+    escaped = re.sub(r'\[(<a href="[^"]+">[^<]+</a>)', r"\1", escaped)
+    return escaped
+
+
+def _markdown_line_to_html(line: str) -> str:
+    stripped = line.strip()
+    if not stripped:
+        return ""
+    if stripped == "---":
+        return "      <hr>"
+    heading_match = re.match(r"^(#{1,4})\s+(.+)$", stripped)
+    if heading_match:
+        level = len(heading_match.group(1))
+        return f"      <h{level}>{_inline_markdown_to_html(heading_match.group(2))}</h{level}>"
+    if stripped.startswith("- "):
+        return f"      <p>• {_inline_markdown_to_html(stripped[2:])}</p>"
+    return f"      <p>{_inline_markdown_to_html(stripped)}</p>"
 
 
 def _run_summary(root: Path, run_date: str) -> dict:

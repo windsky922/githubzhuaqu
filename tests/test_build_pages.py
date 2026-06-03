@@ -592,6 +592,29 @@ class BuildPagesTest(unittest.TestCase):
         finally:
             shutil.rmtree(root, ignore_errors=True)
 
+    def test_weekly_html_cleans_readme_badges_and_relative_links(self):
+        root = Path.cwd() / f".tmp-pages-test-{uuid.uuid4().hex}"
+        try:
+            (root / "reports").mkdir(parents=True)
+            (root / "reports" / "2026-06-04.md").write_text(
+                "- README 摘要：[中文](README.zh-CN.md) "
+                "![badge](https://img.shields.io/badge/test-ok) "
+                "<a href=\"https://example.com/docs\">Docs</a>\n",
+                encoding="utf-8",
+            )
+
+            build_pages(root)
+
+            weekly_html = (root / "docs" / "weekly" / "2026-06-04.html").read_text(encoding="utf-8")
+            self.assertIn("中文", weekly_html)
+            self.assertIn("badge", weekly_html)
+            self.assertNotIn("](README.zh-CN.md)", weekly_html)
+            self.assertNotIn("](https://img.shields.io", weekly_html)
+            self.assertNotIn("https://example.com/docs&quot;", weekly_html)
+            self.assertIn('<a href="https://example.com/docs">Docs</a>', weekly_html)
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
 
 if __name__ == "__main__":
     unittest.main()
