@@ -4,217 +4,35 @@
   "projects": [
     {
       "run_date": "2026-06-03",
-      "full_name": "harry0703/MoneyPrinterTurbo",
-      "html_url": "https://github.com/harry0703/MoneyPrinterTurbo",
-      "description": "利用AI大模型，一键生成高清短视频 Generate short videos with one click using AI LLM.",
-      "readme_summary": "MoneyPrinterTurbo 💸 简体中文 | English | العربية 只需提供一个视频 主题 或 关键词 ，就可以全自动生成视频文案、视频素材、视频字幕、视频背景音乐，然后合成一个高清的短视频。 感谢 AIHubMix 对本项目的赞助。AIHubMix 深度适配 OpenAI、Claude、Gemini、DeepSeek、智谱、千问等全球顶级最新模型，一站式快速接入 GPT-5.5、deepseek-v4-flash 等 700+ 模型（含多个免费模型），提供企业级生产稳定性保障。",
-      "category": "LLM Tooling",
-      "language": "Python",
-      "stargazers_count": 78190,
-      "forks_count": 11099,
-      "star_growth": 20,
-      "score": 0.7868,
-      "sources": [
-        "github_search",
-        "github_trending"
-      ],
-      "trending_rank": 1,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 1 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 20，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "当前累计 Star 78190，具备一定社区关注度。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
-      "quality_level": "high",
-      "report_url": "weekly/2026-06-03.html"
-    },
-    {
-      "run_date": "2026-06-03",
-      "full_name": "chopratejas/headroom",
-      "html_url": "https://github.com/chopratejas/headroom",
-      "description": "Compress tool outputs, logs, files, and RAG chunks before they reach the LLM. 60-95% fewer tokens, same answers. Library, proxy, MCP server.",
-      "readme_summary": "AI agents / LLMs: read /llms.txt here, or fetch the live index / full docs blob . Headroom compresses everything your AI agent reads — tool outputs, logs, RAG chunks, files, and conversation history — before it reaches the LLM. Same answers, fraction of the tokens.",
+      "full_name": "NousResearch/hermes-agent",
+      "html_url": "https://github.com/NousResearch/hermes-agent",
+      "description": "The agent that grows with you",
+      "readme_summary": "",
       "category": "AI Agent",
       "language": "Python",
-      "stargazers_count": 7060,
-      "forks_count": 488,
+      "stargazers_count": 177935,
+      "forks_count": 30462,
       "star_growth": 64,
-      "score": 0.9051,
+      "score": 0.4418,
       "sources": [
-        "github_trending"
+        "github_search"
       ],
-      "trending_rank": 3,
+      "trending_rank": 0,
       "selection_reasons": [
-        "进入 GitHub Trending 周榜第 3 位，是本期最重要的热度信号。",
         "较上次记录新增 Star 64，近期热度上升。",
         "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "当前累计 Star 7060，具备一定社区关注度。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
-      "quality_level": "high",
-      "report_url": "weekly/2026-06-03.html"
-    },
-    {
-      "run_date": "2026-06-03",
-      "full_name": "Lum1104/Understand-Anything",
-      "html_url": "https://github.com/Lum1104/Understand-Anything",
-      "description": "Graphs that teach > graphs that impress. Turn any code into an interactive knowledge graph you can explore, search, and ask questions about. Works with Claude Code, Codex, Cursor, Copilot, Gemini CLI, and more.",
-      "readme_summary": "Understand Anything Turn any codebase, knowledge base, or docs into an interactive knowledge graph you can explore, search, and ask questions about. Works with Claude Code, Codex, Cursor, Copilot, Gemini CLI, and more.",
-      "category": "AI Agent",
-      "language": "TypeScript",
-      "stargazers_count": 50355,
-      "forks_count": 4101,
-      "star_growth": 21,
-      "score": 0.6275,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 4,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 4 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 21，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "当前累计 Star 50355，具备一定社区关注度。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
-      "quality_level": "high",
-      "report_url": "weekly/2026-06-03.html"
-    },
-    {
-      "run_date": "2026-06-03",
-      "full_name": "revfactory/harness",
-      "html_url": "https://github.com/revfactory/harness",
-      "description": "A meta-skill that designs domain-specific agent teams, defines specialized agents, and generates the skills they use.",
-      "readme_summary": "English** | 한국어 | 日本語 Harness is a team-architecture factory for Claude Code.** Say **\"build a harness for this project\"** (English) or **\"하네스 구성해줘\"** (한국어) or **\"ハーネスを構成して\"** (日本語), and the plugin turns your domain description into an agent team and the skills they use — picked from six pre-defined team-architecture patterns.",
-      "category": "AI Agent",
-      "language": "HTML",
-      "stargazers_count": 5559,
-      "forks_count": 738,
-      "star_growth": 1,
-      "score": 0.3819,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 7,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 7 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 1，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "当前累计 Star 5559，具备一定社区关注度。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
-      "quality_level": "high",
-      "report_url": "weekly/2026-06-03.html"
-    },
-    {
-      "run_date": "2026-06-03",
-      "full_name": "rohitg00/ai-engineering-from-scratch",
-      "html_url": "https://github.com/rohitg00/ai-engineering-from-scratch",
-      "description": "Learn it. Build it. Ship it for others.",
-      "readme_summary": "% of students already use AI tools. Only 18% feel prepared to use them professionally.** This curriculum closes that gap. Python, TypeScript, Rust, Julia.",
-      "category": "AI Agent",
-      "language": "Python",
-      "stargazers_count": 27484,
-      "forks_count": 4461,
-      "star_growth": 11,
-      "score": 0.6024,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 8,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 8 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 11，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "当前累计 Star 27484，具备一定社区关注度。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
-      "quality_level": "high",
-      "report_url": "weekly/2026-06-03.html"
-    },
-    {
-      "run_date": "2026-06-03",
-      "full_name": "colbymchenry/codegraph",
-      "html_url": "https://github.com/colbymchenry/codegraph",
-      "description": "Pre-indexed code knowledge graph for Claude Code, Codex, Gemini, Cursor, OpenCode, AntiGravity, Kiro, and Hermes Agent — fewer tokens, fewer tool calls, 100% local",
-      "readme_summary": "~16% cheaper · ~58% fewer tool calls · 100% local** No Node.js required** — one command grabs the right build for your OS: Already have Node? Use npm instead (works on any version): CodeGraph bundles its own runtime — nothing to compile, no native build, works the same everywhere.",
-      "category": "AI Agent",
-      "language": "TypeScript",
-      "stargazers_count": 38302,
-      "forks_count": 2372,
-      "star_growth": 14,
-      "score": 0.4449,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 9,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 9 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 14，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "当前累计 Star 38302，具备一定社区关注度。"
+        "当前累计 Star 177935，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
       ],
       "security_flags": [],
       "security_score": 100,
       "security_level": "low",
       "quality_flags": [
-        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+        "README 摘要不足，后续理解项目价值时需要打开仓库人工确认。",
+        "仓库简介较短，项目定位信息有限。"
       ],
-      "quality_score": 92,
-      "quality_level": "high",
-      "report_url": "weekly/2026-06-03.html"
-    },
-    {
-      "run_date": "2026-06-03",
-      "full_name": "mukul975/Anthropic-Cybersecurity-Skills",
-      "html_url": "https://github.com/mukul975/Anthropic-Cybersecurity-Skills",
-      "description": "754 structured cybersecurity skills for AI agents · Mapped to 5 frameworks: MITRE ATT&CK, NIST CSF 2.0, MITRE ATLAS, D3FEND & NIST AI RMF · agentskills.io standard · Works with Claude Code, GitHub Copilot, Codex CLI, Cursor, Gemini CLI & 20+ platforms · 26 security domains · Apache 2.0",
-      "readme_summary": "production-grade cybersecurity skills · 26 security domains · 5 framework mappings · 26+ AI platforms** Get Started · What's Inside · Frameworks · Platforms · Contributing ⚠️ **Community Project** — This is an independent, community-created project. Not affiliated with Anthropic PBC.",
-      "category": "AI Agent",
-      "language": "Python",
-      "stargazers_count": 13673,
-      "forks_count": 1602,
-      "star_growth": 11,
-      "score": 0.4968,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 10,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 10 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 11，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "当前累计 Star 13673，具备一定社区关注度。"
-      ],
-      "security_flags": [
-        "包含恶意软件相关表述，需人工确认项目用途。"
-      ],
-      "security_score": 65,
-      "security_level": "medium",
-      "quality_flags": [],
-      "quality_score": 100,
-      "quality_level": "high",
+      "quality_score": 74,
+      "quality_level": "medium",
       "report_url": "weekly/2026-06-03.html"
     },
     {
@@ -222,92 +40,292 @@
       "full_name": "affaan-m/ECC",
       "html_url": "https://github.com/affaan-m/ECC",
       "description": "The agent harness performance optimization system. Skills, instincts, memory, security, and research-first development for Claude Code, Codex, Opencode, Cursor and beyond.",
-      "readme_summary": "Language:** English | Português (Brasil) | 简体中文 | 繁體中文 | 日本語 | 한국어 | Türkçe | Русский | Tiếng Việt | ไทย | Deutsch K+ stars** | **28K+ forks** | **170+ contributors** | **12+ language ecosystems** | **Cross-harness agent workflows** Language / 语言 / 語言 / Dil / Язык / Ngôn ngữ** English** | Português (Brasil) | 简体中文 | 繁體中文 | 日本語 | 한국어 | Türkçe | Русский | Tiếng Việt | ไทย | Deutsch The harness-native operator system for agentic work.",
+      "readme_summary": "",
       "category": "AI Agent",
       "language": "JavaScript",
-      "stargazers_count": 204317,
-      "forks_count": 31343,
-      "star_growth": 34,
-      "score": 0.4675,
-      "sources": [
-        "github_search",
-        "github_trending"
-      ],
-      "trending_rank": 11,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 11 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 34，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "当前累计 Star 204317，具备一定社区关注度。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
-      "quality_level": "high",
-      "report_url": "weekly/2026-06-03.html"
-    },
-    {
-      "run_date": "2026-06-03",
-      "full_name": "microsoft/agent-governance-toolkit",
-      "html_url": "https://github.com/microsoft/agent-governance-toolkit",
-      "description": "AI Agent Governance Toolkit — Policy enforcement, zero-trust identity, execution sandboxing, and reliability engineering for autonomous AI agents. Covers 10/10 OWASP Agentic Top 10.",
-      "readme_summary": "🌍 English | 日本語 | 简体中文 | 한국어 🚀 Quick Start · 📋 Specifications · 📦 PyPI · 📝 Changelog [!IMPORTANT] Public Preview** -- production-quality, Microsoft-signed releases. May have breaking changes before GA. Policy enforcement, identity, sandboxing, and SRE for autonomous AI agents.",
-      "category": "AI Agent",
-      "language": "Python",
-      "stargazers_count": 3838,
-      "forks_count": 534,
-      "star_growth": 2,
-      "score": 0.3231,
-      "sources": [
-        "github_trending"
-      ],
-      "trending_rank": 15,
-      "selection_reasons": [
-        "进入 GitHub Trending 周榜第 15 位，是本期最重要的热度信号。",
-        "较上次记录新增 Star 2，近期热度上升。",
-        "当前累计 Star 3838，具备一定社区关注度。",
-        "仓库主题、语言或名称与关注方向匹配。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
-      "quality_level": "high",
-      "report_url": "weekly/2026-06-03.html"
-    },
-    {
-      "run_date": "2026-06-03",
-      "full_name": "NousResearch/hermes-agent",
-      "html_url": "https://github.com/NousResearch/hermes-agent",
-      "description": "The agent that grows with you",
-      "readme_summary": "The self-improving AI agent built by Nous Research.** It's the only agent with a built-in learning loop — it creates skills from experience, improves them during use, nudges itself to persist knowledge, searches its own past conversations, and builds a deepening model of who you are across sessions.",
-      "category": "AI Agent",
-      "language": "Python",
-      "stargazers_count": 177677,
-      "forks_count": 30407,
-      "star_growth": 23,
-      "score": 0.29,
+      "stargazers_count": 204588,
+      "forks_count": 31383,
+      "star_growth": 63,
+      "score": 0.3449,
       "sources": [
         "github_search"
       ],
       "trending_rank": 0,
       "selection_reasons": [
-        "较上次记录新增 Star 23，近期热度上升。",
+        "较上次记录新增 Star 63，近期热度上升。",
         "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "当前累计 Star 177677，具备一定社区关注度。",
+        "当前累计 Star 204588，具备一定社区关注度。",
         "仓库主题、语言或名称与关注方向匹配。"
       ],
       "security_flags": [],
       "security_score": 100,
       "security_level": "low",
       "quality_flags": [
-        "仓库简介较短，项目定位信息有限。"
+        "README 摘要不足，后续理解项目价值时需要打开仓库人工确认。"
       ],
-      "quality_score": 92,
+      "quality_score": 82,
       "quality_level": "high",
+      "report_url": "weekly/2026-06-03.html"
+    },
+    {
+      "run_date": "2026-06-03",
+      "full_name": "D4Vinci/Scrapling",
+      "html_url": "https://github.com/D4Vinci/Scrapling",
+      "description": "🕷️ An adaptive Web Scraping framework that handles everything from a single request to a full-scale crawl!",
+      "readme_summary": "",
+      "category": "Developer Tools",
+      "language": "Python",
+      "stargazers_count": 59523,
+      "forks_count": 5745,
+      "star_growth": 43,
+      "score": 0.3381,
+      "sources": [
+        "github_search"
+      ],
+      "trending_rank": 0,
+      "selection_reasons": [
+        "较上次记录新增 Star 43，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "当前累计 Star 59523，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "README 摘要不足，后续理解项目价值时需要打开仓库人工确认。"
+      ],
+      "quality_score": 82,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-03.html"
+    },
+    {
+      "run_date": "2026-06-03",
+      "full_name": "harry0703/MoneyPrinterTurbo",
+      "html_url": "https://github.com/harry0703/MoneyPrinterTurbo",
+      "description": "利用AI大模型，一键生成高清短视频 Generate short videos with one click using AI LLM.",
+      "readme_summary": "",
+      "category": "LLM Tooling",
+      "language": "Python",
+      "stargazers_count": 78347,
+      "forks_count": 11120,
+      "star_growth": 36,
+      "score": 0.3285,
+      "sources": [
+        "github_search"
+      ],
+      "trending_rank": 0,
+      "selection_reasons": [
+        "较上次记录新增 Star 36，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "当前累计 Star 78347，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "README 摘要不足，后续理解项目价值时需要打开仓库人工确认。"
+      ],
+      "quality_score": 82,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-03.html"
+    },
+    {
+      "run_date": "2026-06-03",
+      "full_name": "obra/superpowers",
+      "html_url": "https://github.com/obra/superpowers",
+      "description": "An agentic skills framework & software development methodology that works.",
+      "readme_summary": "",
+      "category": "AI Agent",
+      "language": "Shell",
+      "stargazers_count": 216279,
+      "forks_count": 19254,
+      "star_growth": 65,
+      "score": 0.2984,
+      "sources": [
+        "github_search"
+      ],
+      "trending_rank": 0,
+      "selection_reasons": [
+        "较上次记录新增 Star 65，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "当前累计 Star 216279，具备一定社区关注度。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "README 摘要不足，后续理解项目价值时需要打开仓库人工确认。",
+        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+      ],
+      "quality_score": 74,
+      "quality_level": "medium",
+      "report_url": "weekly/2026-06-03.html"
+    },
+    {
+      "run_date": "2026-06-03",
+      "full_name": "shareAI-lab/learn-claude-code",
+      "html_url": "https://github.com/shareAI-lab/learn-claude-code",
+      "description": "Bash is all you need -  A nano claude code–like 「agent harness」, built from 0 to 1",
+      "readme_summary": "",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 64400,
+      "forks_count": 10521,
+      "star_growth": 20,
+      "score": 0.2678,
+      "sources": [
+        "github_search"
+      ],
+      "trending_rank": 0,
+      "selection_reasons": [
+        "较上次记录新增 Star 20，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "当前累计 Star 64400，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "README 摘要不足，后续理解项目价值时需要打开仓库人工确认。"
+      ],
+      "quality_score": 82,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-03.html"
+    },
+    {
+      "run_date": "2026-06-03",
+      "full_name": "langgenius/dify",
+      "html_url": "https://github.com/langgenius/dify",
+      "description": "Production-ready platform for agentic workflow development.",
+      "readme_summary": "",
+      "category": "AI Agent",
+      "language": "TypeScript",
+      "stargazers_count": 143645,
+      "forks_count": 22600,
+      "star_growth": 8,
+      "score": 0.2308,
+      "sources": [
+        "github_search"
+      ],
+      "trending_rank": 0,
+      "selection_reasons": [
+        "较上次记录新增 Star 8，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "当前累计 Star 143645，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "README 摘要不足，后续理解项目价值时需要打开仓库人工确认。"
+      ],
+      "quality_score": 82,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-03.html"
+    },
+    {
+      "run_date": "2026-06-03",
+      "full_name": "rtk-ai/rtk",
+      "html_url": "https://github.com/rtk-ai/rtk",
+      "description": "CLI proxy that reduces LLM token consumption by 60-90% on common dev commands. Single Rust binary, zero dependencies",
+      "readme_summary": "",
+      "category": "AI Agent",
+      "language": "Rust",
+      "stargazers_count": 58136,
+      "forks_count": 3577,
+      "star_growth": 18,
+      "score": 0.2269,
+      "sources": [
+        "github_search"
+      ],
+      "trending_rank": 0,
+      "selection_reasons": [
+        "较上次记录新增 Star 18，近期热度上升。",
+        "当前累计 Star 58136，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "README 摘要不足，后续理解项目价值时需要打开仓库人工确认。"
+      ],
+      "quality_score": 82,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-03.html"
+    },
+    {
+      "run_date": "2026-06-03",
+      "full_name": "rasbt/LLMs-from-scratch",
+      "html_url": "https://github.com/rasbt/LLMs-from-scratch",
+      "description": "Implement a ChatGPT-like LLM in PyTorch from scratch, step by step",
+      "readme_summary": "",
+      "category": "LLM Tooling",
+      "language": "Jupyter Notebook",
+      "stargazers_count": 96552,
+      "forks_count": 14768,
+      "star_growth": 7,
+      "score": 0.2222,
+      "sources": [
+        "github_search"
+      ],
+      "trending_rank": 0,
+      "selection_reasons": [
+        "较上次记录新增 Star 7，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "当前累计 Star 96552，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "README 摘要不足，后续理解项目价值时需要打开仓库人工确认。"
+      ],
+      "quality_score": 82,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-03.html"
+    },
+    {
+      "run_date": "2026-06-03",
+      "full_name": "anthropics/claude-code",
+      "html_url": "https://github.com/anthropics/claude-code",
+      "description": "Claude Code is an agentic coding tool that lives in your terminal, understands your codebase, and helps you code faster by executing routine tasks, explaining complex code, and handling git workflows - all through natural language commands.",
+      "readme_summary": "",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 129705,
+      "forks_count": 21084,
+      "star_growth": 12,
+      "score": 0.2217,
+      "sources": [
+        "github_search"
+      ],
+      "trending_rank": 0,
+      "selection_reasons": [
+        "较上次记录新增 Star 12，近期热度上升。",
+        "当前累计 Star 129705，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [
+        "未识别到许可证，复用代码前需要人工确认授权。"
+      ],
+      "security_score": 85,
+      "security_level": "low",
+      "quality_flags": [
+        "README 摘要不足，后续理解项目价值时需要打开仓库人工确认。",
+        "许可证元数据缺失，复用代码前需要确认授权。",
+        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+      ],
+      "quality_score": 62,
+      "quality_level": "medium",
       "report_url": "weekly/2026-06-03.html"
     },
     {
