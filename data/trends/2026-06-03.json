@@ -4,11 +4,11 @@
   "trending_project_count": 0,
   "trending_top10_selected_count": 0,
   "trending_selected_rate": 0.0,
-  "total_star_growth": 336,
+  "total_star_growth": 894,
   "top_languages": [
     {
       "name": "Python",
-      "count": 5
+      "count": 6
     },
     {
       "name": "JavaScript",
@@ -23,22 +23,18 @@
       "count": 1
     },
     {
-      "name": "Rust",
-      "count": 1
-    },
-    {
-      "name": "Jupyter Notebook",
+      "name": "Go",
       "count": 1
     }
   ],
   "top_categories": [
     {
       "name": "AI Agent",
-      "count": 7
+      "count": 8
     },
     {
       "name": "LLM Tooling",
-      "count": 2
+      "count": 1
     },
     {
       "name": "Developer Tools",
@@ -48,50 +44,50 @@
   "top_trending": [],
   "top_star_growth": [
     {
-      "full_name": "obra/superpowers",
-      "html_url": "https://github.com/obra/superpowers",
-      "star_growth": 65,
-      "stargazers_count": 216279,
-      "language": "Shell",
-      "category": "AI Agent"
-    },
-    {
       "full_name": "NousResearch/hermes-agent",
       "html_url": "https://github.com/NousResearch/hermes-agent",
-      "star_growth": 64,
-      "stargazers_count": 177935,
+      "star_growth": 198,
+      "stargazers_count": 178133,
       "language": "Python",
       "category": "AI Agent"
     },
     {
       "full_name": "affaan-m/ECC",
       "html_url": "https://github.com/affaan-m/ECC",
-      "star_growth": 63,
-      "stargazers_count": 204588,
+      "star_growth": 187,
+      "stargazers_count": 204775,
       "language": "JavaScript",
+      "category": "AI Agent"
+    },
+    {
+      "full_name": "obra/superpowers",
+      "html_url": "https://github.com/obra/superpowers",
+      "star_growth": 172,
+      "stargazers_count": 216451,
+      "language": "Shell",
       "category": "AI Agent"
     },
     {
       "full_name": "D4Vinci/Scrapling",
       "html_url": "https://github.com/D4Vinci/Scrapling",
-      "star_growth": 43,
-      "stargazers_count": 59523,
+      "star_growth": 110,
+      "stargazers_count": 59633,
       "language": "Python",
       "category": "Developer Tools"
     },
     {
       "full_name": "harry0703/MoneyPrinterTurbo",
       "html_url": "https://github.com/harry0703/MoneyPrinterTurbo",
-      "star_growth": 36,
-      "stargazers_count": 78347,
+      "star_growth": 107,
+      "stargazers_count": 78454,
       "language": "Python",
       "category": "LLM Tooling"
     }
   ],
   "summary_points": [
-    "AI Agent 是本期最集中的方向，共 7 个项目。",
-    "Python 是本期出现最多的主要语言，共 5 个项目。",
-    "本期入选项目累计新增 Star 336。",
-    "obra/superpowers 是本期新增 Star 最高的项目，新增 65。"
+    "AI Agent 是本期最集中的方向，共 8 个项目。",
+    "Python 是本期出现最多的主要语言，共 6 个项目。",
+    "本期入选项目累计新增 Star 894。",
+    "NousResearch/hermes-agent 是本期新增 Star 最高的项目，新增 198。"
   ]
 }
