@@ -809,16 +809,17 @@
         databaseOverview.innerHTML = metric("数据库模式", "静态");
         databaseFacets.innerHTML = '<p>启动本地后端或添加 api=1 后显示数据库分面。</p>';
         databaseTrends.innerHTML = '<p>启动本地后端或添加 api=1 后显示运行趋势。</p>';
-        ragQualitySummary.innerHTML = '<p>启动本地后端或添加 api=1 后显示 RAG 质量概览。</p>';
+        ragQualitySummary.innerHTML = '<p>启动本地后端或添加 api=1 后显示 RAG 诊断和质量概览。</p>';
         return;
       }
       Promise.all([
         fetch("/v1/database/summary", { cache: "no-store" }).then(jsonOrThrow),
         fetch("/v1/database/facets?limit=6", { cache: "no-store" }).then(jsonOrThrow),
         fetch("/v1/database/trends?limit=8", { cache: "no-store" }).then(jsonOrThrow),
+        fetch("/v1/rag/diagnostics?limit=5", { cache: "no-store" }).then(jsonOrThrow),
         fetch("/v1/rag/quality-summary?limit=5", { cache: "no-store" }).then(jsonOrThrow),
       ])
-        .then(([summary, facets, trends, qualitySummary]) => {
+        .then(([summary, facets, trends, diagnostics, qualitySummary]) => {
           const counts = summary.table_counts || {};
           databaseOverview.innerHTML = [
             metric("仓库记录", counts.repositories || 0),
@@ -828,7 +829,7 @@
           ].join("");
           databaseFacets.innerHTML = databaseFacetsHtml(facets);
           databaseTrends.innerHTML = databaseTrendsHtml(trends);
-          ragQualitySummary.innerHTML = ragQualitySummaryHtml(qualitySummary);
+          ragQualitySummary.innerHTML = ragDiagnosticsHtml(diagnostics) + ragQualitySummaryHtml(qualitySummary);
         })
         .catch(error => {
           databaseOverview.innerHTML = metric("数据库状态", "读取失败");
@@ -1100,6 +1101,32 @@
         recommendationHtml,
         "<h4>最近低质量解释</h4>",
         lowHtml,
+      ].join("");
+    }
+
+    function ragDiagnosticsHtml(data) {
+      const signals = data.signals || {};
+      const tables = data.table_counts || {};
+      const coverage = data.coverage || {};
+      const actions = data.next_actions || [];
+      const actionHtml = actions.length
+        ? actions.map(item => `<p>${escapeHtml(item)}</p>`).join("")
+        : "<p>暂无诊断建议。</p>";
+      return [
+        "<h3>RAG 诊断</h3>",
+        `<div class="overview">${[
+          metric("健康等级", data.level || "-"),
+          metric("诊断状态", data.status || "-"),
+          metric("覆盖率", percent(coverage.coverage_rate || 0)),
+          metric("覆盖缺口", coverage.gap_count || 0),
+        ].join("")}</div>`,
+        facetRow("语料记录", tables.project_corpus || 0, signals.has_corpus ? "已具备" : "缺少"),
+        facetRow("证据块", tables.rag_chunks || 0, signals.has_chunks ? "已具备" : "缺少"),
+        facetRow("向量索引", tables.rag_embeddings || 0, signals.has_embeddings ? "已具备" : "缺少"),
+        facetRow("解释历史", tables.rag_explanations || 0, signals.has_explanations ? "已具备" : "缺少"),
+        facetRow("问答能力", signals.ready_for_answering ? "已准备" : "未准备", "RAG ask"),
+        "<h4>诊断建议</h4>",
+        actionHtml,
       ].join("");
     }
 
