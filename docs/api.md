@@ -537,7 +537,9 @@ POST /v1/jobs/{job_id}/execute
 
 ### `POST /v1/rag/maintenance-plan`
 
-检查 RAG 覆盖缺口，并按需创建 RAG 回填 planned 任务。该接口会先调用覆盖缺口逻辑；如果 `gap_count` 小于 `min_gap_count`，只返回健康状态，不创建任务；如果已经存在相同参数的 active `rag_backfill` 任务，则返回 `duplicate_of`，避免重复补库。
+检查 RAG 诊断状态与覆盖缺口，并按需创建 RAG 回填 planned 任务。该接口会先调用 `/v1/rag/diagnostics`；如果 `project_corpus` 或 `rag_chunks` 还没有准备好，只返回 `reason=rag_diagnostics_needs_corpus` 和诊断建议，不创建无效回填任务；如果 `gap_count` 小于 `min_gap_count`，只返回健康状态，不创建任务；如果已经存在相同参数的 active `rag_backfill` 任务，则返回 `duplicate_of`，避免重复补库。
+
+返回结果会包含 `diagnostics`、`coverage`、`gap_count` 和 `min_gap_count`，方便 GitHub Actions、后台管理页或后续 Agent 判断下一步应先建语料、补向量，还是创建解释回填任务。
 
 常用请求字段：
 

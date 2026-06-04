@@ -406,8 +406,11 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(rag_maintenance_plan["reason"], "rag_coverage_gap_detected")
             self.assertTrue(rag_maintenance_plan["planned_job_created"])
             self.assertEqual(rag_maintenance_plan["job"]["kind"], "rag_backfill")
+            self.assertIn("diagnostics", rag_maintenance_plan)
+            self.assertIn("ready_for_answering", rag_maintenance_plan["diagnostics"]["signals"])
             self.assertFalse(rag_maintenance_duplicate["planned_job_created"])
             self.assertEqual(rag_maintenance_duplicate["duplicate_of"], rag_maintenance_plan["job_id"])
+            self.assertIn("diagnostics", rag_maintenance_duplicate)
             self.assertGreaterEqual(database_summary_after_explain["table_counts"]["rag_explanations"], 1)
             self.assertTrue(database_summary_after_explain["rag_readiness"]["ready_for_explanation_history"])
             self.assertTrue(similar["found"])
@@ -428,6 +431,23 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertTrue(preference_comparison["preference"]["active"])
             self.assertEqual(preference_comparison["preference"]["language"], "Python")
             self.assertEqual(preference_comparison["recommendation"]["scoring_model"], "rule:v2-preference")
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
+    def test_rag_maintenance_plan_waits_for_corpus_before_backfill(self):
+        root = Path.cwd() / f".tmp-api-empty-rag-{uuid.uuid4().hex}"
+        try:
+            root.mkdir(parents=True)
+            repository = ApiRepository(root=root, db_path=root / "data" / "github_weekly.sqlite")
+
+            plan = repository.plan_rag_maintenance({"limit": 5, "dry_run": True, "requested_by": "test"})
+
+            self.assertTrue(plan["accepted"])
+            self.assertFalse(plan["planned_job_created"])
+            self.assertEqual(plan["reason"], "rag_diagnostics_needs_corpus")
+            self.assertEqual(plan["diagnostics"]["status"], "needs_corpus")
+            self.assertFalse(plan["diagnostics"]["signals"]["has_corpus"])
+            self.assertEqual(plan["job_id"], "")
         finally:
             shutil.rmtree(root, ignore_errors=True)
 
@@ -686,6 +706,7 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(v1_rag_backfill_plan_execute.json()["status"], "succeeded")
             self.assertTrue(v1_rag_maintenance_plan.json()["accepted"])
             self.assertEqual(v1_rag_maintenance_plan.json()["reason"], "rag_coverage_gap_detected")
+            self.assertIn("diagnostics", v1_rag_maintenance_plan.json())
             self.assertEqual(v1_rag_backfill_jobs.json()["jobs"][0]["kind"], "rag_backfill")
             self.assertIn(
                 v1_rag_backfill.json()["job_id"],

@@ -13,14 +13,18 @@ from src.api.repository import ApiRepository
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="检查 RAG 覆盖缺口，并按需创建 RAG 回填 planned 任务。")
+    parser = argparse.ArgumentParser(description="检查 RAG 诊断与覆盖缺口，并按需创建 RAG 回填 planned 任务。")
     parser.add_argument("--root", type=Path, default=ROOT, help="项目根目录，默认当前仓库根目录。")
     parser.add_argument("--db", type=Path, default=None, help="SQLite 派生索引路径，默认 data/github_weekly.sqlite。")
     parser.add_argument("--limit", type=int, default=10, help="计划回填项目数量，默认 10。")
-    parser.add_argument("--coverage-limit", type=int, default=100, help="覆盖缺口检查数量，默认 100。")
+    parser.add_argument("--coverage-limit", type=int, default=100, help="诊断和覆盖缺口检查数量，默认 100。")
     parser.add_argument("--min-gap-count", type=int, default=1, help="达到多少缺口才创建任务，默认 1。")
     parser.add_argument("--execute", action="store_true", help="创建真实写库任务；默认只创建 dry-run 任务。")
-    parser.add_argument("--confirm-execution", action="store_true", help="确认允许真实写库，必须和 --execute 同时使用才会生效。")
+    parser.add_argument(
+        "--confirm-execution",
+        action="store_true",
+        help="确认允许真实写库，必须和 --execute 同时使用才会生效。",
+    )
     parser.add_argument("--requested-by", default="maintenance_script", help="任务创建者标识。")
     args = parser.parse_args()
 

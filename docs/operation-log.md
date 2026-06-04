@@ -2,6 +2,20 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-06-04 追加：RAG 维护计划接入诊断判断
+
+### 1. 开发目的
+RAG 维护计划此前只看覆盖缺口，语料或切片未准备好时也可能创建回填 planned 任务。为了让自动化维护更可靠，本次把 `/v1/rag/diagnostics` 接入维护计划：先判断 RAG 基础语料是否可用，再决定是否创建回填任务。
+
+### 2. 修改内容
+1. `ApiRepository.plan_rag_maintenance` 改为先读取 `rag_diagnostics`。
+2. 如果 `project_corpus` 或 `rag_chunks` 缺失，返回 `reason=rag_diagnostics_needs_corpus`，不创建无效 `rag_backfill` 任务。
+3. 维护计划返回结果新增 `diagnostics`，便于 GitHub Actions、后台管理页和后续 Agent 判断下一步操作。
+4. 修正 `scripts/plan_rag_maintenance.py` 的中文帮助文本，并更新 API 文档与后端测试。
+
+### 3. 后续空间
+下一步可以继续把诊断结果用于更完整的维护编排：先建语料，再建 embedding，最后创建解释回填任务。当前先保持计划入口只负责判断与创建回填计划，不引入过重框架。
+
 ## 2026-06-04 追加：管理首页接入 RAG 诊断
 
 ### 1. 开发目的

@@ -953,9 +953,28 @@ class ApiRepository:
     def plan_rag_maintenance(self, payload: dict[str, Any] | None) -> dict[str, Any]:
         payload = payload if isinstance(payload, dict) else {}
         coverage_limit = max(1, min(_int_value(payload.get("coverage_limit")) or 100, 500))
-        coverage = self.rag_coverage(limit=coverage_limit)
+        diagnostics = self.rag_diagnostics(limit=coverage_limit)
+        signals = diagnostics.get("signals") if isinstance(diagnostics.get("signals"), dict) else {}
+        coverage = diagnostics.get("coverage") if isinstance(diagnostics.get("coverage"), dict) else {}
         gap_count = _int_value(coverage.get("gap_count"))
         min_gap_count = max(1, _int_value(payload.get("min_gap_count")) or 1)
+        if (
+            diagnostics.get("status") == "needs_corpus"
+            or not signals.get("has_corpus")
+            or not signals.get("has_chunks")
+        ):
+            return {
+                "schema_version": 1,
+                "accepted": True,
+                "planned_job_created": False,
+                "reason": "rag_diagnostics_needs_corpus",
+                "gap_count": gap_count,
+                "min_gap_count": min_gap_count,
+                "coverage": coverage,
+                "diagnostics": diagnostics,
+                "job_id": "",
+                "job": {},
+            }
         if gap_count < min_gap_count:
             return {
                 "schema_version": 1,
@@ -965,6 +984,7 @@ class ApiRepository:
                 "gap_count": gap_count,
                 "min_gap_count": min_gap_count,
                 "coverage": coverage,
+                "diagnostics": diagnostics,
                 "job_id": "",
                 "job": {},
             }
@@ -983,6 +1003,7 @@ class ApiRepository:
             "gap_count": gap_count,
             "min_gap_count": min_gap_count,
             "coverage": coverage,
+            "diagnostics": diagnostics,
         }
 
     def _rag_backfill_request_from_payload(
