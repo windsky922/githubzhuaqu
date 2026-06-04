@@ -919,6 +919,7 @@ def _admin_dashboard_content() -> str:
         </label>
         <label>检索方式
           <select id="ragMode">
+            <option value="ask">RAG 问答</option>
             <option value="retrieve">FTS 证据检索</option>
             <option value="vector">本地向量检索</option>
           </select>
@@ -1163,7 +1164,7 @@ def _admin_dashboard_content() -> str:
       if (ragControls.language.value.trim()) params.set("language", ragControls.language.value.trim());
       const mode = ragControls.mode.value || "retrieve";
       if (mode === "vector") params.set("auto_build", "true");
-      const endpoint = mode === "vector" ? "/v1/rag/vector-search" : "/v1/rag/retrieve";
+      const endpoint = mode === "ask" ? "/v1/rag/ask" : mode === "vector" ? "/v1/rag/vector-search" : "/v1/rag/retrieve";
       ragControls.button.disabled = true;
       ragSearchResults.innerHTML = '<p>检索中...</p>';
       fetch(`${endpoint}?${params.toString()}`, { cache: "no-store" })
@@ -1628,7 +1629,14 @@ def _admin_dashboard_content() -> str:
       const citations = data.citations || [];
       const promptContext = data.prompt_context || "";
       const retrieval = data.retrieval || {};
-      if (!contexts.length) return `${summary}<p>没有召回 RAG 证据块。</p>`;
+      const answerHtml = data.answer ? `<article class="search-row">
+        <strong>RAG 回答</strong>
+        <p>${escapeHtml(data.answer)}</p>
+        <span>${escapeHtml(data.answer_model || "-")} · ${escapeHtml(data.confidence || "-")} · ${escapeHtml(data.source_explanation_id || "-")}</span>
+      </article>` : "";
+      const nextActions = (data.next_actions || []).map(item => `<li>${escapeHtml(item)}</li>`).join("");
+      const nextActionsHtml = nextActions ? `<article class="search-row"><strong>下一步动作</strong><ul>${nextActions}</ul></article>` : "";
+      if (!contexts.length) return `${answerHtml}${summary}${nextActionsHtml}<p>没有召回 RAG 证据块。</p>`;
       const contextHtml = contexts.map((context, index) => {
         const meta = context.metadata || {};
         const citation = citations[index] || {};
@@ -1639,7 +1647,7 @@ def _admin_dashboard_content() -> str:
           <span>引用：${escapeHtml(citation.chunk_id || context.chunk_id || "-")} · ${escapeHtml(meta.run_date || "-")}</span>
         </article>`;
       }).join("");
-      return `${summary}${contextHtml}<label>Prompt Context<textarea readonly>${escapeHtml(promptContext)}</textarea></label>`;
+      return `${answerHtml}${summary}${nextActionsHtml}${contextHtml}<label>Prompt Context<textarea readonly>${escapeHtml(promptContext)}</textarea></label>`;
     }
 
     function facetRow(name, value, detail) {
