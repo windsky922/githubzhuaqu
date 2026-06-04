@@ -9,7 +9,14 @@ from typing import Any
 
 from scripts.query_archive import query_archive
 from src.job_runner import run_planned_job
-from src.rag.embeddings import MODEL_NAME, build_rag_embeddings, cosine_similarity, hash_embedding, vector_from_json
+from src.rag.embeddings import (
+    DEFAULT_DIMENSIONS,
+    MODEL_NAME,
+    build_rag_embeddings,
+    cosine_similarity,
+    hash_embedding,
+    vector_from_json,
+)
 from src.storage.sqlite_store import (
     connect,
     import_json_archive,
@@ -21,6 +28,7 @@ from src.storage.sqlite_store import (
 )
 
 ROOT = Path(__file__).resolve().parents[2]
+EXECUTABLE_JOB_KINDS = {"weekly_report", "rag_backfill", "rag_corpus_rebuild", "rag_embedding_build"}
 
 
 class ApiRepository:
@@ -950,6 +958,30 @@ class ApiRepository:
             "job": job,
         }
 
+    def plan_rag_corpus_rebuild(self, payload: dict[str, Any] | None) -> dict[str, Any]:
+        request = self._rag_maintenance_job_request(
+            payload,
+            action="rebuild_corpus",
+            default_trigger_source="rag_corpus_rebuild_plan_api",
+        )
+        return self._plan_rag_maintenance_job(
+            kind="rag_corpus_rebuild",
+            request=request,
+            message="已创建 RAG 语料重建 planned 任务。",
+        )
+
+    def plan_rag_embedding_build(self, payload: dict[str, Any] | None) -> dict[str, Any]:
+        request = self._rag_maintenance_job_request(
+            payload,
+            action="build_embeddings",
+            default_trigger_source="rag_embedding_build_plan_api",
+        )
+        return self._plan_rag_maintenance_job(
+            kind="rag_embedding_build",
+            request=request,
+            message="已创建 RAG embedding 构建 planned 任务。",
+        )
+
     def plan_rag_maintenance(self, payload: dict[str, Any] | None) -> dict[str, Any]:
         payload = payload if isinstance(payload, dict) else {}
         coverage_limit = max(1, min(_int_value(payload.get("coverage_limit")) or 100, 500))
@@ -963,17 +995,24 @@ class ApiRepository:
             or not signals.get("has_corpus")
             or not signals.get("has_chunks")
         ):
+            plan = self.plan_rag_corpus_rebuild(payload)
             return {
-                "schema_version": 1,
-                "accepted": True,
-                "planned_job_created": False,
+                **plan,
                 "reason": "rag_diagnostics_needs_corpus",
                 "gap_count": gap_count,
                 "min_gap_count": min_gap_count,
                 "coverage": coverage,
                 "diagnostics": diagnostics,
-                "job_id": "",
-                "job": {},
+            }
+        if not signals.get("has_embeddings"):
+            plan = self.plan_rag_embedding_build(payload)
+            return {
+                **plan,
+                "reason": "rag_diagnostics_needs_embeddings",
+                "gap_count": gap_count,
+                "min_gap_count": min_gap_count,
+                "coverage": coverage,
+                "diagnostics": diagnostics,
             }
         if gap_count < min_gap_count:
             return {
@@ -1004,6 +1043,85 @@ class ApiRepository:
             "min_gap_count": min_gap_count,
             "coverage": coverage,
             "diagnostics": diagnostics,
+        }
+
+    def _rag_maintenance_job_request(
+        self,
+        payload: dict[str, Any] | None,
+        *,
+        action: str,
+        default_trigger_source: str,
+    ) -> dict[str, Any]:
+        payload = payload if isinstance(payload, dict) else {}
+        dry_run = _bool_value(payload.get("dry_run"), True)
+        requested_dry_run = dry_run
+        confirm_execution = _bool_value(payload.get("confirm_execution"), False)
+        safety_warnings = []
+        if not requested_dry_run and not confirm_execution:
+            dry_run = True
+            safety_warnings.append("未显式确认真实写库，已自动改为 dry_run=true。")
+        return {
+            "maintenance_action": action,
+            "limit": max(1, min(_int_value(payload.get("limit")) or 10, 100)),
+            "coverage_limit": max(1, min(_int_value(payload.get("coverage_limit")) or 100, 500)),
+            "min_gap_count": max(1, _int_value(payload.get("min_gap_count")) or 1),
+            "dry_run": dry_run,
+            "requested_dry_run": requested_dry_run,
+            "confirm_execution": confirm_execution,
+            "requested_by": str(payload.get("requested_by") or "api").strip()[:120],
+            "trigger_source": str(payload.get("trigger_source") or default_trigger_source).strip()[:80],
+            "model": str(payload.get("model") or MODEL_NAME).strip(),
+            "dimensions": max(8, min(_int_value(payload.get("dimensions")) or DEFAULT_DIMENSIONS, 512)),
+            "safety_warnings": safety_warnings,
+        }
+
+    def _plan_rag_maintenance_job(self, *, kind: str, request: dict[str, Any], message: str) -> dict[str, Any]:
+        duplicate = self._find_active_duplicate_job(request, kind=kind)
+        if duplicate:
+            return {
+                "schema_version": 1,
+                "accepted": True,
+                "planned_job_created": False,
+                "job_id": duplicate.get("job_id") or "",
+                "status": duplicate.get("status") or "",
+                "request": request,
+                "safety_warnings": request.get("safety_warnings") or [],
+                "duplicate_of": duplicate.get("job_id") or "",
+                "job": duplicate,
+            }
+
+        submitted_at = datetime.now(UTC).isoformat().replace("+00:00", "Z")
+        job_id = _rag_maintenance_plan_job_id(kind, submitted_at, request)
+        job = {
+            "job_id": job_id,
+            "kind": kind,
+            "status": "planned",
+            "run_date": "",
+            "submitted_at": submitted_at,
+            "started_at": "",
+            "finished_at": "",
+            "request": request,
+            "result": {},
+            "error": "",
+        }
+        self._persist_preview_job(job)
+        self._record_job_event(
+            job_id,
+            "job_created",
+            "planned",
+            str(request.get("requested_by") or "api"),
+            message,
+            {"request": request},
+        )
+        return {
+            "schema_version": 1,
+            "accepted": True,
+            "planned_job_created": True,
+            "job_id": job_id,
+            "status": "planned",
+            "request": request,
+            "safety_warnings": request.get("safety_warnings") or [],
+            "job": job,
         }
 
     def _rag_backfill_request_from_payload(
@@ -1775,8 +1893,8 @@ class ApiRepository:
         kind = str(job.get("kind") or "")
         blockers = []
         warnings = []
-        if kind not in {"weekly_report", "rag_backfill"}:
-            blockers.append("当前执行器只支持 weekly_report 和 rag_backfill 任务。")
+        if kind not in EXECUTABLE_JOB_KINDS:
+            blockers.append("当前执行器只支持 weekly_report、rag_backfill、rag_corpus_rebuild 和 rag_embedding_build 任务。")
         if job.get("status") != "planned":
             blockers.append(f"任务状态为 {job.get('status') or 'unknown'}，只有 planned 任务可以被执行器消费。")
         if kind == "weekly_report":
@@ -1789,6 +1907,11 @@ class ApiRepository:
                 blockers.append("dry_run=false 但缺少 confirm_execution=true，不能进入真实补库执行。")
             if not _truthy(request.get("dry_run", True)):
                 warnings.append("该任务允许写入 RAG 解释历史，执行前请确认 SQLite 数据库状态正确。")
+        if kind in {"rag_corpus_rebuild", "rag_embedding_build"}:
+            if not _truthy(request.get("dry_run", True)) and not _truthy(request.get("confirm_execution")):
+                blockers.append("dry_run=false 但缺少 confirm_execution=true，不能进入真实 RAG 维护执行。")
+            if not _truthy(request.get("dry_run", True)):
+                warnings.append("该任务允许写入 SQLite 派生表，执行前请确认本地归档数据完整。")
 
         executable = not blockers
         return {
@@ -1811,6 +1934,8 @@ class ApiRepository:
                 "model": request.get("model") or "",
                 "auto_build": _truthy(request.get("auto_build")),
                 "confirm_execution": _truthy(request.get("confirm_execution")),
+                "maintenance_action": request.get("maintenance_action") or "",
+                "dimensions": _positive_int(request.get("dimensions")),
                 "trigger_source": request.get("trigger_source") or "",
                 "requested_by": request.get("requested_by") or "",
             },
@@ -1895,8 +2020,8 @@ class ApiRepository:
         blockers = []
         if not detail.get("found"):
             blockers.append("任务不存在，不能重试。")
-        if job and job.get("kind") not in {"weekly_report", "rag_backfill"}:
-            blockers.append("当前只支持 weekly_report 和 rag_backfill 任务重试。")
+        if job and job.get("kind") not in EXECUTABLE_JOB_KINDS:
+            blockers.append("当前只支持 weekly_report、rag_backfill、rag_corpus_rebuild 和 rag_embedding_build 任务重试。")
         if job and job.get("status") != "failed":
             blockers.append(f"任务状态为 {job.get('status') or 'unknown'}，只有 failed 任务可以重试。")
 
@@ -2392,7 +2517,7 @@ class ApiRepository:
     def _find_active_duplicate_job(self, request: dict[str, Any], *, kind: str = "weekly_report") -> dict[str, Any]:
         self.ensure_sqlite_index()
         target_key = _job_request_key(request)
-        normalized_kind = kind if kind in {"weekly_report", "rag_backfill"} else "weekly_report"
+        normalized_kind = kind if kind in EXECUTABLE_JOB_KINDS else "weekly_report"
         connection = connect(self.db_path)
         try:
             rows = connection.execute(
@@ -2628,6 +2753,14 @@ def _rag_backfill_plan_job_id(submitted_at: str, request: dict[str, Any]) -> str
     fingerprint = json.dumps(request, ensure_ascii=False, sort_keys=True)
     digest = sha1(fingerprint.encode("utf-8")).hexdigest()[:10]
     return f"rag-backfill-plan:{compact_time}:{digest}"
+
+
+def _rag_maintenance_plan_job_id(kind: str, submitted_at: str, request: dict[str, Any]) -> str:
+    compact_time = submitted_at.replace("-", "").replace(":", "").replace(".", "").replace("Z", "")
+    fingerprint = json.dumps({"kind": kind, "request": request}, ensure_ascii=False, sort_keys=True)
+    digest = sha1(fingerprint.encode("utf-8")).hexdigest()[:10]
+    prefix = "rag-corpus-plan" if kind == "rag_corpus_rebuild" else "rag-embedding-plan"
+    return f"{prefix}:{compact_time}:{digest}"
 
 
 def _rag_backfill_job_result(result: dict[str, Any]) -> dict[str, Any]:
@@ -4130,6 +4263,7 @@ def _job_search_text(job: dict[str, Any], request: dict[str, Any], result: dict[
         result.get("telegram_report_url"),
         request.get("trigger_source"),
         request.get("requested_by"),
+        request.get("maintenance_action"),
     ]
     values.extend(request.get("sources") or [])
     values.extend(request.get("safety_warnings") or [])
@@ -4155,6 +4289,8 @@ def _job_request_key(request: dict[str, Any]) -> str:
             "mode": str(request.get("mode") or "").strip(),
             "model": str(request.get("model") or "").strip(),
             "auto_build": _truthy(request.get("auto_build")),
+            "maintenance_action": str(request.get("maintenance_action") or "").strip(),
+            "dimensions": _positive_int(request.get("dimensions")),
         },
         ensure_ascii=False,
         sort_keys=True,

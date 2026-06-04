@@ -5505,6 +5505,9 @@ def _jobs_dashboard_content() -> str:
         <select id="kind">
           <option value="">全部</option>
           <option value="weekly_report">weekly_report</option>
+          <option value="rag_backfill">rag_backfill</option>
+          <option value="rag_corpus_rebuild">rag_corpus_rebuild</option>
+          <option value="rag_embedding_build">rag_embedding_build</option>
         </select>
       </label>
       <label>Profile

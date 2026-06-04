@@ -279,6 +279,8 @@ class BuildPagesTest(unittest.TestCase):
             self.assertIn("任务详情", admin_page)
             jobs_page = (root / "docs" / "jobs.html").read_text(encoding="utf-8")
             self.assertIn("GitHub 周报任务状态", jobs_page)
+            self.assertIn('value="rag_corpus_rebuild"', jobs_page)
+            self.assertIn('value="rag_embedding_build"', jobs_page)
             self.assertIn('fetch("/v1/jobs?limit=200"', jobs_page)
             self.assertIn('fetch("jobs.json"', jobs_page)
             self.assertIn("loadJobs", jobs_page)

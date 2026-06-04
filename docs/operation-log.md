@@ -2,6 +2,21 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-06-04 追加：RAG 维护计划支持语料与向量任务
+
+### 1. 开发目的
+RAG 诊断已经能判断语料、证据块、embedding 和解释历史是否完整，但维护计划此前主要面向解释回填。为了优先推进数据库/RAG核心闭环，本次把维护计划升级为分阶段编排入口：先补语料，再补向量，最后补解释。
+
+### 2. 修改内容
+1. 新增 `rag_corpus_rebuild` 和 `rag_embedding_build` 两类 planned 任务。
+2. `plan_rag_maintenance` 按诊断结果决定创建语料重建、embedding 构建或解释回填任务。
+3. `src/job_runner.py` 支持执行新任务；`dry_run=true` 只预览，真实写库仍要求 `confirm_execution=true`。
+4. 任务状态页类型筛选新增 `rag_backfill`、`rag_corpus_rebuild` 和 `rag_embedding_build`。
+5. 更新 README、API 文档、数据契约和测试。
+
+### 3. 后续空间
+下一步可以把这套任务编排继续接入后台管理页的一键维护按钮，或在 GitHub Actions 中分阶段执行真实维护任务。当前先保证任务模型、执行器和数据契约稳定。
+
 ## 2026-06-04 追加：RAG 维护计划接入诊断判断
 
 ### 1. 开发目的

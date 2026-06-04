@@ -434,7 +434,7 @@ class ApiRepositoryTest(unittest.TestCase):
         finally:
             shutil.rmtree(root, ignore_errors=True)
 
-    def test_rag_maintenance_plan_waits_for_corpus_before_backfill(self):
+    def test_rag_maintenance_plan_creates_corpus_rebuild_before_backfill(self):
         root = Path.cwd() / f".tmp-api-empty-rag-{uuid.uuid4().hex}"
         try:
             root.mkdir(parents=True)
@@ -443,11 +443,42 @@ class ApiRepositoryTest(unittest.TestCase):
             plan = repository.plan_rag_maintenance({"limit": 5, "dry_run": True, "requested_by": "test"})
 
             self.assertTrue(plan["accepted"])
-            self.assertFalse(plan["planned_job_created"])
+            self.assertTrue(plan["planned_job_created"])
             self.assertEqual(plan["reason"], "rag_diagnostics_needs_corpus")
             self.assertEqual(plan["diagnostics"]["status"], "needs_corpus")
             self.assertFalse(plan["diagnostics"]["signals"]["has_corpus"])
-            self.assertEqual(plan["job_id"], "")
+            self.assertEqual(plan["job"]["kind"], "rag_corpus_rebuild")
+            self.assertTrue(plan["job_id"].startswith("rag-corpus-plan:"))
+            precheck = repository.job_execution_check(plan["job_id"])
+            self.assertTrue(precheck["executable"])
+            execute = repository.execute_job(plan["job_id"], {"confirm_execution": True, "requested_by": "test"})
+            self.assertTrue(execute["executed"])
+            self.assertEqual(execute["status"], "succeeded")
+            self.assertTrue(execute["runner_result"]["result"]["dry_run"])
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
+    def test_rag_maintenance_plan_creates_embedding_build_before_backfill(self):
+        root = Path.cwd() / f".tmp-api-rag-embedding-{uuid.uuid4().hex}"
+        try:
+            _write_fixture(root)
+            repository = ApiRepository(root=root, db_path=root / "data" / "github_weekly.sqlite")
+
+            plan = repository.plan_rag_maintenance({"limit": 5, "dry_run": True, "requested_by": "test"})
+
+            self.assertTrue(plan["accepted"])
+            self.assertTrue(plan["planned_job_created"])
+            self.assertEqual(plan["reason"], "rag_diagnostics_needs_embeddings")
+            self.assertTrue(plan["diagnostics"]["signals"]["has_corpus"])
+            self.assertFalse(plan["diagnostics"]["signals"]["has_embeddings"])
+            self.assertEqual(plan["job"]["kind"], "rag_embedding_build")
+            self.assertTrue(plan["job_id"].startswith("rag-embedding-plan:"))
+            precheck = repository.job_execution_check(plan["job_id"])
+            self.assertTrue(precheck["executable"])
+            execute = repository.execute_job(plan["job_id"], {"confirm_execution": True, "requested_by": "test"})
+            self.assertTrue(execute["executed"])
+            self.assertEqual(execute["status"], "succeeded")
+            self.assertTrue(execute["runner_result"]["result"]["dry_run"])
         finally:
             shutil.rmtree(root, ignore_errors=True)
 

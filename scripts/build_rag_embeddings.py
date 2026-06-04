@@ -14,9 +14,9 @@ from src.rag.embeddings import DEFAULT_DIMENSIONS, MODEL_NAME, build_rag_embeddi
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="构建本地 RAG embedding 索引。")
-    parser.add_argument("--db-path", default=str(ROOT / "data" / "github_weekly.sqlite"))
-    parser.add_argument("--model", default=MODEL_NAME)
-    parser.add_argument("--dimensions", type=int, default=DEFAULT_DIMENSIONS)
+    parser.add_argument("--db-path", default=str(ROOT / "data" / "github_weekly.sqlite"), help="SQLite 数据库路径。")
+    parser.add_argument("--model", default=MODEL_NAME, help="embedding 模型标识，默认 local-hash-v1。")
+    parser.add_argument("--dimensions", type=int, default=DEFAULT_DIMENSIONS, help="向量维度。")
     args = parser.parse_args()
 
     result = build_rag_embeddings(Path(args.db_path), model=args.model, dimensions=args.dimensions)

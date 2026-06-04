@@ -212,11 +212,11 @@ error
 report_url
 ```
 
-`kind` 当前支持 `weekly_report` 和 `rag_backfill`。`weekly_report` 表示周报任务，`rag_backfill` 表示通过后端 API、维护计划或脚本发起的 RAG 解释回填任务。
+`kind` 当前支持 `weekly_report`、`rag_backfill`、`rag_corpus_rebuild` 和 `rag_embedding_build`。`weekly_report` 表示周报任务，`rag_backfill` 表示 RAG 解释回填任务，`rag_corpus_rebuild` 表示从 JSON 归档重建 SQLite RAG 语料与证据块，`rag_embedding_build` 表示从 `rag_chunks` 构建本地 embedding 索引。
 
-`request` 只公开 `profile`、`sources`、`dry_run`、`requested_dry_run`、`confirm_delivery`、`delivery_allowed`、`days_back`、`trigger_source`、`requested_by`、`safety_warnings`、`limit`、`rag_limit`、`mode`、`model`、`auto_build` 和 `confirm_execution`。这些字段用于任务审计和受控推送/补库确认，不应包含 Token、Chat ID、Webhook 或其他密钥。
+`request` 只公开 `profile`、`sources`、`dry_run`、`requested_dry_run`、`confirm_delivery`、`delivery_allowed`、`days_back`、`trigger_source`、`requested_by`、`safety_warnings`、`limit`、`rag_limit`、`mode`、`model`、`auto_build`、`confirm_execution`、`maintenance_action`、`coverage_limit`、`min_gap_count` 和 `dimensions`。这些字段用于任务审计和受控推送/补库确认，不应包含 Token、Chat ID、Webhook 或其他密钥。
 
-`result` 只公开运行日期、状态、项目数量、Kimi/降级状态、Telegram 状态、报告路径、报告链接、SQLite 同步状态、RAG 回填数量、回填前覆盖概况、回填项目摘要和截断后的错误摘要。RAG 回填任务中的 `processed_repositories` 只保留仓库名、状态、质量分、质量等级和解释编号，不保存完整解释正文。
+`result` 只公开运行日期、状态、项目数量、Kimi/降级状态、Telegram 状态、报告路径、报告链接、SQLite 同步状态、RAG 回填数量、回填前覆盖概况、语料/向量维护计数、回填项目摘要和截断后的错误摘要。RAG 回填任务中的 `processed_repositories` 只保留仓库名、状态、质量分、质量等级和解释编号，不保存完整解释正文。
 
 ## 七、SQLite 表
 

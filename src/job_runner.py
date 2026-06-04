@@ -8,7 +8,8 @@ from pathlib import Path
 from typing import Any, Iterator
 
 from src.models import RunSummary
-from src.storage.sqlite_store import connect, initialize, insert_job_event, upsert_job
+from src.rag.embeddings import DEFAULT_DIMENSIONS, MODEL_NAME, build_rag_embeddings
+from src.storage.sqlite_store import connect, import_json_archive, initialize, insert_job_event, table_count, upsert_job
 from src.weekly_run import run_weekly_report
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -97,6 +98,10 @@ def _execute_job_by_kind(root: Path, db_path: Path, kind: str, request: dict[str
         return result
     if kind == "rag_backfill":
         return _execute_rag_backfill(root=root, db_path=db_path, request=request)
+    if kind == "rag_corpus_rebuild":
+        return _execute_rag_corpus_rebuild(root=root, db_path=db_path, request=request)
+    if kind == "rag_embedding_build":
+        return _execute_rag_embedding_build(db_path=db_path, request=request)
     raise ValueError(f"不支持的任务类型：{kind}")
 
 
@@ -143,6 +148,67 @@ def _execute_rag_backfill(root: Path, db_path: Path, request: dict[str, Any]) ->
             for item in processed
             if isinstance(item, dict)
         ],
+        "request_context": _request_context(request),
+    }
+
+
+def _execute_rag_corpus_rebuild(root: Path, db_path: Path, request: dict[str, Any]) -> dict[str, Any]:
+    dry_run = _bool_value(request.get("dry_run"), True)
+    before_counts = _rag_table_counts(db_path)
+    selected_count = _selected_archive_count(root)
+    if dry_run:
+        return {
+            "run_date": _now()[:10],
+            "status": "ok",
+            "dry_run": True,
+            "selected_archive_count": selected_count,
+            "before_counts": before_counts,
+            "after_counts": before_counts,
+            "message": "dry_run=true，仅预览 RAG 语料重建任务，未写入 SQLite。",
+            "request_context": _request_context(request),
+        }
+
+    counts = import_json_archive(root, db_path)
+    return {
+        "run_date": _now()[:10],
+        "status": "ok",
+        "dry_run": False,
+        "selected_archive_count": selected_count,
+        "import_counts": counts,
+        "before_counts": before_counts,
+        "after_counts": _rag_table_counts(db_path),
+        "request_context": _request_context(request),
+    }
+
+
+def _execute_rag_embedding_build(db_path: Path, request: dict[str, Any]) -> dict[str, Any]:
+    dry_run = _bool_value(request.get("dry_run"), True)
+    model = str(request.get("model") or MODEL_NAME)
+    dimensions = max(8, min(_positive_int(request.get("dimensions")) or DEFAULT_DIMENSIONS, 512))
+    before_counts = _rag_table_counts(db_path)
+    if dry_run:
+        return {
+            "run_date": _now()[:10],
+            "status": "ok",
+            "dry_run": True,
+            "model": model,
+            "dimensions": dimensions,
+            "chunk_count": before_counts.get("rag_chunks", 0),
+            "embedding_count": before_counts.get("rag_embeddings", 0),
+            "before_counts": before_counts,
+            "after_counts": before_counts,
+            "message": "dry_run=true，仅预览 RAG embedding 构建任务，未写入 SQLite。",
+            "request_context": _request_context(request),
+        }
+
+    result = build_rag_embeddings(db_path, model=model, dimensions=dimensions)
+    return {
+        "run_date": _now()[:10],
+        "status": "ok",
+        "dry_run": False,
+        **result,
+        "before_counts": before_counts,
+        "after_counts": _rag_table_counts(db_path),
         "request_context": _request_context(request),
     }
 
@@ -285,9 +351,37 @@ def _request_context(request: dict[str, Any]) -> dict[str, Any]:
             "model",
             "auto_build",
             "confirm_execution",
+            "maintenance_action",
+            "coverage_limit",
+            "min_gap_count",
+            "dimensions",
         )
         if request.get(key) not in (None, "", [])
     }
+
+
+def _rag_table_counts(db_path: Path) -> dict[str, int]:
+    connection = connect(db_path)
+    try:
+        initialize(connection)
+        return {
+            name: table_count(connection, name)
+            for name in ("project_corpus", "rag_chunks", "rag_embeddings", "rag_explanations")
+        }
+    finally:
+        connection.close()
+
+
+def _selected_archive_count(root: Path) -> int:
+    count = 0
+    for path in sorted((root / "data" / "selected").glob("*.json")):
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (FileNotFoundError, json.JSONDecodeError):
+            continue
+        if isinstance(data, list):
+            count += len(data)
+    return count
 
 
 def _json_object(text: str) -> dict[str, Any]:
