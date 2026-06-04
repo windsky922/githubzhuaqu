@@ -546,6 +546,8 @@ POST /v1/jobs/{job_id}/execute
 
 返回结果会包含 `diagnostics`、`coverage`、`gap_count` 和 `min_gap_count`，方便 GitHub Actions、后台管理页或后续 Agent 判断下一步应先建语料、补向量，还是创建解释回填任务。三类任务都会写入 `jobs` 表，可以继续通过 `GET /v1/job-execution-check?job_id=...` 和 `POST /v1/jobs/{job_id}/execute` 检查与执行。
 
+任务详情页 `job.html?job=...&api=1` 会针对 RAG 维护任务展示结构化执行摘要：语料、证据块、embedding 的 before/after 计数、回填候选数、处理数和处理仓库列表，同时保留原始 JSON 结果用于调试。
+
 常用请求字段：
 
 | 字段 | 说明 |

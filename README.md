@@ -134,6 +134,7 @@ docs/weekly/YYYY-MM-DD.md
 
 `jobs.html` 是任务状态面板，直接读取 `jobs.json`，用于查看 planned、running、succeeded、failed 任务状态，以及任务输入、执行结果和错误摘要。
 订阅生成的 planned 任务会把 profile、语言、方向、关键词和数量作为任务上下文传给 job runner；执行结果会记录 `request_context`，便于回看定向任务到底使用了哪些筛选条件。
+`job.html` 是单任务详情页；对 RAG 语料重建、embedding 构建和解释回填任务，会在原始 JSON 结果上方展示 before/after 计数、候选数、处理数和回填仓库摘要。
 
 本地管理首页 `admin.html?api=1` 的 RAG 区域可以直接生成维护计划；后端会根据诊断结果创建语料重建、embedding 构建或解释回填 planned 任务，随后可进入任务详情页检查并执行。
 
