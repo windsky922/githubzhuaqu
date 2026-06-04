@@ -179,6 +179,8 @@ GET /v1/search
 GET /v1/rag/corpus
 GET /v1/rag/retrieve
 GET /v1/rag/vector-search
+GET /v1/rag/explain
+GET /v1/rag/ask
 ```
 
 `/api/projects` 复用历史归档查询能力，支持按语言、方向、profile、来源、风险提示、质量分、Trending 排名和关键词筛选。返回结构保持为：

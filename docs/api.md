@@ -335,6 +335,43 @@ py scripts\build_rag_embeddings.py
 
 这是当前 RAG 从“召回证据”升级到“解释输出”的第一层接口。后续如果接入真实 LLM，应优先复用 `citations` 和 `prompt_context`，并要求模型按引用编号回答。
 
+### `GET /v1/rag/ask`
+
+面向前端和后续 Agent 编排的 RAG 问答入口。它复用 `/v1/rag/explain` 的检索、解释和 SQLite 解释历史写入能力，但返回结构更接近“可直接展示或交给下一步工具”的问答结果。
+
+当前版本仍是本地规则版，不调用外部模型、不读取密钥。后续接入 Kimi、LangChain 或其他问答链时，应优先保持该接口的 `answer + citations + prompt_context + next_actions` 数据边界稳定。
+
+支持参数与 `/v1/rag/explain` 一致：
+
+| 参数 | 说明 |
+|---|---|
+| `q` | 必填，用户问题 |
+| `language` | 可选，按语言过滤 |
+| `category` | 可选，按项目方向过滤 |
+| `source` | 可选，按来源过滤，例如 `github_trending` |
+| `limit` | 返回上下文数量，默认 8，最大 30 |
+| `mode` | 可选，默认 `fts5`；传 `vector` 时走本地向量检索 |
+| `model` | 可选，向量模式下默认 `local-hash-v1` |
+| `auto_build` | 可选，向量模式下索引为空时自动构建本地索引 |
+
+返回字段包含：
+
+1. `answer`：当前规则版回答。
+2. `answer_model`：回答生成策略，当前为 `rule:rag-ask-v1`。
+3. `citations`：回答引用的项目、日期和 chunk ID。
+4. `evidence`：裁剪后的证据摘要。
+5. `quality`：解释质量分与质量等级。
+6. `prompt_context`：后续接入模型时可直接使用的上下文。
+7. `next_actions`：建议的下一步核验或补库动作。
+8. `source_explanation_id`：本次问答复用或写入的 RAG 解释编号。
+
+示例：
+
+```text
+/v1/rag/ask?q=agent%20workflow&language=Python&limit=8
+/v1/rag/ask?q=agent%20workflow&mode=vector&auto_build=true
+```
+
 ### `GET /v1/rag/explanations`
 
 查询已经写入 SQLite 的 RAG 解释历史。每次调用 `/v1/rag/explain` 都会把解释结果写入 `rag_explanations` 表，便于后续查看解释质量、比较 FTS 与向量模式、评估模型替换效果。

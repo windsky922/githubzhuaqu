@@ -63,6 +63,7 @@ class ApiRepository:
                 "rag_retrieve": True,
                 "rag_vector_search": True,
                 "rag_explain": True,
+                "rag_ask": True,
                 "rag_explanations": True,
                 "rag_project_explanations": True,
                 "rag_project_bundle": True,
@@ -496,6 +497,52 @@ class ApiRepository:
             ),
         }
         return self._persist_rag_explanation(result)
+
+    def rag_ask(
+        self,
+        *,
+        query: str,
+        language: str | None = None,
+        category: str | None = None,
+        source: str | None = None,
+        limit: int = 8,
+        mode: str = "fts5",
+        model: str = MODEL_NAME,
+        auto_build: bool = False,
+    ) -> dict[str, Any]:
+        explained = self.rag_explain(
+            query=query,
+            language=language,
+            category=category,
+            source=source,
+            limit=limit,
+            mode=mode,
+            model=model,
+            auto_build=auto_build,
+        )
+        explanation = explained.get("explanation") if isinstance(explained.get("explanation"), dict) else {}
+        quality = explained.get("quality") if isinstance(explained.get("quality"), dict) else {}
+        answer = str(explanation.get("answer") or "当前没有足够 RAG 证据形成回答。")
+        evidence = explanation.get("evidence") if isinstance(explanation.get("evidence"), list) else []
+        citations = explained.get("citations") if isinstance(explained.get("citations"), list) else []
+        contexts = explained.get("contexts") if isinstance(explained.get("contexts"), list) else []
+        return {
+            "schema_version": 1,
+            "query": explained.get("query") or query,
+            "answer": answer,
+            "answer_model": "rule:rag-ask-v1",
+            "confidence": explanation.get("confidence") or "low",
+            "count": len(contexts),
+            "retrieval": explained.get("retrieval") or {},
+            "citations": citations,
+            "evidence": evidence,
+            "quality": quality,
+            "prompt_context": explained.get("prompt_context") or "",
+            "source_explanation_id": explained.get("explanation_id") or "",
+            "cached": bool(explained.get("cached")),
+            "next_actions": _rag_answer_next_actions(explanation=explanation, quality=quality, citations=citations),
+            "contexts": contexts,
+        }
 
     def rag_explanations(
         self,
@@ -3253,6 +3300,23 @@ def _rag_explanation_quality(
             "risk_penalty": risk_penalty,
         },
     }
+
+
+def _rag_answer_next_actions(
+    *,
+    explanation: dict[str, Any],
+    quality: dict[str, Any],
+    citations: list[dict[str, Any]],
+) -> list[str]:
+    actions = _list_strings(explanation.get("next_steps") or [])[:3]
+    quality_level = str(quality.get("level") or "").lower()
+    if quality_level in {"low", "medium"}:
+        actions.insert(0, "先补充 README 摘要、Trending 排名或新增 Star 证据，再让模型生成最终结论。")
+    if citations:
+        actions.append("回答对外展示前，应保留 citations 中的项目链接和 chunk ID。")
+    else:
+        actions.append("当前没有可引用项目，建议扩大关键词或取消语言/方向过滤。")
+    return _unique_strings(actions)[:5]
 
 
 def _rag_quality_recommendations(total_count: int, average_quality_score: float, quality_levels: dict[str, int]) -> list[str]:

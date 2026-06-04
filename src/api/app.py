@@ -295,6 +295,28 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
             auto_build=auto_build,
         )
 
+    @app.get("/v1/rag/ask")
+    def v1_rag_ask(
+        q: str = Query(..., min_length=1),
+        language: str | None = None,
+        category: str | None = None,
+        source: str | None = None,
+        limit: int = Query(default=8, ge=1, le=30),
+        mode: str = "fts5",
+        model: str | None = None,
+        auto_build: bool = False,
+    ) -> dict[str, Any]:
+        return repository.rag_ask(
+            query=q,
+            language=language,
+            category=category,
+            source=source,
+            limit=limit,
+            mode=mode,
+            model=model or "local-hash-v1",
+            auto_build=auto_build,
+        )
+
     @app.get("/v1/rag/explanations")
     def v1_rag_explanations(
         q: str | None = None,

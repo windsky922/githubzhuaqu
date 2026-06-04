@@ -2,6 +2,20 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-06-04 追加：新增 RAG 问答接口
+
+### 1. 开发目的
+数据库和 RAG 已经具备语料、检索、向量召回、解释和质量评估，但前端或后续 Agent 仍需要一个更直接的“提问 -> 回答 -> 引用 -> 下一步动作”入口。为了优先推进核心能力，本次新增本地规则版 RAG 问答接口，不引入外部模型依赖，也不重复实现检索管线。
+
+### 2. 修改内容
+1. 新增 `ApiRepository.rag_ask`，复用 `rag_explain` 的检索、解释和 SQLite 解释历史写入能力。
+2. 新增 `GET /v1/rag/ask`，返回 `answer`、`answer_model`、`citations`、`evidence`、`quality`、`prompt_context`、`next_actions` 和 `source_explanation_id`。
+3. `/v1/health` 能力声明新增 `rag_ask`。
+4. 更新 API 文档、数据契约和后端测试。
+
+### 3. 后续空间
+当前 `answer_model` 为 `rule:rag-ask-v1`。后续接入 Kimi、LangChain 或真实 embedding 后，应优先保持 `answer + citations + prompt_context + next_actions` 返回边界稳定，只替换内部生成器和检索器。
+
 ## 2026-06-01 追加：GitHub Actions 接入 RAG 维护计划
 
 ### 1. 开发目的
