@@ -450,6 +450,16 @@
       <div id="ragSearchResults" class="search-results"></div>
       <div id="ragQualitySummary" class="search-results"></div>
       <div class="search-form">
+        <label>维护数量
+          <input id="ragMaintenanceLimit" type="number" min="1" max="100" value="10">
+        </label>
+        <label>覆盖检查
+          <input id="ragMaintenanceCoverageLimit" type="number" min="1" max="500" value="100">
+        </label>
+        <button id="planRagMaintenance" type="button">生成维护计划</button>
+      </div>
+      <div id="ragMaintenanceResults" class="search-results"></div>
+      <div class="search-form">
         <label>回填数量
           <input id="ragBackfillLimit" type="number" min="1" max="100" value="5">
         </label>
@@ -549,6 +559,7 @@
     const corpusSearchResults = document.getElementById("corpusSearchResults");
     const ragSearchResults = document.getElementById("ragSearchResults");
     const ragQualitySummary = document.getElementById("ragQualitySummary");
+    const ragMaintenanceResults = document.getElementById("ragMaintenanceResults");
     const ragBackfillResults = document.getElementById("ragBackfillResults");
     const adminState = { jobs: [], jobFilter: "attention" };
     const createControls = {
@@ -578,6 +589,11 @@
       confirm: document.getElementById("confirmRagBackfill"),
       runButton: document.getElementById("runRagBackfill"),
     };
+    const ragMaintenanceControls = {
+      limit: document.getElementById("ragMaintenanceLimit"),
+      coverageLimit: document.getElementById("ragMaintenanceCoverageLimit"),
+      button: document.getElementById("planRagMaintenance"),
+    };
 
     loadHealth();
     loadOverview();
@@ -586,6 +602,7 @@
     setupCorpusSearch();
     setupRagSearch();
     setupRagBackfill();
+    setupRagMaintenance();
     bindWorkbenchFilters();
     jobWorkbench.addEventListener("click", handleWorkbenchAction);
 
@@ -642,6 +659,16 @@
       ragBackfillResults.innerHTML = '<p>先预览缺少解释历史的项目，再确认是否写入 SQLite。</p>';
       ragBackfillControls.previewButton.addEventListener("click", () => runRagBackfill(true));
       ragBackfillControls.runButton.addEventListener("click", () => runRagBackfill(false));
+    }
+
+    function setupRagMaintenance() {
+      if (!shouldUseApi()) {
+        ragMaintenanceControls.button.disabled = true;
+        ragMaintenanceResults.innerHTML = '<p>RAG 维护计划需要本地后端或 api=1 模式。</p>';
+        return;
+      }
+      ragMaintenanceResults.innerHTML = '<p>根据诊断结果生成 planned 维护任务；执行仍需进入任务详情页确认。</p>';
+      ragMaintenanceControls.button.addEventListener("click", runRagMaintenancePlan);
     }
 
     function runCorpusSearch() {
@@ -728,6 +755,38 @@
         .finally(() => {
           ragBackfillControls.previewButton.disabled = false;
           ragBackfillControls.runButton.disabled = false;
+        });
+    }
+
+    function runRagMaintenancePlan() {
+      const limit = Math.max(1, Math.min(Number(ragMaintenanceControls.limit.value || 10), 100));
+      const coverageLimit = Math.max(1, Math.min(Number(ragMaintenanceControls.coverageLimit.value || 100), 500));
+      const payload = {
+        limit,
+        coverage_limit: coverageLimit,
+        min_gap_count: 1,
+        dry_run: true,
+        requested_by: "local-admin",
+        trigger_source: "admin_page",
+      };
+      ragMaintenanceControls.button.disabled = true;
+      ragMaintenanceResults.innerHTML = '<p>正在生成 RAG 维护计划...</p>';
+      fetch("/v1/rag/maintenance-plan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+        .then(jsonOrThrow)
+        .then(data => {
+          ragMaintenanceResults.innerHTML = ragMaintenancePlanHtml(data);
+          return loadOverview();
+        })
+        .then(() => loadDatabaseInsights())
+        .catch(error => {
+          ragMaintenanceResults.innerHTML = `<p>RAG 维护计划生成失败：${escapeHtml(error.message || error)}</p>`;
+        })
+        .finally(() => {
+          ragMaintenanceControls.button.disabled = false;
         });
     }
 
@@ -1128,6 +1187,29 @@
         "<h4>诊断建议</h4>",
         actionHtml,
       ].join("");
+    }
+
+    function ragMaintenancePlanHtml(data) {
+      const jobId = data.job_id || "";
+      const job = data.job || {};
+      const detail = jobId ? `<a href="${escapeAttribute(jobDetailUrl(jobId))}">打开任务详情</a>` : "";
+      const warnings = data.safety_warnings || [];
+      const diagnostics = data.diagnostics || {};
+      const warningHtml = warnings.length
+        ? `<p>${warnings.map(item => escapeHtml(item)).join("；")}</p>`
+        : "";
+      return [
+        "<h3>RAG 维护计划</h3>",
+        `<div class="overview">${[
+          metric("计划状态", data.planned_job_created ? "已创建" : "未创建"),
+          metric("维护类型", job.kind || "-"),
+          metric("诊断原因", data.reason || "-"),
+          metric("覆盖缺口", data.gap_count || 0),
+        ].join("")}</div>`,
+        jobId ? `<p>任务编号：<code>${escapeHtml(jobId)}</code> ${detail}</p>` : "<p>当前不需要创建维护任务。</p>",
+        diagnostics.status ? `<p>诊断状态：${escapeHtml(diagnostics.status || "")}，健康等级：${escapeHtml(diagnostics.level || "")}</p>` : "",
+        warningHtml,
+      ].filter(Boolean).join("");
     }
 
     function ragBackfillHtml(data) {
