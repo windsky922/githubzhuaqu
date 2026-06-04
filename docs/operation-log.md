@@ -2,6 +2,20 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-06-04 追加：新增 RAG 诊断接口
+
+### 1. 开发目的
+当前项目已经具备 RAG 语料、证据检索、向量检索、问答、解释历史和回填任务，但这些能力分散在多个接口里。为了让后续 Agent 能先判断数据库/RAG 是否健康，再决定是否补库、构建 embedding 或进入问答，本次新增统一诊断入口。
+
+### 2. 修改内容
+1. 新增 `ApiRepository.rag_diagnostics`，组合 `database_summary`、`rag_quality_summary` 和 `rag_coverage`。
+2. 新增 `GET /v1/rag/diagnostics`，返回 `status`、`level`、`signals`、核心表计数、质量摘要、覆盖缺口和 `next_actions`。
+3. `/v1/health` 能力声明新增 `rag_diagnostics`。
+4. 更新 API 文档、数据契约和后端测试。
+
+### 3. 后续空间
+该接口可作为 GitHub Actions 自动维护、管理页健康面板和后续 LangChain/Agent 自检的统一入口。后续如果升级到 PostgreSQL、pgvector 或真实 embedding，应保持诊断字段稳定，只替换内部统计来源。
+
 ## 2026-06-04 追加：管理首页接入 RAG 问答
 
 ### 1. 开发目的

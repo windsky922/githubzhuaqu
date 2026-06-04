@@ -457,6 +457,32 @@ python scripts/backfill_rag_explanations.py --dry-run
 python scripts/backfill_rag_explanations.py --limit 10
 ```
 
+### `GET /v1/rag/diagnostics`
+
+返回数据库/RAG 的统一健康诊断。它组合 SQLite 表计数、RAG 质量摘要和覆盖缺口，不写入数据、不调用外部模型，适合本地管理页、GitHub Actions 或后续 Agent 自检使用。
+
+支持参数：
+
+| 参数 | 说明 |
+|---|---|
+| `limit` | 返回低质量样本和覆盖缺口数量，默认 10，最大 50 |
+
+返回字段包含：
+
+1. `status`：诊断状态，例如 `needs_corpus`、`needs_explanations`、`needs_maintenance`、`ready_for_text_rag` 或 `ready`。
+2. `level`：健康等级，可能为 `low`、`medium` 或 `high`。
+3. `signals`：布尔信号，包括是否已有语料、证据块、embedding、解释历史，以及是否可回答。
+4. `table_counts`：核心 RAG 表记录数。
+5. `quality`：解释历史数量、平均质量分和质量分布。
+6. `coverage`：项目覆盖率、缺口数量和缺口样本。
+7. `next_actions`：建议的下一步维护动作。
+
+示例：
+
+```text
+/v1/rag/diagnostics?limit=10
+```
+
 ### `POST /v1/rag/backfill-explanations`
 
 按 `/v1/rag/coverage` 的缺口结果，为缺少解释历史的项目批量生成规则版 RAG 解释。该接口只使用本地 SQLite 和现有 RAG 检索逻辑，不调用外部模型、不请求 GitHub/Kimi/Telegram。
