@@ -131,6 +131,12 @@ class ApiRepositoryTest(unittest.TestCase):
                 limit=5,
                 auto_build=True,
             )
+            rag_hybrid_search = repository.rag_hybrid_search(
+                query="agent workflow",
+                language="Python",
+                limit=5,
+                auto_build=True,
+            )
             rag_explain = repository.rag_explain(query="agent workflow", language="Python", limit=5)
             rag_ask = repository.rag_ask(query="agent workflow", language="Python", limit=5)
             rag_explanations = repository.rag_explanations(query="agent", limit=5)
@@ -224,6 +230,7 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertTrue(health["capabilities"]["rag_corpus"])
             self.assertTrue(health["capabilities"]["rag_retrieve"])
             self.assertTrue(health["capabilities"]["rag_vector_search"])
+            self.assertTrue(health["capabilities"]["rag_hybrid_search"])
             self.assertTrue(health["capabilities"]["rag_explain"])
             self.assertTrue(health["capabilities"]["rag_ask"])
             self.assertTrue(health["capabilities"]["rag_project_explanations"])
@@ -361,6 +368,11 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertTrue(rag_ask["citations"])
             self.assertTrue(rag_ask["next_actions"])
             self.assertTrue(rag_ask["source_explanation_id"].startswith("ragx:"))
+            self.assertGreaterEqual(rag_hybrid_search["count"], 1)
+            self.assertEqual(rag_hybrid_search["retrieval"]["mode"], "hybrid")
+            self.assertIn("text", rag_hybrid_search["contexts"][0]["retrieval_sources"])
+            self.assertIn("vector", rag_hybrid_search["contexts"][0]["retrieval_sources"])
+            self.assertTrue(rag_hybrid_search["citations"])
             self.assertGreaterEqual(rag_explanations["count"], 1)
             self.assertEqual(rag_explanations["explanations"][0]["explanation_id"], rag_explain["explanation_id"])
             self.assertIn("owner/agent", rag_explanations["explanations"][0]["answer"])
@@ -533,6 +545,10 @@ class ApiRepositoryTest(unittest.TestCase):
                 "/v1/rag/vector-search",
                 params={"q": "agent workflow", "language": "Python", "limit": 5, "auto_build": True},
             )
+            v1_rag_hybrid_search = client.get(
+                "/v1/rag/hybrid-search",
+                params={"q": "agent workflow", "language": "Python", "limit": 5, "auto_build": True},
+            )
             v1_rag_explain = client.get(
                 "/v1/rag/explain",
                 params={"q": "agent workflow", "language": "Python", "limit": 5},
@@ -664,6 +680,7 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(v1_rag_corpus.status_code, 200)
             self.assertEqual(v1_rag_retrieve.status_code, 200)
             self.assertEqual(v1_rag_vector_search.status_code, 200)
+            self.assertEqual(v1_rag_hybrid_search.status_code, 200)
             self.assertEqual(v1_rag_explain.status_code, 200)
             self.assertEqual(v1_rag_ask.status_code, 200)
             self.assertEqual(v1_rag_explanations.status_code, 200)
@@ -720,6 +737,9 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertTrue(v1_rag_retrieve.json()["citations"])
             self.assertIn("owner/agent", [item["metadata"]["full_name"] for item in v1_rag_vector_search.json()["contexts"]])
             self.assertTrue(v1_rag_vector_search.json()["citations"])
+            self.assertIn("owner/agent", [item["metadata"]["full_name"] for item in v1_rag_hybrid_search.json()["contexts"]])
+            self.assertEqual(v1_rag_hybrid_search.json()["retrieval"]["mode"], "hybrid")
+            self.assertTrue(v1_rag_hybrid_search.json()["citations"])
             self.assertEqual(v1_rag_explain.json()["explanation"]["scoring_model"], "rule:rag-explain-v1")
             self.assertTrue(v1_rag_explain.json()["explanation_id"].startswith("ragx:"))
             self.assertGreaterEqual(v1_rag_explain.json()["quality"]["score"], 1)

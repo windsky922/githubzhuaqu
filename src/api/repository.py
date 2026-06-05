@@ -70,6 +70,7 @@ class ApiRepository:
                 "rag_corpus": True,
                 "rag_retrieve": True,
                 "rag_vector_search": True,
+                "rag_hybrid_search": True,
                 "rag_explain": True,
                 "rag_ask": True,
                 "rag_explanations": True,
@@ -444,6 +445,86 @@ class ApiRepository:
             "retrieval": {"mode": "vector", "model": model, "limit": limit, "auto_build": bool(auto_build)},
             "prompt_context": _rag_prompt_context(contexts),
             "summary": _rag_vector_summary(contexts, model),
+        }
+
+    def rag_hybrid_search(
+        self,
+        *,
+        query: str,
+        language: str | None = None,
+        category: str | None = None,
+        source: str | None = None,
+        limit: int = 8,
+        model: str = MODEL_NAME,
+        auto_build: bool = False,
+    ) -> dict[str, Any]:
+        normalized_query = (_blank_to_none(query) or "").strip()
+        terms = _search_terms(normalized_query)
+        limit = max(1, min(int(limit or 8), 30))
+        model = _blank_to_none(model) or MODEL_NAME
+        if not terms:
+            return {
+                "schema_version": 1,
+                "query": normalized_query,
+                "count": 0,
+                "contexts": [],
+                "citations": [],
+                "retrieval": {
+                    "mode": "hybrid",
+                    "terms": [],
+                    "limit": limit,
+                    "model": model,
+                    "auto_build": bool(auto_build),
+                    "weights": {"text": 0.55, "vector": 0.45},
+                },
+                "prompt_context": "",
+                "summary": ["请输入用于混合 RAG 检索的问题或关键词。"],
+            }
+
+        candidate_limit = min(30, max(limit * 2, limit))
+        text_result = self.rag_retrieve(
+            query=normalized_query,
+            language=language,
+            category=category,
+            source=source,
+            limit=candidate_limit,
+        )
+        vector_result = self.rag_vector_search(
+            query=normalized_query,
+            language=language,
+            category=category,
+            source=source,
+            limit=candidate_limit,
+            model=model,
+            auto_build=auto_build,
+        )
+        contexts = _merge_hybrid_contexts(
+            text_result.get("contexts") if isinstance(text_result.get("contexts"), list) else [],
+            vector_result.get("contexts") if isinstance(vector_result.get("contexts"), list) else [],
+            limit=limit,
+        )
+        return {
+            "schema_version": 1,
+            "query": normalized_query,
+            "language": _blank_to_none(language) or "",
+            "category": _blank_to_none(category) or "",
+            "source": _blank_to_none(source) or "",
+            "count": len(contexts),
+            "contexts": contexts,
+            "citations": _rag_citations(contexts),
+            "retrieval": {
+                "mode": "hybrid",
+                "terms": terms,
+                "limit": limit,
+                "model": model,
+                "auto_build": bool(auto_build),
+                "weights": {"text": 0.55, "vector": 0.45},
+                "text_mode": text_result.get("retrieval", {}).get("mode") or "",
+                "text_count": len(text_result.get("contexts") or []),
+                "vector_count": len(vector_result.get("contexts") or []),
+            },
+            "prompt_context": _rag_prompt_context(contexts),
+            "summary": _rag_hybrid_summary(contexts, model),
         }
 
     def rag_explain(
@@ -3490,6 +3571,75 @@ def _rag_vector_summary(contexts: list[dict[str, Any]], model: str) -> list[str]
     return [
         f"本地向量索引召回 {len(contexts)} 个证据块，模型：{model}。",
         f"覆盖 {len(repositories)} 个项目：{'、'.join(repositories[:5])}。",
+    ]
+
+
+def _merge_hybrid_contexts(
+    text_contexts: list[dict[str, Any]],
+    vector_contexts: list[dict[str, Any]],
+    *,
+    limit: int,
+) -> list[dict[str, Any]]:
+    merged: dict[tuple[str, int], dict[str, Any]] = {}
+    _add_hybrid_contexts(merged, text_contexts, source="text", weight=0.55)
+    _add_hybrid_contexts(merged, vector_contexts, source="vector", weight=0.45)
+    contexts = list(merged.values())
+    for context in contexts:
+        context["retrieval_sources"] = sorted(set(_list_strings(context.get("retrieval_sources") or [])))
+        context["score"] = round(float(context.get("hybrid_score") or 0), 6)
+    contexts.sort(
+        key=lambda item: (
+            float(item.get("score") or 0),
+            len(item.get("retrieval_sources") or []),
+            item.get("metadata", {}).get("run_date") or "",
+            item.get("metadata", {}).get("full_name") or "",
+        ),
+        reverse=True,
+    )
+    return contexts[:limit]
+
+
+def _add_hybrid_contexts(
+    merged: dict[tuple[str, int], dict[str, Any]],
+    contexts: list[dict[str, Any]],
+    *,
+    source: str,
+    weight: float,
+) -> None:
+    total = max(len(contexts), 1)
+    for index, context in enumerate(contexts, start=1):
+        metadata = context.get("metadata") if isinstance(context.get("metadata"), dict) else {}
+        key = (
+            str(metadata.get("full_name") or "").lower(),
+            _int_value(metadata.get("chunk_index")),
+        )
+        if not key[0]:
+            continue
+        rank_score = (total - index + 1) / total
+        item = merged.get(key)
+        if not item:
+            item = json.loads(json.dumps(context, ensure_ascii=False))
+            item["hybrid_score"] = 0.0
+            item["retrieval_sources"] = []
+            item["retrieval_scores"] = {}
+            merged[key] = item
+        item["hybrid_score"] = round(float(item.get("hybrid_score") or 0) + rank_score * weight, 6)
+        item["retrieval_sources"].append(source)
+        item["retrieval_scores"][source] = context.get("score", 0)
+
+
+def _rag_hybrid_summary(contexts: list[dict[str, Any]], model: str) -> list[str]:
+    if not contexts:
+        return [f"混合检索没有命中证据块；请放宽过滤条件，或先构建 {model} 向量索引。"]
+    repositories = _unique_strings(context.get("metadata", {}).get("full_name") or "" for context in contexts)
+    source_counts = {
+        "text": sum(1 for context in contexts if "text" in _list_strings(context.get("retrieval_sources") or [])),
+        "vector": sum(1 for context in contexts if "vector" in _list_strings(context.get("retrieval_sources") or [])),
+    }
+    return [
+        f"混合检索召回 {len(contexts)} 个证据块，覆盖 {len(repositories)} 个项目。",
+        f"文本命中 {source_counts['text']} 个，向量命中 {source_counts['vector']} 个，向量模型：{model}。",
+        f"优先项目：{'、'.join(repositories[:5])}。",
     ]
 
 

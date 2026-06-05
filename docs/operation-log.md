@@ -2,6 +2,21 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-06-05 追加：RAG 混合检索接口
+
+### 1. 开发目的
+当前后端已经分别提供 FTS5 文本检索和本地向量检索，但后续 Agent/RAG 编排更需要一个稳定的统一召回入口。为了优先推进数据库/RAG核心能力，本次新增混合检索接口，把文本召回和向量召回合并、去重并重新排序。
+
+### 2. 修改内容
+1. 新增 `GET /v1/rag/hybrid-search`。
+2. `ApiRepository.rag_hybrid_search` 复用 `/v1/rag/retrieve` 和 `/v1/rag/vector-search` 的结果。
+3. 混合排序采用固定权重：文本召回 0.55，向量召回 0.45。
+4. 每条证据块新增 `retrieval_sources` 和 `retrieval_scores`，便于判断证据来自文本、向量或两者共同命中。
+5. 更新 README、API 文档和后端测试。
+
+### 3. 后续空间
+后续可以让 `/v1/rag/explain` 和 `/v1/rag/ask` 支持 `mode=hybrid`，并把混合检索作为 LangChain retriever 或推荐解释重排的默认候选层。
+
 ## 2026-06-05 追加：RAG 维护历史汇总接口
 
 ### 1. 开发目的
