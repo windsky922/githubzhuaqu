@@ -342,9 +342,9 @@ py scripts\build_rag_embeddings.py
 | `category` | 可选，按项目方向过滤 |
 | `source` | 可选，按来源过滤，例如 `github_trending` |
 | `limit` | 返回上下文数量，默认 8，最大 30 |
-| `mode` | 可选，默认 `fts5`；传 `vector` 时走本地向量检索 |
-| `model` | 可选，向量模式下默认 `local-hash-v1` |
-| `auto_build` | 可选，向量模式下索引为空时自动构建本地索引 |
+| `mode` | 可选，默认 `fts5`；传 `vector` 走本地向量检索，传 `hybrid` 同时使用文本和向量混合检索 |
+| `model` | 可选，向量或混合模式下默认 `local-hash-v1` |
+| `auto_build` | 可选，向量或混合模式下索引为空时自动构建本地索引 |
 
 返回字段包含：
 
@@ -362,6 +362,7 @@ py scripts\build_rag_embeddings.py
 ```text
 /v1/rag/explain?q=agent%20workflow&language=Python&limit=8
 /v1/rag/explain?q=agent%20workflow&mode=vector&auto_build=true
+/v1/rag/explain?q=agent%20workflow&mode=hybrid&auto_build=true
 ```
 
 这是当前 RAG 从“召回证据”升级到“解释输出”的第一层接口。后续如果接入真实 LLM，应优先复用 `citations` 和 `prompt_context`，并要求模型按引用编号回答。
@@ -381,9 +382,9 @@ py scripts\build_rag_embeddings.py
 | `category` | 可选，按项目方向过滤 |
 | `source` | 可选，按来源过滤，例如 `github_trending` |
 | `limit` | 返回上下文数量，默认 8，最大 30 |
-| `mode` | 可选，默认 `fts5`；传 `vector` 时走本地向量检索 |
-| `model` | 可选，向量模式下默认 `local-hash-v1` |
-| `auto_build` | 可选，向量模式下索引为空时自动构建本地索引 |
+| `mode` | 可选，默认 `fts5`；传 `vector` 走本地向量检索，传 `hybrid` 同时使用文本和向量混合检索 |
+| `model` | 可选，向量或混合模式下默认 `local-hash-v1` |
+| `auto_build` | 可选，向量或混合模式下索引为空时自动构建本地索引 |
 
 返回字段包含：
 
@@ -401,6 +402,7 @@ py scripts\build_rag_embeddings.py
 ```text
 /v1/rag/ask?q=agent%20workflow&language=Python&limit=8
 /v1/rag/ask?q=agent%20workflow&mode=vector&auto_build=true
+/v1/rag/ask?q=agent%20workflow&mode=hybrid&auto_build=true
 ```
 
 ### `GET /v1/rag/explanations`

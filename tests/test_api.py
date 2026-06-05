@@ -139,6 +139,20 @@ class ApiRepositoryTest(unittest.TestCase):
             )
             rag_explain = repository.rag_explain(query="agent workflow", language="Python", limit=5)
             rag_ask = repository.rag_ask(query="agent workflow", language="Python", limit=5)
+            rag_hybrid_explain = repository.rag_explain(
+                query="agent workflow",
+                language="Python",
+                limit=5,
+                mode="hybrid",
+                auto_build=True,
+            )
+            rag_hybrid_ask = repository.rag_ask(
+                query="agent workflow",
+                language="Python",
+                limit=5,
+                mode="hybrid",
+                auto_build=True,
+            )
             rag_explanations = repository.rag_explanations(query="agent", limit=5)
             project_rag_explanations = repository.rag_explanations(repo="owner/agent", limit=5)
             project_rag_bundle = repository.project_rag_bundle("owner/agent", limit=5, explanation_limit=5)
@@ -373,8 +387,15 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertIn("text", rag_hybrid_search["contexts"][0]["retrieval_sources"])
             self.assertIn("vector", rag_hybrid_search["contexts"][0]["retrieval_sources"])
             self.assertTrue(rag_hybrid_search["citations"])
+            self.assertEqual(rag_hybrid_explain["retrieval"]["mode"], "hybrid")
+            self.assertIn("owner/agent", rag_hybrid_explain["explanation"]["answer"])
+            self.assertEqual(rag_hybrid_ask["retrieval"]["mode"], "hybrid")
+            self.assertIn("owner/agent", rag_hybrid_ask["answer"])
             self.assertGreaterEqual(rag_explanations["count"], 1)
-            self.assertEqual(rag_explanations["explanations"][0]["explanation_id"], rag_explain["explanation_id"])
+            self.assertIn(
+                rag_explain["explanation_id"],
+                [item["explanation_id"] for item in rag_explanations["explanations"]],
+            )
             self.assertIn("owner/agent", rag_explanations["explanations"][0]["answer"])
             self.assertEqual(rag_explanations["explanations"][0]["quality_score"], rag_explain["quality"]["score"])
             self.assertEqual(rag_explanations["explanations"][0]["quality_level"], rag_explain["quality"]["level"])
@@ -553,9 +574,29 @@ class ApiRepositoryTest(unittest.TestCase):
                 "/v1/rag/explain",
                 params={"q": "agent workflow", "language": "Python", "limit": 5},
             )
+            v1_rag_hybrid_explain = client.get(
+                "/v1/rag/explain",
+                params={
+                    "q": "agent workflow",
+                    "language": "Python",
+                    "limit": 5,
+                    "mode": "hybrid",
+                    "auto_build": True,
+                },
+            )
             v1_rag_ask = client.get(
                 "/v1/rag/ask",
                 params={"q": "agent workflow", "language": "Python", "limit": 5},
+            )
+            v1_rag_hybrid_ask = client.get(
+                "/v1/rag/ask",
+                params={
+                    "q": "agent workflow",
+                    "language": "Python",
+                    "limit": 5,
+                    "mode": "hybrid",
+                    "auto_build": True,
+                },
             )
             v1_rag_explanations = client.get(
                 "/v1/rag/explanations",
@@ -682,7 +723,9 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(v1_rag_vector_search.status_code, 200)
             self.assertEqual(v1_rag_hybrid_search.status_code, 200)
             self.assertEqual(v1_rag_explain.status_code, 200)
+            self.assertEqual(v1_rag_hybrid_explain.status_code, 200)
             self.assertEqual(v1_rag_ask.status_code, 200)
+            self.assertEqual(v1_rag_hybrid_ask.status_code, 200)
             self.assertEqual(v1_rag_explanations.status_code, 200)
             self.assertEqual(v1_project_rag_explanations.status_code, 200)
             self.assertEqual(v1_project_rag.status_code, 200)
@@ -744,9 +787,13 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertTrue(v1_rag_explain.json()["explanation_id"].startswith("ragx:"))
             self.assertGreaterEqual(v1_rag_explain.json()["quality"]["score"], 1)
             self.assertIn("owner/agent", v1_rag_explain.json()["explanation"]["answer"])
+            self.assertEqual(v1_rag_hybrid_explain.json()["retrieval"]["mode"], "hybrid")
+            self.assertIn("owner/agent", v1_rag_hybrid_explain.json()["explanation"]["answer"])
             self.assertEqual(v1_rag_ask.json()["answer_model"], "rule:rag-ask-v1")
             self.assertIn("owner/agent", v1_rag_ask.json()["answer"])
             self.assertTrue(v1_rag_ask.json()["next_actions"])
+            self.assertEqual(v1_rag_hybrid_ask.json()["retrieval"]["mode"], "hybrid")
+            self.assertIn("owner/agent", v1_rag_hybrid_ask.json()["answer"])
             self.assertIn("ready_for_answering", v1_rag_diagnostics.json()["signals"])
             self.assertTrue(v1_rag_diagnostics.json()["next_actions"])
             self.assertEqual(v1_rag_maintenance_report.json()["schema_version"], 1)

@@ -540,7 +540,17 @@ class ApiRepository:
         auto_build: bool = False,
     ) -> dict[str, Any]:
         normalized_mode = (_blank_to_none(mode) or "fts5").lower()
-        if normalized_mode in {"vector", "embedding", "semantic"}:
+        if normalized_mode in {"hybrid", "mixed"}:
+            retrieval = self.rag_hybrid_search(
+                query=query,
+                language=language,
+                category=category,
+                source=source,
+                limit=limit,
+                model=model,
+                auto_build=auto_build,
+            )
+        elif normalized_mode in {"vector", "embedding", "semantic"}:
             retrieval = self.rag_vector_search(
                 query=query,
                 language=language,

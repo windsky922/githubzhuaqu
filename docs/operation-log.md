@@ -2,6 +2,20 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-06-05 追加：RAG 解释与问答接入混合检索
+
+### 1. 开发目的
+`/v1/rag/hybrid-search` 已经提供文本和向量的统一召回入口，但解释和问答接口仍只能在 FTS5 与向量模式之间二选一。为了让后续 Agent 和前端直接使用更稳定的证据召回，本次把 `mode=hybrid` 接入 `/v1/rag/explain` 和 `/v1/rag/ask`。
+
+### 2. 修改内容
+1. `ApiRepository.rag_explain` 新增 `hybrid` 和 `mixed` 模式分支。
+2. `/v1/rag/explain?mode=hybrid` 会调用 `rag_hybrid_search`，并继续写入 `rag_explanations`。
+3. `/v1/rag/ask?mode=hybrid` 复用解释接口，返回混合检索后的回答、引用和 `prompt_context`。
+4. 更新 README、API 文档和后端测试。
+
+### 3. 后续空间
+后续可以在管理首页 RAG 问答区增加检索模式选择，但当前先保持后端能力稳定，不做额外 UI 扩展。
+
 ## 2026-06-05 追加：RAG 混合检索接口
 
 ### 1. 开发目的
