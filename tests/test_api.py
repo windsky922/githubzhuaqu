@@ -154,6 +154,7 @@ class ApiRepositoryTest(unittest.TestCase):
             rag_maintenance_duplicate = repository.plan_rag_maintenance(
                 {"limit": 1, "dry_run": True, "requested_by": "test"}
             )
+            rag_maintenance_report = repository.rag_maintenance_report(limit=5)
             database_summary_after_explain = repository.database_summary()
             similar = repository.similar_projects("owner/agent", limit=5)
             comparison = repository.compare_projects(["owner/agent", "owner/agent-helper", "missing/repo"])
@@ -232,6 +233,7 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertTrue(health["capabilities"]["rag_diagnostics"])
             self.assertTrue(health["capabilities"]["rag_backfill_explanations"])
             self.assertTrue(health["capabilities"]["rag_maintenance_plan"])
+            self.assertTrue(health["capabilities"]["rag_maintenance_report"])
             self.assertEqual(jobs["jobs"][0]["job_id"], "run:2026-05-09")
             self.assertTrue(job_detail["found"])
             self.assertEqual(job_detail["run_summary"]["run_date"], "2026-05-09")
@@ -411,6 +413,11 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertFalse(rag_maintenance_duplicate["planned_job_created"])
             self.assertEqual(rag_maintenance_duplicate["duplicate_of"], rag_maintenance_plan["job_id"])
             self.assertIn("diagnostics", rag_maintenance_duplicate)
+            self.assertEqual(rag_maintenance_report["schema_version"], 1)
+            self.assertGreaterEqual(rag_maintenance_report["count"], 1)
+            self.assertIn("rag_backfill", rag_maintenance_report["kind_counts"])
+            self.assertTrue(rag_maintenance_report["latest_success"]["job_id"])
+            self.assertTrue(rag_maintenance_report["recommendations"])
             self.assertGreaterEqual(database_summary_after_explain["table_counts"]["rag_explanations"], 1)
             self.assertTrue(database_summary_after_explain["rag_readiness"]["ready_for_explanation_history"])
             self.assertTrue(similar["found"])
@@ -570,10 +577,15 @@ class ApiRepositoryTest(unittest.TestCase):
                 "/v1/jobs",
                 params={"status": "succeeded", "kind": "rag_backfill", "limit": 5},
             )
+            v1_rag_corpus_jobs = client.get(
+                "/v1/jobs",
+                params={"kind": "rag_corpus_rebuild", "limit": 5},
+            )
             v1_rag_backfill_events = client.get(
                 f"/v1/jobs/{v1_rag_backfill.json()['job_id']}/events",
                 params={"limit": 5},
             )
+            v1_rag_maintenance_report = client.get("/v1/rag/maintenance-report", params={"limit": 5})
             v1_similar = client.get("/v1/projects/owner/agent/similar", params={"limit": 5})
             v1_compare = client.get(
                 "/v1/projects/compare",
@@ -660,12 +672,14 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(v1_rag_quality_summary.status_code, 200)
             self.assertEqual(v1_rag_coverage.status_code, 200)
             self.assertEqual(v1_rag_diagnostics.status_code, 200)
+            self.assertEqual(v1_rag_maintenance_report.status_code, 200)
             self.assertEqual(v1_rag_backfill.status_code, 202)
             self.assertEqual(v1_rag_backfill_plan.status_code, 202)
             self.assertEqual(v1_rag_backfill_plan_check.status_code, 200)
             self.assertEqual(v1_rag_backfill_plan_execute.status_code, 200)
             self.assertEqual(v1_rag_maintenance_plan.status_code, 202)
             self.assertEqual(v1_rag_backfill_jobs.status_code, 200)
+            self.assertEqual(v1_rag_corpus_jobs.status_code, 200)
             self.assertEqual(v1_rag_backfill_events.status_code, 200)
             self.assertEqual(v1_similar.status_code, 200)
             self.assertEqual(v1_compare.status_code, 200)
@@ -715,6 +729,9 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertTrue(v1_rag_ask.json()["next_actions"])
             self.assertIn("ready_for_answering", v1_rag_diagnostics.json()["signals"])
             self.assertTrue(v1_rag_diagnostics.json()["next_actions"])
+            self.assertEqual(v1_rag_maintenance_report.json()["schema_version"], 1)
+            self.assertIn("rag_backfill", v1_rag_maintenance_report.json()["kind_counts"])
+            self.assertTrue(v1_rag_maintenance_report.json()["recommendations"])
             self.assertGreaterEqual(v1_rag_explanations.json()["count"], 1)
             self.assertIn("quality_score", v1_rag_explanations.json()["explanations"][0])
             self.assertIn("owner/agent", v1_rag_explanations.json()["explanations"][0]["answer"])

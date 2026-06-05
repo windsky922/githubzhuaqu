@@ -81,6 +81,7 @@ class ApiRepository:
                 "rag_backfill_explanations": True,
                 "rag_backfill_plan": True,
                 "rag_maintenance_plan": True,
+                "rag_maintenance_report": True,
                 "rag_backfill_jobs": True,
                 "runs_query": True,
                 "jobs_query": True,
@@ -828,6 +829,53 @@ class ApiRepository:
                 "recommendations": coverage.get("recommendations") or [],
             },
             "next_actions": _rag_diagnostics_next_actions(signals=signals, quality=quality, coverage=coverage),
+        }
+
+    def rag_maintenance_report(self, *, limit: int = 20) -> dict[str, Any]:
+        limit = max(1, min(_int_value(limit) or 20, 100))
+        maintenance_kinds = {"rag_backfill", "rag_corpus_rebuild", "rag_embedding_build"}
+        jobs = [
+            job
+            for job in self.jobs(limit=max(limit * 4, 100)).get("jobs", [])
+            if job.get("kind") in maintenance_kinds
+        ][:limit]
+        by_kind: dict[str, dict[str, Any]] = {
+            kind: {"kind": kind, "total_count": 0, "status_counts": {}, "latest_job": {}}
+            for kind in sorted(maintenance_kinds)
+        }
+        latest_success = {}
+        latest_failed = {}
+        for job in jobs:
+            kind = str(job.get("kind") or "")
+            status = str(job.get("status") or "")
+            bucket = by_kind.setdefault(kind, {"kind": kind, "total_count": 0, "status_counts": {}, "latest_job": {}})
+            bucket["total_count"] += 1
+            bucket["status_counts"][status] = _int_value(bucket["status_counts"].get(status)) + 1
+            if not bucket["latest_job"]:
+                bucket["latest_job"] = _rag_maintenance_job_summary(job)
+            if status == "succeeded" and not latest_success:
+                latest_success = _rag_maintenance_job_summary(job)
+            if status == "failed" and not latest_failed:
+                latest_failed = _rag_maintenance_job_summary(job)
+        diagnostics = self.rag_diagnostics(limit=10)
+        return {
+            "schema_version": 1,
+            "count": len(jobs),
+            "status_counts": _count_by_field(jobs, "status"),
+            "kind_counts": _count_by_field(jobs, "kind"),
+            "by_kind": list(by_kind.values()),
+            "latest_success": latest_success,
+            "latest_failed": latest_failed,
+            "recent_jobs": [_rag_maintenance_job_summary(job) for job in jobs[: min(limit, 10)]],
+            "diagnostics": {
+                "status": diagnostics.get("status") or "",
+                "level": diagnostics.get("level") or "",
+                "signals": diagnostics.get("signals") or {},
+                "table_counts": diagnostics.get("table_counts") or {},
+                "coverage": diagnostics.get("coverage") or {},
+                "next_actions": diagnostics.get("next_actions") or [],
+            },
+            "recommendations": _rag_maintenance_report_recommendations(jobs, diagnostics),
         }
 
     def backfill_rag_explanations(
@@ -2739,6 +2787,87 @@ def _job_from_row(row: Any) -> dict[str, Any]:
         "telegram_sent": bool(result.get("telegram_sent")),
         "report_url": result.get("report_url") or result.get("telegram_report_url") or payload.get("report_url") or "",
     }
+
+
+def _count_by_field(items: list[dict[str, Any]], field: str) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for item in items:
+        key = str(item.get(field) or "unknown")
+        counts[key] = counts.get(key, 0) + 1
+    return counts
+
+
+def _rag_maintenance_job_summary(job: dict[str, Any]) -> dict[str, Any]:
+    result = job.get("result") if isinstance(job.get("result"), dict) else {}
+    before_counts = result.get("before_counts") if isinstance(result.get("before_counts"), dict) else {}
+    after_counts = result.get("after_counts") if isinstance(result.get("after_counts"), dict) else {}
+    summary = {
+        "job_id": job.get("job_id") or "",
+        "kind": job.get("kind") or "",
+        "status": job.get("status") or "",
+        "run_date": job.get("run_date") or "",
+        "submitted_at": job.get("submitted_at") or "",
+        "finished_at": job.get("finished_at") or "",
+        "dry_run": bool(result.get("dry_run")),
+        "error": job.get("error") or "",
+        "before_counts": before_counts,
+        "after_counts": after_counts,
+        "count_delta": {
+            key: _int_value(after_counts.get(key)) - _int_value(before_counts.get(key))
+            for key in sorted(set(before_counts) | set(after_counts))
+        },
+    }
+    kind = str(job.get("kind") or "")
+    if kind == "rag_backfill":
+        summary.update(
+            {
+                "candidate_count": _int_value(result.get("candidate_count")),
+                "processed_count": _int_value(result.get("processed_count")),
+                "coverage_before": result.get("coverage_before")
+                if isinstance(result.get("coverage_before"), dict)
+                else {},
+                "processed_repositories": result.get("processed_repositories")
+                if isinstance(result.get("processed_repositories"), list)
+                else [],
+            }
+        )
+    elif kind == "rag_corpus_rebuild":
+        summary.update(
+            {
+                "selected_archive_count": _int_value(result.get("selected_archive_count")),
+                "import_counts": result.get("import_counts") if isinstance(result.get("import_counts"), dict) else {},
+            }
+        )
+    elif kind == "rag_embedding_build":
+        summary.update(
+            {
+                "model": result.get("model") or "",
+                "dimensions": _int_value(result.get("dimensions")),
+                "chunk_count": _int_value(result.get("chunk_count")),
+                "embedding_count": _int_value(result.get("embedding_count")),
+            }
+        )
+    return summary
+
+
+def _rag_maintenance_report_recommendations(jobs: list[dict[str, Any]], diagnostics: dict[str, Any]) -> list[str]:
+    recommendations = []
+    signals = diagnostics.get("signals") if isinstance(diagnostics.get("signals"), dict) else {}
+    coverage = diagnostics.get("coverage") if isinstance(diagnostics.get("coverage"), dict) else {}
+    if not jobs:
+        recommendations.append("还没有 RAG 维护任务记录，建议先在管理页生成维护计划。")
+    if not signals.get("has_corpus"):
+        recommendations.append("语料表为空，优先执行 rag_corpus_rebuild。")
+    elif not signals.get("has_embeddings"):
+        recommendations.append("向量索引为空，优先执行 rag_embedding_build。")
+    elif _int_value(coverage.get("gap_count")) > 0:
+        recommendations.append("仍存在解释覆盖缺口，继续执行 rag_backfill。")
+    failed_count = sum(1 for job in jobs if job.get("status") == "failed")
+    if failed_count:
+        recommendations.append(f"最近维护任务中有 {failed_count} 个失败任务，需要查看任务详情和事件日志。")
+    if not recommendations:
+        recommendations.append("RAG 维护链路已有可用记录，下一步可以观察覆盖率和解释质量变化。")
+    return recommendations
 
 
 def _rag_backfill_job_id(submitted_at: str, request: dict[str, Any]) -> str:

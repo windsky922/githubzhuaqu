@@ -42,7 +42,7 @@ http://127.0.0.1:8000/admin.html?api=1
 
 根路径 `http://127.0.0.1:8000/` 会跳转到管理首页。`/v1/*` 路径是 JSON API，例如 `/v1/jobs?limit=50` 返回机器可读任务数据，不是 HTML 页面。
 
-管理首页中的 RAG 区域会调用 `/v1/rag/ask`、`/v1/rag/retrieve` 和 `/v1/rag/vector-search`，用于查看问答结果、证据块、引用和 `prompt_context`；RAG 诊断会调用 `/v1/rag/diagnostics`，用于判断语料、证据块、embedding、解释历史和问答能力是否可用；RAG 质量概览会调用 `/v1/rag/quality-summary`，用于查看解释数量、质量分布、改进建议和低质量样本；RAG 维护计划按钮会调用 `/v1/rag/maintenance-plan`，按诊断结果创建语料重建、embedding 构建或解释回填 planned 任务；RAG 回填区会调用 `/v1/rag/backfill-explanations`，先预览缺口项目，确认后再写入 SQLite。向量检索会在 `auto_build=true` 时自动构建本地 `local-hash-v1` 索引，也可以先手动运行 `py scripts\build_rag_embeddings.py`。
+管理首页中的 RAG 区域会调用 `/v1/rag/ask`、`/v1/rag/retrieve` 和 `/v1/rag/vector-search`，用于查看问答结果、证据块、引用和 `prompt_context`；RAG 诊断会调用 `/v1/rag/diagnostics`，用于判断语料、证据块、embedding、解释历史和问答能力是否可用；RAG 质量概览会调用 `/v1/rag/quality-summary`，用于查看解释数量、质量分布、改进建议和低质量样本；RAG 维护计划按钮会调用 `/v1/rag/maintenance-plan`，按诊断结果创建语料重建、embedding 构建或解释回填 planned 任务；维护历史可以通过 `/v1/rag/maintenance-report` 查看最近 RAG 维护任务状态、计数变化和下一步建议；RAG 回填区会调用 `/v1/rag/backfill-explanations`，先预览缺口项目，确认后再写入 SQLite。向量检索会在 `auto_build=true` 时自动构建本地 `local-hash-v1` 索引，也可以先手动运行 `py scripts\build_rag_embeddings.py`。
 
 如果本地没有 `data/github_weekly.sqlite`，查询项目接口会从 `data/` 下的 JSON 归档自动重建 SQLite 派生索引。
 
@@ -547,6 +547,31 @@ POST /v1/jobs/{job_id}/execute
 返回结果会包含 `diagnostics`、`coverage`、`gap_count` 和 `min_gap_count`，方便 GitHub Actions、后台管理页或后续 Agent 判断下一步应先建语料、补向量，还是创建解释回填任务。三类任务都会写入 `jobs` 表，可以继续通过 `GET /v1/job-execution-check?job_id=...` 和 `POST /v1/jobs/{job_id}/execute` 检查与执行。
 
 任务详情页 `job.html?job=...&api=1` 会针对 RAG 维护任务展示结构化执行摘要：语料、证据块、embedding 的 before/after 计数、回填候选数、处理数和处理仓库列表，同时保留原始 JSON 结果用于调试。
+
+### `GET /v1/rag/maintenance-report`
+
+汇总最近 RAG 维护任务，用于判断数据库/RAG 维护链路是否持续生效。该接口只读取 SQLite，不创建任务、不执行任务、不调用外部服务。
+
+支持参数：
+
+| 字段 | 说明 |
+|---|---|
+| `limit` | 读取最近多少个 RAG 维护任务，默认 20，最大 100 |
+
+返回内容包括：
+
+1. `status_counts` 和 `kind_counts`：最近维护任务的状态分布和类型分布。
+2. `by_kind`：按 `rag_corpus_rebuild`、`rag_embedding_build`、`rag_backfill` 分组的任务统计。
+3. `latest_success` 和 `latest_failed`：最近成功和最近失败的维护任务摘要。
+4. `recent_jobs`：最近维护任务列表，包含 before/after 计数和关键执行结果。
+5. `diagnostics`：当前 RAG 诊断摘要，便于把历史任务与当前数据库状态对照。
+6. `recommendations`：基于任务历史和诊断结果给出的下一步维护建议。
+
+示例：
+
+```text
+/v1/rag/maintenance-report?limit=20
+```
 
 常用请求字段：
 

@@ -1,10 +1,12 @@
 import unittest
+from datetime import UTC, datetime, timedelta
 
 from src.models import Repository
 from src.quality import apply_quality_signals, quality_flags, quality_level, quality_score
 
 
 def repo(**overrides):
+    recent_time = (datetime.now(UTC) - timedelta(days=1)).isoformat().replace("+00:00", "Z")
     values = {
         "full_name": "owner/project",
         "html_url": "https://github.com/owner/project",
@@ -13,8 +15,8 @@ def repo(**overrides):
         "forks_count": 40,
         "language": "Python",
         "created_at": "2026-04-01T00:00:00Z",
-        "updated_at": "2026-05-05T00:00:00Z",
-        "pushed_at": "2026-05-05T00:00:00Z",
+        "updated_at": recent_time,
+        "pushed_at": recent_time,
         "topics": ["agent", "automation"],
         "license_name": "MIT",
         "readme_summary": "该项目提供清晰的安装方式、使用示例和核心功能说明。",

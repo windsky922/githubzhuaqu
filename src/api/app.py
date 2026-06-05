@@ -337,6 +337,10 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
     def v1_rag_diagnostics(limit: int = Query(default=10, ge=1, le=50)) -> dict[str, Any]:
         return repository.rag_diagnostics(limit=limit)
 
+    @app.get("/v1/rag/maintenance-report")
+    def v1_rag_maintenance_report(limit: int = Query(default=20, ge=1, le=100)) -> dict[str, Any]:
+        return repository.rag_maintenance_report(limit=limit)
+
     @app.post("/v1/rag/backfill-explanations", status_code=202)
     def v1_rag_backfill_explanations(payload: dict[str, Any] | None = Body(default=None)) -> dict[str, Any]:
         return repository.backfill_rag_explanations_from_payload(payload)
@@ -356,7 +360,10 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
     @app.get("/v1/jobs")
     def v1_jobs(
         status: str | None = Query(default=None, pattern="^(planned|running|succeeded|failed)?$"),
-        kind: str | None = Query(default=None, pattern="^(weekly_report|rag_backfill)?$"),
+        kind: str | None = Query(
+            default=None,
+            pattern="^(weekly_report|rag_backfill|rag_corpus_rebuild|rag_embedding_build)?$",
+        ),
         profile: str | None = None,
         query: str | None = None,
         limit: int = Query(default=20, ge=1, le=200),
