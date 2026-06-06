@@ -2,6 +2,24 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-06-06 追加：RAG 检索模式对比接口
+
+### 1. 开发目的
+
+当前后端已经具备 FTS5 文本检索、向量检索和混合检索，但缺少一个统一入口来判断三种检索模式的召回差异。为了优先推进数据库/RAG 核心能力，本次新增只读对比接口，让后续 Agent 可以基于命中数量、项目重叠率和推荐模式选择更合适的检索策略。
+
+### 2. 修改内容
+
+1. 新增 `GET /v1/rag/search-compare`。
+2. 新增 `ApiRepository.rag_search_compare`，同时执行 `/v1/rag/retrieve`、`/v1/rag/vector-search` 和 `/v1/rag/hybrid-search`。
+3. 返回 `modes`、`overlap`、`recommendation` 和 `summary`，用于查看三种模式的命中项目、重叠情况和推荐检索模式。
+4. 在 `/v1/health` 能力清单中加入 `rag_search_compare`。
+5. 更新 README、API 文档和后端测试。
+
+### 3. 后续空间
+
+下一步可以把该接口作为 RAG 评估入口，继续扩展检索质量评分、查询样本集和自动选择 `fts5/vector/hybrid` 的策略，但当前先保持后端核心能力稳定，不做过细 UI。
+
 ## 2026-06-05 追加：RAG 解释与问答接入混合检索
 
 ### 1. 开发目的

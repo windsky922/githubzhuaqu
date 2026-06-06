@@ -71,6 +71,7 @@ class ApiRepository:
                 "rag_retrieve": True,
                 "rag_vector_search": True,
                 "rag_hybrid_search": True,
+                "rag_search_compare": True,
                 "rag_explain": True,
                 "rag_ask": True,
                 "rag_explanations": True,
@@ -525,6 +526,67 @@ class ApiRepository:
             },
             "prompt_context": _rag_prompt_context(contexts),
             "summary": _rag_hybrid_summary(contexts, model),
+        }
+
+    def rag_search_compare(
+        self,
+        *,
+        query: str,
+        language: str | None = None,
+        category: str | None = None,
+        source: str | None = None,
+        limit: int = 8,
+        model: str = MODEL_NAME,
+        auto_build: bool = False,
+    ) -> dict[str, Any]:
+        normalized_query = (_blank_to_none(query) or "").strip()
+        limit = max(1, min(int(limit or 8), 30))
+        model = _blank_to_none(model) or MODEL_NAME
+        text_result = self.rag_retrieve(
+            query=normalized_query,
+            language=language,
+            category=category,
+            source=source,
+            limit=limit,
+        )
+        vector_result = self.rag_vector_search(
+            query=normalized_query,
+            language=language,
+            category=category,
+            source=source,
+            limit=limit,
+            model=model,
+            auto_build=auto_build,
+        )
+        hybrid_result = self.rag_hybrid_search(
+            query=normalized_query,
+            language=language,
+            category=category,
+            source=source,
+            limit=limit,
+            model=model,
+            auto_build=auto_build,
+        )
+        modes = {
+            "fts5": _rag_compare_mode_summary(text_result),
+            "vector": _rag_compare_mode_summary(vector_result),
+            "hybrid": _rag_compare_mode_summary(hybrid_result),
+        }
+        overlap = _rag_compare_overlap(modes)
+        recommendation = _rag_compare_recommendation(modes, overlap)
+        return {
+            "schema_version": 1,
+            "query": normalized_query,
+            "language": _blank_to_none(language) or "",
+            "category": _blank_to_none(category) or "",
+            "source": _blank_to_none(source) or "",
+            "limit": limit,
+            "model": model,
+            "auto_build": bool(auto_build),
+            "modes": modes,
+            "overlap": overlap,
+            "recommendation": recommendation,
+            "summary": _rag_compare_summary(modes, overlap, recommendation),
         }
 
     def rag_explain(
@@ -3650,6 +3712,106 @@ def _rag_hybrid_summary(contexts: list[dict[str, Any]], model: str) -> list[str]
         f"混合检索召回 {len(contexts)} 个证据块，覆盖 {len(repositories)} 个项目。",
         f"文本命中 {source_counts['text']} 个，向量命中 {source_counts['vector']} 个，向量模型：{model}。",
         f"优先项目：{'、'.join(repositories[:5])}。",
+    ]
+
+
+def _rag_compare_mode_summary(result: dict[str, Any]) -> dict[str, Any]:
+    contexts = result.get("contexts") if isinstance(result.get("contexts"), list) else []
+    repositories = _unique_strings(
+        context.get("metadata", {}).get("full_name") or "" for context in contexts if isinstance(context, dict)
+    )
+    return {
+        "mode": result.get("retrieval", {}).get("mode") or "",
+        "count": len(contexts),
+        "citation_count": len(result.get("citations") or []),
+        "repositories": repositories,
+        "top_repositories": repositories[:5],
+        "top_contexts": _rag_compare_top_contexts(contexts),
+        "retrieval": result.get("retrieval") or {},
+    }
+
+
+def _rag_compare_top_contexts(contexts: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    output = []
+    for context in contexts[:5]:
+        metadata = context.get("metadata") if isinstance(context.get("metadata"), dict) else {}
+        output.append(
+            {
+                "full_name": metadata.get("full_name") or "",
+                "html_url": metadata.get("html_url") or "",
+                "run_date": metadata.get("run_date") or "",
+                "chunk_id": context.get("chunk_id") or "",
+                "score": context.get("score", 0),
+                "retrieval_sources": _list_strings(context.get("retrieval_sources") or []),
+                "text_preview": str(context.get("text") or "")[:220],
+            }
+        )
+    return output
+
+
+def _rag_compare_overlap(modes: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    sets = {name: set(_list_strings(data.get("repositories") or [])) for name, data in modes.items()}
+    all_repositories = set().union(*sets.values()) if sets else set()
+    common_repositories = set.intersection(*sets.values()) if sets and all(sets.values()) else set()
+    pairwise = {}
+    pairs = [("fts5", "vector"), ("fts5", "hybrid"), ("vector", "hybrid")]
+    for left, right in pairs:
+        left_set = sets.get(left, set())
+        right_set = sets.get(right, set())
+        union = left_set | right_set
+        intersection = left_set & right_set
+        pairwise[f"{left}_vs_{right}"] = {
+            "intersection_count": len(intersection),
+            "union_count": len(union),
+            "overlap_rate": round(len(intersection) / len(union), 4) if union else 0,
+            "repositories": sorted(intersection),
+        }
+    return {
+        "repository_count": len(all_repositories),
+        "common_count": len(common_repositories),
+        "common_repositories": sorted(common_repositories),
+        "pairwise": pairwise,
+    }
+
+
+def _rag_compare_recommendation(modes: dict[str, dict[str, Any]], overlap: dict[str, Any]) -> dict[str, Any]:
+    hybrid = modes.get("hybrid", {})
+    text = modes.get("fts5", {})
+    vector = modes.get("vector", {})
+    if hybrid.get("count", 0) > 0:
+        mode = "hybrid"
+        reason = "混合检索已有命中，能同时吸收关键词精确匹配和向量相似召回。"
+    elif text.get("count", 0) >= vector.get("count", 0) and text.get("count", 0) > 0:
+        mode = "fts5"
+        reason = "文本检索命中更多，适合作为当前查询的主要证据来源。"
+    elif vector.get("count", 0) > 0:
+        mode = "vector"
+        reason = "向量检索有命中，适合查询词和项目描述不完全一致的场景。"
+    else:
+        mode = "none"
+        reason = "三种模式都没有命中，需要放宽筛选条件或补充 RAG 语料。"
+    return {
+        "preferred_mode": mode,
+        "reason": reason,
+        "common_repository_count": overlap.get("common_count", 0),
+    }
+
+
+def _rag_compare_summary(
+    modes: dict[str, dict[str, Any]],
+    overlap: dict[str, Any],
+    recommendation: dict[str, Any],
+) -> list[str]:
+    return [
+        (
+            "FTS5 命中 {fts5} 个证据块，向量命中 {vector} 个证据块，混合命中 {hybrid} 个证据块。"
+        ).format(
+            fts5=modes.get("fts5", {}).get("count", 0),
+            vector=modes.get("vector", {}).get("count", 0),
+            hybrid=modes.get("hybrid", {}).get("count", 0),
+        ),
+        f"三种模式共同覆盖 {overlap.get('common_count', 0)} 个项目，总覆盖 {overlap.get('repository_count', 0)} 个项目。",
+        f"建议优先使用 {recommendation.get('preferred_mode')}：{recommendation.get('reason')}",
     ]
 
 

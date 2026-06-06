@@ -42,7 +42,7 @@ http://127.0.0.1:8000/admin.html?api=1
 
 根路径 `http://127.0.0.1:8000/` 会跳转到管理首页。`/v1/*` 路径是 JSON API，例如 `/v1/jobs?limit=50` 返回机器可读任务数据，不是 HTML 页面。
 
-管理首页中的 RAG 区域会调用 `/v1/rag/ask`、`/v1/rag/retrieve`、`/v1/rag/vector-search` 和 `/v1/rag/hybrid-search`，用于查看问答结果、证据块、引用和 `prompt_context`；RAG 诊断会调用 `/v1/rag/diagnostics`，用于判断语料、证据块、embedding、解释历史和问答能力是否可用；RAG 质量概览会调用 `/v1/rag/quality-summary`，用于查看解释数量、质量分布、改进建议和低质量样本；RAG 维护计划按钮会调用 `/v1/rag/maintenance-plan`，按诊断结果创建语料重建、embedding 构建或解释回填 planned 任务；维护历史可以通过 `/v1/rag/maintenance-report` 查看最近 RAG 维护任务状态、计数变化和下一步建议；RAG 回填区会调用 `/v1/rag/backfill-explanations`，先预览缺口项目，确认后再写入 SQLite。向量检索会在 `auto_build=true` 时自动构建本地 `local-hash-v1` 索引，也可以先手动运行 `py scripts\build_rag_embeddings.py`。
+管理首页中的 RAG 区域会调用 `/v1/rag/ask`、`/v1/rag/retrieve`、`/v1/rag/vector-search` 和 `/v1/rag/hybrid-search`，用于查看问答结果、证据块、引用和 `prompt_context`；后端还提供 `/v1/rag/search-compare`，用于比较三种检索模式的召回差异；RAG 诊断会调用 `/v1/rag/diagnostics`，用于判断语料、证据块、embedding、解释历史和问答能力是否可用；RAG 质量概览会调用 `/v1/rag/quality-summary`，用于查看解释数量、质量分布、改进建议和低质量样本；RAG 维护计划按钮会调用 `/v1/rag/maintenance-plan`，按诊断结果创建语料重建、embedding 构建或解释回填 planned 任务；维护历史可以通过 `/v1/rag/maintenance-report` 查看最近 RAG 维护任务状态、计数变化和下一步建议；RAG 回填区会调用 `/v1/rag/backfill-explanations`，先预览缺口项目，确认后再写入 SQLite。向量检索会在 `auto_build=true` 时自动构建本地 `local-hash-v1` 索引，也可以先手动运行 `py scripts\build_rag_embeddings.py`。
 
 如果本地没有 `data/github_weekly.sqlite`，查询项目接口会从 `data/` 下的 JSON 归档自动重建 SQLite 派生索引。
 
@@ -328,6 +328,37 @@ py scripts\build_rag_embeddings.py
 ```
 
 该接口是后续接入 LangChain retriever、推荐解释重排和多策略检索评估的优先入口。它仍然只使用本地 SQLite 数据，不调用外部模型或推送服务。
+
+### `GET /v1/rag/search-compare`
+
+同时执行 FTS5 文本检索、本地向量检索和混合检索，并返回三种模式的命中数量、Top 项目、引用数量、项目重叠率和推荐使用的检索模式。该接口用于 RAG 调试、召回质量评估和后续 Agent 自动选择检索策略。
+
+支持参数与 `/v1/rag/hybrid-search` 一致：
+
+| 参数 | 说明 |
+|---|---|
+| `q` | 必填，查询问题或关键词 |
+| `language` | 可选，按语言过滤 |
+| `category` | 可选，按方向过滤 |
+| `source` | 可选，按来源过滤 |
+| `limit` | 返回数量，默认 8，最大 30 |
+| `model` | 可选，默认 `local-hash-v1` |
+| `auto_build` | 可选，为 `true` 且索引为空时自动构建本地索引 |
+
+返回内容包含：
+
+1. `modes`：`fts5`、`vector`、`hybrid` 三种模式的命中摘要。
+2. `overlap`：三种模式的项目集合重叠情况和两两重叠率。
+3. `recommendation`：当前查询建议优先使用的检索模式和原因。
+4. `summary`：适合前端展示或 Agent 日志记录的中文摘要。
+
+示例：
+
+```text
+/v1/rag/search-compare?q=agent%20workflow&language=Python&limit=8&auto_build=true
+```
+
+该接口只读 SQLite，不写入解释历史，不调用外部模型，也不触发推送。
 
 ### `GET /v1/rag/explain`
 
