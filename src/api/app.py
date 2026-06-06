@@ -313,6 +313,26 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
             auto_build=auto_build,
         )
 
+    @app.get("/v1/rag/search-evaluation")
+    def v1_rag_search_evaluation(
+        q: list[str] | None = Query(default=None),
+        language: str | None = None,
+        category: str | None = None,
+        source: str | None = None,
+        limit: int = Query(default=8, ge=1, le=30),
+        model: str | None = None,
+        auto_build: bool = False,
+    ) -> dict[str, Any]:
+        return repository.rag_search_evaluation(
+            queries=q,
+            language=language,
+            category=category,
+            source=source,
+            limit=limit,
+            model=model or "local-hash-v1",
+            auto_build=auto_build,
+        )
+
     @app.get("/v1/rag/explain")
     def v1_rag_explain(
         q: str = Query(..., min_length=1),

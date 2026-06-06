@@ -2,6 +2,24 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-06-06 追加：RAG 检索评估接口
+
+### 1. 开发目的
+
+`/v1/rag/search-compare` 已经可以比较单个查询在 FTS5、向量和混合检索中的召回差异，但后续 Agent 需要更稳定的批量评估入口，才能判断默认使用哪种检索策略。为继续优先推进数据库/RAG 核心能力，本次新增只读检索评估接口，用固定或自定义查询样本批量评估三种模式的命中率、平均召回和推荐模式分布。
+
+### 2. 修改内容
+
+1. 新增 `GET /v1/rag/search-evaluation`。
+2. 新增 `ApiRepository.rag_search_evaluation`，批量复用 `rag_search_compare`。
+3. 新增评估聚合字段：`preferred_mode_counts`、`modes`、`repository_count`、`zero_hit_queries`、`pairwise_average_overlap` 和 `recommendations`。
+4. 在 `/v1/health` 能力清单中加入 `rag_search_evaluation`。
+5. 更新 README、API 文档和后端测试。
+
+### 3. 后续空间
+
+下一步可以把评估样本配置化，或把评估结果写入 SQLite 形成长期检索质量趋势；当前先保持接口只读，不引入复杂框架。
+
 ## 2026-06-06 追加：RAG 检索模式对比接口
 
 ### 1. 开发目的

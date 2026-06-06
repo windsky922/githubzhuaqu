@@ -143,6 +143,12 @@ class ApiRepositoryTest(unittest.TestCase):
                 limit=5,
                 auto_build=True,
             )
+            rag_search_evaluation = repository.rag_search_evaluation(
+                queries=["agent workflow", "python automation"],
+                language="Python",
+                limit=5,
+                auto_build=True,
+            )
             rag_explain = repository.rag_explain(query="agent workflow", language="Python", limit=5)
             rag_ask = repository.rag_ask(query="agent workflow", language="Python", limit=5)
             rag_hybrid_explain = repository.rag_explain(
@@ -252,6 +258,7 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertTrue(health["capabilities"]["rag_vector_search"])
             self.assertTrue(health["capabilities"]["rag_hybrid_search"])
             self.assertTrue(health["capabilities"]["rag_search_compare"])
+            self.assertTrue(health["capabilities"]["rag_search_evaluation"])
             self.assertTrue(health["capabilities"]["rag_explain"])
             self.assertTrue(health["capabilities"]["rag_ask"])
             self.assertTrue(health["capabilities"]["rag_project_explanations"])
@@ -401,6 +408,11 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertIn("owner/agent", rag_search_compare["modes"]["hybrid"]["repositories"])
             self.assertIn(rag_search_compare["recommendation"]["preferred_mode"], {"fts5", "vector", "hybrid", "none"})
             self.assertGreaterEqual(rag_search_compare["overlap"]["repository_count"], 1)
+            self.assertEqual(rag_search_evaluation["schema_version"], 1)
+            self.assertEqual(rag_search_evaluation["sample_count"], 2)
+            self.assertIn("hybrid", rag_search_evaluation["aggregate"]["modes"])
+            self.assertGreaterEqual(rag_search_evaluation["aggregate"]["repository_count"], 1)
+            self.assertTrue(rag_search_evaluation["summary"])
             self.assertEqual(rag_hybrid_explain["retrieval"]["mode"], "hybrid")
             self.assertIn("owner/agent", rag_hybrid_explain["explanation"]["answer"])
             self.assertEqual(rag_hybrid_ask["retrieval"]["mode"], "hybrid")
@@ -588,6 +600,16 @@ class ApiRepositoryTest(unittest.TestCase):
                 "/v1/rag/search-compare",
                 params={"q": "agent workflow", "language": "Python", "limit": 5, "auto_build": True},
             )
+            v1_rag_search_evaluation = client.get(
+                "/v1/rag/search-evaluation",
+                params=[
+                    ("q", "agent workflow"),
+                    ("q", "python automation"),
+                    ("language", "Python"),
+                    ("limit", "5"),
+                    ("auto_build", "true"),
+                ],
+            )
             v1_rag_explain = client.get(
                 "/v1/rag/explain",
                 params={"q": "agent workflow", "language": "Python", "limit": 5},
@@ -741,6 +763,7 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(v1_rag_vector_search.status_code, 200)
             self.assertEqual(v1_rag_hybrid_search.status_code, 200)
             self.assertEqual(v1_rag_search_compare.status_code, 200)
+            self.assertEqual(v1_rag_search_evaluation.status_code, 200)
             self.assertEqual(v1_rag_explain.status_code, 200)
             self.assertEqual(v1_rag_hybrid_explain.status_code, 200)
             self.assertEqual(v1_rag_ask.status_code, 200)
@@ -805,6 +828,9 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(v1_rag_search_compare.json()["modes"]["hybrid"]["mode"], "hybrid")
             self.assertIn("owner/agent", v1_rag_search_compare.json()["modes"]["hybrid"]["repositories"])
             self.assertTrue(v1_rag_search_compare.json()["summary"])
+            self.assertEqual(v1_rag_search_evaluation.json()["sample_count"], 2)
+            self.assertIn("hybrid", v1_rag_search_evaluation.json()["aggregate"]["modes"])
+            self.assertTrue(v1_rag_search_evaluation.json()["summary"])
             self.assertEqual(v1_rag_explain.json()["explanation"]["scoring_model"], "rule:rag-explain-v1")
             self.assertTrue(v1_rag_explain.json()["explanation_id"].startswith("ragx:"))
             self.assertGreaterEqual(v1_rag_explain.json()["quality"]["score"], 1)

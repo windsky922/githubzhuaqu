@@ -72,6 +72,7 @@ class ApiRepository:
                 "rag_vector_search": True,
                 "rag_hybrid_search": True,
                 "rag_search_compare": True,
+                "rag_search_evaluation": True,
                 "rag_explain": True,
                 "rag_ask": True,
                 "rag_explanations": True,
@@ -587,6 +588,48 @@ class ApiRepository:
             "overlap": overlap,
             "recommendation": recommendation,
             "summary": _rag_compare_summary(modes, overlap, recommendation),
+        }
+
+    def rag_search_evaluation(
+        self,
+        *,
+        queries: list[str] | None = None,
+        language: str | None = None,
+        category: str | None = None,
+        source: str | None = None,
+        limit: int = 8,
+        model: str = MODEL_NAME,
+        auto_build: bool = False,
+    ) -> dict[str, Any]:
+        sample_queries = _normalize_rag_evaluation_queries(queries)
+        limit = max(1, min(int(limit or 8), 30))
+        model = _blank_to_none(model) or MODEL_NAME
+        evaluations = [
+            self.rag_search_compare(
+                query=query,
+                language=language,
+                category=category,
+                source=source,
+                limit=limit,
+                model=model,
+                auto_build=auto_build,
+            )
+            for query in sample_queries
+        ]
+        aggregate = _rag_evaluation_aggregate(evaluations)
+        return {
+            "schema_version": 1,
+            "sample_count": len(sample_queries),
+            "queries": sample_queries,
+            "language": _blank_to_none(language) or "",
+            "category": _blank_to_none(category) or "",
+            "source": _blank_to_none(source) or "",
+            "limit": limit,
+            "model": model,
+            "auto_build": bool(auto_build),
+            "aggregate": aggregate,
+            "evaluations": evaluations,
+            "summary": _rag_evaluation_summary(aggregate),
         }
 
     def rag_explain(
@@ -3812,6 +3855,116 @@ def _rag_compare_summary(
         ),
         f"三种模式共同覆盖 {overlap.get('common_count', 0)} 个项目，总覆盖 {overlap.get('repository_count', 0)} 个项目。",
         f"建议优先使用 {recommendation.get('preferred_mode')}：{recommendation.get('reason')}",
+    ]
+
+
+def _normalize_rag_evaluation_queries(queries: list[str] | None) -> list[str]:
+    defaults = [
+        "agent workflow",
+        "python automation",
+        "developer tools",
+        "rag search",
+        "java backend",
+    ]
+    candidates = queries if queries else defaults
+    output = []
+    seen = set()
+    for query in candidates:
+        normalized = str(query or "").strip()
+        key = normalized.lower()
+        if not normalized or key in seen:
+            continue
+        seen.add(key)
+        output.append(normalized)
+        if len(output) >= 10:
+            break
+    return output or defaults[:1]
+
+
+def _rag_evaluation_aggregate(evaluations: list[dict[str, Any]]) -> dict[str, Any]:
+    mode_names = ["fts5", "vector", "hybrid"]
+    preferred_mode_counts: dict[str, int] = {}
+    mode_totals = {name: {"count": 0, "citation_count": 0, "hit_queries": 0} for name in mode_names}
+    all_repositories: set[str] = set()
+    zero_hit_queries = []
+    pairwise_overlap_totals: dict[str, float] = {}
+    for evaluation in evaluations:
+        recommendation = evaluation.get("recommendation") if isinstance(evaluation.get("recommendation"), dict) else {}
+        preferred = str(recommendation.get("preferred_mode") or "none")
+        preferred_mode_counts[preferred] = preferred_mode_counts.get(preferred, 0) + 1
+        modes = evaluation.get("modes") if isinstance(evaluation.get("modes"), dict) else {}
+        query_has_hit = False
+        for name in mode_names:
+            mode = modes.get(name) if isinstance(modes.get(name), dict) else {}
+            count = _int_value(mode.get("count"))
+            citation_count = _int_value(mode.get("citation_count"))
+            mode_totals[name]["count"] += count
+            mode_totals[name]["citation_count"] += citation_count
+            if count > 0:
+                mode_totals[name]["hit_queries"] += 1
+                query_has_hit = True
+            all_repositories.update(_list_strings(mode.get("repositories") or []))
+        if not query_has_hit:
+            zero_hit_queries.append(evaluation.get("query") or "")
+        pairwise = evaluation.get("overlap", {}).get("pairwise", {})
+        if isinstance(pairwise, dict):
+            for name, data in pairwise.items():
+                if isinstance(data, dict):
+                    pairwise_overlap_totals[name] = pairwise_overlap_totals.get(name, 0.0) + float(
+                        data.get("overlap_rate") or 0
+                    )
+    sample_count = max(len(evaluations), 1)
+    modes = {
+        name: {
+            "total_count": values["count"],
+            "average_count": round(values["count"] / sample_count, 4),
+            "total_citation_count": values["citation_count"],
+            "hit_queries": values["hit_queries"],
+            "hit_rate": round(values["hit_queries"] / sample_count, 4),
+        }
+        for name, values in mode_totals.items()
+    }
+    return {
+        "preferred_mode_counts": preferred_mode_counts,
+        "modes": modes,
+        "repository_count": len(all_repositories),
+        "repositories": sorted(all_repositories)[:30],
+        "zero_hit_queries": [query for query in zero_hit_queries if query],
+        "pairwise_average_overlap": {
+            name: round(total / sample_count, 4) for name, total in sorted(pairwise_overlap_totals.items())
+        },
+        "recommendations": _rag_evaluation_recommendations(preferred_mode_counts, modes, zero_hit_queries),
+    }
+
+
+def _rag_evaluation_recommendations(
+    preferred_mode_counts: dict[str, int],
+    modes: dict[str, dict[str, Any]],
+    zero_hit_queries: list[str],
+) -> list[str]:
+    recommendations = []
+    if preferred_mode_counts.get("hybrid", 0) >= max(preferred_mode_counts.get("fts5", 0), preferred_mode_counts.get("vector", 0)):
+        recommendations.append("当前样本中混合检索最稳定，后续解释和问答可以优先使用 hybrid。")
+    if modes.get("vector", {}).get("hit_rate", 0) == 0:
+        recommendations.append("向量检索没有命中样本，请先检查 embedding 索引是否已构建。")
+    if zero_hit_queries:
+        recommendations.append("存在未命中的查询样本，建议补充项目语料或放宽语言/方向过滤。")
+    return recommendations or ["当前样本召回正常，可以继续扩大评估样本集。"]
+
+
+def _rag_evaluation_summary(aggregate: dict[str, Any]) -> list[str]:
+    modes = aggregate.get("modes") if isinstance(aggregate.get("modes"), dict) else {}
+    preferred = aggregate.get("preferred_mode_counts") if isinstance(aggregate.get("preferred_mode_counts"), dict) else {}
+    return [
+        (
+            "样本评估完成：FTS5 平均命中 {fts5}，向量平均命中 {vector}，混合平均命中 {hybrid}。"
+        ).format(
+            fts5=modes.get("fts5", {}).get("average_count", 0),
+            vector=modes.get("vector", {}).get("average_count", 0),
+            hybrid=modes.get("hybrid", {}).get("average_count", 0),
+        ),
+        f"推荐模式分布：{preferred}。",
+        f"覆盖项目数：{aggregate.get('repository_count', 0)}；零命中样本数：{len(aggregate.get('zero_hit_queries') or [])}。",
     ]
 
 
