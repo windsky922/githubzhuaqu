@@ -391,7 +391,41 @@ py scripts\build_rag_embeddings.py
 /v1/rag/search-evaluation?q=agent%20workflow&q=python%20automation&language=Python&auto_build=true
 ```
 
-该接口只读 SQLite，不写入解释历史，不调用外部模型，也不触发推送。
+`GET /v1/rag/search-evaluation` 只读 SQLite，不写入解释历史，不调用外部模型，也不触发推送。
+
+### `POST /v1/rag/search-evaluation`
+
+执行一次 RAG 检索评估并把结果写入 SQLite `jobs` 和 `job_events`，任务类型为 `rag_search_evaluation`。该接口用于沉淀评估历史，方便后续查看 RAG 检索质量趋势。
+
+请求体字段与 `GET /v1/rag/search-evaluation` 基本一致，额外要求：
+
+| 参数 | 说明 |
+|---|---|
+| `queries` | 可选，查询样本列表；不传时使用内置小样本 |
+| `confirm_execution` | 必填确认项；只有传入 `true` 才会写入 SQLite |
+| `requested_by` | 可选，记录触发来源 |
+
+如果没有传入 `confirm_execution=true`，接口会返回 `accepted=false`、`executed=false` 和阻塞原因，同时附带一次只读预览结果；不会写入任务记录。
+
+示例：
+
+```json
+{
+  "queries": ["agent workflow", "python automation"],
+  "language": "Python",
+  "limit": 8,
+  "auto_build": true,
+  "confirm_execution": true,
+  "requested_by": "local-api"
+}
+```
+
+写入后可通过以下接口查看：
+
+```text
+/v1/jobs?kind=rag_search_evaluation&status=succeeded
+/v1/jobs/{job_id}/events
+```
 
 ### `GET /v1/rag/explain`
 

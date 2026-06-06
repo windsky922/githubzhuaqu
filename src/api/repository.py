@@ -73,6 +73,7 @@ class ApiRepository:
                 "rag_hybrid_search": True,
                 "rag_search_compare": True,
                 "rag_search_evaluation": True,
+                "rag_search_evaluation_jobs": True,
                 "rag_explain": True,
                 "rag_ask": True,
                 "rag_explanations": True,
@@ -630,6 +631,119 @@ class ApiRepository:
             "aggregate": aggregate,
             "evaluations": evaluations,
             "summary": _rag_evaluation_summary(aggregate),
+        }
+
+    def persist_rag_search_evaluation(self, payload: dict[str, Any] | None) -> dict[str, Any]:
+        request = _rag_search_evaluation_request(payload)
+        if not request["confirm_execution"]:
+            return {
+                "schema_version": 1,
+                "accepted": False,
+                "executed": False,
+                "status": "blocked",
+                "blockers": ["需要显式传入 confirm_execution=true 才会写入 SQLite jobs。"],
+                "request": request,
+                "preview": self.rag_search_evaluation(
+                    queries=request["queries"],
+                    language=request["language"] or None,
+                    category=request["category"] or None,
+                    source=request["source"] or None,
+                    limit=request["limit"],
+                    model=request["model"],
+                    auto_build=request["auto_build"],
+                ),
+            }
+
+        submitted_at = datetime.now(UTC).isoformat().replace("+00:00", "Z")
+        run_date = submitted_at[:10]
+        job_id = _rag_search_evaluation_job_id(submitted_at, request)
+        actor = request["requested_by"]
+        running_job = {
+            "job_id": job_id,
+            "kind": "rag_search_evaluation",
+            "status": "running",
+            "run_date": run_date,
+            "submitted_at": submitted_at,
+            "started_at": submitted_at,
+            "finished_at": "",
+            "request": request,
+            "result": {},
+            "error": "",
+        }
+        self._persist_preview_job(running_job)
+        self._record_job_event(
+            job_id,
+            "rag_search_evaluation_started",
+            "running",
+            actor,
+            "RAG 检索评估已开始。",
+            {"request": request},
+        )
+        try:
+            result = self.rag_search_evaluation(
+                queries=request["queries"],
+                language=request["language"] or None,
+                category=request["category"] or None,
+                source=request["source"] or None,
+                limit=request["limit"],
+                model=request["model"],
+                auto_build=request["auto_build"],
+            )
+        except Exception as exc:  # pragma: no cover - defensive audit path
+            finished_at = datetime.now(UTC).isoformat().replace("+00:00", "Z")
+            failed_job = {
+                **running_job,
+                "status": "failed",
+                "finished_at": finished_at,
+                "error": str(exc),
+                "result": {"error": str(exc)},
+            }
+            self._persist_preview_job(failed_job)
+            self._record_job_event(
+                job_id,
+                "rag_search_evaluation_failed",
+                "failed",
+                actor,
+                "RAG 检索评估失败。",
+                {"error": str(exc)},
+            )
+            return {
+                "schema_version": 1,
+                "accepted": True,
+                "executed": False,
+                "status": "failed",
+                "job_id": job_id,
+                "error": str(exc),
+                "request": request,
+            }
+
+        finished_at = datetime.now(UTC).isoformat().replace("+00:00", "Z")
+        result["job_id"] = job_id
+        result["request"] = request
+        succeeded_job = {
+            **running_job,
+            "status": "succeeded",
+            "finished_at": finished_at,
+            "result": _rag_search_evaluation_job_result(result),
+            "payload": result,
+        }
+        self._persist_preview_job(succeeded_job)
+        self._record_job_event(
+            job_id,
+            "rag_search_evaluation_succeeded",
+            "succeeded",
+            actor,
+            "RAG 检索评估已完成并写入 jobs。",
+            {"aggregate": result.get("aggregate") or {}, "sample_count": result.get("sample_count", 0)},
+        )
+        return {
+            "schema_version": 1,
+            "accepted": True,
+            "executed": True,
+            "status": "succeeded",
+            "job_id": job_id,
+            "request": request,
+            "result": result,
         }
 
     def rag_explain(
@@ -3966,6 +4080,60 @@ def _rag_evaluation_summary(aggregate: dict[str, Any]) -> list[str]:
         f"推荐模式分布：{preferred}。",
         f"覆盖项目数：{aggregate.get('repository_count', 0)}；零命中样本数：{len(aggregate.get('zero_hit_queries') or [])}。",
     ]
+
+
+def _rag_search_evaluation_request(payload: dict[str, Any] | None) -> dict[str, Any]:
+    payload = payload if isinstance(payload, dict) else {}
+    raw_queries = payload.get("queries", payload.get("q"))
+    if isinstance(raw_queries, str):
+        queries = [raw_queries]
+    elif isinstance(raw_queries, list):
+        queries = [str(item) for item in raw_queries]
+    else:
+        queries = []
+    return {
+        "queries": _normalize_rag_evaluation_queries(queries),
+        "language": _blank_to_none(str(payload.get("language") or "")) or "",
+        "category": _blank_to_none(str(payload.get("category") or "")) or "",
+        "source": _blank_to_none(str(payload.get("source") or "")) or "",
+        "limit": max(1, min(_int_value(payload.get("limit")) or 8, 30)),
+        "model": _blank_to_none(str(payload.get("model") or "")) or MODEL_NAME,
+        "auto_build": _bool_value(payload.get("auto_build"), False),
+        "confirm_execution": _truthy(payload.get("confirm_execution", False)),
+        "trigger_source": str(payload.get("trigger_source") or "rag_search_evaluation_api"),
+        "requested_by": str(payload.get("requested_by") or "api").strip()[:120],
+    }
+
+
+def _rag_search_evaluation_job_id(submitted_at: str, request: dict[str, Any]) -> str:
+    text = json.dumps(
+        {
+            "submitted_at": submitted_at,
+            "queries": request.get("queries") or [],
+            "language": request.get("language") or "",
+            "category": request.get("category") or "",
+            "source": request.get("source") or "",
+            "limit": request.get("limit") or 0,
+            "model": request.get("model") or "",
+        },
+        ensure_ascii=False,
+        sort_keys=True,
+    )
+    digest = sha1(text.encode("utf-8")).hexdigest()[:12]
+    return f"rag-search-eval:{submitted_at[:10]}:{digest}"
+
+
+def _rag_search_evaluation_job_result(result: dict[str, Any]) -> dict[str, Any]:
+    aggregate = result.get("aggregate") if isinstance(result.get("aggregate"), dict) else {}
+    return {
+        "schema_version": result.get("schema_version", 1),
+        "sample_count": result.get("sample_count", 0),
+        "queries": result.get("queries") or [],
+        "model": result.get("model") or "",
+        "auto_build": bool(result.get("auto_build")),
+        "aggregate": aggregate,
+        "summary": result.get("summary") or [],
+    }
 
 
 def _rag_explanation(

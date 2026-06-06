@@ -2,6 +2,25 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-06-06 追加：RAG 检索评估结果入库
+
+### 1. 开发目的
+
+`GET /v1/rag/search-evaluation` 已经能批量评估 FTS5、向量和混合检索，但结果只存在于单次响应中，不能沉淀为历史数据。为了继续推进数据库/RAG 核心闭环，本次新增确认式写入能力，把检索评估结果保存到 SQLite `jobs` 和 `job_events`，方便后续查看趋势和审计。
+
+### 2. 修改内容
+
+1. 新增 `POST /v1/rag/search-evaluation`。
+2. 新增 `ApiRepository.persist_rag_search_evaluation`。
+3. 未传入 `confirm_execution=true` 时只返回阻塞原因和只读预览，不写入 SQLite。
+4. 确认执行后写入 `rag_search_evaluation` 类型任务，并记录 started/succeeded 事件。
+5. `/v1/jobs` 的 `kind` 过滤支持 `rag_search_evaluation`。
+6. 更新 README、API 文档和后端测试。
+
+### 3. 后续空间
+
+下一步可以基于 `rag_search_evaluation` 任务历史生成质量趋势接口，例如不同日期的平均命中数、零命中样本数和推荐模式变化。
+
 ## 2026-06-06 追加：RAG 检索评估接口
 
 ### 1. 开发目的

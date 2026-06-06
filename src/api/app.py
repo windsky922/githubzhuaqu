@@ -333,6 +333,10 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
             auto_build=auto_build,
         )
 
+    @app.post("/v1/rag/search-evaluation", status_code=202)
+    def v1_persist_rag_search_evaluation(payload: dict[str, Any] | None = Body(default=None)) -> dict[str, Any]:
+        return repository.persist_rag_search_evaluation(payload)
+
     @app.get("/v1/rag/explain")
     def v1_rag_explain(
         q: str = Query(..., min_length=1),
@@ -422,7 +426,7 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
         status: str | None = Query(default=None, pattern="^(planned|running|succeeded|failed)?$"),
         kind: str | None = Query(
             default=None,
-            pattern="^(weekly_report|rag_backfill|rag_corpus_rebuild|rag_embedding_build)?$",
+            pattern="^(weekly_report|rag_backfill|rag_corpus_rebuild|rag_embedding_build|rag_search_evaluation)?$",
         ),
         profile: str | None = None,
         query: str | None = None,

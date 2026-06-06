@@ -149,6 +149,21 @@ class ApiRepositoryTest(unittest.TestCase):
                 limit=5,
                 auto_build=True,
             )
+            rag_search_evaluation_blocked = repository.persist_rag_search_evaluation(
+                {"queries": ["agent workflow"], "language": "Python", "requested_by": "test"}
+            )
+            rag_search_evaluation_job = repository.persist_rag_search_evaluation(
+                {
+                    "queries": ["agent workflow", "python automation"],
+                    "language": "Python",
+                    "limit": 5,
+                    "auto_build": True,
+                    "confirm_execution": True,
+                    "requested_by": "test",
+                }
+            )
+            rag_search_evaluation_jobs = repository.jobs(kind="rag_search_evaluation", status="succeeded", limit=5)
+            rag_search_evaluation_events = repository.job_events(rag_search_evaluation_job["job_id"], limit=5)
             rag_explain = repository.rag_explain(query="agent workflow", language="Python", limit=5)
             rag_ask = repository.rag_ask(query="agent workflow", language="Python", limit=5)
             rag_hybrid_explain = repository.rag_explain(
@@ -259,6 +274,7 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertTrue(health["capabilities"]["rag_hybrid_search"])
             self.assertTrue(health["capabilities"]["rag_search_compare"])
             self.assertTrue(health["capabilities"]["rag_search_evaluation"])
+            self.assertTrue(health["capabilities"]["rag_search_evaluation_jobs"])
             self.assertTrue(health["capabilities"]["rag_explain"])
             self.assertTrue(health["capabilities"]["rag_ask"])
             self.assertTrue(health["capabilities"]["rag_project_explanations"])
@@ -413,6 +429,17 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertIn("hybrid", rag_search_evaluation["aggregate"]["modes"])
             self.assertGreaterEqual(rag_search_evaluation["aggregate"]["repository_count"], 1)
             self.assertTrue(rag_search_evaluation["summary"])
+            self.assertFalse(rag_search_evaluation_blocked["accepted"])
+            self.assertFalse(rag_search_evaluation_blocked["executed"])
+            self.assertIn("confirm_execution=true", " ".join(rag_search_evaluation_blocked["blockers"]))
+            self.assertTrue(rag_search_evaluation_job["accepted"])
+            self.assertTrue(rag_search_evaluation_job["executed"])
+            self.assertEqual(rag_search_evaluation_job["status"], "succeeded")
+            self.assertEqual(rag_search_evaluation_jobs["jobs"][0]["kind"], "rag_search_evaluation")
+            self.assertEqual(rag_search_evaluation_jobs["jobs"][0]["job_id"], rag_search_evaluation_job["job_id"])
+            self.assertTrue(
+                any(event["event_type"] == "rag_search_evaluation_succeeded" for event in rag_search_evaluation_events["events"])
+            )
             self.assertEqual(rag_hybrid_explain["retrieval"]["mode"], "hybrid")
             self.assertIn("owner/agent", rag_hybrid_explain["explanation"]["answer"])
             self.assertEqual(rag_hybrid_ask["retrieval"]["mode"], "hybrid")
@@ -610,6 +637,25 @@ class ApiRepositoryTest(unittest.TestCase):
                     ("auto_build", "true"),
                 ],
             )
+            v1_rag_search_evaluation_blocked = client.post(
+                "/v1/rag/search-evaluation",
+                json={"queries": ["agent workflow"], "language": "Python", "requested_by": "route-test"},
+            )
+            v1_rag_search_evaluation_job = client.post(
+                "/v1/rag/search-evaluation",
+                json={
+                    "queries": ["agent workflow", "python automation"],
+                    "language": "Python",
+                    "limit": 5,
+                    "auto_build": True,
+                    "confirm_execution": True,
+                    "requested_by": "route-test",
+                },
+            )
+            v1_rag_search_evaluation_jobs = client.get(
+                "/v1/jobs",
+                params={"kind": "rag_search_evaluation", "status": "succeeded", "limit": 5},
+            )
             v1_rag_explain = client.get(
                 "/v1/rag/explain",
                 params={"q": "agent workflow", "language": "Python", "limit": 5},
@@ -764,6 +810,9 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(v1_rag_hybrid_search.status_code, 200)
             self.assertEqual(v1_rag_search_compare.status_code, 200)
             self.assertEqual(v1_rag_search_evaluation.status_code, 200)
+            self.assertEqual(v1_rag_search_evaluation_blocked.status_code, 202)
+            self.assertEqual(v1_rag_search_evaluation_job.status_code, 202)
+            self.assertEqual(v1_rag_search_evaluation_jobs.status_code, 200)
             self.assertEqual(v1_rag_explain.status_code, 200)
             self.assertEqual(v1_rag_hybrid_explain.status_code, 200)
             self.assertEqual(v1_rag_ask.status_code, 200)
@@ -831,6 +880,9 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(v1_rag_search_evaluation.json()["sample_count"], 2)
             self.assertIn("hybrid", v1_rag_search_evaluation.json()["aggregate"]["modes"])
             self.assertTrue(v1_rag_search_evaluation.json()["summary"])
+            self.assertFalse(v1_rag_search_evaluation_blocked.json()["accepted"])
+            self.assertTrue(v1_rag_search_evaluation_job.json()["executed"])
+            self.assertEqual(v1_rag_search_evaluation_jobs.json()["jobs"][0]["kind"], "rag_search_evaluation")
             self.assertEqual(v1_rag_explain.json()["explanation"]["scoring_model"], "rule:rag-explain-v1")
             self.assertTrue(v1_rag_explain.json()["explanation_id"].startswith("ragx:"))
             self.assertGreaterEqual(v1_rag_explain.json()["quality"]["score"], 1)
