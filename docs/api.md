@@ -427,6 +427,29 @@ py scripts\build_rag_embeddings.py
 /v1/jobs/{job_id}/events
 ```
 
+### `GET /v1/rag/search-evaluation-trends`
+
+读取已经写入 SQLite `jobs` 的 `rag_search_evaluation` 任务，汇总 RAG 检索质量趋势。该接口不重新执行检索，只读取历史评估结果，适合用于后续管理页、Agent 自检和定期质量报告。
+
+支持参数：
+
+| 参数 | 说明 |
+|---|---|
+| `limit` | 返回最近评估任务数量，默认 20，最大 100 |
+
+返回内容包含：
+
+1. `jobs`：最近评估任务摘要，包括样本数、平均命中、零命中数量、推荐模式分布和项目覆盖数。
+2. `aggregate`：跨任务汇总的平均样本数、平均零命中数、模式平均命中、命中率和最新推荐模式。
+3. `summary`：适合直接展示的中文趋势摘要。
+4. `recommendations`：下一步改进建议，例如是否需要补充语料或继续使用 hybrid。
+
+示例：
+
+```text
+/v1/rag/search-evaluation-trends?limit=20
+```
+
 ### `GET /v1/rag/explain`
 
 基于 `/v1/rag/retrieve` 或 `/v1/rag/vector-search` 的召回结果生成规则版 RAG 解释。该接口不调用外部模型，不请求 GitHub/Kimi/Telegram，只把已有证据块整理为“推荐解释、证据引用、风险提示、下一步动作”，用于后续接入模型总结、项目详情页解释和 LangChain 编排。

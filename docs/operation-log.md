@@ -2,6 +2,25 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-06-06 追加：RAG 检索质量趋势接口
+
+### 1. 开发目的
+
+`POST /v1/rag/search-evaluation` 已经能把单次评估结果写入 SQLite jobs，但后续 Agent 需要从历史评估中判断检索质量是否稳定。为继续推进数据库/RAG 核心闭环，本次新增趋势接口，从历史评估任务中汇总平均命中、零命中样本、推荐模式分布和覆盖项目变化。
+
+### 2. 修改内容
+
+1. 新增 `GET /v1/rag/search-evaluation-trends`。
+2. 新增 `ApiRepository.rag_search_evaluation_trends`。
+3. 趋势结果读取 `rag_search_evaluation` 类型 succeeded jobs，不重新执行检索。
+4. 返回 `jobs`、`aggregate`、`summary` 和 `recommendations`。
+5. 在 `/v1/health` 能力清单中加入 `rag_search_evaluation_trends`。
+6. 更新 README、API 文档和后端测试。
+
+### 3. 后续空间
+
+下一步可以把该趋势接口接入管理首页，或让 GitHub Actions 定期写入一次评估任务，用于长期观察 RAG 检索质量。
+
 ## 2026-06-06 追加：RAG 检索评估结果入库
 
 ### 1. 开发目的

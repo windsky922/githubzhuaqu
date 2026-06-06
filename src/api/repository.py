@@ -74,6 +74,7 @@ class ApiRepository:
                 "rag_search_compare": True,
                 "rag_search_evaluation": True,
                 "rag_search_evaluation_jobs": True,
+                "rag_search_evaluation_trends": True,
                 "rag_explain": True,
                 "rag_ask": True,
                 "rag_explanations": True,
@@ -744,6 +745,24 @@ class ApiRepository:
             "job_id": job_id,
             "request": request,
             "result": result,
+        }
+
+    def rag_search_evaluation_trends(self, *, limit: int = 20) -> dict[str, Any]:
+        limit = max(1, min(_int_value(limit) or 20, 100))
+        jobs = [
+            job
+            for job in self.jobs(kind="rag_search_evaluation", status="succeeded", limit=max(limit, 100)).get("jobs", [])
+            if job.get("kind") == "rag_search_evaluation"
+        ][:limit]
+        trend_items = [_rag_search_evaluation_trend_item(job) for job in jobs]
+        aggregate = _rag_search_evaluation_trend_aggregate(trend_items)
+        return {
+            "schema_version": 1,
+            "count": len(trend_items),
+            "jobs": trend_items,
+            "aggregate": aggregate,
+            "summary": _rag_search_evaluation_trend_summary(aggregate),
+            "recommendations": _rag_search_evaluation_trend_recommendations(aggregate),
         }
 
     def rag_explain(
@@ -4134,6 +4153,97 @@ def _rag_search_evaluation_job_result(result: dict[str, Any]) -> dict[str, Any]:
         "aggregate": aggregate,
         "summary": result.get("summary") or [],
     }
+
+
+def _rag_search_evaluation_trend_item(job: dict[str, Any]) -> dict[str, Any]:
+    result = job.get("result") if isinstance(job.get("result"), dict) else {}
+    aggregate = result.get("aggregate") if isinstance(result.get("aggregate"), dict) else {}
+    modes = aggregate.get("modes") if isinstance(aggregate.get("modes"), dict) else {}
+    return {
+        "job_id": job.get("job_id") or "",
+        "status": job.get("status") or "",
+        "run_date": job.get("run_date") or "",
+        "submitted_at": job.get("submitted_at") or "",
+        "finished_at": job.get("finished_at") or "",
+        "sample_count": _int_value(result.get("sample_count")),
+        "queries": result.get("queries") if isinstance(result.get("queries"), list) else [],
+        "preferred_mode_counts": aggregate.get("preferred_mode_counts") or {},
+        "repository_count": _int_value(aggregate.get("repository_count")),
+        "zero_hit_count": len(aggregate.get("zero_hit_queries") or []),
+        "mode_average_counts": {
+            name: float(data.get("average_count") or 0) if isinstance(data, dict) else 0
+            for name, data in modes.items()
+        },
+        "mode_hit_rates": {
+            name: float(data.get("hit_rate") or 0) if isinstance(data, dict) else 0 for name, data in modes.items()
+        },
+        "pairwise_average_overlap": aggregate.get("pairwise_average_overlap") or {},
+        "recommendations": aggregate.get("recommendations") or [],
+    }
+
+
+def _rag_search_evaluation_trend_aggregate(items: list[dict[str, Any]]) -> dict[str, Any]:
+    if not items:
+        return {
+            "job_count": 0,
+            "average_sample_count": 0,
+            "average_zero_hit_count": 0,
+            "preferred_mode_counts": {},
+            "latest_preferred_mode": "",
+            "mode_average_counts": {},
+            "mode_hit_rates": {},
+            "repository_count_max": 0,
+        }
+    preferred_counts: dict[str, int] = {}
+    mode_count_totals: dict[str, float] = {}
+    mode_hit_rate_totals: dict[str, float] = {}
+    for item in items:
+        for mode, count in (item.get("preferred_mode_counts") or {}).items():
+            preferred_counts[str(mode)] = preferred_counts.get(str(mode), 0) + _int_value(count)
+        for mode, value in (item.get("mode_average_counts") or {}).items():
+            mode_count_totals[str(mode)] = mode_count_totals.get(str(mode), 0.0) + float(value or 0)
+        for mode, value in (item.get("mode_hit_rates") or {}).items():
+            mode_hit_rate_totals[str(mode)] = mode_hit_rate_totals.get(str(mode), 0.0) + float(value or 0)
+    count = len(items)
+    latest_preferred = ""
+    if items:
+        latest_counts = items[0].get("preferred_mode_counts") or {}
+        if latest_counts:
+            latest_preferred = max(latest_counts.items(), key=lambda item: _int_value(item[1]))[0]
+    return {
+        "job_count": count,
+        "average_sample_count": round(sum(_int_value(item.get("sample_count")) for item in items) / count, 4),
+        "average_zero_hit_count": round(sum(_int_value(item.get("zero_hit_count")) for item in items) / count, 4),
+        "preferred_mode_counts": preferred_counts,
+        "latest_preferred_mode": latest_preferred,
+        "mode_average_counts": {mode: round(total / count, 4) for mode, total in sorted(mode_count_totals.items())},
+        "mode_hit_rates": {mode: round(total / count, 4) for mode, total in sorted(mode_hit_rate_totals.items())},
+        "repository_count_max": max(_int_value(item.get("repository_count")) for item in items),
+    }
+
+
+def _rag_search_evaluation_trend_summary(aggregate: dict[str, Any]) -> list[str]:
+    if _int_value(aggregate.get("job_count")) == 0:
+        return ["暂无 RAG 检索评估历史；可先调用 POST /v1/rag/search-evaluation 写入一次评估。"]
+    return [
+        f"已汇总 {aggregate.get('job_count', 0)} 次 RAG 检索评估。",
+        f"平均零命中样本数：{aggregate.get('average_zero_hit_count', 0)}；最大覆盖项目数：{aggregate.get('repository_count_max', 0)}。",
+        f"最新推荐模式：{aggregate.get('latest_preferred_mode') or 'unknown'}。",
+    ]
+
+
+def _rag_search_evaluation_trend_recommendations(aggregate: dict[str, Any]) -> list[str]:
+    if _int_value(aggregate.get("job_count")) == 0:
+        return ["先执行一次确认式 RAG 检索评估，建立趋势基线。"]
+    recommendations = []
+    if float(aggregate.get("average_zero_hit_count") or 0) > 0:
+        recommendations.append("存在零命中样本，建议补充语料或扩展查询同义词。")
+    latest = str(aggregate.get("latest_preferred_mode") or "")
+    if latest == "hybrid":
+        recommendations.append("最新评估倾向 hybrid，可继续把 hybrid 作为解释和问答默认候选。")
+    elif latest:
+        recommendations.append(f"最新评估倾向 {latest}，建议检查 hybrid 未成为首选的原因。")
+    return recommendations or ["检索趋势稳定，可继续扩大样本集。"]
 
 
 def _rag_explanation(
