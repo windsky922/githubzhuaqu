@@ -1162,7 +1162,7 @@ class ApiRepository:
 
     def rag_maintenance_report(self, *, limit: int = 20) -> dict[str, Any]:
         limit = max(1, min(_int_value(limit) or 20, 100))
-        maintenance_kinds = {"rag_backfill", "rag_corpus_rebuild", "rag_embedding_build"}
+        maintenance_kinds = {"rag_backfill", "rag_corpus_rebuild", "rag_embedding_build", "rag_search_evaluation"}
         jobs = [
             job
             for job in self.jobs(limit=max(limit * 4, 100)).get("jobs", [])
@@ -3174,6 +3174,27 @@ def _rag_maintenance_job_summary(job: dict[str, Any]) -> dict[str, Any]:
                 "dimensions": _int_value(result.get("dimensions")),
                 "chunk_count": _int_value(result.get("chunk_count")),
                 "embedding_count": _int_value(result.get("embedding_count")),
+            }
+        )
+    elif kind == "rag_search_evaluation":
+        aggregate = result.get("aggregate") if isinstance(result.get("aggregate"), dict) else {}
+        summary.update(
+            {
+                "sample_count": _int_value(result.get("sample_count")),
+                "queries": result.get("queries") if isinstance(result.get("queries"), list) else [],
+                "language": result.get("language") or "",
+                "category": result.get("category") or "",
+                "source": result.get("source") or "",
+                "limit": _int_value(result.get("limit")),
+                "model": result.get("model") or "",
+                "auto_build": bool(result.get("auto_build")),
+                "preferred_mode_counts": aggregate.get("preferred_mode_counts")
+                if isinstance(aggregate.get("preferred_mode_counts"), dict)
+                else {},
+                "zero_hit_queries": aggregate.get("zero_hit_queries")
+                if isinstance(aggregate.get("zero_hit_queries"), list)
+                else [],
+                "repository_count": _int_value(aggregate.get("repository_count")),
             }
         )
     return summary

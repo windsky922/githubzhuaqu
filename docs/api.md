@@ -715,9 +715,9 @@ POST /v1/jobs/{job_id}/execute
 返回内容包括：
 
 1. `status_counts` 和 `kind_counts`：最近维护任务的状态分布和类型分布。
-2. `by_kind`：按 `rag_corpus_rebuild`、`rag_embedding_build`、`rag_backfill` 分组的任务统计。
+2. `by_kind`：按 `rag_corpus_rebuild`、`rag_embedding_build`、`rag_backfill`、`rag_search_evaluation` 分组的任务统计。
 3. `latest_success` 和 `latest_failed`：最近成功和最近失败的维护任务摘要。
-4. `recent_jobs`：最近维护任务列表，包含 before/after 计数和关键执行结果。
+4. `recent_jobs`：最近维护任务列表，包含 before/after 计数、检索评估摘要和关键执行结果。
 5. `diagnostics`：当前 RAG 诊断摘要，便于把历史任务与当前数据库状态对照。
 6. `recommendations`：基于任务历史和诊断结果给出的下一步维护建议。
 

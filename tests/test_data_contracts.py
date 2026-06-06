@@ -96,6 +96,23 @@ JOB_REQUEST_KEYS = {
     "safety_warnings",
 }
 
+RAG_JOB_REQUEST_EXTENSION_KEYS = {
+    "queries",
+    "language",
+    "category",
+    "source",
+    "limit",
+    "rag_limit",
+    "mode",
+    "model",
+    "auto_build",
+    "confirm_execution",
+    "maintenance_action",
+    "coverage_limit",
+    "min_gap_count",
+    "dimensions",
+}
+
 JOB_RESULT_KEYS = {
     "run_date",
     "status",
@@ -110,6 +127,31 @@ JOB_RESULT_KEYS = {
     "sqlite_index_path",
     "sqlite_error",
     "error",
+}
+
+RAG_JOB_RESULT_EXTENSION_KEYS = {
+    "sample_count",
+    "queries",
+    "language",
+    "category",
+    "source",
+    "limit",
+    "model",
+    "auto_build",
+    "aggregate",
+    "evaluations",
+    "summary",
+    "candidate_count",
+    "processed_count",
+    "coverage_before",
+    "processed_repositories",
+    "before_counts",
+    "after_counts",
+    "selected_archive_count",
+    "import_counts",
+    "dimensions",
+    "chunk_count",
+    "embedding_count",
 }
 
 PROFILE_KEYS = {

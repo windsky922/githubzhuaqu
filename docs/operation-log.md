@@ -2,6 +2,23 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-06-06 追加：RAG 评估任务纳入维护报告
+
+### 1. 开发目的
+
+`rag_search_evaluation` 已经可以写入 SQLite jobs，但维护报告和数据契约仍主要围绕语料重建、embedding 构建和解释回填三类任务。为让数据库/RAG 任务体系保持一致，本次把检索评估任务纳入维护历史汇总。
+
+### 2. 修改内容
+
+1. `ApiRepository.rag_maintenance_report` 将 `rag_search_evaluation` 计入 RAG 维护类任务。
+2. `_rag_maintenance_job_summary` 新增检索评估摘要字段，包括样本数、查询词、推荐模式分布、零命中样本和覆盖项目数。
+3. 更新数据契约，补齐 `rag_search_evaluation` 的 `kind`、`request` 和 `result` 公开字段说明。
+4. 更新 README、API 文档和后端测试，确保维护报告能看到检索评估任务。
+
+### 3. 后续空间
+
+后续可以让 GitHub Actions 定期创建一次 `rag_search_evaluation` 任务，并把趋势结果接入管理首页，形成长期 RAG 检索质量观测。
+
 ## 2026-06-06 追加：RAG 检索质量趋势接口
 
 ### 1. 开发目的

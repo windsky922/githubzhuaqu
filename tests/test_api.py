@@ -509,6 +509,11 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(rag_maintenance_report["schema_version"], 1)
             self.assertGreaterEqual(rag_maintenance_report["count"], 1)
             self.assertIn("rag_backfill", rag_maintenance_report["kind_counts"])
+            self.assertIn("rag_search_evaluation", rag_maintenance_report["kind_counts"])
+            self.assertIn("rag_search_evaluation", [item["kind"] for item in rag_maintenance_report["by_kind"]])
+            self.assertTrue(
+                any(job["kind"] == "rag_search_evaluation" for job in rag_maintenance_report["recent_jobs"])
+            )
             self.assertTrue(rag_maintenance_report["latest_success"]["job_id"])
             self.assertTrue(rag_maintenance_report["recommendations"])
             self.assertGreaterEqual(database_summary_after_explain["table_counts"]["rag_explanations"], 1)
