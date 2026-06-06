@@ -23,6 +23,10 @@ on:
         description: "是否根据 RAG 覆盖缺口创建维护计划任务"
         required: false
         default: "true"
+      run_rag_evaluation:
+        description: "是否执行一次 RAG 检索质量评估并写入 jobs"
+        required: false
+        default: "true"
   schedule:
     - cron: "0 0 * * 1"
 
@@ -113,6 +117,29 @@ jobs:
             --limit "$RAG_MAINTENANCE_LIMIT" \
             --coverage-limit "$RAG_MAINTENANCE_COVERAGE_LIMIT" \
             --min-gap-count "$RAG_MAINTENANCE_MIN_GAP_COUNT" \
+            --requested-by "github_actions"
+
+      - name: 执行 RAG 检索质量评估
+        env:
+          WORKFLOW_RUN_RAG_EVALUATION: ${{ inputs.run_rag_evaluation || 'true' }}
+          RAG_EVALUATION_QUERIES: ${{ vars.RAG_EVALUATION_QUERIES }}
+          RAG_EVALUATION_LANGUAGE: ${{ vars.RAG_EVALUATION_LANGUAGE }}
+          RAG_EVALUATION_CATEGORY: ${{ vars.RAG_EVALUATION_CATEGORY }}
+          RAG_EVALUATION_SOURCE: ${{ vars.RAG_EVALUATION_SOURCE }}
+          RAG_EVALUATION_LIMIT: ${{ vars.RAG_EVALUATION_LIMIT || '8' }}
+          RAG_EVALUATION_AUTO_BUILD: ${{ vars.RAG_EVALUATION_AUTO_BUILD || 'true' }}
+        run: |
+          if [ "$WORKFLOW_RUN_RAG_EVALUATION" != "true" ]; then
+            echo "已跳过 RAG 检索质量评估。"
+            exit 0
+          fi
+          python scripts/run_rag_search_evaluation.py \
+            --queries "$RAG_EVALUATION_QUERIES" \
+            --language "$RAG_EVALUATION_LANGUAGE" \
+            --category "$RAG_EVALUATION_CATEGORY" \
+            --source "$RAG_EVALUATION_SOURCE" \
+            --limit "$RAG_EVALUATION_LIMIT" \
+            --auto-build "$RAG_EVALUATION_AUTO_BUILD" \
             --requested-by "github_actions"
 
       - name: 生成周报归档页面

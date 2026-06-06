@@ -2,6 +2,24 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-06-06 追加：GitHub Actions 自动写入 RAG 检索评估
+
+### 1. 开发目的
+
+RAG 检索评估已经支持写入 SQLite jobs，并且趋势接口可以读取历史评估任务。为让趋势数据持续增长，本次把 RAG 检索质量评估接入每周 workflow，在生成 Pages 前自动沉淀一次评估记录。
+
+### 2. 修改内容
+
+1. 新增 `scripts/run_rag_search_evaluation.py`，用于执行一次 RAG 检索质量评估并写入 SQLite jobs。
+2. `.github/workflows/weekly.yml` 新增 `run_rag_evaluation` 手动开关，默认启用。
+3. workflow 新增 `RAG_EVALUATION_QUERIES`、`RAG_EVALUATION_LANGUAGE`、`RAG_EVALUATION_CATEGORY`、`RAG_EVALUATION_SOURCE`、`RAG_EVALUATION_LIMIT` 和 `RAG_EVALUATION_AUTO_BUILD` 变量入口。
+4. RAG 检索评估步骤放在 `scripts/build_pages.py` 前执行，确保 `docs/jobs.json` 和任务页面能包含本次评估结果。
+5. 新增脚本测试和 workflow 测试。
+
+### 3. 后续空间
+
+后续可以把 `/v1/rag/search-evaluation-trends` 接入管理首页，展示最近几次评估的平均命中、零命中样本和推荐检索模式变化。
+
 ## 2026-06-06 追加：RAG 评估任务纳入维护报告
 
 ### 1. 开发目的
