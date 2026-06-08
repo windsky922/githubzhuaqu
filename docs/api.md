@@ -42,7 +42,7 @@ http://127.0.0.1:8000/admin.html?api=1
 
 根路径 `http://127.0.0.1:8000/` 会跳转到管理首页。`/v1/*` 路径是 JSON API，例如 `/v1/jobs?limit=50` 返回机器可读任务数据，不是 HTML 页面。
 
-管理首页中的 RAG 检索区会调用 `/v1/rag/retrieve` 和 `/v1/rag/vector-search`，用于查看证据块、引用和 `prompt_context`；RAG 质量概览会调用 `/v1/rag/quality-summary`，用于查看解释数量、质量分布、改进建议和低质量样本；RAG 回填区会调用 `/v1/rag/backfill-explanations`，先预览缺口项目，确认后再写入 SQLite。向量检索会在 `auto_build=true` 时自动构建本地 `local-hash-v1` 索引，也可以先手动运行 `py scripts\build_rag_embeddings.py`。
+管理首页中的 RAG 区域会调用 `/v1/rag/ask`、`/v1/rag/retrieve`、`/v1/rag/vector-search` 和 `/v1/rag/hybrid-search`，用于查看问答结果、证据块、引用和 `prompt_context`；后端还提供 `/v1/rag/search-compare`、`/v1/rag/search-evaluation` 和 `/v1/rag/search-evaluation-trends`，用于比较、批量评估和长期观察三种检索模式的召回差异；RAG 诊断会调用 `/v1/rag/diagnostics`，用于判断语料、证据块、embedding、解释历史和问答能力是否可用；RAG 质量概览会调用 `/v1/rag/quality-summary`，用于查看解释数量、质量分布、改进建议和低质量样本；RAG 维护计划按钮会调用 `/v1/rag/maintenance-plan`，按诊断结果创建语料重建、embedding 构建或解释回填 planned 任务；维护历史可以通过 `/v1/rag/maintenance-report` 查看最近 RAG 维护任务状态、计数变化和下一步建议；RAG 回填区会调用 `/v1/rag/backfill-explanations`，先预览缺口项目，确认后再写入 SQLite。向量检索会在 `auto_build=true` 时自动构建本地 `local-hash-v1` 索引，也可以先手动运行 `py scripts\build_rag_embeddings.py`。
 
 如果本地没有 `data/github_weekly.sqlite`，查询项目接口会从 `data/` 下的 JSON 归档自动重建 SQLite 派生索引。
 
@@ -298,6 +298,175 @@ py scripts\build_rag_embeddings.py
 
 该接口是后续真正接入 embedding、向量库和 LangChain retriever 的预留层。当前实现只建设稳定数据边界，不改变周报采集、生成和推送流程。
 
+### `GET /v1/rag/hybrid-search`
+
+基于 SQLite FTS5 文本检索和本地 `rag_embeddings` 向量检索执行混合召回。该接口会分别调用文本检索和向量检索，再按同一项目和 chunk 去重，使用固定权重合并排序：文本召回权重 0.55，向量召回权重 0.45。
+
+支持参数与 `/v1/rag/vector-search` 基本一致：
+
+| 参数 | 说明 |
+|---|---|
+| `q` | 必填，用户问题或检索关键词 |
+| `language` | 可选，按语言过滤 |
+| `category` | 可选，按项目方向过滤 |
+| `source` | 可选，按来源过滤，例如 `github_trending` |
+| `limit` | 返回上下文数量，默认 8，最大 30 |
+| `model` | 可选，默认 `local-hash-v1` |
+| `auto_build` | 可选，为 `true` 且索引为空时自动构建本地索引 |
+
+返回内容包括：
+
+1. `contexts`：混合排序后的证据块，每条包含 `retrieval_sources` 和 `retrieval_scores`。
+2. `citations`：按混合排序生成的引用列表。
+3. `prompt_context`：拼接后的上下文文本，供后续问答链直接使用。
+4. `retrieval`：包含 `mode=hybrid`、文本/向量命中数量、权重和向量模型。
+
+示例：
+
+```text
+/v1/rag/hybrid-search?q=agent%20workflow&language=Python&limit=8&auto_build=true
+```
+
+该接口是后续接入 LangChain retriever、推荐解释重排和多策略检索评估的优先入口。它仍然只使用本地 SQLite 数据，不调用外部模型或推送服务。
+
+### `GET /v1/rag/search-compare`
+
+同时执行 FTS5 文本检索、本地向量检索和混合检索，并返回三种模式的命中数量、Top 项目、引用数量、项目重叠率和推荐使用的检索模式。该接口用于 RAG 调试、召回质量评估和后续 Agent 自动选择检索策略。
+
+支持参数与 `/v1/rag/hybrid-search` 一致：
+
+| 参数 | 说明 |
+|---|---|
+| `q` | 必填，查询问题或关键词 |
+| `language` | 可选，按语言过滤 |
+| `category` | 可选，按方向过滤 |
+| `source` | 可选，按来源过滤 |
+| `limit` | 返回数量，默认 8，最大 30 |
+| `model` | 可选，默认 `local-hash-v1` |
+| `auto_build` | 可选，为 `true` 且索引为空时自动构建本地索引 |
+
+返回内容包含：
+
+1. `modes`：`fts5`、`vector`、`hybrid` 三种模式的命中摘要。
+2. `overlap`：三种模式的项目集合重叠情况和两两重叠率。
+3. `recommendation`：当前查询建议优先使用的检索模式和原因。
+4. `summary`：适合前端展示或 Agent 日志记录的中文摘要。
+
+示例：
+
+```text
+/v1/rag/search-compare?q=agent%20workflow&language=Python&limit=8&auto_build=true
+```
+
+该接口只读 SQLite，不写入解释历史，不调用外部模型，也不触发推送。
+
+### `GET /v1/rag/search-evaluation`
+
+用固定查询样本或自定义查询样本批量调用 `/v1/rag/search-compare`，汇总 FTS5、向量和混合检索的平均命中数、命中率、推荐模式分布、项目覆盖数和零命中样本。该接口用于后续 RAG 质量评估、检索策略选择和 Agent 自动调参。
+
+支持参数：
+
+| 参数 | 说明 |
+|---|---|
+| `q` | 可选，可重复传入多个查询样本；不传时使用内置小样本 |
+| `language` | 可选，按语言过滤 |
+| `category` | 可选，按方向过滤 |
+| `source` | 可选，按来源过滤 |
+| `limit` | 每个样本的返回数量，默认 8，最大 30 |
+| `model` | 可选，默认 `local-hash-v1` |
+| `auto_build` | 可选，为 `true` 且索引为空时自动构建本地索引 |
+
+返回内容包含：
+
+1. `aggregate.modes`：三种检索模式的总命中、平均命中、引用数量和命中率。
+2. `aggregate.preferred_mode_counts`：每个样本推荐模式的分布。
+3. `aggregate.pairwise_average_overlap`：模式之间的平均项目重叠率。
+4. `aggregate.zero_hit_queries`：三种模式都没有命中的样本。
+5. `evaluations`：每个样本的完整 `/v1/rag/search-compare` 结果。
+
+示例：
+
+```text
+/v1/rag/search-evaluation?language=Python&limit=8&auto_build=true
+/v1/rag/search-evaluation?q=agent%20workflow&q=python%20automation&language=Python&auto_build=true
+```
+
+`GET /v1/rag/search-evaluation` 只读 SQLite，不写入解释历史，不调用外部模型，也不触发推送。
+
+### `POST /v1/rag/search-evaluation`
+
+执行一次 RAG 检索评估并把结果写入 SQLite `jobs` 和 `job_events`，任务类型为 `rag_search_evaluation`。该接口用于沉淀评估历史，方便后续查看 RAG 检索质量趋势。
+
+请求体字段与 `GET /v1/rag/search-evaluation` 基本一致，额外要求：
+
+| 参数 | 说明 |
+|---|---|
+| `queries` | 可选，查询样本列表；不传时使用内置小样本 |
+| `confirm_execution` | 必填确认项；只有传入 `true` 才会写入 SQLite |
+| `requested_by` | 可选，记录触发来源 |
+
+如果没有传入 `confirm_execution=true`，接口会返回 `accepted=false`、`executed=false` 和阻塞原因，同时附带一次只读预览结果；不会写入任务记录。
+
+示例：
+
+```json
+{
+  "queries": ["agent workflow", "python automation"],
+  "language": "Python",
+  "limit": 8,
+  "auto_build": true,
+  "confirm_execution": true,
+  "requested_by": "local-api"
+}
+```
+
+写入后可通过以下接口查看：
+
+```text
+/v1/jobs?kind=rag_search_evaluation&status=succeeded
+/v1/jobs/{job_id}/events
+```
+
+命令行入口：
+
+```powershell
+py scripts\run_rag_search_evaluation.py --queries "agent workflow;python automation" --language Python --limit 8
+```
+
+GitHub Actions 中的每周 workflow 会在生成 Pages 前调用该脚本。可用仓库变量调整行为：
+
+| 变量 | 说明 |
+|---|---|
+| `RAG_EVALUATION_QUERIES` | 可选，评估查询样本，支持逗号、分号或换行分隔 |
+| `RAG_EVALUATION_LANGUAGE` | 可选，语言过滤 |
+| `RAG_EVALUATION_CATEGORY` | 可选，方向过滤 |
+| `RAG_EVALUATION_SOURCE` | 可选，来源过滤 |
+| `RAG_EVALUATION_LIMIT` | 每种检索模式最多返回多少条证据，默认 8 |
+| `RAG_EVALUATION_AUTO_BUILD` | 是否缺少 embedding 时自动构建，默认 true |
+
+### `GET /v1/rag/search-evaluation-trends`
+
+读取已经写入 SQLite `jobs` 的 `rag_search_evaluation` 任务，汇总 RAG 检索质量趋势。该接口不重新执行检索，只读取历史评估结果，适合用于后续管理页、Agent 自检和定期质量报告。
+
+支持参数：
+
+| 参数 | 说明 |
+|---|---|
+| `limit` | 返回最近评估任务数量，默认 20，最大 100 |
+
+返回内容包含：
+
+1. `jobs`：最近评估任务摘要，包括样本数、平均命中、零命中数量、推荐模式分布和项目覆盖数。
+2. `aggregate`：跨任务汇总的平均样本数、平均零命中数、模式平均命中、命中率和最新推荐模式。
+3. `summary`：适合直接展示的中文趋势摘要。
+4. `recommendations`：下一步改进建议，例如是否需要补充语料或继续使用 hybrid。
+
+示例：
+
+```text
+/v1/rag/search-evaluation-trends?limit=20
+```
+
 ### `GET /v1/rag/explain`
 
 基于 `/v1/rag/retrieve` 或 `/v1/rag/vector-search` 的召回结果生成规则版 RAG 解释。该接口不调用外部模型，不请求 GitHub/Kimi/Telegram，只把已有证据块整理为“推荐解释、证据引用、风险提示、下一步动作”，用于后续接入模型总结、项目详情页解释和 LangChain 编排。
@@ -311,9 +480,9 @@ py scripts\build_rag_embeddings.py
 | `category` | 可选，按项目方向过滤 |
 | `source` | 可选，按来源过滤，例如 `github_trending` |
 | `limit` | 返回上下文数量，默认 8，最大 30 |
-| `mode` | 可选，默认 `fts5`；传 `vector` 时走本地向量检索 |
-| `model` | 可选，向量模式下默认 `local-hash-v1` |
-| `auto_build` | 可选，向量模式下索引为空时自动构建本地索引 |
+| `mode` | 可选，默认 `fts5`；传 `vector` 走本地向量检索，传 `hybrid` 同时使用文本和向量混合检索 |
+| `model` | 可选，向量或混合模式下默认 `local-hash-v1` |
+| `auto_build` | 可选，向量或混合模式下索引为空时自动构建本地索引 |
 
 返回字段包含：
 
@@ -331,9 +500,48 @@ py scripts\build_rag_embeddings.py
 ```text
 /v1/rag/explain?q=agent%20workflow&language=Python&limit=8
 /v1/rag/explain?q=agent%20workflow&mode=vector&auto_build=true
+/v1/rag/explain?q=agent%20workflow&mode=hybrid&auto_build=true
 ```
 
 这是当前 RAG 从“召回证据”升级到“解释输出”的第一层接口。后续如果接入真实 LLM，应优先复用 `citations` 和 `prompt_context`，并要求模型按引用编号回答。
+
+### `GET /v1/rag/ask`
+
+面向前端和后续 Agent 编排的 RAG 问答入口。它复用 `/v1/rag/explain` 的检索、解释和 SQLite 解释历史写入能力，但返回结构更接近“可直接展示或交给下一步工具”的问答结果。
+
+当前版本仍是本地规则版，不调用外部模型、不读取密钥。后续接入 Kimi、LangChain 或其他问答链时，应优先保持该接口的 `answer + citations + prompt_context + next_actions` 数据边界稳定。
+
+支持参数与 `/v1/rag/explain` 一致：
+
+| 参数 | 说明 |
+|---|---|
+| `q` | 必填，用户问题 |
+| `language` | 可选，按语言过滤 |
+| `category` | 可选，按项目方向过滤 |
+| `source` | 可选，按来源过滤，例如 `github_trending` |
+| `limit` | 返回上下文数量，默认 8，最大 30 |
+| `mode` | 可选，默认 `fts5`；传 `vector` 走本地向量检索，传 `hybrid` 同时使用文本和向量混合检索 |
+| `model` | 可选，向量或混合模式下默认 `local-hash-v1` |
+| `auto_build` | 可选，向量或混合模式下索引为空时自动构建本地索引 |
+
+返回字段包含：
+
+1. `answer`：当前规则版回答。
+2. `answer_model`：回答生成策略，当前为 `rule:rag-ask-v1`。
+3. `citations`：回答引用的项目、日期和 chunk ID。
+4. `evidence`：裁剪后的证据摘要。
+5. `quality`：解释质量分与质量等级。
+6. `prompt_context`：后续接入模型时可直接使用的上下文。
+7. `next_actions`：建议的下一步核验或补库动作。
+8. `source_explanation_id`：本次问答复用或写入的 RAG 解释编号。
+
+示例：
+
+```text
+/v1/rag/ask?q=agent%20workflow&language=Python&limit=8
+/v1/rag/ask?q=agent%20workflow&mode=vector&auto_build=true
+/v1/rag/ask?q=agent%20workflow&mode=hybrid&auto_build=true
+```
 
 ### `GET /v1/rag/explanations`
 
@@ -420,6 +628,32 @@ python scripts/backfill_rag_explanations.py --dry-run
 python scripts/backfill_rag_explanations.py --limit 10
 ```
 
+### `GET /v1/rag/diagnostics`
+
+返回数据库/RAG 的统一健康诊断。它组合 SQLite 表计数、RAG 质量摘要和覆盖缺口，不写入数据、不调用外部模型，适合本地管理页、GitHub Actions 或后续 Agent 自检使用。
+
+支持参数：
+
+| 参数 | 说明 |
+|---|---|
+| `limit` | 返回低质量样本和覆盖缺口数量，默认 10，最大 50 |
+
+返回字段包含：
+
+1. `status`：诊断状态，例如 `needs_corpus`、`needs_explanations`、`needs_maintenance`、`ready_for_text_rag` 或 `ready`。
+2. `level`：健康等级，可能为 `low`、`medium` 或 `high`。
+3. `signals`：布尔信号，包括是否已有语料、证据块、embedding、解释历史，以及是否可回答。
+4. `table_counts`：核心 RAG 表记录数。
+5. `quality`：解释历史数量、平均质量分和质量分布。
+6. `coverage`：项目覆盖率、缺口数量和缺口样本。
+7. `next_actions`：建议的下一步维护动作。
+
+示例：
+
+```text
+/v1/rag/diagnostics?limit=10
+```
+
 ### `POST /v1/rag/backfill-explanations`
 
 按 `/v1/rag/coverage` 的缺口结果，为缺少解释历史的项目批量生成规则版 RAG 解释。该接口只使用本地 SQLite 和现有 RAG 检索逻辑，不调用外部模型、不请求 GitHub/Kimi/Telegram。
@@ -474,7 +708,41 @@ POST /v1/jobs/{job_id}/execute
 
 ### `POST /v1/rag/maintenance-plan`
 
-检查 RAG 覆盖缺口，并按需创建 RAG 回填 planned 任务。该接口会先调用覆盖缺口逻辑；如果 `gap_count` 小于 `min_gap_count`，只返回健康状态，不创建任务；如果已经存在相同参数的 active `rag_backfill` 任务，则返回 `duplicate_of`，避免重复补库。
+检查 RAG 诊断状态与覆盖缺口，并按需创建 RAG 维护 planned 任务。该接口会先调用 `/v1/rag/diagnostics`，再按优先级创建任务：
+
+1. 如果 `project_corpus` 或 `rag_chunks` 还没有准备好，创建 `kind=rag_corpus_rebuild` 任务，并返回 `reason=rag_diagnostics_needs_corpus`。
+2. 如果语料已准备但缺少 embedding，创建 `kind=rag_embedding_build` 任务，并返回 `reason=rag_diagnostics_needs_embeddings`。
+3. 如果 embedding 已准备但解释覆盖仍有缺口，创建 `kind=rag_backfill` 任务，并返回 `reason=rag_coverage_gap_detected`。
+4. 如果 `gap_count` 小于 `min_gap_count`，只返回健康状态，不创建任务。
+
+返回结果会包含 `diagnostics`、`coverage`、`gap_count` 和 `min_gap_count`，方便 GitHub Actions、后台管理页或后续 Agent 判断下一步应先建语料、补向量，还是创建解释回填任务。三类任务都会写入 `jobs` 表，可以继续通过 `GET /v1/job-execution-check?job_id=...` 和 `POST /v1/jobs/{job_id}/execute` 检查与执行。
+
+任务详情页 `job.html?job=...&api=1` 会针对 RAG 维护任务展示结构化执行摘要：语料、证据块、embedding 的 before/after 计数、回填候选数、处理数和处理仓库列表，同时保留原始 JSON 结果用于调试。
+
+### `GET /v1/rag/maintenance-report`
+
+汇总最近 RAG 维护任务，用于判断数据库/RAG 维护链路是否持续生效。该接口只读取 SQLite，不创建任务、不执行任务、不调用外部服务。
+
+支持参数：
+
+| 字段 | 说明 |
+|---|---|
+| `limit` | 读取最近多少个 RAG 维护任务，默认 20，最大 100 |
+
+返回内容包括：
+
+1. `status_counts` 和 `kind_counts`：最近维护任务的状态分布和类型分布。
+2. `by_kind`：按 `rag_corpus_rebuild`、`rag_embedding_build`、`rag_backfill`、`rag_search_evaluation` 分组的任务统计。
+3. `latest_success` 和 `latest_failed`：最近成功和最近失败的维护任务摘要。
+4. `recent_jobs`：最近维护任务列表，包含 before/after 计数、检索评估摘要和关键执行结果。
+5. `diagnostics`：当前 RAG 诊断摘要，便于把历史任务与当前数据库状态对照。
+6. `recommendations`：基于任务历史和诊断结果给出的下一步维护建议。
+
+示例：
+
+```text
+/v1/rag/maintenance-report?limit=20
+```
 
 常用请求字段：
 

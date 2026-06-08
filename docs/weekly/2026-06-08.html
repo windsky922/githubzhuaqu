@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GitHub 周报 2026-06-08</title>
+  <style>
+    body { margin: 0; background: #f6f7f9; color: #1f2933; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height: 1.7; }
+    main { max-width: 960px; margin: 0 auto; padding: 32px 20px 56px; }
+    article { background: #fff; border: 1px solid #d8dee8; padding: 28px; }
+    h1, h2, h3, h4 { line-height: 1.3; }
+    a { color: #0969da; }
+    code { background: #eef2f7; padding: 2px 5px; }
+    table { width: 100%; border-collapse: collapse; margin: 18px 0; display: block; overflow-x: auto; }
+    th, td { border: 1px solid #d8dee8; padding: 8px 10px; text-align: left; vertical-align: top; }
+    th { background: #f1f4f8; }
+    hr { border: 0; border-top: 1px solid #d8dee8; margin: 24px 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <article>
+      <p><strong>GitHub 每周热点项目周报</strong></p>
+      <p>*统计周期：2026-06-01 至 2026-06-08*</p>
+      <hr>
+      <h2>1. 本周总体趋势</h2>
+      <p>本周 GitHub 生态呈现 <strong>AI Agent 工具链爆发式增长</strong> 态势。在入选的 10 个活跃项目中，<strong>AI Agent</strong> 类别占据 6 席，<strong>LLM Tooling</strong> 占据 2 席，显示出开发者对智能体开发框架和 LLM 工程化工具的持续高度关注。</p>
+      <p><strong>语言分布</strong>方面，<strong>Python</strong>（5 个项目）与 <strong>TypeScript</strong>（3 个项目）仍是 Agent 开发的主流技术栈，Java 生态亦有 Apache 顶级项目保持活跃维护。</p>
+      <p><strong>热度指标</strong>显示，本期入选项目累计新增 Star 达 <strong>35,635</strong>，其中 8 个项目进入 GitHub Trending 周榜，6 个项目位列 Top 10，社区活跃度处于近期高位。</p>
+      <hr>
+      <h2>2. 热点项目总览</h2>
+      <table>
+        <thead><tr><th>项目名称</th><th>周榜排名</th><th>语言</th><th>新增 Star</th><th>仓库链接</th></tr></thead>
+        <tbody>
+        <tr><td><strong>headroom</strong></td><td>#1</td><td>Python</td><td>+10,038</td><td><a href="https://github.com/chopratejas/headroom">https://github.com/chopratejas/headroom</a></td></tr>
+        <tr><td><strong>MoneyPrinterTurbo</strong></td><td>#3</td><td>Python</td><td>+2,839</td><td><a href="https://github.com/harry0703/MoneyPrinterTurbo">https://github.com/harry0703/MoneyPrinterTurbo</a></td></tr>
+        <tr><td><strong>supermemory</strong></td><td>#4</td><td>TypeScript</td><td>+1,279</td><td><a href="https://github.com/supermemoryai/supermemory">https://github.com/supermemoryai/supermemory</a></td></tr>
+        <tr><td><strong>ECC</strong></td><td>#5</td><td>JavaScript</td><td>+5,153</td><td><a href="https://github.com/affaan-m/ECC">https://github.com/affaan-m/ECC</a></td></tr>
+        <tr><td><strong>last30days-skill</strong></td><td>#8</td><td>Python</td><td>-</td><td><a href="https://github.com/mvanhorn/last30days-skill">https://github.com/mvanhorn/last30days-skill</a></td></tr>
+        <tr><td><strong>compound-engineering-plugin</strong></td><td>#10</td><td>TypeScript</td><td>+969</td><td><a href="https://github.com/EveryInc/compound-engineering-plugin">https://github.com/EveryInc/compound-engineering-plugin</a></td></tr>
+        <tr><td><strong>oh-my-pi</strong></td><td>#11</td><td>TypeScript</td><td>+1,463</td><td><a href="https://github.com/can1357/oh-my-pi">https://github.com/can1357/oh-my-pi</a></td></tr>
+        <tr><td><strong>hermes-agent</strong></td><td>#15</td><td>Python</td><td>+7,965</td><td><a href="https://github.com/NousResearch/hermes-agent">https://github.com/NousResearch/hermes-agent</a></td></tr>
+        <tr><td><strong>yt-dlp</strong></td><td>-</td><td>Python</td><td>+5,929</td><td><a href="https://github.com/yt-dlp/yt-dlp">https://github.com/yt-dlp/yt-dlp</a></td></tr>
+        <tr><td><strong>apache/camel</strong></td><td>-</td><td>Java</td><td>-</td><td><a href="https://github.com/apache/camel">https://github.com/apache/camel</a></td></tr>
+        </tbody>
+      </table>
+      <p>*注：所有质量评分（quality_score）均为 92-100 分，安全等级均为 low，无安全风险标记。*</p>
+      <hr>
+      <h2>3. 重点项目分析</h2>
+      <h3>headroom - 上下文压缩层（GitHub Trending #1）</h3>
+      <p><strong>chopratejas/headroom</strong> 本周以 <strong>10,038</strong> 新增 Star 登顶周榜。该项目定位为 AI Agent 的上下文压缩层，可在工具输出、日志、文件及 RAG 块到达 LLM 前进行压缩，实现 60-95% 的 Token 减少同时保持回答质量。项目提供 Library、Proxy 和 MCP Server 三种接入方式，技术栈基于 Python 与 FastAPI，支持 LangChain 和 OpenAI 生态。对于需要处理长上下文或降低 API 成本的 Agent 开发者，这是本周最值得关注的工程工具。</p>
+      <h3>MoneyPrinterTurbo - AI 短视频生成（GitHub Trending #3）</h3>
+      <p><strong>harry0703/MoneyPrinterTurbo</strong> 是一款基于 AI 大模型的一键高清短视频生成工具。用户仅需提供主题或关键词，即可自动生成文案、素材、字幕及背景音乐并合成视频。项目采用 Python 开发，集成 MoviePy 与 ChatGPT，适合内容创作者与自动化工作流开发者快速验证视频创意。</p>
+      <h3>ECC - Agent 性能优化系统（GitHub Trending #5）</h3>
+      <p><strong>affaan-m/ECC</strong>（The agent harness performance optimization system）是一个面向 Claude Code、Codex、Cursor 等主流 AI 编程工具的增强框架。项目提供 Skills、Instincts、Memory 等模块，专注于提升 Agent 的执行性能与安全性。本周新增 <strong>5,153</strong> Star，显示出开发者对 IDE 集成式 Agent 优化方案的强烈需求。</p>
+      <h3>hermes-agent - 自进化智能体（GitHub Trending #15）</h3>
+      <p><strong>NousResearch/hermes-agent</strong> 由 Nous Research 构建，主打&quot;内置学习循环&quot;的自改进机制。该 Agent 能够从经验中创建 Skills、在运行中优化、持久化知识，并建立跨会话的用户模型。本周新增 <strong>7,965</strong> Star，是本期增量第二高的项目，代表了 Agent 向长期记忆与自我进化方向演进的技术趋势。</p>
+      <h3>oh-my-pi - 终端 AI 编程助手（GitHub Trending #11）</h3>
+      <p><strong>can1357/oh-my-pi</strong> 是一个基于 TypeScript/Bun 的终端 AI Coding Agent，支持 hash-anchored 编辑、LSP 集成、Python 执行、浏览器控制及子 Agent 调度。作为 Pi 项目的 Fork，该项目针对工具调用效率进行了深度优化，适合偏好终端工作流的开发者。</p>
+      <hr>
+      <h2>4. 最适合用户学习的项目</h2>
+      <p>基于您的学习档案（Java 后端、Python 工具开发、Agent 开发、开发者工具），本周推荐以下学习路径：</p>
+      <p><strong>入门级：apache/camel</strong></p>
+      <p>Apache Camel 是成熟的企业级集成框架，支持 Java、Spring Boot 与 Kubernetes。项目质量评分 100 分，代码规范且文档完善，适合学习企业级集成模式（EIP）与微服务架构设计。</p>
+      <p><strong>进阶级：headroom</strong></p>
+      <p>如果您关注 Token 优化与上下文工程，headroom 提供了完整的 Python 实现，包括 FastAPI 服务、MCP 协议适配与 RAG 压缩算法。项目处于快速迭代期（本周 Top 1），代码结构清晰，适合学习现代 Agent 工程化技术。</p>
+      <p><strong>工具向：yt-dlp</strong></p>
+      <p>作为 youtube-dl 的活跃分支，yt-dlp 拥有 169k+ Star 的庞大社区。本周新增 5,929 Star，项目采用 Python 开发，包含丰富的 CLI 设计模式与网络请求处理逻辑，适合学习如何构建高可用命令行工具。</p>
+      <hr>
+      <h2>5. 本周结论</h2>
+      <p>1. <strong>Agent 基础设施成为绝对热点</strong>：6 个 AI Agent 项目进入榜单，涵盖记忆层（supermemory）、上下文压缩（headroom）、IDE 增强（ECC）和终端工具（oh-my-pi），显示生态正从&quot;Demo 级 Agent&quot;向&quot;工程化 Agent 平台&quot;演进。</p>
+      <p>2. <strong>Python 与 TypeScript 双主导</strong>：Python 在服务端 Agent 逻辑与数据处理占据优势（5 个项目），TypeScript 则在 IDE 插件与终端工具方向表现突出（3 个项目），两者是 Agent 开发者的必备技能组合。</p>
+      <p>3. <strong>Token 效率与长期记忆受关注</strong>：headroom 的上下文压缩与 hermes-agent 的自进化记忆机制分别获得 10k+ 和 7.9k+ 新增 Star，表明社区开始关注 LLM 应用的成本优化与持续性能力。</p>
+      <p>4. <strong>传统企业级项目保持活力</strong>：Apache Camel 作为 2009 年创立的老牌 Java 项目，本周仍有代码推送且保持 100 分质量评级，证明在企业集成领域，稳定成熟的框架仍具长期价值。</p>
+      <p>建议持续关注 Agent 工具链的 MCP（Model Context Protocol）标准化进展，以及 Python/TypeScript 混合架构的最佳实践。</p>
+      <h2>附录：项目链接与来源补全</h2>
+      <p>• harry0703/MoneyPrinterTurbo；<a href="https://github.com/harry0703/MoneyPrinterTurbo">https://github.com/harry0703/MoneyPrinterTurbo</a>；来源：GitHub Search + GitHub Trending；Trending 排名：3</p>
+      <p>• affaan-m/ECC；<a href="https://github.com/affaan-m/ECC">https://github.com/affaan-m/ECC</a>；来源：GitHub Search + GitHub Trending；Trending 排名：5</p>
+      <p>• NousResearch/hermes-agent；<a href="https://github.com/NousResearch/hermes-agent">https://github.com/NousResearch/hermes-agent</a>；来源：GitHub Search + GitHub Trending；Trending 排名：15</p>
+      <p>• yt-dlp/yt-dlp；<a href="https://github.com/yt-dlp/yt-dlp">https://github.com/yt-dlp/yt-dlp</a>；来源：GitHub Search</p>
+      <p>• apache/camel；<a href="https://github.com/apache/camel">https://github.com/apache/camel</a>；来源：GitHub Search</p>
+    </article>
+  </main>
+</body>
+</html>

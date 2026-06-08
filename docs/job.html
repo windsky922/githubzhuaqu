@@ -112,6 +112,27 @@
     .event.failed,
     .event.blocked { border-color: var(--bad); }
     .muted { color: var(--muted); }
+    .summary-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .summary-row {
+      display: grid;
+      grid-template-columns: minmax(120px, 180px) 1fr;
+      gap: 10px;
+      padding: 9px 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #f8fafc;
+    }
+    .summary-row span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .summary-row strong {
+      overflow-wrap: anywhere;
+    }
     .actions {
       display: flex;
       flex-wrap: wrap;
@@ -258,6 +279,7 @@
         <section class="panel">
           <h2>执行结果</h2>
           ${job.error ? `<p class="muted">错误：${escapeHtml(job.error)}</p>` : ""}
+          ${ragResultSummaryHtml(job)}
           <pre>${escapeHtml(JSON.stringify(job.result || {}, null, 2))}</pre>
         </section>
         <section class="panel">
@@ -265,6 +287,66 @@
           ${eventsHtml(events)}
         </section>`;
       bindOperationControls(job);
+    }
+
+    function ragResultSummaryHtml(job) {
+      const result = job.result || {};
+      const kind = job.kind || "";
+      if (!["rag_corpus_rebuild", "rag_embedding_build", "rag_backfill"].includes(kind)) return "";
+      const rows = [
+        ["执行模式", result.dry_run ? "预览，不写库" : "已写入 SQLite"],
+        ["任务状态", result.status || "-"],
+      ];
+      if (kind === "rag_corpus_rebuild") {
+        rows.push(
+          ["归档入选记录", result.selected_archive_count || 0],
+          ["语料记录", countDelta(result, "project_corpus")],
+          ["证据块", countDelta(result, "rag_chunks")],
+          ["向量索引", countDelta(result, "rag_embeddings")]
+        );
+      } else if (kind === "rag_embedding_build") {
+        rows.push(
+          ["模型", result.model || "-"],
+          ["维度", result.dimensions || "-"],
+          ["证据块", result.chunk_count || countValue(result.before_counts, "rag_chunks")],
+          ["向量索引", countDelta(result, "rag_embeddings")]
+        );
+      } else if (kind === "rag_backfill") {
+        rows.push(
+          ["候选项目", result.candidate_count || 0],
+          ["处理项目", result.processed_count || 0],
+          ["回填前覆盖率", percent((result.coverage_before || {}).coverage_rate || 0)],
+          ["回填前缺口", (result.coverage_before || {}).gap_count || 0]
+        );
+      }
+      const repositories = Array.isArray(result.processed_repositories) ? result.processed_repositories : [];
+      const repoHtml = repositories.length
+        ? `<h3>处理仓库</h3><div class="summary-list">${repositories.slice(0, 10).map(item => summaryRow(
+            item.full_name || "-",
+            `${item.status || "-"} · ${item.dry_run ? "预览" : "已写入"} · 质量 ${item.quality_score || 0} ${item.quality_level || ""}`
+          )).join("")}</div>`
+        : "";
+      return `<div class="summary-list">${rows.map(([label, value]) => summaryRow(label, value)).join("")}</div>${repoHtml}`;
+    }
+
+    function countDelta(result, key) {
+      const beforeValue = countValue(result.before_counts, key);
+      const afterValue = countValue(result.after_counts, key);
+      const delta = afterValue - beforeValue;
+      return `${beforeValue} -> ${afterValue}${delta ? ` (${delta > 0 ? "+" : ""}${delta})` : ""}`;
+    }
+
+    function countValue(source, key) {
+      return Number((source || {})[key] || 0);
+    }
+
+    function percent(value) {
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? `${Math.round(parsed * 100)}%` : "0%";
+    }
+
+    function summaryRow(label, value) {
+      return `<div class="summary-row"><span>${escapeHtml(label)}</span><strong>${escapeHtml(String(value))}</strong></div>`;
     }
 
     function operationHtml(job) {

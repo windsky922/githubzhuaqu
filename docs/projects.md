@@ -4,16 +4,26 @@
 
 | 日期 | 项目 | 来源 | Trending 排名 | 方向 | 语言 | Star | 新增 Star | 风险提示 | 链接 |
 |---|---|---|---:|---|---|---:|---:|---:|---|
-| 2026-06-03 | NousResearch/hermes-agent | GitHub Search | - | AI Agent | Python | 177935 | 64 | 0 | [https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) |
-| 2026-06-03 | affaan-m/ECC | GitHub Search | - | AI Agent | JavaScript | 204588 | 63 | 0 | [https://github.com/affaan-m/ECC](https://github.com/affaan-m/ECC) |
-| 2026-06-03 | D4Vinci/Scrapling | GitHub Search | - | Developer Tools | Python | 59523 | 43 | 0 | [https://github.com/D4Vinci/Scrapling](https://github.com/D4Vinci/Scrapling) |
-| 2026-06-03 | harry0703/MoneyPrinterTurbo | GitHub Search | - | LLM Tooling | Python | 78347 | 36 | 0 | [https://github.com/harry0703/MoneyPrinterTurbo](https://github.com/harry0703/MoneyPrinterTurbo) |
-| 2026-06-03 | obra/superpowers | GitHub Search | - | AI Agent | Shell | 216279 | 65 | 0 | [https://github.com/obra/superpowers](https://github.com/obra/superpowers) |
-| 2026-06-03 | shareAI-lab/learn-claude-code | GitHub Search | - | AI Agent | Python | 64400 | 20 | 0 | [https://github.com/shareAI-lab/learn-claude-code](https://github.com/shareAI-lab/learn-claude-code) |
-| 2026-06-03 | langgenius/dify | GitHub Search | - | AI Agent | TypeScript | 143645 | 8 | 0 | [https://github.com/langgenius/dify](https://github.com/langgenius/dify) |
-| 2026-06-03 | rtk-ai/rtk | GitHub Search | - | AI Agent | Rust | 58136 | 18 | 0 | [https://github.com/rtk-ai/rtk](https://github.com/rtk-ai/rtk) |
-| 2026-06-03 | rasbt/LLMs-from-scratch | GitHub Search | - | LLM Tooling | Jupyter Notebook | 96552 | 7 | 0 | [https://github.com/rasbt/LLMs-from-scratch](https://github.com/rasbt/LLMs-from-scratch) |
-| 2026-06-03 | anthropics/claude-code | GitHub Search | - | AI Agent | Python | 129705 | 12 | 1 | [https://github.com/anthropics/claude-code](https://github.com/anthropics/claude-code) |
+| 2026-06-08 | chopratejas/headroom | GitHub Trending | 1 | AI Agent | Python | 17098 | 10038 | 0 | [https://github.com/chopratejas/headroom](https://github.com/chopratejas/headroom) |
+| 2026-06-08 | harry0703/MoneyPrinterTurbo | GitHub Search + GitHub Trending | 3 | LLM Tooling | Python | 81293 | 2839 | 0 | [https://github.com/harry0703/MoneyPrinterTurbo](https://github.com/harry0703/MoneyPrinterTurbo) |
+| 2026-06-08 | supermemoryai/supermemory | GitHub Trending | 4 | AI Agent | TypeScript | 26040 | 1279 | 0 | [https://github.com/supermemoryai/supermemory](https://github.com/supermemoryai/supermemory) |
+| 2026-06-08 | affaan-m/ECC | GitHub Search + GitHub Trending | 5 | AI Agent | JavaScript | 209928 | 5153 | 0 | [https://github.com/affaan-m/ECC](https://github.com/affaan-m/ECC) |
+| 2026-06-08 | mvanhorn/last30days-skill | GitHub Trending | 8 | AI Agent | Python | 31447 | 0 | 0 | [https://github.com/mvanhorn/last30days-skill](https://github.com/mvanhorn/last30days-skill) |
+| 2026-06-08 | EveryInc/compound-engineering-plugin | GitHub Trending | 10 | LLM Tooling | TypeScript | 20406 | 969 | 0 | [https://github.com/EveryInc/compound-engineering-plugin](https://github.com/EveryInc/compound-engineering-plugin) |
+| 2026-06-08 | NousResearch/hermes-agent | GitHub Search + GitHub Trending | 15 | AI Agent | Python | 186098 | 7965 | 0 | [https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) |
+| 2026-06-08 | can1357/oh-my-pi | GitHub Trending | 11 | AI Agent | TypeScript | 11111 | 1463 | 0 | [https://github.com/can1357/oh-my-pi](https://github.com/can1357/oh-my-pi) |
+| 2026-06-08 | yt-dlp/yt-dlp | GitHub Search | - | Developer Tools | Python | 169016 | 5929 | 0 | [https://github.com/yt-dlp/yt-dlp](https://github.com/yt-dlp/yt-dlp) |
+| 2026-06-08 | apache/camel | GitHub Search | - | Machine Learning | Java | 6225 | 0 | 0 | [https://github.com/apache/camel](https://github.com/apache/camel) |
+| 2026-06-03 | NousResearch/hermes-agent | GitHub Search | - | AI Agent | Python | 178133 | 198 | 0 | [https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) |
+| 2026-06-03 | affaan-m/ECC | GitHub Search | - | AI Agent | JavaScript | 204775 | 187 | 0 | [https://github.com/affaan-m/ECC](https://github.com/affaan-m/ECC) |
+| 2026-06-03 | harry0703/MoneyPrinterTurbo | GitHub Search | - | LLM Tooling | Python | 78454 | 107 | 0 | [https://github.com/harry0703/MoneyPrinterTurbo](https://github.com/harry0703/MoneyPrinterTurbo) |
+| 2026-06-03 | D4Vinci/Scrapling | GitHub Search | - | Developer Tools | Python | 59633 | 110 | 0 | [https://github.com/D4Vinci/Scrapling](https://github.com/D4Vinci/Scrapling) |
+| 2026-06-03 | obra/superpowers | GitHub Search | - | AI Agent | Shell | 216451 | 172 | 0 | [https://github.com/obra/superpowers](https://github.com/obra/superpowers) |
+| 2026-06-03 | langgenius/dify | GitHub Search | - | AI Agent | TypeScript | 143671 | 26 | 0 | [https://github.com/langgenius/dify](https://github.com/langgenius/dify) |
+| 2026-06-03 | shareAI-lab/learn-claude-code | GitHub Search | - | AI Agent | Python | 64429 | 29 | 0 | [https://github.com/shareAI-lab/learn-claude-code](https://github.com/shareAI-lab/learn-claude-code) |
+| 2026-06-03 | qax-os/excelize | GitHub Search | - | AI Agent | Go | 20635 | 1 | 0 | [https://github.com/qax-os/excelize](https://github.com/qax-os/excelize) |
+| 2026-06-03 | TauricResearch/TradingAgents | GitHub Search | - | AI Agent | Python | 82487 | 42 | 0 | [https://github.com/TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents) |
+| 2026-06-03 | mem0ai/mem0 | GitHub Search | - | AI Agent | Python | 57544 | 22 | 0 | [https://github.com/mem0ai/mem0](https://github.com/mem0ai/mem0) |
 | 2026-06-02 | harry0703/MoneyPrinterTurbo | GitHub Search + GitHub Trending | 1 | LLM Tooling | Python | 77276 | 12 | 0 | [https://github.com/harry0703/MoneyPrinterTurbo](https://github.com/harry0703/MoneyPrinterTurbo) |
 | 2026-06-02 | Lum1104/Understand-Anything | GitHub Trending | 2 | AI Agent | TypeScript | 49263 | 0 | 0 | [https://github.com/Lum1104/Understand-Anything](https://github.com/Lum1104/Understand-Anything) |
 | 2026-06-02 | microsoft/markitdown | GitHub Search + GitHub Trending | 3 | LLM Tooling | Python | 139402 | 23 | 0 | [https://github.com/microsoft/markitdown](https://github.com/microsoft/markitdown) |

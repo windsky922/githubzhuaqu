@@ -2,6 +2,273 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-06-06 追加：GitHub Actions 自动写入 RAG 检索评估
+
+### 1. 开发目的
+
+RAG 检索评估已经支持写入 SQLite jobs，并且趋势接口可以读取历史评估任务。为让趋势数据持续增长，本次把 RAG 检索质量评估接入每周 workflow，在生成 Pages 前自动沉淀一次评估记录。
+
+### 2. 修改内容
+
+1. 新增 `scripts/run_rag_search_evaluation.py`，用于执行一次 RAG 检索质量评估并写入 SQLite jobs。
+2. `.github/workflows/weekly.yml` 新增 `run_rag_evaluation` 手动开关，默认启用。
+3. workflow 新增 `RAG_EVALUATION_QUERIES`、`RAG_EVALUATION_LANGUAGE`、`RAG_EVALUATION_CATEGORY`、`RAG_EVALUATION_SOURCE`、`RAG_EVALUATION_LIMIT` 和 `RAG_EVALUATION_AUTO_BUILD` 变量入口。
+4. RAG 检索评估步骤放在 `scripts/build_pages.py` 前执行，确保 `docs/jobs.json` 和任务页面能包含本次评估结果。
+5. 新增脚本测试和 workflow 测试。
+
+### 3. 后续空间
+
+后续可以把 `/v1/rag/search-evaluation-trends` 接入管理首页，展示最近几次评估的平均命中、零命中样本和推荐检索模式变化。
+
+## 2026-06-06 追加：RAG 评估任务纳入维护报告
+
+### 1. 开发目的
+
+`rag_search_evaluation` 已经可以写入 SQLite jobs，但维护报告和数据契约仍主要围绕语料重建、embedding 构建和解释回填三类任务。为让数据库/RAG 任务体系保持一致，本次把检索评估任务纳入维护历史汇总。
+
+### 2. 修改内容
+
+1. `ApiRepository.rag_maintenance_report` 将 `rag_search_evaluation` 计入 RAG 维护类任务。
+2. `_rag_maintenance_job_summary` 新增检索评估摘要字段，包括样本数、查询词、推荐模式分布、零命中样本和覆盖项目数。
+3. 更新数据契约，补齐 `rag_search_evaluation` 的 `kind`、`request` 和 `result` 公开字段说明。
+4. 更新 README、API 文档和后端测试，确保维护报告能看到检索评估任务。
+
+### 3. 后续空间
+
+后续可以让 GitHub Actions 定期创建一次 `rag_search_evaluation` 任务，并把趋势结果接入管理首页，形成长期 RAG 检索质量观测。
+
+## 2026-06-06 追加：RAG 检索质量趋势接口
+
+### 1. 开发目的
+
+`POST /v1/rag/search-evaluation` 已经能把单次评估结果写入 SQLite jobs，但后续 Agent 需要从历史评估中判断检索质量是否稳定。为继续推进数据库/RAG 核心闭环，本次新增趋势接口，从历史评估任务中汇总平均命中、零命中样本、推荐模式分布和覆盖项目变化。
+
+### 2. 修改内容
+
+1. 新增 `GET /v1/rag/search-evaluation-trends`。
+2. 新增 `ApiRepository.rag_search_evaluation_trends`。
+3. 趋势结果读取 `rag_search_evaluation` 类型 succeeded jobs，不重新执行检索。
+4. 返回 `jobs`、`aggregate`、`summary` 和 `recommendations`。
+5. 在 `/v1/health` 能力清单中加入 `rag_search_evaluation_trends`。
+6. 更新 README、API 文档和后端测试。
+
+### 3. 后续空间
+
+下一步可以把该趋势接口接入管理首页，或让 GitHub Actions 定期写入一次评估任务，用于长期观察 RAG 检索质量。
+
+## 2026-06-06 追加：RAG 检索评估结果入库
+
+### 1. 开发目的
+
+`GET /v1/rag/search-evaluation` 已经能批量评估 FTS5、向量和混合检索，但结果只存在于单次响应中，不能沉淀为历史数据。为了继续推进数据库/RAG 核心闭环，本次新增确认式写入能力，把检索评估结果保存到 SQLite `jobs` 和 `job_events`，方便后续查看趋势和审计。
+
+### 2. 修改内容
+
+1. 新增 `POST /v1/rag/search-evaluation`。
+2. 新增 `ApiRepository.persist_rag_search_evaluation`。
+3. 未传入 `confirm_execution=true` 时只返回阻塞原因和只读预览，不写入 SQLite。
+4. 确认执行后写入 `rag_search_evaluation` 类型任务，并记录 started/succeeded 事件。
+5. `/v1/jobs` 的 `kind` 过滤支持 `rag_search_evaluation`。
+6. 更新 README、API 文档和后端测试。
+
+### 3. 后续空间
+
+下一步可以基于 `rag_search_evaluation` 任务历史生成质量趋势接口，例如不同日期的平均命中数、零命中样本数和推荐模式变化。
+
+## 2026-06-06 追加：RAG 检索评估接口
+
+### 1. 开发目的
+
+`/v1/rag/search-compare` 已经可以比较单个查询在 FTS5、向量和混合检索中的召回差异，但后续 Agent 需要更稳定的批量评估入口，才能判断默认使用哪种检索策略。为继续优先推进数据库/RAG 核心能力，本次新增只读检索评估接口，用固定或自定义查询样本批量评估三种模式的命中率、平均召回和推荐模式分布。
+
+### 2. 修改内容
+
+1. 新增 `GET /v1/rag/search-evaluation`。
+2. 新增 `ApiRepository.rag_search_evaluation`，批量复用 `rag_search_compare`。
+3. 新增评估聚合字段：`preferred_mode_counts`、`modes`、`repository_count`、`zero_hit_queries`、`pairwise_average_overlap` 和 `recommendations`。
+4. 在 `/v1/health` 能力清单中加入 `rag_search_evaluation`。
+5. 更新 README、API 文档和后端测试。
+
+### 3. 后续空间
+
+下一步可以把评估样本配置化，或把评估结果写入 SQLite 形成长期检索质量趋势；当前先保持接口只读，不引入复杂框架。
+
+## 2026-06-06 追加：RAG 检索模式对比接口
+
+### 1. 开发目的
+
+当前后端已经具备 FTS5 文本检索、向量检索和混合检索，但缺少一个统一入口来判断三种检索模式的召回差异。为了优先推进数据库/RAG 核心能力，本次新增只读对比接口，让后续 Agent 可以基于命中数量、项目重叠率和推荐模式选择更合适的检索策略。
+
+### 2. 修改内容
+
+1. 新增 `GET /v1/rag/search-compare`。
+2. 新增 `ApiRepository.rag_search_compare`，同时执行 `/v1/rag/retrieve`、`/v1/rag/vector-search` 和 `/v1/rag/hybrid-search`。
+3. 返回 `modes`、`overlap`、`recommendation` 和 `summary`，用于查看三种模式的命中项目、重叠情况和推荐检索模式。
+4. 在 `/v1/health` 能力清单中加入 `rag_search_compare`。
+5. 更新 README、API 文档和后端测试。
+
+### 3. 后续空间
+
+下一步可以把该接口作为 RAG 评估入口，继续扩展检索质量评分、查询样本集和自动选择 `fts5/vector/hybrid` 的策略，但当前先保持后端核心能力稳定，不做过细 UI。
+
+## 2026-06-05 追加：RAG 解释与问答接入混合检索
+
+### 1. 开发目的
+`/v1/rag/hybrid-search` 已经提供文本和向量的统一召回入口，但解释和问答接口仍只能在 FTS5 与向量模式之间二选一。为了让后续 Agent 和前端直接使用更稳定的证据召回，本次把 `mode=hybrid` 接入 `/v1/rag/explain` 和 `/v1/rag/ask`。
+
+### 2. 修改内容
+1. `ApiRepository.rag_explain` 新增 `hybrid` 和 `mixed` 模式分支。
+2. `/v1/rag/explain?mode=hybrid` 会调用 `rag_hybrid_search`，并继续写入 `rag_explanations`。
+3. `/v1/rag/ask?mode=hybrid` 复用解释接口，返回混合检索后的回答、引用和 `prompt_context`。
+4. 更新 README、API 文档和后端测试。
+
+### 3. 后续空间
+后续可以在管理首页 RAG 问答区增加检索模式选择，但当前先保持后端能力稳定，不做额外 UI 扩展。
+
+## 2026-06-05 追加：RAG 混合检索接口
+
+### 1. 开发目的
+当前后端已经分别提供 FTS5 文本检索和本地向量检索，但后续 Agent/RAG 编排更需要一个稳定的统一召回入口。为了优先推进数据库/RAG核心能力，本次新增混合检索接口，把文本召回和向量召回合并、去重并重新排序。
+
+### 2. 修改内容
+1. 新增 `GET /v1/rag/hybrid-search`。
+2. `ApiRepository.rag_hybrid_search` 复用 `/v1/rag/retrieve` 和 `/v1/rag/vector-search` 的结果。
+3. 混合排序采用固定权重：文本召回 0.55，向量召回 0.45。
+4. 每条证据块新增 `retrieval_sources` 和 `retrieval_scores`，便于判断证据来自文本、向量或两者共同命中。
+5. 更新 README、API 文档和后端测试。
+
+### 3. 后续空间
+后续可以让 `/v1/rag/explain` 和 `/v1/rag/ask` 支持 `mode=hybrid`，并把混合检索作为 LangChain retriever 或推荐解释重排的默认候选层。
+
+## 2026-06-05 追加：RAG 维护历史汇总接口
+
+### 1. 开发目的
+RAG 维护计划已经能创建语料重建、embedding 构建和解释回填任务，任务详情页也能查看单次执行结果，但后端还缺少一个面向维护闭环的汇总入口。为了优先推进数据库/RAG核心能力，本次新增只读维护历史汇总接口，用于判断最近维护任务是否成功、是否带来语料或向量计数变化，以及下一步应该先补语料、补向量还是补解释。
+
+### 2. 修改内容
+1. 新增 `GET /v1/rag/maintenance-report`。
+2. `ApiRepository.rag_maintenance_report` 聚合最近 `rag_corpus_rebuild`、`rag_embedding_build` 和 `rag_backfill` 任务。
+3. 返回任务状态分布、类型分布、按类型统计、最近成功/失败任务、before/after 计数变化、当前诊断摘要和维护建议。
+4. 修正 `/v1/jobs` 的 `kind` 参数校验，使其支持查询 `rag_corpus_rebuild` 和 `rag_embedding_build`。
+5. 更新 README、API 文档和后端测试。
+
+### 3. 后续空间
+后续可以把这个汇总接口接入管理首页，但当前先停止在后端核心能力闭环，不继续扩展 UI。
+
+## 2026-06-04 追加：任务详情页展示 RAG 维护结果
+
+### 1. 开发目的
+RAG 维护计划已经能创建并执行语料重建、embedding 构建和解释回填任务，但任务详情页只展示原始 JSON，不利于判断维护是否生效。为了让数据库/RAG维护闭环更容易验证，本次增强任务详情页的执行结果展示。
+
+### 2. 修改内容
+1. `job.html` 在原始 JSON 上方新增 RAG 维护结果摘要。
+2. 语料重建任务展示归档入选记录、语料记录、证据块和向量索引的 before/after 计数。
+3. embedding 构建任务展示模型、维度、证据块数量和向量索引变化。
+4. 解释回填任务展示候选项目、处理项目、回填前覆盖率、缺口数和处理仓库摘要。
+5. 更新 README、API 文档和页面构建测试。
+
+### 3. 后续空间
+下一步可以继续把任务详情页的执行摘要复用到管理首页的最近任务卡片，减少用户在多个页面之间切换。
+
+## 2026-06-04 追加：管理首页接入 RAG 维护计划
+
+### 1. 开发目的
+RAG 维护计划已经能按诊断结果创建语料重建、embedding 构建或解释回填任务，但用户仍需要手写 API 调用。为了让数据库/RAG核心闭环更容易在本地验证，本次把维护计划接入管理首页。
+
+### 2. 修改内容
+1. `admin.html` 的 RAG 区域新增“生成维护计划”控件。
+2. 页面调用 `/v1/rag/maintenance-plan`，返回 planned 任务编号、维护类型、诊断原因和覆盖缺口。
+3. 生成任务后提供任务详情页链接，执行仍走 `/v1/job-execution-check` 和任务详情页确认流程。
+4. 更新 README、API 文档和页面构建测试。
+
+### 3. 后续空间
+下一步可以在任务详情页继续增强“执行结果摘要”，让语料重建和 embedding 构建任务的 before/after 计数更直观。当前先保持管理页只负责创建计划，不直接执行写库任务。
+
+## 2026-06-04 追加：RAG 维护计划支持语料与向量任务
+
+### 1. 开发目的
+RAG 诊断已经能判断语料、证据块、embedding 和解释历史是否完整，但维护计划此前主要面向解释回填。为了优先推进数据库/RAG核心闭环，本次把维护计划升级为分阶段编排入口：先补语料，再补向量，最后补解释。
+
+### 2. 修改内容
+1. 新增 `rag_corpus_rebuild` 和 `rag_embedding_build` 两类 planned 任务。
+2. `plan_rag_maintenance` 按诊断结果决定创建语料重建、embedding 构建或解释回填任务。
+3. `src/job_runner.py` 支持执行新任务；`dry_run=true` 只预览，真实写库仍要求 `confirm_execution=true`。
+4. 任务状态页类型筛选新增 `rag_backfill`、`rag_corpus_rebuild` 和 `rag_embedding_build`。
+5. 更新 README、API 文档、数据契约和测试。
+
+### 3. 后续空间
+下一步可以把这套任务编排继续接入后台管理页的一键维护按钮，或在 GitHub Actions 中分阶段执行真实维护任务。当前先保证任务模型、执行器和数据契约稳定。
+
+## 2026-06-04 追加：RAG 维护计划接入诊断判断
+
+### 1. 开发目的
+RAG 维护计划此前只看覆盖缺口，语料或切片未准备好时也可能创建回填 planned 任务。为了让自动化维护更可靠，本次把 `/v1/rag/diagnostics` 接入维护计划：先判断 RAG 基础语料是否可用，再决定是否创建回填任务。
+
+### 2. 修改内容
+1. `ApiRepository.plan_rag_maintenance` 改为先读取 `rag_diagnostics`。
+2. 如果 `project_corpus` 或 `rag_chunks` 缺失，返回 `reason=rag_diagnostics_needs_corpus`，不创建无效 `rag_backfill` 任务。
+3. 维护计划返回结果新增 `diagnostics`，便于 GitHub Actions、后台管理页和后续 Agent 判断下一步操作。
+4. 修正 `scripts/plan_rag_maintenance.py` 的中文帮助文本，并更新 API 文档与后端测试。
+
+### 3. 后续空间
+下一步可以继续把诊断结果用于更完整的维护编排：先建语料，再建 embedding，最后创建解释回填任务。当前先保持计划入口只负责判断与创建回填计划，不引入过重框架。
+
+## 2026-06-04 追加：管理首页接入 RAG 诊断
+
+### 1. 开发目的
+后端已经有 `/v1/rag/diagnostics`，但用户在管理首页仍需要分别查看质量概览、覆盖缺口和数据库表计数。为了让数据库/RAG 能力更容易自检，本次把诊断结果接入管理首页，让首页直接显示健康等级、覆盖率、核心表计数、问答准备状态和下一步维护动作。
+
+### 2. 修改内容
+1. `loadDatabaseInsights` 新增调用 `/v1/rag/diagnostics?limit=5`。
+2. 新增 `ragDiagnosticsHtml`，展示 `status`、`level`、覆盖率、缺口数量、语料/证据块/embedding/解释历史和问答能力状态。
+3. 保留原有 `ragQualitySummaryHtml`，诊断结果显示在质量概览前面。
+4. 更新 API 文档和页面构建测试。
+
+### 3. 后续空间
+该诊断区域后续可继续接入“自动创建 RAG 回填计划任务”“一键构建 embedding”等能力，但当前先保持只读诊断，不自动写库或推送。
+
+## 2026-06-04 追加：新增 RAG 诊断接口
+
+### 1. 开发目的
+当前项目已经具备 RAG 语料、证据检索、向量检索、问答、解释历史和回填任务，但这些能力分散在多个接口里。为了让后续 Agent 能先判断数据库/RAG 是否健康，再决定是否补库、构建 embedding 或进入问答，本次新增统一诊断入口。
+
+### 2. 修改内容
+1. 新增 `ApiRepository.rag_diagnostics`，组合 `database_summary`、`rag_quality_summary` 和 `rag_coverage`。
+2. 新增 `GET /v1/rag/diagnostics`，返回 `status`、`level`、`signals`、核心表计数、质量摘要、覆盖缺口和 `next_actions`。
+3. `/v1/health` 能力声明新增 `rag_diagnostics`。
+4. 更新 API 文档、数据契约和后端测试。
+
+### 3. 后续空间
+该接口可作为 GitHub Actions 自动维护、管理页健康面板和后续 LangChain/Agent 自检的统一入口。后续如果升级到 PostgreSQL、pgvector 或真实 embedding，应保持诊断字段稳定，只替换内部统计来源。
+
+## 2026-06-04 追加：管理首页接入 RAG 问答
+
+### 1. 开发目的
+后端已经提供 `/v1/rag/ask`，但用户在本地管理页仍只能查看证据检索或向量检索结果。为了让数据库/RAG 能力形成可用闭环，本次把 RAG 问答接入管理首页，让用户能直接输入问题并查看回答、引用、证据和下一步动作。
+
+### 2. 修改内容
+1. `admin.html` 的 RAG 模式下拉新增“RAG 问答”，默认调用 `/v1/rag/ask`。
+2. `ragSearchHtml` 支持展示 `answer`、`answer_model`、`confidence`、`source_explanation_id` 和 `next_actions`。
+3. 保留原有 FTS 证据检索、本地向量检索和 Prompt Context 展示。
+4. 更新页面构建测试和 API 文档。
+
+### 3. 后续空间
+当前问答仍使用本地规则版答案。后续接入 Kimi 或 LangChain 时，前端可以继续复用同一结果结构，只替换后端生成器。
+
+## 2026-06-04 追加：新增 RAG 问答接口
+
+### 1. 开发目的
+数据库和 RAG 已经具备语料、检索、向量召回、解释和质量评估，但前端或后续 Agent 仍需要一个更直接的“提问 -> 回答 -> 引用 -> 下一步动作”入口。为了优先推进核心能力，本次新增本地规则版 RAG 问答接口，不引入外部模型依赖，也不重复实现检索管线。
+
+### 2. 修改内容
+1. 新增 `ApiRepository.rag_ask`，复用 `rag_explain` 的检索、解释和 SQLite 解释历史写入能力。
+2. 新增 `GET /v1/rag/ask`，返回 `answer`、`answer_model`、`citations`、`evidence`、`quality`、`prompt_context`、`next_actions` 和 `source_explanation_id`。
+3. `/v1/health` 能力声明新增 `rag_ask`。
+4. 更新 API 文档、数据契约和后端测试。
+
+### 3. 后续空间
+当前 `answer_model` 为 `rule:rag-ask-v1`。后续接入 Kimi、LangChain 或真实 embedding 后，应优先保持 `answer + citations + prompt_context + next_actions` 返回边界稳定，只替换内部生成器和检索器。
+
 ## 2026-06-01 追加：GitHub Actions 接入 RAG 维护计划
 
 ### 1. 开发目的

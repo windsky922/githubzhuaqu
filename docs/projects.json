@@ -1,7 +1,312 @@
 {
   "schema_version": 1,
-  "count": 120,
+  "count": 130,
   "projects": [
+    {
+      "run_date": "2026-06-08",
+      "full_name": "chopratejas/headroom",
+      "html_url": "https://github.com/chopratejas/headroom",
+      "description": "Compress tool outputs, logs, files, and RAG chunks before they reach the LLM. 60-95% fewer tokens, same answers. Library, proxy, MCP server.",
+      "readme_summary": "██╗ ██╗███████╗ █████╗ ██████╗ ██████╗ ██████╗ ██████╗ ███╗ ███╗ ██║ ██║██╔════╝██╔══██╗██╔══██╗██╔══██╗██╔═══██╗██╔═══██╗████╗ ████║ ███████║█████╗ ███████║██║ ██║██████╔╝██║ ██║██║ ██║██╔████╔██║ ██╔══██║██╔══╝ ██╔══██║██║ ██║██╔══██╗██║ ██║██║ ██║██║╚██╔╝██║ ██║ ██║███████╗██║ ██║██████╔╝██║ ██║╚██████╔╝╚██████╔╝██║ ╚═╝ ██║ ╚═╝ ╚═╝╚══════╝╚═╝ ╚═╝╚═════╝ ╚═╝ ╚═╝ ╚═════╝ ╚═════╝ ╚═╝ ╚═╝ The context compression layer for AI agents AI agents / LLMs: read /llms.txt here, or fetch the live index / full docs blob .",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 17098,
+      "forks_count": 1088,
+      "star_growth": 10038,
+      "score": 0.9489,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 1,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 1 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 10038，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-08.html"
+    },
+    {
+      "run_date": "2026-06-08",
+      "full_name": "harry0703/MoneyPrinterTurbo",
+      "html_url": "https://github.com/harry0703/MoneyPrinterTurbo",
+      "description": "利用AI大模型，一键生成高清短视频 Generate short videos with one click using AI LLM.",
+      "readme_summary": "MoneyPrinterTurbo 💸 简体中文 | English | العربية 只需提供一个视频 主题 或 关键词 ，就可以全自动生成视频文案、视频素材、视频字幕、视频背景音乐，然后合成一个高清的短视频。 感谢 AIHubMix 对本项目的赞助。AIHubMix 深度适配 OpenAI、Claude、Gemini、DeepSeek、智谱、千问等全球顶级最新模型，一站式快速接入 GPT-5.5、deepseek-v4-flash 等 700+ 模型（含多个免费模型），提供企业级生产稳定性保障。",
+      "category": "LLM Tooling",
+      "language": "Python",
+      "stargazers_count": 81293,
+      "forks_count": 11571,
+      "star_growth": 2839,
+      "score": 0.7377,
+      "sources": [
+        "github_search",
+        "github_trending"
+      ],
+      "trending_rank": 3,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 3 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 2839，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-08.html"
+    },
+    {
+      "run_date": "2026-06-08",
+      "full_name": "supermemoryai/supermemory",
+      "html_url": "https://github.com/supermemoryai/supermemory",
+      "description": "Memory engine and app that is extremely fast, scalable. The Memory API for the AI era.",
+      "readme_summary": "State-of-the-art memory and context engine for AI. And yes - you can use it as a company/personal brain. English · 简体中文 Supermemory is the memory and context layer for AI.",
+      "category": "AI Agent",
+      "language": "TypeScript",
+      "stargazers_count": 26040,
+      "forks_count": 2271,
+      "star_growth": 1279,
+      "score": 0.482,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 4,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 4 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 1279，近期热度上升。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 26040，具备一定社区关注度。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-08.html"
+    },
+    {
+      "run_date": "2026-06-08",
+      "full_name": "affaan-m/ECC",
+      "html_url": "https://github.com/affaan-m/ECC",
+      "description": "The agent harness performance optimization system. Skills, instincts, memory, security, and research-first development for Claude Code, Codex, Opencode, Cursor and beyond.",
+      "readme_summary": "Language:** English | Português (Brasil) | 简体中文 | 繁體中文 | 日本語 | 한국어 | Türkçe | Русский | Tiếng Việt | ไทย | Deutsch | Español K+ stars** | **28K+ forks** | **170+ contributors** | **12+ language ecosystems** | **Cross-harness agent workflows** Language / 语言 / 語言 / Dil / Язык / Ngôn ngữ / Idioma** English** | Português (Brasil) | 简体中文 | 繁體中文 | 日本語 | 한국어 | Türkçe | Русский | Tiếng Việt | ไทย | Deutsch | Español The harness-native operator system for agentic work.",
+      "category": "AI Agent",
+      "language": "JavaScript",
+      "stargazers_count": 209928,
+      "forks_count": 32180,
+      "star_growth": 5153,
+      "score": 0.705,
+      "sources": [
+        "github_search",
+        "github_trending"
+      ],
+      "trending_rank": 5,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 5 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 5153，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-08.html"
+    },
+    {
+      "run_date": "2026-06-08",
+      "full_name": "mvanhorn/last30days-skill",
+      "html_url": "https://github.com/mvanhorn/last30days-skill",
+      "description": "AI agent skill that researches any topic across Reddit, X, YouTube, HN, Polymarket, and the web - then synthesizes a grounded summary",
+      "readme_summary": "An AI agent-led search engine scored by upvotes, likes, and real money - not editors.** This README tracks the current v3 pipeline. The runtime skill spec lives in skills/last30days/SKILL.md, which is the source of truth for the latest command and setup behavior.",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 31447,
+      "forks_count": 2620,
+      "star_growth": 0,
+      "score": 0.4258,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 8,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 8 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 31447，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-08.html"
+    },
+    {
+      "run_date": "2026-06-08",
+      "full_name": "EveryInc/compound-engineering-plugin",
+      "html_url": "https://github.com/EveryInc/compound-engineering-plugin",
+      "description": "Official Compound Engineering plugin for Claude Code, Codex, Cursor, and more",
+      "readme_summary": "AI skills and agents that make each unit of engineering work easier than the last. Each unit of engineering work should make subsequent units easier -- not harder.** Traditional development accumulates technical debt. Every feature adds complexity.",
+      "category": "LLM Tooling",
+      "language": "TypeScript",
+      "stargazers_count": 20406,
+      "forks_count": 1513,
+      "star_growth": 969,
+      "score": 0.3494,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 10,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 10 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 969，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Agent 开发、开发者工具。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-08.html"
+    },
+    {
+      "run_date": "2026-06-08",
+      "full_name": "NousResearch/hermes-agent",
+      "html_url": "https://github.com/NousResearch/hermes-agent",
+      "description": "The agent that grows with you",
+      "readme_summary": "The self-improving AI agent built by Nous Research.** It's the only agent with a built-in learning loop — it creates skills from experience, improves them during use, nudges itself to persist knowledge, searches its own past conversations, and builds a deepening model of who you are across sessions.",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 186098,
+      "forks_count": 32011,
+      "star_growth": 7965,
+      "score": 0.5456,
+      "sources": [
+        "github_search",
+        "github_trending"
+      ],
+      "trending_rank": 15,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 15 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 7965，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库简介较短，项目定位信息有限。"
+      ],
+      "quality_score": 92,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-08.html"
+    },
+    {
+      "run_date": "2026-06-08",
+      "full_name": "can1357/oh-my-pi",
+      "html_url": "https://github.com/can1357/oh-my-pi",
+      "description": "⌥  AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more",
+      "readme_summary": "A coding agent with the IDE wired in. omp.sh Fork of Pi by @mariozechner The most capable agent surface that ships. Continuously tuned by real-world use — complete out of the box, open all the way down.",
+      "category": "AI Agent",
+      "language": "TypeScript",
+      "stargazers_count": 11111,
+      "forks_count": 936,
+      "star_growth": 1463,
+      "score": 0.4774,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 11,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 11 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 1463，近期热度上升。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 11111，具备一定社区关注度。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-08.html"
+    },
+    {
+      "run_date": "2026-06-08",
+      "full_name": "yt-dlp/yt-dlp",
+      "html_url": "https://github.com/yt-dlp/yt-dlp",
+      "description": "A feature-rich command-line audio/video downloader",
+      "readme_summary": "yt-dlp is a feature-rich command-line audio/video downloader with support for thousands of sites. The project is a fork of youtube-dl based on the now inactive youtube-dlc.",
+      "category": "Developer Tools",
+      "language": "Python",
+      "stargazers_count": 169016,
+      "forks_count": 14213,
+      "star_growth": 5929,
+      "score": 0.3888,
+      "sources": [
+        "github_search"
+      ],
+      "trending_rank": 0,
+      "selection_reasons": [
+        "较上次记录新增 Star 5929，近期热度上升。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 169016，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-08.html"
+    },
+    {
+      "run_date": "2026-06-08",
+      "full_name": "apache/camel",
+      "html_url": "https://github.com/apache/camel",
+      "description": "Apache Camel is an open source integration framework that empowers you to quickly and easily integrate various systems consuming or producing data.",
+      "readme_summary": "Apache Camel is an Open Source integration framework that empowers you to quickly and easily integrate various systems consuming or producing data. Camel empowers you to define routing and mediation rules in a variety of domain-specific languages (DSL, such as Java, XML, Groovy and YAML).",
+      "category": "Machine Learning",
+      "language": "Java",
+      "stargazers_count": 6225,
+      "forks_count": 5128,
+      "star_growth": 0,
+      "score": 0.3269,
+      "sources": [
+        "github_search"
+      ],
+      "trending_rank": 0,
+      "selection_reasons": [
+        "匹配当前个性化方向：Java 后端与工程实践、Python 工具与应用开发。",
+        "当前累计 Star 6225，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-08.html"
+    },
     {
       "run_date": "2026-06-03",
       "full_name": "NousResearch/hermes-agent",
@@ -10,18 +315,18 @@
       "readme_summary": "",
       "category": "AI Agent",
       "language": "Python",
-      "stargazers_count": 177935,
-      "forks_count": 30462,
-      "star_growth": 64,
-      "score": 0.4418,
+      "stargazers_count": 178133,
+      "forks_count": 30507,
+      "star_growth": 198,
+      "score": 0.4455,
       "sources": [
         "github_search"
       ],
       "trending_rank": 0,
       "selection_reasons": [
-        "较上次记录新增 Star 64，近期热度上升。",
+        "较上次记录新增 Star 198，近期热度上升。",
         "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "当前累计 Star 177935，具备一定社区关注度。",
+        "当前累计 Star 178133，具备一定社区关注度。",
         "仓库主题、语言或名称与关注方向匹配。"
       ],
       "security_flags": [],
@@ -43,50 +348,18 @@
       "readme_summary": "",
       "category": "AI Agent",
       "language": "JavaScript",
-      "stargazers_count": 204588,
-      "forks_count": 31383,
-      "star_growth": 63,
-      "score": 0.3449,
+      "stargazers_count": 204775,
+      "forks_count": 31411,
+      "star_growth": 187,
+      "score": 0.3389,
       "sources": [
         "github_search"
       ],
       "trending_rank": 0,
       "selection_reasons": [
-        "较上次记录新增 Star 63，近期热度上升。",
+        "较上次记录新增 Star 187，近期热度上升。",
         "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "当前累计 Star 204588，具备一定社区关注度。",
-        "仓库主题、语言或名称与关注方向匹配。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [
-        "README 摘要不足，后续理解项目价值时需要打开仓库人工确认。"
-      ],
-      "quality_score": 82,
-      "quality_level": "high",
-      "report_url": "weekly/2026-06-03.html"
-    },
-    {
-      "run_date": "2026-06-03",
-      "full_name": "D4Vinci/Scrapling",
-      "html_url": "https://github.com/D4Vinci/Scrapling",
-      "description": "🕷️ An adaptive Web Scraping framework that handles everything from a single request to a full-scale crawl!",
-      "readme_summary": "",
-      "category": "Developer Tools",
-      "language": "Python",
-      "stargazers_count": 59523,
-      "forks_count": 5745,
-      "star_growth": 43,
-      "score": 0.3381,
-      "sources": [
-        "github_search"
-      ],
-      "trending_rank": 0,
-      "selection_reasons": [
-        "较上次记录新增 Star 43，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "当前累计 Star 59523，具备一定社区关注度。",
+        "当前累计 Star 204775，具备一定社区关注度。",
         "仓库主题、语言或名称与关注方向匹配。"
       ],
       "security_flags": [],
@@ -107,18 +380,50 @@
       "readme_summary": "",
       "category": "LLM Tooling",
       "language": "Python",
-      "stargazers_count": 78347,
-      "forks_count": 11120,
-      "star_growth": 36,
-      "score": 0.3285,
+      "stargazers_count": 78454,
+      "forks_count": 11141,
+      "star_growth": 107,
+      "score": 0.3252,
       "sources": [
         "github_search"
       ],
       "trending_rank": 0,
       "selection_reasons": [
-        "较上次记录新增 Star 36，近期热度上升。",
+        "较上次记录新增 Star 107，近期热度上升。",
         "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "当前累计 Star 78347，具备一定社区关注度。",
+        "当前累计 Star 78454，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "README 摘要不足，后续理解项目价值时需要打开仓库人工确认。"
+      ],
+      "quality_score": 82,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-03.html"
+    },
+    {
+      "run_date": "2026-06-03",
+      "full_name": "D4Vinci/Scrapling",
+      "html_url": "https://github.com/D4Vinci/Scrapling",
+      "description": "🕷️ An adaptive Web Scraping framework that handles everything from a single request to a full-scale crawl!",
+      "readme_summary": "",
+      "category": "Developer Tools",
+      "language": "Python",
+      "stargazers_count": 59633,
+      "forks_count": 5754,
+      "star_growth": 110,
+      "score": 0.3124,
+      "sources": [
+        "github_search"
+      ],
+      "trending_rank": 0,
+      "selection_reasons": [
+        "较上次记录新增 Star 110，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "当前累计 Star 59633，具备一定社区关注度。",
         "仓库主题、语言或名称与关注方向匹配。"
       ],
       "security_flags": [],
@@ -139,18 +444,18 @@
       "readme_summary": "",
       "category": "AI Agent",
       "language": "Shell",
-      "stargazers_count": 216279,
-      "forks_count": 19254,
-      "star_growth": 65,
-      "score": 0.2984,
+      "stargazers_count": 216451,
+      "forks_count": 19265,
+      "star_growth": 172,
+      "score": 0.2665,
       "sources": [
         "github_search"
       ],
       "trending_rank": 0,
       "selection_reasons": [
-        "较上次记录新增 Star 65，近期热度上升。",
+        "较上次记录新增 Star 172，近期热度上升。",
         "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "当前累计 Star 216279，具备一定社区关注度。",
+        "当前累计 Star 216451，具备一定社区关注度。",
         "最近一周仍有更新或维护活动。"
       ],
       "security_flags": [],
@@ -166,56 +471,24 @@
     },
     {
       "run_date": "2026-06-03",
-      "full_name": "shareAI-lab/learn-claude-code",
-      "html_url": "https://github.com/shareAI-lab/learn-claude-code",
-      "description": "Bash is all you need -  A nano claude code–like 「agent harness」, built from 0 to 1",
-      "readme_summary": "",
-      "category": "AI Agent",
-      "language": "Python",
-      "stargazers_count": 64400,
-      "forks_count": 10521,
-      "star_growth": 20,
-      "score": 0.2678,
-      "sources": [
-        "github_search"
-      ],
-      "trending_rank": 0,
-      "selection_reasons": [
-        "较上次记录新增 Star 20，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "当前累计 Star 64400，具备一定社区关注度。",
-        "仓库主题、语言或名称与关注方向匹配。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [
-        "README 摘要不足，后续理解项目价值时需要打开仓库人工确认。"
-      ],
-      "quality_score": 82,
-      "quality_level": "high",
-      "report_url": "weekly/2026-06-03.html"
-    },
-    {
-      "run_date": "2026-06-03",
       "full_name": "langgenius/dify",
       "html_url": "https://github.com/langgenius/dify",
       "description": "Production-ready platform for agentic workflow development.",
       "readme_summary": "",
       "category": "AI Agent",
       "language": "TypeScript",
-      "stargazers_count": 143645,
-      "forks_count": 22600,
-      "star_growth": 8,
-      "score": 0.2308,
+      "stargazers_count": 143671,
+      "forks_count": 22602,
+      "star_growth": 26,
+      "score": 0.2328,
       "sources": [
         "github_search"
       ],
       "trending_rank": 0,
       "selection_reasons": [
-        "较上次记录新增 Star 8，近期热度上升。",
+        "较上次记录新增 Star 26，近期热度上升。",
         "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "当前累计 Star 143645，具备一定社区关注度。",
+        "当前累计 Star 143671，具备一定社区关注度。",
         "仓库主题、语言或名称与关注方向匹配。"
       ],
       "security_flags": [],
@@ -230,102 +503,130 @@
     },
     {
       "run_date": "2026-06-03",
-      "full_name": "rtk-ai/rtk",
-      "html_url": "https://github.com/rtk-ai/rtk",
-      "description": "CLI proxy that reduces LLM token consumption by 60-90% on common dev commands. Single Rust binary, zero dependencies",
-      "readme_summary": "",
-      "category": "AI Agent",
-      "language": "Rust",
-      "stargazers_count": 58136,
-      "forks_count": 3577,
-      "star_growth": 18,
-      "score": 0.2269,
-      "sources": [
-        "github_search"
-      ],
-      "trending_rank": 0,
-      "selection_reasons": [
-        "较上次记录新增 Star 18，近期热度上升。",
-        "当前累计 Star 58136，具备一定社区关注度。",
-        "仓库主题、语言或名称与关注方向匹配。",
-        "最近一周仍有更新或维护活动。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [
-        "README 摘要不足，后续理解项目价值时需要打开仓库人工确认。"
-      ],
-      "quality_score": 82,
-      "quality_level": "high",
-      "report_url": "weekly/2026-06-03.html"
-    },
-    {
-      "run_date": "2026-06-03",
-      "full_name": "rasbt/LLMs-from-scratch",
-      "html_url": "https://github.com/rasbt/LLMs-from-scratch",
-      "description": "Implement a ChatGPT-like LLM in PyTorch from scratch, step by step",
-      "readme_summary": "",
-      "category": "LLM Tooling",
-      "language": "Jupyter Notebook",
-      "stargazers_count": 96552,
-      "forks_count": 14768,
-      "star_growth": 7,
-      "score": 0.2222,
-      "sources": [
-        "github_search"
-      ],
-      "trending_rank": 0,
-      "selection_reasons": [
-        "较上次记录新增 Star 7，近期热度上升。",
-        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
-        "当前累计 Star 96552，具备一定社区关注度。",
-        "仓库主题、语言或名称与关注方向匹配。"
-      ],
-      "security_flags": [],
-      "security_score": 100,
-      "security_level": "low",
-      "quality_flags": [
-        "README 摘要不足，后续理解项目价值时需要打开仓库人工确认。"
-      ],
-      "quality_score": 82,
-      "quality_level": "high",
-      "report_url": "weekly/2026-06-03.html"
-    },
-    {
-      "run_date": "2026-06-03",
-      "full_name": "anthropics/claude-code",
-      "html_url": "https://github.com/anthropics/claude-code",
-      "description": "Claude Code is an agentic coding tool that lives in your terminal, understands your codebase, and helps you code faster by executing routine tasks, explaining complex code, and handling git workflows - all through natural language commands.",
+      "full_name": "shareAI-lab/learn-claude-code",
+      "html_url": "https://github.com/shareAI-lab/learn-claude-code",
+      "description": "Bash is all you need -  A nano claude code–like 「agent harness」, built from 0 to 1",
       "readme_summary": "",
       "category": "AI Agent",
       "language": "Python",
-      "stargazers_count": 129705,
-      "forks_count": 21084,
-      "star_growth": 12,
-      "score": 0.2217,
+      "stargazers_count": 64429,
+      "forks_count": 10523,
+      "star_growth": 29,
+      "score": 0.2287,
       "sources": [
         "github_search"
       ],
       "trending_rank": 0,
       "selection_reasons": [
-        "较上次记录新增 Star 12，近期热度上升。",
-        "当前累计 Star 129705，具备一定社区关注度。",
+        "较上次记录新增 Star 29，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "当前累计 Star 64429，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "README 摘要不足，后续理解项目价值时需要打开仓库人工确认。"
+      ],
+      "quality_score": 82,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-03.html"
+    },
+    {
+      "run_date": "2026-06-03",
+      "full_name": "qax-os/excelize",
+      "html_url": "https://github.com/qax-os/excelize",
+      "description": "Go language library for reading and writing Microsoft Excel™ (XLAM / XLSM / XLSX / XLTM / XLTX) spreadsheets",
+      "readme_summary": "",
+      "category": "AI Agent",
+      "language": "Go",
+      "stargazers_count": 20635,
+      "forks_count": 1911,
+      "star_growth": 1,
+      "score": 0.2209,
+      "sources": [
+        "github_search"
+      ],
+      "trending_rank": 0,
+      "selection_reasons": [
+        "较上次记录新增 Star 1，近期热度上升。",
+        "当前累计 Star 20635，具备一定社区关注度。",
         "仓库主题、语言或名称与关注方向匹配。",
         "最近一周仍有更新或维护活动。"
       ],
-      "security_flags": [
-        "未识别到许可证，复用代码前需要人工确认授权。"
-      ],
-      "security_score": 85,
+      "security_flags": [],
+      "security_score": 100,
       "security_level": "low",
       "quality_flags": [
-        "README 摘要不足，后续理解项目价值时需要打开仓库人工确认。",
-        "许可证元数据缺失，复用代码前需要确认授权。",
-        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+        "README 摘要不足，后续理解项目价值时需要打开仓库人工确认。"
       ],
-      "quality_score": 62,
-      "quality_level": "medium",
+      "quality_score": 82,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-03.html"
+    },
+    {
+      "run_date": "2026-06-03",
+      "full_name": "TauricResearch/TradingAgents",
+      "html_url": "https://github.com/TauricResearch/TradingAgents",
+      "description": "TradingAgents: Multi-Agents LLM Financial Trading Framework",
+      "readme_summary": "",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 82487,
+      "forks_count": 16005,
+      "star_growth": 42,
+      "score": 0.2195,
+      "sources": [
+        "github_search"
+      ],
+      "trending_rank": 0,
+      "selection_reasons": [
+        "较上次记录新增 Star 42，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "当前累计 Star 82487，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "README 摘要不足，后续理解项目价值时需要打开仓库人工确认。"
+      ],
+      "quality_score": 82,
+      "quality_level": "high",
+      "report_url": "weekly/2026-06-03.html"
+    },
+    {
+      "run_date": "2026-06-03",
+      "full_name": "mem0ai/mem0",
+      "html_url": "https://github.com/mem0ai/mem0",
+      "description": "Universal memory layer for AI Agents",
+      "readme_summary": "",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 57544,
+      "forks_count": 6576,
+      "star_growth": 22,
+      "score": 0.2186,
+      "sources": [
+        "github_search"
+      ],
+      "trending_rank": 0,
+      "selection_reasons": [
+        "较上次记录新增 Star 22，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "当前累计 Star 57544，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "README 摘要不足，后续理解项目价值时需要打开仓库人工确认。"
+      ],
+      "quality_score": 82,
+      "quality_level": "high",
       "report_url": "weekly/2026-06-03.html"
     },
     {
@@ -2279,8 +2580,10 @@
       "security_flags": [],
       "security_score": 100,
       "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
+      "quality_flags": [
+        "最近维护时间超过 30 天，建议关注维护连续性。"
+      ],
+      "quality_score": 82,
       "quality_level": "high",
       "report_url": "weekly/2026-05-05.html"
     },
@@ -2312,10 +2615,11 @@
       "security_score": 100,
       "security_level": "low",
       "quality_flags": [
-        "许可证元数据缺失，复用代码前需要确认授权。"
+        "许可证元数据缺失，复用代码前需要确认授权。",
+        "最近维护时间超过 30 天，建议关注维护连续性。"
       ],
-      "quality_score": 88,
-      "quality_level": "high",
+      "quality_score": 70,
+      "quality_level": "medium",
       "report_url": "weekly/2026-05-05.html"
     },
     {
@@ -2343,8 +2647,10 @@
       "security_flags": [],
       "security_score": 100,
       "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
+      "quality_flags": [
+        "最近维护时间超过 30 天，建议关注维护连续性。"
+      ],
+      "quality_score": 82,
       "quality_level": "high",
       "report_url": "weekly/2026-05-05.html"
     },
@@ -2374,10 +2680,11 @@
       "security_score": 100,
       "security_level": "low",
       "quality_flags": [
-        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+        "仓库主题标签较少，垂直方向判断可能不够稳定。",
+        "最近维护时间超过 30 天，建议关注维护连续性。"
       ],
-      "quality_score": 92,
-      "quality_level": "high",
+      "quality_score": 74,
+      "quality_level": "medium",
       "report_url": "weekly/2026-05-05.html"
     },
     {
@@ -2405,8 +2712,10 @@
       "security_flags": [],
       "security_score": 100,
       "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
+      "quality_flags": [
+        "最近维护时间超过 30 天，建议关注维护连续性。"
+      ],
+      "quality_score": 82,
       "quality_level": "high",
       "report_url": "weekly/2026-05-05.html"
     },
@@ -2436,10 +2745,11 @@
       "security_score": 100,
       "security_level": "low",
       "quality_flags": [
-        "仓库简介较短，项目定位信息有限。"
+        "仓库简介较短，项目定位信息有限。",
+        "最近维护时间超过 30 天，建议关注维护连续性。"
       ],
-      "quality_score": 92,
-      "quality_level": "high",
+      "quality_score": 74,
+      "quality_level": "medium",
       "report_url": "weekly/2026-05-05.html"
     },
     {
@@ -2467,8 +2777,10 @@
       "security_flags": [],
       "security_score": 100,
       "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
+      "quality_flags": [
+        "最近维护时间超过 30 天，建议关注维护连续性。"
+      ],
+      "quality_score": 82,
       "quality_level": "high",
       "report_url": "weekly/2026-05-05.html"
     },
@@ -2497,8 +2809,10 @@
       "security_flags": [],
       "security_score": 100,
       "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
+      "quality_flags": [
+        "最近维护时间超过 30 天，建议关注维护连续性。"
+      ],
+      "quality_score": 82,
       "quality_level": "high",
       "report_url": "weekly/2026-05-05.html"
     },
@@ -2629,10 +2943,11 @@
       "security_score": 100,
       "security_level": "low",
       "quality_flags": [
-        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+        "仓库主题标签较少，垂直方向判断可能不够稳定。",
+        "最近维护时间超过 30 天，建议关注维护连续性。"
       ],
-      "quality_score": 92,
-      "quality_level": "high",
+      "quality_score": 74,
+      "quality_level": "medium",
       "report_url": "weekly/2026-05-04.html"
     },
     {
@@ -2661,10 +2976,11 @@
       "security_score": 100,
       "security_level": "low",
       "quality_flags": [
-        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+        "仓库主题标签较少，垂直方向判断可能不够稳定。",
+        "最近维护时间超过 30 天，建议关注维护连续性。"
       ],
-      "quality_score": 92,
-      "quality_level": "high",
+      "quality_score": 74,
+      "quality_level": "medium",
       "report_url": "weekly/2026-05-04.html"
     },
     {
@@ -2692,8 +3008,10 @@
       "security_flags": [],
       "security_score": 100,
       "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
+      "quality_flags": [
+        "最近维护时间超过 30 天，建议关注维护连续性。"
+      ],
+      "quality_score": 82,
       "quality_level": "high",
       "report_url": "weekly/2026-05-04.html"
     },
@@ -2722,8 +3040,10 @@
       "security_flags": [],
       "security_score": 100,
       "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
+      "quality_flags": [
+        "最近维护时间超过 30 天，建议关注维护连续性。"
+      ],
+      "quality_score": 82,
       "quality_level": "high",
       "report_url": "weekly/2026-05-04.html"
     },
@@ -2752,8 +3072,10 @@
       "security_flags": [],
       "security_score": 100,
       "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
+      "quality_flags": [
+        "最近维护时间超过 30 天，建议关注维护连续性。"
+      ],
+      "quality_score": 82,
       "quality_level": "high",
       "report_url": "weekly/2026-05-04.html"
     },
@@ -2783,10 +3105,11 @@
       "security_score": 100,
       "security_level": "low",
       "quality_flags": [
-        "仓库简介较短，项目定位信息有限。"
+        "仓库简介较短，项目定位信息有限。",
+        "最近维护时间超过 30 天，建议关注维护连续性。"
       ],
-      "quality_score": 92,
-      "quality_level": "high",
+      "quality_score": 74,
+      "quality_level": "medium",
       "report_url": "weekly/2026-05-04.html"
     },
     {
@@ -2980,8 +3303,10 @@
       "security_flags": [],
       "security_score": 100,
       "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
+      "quality_flags": [
+        "最近维护时间超过 30 天，建议关注维护连续性。"
+      ],
+      "quality_score": 82,
       "quality_level": "high",
       "report_url": "weekly/2026-05-03.html"
     },
@@ -3010,8 +3335,10 @@
       "security_flags": [],
       "security_score": 100,
       "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
+      "quality_flags": [
+        "最近维护时间超过 30 天，建议关注维护连续性。"
+      ],
+      "quality_score": 82,
       "quality_level": "high",
       "report_url": "weekly/2026-05-03.html"
     },
@@ -3073,10 +3400,11 @@
       "security_score": 100,
       "security_level": "low",
       "quality_flags": [
-        "仓库简介较短，项目定位信息有限。"
+        "仓库简介较短，项目定位信息有限。",
+        "最近维护时间超过 30 天，建议关注维护连续性。"
       ],
-      "quality_score": 92,
-      "quality_level": "high",
+      "quality_score": 74,
+      "quality_level": "medium",
       "report_url": "weekly/2026-05-03.html"
     },
     {
