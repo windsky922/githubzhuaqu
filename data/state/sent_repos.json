@@ -85,6 +85,11 @@
     "first_sent_at": "2026-04-29"
   },
   {
+    "full_name": "apache/camel",
+    "html_url": "https://github.com/apache/camel",
+    "first_sent_at": "2026-06-08"
+  },
+  {
     "full_name": "appsmithorg/appsmith",
     "html_url": "https://github.com/appsmithorg/appsmith",
     "first_sent_at": "2026-04-30"
@@ -118,6 +123,11 @@
     "full_name": "bytedance/deer-flow",
     "html_url": "https://github.com/bytedance/deer-flow",
     "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "can1357/oh-my-pi",
+    "html_url": "https://github.com/can1357/oh-my-pi",
+    "first_sent_at": "2026-06-08"
   },
   {
     "full_name": "chopratejas/headroom",
@@ -420,6 +430,11 @@
     "first_sent_at": "2026-06-02"
   },
   {
+    "full_name": "mvanhorn/last30days-skill",
+    "html_url": "https://github.com/mvanhorn/last30days-skill",
+    "first_sent_at": "2026-06-08"
+  },
+  {
     "full_name": "n8n-io/n8n",
     "html_url": "https://github.com/n8n-io/n8n",
     "first_sent_at": "2026-04-28"
@@ -610,6 +625,11 @@
     "first_sent_at": "2026-04-30"
   },
   {
+    "full_name": "supermemoryai/supermemory",
+    "html_url": "https://github.com/supermemoryai/supermemory",
+    "first_sent_at": "2026-06-08"
+  },
+  {
     "full_name": "SWE-agent/SWE-agent",
     "html_url": "https://github.com/SWE-agent/SWE-agent",
     "first_sent_at": "2026-06-03"
@@ -683,6 +703,11 @@
     "full_name": "Yeachan-Heo/oh-my-claudecode",
     "html_url": "https://github.com/Yeachan-Heo/oh-my-claudecode",
     "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "yt-dlp/yt-dlp",
+    "html_url": "https://github.com/yt-dlp/yt-dlp",
+    "first_sent_at": "2026-06-08"
   },
   {
     "full_name": "zeroclaw-labs/zeroclaw",
