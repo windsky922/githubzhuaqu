@@ -51,7 +51,7 @@ class RagSearchEvaluationScriptTest(unittest.TestCase):
             self.assertEqual(jobs["jobs"][0]["request"]["requested_by"], "unit-test")
             self.assertEqual(jobs["jobs"][0]["result"]["sample_count"], 2)
             events = repository.job_events(jobs["jobs"][0]["job_id"])
-            self.assertIn("rag_search_evaluation_succeeded", [event["event_type"] for event in events["events"]])
+            self.assertIn("runner_finished", [event["event_type"] for event in events["events"]])
         finally:
             shutil.rmtree(root, ignore_errors=True)
 

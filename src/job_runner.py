@@ -102,6 +102,8 @@ def _execute_job_by_kind(root: Path, db_path: Path, kind: str, request: dict[str
         return _execute_rag_corpus_rebuild(root=root, db_path=db_path, request=request)
     if kind == "rag_embedding_build":
         return _execute_rag_embedding_build(db_path=db_path, request=request)
+    if kind == "rag_search_evaluation":
+        return _execute_rag_search_evaluation(root=root, db_path=db_path, request=request)
     raise ValueError(f"不支持的任务类型：{kind}")
 
 
@@ -209,6 +211,38 @@ def _execute_rag_embedding_build(db_path: Path, request: dict[str, Any]) -> dict
         **result,
         "before_counts": before_counts,
         "after_counts": _rag_table_counts(db_path),
+        "request_context": _request_context(request),
+    }
+
+
+def _execute_rag_search_evaluation(root: Path, db_path: Path, request: dict[str, Any]) -> dict[str, Any]:
+    from src.api.repository import ApiRepository
+
+    repository = ApiRepository(root=root, db_path=db_path)
+    queries = request.get("queries") if isinstance(request.get("queries"), list) else []
+    result = repository.rag_search_evaluation(
+        queries=[str(item) for item in queries],
+        language=str(request.get("language") or "") or None,
+        category=str(request.get("category") or "") or None,
+        source=str(request.get("source") or "") or None,
+        limit=_positive_int(request.get("limit")) or 8,
+        model=str(request.get("model") or MODEL_NAME),
+        auto_build=_bool_value(request.get("auto_build"), True),
+    )
+    return {
+        "run_date": _now()[:10],
+        "status": "ok",
+        "schema_version": result.get("schema_version", 1),
+        "sample_count": result.get("sample_count", 0),
+        "queries": result.get("queries") or [],
+        "language": result.get("language") or "",
+        "category": result.get("category") or "",
+        "source": result.get("source") or "",
+        "limit": result.get("limit") or 0,
+        "model": result.get("model") or "",
+        "auto_build": bool(result.get("auto_build")),
+        "aggregate": result.get("aggregate") if isinstance(result.get("aggregate"), dict) else {},
+        "summary": result.get("summary") if isinstance(result.get("summary"), list) else [],
         "request_context": _request_context(request),
     }
 
@@ -340,6 +374,8 @@ def _request_context(request: dict[str, Any]) -> dict[str, Any]:
             "language",
             "category",
             "query",
+            "queries",
+            "source",
             "sort",
             "limit",
             "subscription_id",

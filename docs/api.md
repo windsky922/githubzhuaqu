@@ -427,13 +427,24 @@ py scripts\build_rag_embeddings.py
 /v1/jobs/{job_id}/events
 ```
 
+### `POST /v1/rag/search-evaluation-plan`
+
+创建一个 `kind=rag_search_evaluation`、`status=planned` 的 RAG 检索质量评估任务，但不立即执行。请求字段与 `POST /v1/rag/search-evaluation` 一致，不需要额外触发推送或外部模型。
+
+后续可用统一任务执行入口执行：
+
+```text
+GET /v1/job-execution-check?job_id=...
+POST /v1/jobs/{job_id}/execute
+```
+
 命令行入口：
 
 ```powershell
 py scripts\run_rag_search_evaluation.py --queries "agent workflow;python automation" --language Python --limit 8
 ```
 
-GitHub Actions 中的每周 workflow 会在生成 Pages 前调用该脚本。可用仓库变量调整行为：
+该脚本会先创建 planned job，再调用本地 runner 执行。GitHub Actions 中的每周 workflow 会在生成 Pages 前调用该脚本。可用仓库变量调整行为：
 
 | 变量 | 说明 |
 |---|---|

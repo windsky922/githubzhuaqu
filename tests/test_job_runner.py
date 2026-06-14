@@ -15,6 +15,7 @@ from scripts.run_planned_job import _job_id_from_file, main as run_planned_job_s
 from src.job_runner import run_planned_job
 from src.models import RunSummary
 from src.storage.sqlite_store import connect, initialize, upsert_job
+from tests.test_api import _write_fixture
 
 
 class JobRunnerTest(unittest.TestCase):
@@ -106,6 +107,45 @@ class JobRunnerTest(unittest.TestCase):
             event_types = _read_job_event_types(db_path, "preview:failed")
             self.assertIn("runner_started", event_types)
             self.assertIn("runner_failed", event_types)
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
+    def test_runs_planned_rag_search_evaluation_job(self) -> None:
+        root = Path.cwd() / f".tmp-job-runner-rag-eval-{uuid.uuid4().hex}"
+        try:
+            _write_fixture(root)
+            db_path = root / "data" / "github_weekly.sqlite"
+            _write_job(
+                db_path,
+                {
+                    "job_id": "rag-search-eval-plan:test",
+                    "kind": "rag_search_evaluation",
+                    "status": "planned",
+                    "submitted_at": "2026-05-11T00:00:00Z",
+                    "request": {
+                        "queries": ["agent workflow", "python automation"],
+                        "language": "Python",
+                        "limit": 5,
+                        "model": "local-hash-v1",
+                        "auto_build": True,
+                        "confirm_execution": True,
+                    },
+                },
+            )
+
+            result = run_planned_job(root=root, db_path=db_path, job_id="rag-search-eval-plan:test")
+
+            self.assertTrue(result["executed"])
+            self.assertEqual(result["status"], "succeeded")
+            self.assertEqual(result["result"]["sample_count"], 2)
+            self.assertIn("hybrid", result["result"]["aggregate"]["modes"])
+            self.assertEqual(result["result"]["request_context"]["language"], "Python")
+            self.assertEqual(result["result"]["request_context"]["queries"], ["agent workflow", "python automation"])
+            job = _read_job(db_path, "rag-search-eval-plan:test")
+            self.assertEqual(job["status"], "succeeded")
+            job_result = json.loads(job["result_json"])
+            self.assertEqual(job_result["sample_count"], 2)
+            self.assertIn("runner_finished", _read_job_event_types(db_path, "rag-search-eval-plan:test"))
         finally:
             shutil.rmtree(root, ignore_errors=True)
 

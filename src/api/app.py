@@ -337,6 +337,10 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
     def v1_persist_rag_search_evaluation(payload: dict[str, Any] | None = Body(default=None)) -> dict[str, Any]:
         return repository.persist_rag_search_evaluation(payload)
 
+    @app.post("/v1/rag/search-evaluation-plan", status_code=202)
+    def v1_rag_search_evaluation_plan(payload: dict[str, Any] | None = Body(default=None)) -> dict[str, Any]:
+        return repository.plan_rag_search_evaluation(payload)
+
     @app.get("/v1/rag/search-evaluation-trends")
     def v1_rag_search_evaluation_trends(limit: int = Query(default=20, ge=1, le=100)) -> dict[str, Any]:
         return repository.rag_search_evaluation_trends(limit=limit)

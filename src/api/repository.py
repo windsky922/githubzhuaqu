@@ -28,7 +28,13 @@ from src.storage.sqlite_store import (
 )
 
 ROOT = Path(__file__).resolve().parents[2]
-EXECUTABLE_JOB_KINDS = {"weekly_report", "rag_backfill", "rag_corpus_rebuild", "rag_embedding_build"}
+EXECUTABLE_JOB_KINDS = {
+    "weekly_report",
+    "rag_backfill",
+    "rag_corpus_rebuild",
+    "rag_embedding_build",
+    "rag_search_evaluation",
+}
 
 
 class ApiRepository:
@@ -75,6 +81,7 @@ class ApiRepository:
                 "rag_search_evaluation": True,
                 "rag_search_evaluation_jobs": True,
                 "rag_search_evaluation_trends": True,
+                "rag_search_evaluation_plan": True,
                 "rag_explain": True,
                 "rag_ask": True,
                 "rag_explanations": True,
@@ -1359,6 +1366,56 @@ class ApiRepository:
             message="已创建 RAG embedding 构建 planned 任务。",
         )
 
+    def plan_rag_search_evaluation(self, payload: dict[str, Any] | None) -> dict[str, Any]:
+        request = _rag_search_evaluation_request(payload)
+        request["confirm_execution"] = True
+        request["trigger_source"] = str(request.get("trigger_source") or "rag_search_evaluation_plan_api")
+        duplicate = self._find_active_duplicate_job(request, kind="rag_search_evaluation")
+        if duplicate:
+            return {
+                "schema_version": 1,
+                "accepted": True,
+                "planned_job_created": False,
+                "job_id": duplicate.get("job_id") or "",
+                "status": duplicate.get("status") or "",
+                "request": request,
+                "duplicate_of": duplicate.get("job_id") or "",
+                "job": duplicate,
+            }
+
+        submitted_at = datetime.now(UTC).isoformat().replace("+00:00", "Z")
+        job_id = _rag_search_evaluation_plan_job_id(submitted_at, request)
+        job = {
+            "job_id": job_id,
+            "kind": "rag_search_evaluation",
+            "status": "planned",
+            "run_date": "",
+            "submitted_at": submitted_at,
+            "started_at": "",
+            "finished_at": "",
+            "request": request,
+            "result": {},
+            "error": "",
+        }
+        self._persist_preview_job(job)
+        self._record_job_event(
+            job_id,
+            "job_created",
+            "planned",
+            str(request.get("requested_by") or "api"),
+            "已创建 RAG 检索评估 planned 任务。",
+            {"request": request},
+        )
+        return {
+            "schema_version": 1,
+            "accepted": True,
+            "planned_job_created": True,
+            "job_id": job_id,
+            "status": "planned",
+            "request": request,
+            "job": job,
+        }
+
     def plan_rag_maintenance(self, payload: dict[str, Any] | None) -> dict[str, Any]:
         payload = payload if isinstance(payload, dict) else {}
         coverage_limit = max(1, min(_int_value(payload.get("coverage_limit")) or 100, 500))
@@ -2271,7 +2328,9 @@ class ApiRepository:
         blockers = []
         warnings = []
         if kind not in EXECUTABLE_JOB_KINDS:
-            blockers.append("当前执行器只支持 weekly_report、rag_backfill、rag_corpus_rebuild 和 rag_embedding_build 任务。")
+            blockers.append(
+                "当前执行器只支持 weekly_report、rag_backfill、rag_corpus_rebuild、rag_embedding_build 和 rag_search_evaluation 任务。"
+            )
         if job.get("status") != "planned":
             blockers.append(f"任务状态为 {job.get('status') or 'unknown'}，只有 planned 任务可以被执行器消费。")
         if kind == "weekly_report":
@@ -2289,6 +2348,8 @@ class ApiRepository:
                 blockers.append("dry_run=false 但缺少 confirm_execution=true，不能进入真实 RAG 维护执行。")
             if not _truthy(request.get("dry_run", True)):
                 warnings.append("该任务允许写入 SQLite 派生表，执行前请确认本地归档数据完整。")
+        if kind == "rag_search_evaluation":
+            warnings.append("该任务会写入 RAG 检索评估结果，用于后续质量趋势分析。")
 
         executable = not blockers
         return {
@@ -2302,6 +2363,7 @@ class ApiRepository:
             "request": {
                 "profile": request.get("profile") or "",
                 "sources": _list_strings(request.get("sources")),
+                "queries": _list_strings(request.get("queries")),
                 "dry_run": _truthy(request.get("dry_run", True)),
                 "confirm_delivery": _truthy(request.get("confirm_delivery")),
                 "days_back": _positive_int(request.get("days_back")),
@@ -2309,6 +2371,7 @@ class ApiRepository:
                 "rag_limit": _positive_int(request.get("rag_limit")),
                 "mode": request.get("mode") or "",
                 "model": request.get("model") or "",
+                "source": request.get("source") or "",
                 "auto_build": _truthy(request.get("auto_build")),
                 "confirm_execution": _truthy(request.get("confirm_execution")),
                 "maintenance_action": request.get("maintenance_action") or "",
@@ -2398,7 +2461,9 @@ class ApiRepository:
         if not detail.get("found"):
             blockers.append("任务不存在，不能重试。")
         if job and job.get("kind") not in EXECUTABLE_JOB_KINDS:
-            blockers.append("当前只支持 weekly_report、rag_backfill、rag_corpus_rebuild 和 rag_embedding_build 任务重试。")
+            blockers.append(
+                "当前只支持 weekly_report、rag_backfill、rag_corpus_rebuild、rag_embedding_build 和 rag_search_evaluation 任务重试。"
+            )
         if job and job.get("status") != "failed":
             blockers.append(f"任务状态为 {job.get('status') or 'unknown'}，只有 failed 任务可以重试。")
 
@@ -4163,12 +4228,34 @@ def _rag_search_evaluation_job_id(submitted_at: str, request: dict[str, Any]) ->
     return f"rag-search-eval:{submitted_at[:10]}:{digest}"
 
 
+def _rag_search_evaluation_plan_job_id(submitted_at: str, request: dict[str, Any]) -> str:
+    text = json.dumps(
+        {
+            "submitted_at": submitted_at,
+            "queries": request.get("queries") or [],
+            "language": request.get("language") or "",
+            "category": request.get("category") or "",
+            "source": request.get("source") or "",
+            "limit": request.get("limit") or 0,
+            "model": request.get("model") or "",
+        },
+        ensure_ascii=False,
+        sort_keys=True,
+    )
+    digest = sha1(text.encode("utf-8")).hexdigest()[:12]
+    return f"rag-search-eval-plan:{submitted_at[:10]}:{digest}"
+
+
 def _rag_search_evaluation_job_result(result: dict[str, Any]) -> dict[str, Any]:
     aggregate = result.get("aggregate") if isinstance(result.get("aggregate"), dict) else {}
     return {
         "schema_version": result.get("schema_version", 1),
         "sample_count": result.get("sample_count", 0),
         "queries": result.get("queries") or [],
+        "language": result.get("language") or "",
+        "category": result.get("category") or "",
+        "source": result.get("source") or "",
+        "limit": _int_value(result.get("limit")),
         "model": result.get("model") or "",
         "auto_build": bool(result.get("auto_build")),
         "aggregate": aggregate,

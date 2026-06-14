@@ -2,6 +2,24 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-06-14 追加：RAG 检索评估 planned job 执行闭环
+
+### 1. 开发目的
+
+`rag_search_evaluation` 已经能写入 jobs，但此前主要通过 API 或脚本直接执行，任务执行器还不能消费这类 planned job。为统一数据库/RAG 任务模型，本次补齐“创建 planned job -> 执行前检查 -> runner 执行 -> 写入结果”的闭环。
+
+### 2. 修改内容
+
+1. `EXECUTABLE_JOB_KINDS` 新增 `rag_search_evaluation`。
+2. 新增 `ApiRepository.plan_rag_search_evaluation` 和 `POST /v1/rag/search-evaluation-plan`。
+3. `src/job_runner.py` 新增 `rag_search_evaluation` 执行分支，复用现有 RAG 检索评估逻辑。
+4. `scripts/run_rag_search_evaluation.py` 改为先创建 planned job，再交给 runner 执行。
+5. 更新执行前检查、重试提示、README、API 文档和测试。
+
+### 3. 后续空间
+
+后续可以把检索评估计划入口接入管理首页，或让维护计划在诊断正常时自动创建评估任务，实现更完整的 RAG 自检周期。
+
 ## 2026-06-06 追加：GitHub Actions 自动写入 RAG 检索评估
 
 ### 1. 开发目的

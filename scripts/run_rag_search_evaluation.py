@@ -11,6 +11,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from src.api.repository import ApiRepository
+from src.job_runner import run_planned_job
 
 
 def _bool_value(value: str | bool | None, default: bool = False) -> bool:
@@ -67,9 +68,19 @@ def main(argv: list[str] | None = None) -> int:
         "trigger_source": "rag_search_evaluation_script",
     }
     repository = ApiRepository(root=args.root, db_path=args.db)
-    result = repository.persist_rag_search_evaluation(payload)
+    plan = repository.plan_rag_search_evaluation(payload)
+    runner_result = run_planned_job(root=args.root, db_path=args.db, job_id=plan.get("job_id") or None)
+    result = {
+        "schema_version": 1,
+        "accepted": bool(plan.get("accepted")),
+        "planned_job_created": bool(plan.get("planned_job_created")),
+        "job_id": plan.get("job_id") or "",
+        "status": runner_result.get("status") or plan.get("status") or "",
+        "plan": plan,
+        "runner_result": runner_result,
+    }
     print(json.dumps(result, ensure_ascii=False, sort_keys=True))
-    return 0 if result.get("accepted") and result.get("status") == "succeeded" else 1
+    return 0 if result.get("accepted") and runner_result.get("status") == "succeeded" else 1
 
 
 if __name__ == "__main__":
