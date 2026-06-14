@@ -931,6 +931,7 @@ def _admin_dashboard_content() -> str:
       </div>
       <div id="ragSearchResults" class="search-results"></div>
       <div id="ragQualitySummary" class="search-results"></div>
+      <div id="ragEvaluationTrends" class="search-results"></div>
       <div class="search-form">
         <label>维护数量
           <input id="ragMaintenanceLimit" type="number" min="1" max="100" value="10">
@@ -1041,6 +1042,7 @@ def _admin_dashboard_content() -> str:
     const corpusSearchResults = document.getElementById("corpusSearchResults");
     const ragSearchResults = document.getElementById("ragSearchResults");
     const ragQualitySummary = document.getElementById("ragQualitySummary");
+    const ragEvaluationTrends = document.getElementById("ragEvaluationTrends");
     const ragMaintenanceResults = document.getElementById("ragMaintenanceResults");
     const ragBackfillResults = document.getElementById("ragBackfillResults");
     const adminState = { jobs: [], jobFilter: "attention" };
@@ -1351,6 +1353,7 @@ def _admin_dashboard_content() -> str:
         databaseFacets.innerHTML = '<p>启动本地后端或添加 api=1 后显示数据库分面。</p>';
         databaseTrends.innerHTML = '<p>启动本地后端或添加 api=1 后显示运行趋势。</p>';
         ragQualitySummary.innerHTML = '<p>启动本地后端或添加 api=1 后显示 RAG 诊断和质量概览。</p>';
+        ragEvaluationTrends.innerHTML = '<p>启动本地后端或添加 api=1 后显示 RAG 检索评估趋势。</p>';
         return;
       }
       Promise.all([
@@ -1359,8 +1362,9 @@ def _admin_dashboard_content() -> str:
         fetch("/v1/database/trends?limit=8", { cache: "no-store" }).then(jsonOrThrow),
         fetch("/v1/rag/diagnostics?limit=5", { cache: "no-store" }).then(jsonOrThrow),
         fetch("/v1/rag/quality-summary?limit=5", { cache: "no-store" }).then(jsonOrThrow),
+        fetch("/v1/rag/search-evaluation-trends?limit=8", { cache: "no-store" }).then(jsonOrThrow),
       ])
-        .then(([summary, facets, trends, diagnostics, qualitySummary]) => {
+        .then(([summary, facets, trends, diagnostics, qualitySummary, evaluationTrends]) => {
           const counts = summary.table_counts || {};
           databaseOverview.innerHTML = [
             metric("仓库记录", counts.repositories || 0),
@@ -1371,12 +1375,14 @@ def _admin_dashboard_content() -> str:
           databaseFacets.innerHTML = databaseFacetsHtml(facets);
           databaseTrends.innerHTML = databaseTrendsHtml(trends);
           ragQualitySummary.innerHTML = ragDiagnosticsHtml(diagnostics) + ragQualitySummaryHtml(qualitySummary);
+          ragEvaluationTrends.innerHTML = ragEvaluationTrendsHtml(evaluationTrends);
         })
         .catch(error => {
           databaseOverview.innerHTML = metric("数据库状态", "读取失败");
           databaseFacets.innerHTML = `<p>数据库分面读取失败：${escapeHtml(error.message || error)}</p>`;
           databaseTrends.innerHTML = "";
           ragQualitySummary.innerHTML = "";
+          ragEvaluationTrends.innerHTML = "";
         });
     }
 
@@ -1642,6 +1648,46 @@ def _admin_dashboard_content() -> str:
         recommendationHtml,
         "<h4>最近低质量解释</h4>",
         lowHtml,
+      ].join("");
+    }
+
+    function ragEvaluationTrendsHtml(data) {
+      const aggregate = data.aggregate || {};
+      const jobs = Array.isArray(data.jobs) ? data.jobs : [];
+      const summary = Array.isArray(data.summary) ? data.summary : [];
+      const recommendations = Array.isArray(data.recommendations) ? data.recommendations : [];
+      const preferred = aggregate.preferred_mode_counts || {};
+      const preferredRows = Object.keys(preferred).length
+        ? Object.entries(preferred).map(([name, count]) => facetRow(name, `${count} 次推荐`, "检索模式"))
+        : [facetRow("暂无推荐模式", "-", "-")];
+      const summaryHtml = summary.length
+        ? summary.map(item => `<p>${escapeHtml(item)}</p>`).join("")
+        : "<p>暂无 RAG 检索评估历史。每周 workflow 或脚本执行后会写入趋势数据。</p>";
+      const recommendationHtml = recommendations.length
+        ? recommendations.map(item => `<p>${escapeHtml(item)}</p>`).join("")
+        : "<p>暂无趋势建议。</p>";
+      const latestRows = jobs.length
+        ? jobs.slice(0, 5).map(job => `<article class="search-row">
+          <strong><a href="${escapeAttribute(jobDetailUrl(job.job_id || ""))}">${escapeHtml(job.job_id || "-")}</a></strong>
+          <span>${escapeHtml(job.finished_at || job.submitted_at || "-")} · 样本 ${escapeHtml(job.sample_count || 0)} · 覆盖 ${escapeHtml(job.repository_count || 0)}</span>
+          <p>零命中 ${escapeHtml(job.zero_hit_count || 0)}；推荐 ${escapeHtml(Object.keys(job.preferred_mode_counts || {}).join("、") || "-")}</p>
+        </article>`).join("")
+        : "<p>暂无评估任务。</p>";
+      return [
+        "<h3>RAG 检索评估趋势</h3>",
+        `<div class="overview">${[
+          metric("评估任务", aggregate.job_count || 0),
+          metric("平均样本", aggregate.average_sample_count || 0),
+          metric("平均零命中", aggregate.average_zero_hit_count || 0),
+          metric("最新推荐", aggregate.latest_preferred_mode || "-"),
+        ].join("")}</div>`,
+        summaryHtml,
+        "<h4>推荐模式分布</h4>",
+        ...preferredRows,
+        "<h4>趋势建议</h4>",
+        recommendationHtml,
+        "<h4>最近评估任务</h4>",
+        latestRows,
       ].join("");
     }
 

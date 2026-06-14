@@ -128,7 +128,7 @@ docs/weekly/YYYY-MM-DD.md
 其中 `explorer.html` 是轻量项目筛选页，默认读取 `projects.json` 和 `profiles.json`；在本地后端或 URL 带 `api=1` 时会优先读取 `/api/projects` 和 `/api/profiles`，失败后自动回退到静态 JSON。页面支持按关键词、日期、语言、个性化方向、来源、风险提示和排序方式筛选历史入选项目。页面会根据 profile 自动生成快捷视图按钮，筛选状态会同步到 URL，便于后续在 Telegram、微信、飞书或浏览器中分享同一个筛选视图。项目行支持展开详情，查看 README 精简摘要、推荐理由、质量信号、风险提示、项目指标、完整链接和相似历史项目。
 `recommendations.html` 是个性化推荐页，支持 `recommendations.html?profile=agent_development` 或 `recommendations.html?language=Java&q=spring`。本地后端或 URL 带 `api=1` 时会优先读取 `/v1/recommendations`，否则使用 `projects.json` 静态筛选。页面预留 Agent 开发、Python、Java、后端、前端、AI 工具等快捷方向，后续可以继续接入用户订阅数据库。
 
-`admin.html` 是本地管理首页。本地后端或 URL 带 `api=1` 时会展示数据库概览、语料搜索、RAG 证据检索、本地向量检索、RAG 质量概览、RAG 解释回填、planned 任务创建和任务工作台；静态 GitHub Pages 模式下只展示可读归档入口。
+`admin.html` 是本地管理首页。本地后端或 URL 带 `api=1` 时会展示数据库概览、语料搜索、RAG 证据检索、本地向量检索、RAG 质量概览、RAG 检索评估趋势、RAG 解释回填、planned 任务创建和任务工作台；静态 GitHub Pages 模式下只展示可读归档入口。
 
 `subscriptions.html` 是订阅配置页，支持在本地后端模式下保存、查看、启用和停用订阅偏好。页面会读取 `profiles.json` 生成 Java、Python、Agent 开发等快捷方向按钮，点击后自动填充订阅名称、profile、语言和关键词。订阅列表支持把已启用订阅生成 planned 周报任务，生成后仍需要在任务详情页确认执行。订阅只保存 profile、语言、方向、关键词、排序、数量和通道名称，不保存 Token、Chat ID 或 Webhook。
 
@@ -142,7 +142,7 @@ docs/weekly/YYYY-MM-DD.md
 订阅生成的 planned 任务会把 profile、语言、方向、关键词和数量作为任务上下文传给 job runner；执行结果会记录 `request_context`，便于回看定向任务到底使用了哪些筛选条件。
 `job.html` 是单任务详情页；对 RAG 语料重建、embedding 构建和解释回填任务，会在原始 JSON 结果上方展示 before/after 计数、候选数、处理数和回填仓库摘要。
 
-本地管理首页 `admin.html?api=1` 的 RAG 区域可以直接生成维护计划；后端会根据诊断结果创建语料重建、embedding 构建或解释回填 planned 任务，随后可进入任务详情页检查并执行。
+本地管理首页 `admin.html?api=1` 的 RAG 区域可以查看检索评估趋势，也可以直接生成维护计划；后端会根据诊断结果创建语料重建、embedding 构建或解释回填 planned 任务，随后可进入任务详情页检查并执行。
 
 `profiles.html` 是个性化方向页，直接读取 `profiles.json`，展示 Java、Python、Agent 开发、学习型项目、开发者工具等方向，并提供一键打开对应项目筛选视图的入口。
 
