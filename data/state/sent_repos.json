@@ -20,6 +20,11 @@
     "first_sent_at": "2026-05-03"
   },
   {
+    "full_name": "addyosmani/agent-skills",
+    "html_url": "https://github.com/addyosmani/agent-skills",
+    "first_sent_at": "2026-06-15"
+  },
+  {
     "full_name": "affaan-m/ECC",
     "html_url": "https://github.com/affaan-m/ECC",
     "first_sent_at": "2026-06-02"
@@ -88,6 +93,11 @@
     "full_name": "apache/camel",
     "html_url": "https://github.com/apache/camel",
     "first_sent_at": "2026-06-08"
+  },
+  {
+    "full_name": "apple/container",
+    "html_url": "https://github.com/apple/container",
+    "first_sent_at": "2026-06-15"
   },
   {
     "full_name": "appsmithorg/appsmith",
@@ -460,6 +470,11 @@
     "first_sent_at": "2026-04-29"
   },
   {
+    "full_name": "NVIDIA/SkillSpector",
+    "html_url": "https://github.com/NVIDIA/SkillSpector",
+    "first_sent_at": "2026-06-15"
+  },
+  {
     "full_name": "obra/superpowers",
     "html_url": "https://github.com/obra/superpowers",
     "first_sent_at": "2026-04-29"
@@ -510,6 +525,11 @@
     "first_sent_at": "2026-06-02"
   },
   {
+    "full_name": "Panniantong/Agent-Reach",
+    "html_url": "https://github.com/Panniantong/Agent-Reach",
+    "first_sent_at": "2026-06-15"
+  },
+  {
     "full_name": "pingcap/tidb",
     "html_url": "https://github.com/pingcap/tidb",
     "first_sent_at": "2026-06-03"
@@ -555,6 +575,11 @@
     "first_sent_at": "2026-06-03"
   },
   {
+    "full_name": "roboflow/supervision",
+    "html_url": "https://github.com/roboflow/supervision",
+    "first_sent_at": "2026-06-15"
+  },
+  {
     "full_name": "rohitg00/ai-engineering-from-scratch",
     "html_url": "https://github.com/rohitg00/ai-engineering-from-scratch",
     "first_sent_at": "2026-06-02"
@@ -573,6 +598,11 @@
     "full_name": "ruvnet/ruflo",
     "html_url": "https://github.com/ruvnet/ruflo",
     "first_sent_at": "2026-05-03"
+  },
+  {
+    "full_name": "safishamsi/graphify",
+    "html_url": "https://github.com/safishamsi/graphify",
+    "first_sent_at": "2026-06-15"
   },
   {
     "full_name": "sansan0/TrendRadar",
