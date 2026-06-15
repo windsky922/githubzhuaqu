@@ -196,6 +196,15 @@ projects
 
 其中 `projects` 内部字段与归档查询结果保持一致。后续如需新增字段，应先更新本文档、`docs/api.md` 和对应测试。
 
+`/v1/recommendations` 会在存在匹配反馈时为项目附加：
+
+```text
+preference_score
+feedback_memory
+```
+
+`feedback_memory` 只包含反馈计数、平均评分、最近评分、标签、最近备注和排序调整值，不包含密钥或私有请求头。
+
 ## 六、`docs/jobs.json`
 
 任务状态公开字段：

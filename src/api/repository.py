@@ -156,30 +156,40 @@ class ApiRepository:
         limit: int = 20,
         sort: str = "score",
     ) -> dict[str, Any]:
+        normalized_profile = _blank_to_none(profile)
+        normalized_language = _blank_to_none(language)
+        normalized_category = _blank_to_none(category)
+        normalized_query = _blank_to_none(query)
+        limit = max(1, min(_int_value(limit) or 20, 100))
+        candidate_limit = min(100, max(limit, min(max(limit * 3, 50), 100)))
         projects = self.projects(
-            language=language,
-            category=category,
-            profile=profile,
-            query=query,
-            limit=limit,
+            language=normalized_language,
+            category=normalized_category,
+            profile=normalized_profile,
+            query=normalized_query,
+            limit=candidate_limit,
             sort=sort,
         ).get("projects", [])
         projects = _dedupe_projects_by_full_name(projects)
+        feedback_records = self.project_feedback(profile=normalized_profile, limit=200).get("feedback", [])
+        feedback_memory = _feedback_memory_by_full_name(feedback_records)
+        projects = _apply_feedback_memory(projects, feedback_memory)[:limit]
         return {
             "schema_version": 1,
-            "profile": _blank_to_none(profile) or "",
-            "language": _blank_to_none(language) or "",
-            "category": _blank_to_none(category) or "",
-            "query": _blank_to_none(query) or "",
+            "profile": normalized_profile or "",
+            "language": normalized_language or "",
+            "category": normalized_category or "",
+            "query": normalized_query or "",
             "sort": sort,
             "count": len(projects),
             "selection_summary": _recommendation_summary(
                 projects,
-                profile=_blank_to_none(profile),
-                language=_blank_to_none(language),
-                category=_blank_to_none(category),
-                query=_blank_to_none(query),
+                profile=normalized_profile,
+                language=normalized_language,
+                category=normalized_category,
+                query=normalized_query,
             ),
+            "feedback_memory": _feedback_memory_response(feedback_records),
             "recommendations": projects,
         }
 
@@ -1738,6 +1748,7 @@ class ApiRepository:
             )
         explanations = self.rag_explanations(repo=detail.get("full_name") or normalized, limit=explanation_limit)
         explanation_items = explanations.get("explanations") if isinstance(explanations.get("explanations"), list) else []
+        feedback = self.project_feedback(full_name=detail.get("full_name") or normalized, limit=20)
         return {
             "schema_version": 1,
             "found": True,
@@ -1760,6 +1771,11 @@ class ApiRepository:
             "summary": retrieval.get("summary") if isinstance(retrieval.get("summary"), list) else [],
             "explanations": explanation_items,
             "explanation_summary": _project_rag_explanation_summary(explanation_items),
+            "feedback_memory": {
+                "count": feedback.get("count", 0),
+                "summary": feedback.get("summary") if isinstance(feedback.get("summary"), dict) else {},
+                "feedback": feedback.get("feedback") if isinstance(feedback.get("feedback"), list) else [],
+            },
         }
 
     def _persist_rag_explanation(self, result: dict[str, Any]) -> dict[str, Any]:
@@ -5401,6 +5417,100 @@ def _project_feedback_summary(feedback: list[dict[str, Any]]) -> dict[str, Any]:
         "label_counts": label_counts,
         "repository_counts": repository_counts,
         "ready_for_preference_memory": count > 0,
+    }
+
+
+def _feedback_memory_by_full_name(feedback: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    grouped: dict[str, dict[str, Any]] = {}
+    for item in feedback:
+        full_name = _normalize_full_name(str(item.get("full_name") or ""))
+        if not full_name:
+            continue
+        entry = grouped.setdefault(
+            full_name.lower(),
+            {
+                "full_name": full_name,
+                "count": 0,
+                "rating_total": 0,
+                "latest_rating": 0,
+                "labels": [],
+                "latest_note": "",
+                "latest_updated_at": "",
+            },
+        )
+        rating = _int_value(item.get("rating"))
+        entry["count"] += 1
+        entry["rating_total"] += rating
+        updated_at = str(item.get("updated_at") or item.get("created_at") or "")
+        if updated_at >= str(entry.get("latest_updated_at") or ""):
+            entry["latest_updated_at"] = updated_at
+            entry["latest_rating"] = rating
+            entry["latest_note"] = str(item.get("note") or "")
+        labels = _list_strings(item.get("labels"))
+        entry["labels"] = _unique_strings([*entry.get("labels", []), *labels])[:12]
+    for entry in grouped.values():
+        count = _int_value(entry.get("count"))
+        entry["average_rating"] = round(_int_value(entry.get("rating_total")) / count, 2) if count else 0
+        entry["preference_adjustment"] = _feedback_preference_adjustment(entry)
+        entry.pop("rating_total", None)
+    return grouped
+
+
+def _feedback_preference_adjustment(memory: dict[str, Any]) -> int:
+    average_rating = float(memory.get("average_rating") or 0)
+    latest_rating = _int_value(memory.get("latest_rating"))
+    count = _int_value(memory.get("count"))
+    base = int(round((average_rating * 12) + (latest_rating * 4)))
+    confidence = min(count, 5)
+    return max(-40, min(40, base + confidence))
+
+
+def _apply_feedback_memory(
+    projects: list[dict[str, Any]],
+    feedback_memory: dict[str, dict[str, Any]],
+) -> list[dict[str, Any]]:
+    enriched = []
+    has_feedback = False
+    for project in projects:
+        full_name = _normalize_full_name(str(project.get("full_name") or ""))
+        memory = feedback_memory.get(full_name.lower()) if full_name else None
+        item = dict(project)
+        original_score = _int_value(item.get("score"))
+        adjustment = _int_value(memory.get("preference_adjustment")) if memory else 0
+        item["preference_score"] = original_score + adjustment
+        if memory:
+            has_feedback = True
+            item["feedback_memory"] = {
+                "count": _int_value(memory.get("count")),
+                "average_rating": memory.get("average_rating") or 0,
+                "latest_rating": _int_value(memory.get("latest_rating")),
+                "labels": _list_strings(memory.get("labels")),
+                "latest_note": str(memory.get("latest_note") or ""),
+                "preference_adjustment": adjustment,
+            }
+        enriched.append(item)
+    if not has_feedback:
+        return enriched
+    return sorted(
+        enriched,
+        key=lambda project: (
+            _int_value(project.get("preference_score")),
+            _int_value(project.get("score")),
+            _int_value(project.get("star_growth")),
+            -(_int_value(project.get("trending_rank")) or 9999),
+        ),
+        reverse=True,
+    )
+
+
+def _feedback_memory_response(feedback: list[dict[str, Any]]) -> dict[str, Any]:
+    summary = _project_feedback_summary(feedback)
+    return {
+        "record_count": summary.get("total_count", 0),
+        "average_rating": summary.get("average_rating", 0),
+        "label_counts": summary.get("label_counts", {}),
+        "repository_counts": summary.get("repository_counts", {}),
+        "ready_for_preference_memory": summary.get("ready_for_preference_memory", False),
     }
 
 

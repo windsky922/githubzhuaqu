@@ -123,6 +123,7 @@ http://127.0.0.1:8000/admin.html?api=1
 1. `recommendations`：推荐项目数组。
 2. `selection_summary`：本次推荐的筛选条件、命中数量、Trending 命中和首选项目说明。
 3. `profile`、`language`、`category`、`query`：前端回显当前筛选条件。
+4. `feedback_memory`：当前筛选范围内的反馈记忆摘要。若 SQLite 中存在匹配 profile 的反馈，推荐项目会额外返回 `feedback_memory` 和 `preference_score`，正向反馈会提高排序，负向反馈会降低排序。
 
 对应的 v1 入口为：
 
@@ -978,6 +979,8 @@ GET /v1/feedback?profile=agent_development&limit=20
 ```
 
 响应会返回 `feedback` 列表和 `summary` 汇总，其中 `summary.ready_for_preference_memory=true` 表示已经具备后续个性化记忆建模的基础样本。
+
+当前推荐接口已经会读取这些反馈：`GET /v1/recommendations` 会把匹配 profile 的反馈聚合为项目级 `feedback_memory`，并生成 `preference_score` 参与排序。`GET /v1/projects/{owner}/{repo}/rag` 也会返回该项目的 `feedback_memory`，让 RAG 解释和项目详情页能看到用户历史判断。
 
 ### `/v1` 任务接口
 

@@ -66,6 +66,11 @@ class ApiRepositoryTest(unittest.TestCase):
             project_feedback = repository.project_feedback(full_name="owner/agent", limit=5)
             profile_feedback = repository.project_feedback(profile="agent_development", limit=5)
             missing_feedback = repository.create_project_feedback({"rating": 1})
+            feedback_recommendations = repository.recommendations(
+                profile="agent_development",
+                language="Python",
+                limit=10,
+            )
             latest = repository.latest_weekly()
             health = repository.v1_health()
             jobs = repository.jobs(status="succeeded")
@@ -284,6 +289,9 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(project_feedback["summary"]["average_rating"], 2)
             self.assertTrue(project_feedback["summary"]["ready_for_preference_memory"])
             self.assertEqual(profile_feedback["count"], 1)
+            self.assertEqual(feedback_recommendations["feedback_memory"]["record_count"], 1)
+            self.assertEqual(feedback_recommendations["recommendations"][0]["feedback_memory"]["average_rating"], 2)
+            self.assertGreater(feedback_recommendations["recommendations"][0]["preference_score"], 0)
             self.assertEqual(latest["run_date"], "2026-05-09")
             self.assertIn("owner/agent", latest["markdown"])
             self.assertTrue(health["capabilities"]["jobs_query"])
@@ -507,6 +515,8 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertIn("owner/agent", project_rag_explanations["explanations"][0]["repositories"])
             self.assertTrue(project_rag_bundle["found"])
             self.assertEqual(project_rag_bundle["full_name"], "owner/agent")
+            self.assertEqual(project_rag_bundle["feedback_memory"]["count"], 1)
+            self.assertEqual(project_rag_bundle["feedback_memory"]["summary"]["average_rating"], 2)
             self.assertGreaterEqual(project_rag_bundle["explanation_summary"]["count"], 1)
             self.assertIn("owner/agent", project_rag_bundle["explanations"][0]["repositories"])
             self.assertIn("contexts", project_rag_bundle)
@@ -917,6 +927,14 @@ class ApiRepositoryTest(unittest.TestCase):
                 "/v1/feedback",
                 params={"profile": "agent_development", "limit": 5},
             )
+            v1_recommendations_after_feedback = client.get(
+                "/v1/recommendations",
+                params={"profile": "agent_development", "language": "Python", "limit": 5},
+            )
+            v1_project_rag_after_feedback = client.get(
+                "/v1/projects/owner/agent/rag",
+                params={"limit": 5, "explanation_limit": 5},
+            )
             v1_database_summary_after_feedback = client.get("/v1/database/summary")
             v1_trigger = client.post(
                 "/v1/runs/trigger",
@@ -999,6 +1017,8 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(v1_create_feedback.status_code, 201)
             self.assertEqual(v1_feedback.status_code, 200)
             self.assertEqual(v1_profile_feedback.status_code, 200)
+            self.assertEqual(v1_recommendations_after_feedback.status_code, 200)
+            self.assertEqual(v1_project_rag_after_feedback.status_code, 200)
             self.assertEqual(v1_database_summary_after_feedback.status_code, 200)
             self.assertEqual(v1_trigger.status_code, 202)
             self.assertEqual(v1_execution_check.status_code, 200)
@@ -1117,6 +1137,12 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(v1_feedback.json()["count"], 1)
             self.assertTrue(v1_feedback.json()["summary"]["ready_for_preference_memory"])
             self.assertEqual(v1_profile_feedback.json()["count"], 1)
+            self.assertEqual(v1_recommendations_after_feedback.json()["feedback_memory"]["record_count"], 1)
+            self.assertEqual(
+                v1_recommendations_after_feedback.json()["recommendations"][0]["feedback_memory"]["latest_rating"],
+                2,
+            )
+            self.assertEqual(v1_project_rag_after_feedback.json()["feedback_memory"]["count"], 1)
             self.assertEqual(v1_database_summary_after_feedback.json()["table_counts"]["project_feedback"], 1)
             self.assertTrue(v1_database_summary_after_feedback.json()["rag_readiness"]["ready_for_feedback_memory"])
             self.assertFalse(v1_trigger.json()["execution_supported"])
