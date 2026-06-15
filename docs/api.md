@@ -138,7 +138,7 @@ http://127.0.0.1:8000/admin.html?api=1
 
 返回 SQLite 派生索引的数据库概览，用于本地管理台、数据健康检查和后续 RAG 索引准备。该接口会返回：
 
-1. `table_counts`：`runs`、`repositories`、`selections`、`jobs`、`job_events`、`subscriptions` 等表的记录数。
+1. `table_counts`：`runs`、`repositories`、`selections`、`jobs`、`job_events`、`subscriptions`、`project_feedback` 等表的记录数。
 2. `latest_run` 和 `latest_job`：最近一次运行和最近一个任务。
 3. `job_status_counts` 和 `subscription_status_counts`：任务状态和订阅状态分布。
 4. `top_languages` 和 `top_categories`：当前归档中主要语言和项目方向分布。
@@ -932,6 +932,52 @@ POST /v1/subscriptions/sub:xxxx/trigger
 ```
 
 该接口只创建 planned 任务，不在 HTTP 请求里执行采集、生成或推送。订阅必须是 `enabled` 状态；如果传入 `dry_run=false`，仍需要 `confirm_delivery=true`，否则会自动降级为 `dry_run=true`。
+
+### `/v1` 项目反馈接口
+
+项目反馈接口用于沉淀用户对单个仓库的显式评价，作为后续个性化记忆、RAG 重排和推荐校准的数据基础。该接口只写入 SQLite 派生索引，不读取、不返回任何 Token、Chat ID、Webhook 或请求头。
+
+当前入口包括：
+
+1. `POST /v1/feedback`：写入一条项目反馈。
+2. `GET /v1/feedback`：按仓库名或 profile 查询反馈记录。
+
+`POST /v1/feedback` 请求体支持：
+
+| 字段 | 说明 |
+|---|---|
+| `full_name` | 必填，仓库名，例如 `owner/repo` |
+| `profile` | 可选，反馈所属偏好方向，例如 `agent_development` |
+| `rating` | 可选，整数评分，范围为 `-2` 到 `2` |
+| `labels` | 可选，标签列表，例如 `useful`、`too_complex` |
+| `note` | 可选，用户备注，会截断保存，避免写入过长原文 |
+| `source` | 可选，反馈来源，例如 `admin_page` 或 `telegram` |
+
+示例：
+
+```text
+POST /v1/feedback
+```
+
+```json
+{
+  "full_name": "owner/agent",
+  "profile": "agent_development",
+  "rating": 2,
+  "labels": ["useful", "agent"],
+  "note": "适合作为 Agent 工作流参考",
+  "source": "admin_page"
+}
+```
+
+查询示例：
+
+```text
+GET /v1/feedback?full_name=owner/agent&limit=20
+GET /v1/feedback?profile=agent_development&limit=20
+```
+
+响应会返回 `feedback` 列表和 `summary` 汇总，其中 `summary.ready_for_preference_memory=true` 表示已经具备后续个性化记忆建模的基础样本。
 
 ### `/v1` 任务接口
 

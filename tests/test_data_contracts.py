@@ -279,6 +279,18 @@ SQLITE_COLUMNS = {
         "payload_json",
         "created_at",
     },
+    "project_feedback": {
+        "feedback_id",
+        "full_name",
+        "profile",
+        "rating",
+        "labels_json",
+        "note",
+        "source",
+        "created_at",
+        "updated_at",
+        "payload_json",
+    },
     "trend_summaries": {
         "run_date",
         "total_projects",

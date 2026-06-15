@@ -609,6 +609,7 @@ def table_count(connection: sqlite3.Connection, table_name: str) -> int:
         "rag_chunks_fts",
         "rag_embeddings",
         "rag_explanations",
+        "project_feedback",
         "trend_summaries",
         "sent_repositories",
         "star_history",

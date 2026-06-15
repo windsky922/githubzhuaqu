@@ -53,6 +53,19 @@ class ApiRepositoryTest(unittest.TestCase):
                 created_subscription["subscription"]["subscription_id"],
                 {"requested_by": "unit-test-subscription"},
             )
+            created_feedback = repository.create_project_feedback(
+                {
+                    "full_name": "owner/agent",
+                    "profile": "agent_development",
+                    "rating": 2,
+                    "labels": ["useful", "agent"],
+                    "note": "适合继续跟踪。",
+                    "source": "unit-test",
+                }
+            )
+            project_feedback = repository.project_feedback(full_name="owner/agent", limit=5)
+            profile_feedback = repository.project_feedback(profile="agent_development", limit=5)
+            missing_feedback = repository.create_project_feedback({"rating": 1})
             latest = repository.latest_weekly()
             health = repository.v1_health()
             jobs = repository.jobs(status="succeeded")
@@ -260,6 +273,17 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(updated_subscription["subscription"]["query"], "workflow")
             self.assertFalse(disabled_subscription_trigger["accepted"])
             self.assertIn("不是 enabled 状态", " ".join(disabled_subscription_trigger["blockers"]))
+            self.assertTrue(created_feedback["accepted"])
+            self.assertTrue(created_feedback["created"])
+            self.assertEqual(created_feedback["feedback"]["full_name"], "owner/agent")
+            self.assertEqual(created_feedback["feedback"]["rating"], 2)
+            self.assertEqual(created_feedback["feedback"]["labels"], ["useful", "agent"])
+            self.assertFalse(missing_feedback["accepted"])
+            self.assertEqual(project_feedback["count"], 1)
+            self.assertEqual(project_feedback["feedback"][0]["feedback_id"], created_feedback["feedback"]["feedback_id"])
+            self.assertEqual(project_feedback["summary"]["average_rating"], 2)
+            self.assertTrue(project_feedback["summary"]["ready_for_preference_memory"])
+            self.assertEqual(profile_feedback["count"], 1)
             self.assertEqual(latest["run_date"], "2026-05-09")
             self.assertIn("owner/agent", latest["markdown"])
             self.assertTrue(health["capabilities"]["jobs_query"])
@@ -270,6 +294,8 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertTrue(health["capabilities"]["run_trigger_execute"])
             self.assertTrue(health["capabilities"]["subscription_recommendations"])
             self.assertTrue(health["capabilities"]["subscription_trigger"])
+            self.assertTrue(health["capabilities"]["project_feedback"])
+            self.assertTrue(health["capabilities"]["feedback_memory"])
             self.assertTrue(health["capabilities"]["database_summary"])
             self.assertTrue(health["capabilities"]["database_trends"])
             self.assertTrue(health["capabilities"]["database_facets"])
@@ -362,12 +388,14 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertGreaterEqual(database_summary["table_counts"]["project_corpus_fts"], 1)
             self.assertGreaterEqual(database_summary["table_counts"]["rag_chunks"], 1)
             self.assertGreaterEqual(database_summary["table_counts"]["rag_chunks_fts"], 1)
+            self.assertEqual(database_summary["table_counts"]["project_feedback"], 1)
             self.assertGreaterEqual(database_summary["table_counts"]["job_events"], 1)
             self.assertEqual(database_summary["latest_run"]["run_date"], "2026-05-09")
             self.assertIn("planned", database_summary["job_status_counts"])
             self.assertIn("disabled", database_summary["subscription_status_counts"])
             self.assertTrue(database_summary["rag_readiness"]["ready_for_text_index"])
             self.assertTrue(database_summary["rag_readiness"]["ready_for_chunk_retrieval"])
+            self.assertTrue(database_summary["rag_readiness"]["ready_for_feedback_memory"])
             self.assertGreaterEqual(database_trends["count"], 2)
             self.assertEqual(database_trends["summary"]["latest_run_date"], "2026-05-09")
             self.assertGreaterEqual(database_trends["summary"]["total_selected_count"], 3)
@@ -873,6 +901,23 @@ class ApiRepositoryTest(unittest.TestCase):
                 f"/v1/subscriptions/{subscription_id}",
                 json={"status": "disabled"},
             )
+            v1_create_feedback = client.post(
+                "/v1/feedback",
+                json={
+                    "full_name": "owner/agent",
+                    "profile": "agent_development",
+                    "rating": 2,
+                    "labels": ["useful", "agent"],
+                    "note": "Good fit for agent workflow tracking.",
+                    "source": "route-test",
+                },
+            )
+            v1_feedback = client.get("/v1/feedback", params={"full_name": "owner/agent", "limit": 5})
+            v1_profile_feedback = client.get(
+                "/v1/feedback",
+                params={"profile": "agent_development", "limit": 5},
+            )
+            v1_database_summary_after_feedback = client.get("/v1/database/summary")
             v1_trigger = client.post(
                 "/v1/runs/trigger",
                 json={"profile": "agent_development", "sources": ["github_trending"], "dry_run": True, "days_back": 3},
@@ -951,6 +996,10 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(v1_subscription_recommendations.status_code, 200)
             self.assertEqual(v1_subscription_trigger.status_code, 202)
             self.assertEqual(v1_update_subscription.status_code, 200)
+            self.assertEqual(v1_create_feedback.status_code, 201)
+            self.assertEqual(v1_feedback.status_code, 200)
+            self.assertEqual(v1_profile_feedback.status_code, 200)
+            self.assertEqual(v1_database_summary_after_feedback.status_code, 200)
             self.assertEqual(v1_trigger.status_code, 202)
             self.assertEqual(v1_execution_check.status_code, 200)
             self.assertEqual(v1_blocked_execute.status_code, 200)
@@ -1061,6 +1110,15 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertTrue(v1_subscription_trigger.json()["accepted"])
             self.assertEqual(v1_subscription_trigger.json()["request"]["subscription_id"], subscription_id)
             self.assertEqual(v1_update_subscription.json()["subscription"]["status"], "disabled")
+            self.assertTrue(v1_health.json()["capabilities"]["project_feedback"])
+            self.assertTrue(v1_create_feedback.json()["accepted"])
+            self.assertTrue(v1_create_feedback.json()["created"])
+            self.assertEqual(v1_create_feedback.json()["feedback"]["rating"], 2)
+            self.assertEqual(v1_feedback.json()["count"], 1)
+            self.assertTrue(v1_feedback.json()["summary"]["ready_for_preference_memory"])
+            self.assertEqual(v1_profile_feedback.json()["count"], 1)
+            self.assertEqual(v1_database_summary_after_feedback.json()["table_counts"]["project_feedback"], 1)
+            self.assertTrue(v1_database_summary_after_feedback.json()["rag_readiness"]["ready_for_feedback_memory"])
             self.assertFalse(v1_trigger.json()["execution_supported"])
             self.assertTrue(v1_execution_check.json()["executable"])
             self.assertFalse(v1_blocked_execute.json()["accepted"])

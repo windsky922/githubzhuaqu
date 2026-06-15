@@ -144,6 +144,23 @@ CREATE INDEX IF NOT EXISTS idx_rag_explanations_query ON rag_explanations(query)
 CREATE INDEX IF NOT EXISTS idx_rag_explanations_confidence ON rag_explanations(confidence);
 CREATE INDEX IF NOT EXISTS idx_rag_explanations_quality ON rag_explanations(quality_score, quality_level);
 
+CREATE TABLE IF NOT EXISTS project_feedback (
+  feedback_id TEXT PRIMARY KEY,
+  full_name TEXT NOT NULL DEFAULT '',
+  profile TEXT NOT NULL DEFAULT '',
+  rating INTEGER NOT NULL DEFAULT 0,
+  labels_json TEXT NOT NULL DEFAULT '[]',
+  note TEXT NOT NULL DEFAULT '',
+  source TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL DEFAULT '',
+  updated_at TEXT NOT NULL DEFAULT '',
+  payload_json TEXT NOT NULL DEFAULT '{}'
+);
+
+CREATE INDEX IF NOT EXISTS idx_project_feedback_full_name_updated_at ON project_feedback(full_name, updated_at);
+CREATE INDEX IF NOT EXISTS idx_project_feedback_profile_updated_at ON project_feedback(profile, updated_at);
+CREATE INDEX IF NOT EXISTS idx_project_feedback_rating_updated_at ON project_feedback(rating, updated_at);
+
 CREATE TABLE IF NOT EXISTS trend_summaries (
   run_date TEXT PRIMARY KEY,
   total_projects INTEGER NOT NULL DEFAULT 0,

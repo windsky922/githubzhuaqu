@@ -474,6 +474,18 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
     ) -> dict[str, Any]:
         return repository.update_subscription(subscription_id, payload)
 
+    @app.get("/v1/feedback")
+    def v1_project_feedback(
+        full_name: str | None = None,
+        profile: str | None = None,
+        limit: int = Query(default=50, ge=1, le=200),
+    ) -> dict[str, Any]:
+        return repository.project_feedback(full_name=full_name, profile=profile, limit=limit)
+
+    @app.post("/v1/feedback", status_code=201)
+    def v1_create_project_feedback(payload: dict[str, Any] | None = Body(default=None)) -> dict[str, Any]:
+        return repository.create_project_feedback(payload)
+
     @app.get("/v1/job-execution-check")
     def v1_job_execution_check(job_id: str = Query(..., min_length=1)) -> dict[str, Any]:
         return repository.job_execution_check(job_id)

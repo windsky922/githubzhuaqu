@@ -67,6 +67,8 @@ class ApiRepository:
                 "subscriptions": True,
                 "subscription_recommendations": True,
                 "subscription_trigger": True,
+                "project_feedback": True,
+                "feedback_memory": True,
                 "database_summary": True,
                 "database_trends": True,
                 "database_facets": True,
@@ -2045,6 +2047,7 @@ class ApiRepository:
                 "rag_chunks_fts",
                 "rag_embeddings",
                 "rag_explanations",
+                "project_feedback",
                 "trend_summaries",
                 "jobs",
                 "job_events",
@@ -2111,11 +2114,13 @@ class ApiRepository:
                 "chunk_fts_records": table_counts.get("rag_chunks_fts", 0),
                 "embedding_records": table_counts.get("rag_embeddings", 0),
                 "explanation_records": table_counts.get("rag_explanations", 0),
+                "feedback_records": table_counts.get("project_feedback", 0),
                 "event_records": table_counts.get("job_events", 0),
                 "ready_for_text_index": table_counts.get("project_corpus_fts", 0) > 0,
                 "ready_for_chunk_retrieval": table_counts.get("rag_chunks_fts", 0) > 0,
                 "ready_for_vector_search": table_counts.get("rag_embeddings", 0) > 0,
                 "ready_for_explanation_history": table_counts.get("rag_explanations", 0) > 0,
+                "ready_for_feedback_memory": table_counts.get("project_feedback", 0) > 0,
             },
         }
 
@@ -2854,6 +2859,71 @@ class ApiRepository:
             "subscription": updates,
         }
 
+    def create_project_feedback(self, payload: dict[str, Any] | None = None) -> dict[str, Any]:
+        self.ensure_sqlite_index()
+        data = _project_feedback_payload(payload or {})
+        if not data["full_name"]:
+            return {
+                "schema_version": 1,
+                "accepted": False,
+                "created": False,
+                "error": "full_name 不能为空。",
+                "feedback": {},
+            }
+        now = datetime.now(UTC).isoformat().replace("+00:00", "Z")
+        data["created_at"] = now
+        data["updated_at"] = now
+        data["feedback_id"] = _project_feedback_id(data)
+        self._upsert_project_feedback(data)
+        return {
+            "schema_version": 1,
+            "accepted": True,
+            "created": True,
+            "feedback": data,
+        }
+
+    def project_feedback(
+        self,
+        *,
+        full_name: str | None = None,
+        profile: str | None = None,
+        limit: int = 50,
+    ) -> dict[str, Any]:
+        self.ensure_sqlite_index()
+        limit = max(1, min(_int_value(limit) or 50, 200))
+        conditions = []
+        parameters: list[Any] = []
+        normalized_full_name = _blank_to_none(full_name)
+        normalized_profile = _blank_to_none(profile)
+        if normalized_full_name:
+            conditions.append("LOWER(full_name) = LOWER(?)")
+            parameters.append(normalized_full_name)
+        if normalized_profile:
+            conditions.append("profile = ?")
+            parameters.append(normalized_profile)
+        sql = """
+            SELECT feedback_id, full_name, profile, rating, labels_json, note,
+                   source, created_at, updated_at, payload_json
+            FROM project_feedback
+        """
+        if conditions:
+            sql += " WHERE " + " AND ".join(conditions)
+        sql += " ORDER BY updated_at DESC, feedback_id DESC LIMIT ?"
+        parameters.append(limit)
+        connection = connect(self.db_path)
+        try:
+            initialize(connection)
+            rows = connection.execute(sql, parameters).fetchall()
+        finally:
+            connection.close()
+        feedback = [_project_feedback_from_row(row) for row in rows]
+        return {
+            "schema_version": 1,
+            "count": len(feedback),
+            "feedback": feedback,
+            "summary": _project_feedback_summary(feedback),
+        }
+
     def latest_weekly(self) -> dict[str, Any]:
         reports = sorted((self.root / "reports").glob("*.md"), key=lambda path: path.stem, reverse=True)
         reports = [path for path in reports if path.name != ".gitkeep"]
@@ -3078,6 +3148,44 @@ class ApiRepository:
                     data["sort"],
                     data["limit"],
                     json.dumps(data["channels"], ensure_ascii=False, sort_keys=True),
+                    data["created_at"],
+                    data["updated_at"],
+                    json.dumps(data, ensure_ascii=False, sort_keys=True),
+                ),
+            )
+            connection.commit()
+        finally:
+            connection.close()
+
+    def _upsert_project_feedback(self, data: dict[str, Any]) -> None:
+        connection = connect(self.db_path)
+        try:
+            initialize(connection)
+            connection.execute(
+                """
+                INSERT INTO project_feedback(
+                  feedback_id, full_name, profile, rating, labels_json, note,
+                  source, created_at, updated_at, payload_json
+                )
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(feedback_id) DO UPDATE SET
+                  full_name = excluded.full_name,
+                  profile = excluded.profile,
+                  rating = excluded.rating,
+                  labels_json = excluded.labels_json,
+                  note = excluded.note,
+                  source = excluded.source,
+                  updated_at = excluded.updated_at,
+                  payload_json = excluded.payload_json
+                """,
+                (
+                    data["feedback_id"],
+                    data["full_name"],
+                    data["profile"],
+                    data["rating"],
+                    json.dumps(data["labels"], ensure_ascii=False, sort_keys=True),
+                    data["note"],
+                    data["source"],
                     data["created_at"],
                     data["updated_at"],
                     json.dumps(data, ensure_ascii=False, sort_keys=True),
@@ -5213,6 +5321,87 @@ def _subscription_id(data: dict[str, Any]) -> str:
         sort_keys=True,
     )
     return "sub:" + sha1(text.encode("utf-8")).hexdigest()[:12]
+
+
+def _project_feedback_payload(payload: dict[str, Any]) -> dict[str, Any]:
+    rating = _int_value(payload.get("rating"))
+    rating = max(-2, min(rating, 2))
+    labels = _list_strings(payload.get("labels"))
+    return {
+        "feedback_id": str(payload.get("feedback_id") or "").strip(),
+        "full_name": _normalize_full_name(str(payload.get("full_name") or payload.get("repo") or ""))[:180],
+        "profile": str(payload.get("profile") or "").strip()[:80],
+        "rating": rating,
+        "labels": labels[:12],
+        "note": str(payload.get("note") or "").strip()[:500],
+        "source": str(payload.get("source") or "api").strip()[:80],
+        "created_at": str(payload.get("created_at") or ""),
+        "updated_at": str(payload.get("updated_at") or ""),
+    }
+
+
+def _project_feedback_id(data: dict[str, Any]) -> str:
+    if data.get("feedback_id"):
+        return str(data["feedback_id"])
+    text = json.dumps(
+        {
+            "full_name": data.get("full_name") or "",
+            "profile": data.get("profile") or "",
+            "rating": data.get("rating") or 0,
+            "labels": data.get("labels") or [],
+            "note": data.get("note") or "",
+            "source": data.get("source") or "",
+            "created_at": data.get("created_at") or "",
+        },
+        ensure_ascii=False,
+        sort_keys=True,
+    )
+    return "feedback:" + sha1(text.encode("utf-8")).hexdigest()[:16]
+
+
+def _project_feedback_from_row(row: Any) -> dict[str, Any]:
+    payload = _json_object(row["payload_json"])
+    return {
+        "feedback_id": row["feedback_id"],
+        "full_name": row["full_name"],
+        "profile": row["profile"],
+        "rating": _int_value(row["rating"]),
+        "labels": _list_strings(_json_list(row["labels_json"])),
+        "note": row["note"],
+        "source": row["source"],
+        "created_at": row["created_at"],
+        "updated_at": row["updated_at"],
+        "payload": payload,
+    }
+
+
+def _project_feedback_summary(feedback: list[dict[str, Any]]) -> dict[str, Any]:
+    rating_counts: dict[str, int] = {}
+    profile_counts: dict[str, int] = {}
+    label_counts: dict[str, int] = {}
+    repository_counts: dict[str, int] = {}
+    total_rating = 0
+    for item in feedback:
+        rating = _int_value(item.get("rating"))
+        total_rating += rating
+        rating_counts[str(rating)] = rating_counts.get(str(rating), 0) + 1
+        profile = str(item.get("profile") or "default")
+        profile_counts[profile] = profile_counts.get(profile, 0) + 1
+        full_name = str(item.get("full_name") or "")
+        if full_name:
+            repository_counts[full_name] = repository_counts.get(full_name, 0) + 1
+        for label in _list_strings(item.get("labels")):
+            label_counts[label] = label_counts.get(label, 0) + 1
+    count = len(feedback)
+    return {
+        "total_count": count,
+        "average_rating": round(total_rating / count, 2) if count else 0,
+        "rating_counts": rating_counts,
+        "profile_counts": profile_counts,
+        "label_counts": label_counts,
+        "repository_counts": repository_counts,
+        "ready_for_preference_memory": count > 0,
+    }
 
 
 def _job_matches(
