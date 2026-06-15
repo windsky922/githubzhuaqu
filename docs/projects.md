@@ -4,6 +4,16 @@
 
 | 日期 | 项目 | 来源 | Trending 排名 | 方向 | 语言 | Star | 新增 Star | 风险提示 | 链接 |
 |---|---|---|---:|---|---|---:|---:|---:|---|
+| 2026-06-15 | mvanhorn/last30days-skill | GitHub Trending | 1 | AI Agent | Python | 42139 | 10692 | 0 | [https://github.com/mvanhorn/last30days-skill](https://github.com/mvanhorn/last30days-skill) |
+| 2026-06-15 | apple/container | GitHub Trending | 2 | Other | Swift | 37059 | 0 | 0 | [https://github.com/apple/container](https://github.com/apple/container) |
+| 2026-06-15 | chopratejas/headroom | GitHub Search + GitHub Trending | 4 | AI Agent | Python | 27748 | 10650 | 0 | [https://github.com/chopratejas/headroom](https://github.com/chopratejas/headroom) |
+| 2026-06-15 | NVIDIA/SkillSpector | GitHub Trending | 5 | AI Agent | Python | 5474 | 0 | 0 | [https://github.com/NVIDIA/SkillSpector](https://github.com/NVIDIA/SkillSpector) |
+| 2026-06-15 | addyosmani/agent-skills | GitHub Trending | 6 | AI Agent | Shell | 59625 | 33995 | 0 | [https://github.com/addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) |
+| 2026-06-15 | Panniantong/Agent-Reach | GitHub Search + GitHub Trending | 7 | AI Agent | Python | 28898 | 5648 | 0 | [https://github.com/Panniantong/Agent-Reach](https://github.com/Panniantong/Agent-Reach) |
+| 2026-06-15 | refactoringhq/tolaria | GitHub Trending | 8 | Other | TypeScript | 16250 | 6594 | 0 | [https://github.com/refactoringhq/tolaria](https://github.com/refactoringhq/tolaria) |
+| 2026-06-15 | Leonxlnx/taste-skill | GitHub Search + GitHub Trending | 10 | AI Agent | Shell | 43814 | 6866 | 0 | [https://github.com/Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) |
+| 2026-06-15 | safishamsi/graphify | GitHub Trending | 15 | LLM Tooling | Python | 67224 | 0 | 0 | [https://github.com/safishamsi/graphify](https://github.com/safishamsi/graphify) |
+| 2026-06-15 | roboflow/supervision | GitHub Trending | 13 | Machine Learning | Python | 44220 | 0 | 0 | [https://github.com/roboflow/supervision](https://github.com/roboflow/supervision) |
 | 2026-06-08 | chopratejas/headroom | GitHub Trending | 1 | AI Agent | Python | 17098 | 10038 | 0 | [https://github.com/chopratejas/headroom](https://github.com/chopratejas/headroom) |
 | 2026-06-08 | harry0703/MoneyPrinterTurbo | GitHub Search + GitHub Trending | 3 | LLM Tooling | Python | 81293 | 2839 | 0 | [https://github.com/harry0703/MoneyPrinterTurbo](https://github.com/harry0703/MoneyPrinterTurbo) |
 | 2026-06-08 | supermemoryai/supermemory | GitHub Trending | 4 | AI Agent | TypeScript | 26040 | 1279 | 0 | [https://github.com/supermemoryai/supermemory](https://github.com/supermemoryai/supermemory) |
