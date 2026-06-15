@@ -724,9 +724,9 @@ POST /v1/jobs/{job_id}/execute
 1. 如果 `project_corpus` 或 `rag_chunks` 还没有准备好，创建 `kind=rag_corpus_rebuild` 任务，并返回 `reason=rag_diagnostics_needs_corpus`。
 2. 如果语料已准备但缺少 embedding，创建 `kind=rag_embedding_build` 任务，并返回 `reason=rag_diagnostics_needs_embeddings`。
 3. 如果 embedding 已准备但解释覆盖仍有缺口，创建 `kind=rag_backfill` 任务，并返回 `reason=rag_coverage_gap_detected`。
-4. 如果 `gap_count` 小于 `min_gap_count`，只返回健康状态，不创建任务。
+4. 如果 `gap_count` 小于 `min_gap_count`，创建 `kind=rag_search_evaluation` 任务，并返回 `reason=rag_coverage_healthy_search_evaluation`，用于持续评估 FTS5、向量和混合检索质量。
 
-返回结果会包含 `diagnostics`、`coverage`、`gap_count` 和 `min_gap_count`，方便 GitHub Actions、后台管理页或后续 Agent 判断下一步应先建语料、补向量，还是创建解释回填任务。三类任务都会写入 `jobs` 表，可以继续通过 `GET /v1/job-execution-check?job_id=...` 和 `POST /v1/jobs/{job_id}/execute` 检查与执行。
+返回结果会包含 `diagnostics`、`coverage`、`gap_count` 和 `min_gap_count`，方便 GitHub Actions、后台管理页或后续 Agent 判断下一步应先建语料、补向量、创建解释回填任务，还是创建检索评估任务。四类任务都会写入 `jobs` 表，可以继续通过 `GET /v1/job-execution-check?job_id=...` 和 `POST /v1/jobs/{job_id}/execute` 检查与执行。
 
 任务详情页 `job.html?job=...&api=1` 会针对 RAG 维护任务展示结构化执行摘要：语料、证据块、embedding 的 before/after 计数、回填候选数、处理数和处理仓库列表，同时保留原始 JSON 结果用于调试。
 

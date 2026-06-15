@@ -578,6 +578,68 @@ class ApiRepositoryTest(unittest.TestCase):
         finally:
             shutil.rmtree(root, ignore_errors=True)
 
+    def test_rag_maintenance_plan_creates_search_evaluation_when_coverage_is_healthy(self):
+        root = Path.cwd() / f".tmp-api-rag-evaluation-plan-{uuid.uuid4().hex}"
+        try:
+            _write_fixture(root)
+            repository = ApiRepository(root=root, db_path=root / "data" / "github_weekly.sqlite")
+            repository.rag_vector_search(query="agent workflow", language="Python", limit=5, auto_build=True)
+            repository.backfill_rag_explanations_from_payload(
+                {
+                    "limit": 20,
+                    "dry_run": False,
+                    "confirm_execution": True,
+                    "auto_build": True,
+                    "requested_by": "test",
+                }
+            )
+
+            plan = repository.plan_rag_maintenance(
+                {
+                    "limit": 3,
+                    "evaluation_limit": 4,
+                    "min_gap_count": 999,
+                    "auto_build": True,
+                    "requested_by": "test",
+                }
+            )
+
+            self.assertTrue(plan["accepted"])
+            self.assertTrue(plan["planned_job_created"])
+            self.assertEqual(plan["reason"], "rag_coverage_healthy_search_evaluation")
+            self.assertEqual(plan["job"]["kind"], "rag_search_evaluation")
+            self.assertEqual(plan["request"]["limit"], 4)
+            self.assertTrue(plan["request"]["auto_build"])
+            precheck = repository.job_execution_check(plan["job_id"])
+            self.assertTrue(precheck["executable"])
+            self.assertEqual(precheck["kind"], "rag_search_evaluation")
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
+    def test_rag_search_evaluation_plan_deduplicates_by_query_set(self):
+        root = Path.cwd() / f".tmp-api-rag-query-dedupe-{uuid.uuid4().hex}"
+        try:
+            _write_fixture(root)
+            repository = ApiRepository(root=root, db_path=root / "data" / "github_weekly.sqlite")
+
+            first = repository.plan_rag_search_evaluation(
+                {"queries": ["agent workflow"], "language": "Python", "limit": 5, "requested_by": "test"}
+            )
+            second = repository.plan_rag_search_evaluation(
+                {"queries": ["python automation"], "language": "Python", "limit": 5, "requested_by": "test"}
+            )
+            duplicate = repository.plan_rag_search_evaluation(
+                {"queries": ["agent workflow"], "language": "Python", "limit": 5, "requested_by": "test"}
+            )
+
+            self.assertTrue(first["planned_job_created"])
+            self.assertTrue(second["planned_job_created"])
+            self.assertNotEqual(first["job_id"], second["job_id"])
+            self.assertFalse(duplicate["planned_job_created"])
+            self.assertEqual(duplicate["duplicate_of"], first["job_id"])
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
     def test_rag_maintenance_plan_creates_embedding_build_before_backfill(self):
         root = Path.cwd() / f".tmp-api-rag-embedding-{uuid.uuid4().hex}"
         try:

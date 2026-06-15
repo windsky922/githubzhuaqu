@@ -1449,17 +1449,21 @@ class ApiRepository:
                 "diagnostics": diagnostics,
             }
         if gap_count < min_gap_count:
+            evaluation_payload = {
+                **payload,
+                "limit": max(1, min(_int_value(payload.get("evaluation_limit")) or _int_value(payload.get("limit")) or 8, 30)),
+                "auto_build": _bool_value(payload.get("auto_build"), True),
+                "trigger_source": str(payload.get("trigger_source") or "rag_maintenance_api"),
+                "requested_by": str(payload.get("requested_by") or "api"),
+            }
+            plan = self.plan_rag_search_evaluation(evaluation_payload)
             return {
-                "schema_version": 1,
-                "accepted": True,
-                "planned_job_created": False,
-                "reason": "rag_coverage_healthy",
+                **plan,
+                "reason": "rag_coverage_healthy_search_evaluation",
                 "gap_count": gap_count,
                 "min_gap_count": min_gap_count,
                 "coverage": coverage,
                 "diagnostics": diagnostics,
-                "job_id": "",
-                "job": {},
             }
 
         plan_payload = {
@@ -5266,6 +5270,8 @@ def _job_request_key(request: dict[str, Any]) -> str:
             "profile": str(request.get("profile") or "").strip(),
             "language": str(request.get("language") or "").strip(),
             "category": str(request.get("category") or "").strip(),
+            "source": str(request.get("source") or "").strip(),
+            "queries": _list_strings(request.get("queries")),
             "query": str(request.get("query") or "").strip(),
             "sort": str(request.get("sort") or "").strip(),
             "limit": _positive_int(request.get("limit")),

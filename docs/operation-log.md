@@ -2,6 +2,24 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-06-15 追加：RAG 维护计划健康分支创建检索评估任务
+
+### 1. 开发目的
+
+RAG 维护计划此前只在发现语料、embedding 或解释覆盖缺口时创建修复任务；当覆盖已经健康时只返回状态，不会沉淀新的检索质量样本。为让数据库/RAG 维护链路形成“修复缺口 -> 健康自检 -> 趋势观测”的闭环，本次把健康分支接入 `rag_search_evaluation` planned job。
+
+### 2. 修改内容
+
+1. `plan_rag_maintenance` 在 `gap_count < min_gap_count` 时创建 `kind=rag_search_evaluation` 任务。
+2. 新增返回原因 `rag_coverage_healthy_search_evaluation`，保留 `diagnostics`、`coverage`、`gap_count` 和 `min_gap_count`。
+3. `scripts/plan_rag_maintenance.py` 新增 `--evaluation-limit` 参数，用于控制健康状态下的评估样本数量。
+4. 修复 planned 任务去重 key，纳入 `queries` 和单数 `source`，避免不同 RAG 检索评估查询被误判为重复任务。
+5. 更新 README、API 文档和后端测试。
+
+### 3. 后续空间
+
+后续可以让维护计划根据最近趋势自动调整评估 query 样本，但当前先保持规则简单：缺口优先修复，健康后执行检索质量评估。
+
 ## 2026-06-14 追加：管理首页展示 RAG 检索评估趋势
 
 ### 1. 开发目的
