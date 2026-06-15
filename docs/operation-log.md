@@ -2,6 +2,23 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-06-15 追加：沉淀命令行问题与代码编写规范
+
+### 1. 开发目的
+
+项目长期开发中多次出现 PowerShell 语法、Git 推送、rebase、环境变量、Kimi/Telegram 配置、Actions YAML、SQLite CLI、WSL 混用和中文编码问题。为降低后续重复排错成本，本次把这些问题整理成项目级规范文档。
+
+### 2. 修改内容
+
+1. 新增 `docs/command-line-and-coding-standards.md`，总结已出现的命令行问题、原因、修正命令和后续规范。
+2. 明确 PowerShell 与 Bash/WSL 命令不得混用，Windows 示例默认使用 PowerShell。
+3. 固化本地开发检查顺序、提交顺序、环境变量规范、外部请求规范、GitHub Actions 规范、SQLite/RAG 表变更规范和测试规范。
+4. README 文档索引新增该规范入口。
+
+### 3. 后续空间
+
+后续可基于该规范补充 `scripts/local_check.py` 和本地环境变量检查脚本，把手工规范进一步变成可运行检查。
+
 ## 2026-06-15 追加：反馈记忆接入推荐与项目 RAG
 
 ### 1. 开发目的
