@@ -1225,7 +1225,7 @@ def _admin_dashboard_content() -> str:
       ragBackfillResults.innerHTML = dryRun ? '<p>正在预览 RAG 回填...</p>' : '<p>正在写入 RAG 解释历史...</p>';
       fetch("/v1/rag/backfill-explanations", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: adminWriteHeaders(),
         body: JSON.stringify(payload),
       })
         .then(jsonOrThrow)
@@ -1257,7 +1257,7 @@ def _admin_dashboard_content() -> str:
       ragMaintenanceResults.innerHTML = '<p>正在生成 RAG 维护计划...</p>';
       fetch("/v1/rag/maintenance-plan", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: adminWriteHeaders(),
         body: JSON.stringify(payload),
       })
         .then(jsonOrThrow)
@@ -1289,7 +1289,7 @@ def _admin_dashboard_content() -> str:
       };
       fetch("/v1/runs/trigger", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: adminWriteHeaders(),
         body: JSON.stringify(payload),
       })
         .then(jsonOrThrow)
@@ -1469,7 +1469,7 @@ def _admin_dashboard_content() -> str:
       target.textContent = "执行中...";
       fetch(`/v1/jobs/${encodeURIComponent(jobId)}/execute`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: adminWriteHeaders(),
         body: JSON.stringify({ confirm_execution: true, requested_by: "admin_page" }),
       })
         .then(jsonOrThrow)
@@ -1502,7 +1502,7 @@ def _admin_dashboard_content() -> str:
       target.textContent = "重试创建中...";
       fetch(`/v1/jobs/${encodeURIComponent(jobId)}/retry`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: adminWriteHeaders(),
         body: JSON.stringify({ requested_by: "admin_page" }),
       })
         .then(jsonOrThrow)
@@ -1953,6 +1953,20 @@ def _admin_dashboard_content() -> str:
       return response.json();
     }
 
+    function adminWriteHeaders() {
+      const token = adminToken();
+      const headers = { "Content-Type": "application/json" };
+      if (token) headers["X-Admin-Token"] = token;
+      return headers;
+    }
+
+    function adminToken() {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get("admin_token") || window.localStorage.getItem("github_weekly_admin_token") || "";
+      if (params.get("admin_token")) window.localStorage.setItem("github_weekly_admin_token", params.get("admin_token"));
+      return token.trim();
+    }
+
     function jobDetailUrl(jobId) {
       const params = new URLSearchParams();
       params.set("job", jobId || "");
@@ -2078,6 +2092,19 @@ def _subscriptions_content() -> str:
       channels: document.getElementById("channels")
     };
 
+    function adminWriteHeaders() {
+      const token = adminToken();
+      const headers = { "Content-Type": "application/json" };
+      if (token) headers["X-Admin-Token"] = token;
+      return headers;
+    }
+
+    function adminToken() {
+      const token = params.get("admin_token") || window.localStorage.getItem("github_weekly_admin_token") || "";
+      if (params.get("admin_token")) window.localStorage.setItem("github_weekly_admin_token", params.get("admin_token"));
+      return token.trim();
+    }
+
     function init() {
       fields.profile.value = params.get("profile") || "";
       fields.language.value = params.get("language") || "";
@@ -2180,7 +2207,7 @@ def _subscriptions_content() -> str:
       try {
         const response = await fetch("/v1/subscriptions", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: adminWriteHeaders(),
           body: JSON.stringify(payload)
         });
         if (!response.ok) throw new Error(`保存失败：${response.status}`);
@@ -2246,7 +2273,7 @@ def _subscriptions_content() -> str:
       try {
         const response = await fetch(`/v1/subscriptions/${encodeURIComponent(id)}/trigger`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: adminWriteHeaders(),
           body: JSON.stringify({ dry_run: true, requested_by: "subscriptions_page" })
         });
         if (!response.ok) throw new Error(`生成任务失败：${response.status}`);
@@ -2270,7 +2297,7 @@ def _subscriptions_content() -> str:
       try {
         const response = await fetch(`/v1/subscriptions/${encodeURIComponent(id)}`, {
           method: "PATCH",
-          headers: { "Content-Type": "application/json" },
+          headers: adminWriteHeaders(),
           body: JSON.stringify({ status })
         });
         if (!response.ok) throw new Error(`更新失败：${response.status}`);
@@ -5769,7 +5796,7 @@ def _jobs_dashboard_content() -> str:
       };
       fetch("/v1/runs/trigger", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: adminWriteHeaders(),
         body: JSON.stringify(payload),
       })
         .then(jsonOrThrow)
@@ -5856,7 +5883,7 @@ def _jobs_dashboard_content() -> str:
       target.textContent = "执行中...";
       fetch(`/v1/jobs/${encodeURIComponent(jobId)}/execute`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: adminWriteHeaders(),
         body: JSON.stringify({ confirm_execution: true }),
       })
         .then(jsonOrThrow)
@@ -5903,7 +5930,7 @@ def _jobs_dashboard_content() -> str:
       target.textContent = "重试创建中...";
       fetch(`/v1/jobs/${encodeURIComponent(jobId)}/retry`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: adminWriteHeaders(),
         body: JSON.stringify({ requested_by: "jobs_page" }),
       })
         .then(jsonOrThrow)
@@ -5946,6 +5973,20 @@ def _jobs_dashboard_content() -> str:
     function jsonOrThrow(response) {
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       return response.json();
+    }
+
+    function adminWriteHeaders() {
+      const token = adminToken();
+      const headers = { "Content-Type": "application/json" };
+      if (token) headers["X-Admin-Token"] = token;
+      return headers;
+    }
+
+    function adminToken() {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get("admin_token") || window.localStorage.getItem("github_weekly_admin_token") || "";
+      if (params.get("admin_token")) window.localStorage.setItem("github_weekly_admin_token", params.get("admin_token"));
+      return token.trim();
     }
 
     function render() {
@@ -6972,7 +7013,7 @@ def _job_detail_content() -> str:
       setAction("执行中...", "");
       fetch(`/v1/jobs/${encodeURIComponent(jobId)}/execute`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: adminWriteHeaders(),
         body: JSON.stringify({ confirm_execution: true, requested_by: "job_detail_page" }),
       })
         .then(jsonOrThrow)
@@ -6993,7 +7034,7 @@ def _job_detail_content() -> str:
       setAction("重试创建中...", "");
       fetch(`/v1/jobs/${encodeURIComponent(jobId)}/retry`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: adminWriteHeaders(),
         body: JSON.stringify({ requested_by: "job_detail_page" }),
       })
         .then(jsonOrThrow)
@@ -7074,6 +7115,19 @@ def _job_detail_content() -> str:
     function jsonOrThrow(response) {
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       return response.json();
+    }
+
+    function adminWriteHeaders() {
+      const token = adminToken();
+      const headers = { "Content-Type": "application/json" };
+      if (token) headers["X-Admin-Token"] = token;
+      return headers;
+    }
+
+    function adminToken() {
+      const token = params.get("admin_token") || window.localStorage.getItem("github_weekly_admin_token") || "";
+      if (params.get("admin_token")) window.localStorage.setItem("github_weekly_admin_token", params.get("admin_token"));
+      return token.trim();
     }
 
     function escapeHtml(value) {

@@ -40,6 +40,28 @@ http://127.0.0.1:8000/api/health
 http://127.0.0.1:8000/admin.html?api=1
 ```
 
+### 管理写接口鉴权
+
+本地后端的只读接口不需要鉴权；所有会写入 SQLite、创建任务、执行任务、重试任务、写入反馈或修改订阅的管理型接口都需要管理口令。
+
+配置方式：
+
+```powershell
+$env:ADMIN_API_TOKEN="<本地管理口令>"
+py -m uvicorn src.api.app:app --reload
+```
+
+调用方式任选其一：
+
+```text
+X-Admin-Token: <本地管理口令>
+Authorization: Bearer <本地管理口令>
+```
+
+如果未配置 `ADMIN_API_TOKEN`，管理写接口返回 `403`；如果配置后请求未带正确口令，返回 `401`。受保护接口包括 `/v1/runs/trigger`、`/v1/jobs/{job_id}/execute`、`/v1/jobs/{job_id}/retry`、`/v1/rag/*` 写入/计划接口、`/v1/subscriptions` 写入接口和 `POST /v1/feedback`。
+
+本地页面会从 `?admin_token=...` 或浏览器 `localStorage.github_weekly_admin_token` 读取口令，并仅在写请求中发送 `X-Admin-Token`。不要把真实口令提交到仓库、文档或 GitHub Pages。
+
 根路径 `http://127.0.0.1:8000/` 会跳转到管理首页。`/v1/*` 路径是 JSON API，例如 `/v1/jobs?limit=50` 返回机器可读任务数据，不是 HTML 页面。
 
 管理首页中的 RAG 区域会调用 `/v1/rag/ask`、`/v1/rag/retrieve`、`/v1/rag/vector-search` 和 `/v1/rag/hybrid-search`，用于查看问答结果、证据块、引用和 `prompt_context`；后端还提供 `/v1/rag/search-compare`、`/v1/rag/search-evaluation` 和 `/v1/rag/search-evaluation-trends`，用于比较、批量评估和长期观察三种检索模式的召回差异。管理首页会展示检索评估趋势，包括最近评估任务、平均样本数、零命中样本和推荐模式分布。RAG 诊断会调用 `/v1/rag/diagnostics`，用于判断语料、证据块、embedding、解释历史和问答能力是否可用；RAG 质量概览会调用 `/v1/rag/quality-summary`，用于查看解释数量、质量分布、改进建议和低质量样本；RAG 维护计划按钮会调用 `/v1/rag/maintenance-plan`，按诊断结果创建语料重建、embedding 构建或解释回填 planned 任务；维护历史可以通过 `/v1/rag/maintenance-report` 查看最近 RAG 维护任务状态、计数变化和下一步建议；RAG 回填区会调用 `/v1/rag/backfill-explanations`，先预览缺口项目，确认后再写入 SQLite。向量检索会在 `auto_build=true` 时自动构建本地 `local-hash-v1` 索引，也可以先手动运行 `py scripts\build_rag_embeddings.py`。

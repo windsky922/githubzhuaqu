@@ -394,7 +394,7 @@
       setAction("执行中...", "");
       fetch(`/v1/jobs/${encodeURIComponent(jobId)}/execute`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: adminWriteHeaders(),
         body: JSON.stringify({ confirm_execution: true, requested_by: "job_detail_page" }),
       })
         .then(jsonOrThrow)
@@ -415,7 +415,7 @@
       setAction("重试创建中...", "");
       fetch(`/v1/jobs/${encodeURIComponent(jobId)}/retry`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: adminWriteHeaders(),
         body: JSON.stringify({ requested_by: "job_detail_page" }),
       })
         .then(jsonOrThrow)
@@ -496,6 +496,19 @@
     function jsonOrThrow(response) {
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       return response.json();
+    }
+
+    function adminWriteHeaders() {
+      const token = adminToken();
+      const headers = { "Content-Type": "application/json" };
+      if (token) headers["X-Admin-Token"] = token;
+      return headers;
+    }
+
+    function adminToken() {
+      const token = params.get("admin_token") || window.localStorage.getItem("github_weekly_admin_token") || "";
+      if (params.get("admin_token")) window.localStorage.setItem("github_weekly_admin_token", params.get("admin_token"));
+      return token.trim();
     }
 
     function escapeHtml(value) {

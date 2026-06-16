@@ -1,18 +1,43 @@
 from __future__ import annotations
 
+import hmac
+import os
 from pathlib import Path
 from typing import Any
 
-from fastapi import Body, FastAPI, Query
+from fastapi import Body, Depends, FastAPI, Header, HTTPException, Query, status
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from src.api.repository import ROOT, ApiRepository
 
 
+def require_admin_token(
+    x_admin_token: str | None = Header(default=None),
+    authorization: str | None = Header(default=None),
+) -> None:
+    expected = os.getenv("ADMIN_API_TOKEN", "").strip()
+    if not expected:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin API token is not configured",
+        )
+    provided = (x_admin_token or "").strip()
+    if not provided and authorization:
+        scheme, _, value = authorization.partition(" ")
+        if scheme.lower() == "bearer":
+            provided = value.strip()
+    if not provided or not hmac.compare_digest(provided, expected):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid admin API token",
+        )
+
+
 def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
     repository = ApiRepository(root=root, db_path=db_path)
     app = FastAPI(title="GitHub Weekly Agent API", version="0.1.0")
+    admin_write_dependencies = [Depends(require_admin_token)]
 
     @app.get("/api/health")
     def health() -> dict[str, Any]:
@@ -333,11 +358,11 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
             auto_build=auto_build,
         )
 
-    @app.post("/v1/rag/search-evaluation", status_code=202)
+    @app.post("/v1/rag/search-evaluation", status_code=202, dependencies=admin_write_dependencies)
     def v1_persist_rag_search_evaluation(payload: dict[str, Any] | None = Body(default=None)) -> dict[str, Any]:
         return repository.persist_rag_search_evaluation(payload)
 
-    @app.post("/v1/rag/search-evaluation-plan", status_code=202)
+    @app.post("/v1/rag/search-evaluation-plan", status_code=202, dependencies=admin_write_dependencies)
     def v1_rag_search_evaluation_plan(payload: dict[str, Any] | None = Body(default=None)) -> dict[str, Any]:
         return repository.plan_rag_search_evaluation(payload)
 
@@ -413,15 +438,15 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
     def v1_rag_maintenance_report(limit: int = Query(default=20, ge=1, le=100)) -> dict[str, Any]:
         return repository.rag_maintenance_report(limit=limit)
 
-    @app.post("/v1/rag/backfill-explanations", status_code=202)
+    @app.post("/v1/rag/backfill-explanations", status_code=202, dependencies=admin_write_dependencies)
     def v1_rag_backfill_explanations(payload: dict[str, Any] | None = Body(default=None)) -> dict[str, Any]:
         return repository.backfill_rag_explanations_from_payload(payload)
 
-    @app.post("/v1/rag/backfill-plan", status_code=202)
+    @app.post("/v1/rag/backfill-plan", status_code=202, dependencies=admin_write_dependencies)
     def v1_rag_backfill_plan(payload: dict[str, Any] | None = Body(default=None)) -> dict[str, Any]:
         return repository.plan_rag_backfill(payload)
 
-    @app.post("/v1/rag/maintenance-plan", status_code=202)
+    @app.post("/v1/rag/maintenance-plan", status_code=202, dependencies=admin_write_dependencies)
     def v1_rag_maintenance_plan(payload: dict[str, Any] | None = Body(default=None)) -> dict[str, Any]:
         return repository.plan_rag_maintenance(payload)
 
@@ -456,18 +481,18 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
     ) -> dict[str, Any]:
         return repository.subscription_recommendations(subscription_id, limit=limit)
 
-    @app.post("/v1/subscriptions/{subscription_id:path}/trigger", status_code=202)
+    @app.post("/v1/subscriptions/{subscription_id:path}/trigger", status_code=202, dependencies=admin_write_dependencies)
     def v1_trigger_subscription_run(
         subscription_id: str,
         payload: dict[str, Any] | None = Body(default=None),
     ) -> dict[str, Any]:
         return repository.trigger_subscription_run(subscription_id, payload)
 
-    @app.post("/v1/subscriptions", status_code=201)
+    @app.post("/v1/subscriptions", status_code=201, dependencies=admin_write_dependencies)
     def v1_create_subscription(payload: dict[str, Any] | None = Body(default=None)) -> dict[str, Any]:
         return repository.create_subscription(payload)
 
-    @app.patch("/v1/subscriptions/{subscription_id:path}")
+    @app.patch("/v1/subscriptions/{subscription_id:path}", dependencies=admin_write_dependencies)
     def v1_update_subscription(
         subscription_id: str,
         payload: dict[str, Any] | None = Body(default=None),
@@ -482,7 +507,7 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
     ) -> dict[str, Any]:
         return repository.project_feedback(full_name=full_name, profile=profile, limit=limit)
 
-    @app.post("/v1/feedback", status_code=201)
+    @app.post("/v1/feedback", status_code=201, dependencies=admin_write_dependencies)
     def v1_create_project_feedback(payload: dict[str, Any] | None = Body(default=None)) -> dict[str, Any]:
         return repository.create_project_feedback(payload)
 
@@ -494,11 +519,11 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
     def v1_job_events(job_id: str, limit: int = Query(default=100, ge=1, le=500)) -> dict[str, Any]:
         return repository.job_events(job_id, limit=limit)
 
-    @app.post("/v1/jobs/{job_id:path}/execute")
+    @app.post("/v1/jobs/{job_id:path}/execute", dependencies=admin_write_dependencies)
     def v1_execute_job(job_id: str, payload: dict[str, Any] | None = Body(default=None)) -> dict[str, Any]:
         return repository.execute_job(job_id, payload)
 
-    @app.post("/v1/jobs/{job_id:path}/retry")
+    @app.post("/v1/jobs/{job_id:path}/retry", dependencies=admin_write_dependencies)
     def v1_retry_job(job_id: str, payload: dict[str, Any] | None = Body(default=None)) -> dict[str, Any]:
         return repository.retry_job(job_id, payload)
 
@@ -506,7 +531,7 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
     def v1_job_detail(job_id: str) -> dict[str, Any]:
         return repository.job_detail(job_id)
 
-    @app.post("/v1/runs/trigger", status_code=202)
+    @app.post("/v1/runs/trigger", status_code=202, dependencies=admin_write_dependencies)
     def v1_trigger_run(payload: dict[str, Any] | None = Body(default=None)) -> dict[str, Any]:
         return repository.trigger_run_preview(payload)
 

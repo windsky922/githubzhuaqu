@@ -743,7 +743,7 @@
       ragBackfillResults.innerHTML = dryRun ? '<p>正在预览 RAG 回填...</p>' : '<p>正在写入 RAG 解释历史...</p>';
       fetch("/v1/rag/backfill-explanations", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: adminWriteHeaders(),
         body: JSON.stringify(payload),
       })
         .then(jsonOrThrow)
@@ -775,7 +775,7 @@
       ragMaintenanceResults.innerHTML = '<p>正在生成 RAG 维护计划...</p>';
       fetch("/v1/rag/maintenance-plan", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: adminWriteHeaders(),
         body: JSON.stringify(payload),
       })
         .then(jsonOrThrow)
@@ -807,7 +807,7 @@
       };
       fetch("/v1/runs/trigger", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: adminWriteHeaders(),
         body: JSON.stringify(payload),
       })
         .then(jsonOrThrow)
@@ -987,7 +987,7 @@
       target.textContent = "执行中...";
       fetch(`/v1/jobs/${encodeURIComponent(jobId)}/execute`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: adminWriteHeaders(),
         body: JSON.stringify({ confirm_execution: true, requested_by: "admin_page" }),
       })
         .then(jsonOrThrow)
@@ -1020,7 +1020,7 @@
       target.textContent = "重试创建中...";
       fetch(`/v1/jobs/${encodeURIComponent(jobId)}/retry`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: adminWriteHeaders(),
         body: JSON.stringify({ requested_by: "admin_page" }),
       })
         .then(jsonOrThrow)
@@ -1469,6 +1469,20 @@
     function jsonOrThrow(response) {
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       return response.json();
+    }
+
+    function adminWriteHeaders() {
+      const token = adminToken();
+      const headers = { "Content-Type": "application/json" };
+      if (token) headers["X-Admin-Token"] = token;
+      return headers;
+    }
+
+    function adminToken() {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get("admin_token") || window.localStorage.getItem("github_weekly_admin_token") || "";
+      if (params.get("admin_token")) window.localStorage.setItem("github_weekly_admin_token", params.get("admin_token"));
+      return token.trim();
     }
 
     function jobDetailUrl(jobId) {

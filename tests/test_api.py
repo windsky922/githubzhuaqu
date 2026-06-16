@@ -1,5 +1,6 @@
 import importlib.util
 import json
+import os
 import shutil
 import unittest
 import uuid
@@ -703,13 +704,65 @@ class ApiRepositoryTest(unittest.TestCase):
             shutil.rmtree(root, ignore_errors=True)
 
     @unittest.skipUnless(_api_route_dependencies_installed(), "本地未安装 FastAPI 或 httpx，跳过 API 路由测试")
+    def test_fastapi_management_writes_require_admin_token(self):
+        from fastapi.testclient import TestClient
+        from src.api.app import create_app
+
+        root = Path.cwd() / f".tmp-api-auth-test-{uuid.uuid4().hex}"
+        try:
+            _write_fixture(root)
+            app = create_app(root=root, db_path=root / "data" / "github_weekly.sqlite")
+            client = TestClient(app)
+
+            read_response = client.get("/v1/health")
+            self.assertEqual(read_response.status_code, 200)
+
+            with patch.dict(os.environ, {}, clear=True):
+                unconfigured = client.post(
+                    "/v1/feedback",
+                    json={"full_name": "owner/agent", "rating": 1, "source": "route-test"},
+                )
+            self.assertEqual(unconfigured.status_code, 403)
+
+            with patch.dict(os.environ, {"ADMIN_API_TOKEN": "test"}, clear=False):
+                missing = client.post(
+                    "/v1/feedback",
+                    json={"full_name": "owner/agent", "rating": 1, "source": "route-test"},
+                )
+                invalid = client.post(
+                    "/v1/feedback",
+                    headers={"X-Admin-Token": "bad"},
+                    json={"full_name": "owner/agent", "rating": 1, "source": "route-test"},
+                )
+                valid = client.post(
+                    "/v1/feedback",
+                    headers={"X-Admin-Token": "test"},
+                    json={"full_name": "owner/agent", "rating": 1, "source": "route-test"},
+                )
+                bearer_valid = client.post(
+                    "/v1/runs/trigger",
+                    headers={"Authorization": "Bearer test"},
+                    json={"profile": "agent_development", "sources": ["github_trending"], "dry_run": True},
+                )
+
+            self.assertEqual(missing.status_code, 401)
+            self.assertEqual(invalid.status_code, 401)
+            self.assertEqual(valid.status_code, 201)
+            self.assertTrue(valid.json()["created"])
+            self.assertEqual(bearer_valid.status_code, 202)
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
+    @unittest.skipUnless(_api_route_dependencies_installed(), "本地未安装 FastAPI 或 httpx，跳过 API 路由测试")
     def test_fastapi_routes_return_public_archive_data(self):
         from fastapi.testclient import TestClient
         from src.api.app import create_app
 
         root = Path.cwd() / f".tmp-api-route-test-{uuid.uuid4().hex}"
+        admin_token_patcher = patch.dict(os.environ, {"ADMIN_API_TOKEN": "test"}, clear=False)
         try:
             _write_fixture(root)
+            admin_token_patcher.start()
             setup_repository = ApiRepository(root=root, db_path=root / "data" / "github_weekly.sqlite")
             setup_repository._persist_preview_job(
                 {
@@ -724,6 +777,7 @@ class ApiRepositoryTest(unittest.TestCase):
             )
             app = create_app(root=root, db_path=root / "data" / "github_weekly.sqlite")
             client = TestClient(app)
+            client.headers.update({"X-Admin-Token": "test"})
 
             health = client.get("/api/health")
             projects = client.get("/api/projects", params={"profile": "agent_development", "limit": 5})
@@ -1157,6 +1211,7 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertIn("retry_created", [event["event_type"] for event in v1_retry_events.json()["events"]])
             self.assertEqual(v1_planned_jobs.json()["count"], 1)
         finally:
+            admin_token_patcher.stop()
             shutil.rmtree(root, ignore_errors=True)
 
 

@@ -134,6 +134,8 @@ docs/weekly/YYYY-MM-DD.md
 
 `admin.html` 是本地管理首页。本地后端或 URL 带 `api=1` 时会展示数据库概览、语料搜索、RAG 证据检索、本地向量检索、RAG 质量概览、RAG 检索评估趋势、RAG 解释回填、planned 任务创建和任务工作台；静态 GitHub Pages 模式下只展示可读归档入口。
 
+本地管理页涉及写入、任务创建、执行、重试、订阅修改或反馈写入时，需要后端配置 `ADMIN_API_TOKEN`，页面可通过 `?admin_token=...` 或浏览器 `localStorage.github_weekly_admin_token` 发送 `X-Admin-Token`。真实口令只保存在本地环境变量中，不写入仓库。
+
 `subscriptions.html` 是订阅配置页，支持在本地后端模式下保存、查看、启用和停用订阅偏好。页面会读取 `profiles.json` 生成 Java、Python、Agent 开发等快捷方向按钮，点击后自动填充订阅名称、profile、语言和关键词。订阅列表支持把已启用订阅生成 planned 周报任务，生成后仍需要在任务详情页确认执行。订阅只保存 profile、语言、方向、关键词、排序、数量和通道名称，不保存 Token、Chat ID 或 Webhook。
 
 `project.html` 是单项目详情页，支持 `project.html?repo=owner/name`，展示历史入选次数、首次和最近入选日期、累计新增 Star、最好 Trending 排名、质量提示、风险提示、历史趋势、历史入选记录和相似项目。本地后端或 URL 带 `api=1` 时会优先读取 `/api/projects/{owner}/{repo}`，并通过 `/v1/projects/{owner}/{repo}/rag` 一次展示该项目相关 RAG 证据块、引用、`prompt_context`、解释历史和解释质量摘要；否则使用 `projects.json` 静态聚合。

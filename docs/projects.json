@@ -2275,8 +2275,10 @@
       "security_flags": [],
       "security_score": 100,
       "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
+      "quality_flags": [
+        "最近维护时间超过 30 天，建议关注维护连续性。"
+      ],
+      "quality_score": 82,
       "quality_level": "high",
       "report_url": "weekly/2026-05-05.html"
     },
@@ -2308,10 +2310,11 @@
       "security_score": 100,
       "security_level": "low",
       "quality_flags": [
-        "许可证元数据缺失，复用代码前需要确认授权。"
+        "许可证元数据缺失，复用代码前需要确认授权。",
+        "最近维护时间超过 30 天，建议关注维护连续性。"
       ],
-      "quality_score": 88,
-      "quality_level": "high",
+      "quality_score": 70,
+      "quality_level": "medium",
       "report_url": "weekly/2026-05-05.html"
     },
     {
@@ -2339,8 +2342,10 @@
       "security_flags": [],
       "security_score": 100,
       "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
+      "quality_flags": [
+        "最近维护时间超过 30 天，建议关注维护连续性。"
+      ],
+      "quality_score": 82,
       "quality_level": "high",
       "report_url": "weekly/2026-05-05.html"
     },
@@ -2370,10 +2375,11 @@
       "security_score": 100,
       "security_level": "low",
       "quality_flags": [
-        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+        "仓库主题标签较少，垂直方向判断可能不够稳定。",
+        "最近维护时间超过 30 天，建议关注维护连续性。"
       ],
-      "quality_score": 92,
-      "quality_level": "high",
+      "quality_score": 74,
+      "quality_level": "medium",
       "report_url": "weekly/2026-05-05.html"
     },
     {
@@ -2401,8 +2407,10 @@
       "security_flags": [],
       "security_score": 100,
       "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
+      "quality_flags": [
+        "最近维护时间超过 30 天，建议关注维护连续性。"
+      ],
+      "quality_score": 82,
       "quality_level": "high",
       "report_url": "weekly/2026-05-05.html"
     },
@@ -2432,10 +2440,11 @@
       "security_score": 100,
       "security_level": "low",
       "quality_flags": [
-        "仓库简介较短，项目定位信息有限。"
+        "仓库简介较短，项目定位信息有限。",
+        "最近维护时间超过 30 天，建议关注维护连续性。"
       ],
-      "quality_score": 92,
-      "quality_level": "high",
+      "quality_score": 74,
+      "quality_level": "medium",
       "report_url": "weekly/2026-05-05.html"
     },
     {
@@ -2463,8 +2472,10 @@
       "security_flags": [],
       "security_score": 100,
       "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
+      "quality_flags": [
+        "最近维护时间超过 30 天，建议关注维护连续性。"
+      ],
+      "quality_score": 82,
       "quality_level": "high",
       "report_url": "weekly/2026-05-05.html"
     },
@@ -2493,8 +2504,10 @@
       "security_flags": [],
       "security_score": 100,
       "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
+      "quality_flags": [
+        "最近维护时间超过 30 天，建议关注维护连续性。"
+      ],
+      "quality_score": 82,
       "quality_level": "high",
       "report_url": "weekly/2026-05-05.html"
     },
@@ -2658,10 +2671,11 @@
       "security_score": 100,
       "security_level": "low",
       "quality_flags": [
-        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+        "仓库主题标签较少，垂直方向判断可能不够稳定。",
+        "最近维护时间超过 30 天，建议关注维护连续性。"
       ],
-      "quality_score": 92,
-      "quality_level": "high",
+      "quality_score": 74,
+      "quality_level": "medium",
       "report_url": "weekly/2026-05-04.html"
     },
     {
@@ -2753,8 +2767,10 @@
       "security_flags": [],
       "security_score": 100,
       "security_level": "low",
-      "quality_flags": [],
-      "quality_score": 100,
+      "quality_flags": [
+        "最近维护时间超过 30 天，建议关注维护连续性。"
+      ],
+      "quality_score": 82,
       "quality_level": "high",
       "report_url": "weekly/2026-05-04.html"
     },

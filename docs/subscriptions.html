@@ -91,6 +91,19 @@
       channels: document.getElementById("channels")
     };
 
+    function adminWriteHeaders() {
+      const token = adminToken();
+      const headers = { "Content-Type": "application/json" };
+      if (token) headers["X-Admin-Token"] = token;
+      return headers;
+    }
+
+    function adminToken() {
+      const token = params.get("admin_token") || window.localStorage.getItem("github_weekly_admin_token") || "";
+      if (params.get("admin_token")) window.localStorage.setItem("github_weekly_admin_token", params.get("admin_token"));
+      return token.trim();
+    }
+
     function init() {
       fields.profile.value = params.get("profile") || "";
       fields.language.value = params.get("language") || "";
@@ -193,7 +206,7 @@
       try {
         const response = await fetch("/v1/subscriptions", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: adminWriteHeaders(),
           body: JSON.stringify(payload)
         });
         if (!response.ok) throw new Error(`保存失败：${response.status}`);
@@ -259,7 +272,7 @@
       try {
         const response = await fetch(`/v1/subscriptions/${encodeURIComponent(id)}/trigger`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: adminWriteHeaders(),
           body: JSON.stringify({ dry_run: true, requested_by: "subscriptions_page" })
         });
         if (!response.ok) throw new Error(`生成任务失败：${response.status}`);
@@ -283,7 +296,7 @@
       try {
         const response = await fetch(`/v1/subscriptions/${encodeURIComponent(id)}`, {
           method: "PATCH",
-          headers: { "Content-Type": "application/json" },
+          headers: adminWriteHeaders(),
           body: JSON.stringify({ status })
         });
         if (!response.ok) throw new Error(`更新失败：${response.status}`);
