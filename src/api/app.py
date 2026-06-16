@@ -153,6 +153,10 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
     ) -> dict[str, Any]:
         return repository.dev_context_search(query=q, source_type=source_type, limit=limit)
 
+    @app.post("/v1/dev-context/ask")
+    def v1_dev_context_ask(payload: dict[str, Any] | None = Body(default=None)) -> dict[str, Any]:
+        return repository.dev_context_ask(payload)
+
     @app.get("/v1/dev-context/runs/{run_id:path}")
     def v1_dev_context_run(run_id: str) -> dict[str, Any]:
         return repository.dev_context_run(run_id)

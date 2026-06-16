@@ -101,6 +101,7 @@ class ApiRepository:
                 "rag_backfill_jobs": True,
                 "dev_context_index": True,
                 "dev_context_search": True,
+                "dev_context_ask": True,
                 "dev_context_runs": True,
                 "runs_query": True,
                 "jobs_query": True,
@@ -542,6 +543,56 @@ class ApiRepository:
             "count": len(results),
             "results": results,
             "summary": _dev_context_search_summary(results, terms),
+        }
+
+    def dev_context_ask(self, payload: dict[str, Any] | None = None) -> dict[str, Any]:
+        payload = payload or {}
+        question = str(payload.get("q") or payload.get("question") or payload.get("query") or "").strip()
+        source_type = _blank_to_none(payload.get("source_type"))
+        limit = max(1, min(_int_value(payload.get("limit")) or 8, 20))
+        if not question:
+            return {
+                "schema_version": 1,
+                "question": "",
+                "answer": "请输入开发上下文问题。",
+                "confidence": "low",
+                "evidence": [],
+                "citations": [],
+                "next_actions": ["先输入一个具体问题，例如“最近测试为什么失败？”或“当前下一步该做什么？”。"],
+                "retrieval": {"query": "", "count": 0, "search_engine": ""},
+            }
+        retrieval = self.dev_context_search(
+            query=_dev_context_question_query(question),
+            source_type=source_type,
+            limit=limit,
+        )
+        evidence = [_dev_context_evidence_item(item, index) for index, item in enumerate(retrieval.get("results") or [], start=1)]
+        answer_pack = _dev_context_answer(question, evidence)
+        return {
+            "schema_version": 1,
+            "question": question,
+            "answer": answer_pack["answer"],
+            "confidence": answer_pack["confidence"],
+            "question_type": answer_pack["question_type"],
+            "evidence": evidence,
+            "citations": [
+                {
+                    "index": item["index"],
+                    "chunk_id": item["chunk_id"],
+                    "source_type": item["source_type"],
+                    "source_path": item["source_path"],
+                    "title": item["title"],
+                    "run_id": item["run_id"],
+                }
+                for item in evidence
+            ],
+            "next_actions": answer_pack["next_actions"],
+            "retrieval": {
+                "query": retrieval.get("query") or "",
+                "source_type": retrieval.get("source_type") or "",
+                "search_engine": retrieval.get("search_engine") or "",
+                "count": retrieval.get("count") or 0,
+            },
         }
 
     def dev_context_run(self, run_id: str) -> dict[str, Any]:
@@ -6430,4 +6481,160 @@ def _dev_context_search_summary(results: list[dict[str, Any]], terms: list[str])
         f"命中 {len(results)} 条开发上下文片段，关键词：{'、'.join(terms)}。",
         f"主要来源：{_summary_text(source_counts)}。",
     ]
+
+
+def _dev_context_question_query(question: str) -> str:
+    text = question.strip()
+    question_type = _dev_context_question_type(text)
+    query_by_type = {
+        "test_diagnosis": "test",
+        "recent_changes": "diff",
+        "api_contract": "API",
+        "next_step": "下一步",
+        "risk_review": "安全",
+    }
+    return query_by_type.get(question_type, text)
+
+
+def _dev_context_question_type(question: str) -> str:
+    lower = question.lower()
+    if any(word in question for word in ["测试", "失败", "报错"]) or any(word in lower for word in ["test", "failed", "error"]):
+        return "test_diagnosis"
+    if any(word in question for word in ["最近改", "改了什么", "变更"]) or "diff" in lower:
+        return "recent_changes"
+    if any(word in question for word in ["API", "接口", "数据契约", "契约"]) or any(
+        word in lower for word in ["api", "contract", "schema"]
+    ):
+        return "api_contract"
+    if any(word in question for word in ["下一步", "后续", "做什么", "方向"]):
+        return "next_step"
+    if any(word in question for word in ["安全", "风险", "架构"]) or any(
+        word in lower for word in ["security", "risk", "architecture"]
+    ):
+        return "risk_review"
+    return "general"
+
+
+def _dev_context_evidence_item(item: dict[str, Any], index: int) -> dict[str, Any]:
+    return {
+        "index": index,
+        "chunk_id": item.get("chunk_id") or "",
+        "run_id": item.get("run_id") or "",
+        "source_type": item.get("source_type") or "",
+        "source_path": item.get("source_path") or "",
+        "title": item.get("title") or "",
+        "snippet": item.get("snippet") or "",
+    }
+
+
+def _dev_context_answer(question: str, evidence: list[dict[str, Any]]) -> dict[str, Any]:
+    question_type = _dev_context_question_type(question)
+    confidence = "high" if len(evidence) >= 3 else "medium" if evidence else "low"
+    if not evidence:
+        return {
+            "question_type": question_type,
+            "confidence": "low",
+            "answer": "当前没有召回开发上下文证据。请先在管理页执行开发上下文索引，或换一个更具体的问题。",
+            "next_actions": [
+                "执行 POST /v1/dev-context/index 或在管理页点击“索引开发上下文”。",
+                "重新提问时加入关键词，例如测试、API、数据契约、RAG 维护或反馈入口。",
+            ],
+        }
+    handlers = {
+        "test_diagnosis": _dev_context_test_answer,
+        "recent_changes": _dev_context_changes_answer,
+        "api_contract": _dev_context_api_contract_answer,
+        "next_step": _dev_context_next_step_answer,
+        "risk_review": _dev_context_risk_answer,
+    }
+    handler = handlers.get(question_type, _dev_context_general_answer)
+    answer, next_actions = handler(question, evidence)
+    return {
+        "question_type": question_type,
+        "confidence": confidence,
+        "answer": answer,
+        "next_actions": next_actions,
+    }
+
+
+def _dev_context_test_answer(question: str, evidence: list[dict[str, Any]]) -> tuple[str, list[str]]:
+    test_items = [item for item in evidence if item["source_type"] in {"test_output", "security_check"}]
+    target = test_items or evidence[:3]
+    status_hint = "；".join(_compact_evidence(item) for item in target[:3])
+    return (
+        f"根据开发上下文，测试/检查问题优先看 {len(test_items)} 条测试或安全检查证据。关键线索：{status_hint}",
+        [
+            "先查看 test_output 和 security_check 来源的证据片段。",
+            "若输出显示 OK 或安全检查通过，则当前问题更可能是历史问题或文档中的风险提示。",
+            "若输出包含 failed/error，先定位对应测试名，再修复最小失败点。",
+        ],
+    )
+
+
+def _dev_context_changes_answer(question: str, evidence: list[dict[str, Any]]) -> tuple[str, list[str]]:
+    diff_items = [item for item in evidence if item["source_type"] == "git_diff"]
+    target = diff_items or evidence[:3]
+    return (
+        f"最近变更主要来自 {len(diff_items)} 条 Git diff 证据。关键片段：{'; '.join(_compact_evidence(item) for item in target[:3])}",
+        [
+            "优先审查 Git diff 中的 API、schema、测试和页面生成器改动。",
+            "变更稳定后运行单元测试、安全检查和 git diff --check。",
+        ],
+    )
+
+
+def _dev_context_api_contract_answer(question: str, evidence: list[dict[str, Any]]) -> tuple[str, list[str]]:
+    contract_items = [
+        item
+        for item in evidence
+        if "api" in item["source_path"].lower() or "data-contracts" in item["source_path"].lower() or "schema" in item["snippet"].lower()
+    ]
+    target = contract_items or evidence[:3]
+    return (
+        f"API/数据契约相关证据有 {len(contract_items)} 条。当前应检查路由、SQLite 表字段、数据契约和测试是否同步。关键片段：{'; '.join(_compact_evidence(item) for item in target[:3])}",
+        [
+            "新增或修改 API 时同步 docs/api.md。",
+            "新增 SQLite 表或字段时同步 schema.sql、sqlite_store.py、docs/data-contracts.md 和 tests/test_data_contracts.py。",
+            "管理页调用新接口后同步 tests/test_build_pages.py。",
+        ],
+    )
+
+
+def _dev_context_next_step_answer(question: str, evidence: list[dict[str, Any]]) -> tuple[str, list[str]]:
+    return (
+        f"下一步应从召回证据中优先处理仍未闭环的开发项。当前证据显示：{'; '.join(_compact_evidence(item) for item in evidence[:3])}",
+        [
+            "先确认当前目标的 API、页面、测试和文档是否都已同步。",
+            "再选择一个闭环小目标推进，避免提前做复杂 UI 或外部服务。",
+            "完成后执行单元测试、安全检查、diff 检查、提交并推送。",
+        ],
+    )
+
+
+def _dev_context_risk_answer(question: str, evidence: list[dict[str, Any]]) -> tuple[str, list[str]]:
+    return (
+        f"安全或架构风险需要重点看密钥、写接口鉴权、外部命令和过早复杂化。当前证据：{'; '.join(_compact_evidence(item) for item in evidence[:3])}",
+        [
+            "确认所有写接口仍使用管理口令边界。",
+            "确认索引材料写入前脱敏，且外部命令有超时。",
+            "不要引入外部向量库、多用户权限或复杂聊天 UI，除非后续目标明确要求。",
+        ],
+    )
+
+
+def _dev_context_general_answer(question: str, evidence: list[dict[str, Any]]) -> tuple[str, list[str]]:
+    return (
+        f"已基于开发上下文召回 {len(evidence)} 条证据。结论需要人工复核，主要线索：{'; '.join(_compact_evidence(item) for item in evidence[:3])}",
+        [
+            "先查看 citations 中的来源文件或命令输出。",
+            "如果证据不准，换用更具体关键词重新提问。",
+        ],
+    )
+
+
+def _compact_evidence(item: dict[str, Any]) -> str:
+    snippet = str(item.get("snippet") or "").replace("\n", " ").strip()
+    if len(snippet) > 120:
+        snippet = snippet[:117] + "..."
+    return f"[{item.get('index')}] {item.get('source_type')}/{item.get('title')}: {snippet}"
 

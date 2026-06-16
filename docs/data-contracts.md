@@ -186,6 +186,7 @@ GET /v1/feedback
 POST /v1/feedback
 POST /v1/dev-context/index
 GET /v1/dev-context/search
+POST /v1/dev-context/ask
 GET /v1/dev-context/runs/{id}
 ```
 
@@ -210,7 +211,7 @@ feedback_memory
 
 页面层反馈入口复用同一数据契约：`project.html` 和 `recommendations.html` 只向 `POST /v1/feedback` 写入仓库名、profile、评分、标签、备注和来源；`admin.html` 只读取 `GET /v1/feedback?limit=200` 的列表与汇总，不公开管理口令、请求头或任何密钥。
 
-`/v1/dev-context/index` 会采集开发材料并写入 SQLite 开发上下文表。当前保存内容包括 README、API 文档、数据契约、操作日志、Git diff、测试输出和安全检查输出；写入前会对明显密钥形态做脱敏。`/v1/dev-context/search` 只返回匹配分块、来源、摘要和 metadata，不返回管理口令或请求头。
+`/v1/dev-context/index` 会采集开发材料并写入 SQLite 开发上下文表。当前保存内容包括 README、API 文档、数据契约、操作日志、Git diff、测试输出和安全检查输出；写入前会对明显密钥形态做脱敏。`/v1/dev-context/search` 只返回匹配分块、来源、摘要和 metadata，不返回管理口令或请求头。`/v1/dev-context/ask` 复用已索引分块生成规则版回答，响应字段固定为 `answer`、`citations`、`evidence`、`confidence`、`question_type`、`retrieval` 和 `next_actions`；该接口不调用外部模型，不写入新的敏感数据。
 
 ## 六、`docs/jobs.json`
 

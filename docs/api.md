@@ -64,7 +64,7 @@ Authorization: Bearer <本地管理口令>
 
 根路径 `http://127.0.0.1:8000/` 会跳转到管理首页。`/v1/*` 路径是 JSON API，例如 `/v1/jobs?limit=50` 返回机器可读任务数据，不是 HTML 页面。
 
-管理首页中的 RAG 区域会调用 `/v1/rag/ask`、`/v1/rag/retrieve`、`/v1/rag/vector-search` 和 `/v1/rag/hybrid-search`，用于查看问答结果、证据块、引用和 `prompt_context`；后端还提供 `/v1/rag/search-compare`、`/v1/rag/search-evaluation` 和 `/v1/rag/search-evaluation-trends`，用于比较、批量评估和长期观察三种检索模式的召回差异。管理首页会展示检索评估趋势，包括最近评估任务、平均样本数、零命中样本和推荐模式分布。RAG 诊断会调用 `/v1/rag/diagnostics`，用于判断语料、证据块、embedding、解释历史和问答能力是否可用；RAG 质量概览会调用 `/v1/rag/quality-summary`，用于查看解释数量、质量分布、改进建议和低质量样本；RAG 维护计划按钮会调用 `/v1/rag/maintenance-plan`，按诊断结果创建语料重建、embedding 构建或解释回填 planned 任务；维护历史可以通过 `/v1/rag/maintenance-report` 查看最近 RAG 维护任务状态、计数变化和下一步建议；RAG 回填区会调用 `/v1/rag/backfill-explanations`，先预览缺口项目，确认后再写入 SQLite。向量检索会在 `auto_build=true` 时自动构建本地 `local-hash-v1` 索引，也可以先手动运行 `py scripts\build_rag_embeddings.py`。
+管理首页中的 RAG 区域会调用 `/v1/rag/ask`、`/v1/rag/retrieve`、`/v1/rag/vector-search` 和 `/v1/rag/hybrid-search`，用于查看问答结果、证据块、引用和 `prompt_context`；开发上下文区域会调用 `/v1/dev-context/index`、`/v1/dev-context/search` 和 `/v1/dev-context/ask`，用于索引开发材料、检索证据和生成规则版审查/诊断回答。后端还提供 `/v1/rag/search-compare`、`/v1/rag/search-evaluation` 和 `/v1/rag/search-evaluation-trends`，用于比较、批量评估和长期观察三种检索模式的召回差异。管理首页会展示检索评估趋势，包括最近评估任务、平均样本数、零命中样本和推荐模式分布。RAG 诊断会调用 `/v1/rag/diagnostics`，用于判断语料、证据块、embedding、解释历史和问答能力是否可用；RAG 质量概览会调用 `/v1/rag/quality-summary`，用于查看解释数量、质量分布、改进建议和低质量样本；RAG 维护计划按钮会调用 `/v1/rag/maintenance-plan`，按诊断结果创建语料重建、embedding 构建或解释回填 planned 任务；维护历史可以通过 `/v1/rag/maintenance-report` 查看最近 RAG 维护任务状态、计数变化和下一步建议；RAG 回填区会调用 `/v1/rag/backfill-explanations`，先预览缺口项目，确认后再写入 SQLite。向量检索会在 `auto_build=true` 时自动构建本地 `local-hash-v1` 索引，也可以先手动运行 `py scripts\build_rag_embeddings.py`。
 
 如果本地没有 `data/github_weekly.sqlite`，查询项目接口会从 `data/` 下的 JSON 归档自动重建 SQLite 派生索引。
 
@@ -1008,13 +1008,14 @@ GET /v1/feedback?profile=agent_development&limit=20
 
 ### `/v1/dev-context` 开发上下文 RAG
 
-开发上下文接口用于把本仓库的开发材料沉淀到 SQLite，作为后续代码审查、运行诊断、历史追踪和开发决策问答的记忆层。第一阶段只提供本地索引和 FTS5 检索，不提供复杂聊天 UI。
+开发上下文接口用于把本仓库的开发材料沉淀到 SQLite，作为后续代码审查、运行诊断、历史追踪和开发决策问答的记忆层。当前阶段提供本地索引、FTS5 检索和规则版问答，不接入外部模型。
 
 当前入口包括：
 
 1. `POST /v1/dev-context/index`：采集并索引开发上下文，写入 `dev_runs`、`dev_corpus`、`dev_chunks`、`dev_chunks_fts` 和 `dev_embeddings`。
 2. `GET /v1/dev-context/search?q=...`：按关键词检索开发上下文片段，支持可选 `source_type=document|git_diff|test_output|security_check`。
-3. `GET /v1/dev-context/runs/{id}`：查看一次索引任务的来源和样例分块。
+3. `POST /v1/dev-context/ask`：基于已索引的开发上下文生成规则版回答，返回 `answer`、`citations`、`evidence`、`confidence`、`question_type`、`retrieval` 和 `next_actions`。
+4. `GET /v1/dev-context/runs/{id}`：查看一次索引任务的来源和样例分块。
 
 `POST /v1/dev-context/index` 是管理写接口，必须提供 `X-Admin-Token` 或 `Authorization: Bearer ...`。默认会采集 README、API 文档、数据契约、操作日志、`git diff`、单元测试输出和安全检查输出；接口会对明显密钥形态做脱敏，并给外部命令设置超时。测试或调试时可传入 `{"run_checks": false}` 跳过单元测试和安全检查。
 
@@ -1024,10 +1025,11 @@ GET /v1/feedback?profile=agent_development&limit=20
 POST /v1/dev-context/index
 GET /v1/dev-context/search?q=最近测试失败&limit=8
 GET /v1/dev-context/search?q=反馈入口&source_type=document
+POST /v1/dev-context/ask {"question":"哪些 API 和数据契约相关？","limit":8}
 GET /v1/dev-context/runs/dev-context:xxxx
 ```
 
-管理页 `admin.html?api=1` 已提供“索引开发上下文”和搜索入口。
+`POST /v1/dev-context/ask` 支持测试诊断、最近变更、API/数据契约一致性、下一步开发和安全架构风险等问题类型。它只读取 SQLite 中已经脱敏的开发上下文分块，不调用 GitHub、Kimi、Telegram 或外部 embedding 服务。管理页 `admin.html?api=1` 已提供“索引开发上下文”、搜索和问答入口。
 
 ### `/v1` 任务接口
 

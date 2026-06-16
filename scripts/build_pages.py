@@ -946,6 +946,7 @@ def _admin_dashboard_content() -> str:
           </select>
         </label>
         <button id="indexDevContext" type="button">索引开发上下文</button>
+        <button id="askDevContext" type="button">问答</button>
         <button id="runDevContextSearch" type="button">搜索</button>
       </div>
       <div id="devContextResults" class="search-results"></div>
@@ -1092,6 +1093,7 @@ def _admin_dashboard_content() -> str:
       query: document.getElementById("devContextQuery"),
       source: document.getElementById("devContextSource"),
       indexButton: document.getElementById("indexDevContext"),
+      askButton: document.getElementById("askDevContext"),
       searchButton: document.getElementById("runDevContextSearch"),
     };
     const ragBackfillControls = {
@@ -1164,14 +1166,16 @@ def _admin_dashboard_content() -> str:
     function setupDevContext() {
       if (!shouldUseApi()) {
         devContextControls.indexButton.disabled = true;
+        devContextControls.askButton.disabled = true;
         devContextControls.searchButton.disabled = true;
         devContextResults.innerHTML = '<p>开发上下文索引需要本地后端或 api=1 模式。</p>';
         return;
       }
       devContextControls.indexButton.addEventListener("click", indexDevContext);
+      devContextControls.askButton.addEventListener("click", askDevContext);
       devContextControls.searchButton.addEventListener("click", runDevContextSearch);
       devContextControls.query.addEventListener("keydown", event => {
-        if (event.key === "Enter") runDevContextSearch();
+        if (event.key === "Enter") askDevContext();
       });
     }
 
@@ -1292,6 +1296,33 @@ def _admin_dashboard_content() -> str:
         })
         .catch(error => {
           devContextResults.innerHTML = `<p>开发上下文搜索失败：${escapeHtml(error.message || error)}</p>`;
+        });
+    }
+
+    function askDevContext() {
+      const question = devContextControls.query.value.trim();
+      if (!question) {
+        devContextResults.innerHTML = '<p>请输入开发上下文问题。</p>';
+        return;
+      }
+      const payload = { question, limit: 8 };
+      if (devContextControls.source.value) payload.source_type = devContextControls.source.value;
+      devContextControls.askButton.disabled = true;
+      devContextResults.innerHTML = '<p>开发上下文问答生成中...</p>';
+      fetch("/v1/dev-context/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+        .then(jsonOrThrow)
+        .then(data => {
+          devContextResults.innerHTML = devContextAskHtml(data);
+        })
+        .catch(error => {
+          devContextResults.innerHTML = `<p>开发上下文问答失败：${escapeHtml(error.message || error)}</p>`;
+        })
+        .finally(() => {
+          devContextControls.askButton.disabled = false;
         });
     }
 
@@ -1937,6 +1968,24 @@ def _admin_dashboard_content() -> str:
         <span>${escapeHtml(result.source_type || "-")} · ${escapeHtml(result.source_path || "-")} · ${escapeHtml(result.run_id || "-")}</span>
         <p>${escapeHtml(result.snippet || "")}</p>
       </article>`).join("")}`;
+    }
+
+    function devContextAskHtml(data) {
+      const retrieval = data.retrieval || {};
+      const nextActions = (data.next_actions || []).map(item => `<li>${escapeHtml(item)}</li>`).join("");
+      const nextActionsHtml = nextActions ? `<article class="search-row"><strong>下一步动作</strong><ul>${nextActions}</ul></article>` : "";
+      const evidence = data.evidence || [];
+      const evidenceHtml = evidence.map(item => `<article class="search-row">
+        <strong>${escapeHtml(item.index || "-")} · ${escapeHtml(item.title || item.source_path || "-")}</strong>
+        <span>${escapeHtml(item.source_type || "-")} · ${escapeHtml(item.source_path || "-")} · ${escapeHtml(item.run_id || "-")}</span>
+        <p>${escapeHtml(item.snippet || "")}</p>
+      </article>`).join("");
+      const emptyEvidence = evidence.length ? "" : "<p>没有召回证据。可先点击“索引开发上下文”，或换一个更具体的问题。</p>";
+      return `<article class="search-row">
+        <strong>开发上下文回答</strong>
+        <span>${escapeHtml(data.question_type || "-")} · ${escapeHtml(data.confidence || "-")} · ${escapeHtml(retrieval.search_engine || "-")} · 证据 ${escapeHtml(retrieval.count || 0)}</span>
+        <p>${escapeHtml(data.answer || "")}</p>
+      </article>${nextActionsHtml}${emptyEvidence}${evidenceHtml}`;
     }
 
     function facetRow(name, value, detail) {
