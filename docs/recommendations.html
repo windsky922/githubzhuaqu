@@ -29,7 +29,15 @@
     .desc { color: #57606a; margin: 0; line-height: 1.5; }
     .meta { display: flex; flex-wrap: wrap; gap: 8px; }
     .pill { border: 1px solid #d8dee4; border-radius: 999px; padding: 3px 8px; color: #57606a; background: #f6f8fa; font-size: 12px; }
+    .pill.preference { border-color: #bbf7d0; color: #15803d; background: #f0fdf4; }
     .reasons { margin: 0; padding-left: 18px; color: #57606a; line-height: 1.55; }
+    .feedback { border-top: 1px solid #d8dee4; padding-top: 10px; display: grid; gap: 8px; }
+    .feedback-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .feedback-actions button { width: auto; background: #ffffff; color: #0969da; border-color: #d0d7de; padding: 7px 10px; }
+    .feedback-actions button:disabled { cursor: not-allowed; opacity: .55; }
+    .feedback-memory { color: #57606a; font-size: 13px; margin: 0; }
+    .feedback-status { min-height: 18px; color: #57606a; font-size: 13px; }
+    .feedback-status.error { color: #cf222e; }
     .empty, .error { border: 1px dashed #d0d7de; color: #57606a; padding: 18px; text-align: center; background: #ffffff; }
     .error { color: #cf222e; }
     @media (max-width: 900px) { .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
@@ -105,6 +113,7 @@
     };
 
     function init() {
+      adminToken();
       controls.profile.value = params.get("profile") || "";
       controls.language.value = params.get("language") || "";
       controls.category.value = params.get("category") || "";
@@ -262,8 +271,18 @@
             <span class="pill">新增 Star ${number(project.star_growth)}</span>
             <span class="pill">Trending ${project.trending_rank ? "#" + number(project.trending_rank) : "-"}</span>
             <span class="pill">质量 ${number(project.quality_score)}</span>
+            <span class="pill preference">偏好 ${signedNumber(project.preference_score)}</span>
           </div>
           <ul class="reasons">${reasonsHtml(project)}</ul>
+          <div class="feedback">
+            ${feedbackMemoryHtml(project.feedback_memory)}
+            <div class="feedback-actions" data-repo="${escapeAttribute(project.full_name || "")}">
+              <button type="button" data-feedback="useful"${apiMode ? "" : " disabled"}>有用</button>
+              <button type="button" data-feedback="not_fit"${apiMode ? "" : " disabled"}>不适合</button>
+              <button type="button" data-feedback="watch"${apiMode ? "" : " disabled"}>继续跟踪</button>
+            </div>
+            <div id="feedback-${safeId(project.full_name || "")}" class="feedback-status" aria-live="polite">${apiMode ? "" : "反馈写入需要本地后端或 api=1。"}</div>
+          </div>
           <div class="meta">
             <a class="button ghost" href="${escapeAttribute(projectDetailUrl(project))}">项目详情</a>
             <a class="button ghost" href="${escapeAttribute(compareUrl([project.full_name]))}">加入对比</a>
@@ -271,11 +290,79 @@
           </div>
         </article>
       `).join("");
+      bindRecommendationFeedback();
     }
 
     function reasonsHtml(project) {
       const reasons = Array.isArray(project.selection_reasons) && project.selection_reasons.length ? project.selection_reasons.slice(0, 3) : ["综合热度、方向和项目质量进入推荐列表。"];
       return reasons.map(reason => `<li>${escapeHtml(reason)}</li>`).join("");
+    }
+
+    function feedbackMemoryHtml(memory) {
+      if (!memory || !Number(memory.record_count || 0)) return '<p class="feedback-memory">暂无反馈记忆。</p>';
+      const labels = Array.isArray(memory.labels) ? memory.labels.slice(0, 3).join(", ") : "";
+      const note = memory.latest_note ? ` / ${memory.latest_note}` : "";
+      return `<p class="feedback-memory">反馈 ${number(memory.record_count)} 条，均分 ${number(memory.average_rating)}，最近 ${signedNumber(memory.latest_rating)}${labels ? ` / ${escapeHtml(labels)}` : ""}${escapeHtml(note)}</p>`;
+    }
+
+    function bindRecommendationFeedback() {
+      document.querySelectorAll("[data-feedback]").forEach(button => {
+        button.addEventListener("click", () => submitRecommendationFeedback(button));
+      });
+    }
+
+    async function submitRecommendationFeedback(button) {
+      const row = button.closest("[data-repo]");
+      const fullName = row ? row.dataset.repo || "" : "";
+      const action = button.dataset.feedback || "";
+      const status = document.getElementById(`feedback-${safeId(fullName)}`);
+      if (!apiMode || !fullName) return;
+      const payload = feedbackPayload(fullName, action, "recommendations_page");
+      try {
+        setFeedbackStatus(status, "写入中...", false);
+        const response = await fetch("/v1/feedback", {
+          method: "POST",
+          headers: adminWriteHeaders(),
+          body: JSON.stringify(payload)
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        setFeedbackStatus(status, "反馈已写入，正在刷新推荐排序。", false);
+        await loadRecommendations(false);
+      } catch (error) {
+        setFeedbackStatus(status, `反馈写入失败：${error.message || error}`, true);
+      }
+    }
+
+    function feedbackPayload(fullName, action, source) {
+      const ratings = { useful: 2, not_fit: -2, watch: 1 };
+      const notes = { useful: "recommendation useful", not_fit: "recommendation not fit", watch: "continue tracking" };
+      return {
+        full_name: fullName,
+        profile: controls.profile.value.trim(),
+        rating: ratings[action] || 0,
+        labels: [action],
+        note: notes[action] || action,
+        source
+      };
+    }
+
+    function setFeedbackStatus(target, message, isError) {
+      if (!target) return;
+      target.textContent = message;
+      target.classList.toggle("error", Boolean(isError));
+    }
+
+    function adminWriteHeaders() {
+      const token = adminToken();
+      const headers = { "Content-Type": "application/json" };
+      if (token) headers["X-Admin-Token"] = token;
+      return headers;
+    }
+
+    function adminToken() {
+      const token = params.get("admin_token") || window.localStorage.getItem("github_weekly_admin_token") || "";
+      if (params.get("admin_token")) window.localStorage.setItem("github_weekly_admin_token", params.get("admin_token"));
+      return token.trim();
     }
 
     function renderError(error) {
@@ -287,6 +374,7 @@
       const repo = project.full_name || "";
       const next = new URLSearchParams();
       next.set("repo", repo);
+      if (controls.profile.value.trim()) next.set("profile", controls.profile.value.trim());
       if (params.get("api")) next.set("api", params.get("api"));
       return `project.html?${next.toString()}`;
     }
@@ -301,6 +389,15 @@
 
     function number(value) {
       return Number(value || 0).toLocaleString("zh-CN");
+    }
+
+    function signedNumber(value) {
+      const numberValue = Number(value || 0);
+      return numberValue > 0 ? `+${number(numberValue)}` : number(numberValue);
+    }
+
+    function safeId(value) {
+      return String(value || "item").replace(/[^a-zA-Z0-9_-]+/g, "-");
     }
 
     function escapeHtml(value) {

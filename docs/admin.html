@@ -408,6 +408,7 @@
     <section class="panel">
       <h2>数据库与语料</h2>
       <div id="databaseOverview" class="overview"></div>
+      <div id="feedbackSummary" class="result-panel"></div>
       <div class="split">
         <div>
           <h3>主要分面</h3>
@@ -555,6 +556,7 @@
     const workflowBoard = document.getElementById("workflowBoard");
     const jobWorkbench = document.getElementById("jobWorkbench");
     const databaseOverview = document.getElementById("databaseOverview");
+    const feedbackSummary = document.getElementById("feedbackSummary");
     const databaseFacets = document.getElementById("databaseFacets");
     const databaseTrends = document.getElementById("databaseTrends");
     const corpusSearchResults = document.getElementById("corpusSearchResults");
@@ -868,6 +870,7 @@
     function loadDatabaseInsights() {
       if (!shouldUseApi()) {
         databaseOverview.innerHTML = metric("数据库模式", "静态");
+        feedbackSummary.innerHTML = '<p>启动本地后端或添加 api=1 后显示反馈记忆汇总。</p>';
         databaseFacets.innerHTML = '<p>启动本地后端或添加 api=1 后显示数据库分面。</p>';
         databaseTrends.innerHTML = '<p>启动本地后端或添加 api=1 后显示运行趋势。</p>';
         ragQualitySummary.innerHTML = '<p>启动本地后端或添加 api=1 后显示 RAG 诊断和质量概览。</p>';
@@ -881,8 +884,9 @@
         fetch("/v1/rag/diagnostics?limit=5", { cache: "no-store" }).then(jsonOrThrow),
         fetch("/v1/rag/quality-summary?limit=5", { cache: "no-store" }).then(jsonOrThrow),
         fetch("/v1/rag/search-evaluation-trends?limit=8", { cache: "no-store" }).then(jsonOrThrow),
+        fetch("/v1/feedback?limit=200", { cache: "no-store" }).then(jsonOrThrow).catch(() => ({ feedback: [], count: 0 })),
       ])
-        .then(([summary, facets, trends, diagnostics, qualitySummary, evaluationTrends]) => {
+        .then(([summary, facets, trends, diagnostics, qualitySummary, evaluationTrends, feedback]) => {
           const counts = summary.table_counts || {};
           databaseOverview.innerHTML = [
             metric("仓库记录", counts.repositories || 0),
@@ -890,6 +894,7 @@
             metric("语料记录", counts.project_corpus || 0),
             metric("订阅记录", counts.subscriptions || 0),
           ].join("");
+          feedbackSummary.innerHTML = feedbackSummaryHtml(feedback);
           databaseFacets.innerHTML = databaseFacetsHtml(facets);
           databaseTrends.innerHTML = databaseTrendsHtml(trends);
           ragQualitySummary.innerHTML = ragDiagnosticsHtml(diagnostics) + ragQualitySummaryHtml(qualitySummary);
@@ -897,6 +902,7 @@
         })
         .catch(error => {
           databaseOverview.innerHTML = metric("数据库状态", "读取失败");
+          feedbackSummary.innerHTML = "";
           databaseFacets.innerHTML = `<p>数据库分面读取失败：${escapeHtml(error.message || error)}</p>`;
           databaseTrends.innerHTML = "";
           ragQualitySummary.innerHTML = "";
@@ -1121,6 +1127,31 @@
         '<h4>来源</h4>',
         ...(sources.length ? sources : [facetRow("无", "-", "-")]),
         facetRow("文本搜索", ready.ready_for_text_search ? "已准备" : "未准备", "project_corpus"),
+      ].join("");
+    }
+
+    function feedbackSummaryHtml(data) {
+      const feedback = Array.isArray(data.feedback) ? data.feedback : [];
+      const count = Number(data.count || feedback.length || 0);
+      const average = feedback.length
+        ? feedback.reduce((total, item) => total + Number(item.rating || 0), 0) / feedback.length
+        : 0;
+      const positive = feedback.filter(item => Number(item.rating || 0) > 0).length;
+      const negative = feedback.filter(item => Number(item.rating || 0) < 0).length;
+      const latest = feedback.slice(0, 5).map(item => `<article class="search-row">
+        <strong>${escapeHtml(item.full_name || "-")}</strong>
+        <span>${escapeHtml(item.profile || "default")} · 评分 ${escapeHtml(item.rating || 0)} · ${escapeHtml(item.source || "-")} · ${escapeHtml(item.created_at || "")}</span>
+        <p>${escapeHtml(item.note || "")}</p>
+      </article>`).join("");
+      return [
+        "<h3>反馈记忆汇总</h3>",
+        `<div class="overview">${[
+          metric("反馈记录", count),
+          metric("平均评分", average.toFixed(2)),
+          metric("正向反馈", positive),
+          metric("负向反馈", negative),
+        ].join("")}</div>`,
+        latest || "<p>暂无项目反馈。可先在项目详情页或推荐页写入有用/不适合/继续跟踪。</p>",
       ].join("");
     }
 

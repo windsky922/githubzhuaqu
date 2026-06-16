@@ -890,6 +890,7 @@ def _admin_dashboard_content() -> str:
     <section class="panel">
       <h2>数据库与语料</h2>
       <div id="databaseOverview" class="overview"></div>
+      <div id="feedbackSummary" class="result-panel"></div>
       <div class="split">
         <div>
           <h3>主要分面</h3>
@@ -1037,6 +1038,7 @@ def _admin_dashboard_content() -> str:
     const workflowBoard = document.getElementById("workflowBoard");
     const jobWorkbench = document.getElementById("jobWorkbench");
     const databaseOverview = document.getElementById("databaseOverview");
+    const feedbackSummary = document.getElementById("feedbackSummary");
     const databaseFacets = document.getElementById("databaseFacets");
     const databaseTrends = document.getElementById("databaseTrends");
     const corpusSearchResults = document.getElementById("corpusSearchResults");
@@ -1350,6 +1352,7 @@ def _admin_dashboard_content() -> str:
     function loadDatabaseInsights() {
       if (!shouldUseApi()) {
         databaseOverview.innerHTML = metric("数据库模式", "静态");
+        feedbackSummary.innerHTML = '<p>启动本地后端或添加 api=1 后显示反馈记忆汇总。</p>';
         databaseFacets.innerHTML = '<p>启动本地后端或添加 api=1 后显示数据库分面。</p>';
         databaseTrends.innerHTML = '<p>启动本地后端或添加 api=1 后显示运行趋势。</p>';
         ragQualitySummary.innerHTML = '<p>启动本地后端或添加 api=1 后显示 RAG 诊断和质量概览。</p>';
@@ -1363,8 +1366,9 @@ def _admin_dashboard_content() -> str:
         fetch("/v1/rag/diagnostics?limit=5", { cache: "no-store" }).then(jsonOrThrow),
         fetch("/v1/rag/quality-summary?limit=5", { cache: "no-store" }).then(jsonOrThrow),
         fetch("/v1/rag/search-evaluation-trends?limit=8", { cache: "no-store" }).then(jsonOrThrow),
+        fetch("/v1/feedback?limit=200", { cache: "no-store" }).then(jsonOrThrow).catch(() => ({ feedback: [], count: 0 })),
       ])
-        .then(([summary, facets, trends, diagnostics, qualitySummary, evaluationTrends]) => {
+        .then(([summary, facets, trends, diagnostics, qualitySummary, evaluationTrends, feedback]) => {
           const counts = summary.table_counts || {};
           databaseOverview.innerHTML = [
             metric("仓库记录", counts.repositories || 0),
@@ -1372,6 +1376,7 @@ def _admin_dashboard_content() -> str:
             metric("语料记录", counts.project_corpus || 0),
             metric("订阅记录", counts.subscriptions || 0),
           ].join("");
+          feedbackSummary.innerHTML = feedbackSummaryHtml(feedback);
           databaseFacets.innerHTML = databaseFacetsHtml(facets);
           databaseTrends.innerHTML = databaseTrendsHtml(trends);
           ragQualitySummary.innerHTML = ragDiagnosticsHtml(diagnostics) + ragQualitySummaryHtml(qualitySummary);
@@ -1379,6 +1384,7 @@ def _admin_dashboard_content() -> str:
         })
         .catch(error => {
           databaseOverview.innerHTML = metric("数据库状态", "读取失败");
+          feedbackSummary.innerHTML = "";
           databaseFacets.innerHTML = `<p>数据库分面读取失败：${escapeHtml(error.message || error)}</p>`;
           databaseTrends.innerHTML = "";
           ragQualitySummary.innerHTML = "";
@@ -1603,6 +1609,31 @@ def _admin_dashboard_content() -> str:
         '<h4>来源</h4>',
         ...(sources.length ? sources : [facetRow("无", "-", "-")]),
         facetRow("文本搜索", ready.ready_for_text_search ? "已准备" : "未准备", "project_corpus"),
+      ].join("");
+    }
+
+    function feedbackSummaryHtml(data) {
+      const feedback = Array.isArray(data.feedback) ? data.feedback : [];
+      const count = Number(data.count || feedback.length || 0);
+      const average = feedback.length
+        ? feedback.reduce((total, item) => total + Number(item.rating || 0), 0) / feedback.length
+        : 0;
+      const positive = feedback.filter(item => Number(item.rating || 0) > 0).length;
+      const negative = feedback.filter(item => Number(item.rating || 0) < 0).length;
+      const latest = feedback.slice(0, 5).map(item => `<article class="search-row">
+        <strong>${escapeHtml(item.full_name || "-")}</strong>
+        <span>${escapeHtml(item.profile || "default")} · 评分 ${escapeHtml(item.rating || 0)} · ${escapeHtml(item.source || "-")} · ${escapeHtml(item.created_at || "")}</span>
+        <p>${escapeHtml(item.note || "")}</p>
+      </article>`).join("");
+      return [
+        "<h3>反馈记忆汇总</h3>",
+        `<div class="overview">${[
+          metric("反馈记录", count),
+          metric("平均评分", average.toFixed(2)),
+          metric("正向反馈", positive),
+          metric("负向反馈", negative),
+        ].join("")}</div>`,
+        latest || "<p>暂无项目反馈。可先在项目详情页或推荐页写入有用/不适合/继续跟踪。</p>",
       ].join("");
     }
 
@@ -2428,7 +2459,15 @@ def _recommendations_content() -> str:
     .desc { color: #57606a; margin: 0; line-height: 1.5; }
     .meta { display: flex; flex-wrap: wrap; gap: 8px; }
     .pill { border: 1px solid #d8dee4; border-radius: 999px; padding: 3px 8px; color: #57606a; background: #f6f8fa; font-size: 12px; }
+    .pill.preference { border-color: #bbf7d0; color: #15803d; background: #f0fdf4; }
     .reasons { margin: 0; padding-left: 18px; color: #57606a; line-height: 1.55; }
+    .feedback { border-top: 1px solid #d8dee4; padding-top: 10px; display: grid; gap: 8px; }
+    .feedback-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .feedback-actions button { width: auto; background: #ffffff; color: #0969da; border-color: #d0d7de; padding: 7px 10px; }
+    .feedback-actions button:disabled { cursor: not-allowed; opacity: .55; }
+    .feedback-memory { color: #57606a; font-size: 13px; margin: 0; }
+    .feedback-status { min-height: 18px; color: #57606a; font-size: 13px; }
+    .feedback-status.error { color: #cf222e; }
     .empty, .error { border: 1px dashed #d0d7de; color: #57606a; padding: 18px; text-align: center; background: #ffffff; }
     .error { color: #cf222e; }
     @media (max-width: 900px) { .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
@@ -2504,6 +2543,7 @@ def _recommendations_content() -> str:
     };
 
     function init() {
+      adminToken();
       controls.profile.value = params.get("profile") || "";
       controls.language.value = params.get("language") || "";
       controls.category.value = params.get("category") || "";
@@ -2661,8 +2701,18 @@ def _recommendations_content() -> str:
             <span class="pill">新增 Star ${number(project.star_growth)}</span>
             <span class="pill">Trending ${project.trending_rank ? "#" + number(project.trending_rank) : "-"}</span>
             <span class="pill">质量 ${number(project.quality_score)}</span>
+            <span class="pill preference">偏好 ${signedNumber(project.preference_score)}</span>
           </div>
           <ul class="reasons">${reasonsHtml(project)}</ul>
+          <div class="feedback">
+            ${feedbackMemoryHtml(project.feedback_memory)}
+            <div class="feedback-actions" data-repo="${escapeAttribute(project.full_name || "")}">
+              <button type="button" data-feedback="useful"${apiMode ? "" : " disabled"}>有用</button>
+              <button type="button" data-feedback="not_fit"${apiMode ? "" : " disabled"}>不适合</button>
+              <button type="button" data-feedback="watch"${apiMode ? "" : " disabled"}>继续跟踪</button>
+            </div>
+            <div id="feedback-${safeId(project.full_name || "")}" class="feedback-status" aria-live="polite">${apiMode ? "" : "反馈写入需要本地后端或 api=1。"}</div>
+          </div>
           <div class="meta">
             <a class="button ghost" href="${escapeAttribute(projectDetailUrl(project))}">项目详情</a>
             <a class="button ghost" href="${escapeAttribute(compareUrl([project.full_name]))}">加入对比</a>
@@ -2670,11 +2720,79 @@ def _recommendations_content() -> str:
           </div>
         </article>
       `).join("");
+      bindRecommendationFeedback();
     }
 
     function reasonsHtml(project) {
       const reasons = Array.isArray(project.selection_reasons) && project.selection_reasons.length ? project.selection_reasons.slice(0, 3) : ["综合热度、方向和项目质量进入推荐列表。"];
       return reasons.map(reason => `<li>${escapeHtml(reason)}</li>`).join("");
+    }
+
+    function feedbackMemoryHtml(memory) {
+      if (!memory || !Number(memory.record_count || 0)) return '<p class="feedback-memory">暂无反馈记忆。</p>';
+      const labels = Array.isArray(memory.labels) ? memory.labels.slice(0, 3).join(", ") : "";
+      const note = memory.latest_note ? ` / ${memory.latest_note}` : "";
+      return `<p class="feedback-memory">反馈 ${number(memory.record_count)} 条，均分 ${number(memory.average_rating)}，最近 ${signedNumber(memory.latest_rating)}${labels ? ` / ${escapeHtml(labels)}` : ""}${escapeHtml(note)}</p>`;
+    }
+
+    function bindRecommendationFeedback() {
+      document.querySelectorAll("[data-feedback]").forEach(button => {
+        button.addEventListener("click", () => submitRecommendationFeedback(button));
+      });
+    }
+
+    async function submitRecommendationFeedback(button) {
+      const row = button.closest("[data-repo]");
+      const fullName = row ? row.dataset.repo || "" : "";
+      const action = button.dataset.feedback || "";
+      const status = document.getElementById(`feedback-${safeId(fullName)}`);
+      if (!apiMode || !fullName) return;
+      const payload = feedbackPayload(fullName, action, "recommendations_page");
+      try {
+        setFeedbackStatus(status, "写入中...", false);
+        const response = await fetch("/v1/feedback", {
+          method: "POST",
+          headers: adminWriteHeaders(),
+          body: JSON.stringify(payload)
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        setFeedbackStatus(status, "反馈已写入，正在刷新推荐排序。", false);
+        await loadRecommendations(false);
+      } catch (error) {
+        setFeedbackStatus(status, `反馈写入失败：${error.message || error}`, true);
+      }
+    }
+
+    function feedbackPayload(fullName, action, source) {
+      const ratings = { useful: 2, not_fit: -2, watch: 1 };
+      const notes = { useful: "recommendation useful", not_fit: "recommendation not fit", watch: "continue tracking" };
+      return {
+        full_name: fullName,
+        profile: controls.profile.value.trim(),
+        rating: ratings[action] || 0,
+        labels: [action],
+        note: notes[action] || action,
+        source
+      };
+    }
+
+    function setFeedbackStatus(target, message, isError) {
+      if (!target) return;
+      target.textContent = message;
+      target.classList.toggle("error", Boolean(isError));
+    }
+
+    function adminWriteHeaders() {
+      const token = adminToken();
+      const headers = { "Content-Type": "application/json" };
+      if (token) headers["X-Admin-Token"] = token;
+      return headers;
+    }
+
+    function adminToken() {
+      const token = params.get("admin_token") || window.localStorage.getItem("github_weekly_admin_token") || "";
+      if (params.get("admin_token")) window.localStorage.setItem("github_weekly_admin_token", params.get("admin_token"));
+      return token.trim();
     }
 
     function renderError(error) {
@@ -2686,6 +2804,7 @@ def _recommendations_content() -> str:
       const repo = project.full_name || "";
       const next = new URLSearchParams();
       next.set("repo", repo);
+      if (controls.profile.value.trim()) next.set("profile", controls.profile.value.trim());
       if (params.get("api")) next.set("api", params.get("api"));
       return `project.html?${next.toString()}`;
     }
@@ -2700,6 +2819,15 @@ def _recommendations_content() -> str:
 
     function number(value) {
       return Number(value || 0).toLocaleString("zh-CN");
+    }
+
+    function signedNumber(value) {
+      const numberValue = Number(value || 0);
+      return numberValue > 0 ? `+${number(numberValue)}` : number(numberValue);
+    }
+
+    function safeId(value) {
+      return String(value || "item").replace(/[^a-zA-Z0-9_-]+/g, "-");
     }
 
     function escapeHtml(value) {
@@ -4454,6 +4582,35 @@ def _project_detail_content() -> str:
       line-height: 1.5;
       margin: 10px 0 0;
     }
+    .feedback-panel {
+      margin: 12px 0;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+    }
+    .feedback-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .feedback-actions button {
+      width: auto;
+      min-width: 96px;
+    }
+    .feedback-actions button:disabled {
+      cursor: not-allowed;
+      opacity: .55;
+    }
+    .feedback-status {
+      min-height: 18px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .feedback-status.error {
+      color: var(--risk);
+    }
     table {
       width: 100%;
       border-collapse: collapse;
@@ -4508,6 +4665,8 @@ def _project_detail_content() -> str:
     const content = document.getElementById("content");
     const title = document.getElementById("title");
 
+    adminToken();
+
     Promise.resolve()
       .then(loadDetail)
       .then(render)
@@ -4546,6 +4705,7 @@ def _project_detail_content() -> str:
           rag_explanations: Array.isArray(rag.explanations) ? rag.explanations : [],
           rag_explanation_count: number((rag.explanation_summary || {}).count),
           rag_explanation_summary: rag.explanation_summary || {},
+          feedback_memory: rag.feedback_memory || detail.feedback_memory || {},
         }))
         .catch(() => detail);
     }
@@ -4593,6 +4753,7 @@ def _project_detail_content() -> str:
         rag_explanations: [],
         rag_explanation_count: 0,
         rag_explanation_summary: {},
+        feedback_memory: {},
         data_source: "静态 JSON"
       };
     }
@@ -4626,6 +4787,16 @@ def _project_detail_content() -> str:
           ${metric("最近入选", detail.latest_run_date || "-")}
           ${metric("质量分", number(detail.latest_quality_score))}
         </section>
+        <section class="feedback-panel">
+          <h2>项目反馈</h2>
+          ${feedbackMemoryHtml(detail.feedback_memory)}
+          <div class="feedback-actions" data-repo="${escapeAttribute(detail.full_name || "")}">
+            <button type="button" data-project-feedback="useful"${shouldUseApi() ? "" : " disabled"}>有用</button>
+            <button type="button" data-project-feedback="not_fit"${shouldUseApi() ? "" : " disabled"}>不适合</button>
+            <button type="button" data-project-feedback="watch"${shouldUseApi() ? "" : " disabled"}>继续跟踪</button>
+          </div>
+          <div id="projectFeedbackStatus" class="feedback-status" aria-live="polite">${shouldUseApi() ? "" : "反馈写入需要本地后端或 api=1。"}</div>
+        </section>
         <section class="grid">
           <div class="section"><h2>推荐理由</h2>${listHtml(detail.selection_reasons || [], "暂无推荐理由。")}</div>
           <div class="section"><h2>趋势判断</h2>${listHtml(detail.trend_summary || [], "暂无趋势判断。")}</div>
@@ -4645,6 +4816,7 @@ def _project_detail_content() -> str:
           <div class="table-shell">${historyTable(detail.history || [])}</div>
         </section>
       `;
+      bindProjectFeedback(detail);
     }
 
     function historyTable(history) {
@@ -4720,6 +4892,7 @@ def _project_detail_content() -> str:
           prompt_context: "",
           rag_explanations: [],
           rag_explanation_count: 0,
+          feedback_memory: {},
         });
       }
       const params = new URLSearchParams();
@@ -4734,7 +4907,76 @@ def _project_detail_content() -> str:
           prompt_context: "",
           explanations: [],
           explanation_summary: { count: 0, recommendations: [] },
+          feedback_memory: {},
         }));
+    }
+
+    function feedbackMemoryHtml(memory) {
+      const summary = memory && memory.summary ? memory.summary : memory || {};
+      const count = Number(memory && memory.count !== undefined ? memory.count : summary.record_count || 0);
+      if (!count) return "<p>暂无反馈记忆。</p>";
+      const labels = Array.isArray(summary.labels) ? summary.labels.slice(0, 4).join(", ") : "";
+      const latestNote = summary.latest_note ? ` / ${summary.latest_note}` : "";
+      return `<p>反馈 ${number(count)} 条，平均评分 ${number(summary.average_rating)}，最近评分 ${signedNumber(summary.latest_rating)}${labels ? ` / ${escapeHtml(labels)}` : ""}${escapeHtml(latestNote)}</p>`;
+    }
+
+    function bindProjectFeedback(detail) {
+      document.querySelectorAll("[data-project-feedback]").forEach(button => {
+        button.addEventListener("click", () => submitProjectFeedback(button, detail));
+      });
+    }
+
+    async function submitProjectFeedback(button, detail) {
+      if (!shouldUseApi()) return;
+      const status = document.getElementById("projectFeedbackStatus");
+      const action = button.dataset.projectFeedback || "";
+      const payload = projectFeedbackPayload(detail.full_name || repoName(), action);
+      try {
+        setFeedbackStatus(status, "写入中...", false);
+        const response = await fetch("/v1/feedback", {
+          method: "POST",
+          headers: adminWriteHeaders(),
+          body: JSON.stringify(payload)
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        setFeedbackStatus(status, "反馈已写入，刷新后会影响推荐排序。", false);
+      } catch (error) {
+        setFeedbackStatus(status, `反馈写入失败：${error.message || error}`, true);
+      }
+    }
+
+    function projectFeedbackPayload(fullName, action) {
+      const ratings = { useful: 2, not_fit: -2, watch: 1 };
+      const notes = { useful: "project useful", not_fit: "project not fit", watch: "continue tracking" };
+      const params = new URLSearchParams(window.location.search);
+      return {
+        full_name: fullName,
+        profile: params.get("profile") || "",
+        rating: ratings[action] || 0,
+        labels: [action],
+        note: notes[action] || action,
+        source: "project_page"
+      };
+    }
+
+    function setFeedbackStatus(target, message, isError) {
+      if (!target) return;
+      target.textContent = message;
+      target.classList.toggle("error", Boolean(isError));
+    }
+
+    function adminWriteHeaders() {
+      const token = adminToken();
+      const headers = { "Content-Type": "application/json" };
+      if (token) headers["X-Admin-Token"] = token;
+      return headers;
+    }
+
+    function adminToken() {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get("admin_token") || window.localStorage.getItem("github_weekly_admin_token") || "";
+      if (params.get("admin_token")) window.localStorage.setItem("github_weekly_admin_token", params.get("admin_token"));
+      return token.trim();
     }
 
     function ragEvidenceHtml(detail) {
@@ -4895,6 +5137,11 @@ def _project_detail_content() -> str:
     function number(value) {
       const parsed = Number(value || 0);
       return Number.isFinite(parsed) ? parsed : 0;
+    }
+
+    function signedNumber(value) {
+      const numberValue = number(value);
+      return numberValue > 0 ? `+${numberValue}` : numberValue;
     }
 
     function escapeHtml(value) {

@@ -1004,6 +1004,8 @@ GET /v1/feedback?profile=agent_development&limit=20
 
 当前推荐接口已经会读取这些反馈：`GET /v1/recommendations` 会把匹配 profile 的反馈聚合为项目级 `feedback_memory`，并生成 `preference_score` 参与排序。`GET /v1/projects/{owner}/{repo}/rag` 也会返回该项目的 `feedback_memory`，让 RAG 解释和项目详情页能看到用户历史判断。
 
+前端入口已经接入反馈闭环：`project.html?repo=...&api=1` 和 `recommendations.html?api=1` 会通过 `POST /v1/feedback` 写入“有用 / 不适合 / 继续跟踪”反馈；`admin.html?api=1` 会读取 `GET /v1/feedback?limit=200` 展示反馈记忆汇总。所有页面写请求仍需提供管理口令，来源为 `?admin_token=...` 或 `localStorage.github_weekly_admin_token`。
+
 ### `/v1` 任务接口
 
 `/v1` 是后端服务化入口，当前已经支持：

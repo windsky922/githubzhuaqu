@@ -205,6 +205,8 @@ feedback_memory
 
 `feedback_memory` 只包含反馈计数、平均评分、最近评分、标签、最近备注和排序调整值，不包含密钥或私有请求头。
 
+页面层反馈入口复用同一数据契约：`project.html` 和 `recommendations.html` 只向 `POST /v1/feedback` 写入仓库名、profile、评分、标签、备注和来源；`admin.html` 只读取 `GET /v1/feedback?limit=200` 的列表与汇总，不公开管理口令、请求头或任何密钥。
+
 ## 六、`docs/jobs.json`
 
 任务状态公开字段：

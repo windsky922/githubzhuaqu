@@ -219,6 +219,35 @@
       line-height: 1.5;
       margin: 10px 0 0;
     }
+    .feedback-panel {
+      margin: 12px 0;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+    }
+    .feedback-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .feedback-actions button {
+      width: auto;
+      min-width: 96px;
+    }
+    .feedback-actions button:disabled {
+      cursor: not-allowed;
+      opacity: .55;
+    }
+    .feedback-status {
+      min-height: 18px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .feedback-status.error {
+      color: var(--risk);
+    }
     table {
       width: 100%;
       border-collapse: collapse;
@@ -273,6 +302,8 @@
     const content = document.getElementById("content");
     const title = document.getElementById("title");
 
+    adminToken();
+
     Promise.resolve()
       .then(loadDetail)
       .then(render)
@@ -311,6 +342,7 @@
           rag_explanations: Array.isArray(rag.explanations) ? rag.explanations : [],
           rag_explanation_count: number((rag.explanation_summary || {}).count),
           rag_explanation_summary: rag.explanation_summary || {},
+          feedback_memory: rag.feedback_memory || detail.feedback_memory || {},
         }))
         .catch(() => detail);
     }
@@ -358,6 +390,7 @@
         rag_explanations: [],
         rag_explanation_count: 0,
         rag_explanation_summary: {},
+        feedback_memory: {},
         data_source: "静态 JSON"
       };
     }
@@ -391,6 +424,16 @@
           ${metric("最近入选", detail.latest_run_date || "-")}
           ${metric("质量分", number(detail.latest_quality_score))}
         </section>
+        <section class="feedback-panel">
+          <h2>项目反馈</h2>
+          ${feedbackMemoryHtml(detail.feedback_memory)}
+          <div class="feedback-actions" data-repo="${escapeAttribute(detail.full_name || "")}">
+            <button type="button" data-project-feedback="useful"${shouldUseApi() ? "" : " disabled"}>有用</button>
+            <button type="button" data-project-feedback="not_fit"${shouldUseApi() ? "" : " disabled"}>不适合</button>
+            <button type="button" data-project-feedback="watch"${shouldUseApi() ? "" : " disabled"}>继续跟踪</button>
+          </div>
+          <div id="projectFeedbackStatus" class="feedback-status" aria-live="polite">${shouldUseApi() ? "" : "反馈写入需要本地后端或 api=1。"}</div>
+        </section>
         <section class="grid">
           <div class="section"><h2>推荐理由</h2>${listHtml(detail.selection_reasons || [], "暂无推荐理由。")}</div>
           <div class="section"><h2>趋势判断</h2>${listHtml(detail.trend_summary || [], "暂无趋势判断。")}</div>
@@ -410,6 +453,7 @@
           <div class="table-shell">${historyTable(detail.history || [])}</div>
         </section>
       `;
+      bindProjectFeedback(detail);
     }
 
     function historyTable(history) {
@@ -485,6 +529,7 @@
           prompt_context: "",
           rag_explanations: [],
           rag_explanation_count: 0,
+          feedback_memory: {},
         });
       }
       const params = new URLSearchParams();
@@ -499,7 +544,76 @@
           prompt_context: "",
           explanations: [],
           explanation_summary: { count: 0, recommendations: [] },
+          feedback_memory: {},
         }));
+    }
+
+    function feedbackMemoryHtml(memory) {
+      const summary = memory && memory.summary ? memory.summary : memory || {};
+      const count = Number(memory && memory.count !== undefined ? memory.count : summary.record_count || 0);
+      if (!count) return "<p>暂无反馈记忆。</p>";
+      const labels = Array.isArray(summary.labels) ? summary.labels.slice(0, 4).join(", ") : "";
+      const latestNote = summary.latest_note ? ` / ${summary.latest_note}` : "";
+      return `<p>反馈 ${number(count)} 条，平均评分 ${number(summary.average_rating)}，最近评分 ${signedNumber(summary.latest_rating)}${labels ? ` / ${escapeHtml(labels)}` : ""}${escapeHtml(latestNote)}</p>`;
+    }
+
+    function bindProjectFeedback(detail) {
+      document.querySelectorAll("[data-project-feedback]").forEach(button => {
+        button.addEventListener("click", () => submitProjectFeedback(button, detail));
+      });
+    }
+
+    async function submitProjectFeedback(button, detail) {
+      if (!shouldUseApi()) return;
+      const status = document.getElementById("projectFeedbackStatus");
+      const action = button.dataset.projectFeedback || "";
+      const payload = projectFeedbackPayload(detail.full_name || repoName(), action);
+      try {
+        setFeedbackStatus(status, "写入中...", false);
+        const response = await fetch("/v1/feedback", {
+          method: "POST",
+          headers: adminWriteHeaders(),
+          body: JSON.stringify(payload)
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        setFeedbackStatus(status, "反馈已写入，刷新后会影响推荐排序。", false);
+      } catch (error) {
+        setFeedbackStatus(status, `反馈写入失败：${error.message || error}`, true);
+      }
+    }
+
+    function projectFeedbackPayload(fullName, action) {
+      const ratings = { useful: 2, not_fit: -2, watch: 1 };
+      const notes = { useful: "project useful", not_fit: "project not fit", watch: "continue tracking" };
+      const params = new URLSearchParams(window.location.search);
+      return {
+        full_name: fullName,
+        profile: params.get("profile") || "",
+        rating: ratings[action] || 0,
+        labels: [action],
+        note: notes[action] || action,
+        source: "project_page"
+      };
+    }
+
+    function setFeedbackStatus(target, message, isError) {
+      if (!target) return;
+      target.textContent = message;
+      target.classList.toggle("error", Boolean(isError));
+    }
+
+    function adminWriteHeaders() {
+      const token = adminToken();
+      const headers = { "Content-Type": "application/json" };
+      if (token) headers["X-Admin-Token"] = token;
+      return headers;
+    }
+
+    function adminToken() {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get("admin_token") || window.localStorage.getItem("github_weekly_admin_token") || "";
+      if (params.get("admin_token")) window.localStorage.setItem("github_weekly_admin_token", params.get("admin_token"));
+      return token.trim();
     }
 
     function ragEvidenceHtml(detail) {
@@ -660,6 +774,11 @@
     function number(value) {
       const parsed = Number(value || 0);
       return Number.isFinite(parsed) ? parsed : 0;
+    }
+
+    function signedNumber(value) {
+      const numberValue = number(value);
+      return numberValue > 0 ? `+${numberValue}` : numberValue;
     }
 
     function escapeHtml(value) {
