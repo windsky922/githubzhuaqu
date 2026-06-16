@@ -184,6 +184,9 @@ GET /v1/rag/ask
 GET /v1/rag/diagnostics
 GET /v1/feedback
 POST /v1/feedback
+POST /v1/dev-context/index
+GET /v1/dev-context/search
+GET /v1/dev-context/runs/{id}
 ```
 
 `/api/projects` 复用历史归档查询能力，支持按语言、方向、profile、来源、风险提示、质量分、Trending 排名和关键词筛选。返回结构保持为：
@@ -206,6 +209,8 @@ feedback_memory
 `feedback_memory` 只包含反馈计数、平均评分、最近评分、标签、最近备注和排序调整值，不包含密钥或私有请求头。
 
 页面层反馈入口复用同一数据契约：`project.html` 和 `recommendations.html` 只向 `POST /v1/feedback` 写入仓库名、profile、评分、标签、备注和来源；`admin.html` 只读取 `GET /v1/feedback?limit=200` 的列表与汇总，不公开管理口令、请求头或任何密钥。
+
+`/v1/dev-context/index` 会采集开发材料并写入 SQLite 开发上下文表。当前保存内容包括 README、API 文档、数据契约、操作日志、Git diff、测试输出和安全检查输出；写入前会对明显密钥形态做脱敏。`/v1/dev-context/search` 只返回匹配分块、来源、摘要和 metadata，不返回管理口令或请求头。
 
 ## 六、`docs/jobs.json`
 
@@ -246,6 +251,11 @@ rag_chunks_fts
 rag_embeddings
 rag_explanations
 project_feedback
+dev_runs
+dev_corpus
+dev_chunks
+dev_chunks_fts
+dev_embeddings
 trend_summaries
 sent_repositories
 star_history
@@ -267,13 +277,18 @@ migration_meta
 8. `rag_embeddings` 保存从 `rag_chunks` 派生的本地 embedding 向量索引；当前默认模型为 `local-hash-v1`，可重建，不保存密钥。
 9. `rag_explanations` 保存 RAG 解释结果、引用、检索参数、解释摘要和规则版质量评估，用于后续质量评估和模型替换对比；不保存密钥。
 10. `project_feedback` 保存用户对项目的显式反馈，包括仓库名、profile、评分、标签、备注和来源，用于后续个性化记忆、RAG 重排和推荐校准；不保存密钥。
-11. `trend_summaries` 保存趋势摘要。
-12. `sent_repositories` 保存已推送仓库状态。
-13. `star_history` 保存 Star 历史。
-14. `jobs` 保存历史周报任务和触发预览任务状态。
-15. `job_events` 保存任务创建、重复命中、执行请求、执行阻止和执行完成等审计事件。
-16. `subscriptions` 保存本地订阅偏好，只记录筛选条件和通道名称，不记录 Token、Chat ID 或 Webhook。
-17. `migration_meta` 保存迁移元数据。
+11. `dev_runs` 保存每次开发上下文索引任务的状态、来源数量、分块数量、embedding 数量和错误摘要。
+12. `dev_corpus` 保存开发上下文原始材料，包括文档、Git diff、测试输出和安全检查输出；写入前应脱敏。
+13. `dev_chunks` 保存从开发上下文材料拆分出的短文本片段。
+14. `dev_chunks_fts` 保存 `dev_chunks` 的 SQLite FTS5 搜索索引。
+15. `dev_embeddings` 保存从 `dev_chunks` 派生的本地确定性 embedding；当前只作为后续向量检索预留，不接外部向量库。
+16. `trend_summaries` 保存趋势摘要。
+17. `sent_repositories` 保存已推送仓库状态。
+18. `star_history` 保存 Star 历史。
+19. `jobs` 保存历史周报任务和触发预览任务状态。
+20. `job_events` 保存任务创建、重复命中、执行请求、执行阻止和执行完成等审计事件。
+21. `subscriptions` 保存本地订阅偏好，只记录筛选条件和通道名称，不记录 Token、Chat ID 或 Webhook。
+22. `migration_meta` 保存迁移元数据。
 
 当前只读查询入口位于：
 

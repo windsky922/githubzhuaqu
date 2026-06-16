@@ -931,6 +931,24 @@ def _admin_dashboard_content() -> str:
         <button id="runRagSearch" type="button">检索</button>
       </div>
       <div id="ragSearchResults" class="search-results"></div>
+      <h3>开发上下文 RAG</h3>
+      <div class="search-form">
+        <label>开发上下文问题
+          <input id="devContextQuery" type="text" placeholder="反馈入口 / 最近测试失败 / RAG 维护">
+        </label>
+        <label>来源
+          <select id="devContextSource">
+            <option value="">全部</option>
+            <option value="document">文档</option>
+            <option value="git_diff">Git diff</option>
+            <option value="test_output">测试输出</option>
+            <option value="security_check">安全检查</option>
+          </select>
+        </label>
+        <button id="indexDevContext" type="button">索引开发上下文</button>
+        <button id="runDevContextSearch" type="button">搜索</button>
+      </div>
+      <div id="devContextResults" class="search-results"></div>
       <div id="ragQualitySummary" class="search-results"></div>
       <div id="ragEvaluationTrends" class="search-results"></div>
       <div class="search-form">
@@ -1043,6 +1061,7 @@ def _admin_dashboard_content() -> str:
     const databaseTrends = document.getElementById("databaseTrends");
     const corpusSearchResults = document.getElementById("corpusSearchResults");
     const ragSearchResults = document.getElementById("ragSearchResults");
+    const devContextResults = document.getElementById("devContextResults");
     const ragQualitySummary = document.getElementById("ragQualitySummary");
     const ragEvaluationTrends = document.getElementById("ragEvaluationTrends");
     const ragMaintenanceResults = document.getElementById("ragMaintenanceResults");
@@ -1069,6 +1088,12 @@ def _admin_dashboard_content() -> str:
       language: document.getElementById("ragLanguage"),
       button: document.getElementById("runRagSearch"),
     };
+    const devContextControls = {
+      query: document.getElementById("devContextQuery"),
+      source: document.getElementById("devContextSource"),
+      indexButton: document.getElementById("indexDevContext"),
+      searchButton: document.getElementById("runDevContextSearch"),
+    };
     const ragBackfillControls = {
       limit: document.getElementById("ragBackfillLimit"),
       previewButton: document.getElementById("previewRagBackfill"),
@@ -1085,9 +1110,10 @@ def _admin_dashboard_content() -> str:
     loadOverview();
     loadDatabaseInsights();
     setupCreateTask();
-    setupCorpusSearch();
-    setupRagSearch();
-    setupRagBackfill();
+      setupCorpusSearch();
+      setupRagSearch();
+      setupDevContext();
+      setupRagBackfill();
     setupRagMaintenance();
     bindWorkbenchFilters();
     jobWorkbench.addEventListener("click", handleWorkbenchAction);
@@ -1132,6 +1158,20 @@ def _admin_dashboard_content() -> str:
       ragControls.button.addEventListener("click", runRagSearch);
       ragControls.query.addEventListener("keydown", event => {
         if (event.key === "Enter") runRagSearch();
+      });
+    }
+
+    function setupDevContext() {
+      if (!shouldUseApi()) {
+        devContextControls.indexButton.disabled = true;
+        devContextControls.searchButton.disabled = true;
+        devContextResults.innerHTML = '<p>开发上下文索引需要本地后端或 api=1 模式。</p>';
+        return;
+      }
+      devContextControls.indexButton.addEventListener("click", indexDevContext);
+      devContextControls.searchButton.addEventListener("click", runDevContextSearch);
+      devContextControls.query.addEventListener("keydown", event => {
+        if (event.key === "Enter") runDevContextSearch();
       });
     }
 
@@ -1208,6 +1248,50 @@ def _admin_dashboard_content() -> str:
         })
         .finally(() => {
           ragControls.button.disabled = false;
+        });
+    }
+
+    function indexDevContext() {
+      if (!shouldUseApi()) return;
+      devContextResults.innerHTML = '<p>开发上下文索引中，可能会运行测试和安全检查...</p>';
+      fetch("/v1/dev-context/index", {
+        method: "POST",
+        headers: adminWriteHeaders(),
+        body: JSON.stringify({
+          run_checks: true,
+          requested_by: "admin_page",
+          source: "admin_page"
+        })
+      })
+        .then(jsonOrThrow)
+        .then(data => {
+          devContextResults.innerHTML = devContextIndexHtml(data);
+          if (devContextControls.query.value.trim()) runDevContextSearch();
+          loadDatabaseInsights();
+        })
+        .catch(error => {
+          devContextResults.innerHTML = `<p>开发上下文索引失败：${escapeHtml(error.message || error)}</p>`;
+        });
+    }
+
+    function runDevContextSearch() {
+      const query = devContextControls.query.value.trim();
+      if (!query) {
+        devContextResults.innerHTML = '<p>请输入开发上下文问题或关键词。</p>';
+        return;
+      }
+      const params = new URLSearchParams();
+      params.set("q", query);
+      params.set("limit", "8");
+      if (devContextControls.source.value) params.set("source_type", devContextControls.source.value);
+      devContextResults.innerHTML = '<p>开发上下文搜索中...</p>';
+      fetch(`/v1/dev-context/search?${params.toString()}`, { cache: "no-store" })
+        .then(jsonOrThrow)
+        .then(data => {
+          devContextResults.innerHTML = devContextSearchHtml(data);
+        })
+        .catch(error => {
+          devContextResults.innerHTML = `<p>开发上下文搜索失败：${escapeHtml(error.message || error)}</p>`;
         });
     }
 
@@ -1834,6 +1918,25 @@ def _admin_dashboard_content() -> str:
         </article>`;
       }).join("");
       return `${answerHtml}${summary}${nextActionsHtml}${contextHtml}<label>Prompt Context<textarea readonly>${escapeHtml(promptContext)}</textarea></label>`;
+    }
+
+    function devContextIndexHtml(data) {
+      return `<article class="search-row">
+        <strong>开发上下文索引完成</strong>
+        <span>${escapeHtml(data.run_id || "-")} · ${escapeHtml(data.status || "-")}</span>
+        <p>来源 ${escapeHtml(data.source_count || 0)}，分块 ${escapeHtml(data.chunk_count || 0)}，embedding ${escapeHtml(data.embedding_count || 0)}，命令 ${escapeHtml(data.command_count || 0)}。</p>
+      </article>`;
+    }
+
+    function devContextSearchHtml(data) {
+      const summary = (data.summary || []).map(item => `<p>${escapeHtml(item)}</p>`).join("");
+      const results = data.results || [];
+      if (!results.length) return `${summary}<p>没有搜索结果。可先点击“索引开发上下文”。</p>`;
+      return `${summary}${results.map(result => `<article class="search-row">
+        <strong>${escapeHtml(result.title || result.source_path || "-")}</strong>
+        <span>${escapeHtml(result.source_type || "-")} · ${escapeHtml(result.source_path || "-")} · ${escapeHtml(result.run_id || "-")}</span>
+        <p>${escapeHtml(result.snippet || "")}</p>
+      </article>`).join("")}`;
     }
 
     function facetRow(name, value, detail) {

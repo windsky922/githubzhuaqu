@@ -1006,6 +1006,29 @@ GET /v1/feedback?profile=agent_development&limit=20
 
 前端入口已经接入反馈闭环：`project.html?repo=...&api=1` 和 `recommendations.html?api=1` 会通过 `POST /v1/feedback` 写入“有用 / 不适合 / 继续跟踪”反馈；`admin.html?api=1` 会读取 `GET /v1/feedback?limit=200` 展示反馈记忆汇总。所有页面写请求仍需提供管理口令，来源为 `?admin_token=...` 或 `localStorage.github_weekly_admin_token`。
 
+### `/v1/dev-context` 开发上下文 RAG
+
+开发上下文接口用于把本仓库的开发材料沉淀到 SQLite，作为后续代码审查、运行诊断、历史追踪和开发决策问答的记忆层。第一阶段只提供本地索引和 FTS5 检索，不提供复杂聊天 UI。
+
+当前入口包括：
+
+1. `POST /v1/dev-context/index`：采集并索引开发上下文，写入 `dev_runs`、`dev_corpus`、`dev_chunks`、`dev_chunks_fts` 和 `dev_embeddings`。
+2. `GET /v1/dev-context/search?q=...`：按关键词检索开发上下文片段，支持可选 `source_type=document|git_diff|test_output|security_check`。
+3. `GET /v1/dev-context/runs/{id}`：查看一次索引任务的来源和样例分块。
+
+`POST /v1/dev-context/index` 是管理写接口，必须提供 `X-Admin-Token` 或 `Authorization: Bearer ...`。默认会采集 README、API 文档、数据契约、操作日志、`git diff`、单元测试输出和安全检查输出；接口会对明显密钥形态做脱敏，并给外部命令设置超时。测试或调试时可传入 `{"run_checks": false}` 跳过单元测试和安全检查。
+
+示例：
+
+```text
+POST /v1/dev-context/index
+GET /v1/dev-context/search?q=最近测试失败&limit=8
+GET /v1/dev-context/search?q=反馈入口&source_type=document
+GET /v1/dev-context/runs/dev-context:xxxx
+```
+
+管理页 `admin.html?api=1` 已提供“索引开发上下文”和搜索入口。
+
 ### `/v1` 任务接口
 
 `/v1` 是后端服务化入口，当前已经支持：

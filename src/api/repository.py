@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import json
+import re
 import sqlite3
+import subprocess
 from datetime import UTC, datetime
 from hashlib import sha1
 from pathlib import Path
@@ -97,6 +99,9 @@ class ApiRepository:
                 "rag_maintenance_plan": True,
                 "rag_maintenance_report": True,
                 "rag_backfill_jobs": True,
+                "dev_context_index": True,
+                "dev_context_search": True,
+                "dev_context_runs": True,
                 "runs_query": True,
                 "jobs_query": True,
                 "job_events": True,
@@ -257,6 +262,332 @@ class ApiRepository:
             "count": len(results),
             "results": results,
             "summary": _search_summary(results, terms),
+        }
+
+    def dev_context_index(self, payload: dict[str, Any] | None = None) -> dict[str, Any]:
+        payload = payload or {}
+        self.ensure_sqlite_index()
+        started_at = datetime.now(UTC).isoformat()
+        run_id = str(payload.get("run_id") or "").strip()
+        if not run_id:
+            run_id = "dev-context:" + sha1(f"{started_at}:{self.root}".encode("utf-8")).hexdigest()[:16]
+        run_checks = payload.get("run_checks", True) is not False
+        replace = payload.get("replace", False) is True
+        max_command_chars = _int_value(payload.get("max_command_chars")) or 120000
+        max_command_chars = max(2000, min(max_command_chars, 250000))
+        sources = _dev_context_sources(self.root, run_checks=run_checks, max_command_chars=max_command_chars)
+        chunks: list[dict[str, Any]] = []
+        embedding_count = 0
+
+        connection = connect(self.db_path)
+        try:
+            initialize(connection)
+            if replace:
+                connection.execute("DELETE FROM dev_embeddings")
+                connection.execute("DELETE FROM dev_chunks_fts")
+                connection.execute("DELETE FROM dev_chunks")
+                connection.execute("DELETE FROM dev_corpus")
+            for source in sources:
+                corpus_id = _dev_corpus_id(run_id, source)
+                metadata = dict(source.get("metadata") or {})
+                metadata.update({"run_id": run_id, "content_hash": source.get("content_hash") or ""})
+                connection.execute(
+                    """
+                    INSERT INTO dev_corpus(
+                      corpus_id, run_id, source_type, source_path, title,
+                      content_hash, content_text, metadata_json, created_at
+                    )
+                    VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ON CONFLICT(corpus_id) DO UPDATE SET
+                      run_id = excluded.run_id,
+                      source_type = excluded.source_type,
+                      source_path = excluded.source_path,
+                      title = excluded.title,
+                      content_hash = excluded.content_hash,
+                      content_text = excluded.content_text,
+                      metadata_json = excluded.metadata_json,
+                      created_at = excluded.created_at
+                    """,
+                    (
+                        corpus_id,
+                        run_id,
+                        source.get("source_type") or "",
+                        source.get("source_path") or "",
+                        source.get("title") or "",
+                        source.get("content_hash") or "",
+                        source.get("content_text") or "",
+                        json.dumps(metadata, ensure_ascii=False, sort_keys=True),
+                        started_at,
+                    ),
+                )
+                connection.execute("DELETE FROM dev_chunks_fts WHERE chunk_id IN (SELECT chunk_id FROM dev_chunks WHERE corpus_id = ?)", (corpus_id,))
+                connection.execute("DELETE FROM dev_embeddings WHERE corpus_id = ?", (corpus_id,))
+                connection.execute("DELETE FROM dev_chunks WHERE corpus_id = ?", (corpus_id,))
+                for chunk in _dev_context_chunks(
+                    corpus_id=corpus_id,
+                    run_id=run_id,
+                    source=source,
+                    created_at=started_at,
+                ):
+                    chunks.append(chunk)
+                    connection.execute(
+                        """
+                        INSERT INTO dev_chunks(
+                          chunk_id, corpus_id, run_id, chunk_index, source_type,
+                          source_path, title, chunk_text, token_estimate,
+                          metadata_json, created_at
+                        )
+                        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """,
+                        (
+                            chunk["chunk_id"],
+                            chunk["corpus_id"],
+                            chunk["run_id"],
+                            chunk["chunk_index"],
+                            chunk["source_type"],
+                            chunk["source_path"],
+                            chunk["title"],
+                            chunk["chunk_text"],
+                            chunk["token_estimate"],
+                            json.dumps(chunk["metadata"], ensure_ascii=False, sort_keys=True),
+                            chunk["created_at"],
+                        ),
+                    )
+                    connection.execute(
+                        """
+                        INSERT INTO dev_chunks_fts(chunk_id, source_type, source_path, title, chunk_text)
+                        VALUES(?, ?, ?, ?, ?)
+                        """,
+                        (
+                            chunk["chunk_id"],
+                            chunk["source_type"],
+                            chunk["source_path"],
+                            chunk["title"],
+                            chunk["chunk_text"],
+                        ),
+                    )
+                    vector = hash_embedding(chunk["chunk_text"], dimensions=DEFAULT_DIMENSIONS)
+                    connection.execute(
+                        """
+                        INSERT INTO dev_embeddings(
+                          chunk_id, corpus_id, run_id, source_type, source_path,
+                          embedding_model, dimensions, vector_json, metadata_json, updated_at
+                        )
+                        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        ON CONFLICT(chunk_id, embedding_model) DO UPDATE SET
+                          corpus_id = excluded.corpus_id,
+                          run_id = excluded.run_id,
+                          source_type = excluded.source_type,
+                          source_path = excluded.source_path,
+                          dimensions = excluded.dimensions,
+                          vector_json = excluded.vector_json,
+                          metadata_json = excluded.metadata_json,
+                          updated_at = excluded.updated_at
+                        """,
+                        (
+                            chunk["chunk_id"],
+                            chunk["corpus_id"],
+                            chunk["run_id"],
+                            chunk["source_type"],
+                            chunk["source_path"],
+                            MODEL_NAME,
+                            DEFAULT_DIMENSIONS,
+                            json.dumps(vector, ensure_ascii=False),
+                            json.dumps(chunk["metadata"], ensure_ascii=False, sort_keys=True),
+                            started_at,
+                        ),
+                    )
+                    embedding_count += 1
+            finished_at = datetime.now(UTC).isoformat()
+            command_count = sum(1 for source in sources if (source.get("metadata") or {}).get("kind") == "command")
+            run_payload = {
+                "run_checks": run_checks,
+                "replace": replace,
+                "sources": [
+                    {
+                        "source_type": source.get("source_type") or "",
+                        "source_path": source.get("source_path") or "",
+                        "title": source.get("title") or "",
+                        "content_hash": source.get("content_hash") or "",
+                    }
+                    for source in sources
+                ],
+            }
+            connection.execute(
+                """
+                INSERT INTO dev_runs(
+                  run_id, status, started_at, finished_at, source_count,
+                  chunk_count, embedding_count, command_count, error, payload_json
+                )
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(run_id) DO UPDATE SET
+                  status = excluded.status,
+                  finished_at = excluded.finished_at,
+                  source_count = excluded.source_count,
+                  chunk_count = excluded.chunk_count,
+                  embedding_count = excluded.embedding_count,
+                  command_count = excluded.command_count,
+                  error = excluded.error,
+                  payload_json = excluded.payload_json
+                """,
+                (
+                    run_id,
+                    "succeeded",
+                    started_at,
+                    finished_at,
+                    len(sources),
+                    len(chunks),
+                    embedding_count,
+                    command_count,
+                    "",
+                    json.dumps(run_payload, ensure_ascii=False, sort_keys=True),
+                ),
+            )
+            connection.commit()
+        except Exception as exc:
+            connection.rollback()
+            finished_at = datetime.now(UTC).isoformat()
+            connection.execute(
+                """
+                INSERT INTO dev_runs(
+                  run_id, status, started_at, finished_at, source_count,
+                  chunk_count, embedding_count, command_count, error, payload_json
+                )
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(run_id) DO UPDATE SET
+                  status = excluded.status,
+                  finished_at = excluded.finished_at,
+                  error = excluded.error,
+                  payload_json = excluded.payload_json
+                """,
+                (
+                    run_id,
+                    "failed",
+                    started_at,
+                    finished_at,
+                    0,
+                    0,
+                    0,
+                    0,
+                    str(exc)[:1000],
+                    json.dumps({"run_checks": run_checks, "replace": replace}, ensure_ascii=False, sort_keys=True),
+                ),
+            )
+            connection.commit()
+            raise
+        finally:
+            connection.close()
+
+        return {
+            "schema_version": 1,
+            "run_id": run_id,
+            "status": "succeeded",
+            "source_count": len(sources),
+            "chunk_count": len(chunks),
+            "embedding_count": embedding_count,
+            "command_count": sum(1 for source in sources if (source.get("metadata") or {}).get("kind") == "command"),
+            "started_at": started_at,
+            "finished_at": finished_at,
+        }
+
+    def dev_context_search(
+        self,
+        *,
+        query: str,
+        source_type: str | None = None,
+        limit: int = 20,
+    ) -> dict[str, Any]:
+        self.ensure_sqlite_index()
+        normalized_query = (_blank_to_none(query) or "").strip()
+        terms = _search_terms(normalized_query)
+        limit = max(1, min(int(limit or 20), 100))
+        if not terms:
+            return {
+                "schema_version": 1,
+                "query": normalized_query,
+                "source_type": _blank_to_none(source_type) or "",
+                "count": 0,
+                "results": [],
+                "summary": ["请输入开发上下文搜索关键词。"],
+            }
+
+        connection = connect(self.db_path)
+        search_engine = "fts5"
+        try:
+            initialize(connection)
+            try:
+                rows = _dev_context_search_fts(
+                    connection,
+                    terms=terms,
+                    source_type=_blank_to_none(source_type),
+                    limit=limit * 3,
+                )
+            except sqlite3.Error:
+                search_engine = "like"
+                rows = _dev_context_search_like(
+                    connection,
+                    terms=terms,
+                    source_type=_blank_to_none(source_type),
+                    limit=limit * 3,
+                )
+        finally:
+            connection.close()
+
+        results = [_dev_context_result(row, terms) for row in rows][:limit]
+        return {
+            "schema_version": 1,
+            "query": normalized_query,
+            "source_type": _blank_to_none(source_type) or "",
+            "search_engine": search_engine,
+            "count": len(results),
+            "results": results,
+            "summary": _dev_context_search_summary(results, terms),
+        }
+
+    def dev_context_run(self, run_id: str) -> dict[str, Any]:
+        self.ensure_sqlite_index()
+        normalized = str(run_id or "").strip()
+        connection = connect(self.db_path)
+        try:
+            initialize(connection)
+            run = connection.execute("SELECT * FROM dev_runs WHERE run_id = ?", (normalized,)).fetchone()
+            if not run:
+                return {"schema_version": 1, "found": False, "run_id": normalized}
+            sources = [
+                _dev_context_corpus_from_row(row)
+                for row in connection.execute(
+                    """
+                    SELECT corpus_id, run_id, source_type, source_path, title,
+                           content_hash, metadata_json, created_at
+                    FROM dev_corpus
+                    WHERE run_id = ?
+                    ORDER BY source_type ASC, source_path ASC
+                    """,
+                    (normalized,),
+                ).fetchall()
+            ]
+            chunks = [
+                _dev_context_result(row, [])
+                for row in connection.execute(
+                    """
+                    SELECT *
+                    FROM dev_chunks
+                    WHERE run_id = ?
+                    ORDER BY source_type ASC, source_path ASC, chunk_index ASC
+                    LIMIT 50
+                    """,
+                    (normalized,),
+                ).fetchall()
+            ]
+        finally:
+            connection.close()
+        return {
+            "schema_version": 1,
+            "found": True,
+            "run": _dev_context_run_from_row(run),
+            "source_count": len(sources),
+            "sources": sources,
+            "sample_chunks": chunks,
         }
 
     def rag_corpus(
@@ -2064,6 +2395,11 @@ class ApiRepository:
                 "rag_embeddings",
                 "rag_explanations",
                 "project_feedback",
+                "dev_corpus",
+                "dev_chunks",
+                "dev_chunks_fts",
+                "dev_embeddings",
+                "dev_runs",
                 "trend_summaries",
                 "jobs",
                 "job_events",
@@ -2131,12 +2467,17 @@ class ApiRepository:
                 "embedding_records": table_counts.get("rag_embeddings", 0),
                 "explanation_records": table_counts.get("rag_explanations", 0),
                 "feedback_records": table_counts.get("project_feedback", 0),
+                "dev_corpus_records": table_counts.get("dev_corpus", 0),
+                "dev_chunk_records": table_counts.get("dev_chunks", 0),
+                "dev_embedding_records": table_counts.get("dev_embeddings", 0),
+                "dev_run_records": table_counts.get("dev_runs", 0),
                 "event_records": table_counts.get("job_events", 0),
                 "ready_for_text_index": table_counts.get("project_corpus_fts", 0) > 0,
                 "ready_for_chunk_retrieval": table_counts.get("rag_chunks_fts", 0) > 0,
                 "ready_for_vector_search": table_counts.get("rag_embeddings", 0) > 0,
                 "ready_for_explanation_history": table_counts.get("rag_explanations", 0) > 0,
                 "ready_for_feedback_memory": table_counts.get("project_feedback", 0) > 0,
+                "ready_for_dev_context_search": table_counts.get("dev_chunks_fts", 0) > 0,
             },
         }
 
@@ -2970,6 +3311,11 @@ class ApiRepository:
             or not self._sqlite_table_exists("rag_chunks")
             or not self._sqlite_table_exists("rag_chunks_fts")
             or not self._sqlite_table_exists("rag_embeddings")
+            or not self._sqlite_table_exists("dev_corpus")
+            or not self._sqlite_table_exists("dev_chunks")
+            or not self._sqlite_table_exists("dev_chunks_fts")
+            or not self._sqlite_table_exists("dev_embeddings")
+            or not self._sqlite_table_exists("dev_runs")
         ):
             connection = connect(self.db_path)
             try:
@@ -5784,4 +6130,304 @@ def _project_keywords(project: dict[str, Any]) -> set[str]:
 def _rank_value(value: Any) -> int:
     rank = _int_value(value)
     return rank if rank > 0 else 9999
+
+
+def _dev_context_sources(root: Path, *, run_checks: bool, max_command_chars: int) -> list[dict[str, Any]]:
+    sources: list[dict[str, Any]] = []
+    for relative, title in [
+        ("README.md", "README"),
+        ("docs/api.md", "API 文档"),
+        ("docs/data-contracts.md", "数据契约"),
+        ("docs/operation-log.md", "操作日志"),
+    ]:
+        path = root / relative
+        if not path.exists() or not path.is_file():
+            continue
+        content = _redact_sensitive_text(path.read_text(encoding="utf-8", errors="replace"))
+        sources.append(
+            _dev_context_source(
+                source_type="document",
+                source_path=relative,
+                title=title,
+                content_text=content,
+                metadata={"kind": "file", "relative_path": relative, "bytes": len(content.encode("utf-8"))},
+            )
+        )
+
+    command_specs: list[tuple[str, str, list[str], str]] = [
+        ("git_diff", "git diff --stat", ["git", "diff", "--stat"], "Git diff 摘要"),
+        ("git_diff", "git diff", ["git", "diff", "--", "README.md", "docs", "src", "scripts", "tests"], "Git diff 详情"),
+    ]
+    if run_checks:
+        command_specs.extend(
+            [
+                ("test_output", "python -m unittest discover -q", ["python", "-m", "unittest", "discover", "-q"], "单元测试输出"),
+                ("security_check", "python scripts/security_check.py", ["python", "scripts/security_check.py"], "安全检查输出"),
+            ]
+        )
+    for source_type, command_text, args, title in command_specs:
+        command_result = _run_dev_context_command(root, args, max_chars=max_command_chars)
+        sources.append(
+            _dev_context_source(
+                source_type=source_type,
+                source_path=f"command:{command_text}",
+                title=title,
+                content_text=command_result["content"],
+                metadata={
+                    "kind": "command",
+                    "command": command_text,
+                    "exit_code": command_result["exit_code"],
+                    "timed_out": command_result["timed_out"],
+                },
+            )
+        )
+    return sources
+
+
+def _dev_context_source(
+    *,
+    source_type: str,
+    source_path: str,
+    title: str,
+    content_text: str,
+    metadata: dict[str, Any],
+) -> dict[str, Any]:
+    content = _redact_sensitive_text(content_text or "")
+    content_hash = sha1(content.encode("utf-8")).hexdigest()
+    return {
+        "source_type": source_type,
+        "source_path": source_path,
+        "title": title,
+        "content_hash": content_hash,
+        "content_text": content,
+        "metadata": metadata,
+    }
+
+
+def _run_dev_context_command(root: Path, args: list[str], *, max_chars: int) -> dict[str, Any]:
+    try:
+        completed = subprocess.run(
+            args,
+            cwd=root,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=90,
+            check=False,
+        )
+        output = "\n".join(
+            [
+                f"$ {' '.join(args)}",
+                f"exit_code={completed.returncode}",
+                completed.stdout or "",
+                completed.stderr or "",
+            ]
+        ).strip()
+        return {
+            "exit_code": completed.returncode,
+            "timed_out": False,
+            "content": _redact_sensitive_text(output[:max_chars]),
+        }
+    except subprocess.TimeoutExpired as exc:
+        output = "\n".join(
+            [
+                f"$ {' '.join(args)}",
+                "timed_out=true",
+                str(exc.stdout or ""),
+                str(exc.stderr or ""),
+            ]
+        ).strip()
+        return {"exit_code": -1, "timed_out": True, "content": _redact_sensitive_text(output[:max_chars])}
+    except OSError as exc:
+        return {
+            "exit_code": -1,
+            "timed_out": False,
+            "content": _redact_sensitive_text(f"$ {' '.join(args)}\ncommand_error={exc}"),
+        }
+
+
+def _redact_sensitive_text(text: str) -> str:
+    value = text or ""
+    patterns = [
+        r"(?i)(api[_-]?key|token|secret|webhook|chat[_-]?id)(\s*[:=]\s*)([^\s,;]+)",
+        r"(?i)(authorization\s*:\s*bearer\s+)([^\s,;]+)",
+    ]
+    for pattern in patterns:
+        value = re.sub(pattern, lambda match: "".join(match.groups()[:-1]) + "[REDACTED]", value)
+    return value
+
+
+def _dev_corpus_id(run_id: str, source: dict[str, Any]) -> str:
+    text = json.dumps(
+        {
+            "run_id": run_id,
+            "source_path": source.get("source_path") or "",
+            "content_hash": source.get("content_hash") or "",
+        },
+        ensure_ascii=False,
+        sort_keys=True,
+    )
+    return "dev-corpus:" + sha1(text.encode("utf-8")).hexdigest()[:16]
+
+
+def _dev_context_chunks(
+    *,
+    corpus_id: str,
+    run_id: str,
+    source: dict[str, Any],
+    created_at: str,
+) -> list[dict[str, Any]]:
+    content = str(source.get("content_text") or "").strip() or "(empty)"
+    raw_chunks = _split_dev_context_text(content)
+    chunks = []
+    for index, chunk_text in enumerate(raw_chunks):
+        chunk_id = "dev-chunk:" + sha1(f"{corpus_id}:{index}:{chunk_text[:120]}".encode("utf-8")).hexdigest()[:18]
+        metadata = dict(source.get("metadata") or {})
+        metadata.update({"content_hash": source.get("content_hash") or ""})
+        chunks.append(
+            {
+                "chunk_id": chunk_id,
+                "corpus_id": corpus_id,
+                "run_id": run_id,
+                "chunk_index": index,
+                "source_type": source.get("source_type") or "",
+                "source_path": source.get("source_path") or "",
+                "title": source.get("title") or "",
+                "chunk_text": chunk_text,
+                "token_estimate": max(1, len(chunk_text) // 4),
+                "metadata": metadata,
+                "created_at": created_at,
+            }
+        )
+    return chunks
+
+
+def _split_dev_context_text(text: str, *, max_chars: int = 1800) -> list[str]:
+    lines = (text or "").splitlines()
+    chunks: list[str] = []
+    current: list[str] = []
+    current_size = 0
+    for line in lines:
+        line_size = len(line) + 1
+        if current and current_size + line_size > max_chars:
+            chunks.append("\n".join(current).strip())
+            current = []
+            current_size = 0
+        current.append(line)
+        current_size += line_size
+    if current:
+        chunks.append("\n".join(current).strip())
+    return [chunk for chunk in chunks if chunk] or [text[:max_chars]]
+
+
+def _dev_context_search_fts(
+    connection: sqlite3.Connection,
+    *,
+    terms: list[str],
+    source_type: str | None,
+    limit: int,
+) -> list[Any]:
+    return connection.execute(
+        """
+        SELECT c.*, bm25(dev_chunks_fts) AS fts_rank
+        FROM dev_chunks_fts
+        JOIN dev_chunks c ON c.chunk_id = dev_chunks_fts.chunk_id
+        WHERE dev_chunks_fts MATCH ?
+          AND (? = '' OR c.source_type = ?)
+        ORDER BY fts_rank ASC, c.created_at DESC
+        LIMIT ?
+        """,
+        (_dev_context_match_query(terms), source_type or "", source_type or "", limit),
+    ).fetchall()
+
+
+def _dev_context_search_like(
+    connection: sqlite3.Connection,
+    *,
+    terms: list[str],
+    source_type: str | None,
+    limit: int,
+) -> list[Any]:
+    where = []
+    params: list[Any] = []
+    for term in terms:
+        where.append("LOWER(c.chunk_text || ' ' || c.title || ' ' || c.source_path) LIKE ?")
+        params.append(f"%{term.lower()}%")
+    if source_type:
+        where.append("c.source_type = ?")
+        params.append(source_type)
+    params.append(limit)
+    return connection.execute(
+        f"""
+        SELECT c.*
+        FROM dev_chunks c
+        WHERE {' AND '.join(where)}
+        ORDER BY c.created_at DESC, c.source_type ASC
+        LIMIT ?
+        """,
+        params,
+    ).fetchall()
+
+
+def _dev_context_match_query(terms: list[str]) -> str:
+    return _fts_query(terms)
+
+
+def _dev_context_result(row: Any, terms: list[str]) -> dict[str, Any]:
+    keys = set(row.keys()) if hasattr(row, "keys") else set()
+    chunk_text = str(row["chunk_text"] or "")
+    return {
+        "chunk_id": row["chunk_id"],
+        "corpus_id": row["corpus_id"],
+        "run_id": row["run_id"],
+        "chunk_index": _int_value(row["chunk_index"]),
+        "source_type": row["source_type"],
+        "source_path": row["source_path"],
+        "title": row["title"],
+        "snippet": _snippet(chunk_text, terms, size=260) if terms else chunk_text[:260],
+        "chunk_text": chunk_text,
+        "token_estimate": _int_value(row["token_estimate"]),
+        "metadata": _json_object(row["metadata_json"]),
+        "created_at": row["created_at"],
+        "rank": float(row["fts_rank"]) if "fts_rank" in keys else 0.0,
+    }
+
+
+def _dev_context_corpus_from_row(row: Any) -> dict[str, Any]:
+    return {
+        "corpus_id": row["corpus_id"],
+        "run_id": row["run_id"],
+        "source_type": row["source_type"],
+        "source_path": row["source_path"],
+        "title": row["title"],
+        "content_hash": row["content_hash"],
+        "metadata": _json_object(row["metadata_json"]),
+        "created_at": row["created_at"],
+    }
+
+
+def _dev_context_run_from_row(row: Any) -> dict[str, Any]:
+    return {
+        "run_id": row["run_id"],
+        "status": row["status"],
+        "started_at": row["started_at"],
+        "finished_at": row["finished_at"],
+        "source_count": _int_value(row["source_count"]),
+        "chunk_count": _int_value(row["chunk_count"]),
+        "embedding_count": _int_value(row["embedding_count"]),
+        "command_count": _int_value(row["command_count"]),
+        "error": row["error"],
+        "payload": _json_object(row["payload_json"]),
+    }
+
+
+def _dev_context_search_summary(results: list[dict[str, Any]], terms: list[str]) -> list[str]:
+    if not results:
+        return [f"没有找到匹配 {'、'.join(terms)} 的开发上下文片段。"]
+    source_counts = _summary_counts(result.get("source_type") or "unknown" for result in results)
+    return [
+        f"命中 {len(results)} 条开发上下文片段，关键词：{'、'.join(terms)}。",
+        f"主要来源：{_summary_text(source_counts)}。",
+    ]
 

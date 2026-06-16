@@ -72,6 +72,26 @@ class ApiRepositoryTest(unittest.TestCase):
                 language="Python",
                 limit=10,
             )
+            (root / "README.md").write_text(
+                "# 测试项目\n\n开发上下文 RAG 需要记录反馈入口、RAG 维护和最近测试失败原因。",
+                encoding="utf-8",
+            )
+            (root / "docs" / "api.md").write_text(
+                "POST /v1/dev-context/index\nGET /v1/dev-context/search?q=反馈入口",
+                encoding="utf-8",
+            )
+            (root / "docs" / "data-contracts.md").write_text(
+                "dev_corpus dev_chunks dev_embeddings dev_runs",
+                encoding="utf-8",
+            )
+            (root / "docs" / "operation-log.md").write_text(
+                "# 操作日志\n\n最近测试失败需要通过开发上下文 RAG 检索。",
+                encoding="utf-8",
+            )
+            dev_index = repository.dev_context_index({"run_checks": False})
+            dev_search = repository.dev_context_search(query="反馈入口", limit=5)
+            dev_run = repository.dev_context_run(dev_index["run_id"])
+            dev_database_summary = repository.database_summary()
             latest = repository.latest_weekly()
             health = repository.v1_health()
             jobs = repository.jobs(status="succeeded")
@@ -293,6 +313,19 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(feedback_recommendations["feedback_memory"]["record_count"], 1)
             self.assertEqual(feedback_recommendations["recommendations"][0]["feedback_memory"]["average_rating"], 2)
             self.assertGreater(feedback_recommendations["recommendations"][0]["preference_score"], 0)
+            self.assertEqual(dev_index["status"], "succeeded")
+            self.assertGreaterEqual(dev_index["source_count"], 6)
+            self.assertGreater(dev_index["chunk_count"], 0)
+            self.assertEqual(dev_index["embedding_count"], dev_index["chunk_count"])
+            self.assertGreater(dev_search["count"], 0)
+            self.assertEqual(dev_search["results"][0]["source_type"], "document")
+            self.assertTrue(dev_run["found"])
+            self.assertEqual(dev_run["run"]["run_id"], dev_index["run_id"])
+            self.assertGreaterEqual(dev_database_summary["table_counts"]["dev_corpus"], 1)
+            self.assertGreaterEqual(dev_database_summary["table_counts"]["dev_chunks"], 1)
+            self.assertGreaterEqual(dev_database_summary["table_counts"]["dev_embeddings"], 1)
+            self.assertGreaterEqual(dev_database_summary["table_counts"]["dev_runs"], 1)
+            self.assertTrue(dev_database_summary["rag_readiness"]["ready_for_dev_context_search"])
             self.assertEqual(latest["run_date"], "2026-05-09")
             self.assertIn("owner/agent", latest["markdown"])
             self.assertTrue(health["capabilities"]["jobs_query"])
@@ -308,6 +341,9 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertTrue(health["capabilities"]["database_summary"])
             self.assertTrue(health["capabilities"]["database_trends"])
             self.assertTrue(health["capabilities"]["database_facets"])
+            self.assertTrue(health["capabilities"]["dev_context_index"])
+            self.assertTrue(health["capabilities"]["dev_context_search"])
+            self.assertTrue(health["capabilities"]["dev_context_runs"])
             self.assertTrue(health["capabilities"]["project_search"])
             self.assertTrue(health["capabilities"]["project_similarity"])
             self.assertTrue(health["capabilities"]["project_compare"])
@@ -722,13 +758,16 @@ class ApiRepositoryTest(unittest.TestCase):
                     "/v1/feedback",
                     json={"full_name": "owner/agent", "rating": 1, "source": "route-test"},
                 )
+                unconfigured_dev_context = client.post("/v1/dev-context/index", json={"run_checks": False})
             self.assertEqual(unconfigured.status_code, 403)
+            self.assertEqual(unconfigured_dev_context.status_code, 403)
 
             with patch.dict(os.environ, {"ADMIN_API_TOKEN": "test"}, clear=False):
                 missing = client.post(
                     "/v1/feedback",
                     json={"full_name": "owner/agent", "rating": 1, "source": "route-test"},
                 )
+                missing_dev_context = client.post("/v1/dev-context/index", json={"run_checks": False})
                 invalid = client.post(
                     "/v1/feedback",
                     headers={"X-Admin-Token": "bad"},
@@ -739,6 +778,11 @@ class ApiRepositoryTest(unittest.TestCase):
                     headers={"X-Admin-Token": "test"},
                     json={"full_name": "owner/agent", "rating": 1, "source": "route-test"},
                 )
+                valid_dev_context = client.post(
+                    "/v1/dev-context/index",
+                    headers={"X-Admin-Token": "test"},
+                    json={"run_checks": False},
+                )
                 bearer_valid = client.post(
                     "/v1/runs/trigger",
                     headers={"Authorization": "Bearer test"},
@@ -746,8 +790,10 @@ class ApiRepositoryTest(unittest.TestCase):
                 )
 
             self.assertEqual(missing.status_code, 401)
+            self.assertEqual(missing_dev_context.status_code, 401)
             self.assertEqual(invalid.status_code, 401)
             self.assertEqual(valid.status_code, 201)
+            self.assertEqual(valid_dev_context.status_code, 202)
             self.assertTrue(valid.json()["created"])
             self.assertEqual(bearer_valid.status_code, 202)
         finally:
@@ -762,6 +808,16 @@ class ApiRepositoryTest(unittest.TestCase):
         admin_token_patcher = patch.dict(os.environ, {"ADMIN_API_TOKEN": "test"}, clear=False)
         try:
             _write_fixture(root)
+            (root / "README.md").write_text(
+                "# 路由测试\n\n开发上下文 RAG 需要检索反馈入口和 RAG 维护。",
+                encoding="utf-8",
+            )
+            (root / "docs" / "api.md").write_text(
+                "POST /v1/dev-context/index\nGET /v1/dev-context/search?q=反馈入口",
+                encoding="utf-8",
+            )
+            (root / "docs" / "data-contracts.md").write_text("dev_corpus dev_chunks dev_runs", encoding="utf-8")
+            (root / "docs" / "operation-log.md").write_text("反馈入口 已接入推荐页。", encoding="utf-8")
             admin_token_patcher.start()
             setup_repository = ApiRepository(root=root, db_path=root / "data" / "github_weekly.sqlite")
             setup_repository._persist_preview_job(
@@ -787,6 +843,9 @@ class ApiRepositoryTest(unittest.TestCase):
             v1_database_summary = client.get("/v1/database/summary")
             v1_database_trends = client.get("/v1/database/trends", params={"limit": 5})
             v1_database_facets = client.get("/v1/database/facets", params={"limit": 5})
+            v1_dev_context_index = client.post("/v1/dev-context/index", json={"run_checks": False})
+            v1_dev_context_search = client.get("/v1/dev-context/search", params={"q": "反馈入口", "limit": 5})
+            v1_dev_context_run = client.get(f"/v1/dev-context/runs/{v1_dev_context_index.json()['run_id']}")
             v1_search = client.get("/v1/search", params={"q": "agent workflow", "language": "Python", "limit": 5})
             v1_rag_corpus = client.get(
                 "/v1/rag/corpus",
@@ -1025,6 +1084,9 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(v1_database_summary.status_code, 200)
             self.assertEqual(v1_database_trends.status_code, 200)
             self.assertEqual(v1_database_facets.status_code, 200)
+            self.assertEqual(v1_dev_context_index.status_code, 202)
+            self.assertEqual(v1_dev_context_search.status_code, 200)
+            self.assertEqual(v1_dev_context_run.status_code, 200)
             self.assertEqual(v1_search.status_code, 200)
             self.assertEqual(v1_rag_corpus.status_code, 200)
             self.assertEqual(v1_rag_retrieve.status_code, 200)
@@ -1093,6 +1155,10 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertGreaterEqual(v1_database_summary.json()["table_counts"]["repositories"], 1)
             self.assertTrue(v1_database_summary.json()["rag_readiness"]["ready_for_text_index"])
             self.assertTrue(v1_database_summary.json()["rag_readiness"]["ready_for_chunk_retrieval"])
+            self.assertEqual(v1_dev_context_index.json()["status"], "succeeded")
+            self.assertGreater(v1_dev_context_index.json()["chunk_count"], 0)
+            self.assertGreater(v1_dev_context_search.json()["count"], 0)
+            self.assertTrue(v1_dev_context_run.json()["found"])
             self.assertGreaterEqual(v1_database_trends.json()["count"], 1)
             self.assertEqual(v1_database_facets.json()["languages"][0]["name"], "Python")
             self.assertEqual(v1_database_facets.json()["sources"][0]["name"], "github_trending")

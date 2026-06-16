@@ -161,6 +161,82 @@ CREATE INDEX IF NOT EXISTS idx_project_feedback_full_name_updated_at ON project_
 CREATE INDEX IF NOT EXISTS idx_project_feedback_profile_updated_at ON project_feedback(profile, updated_at);
 CREATE INDEX IF NOT EXISTS idx_project_feedback_rating_updated_at ON project_feedback(rating, updated_at);
 
+CREATE TABLE IF NOT EXISTS dev_runs (
+  run_id TEXT PRIMARY KEY,
+  status TEXT NOT NULL DEFAULT '',
+  started_at TEXT NOT NULL DEFAULT '',
+  finished_at TEXT NOT NULL DEFAULT '',
+  source_count INTEGER NOT NULL DEFAULT 0,
+  chunk_count INTEGER NOT NULL DEFAULT 0,
+  embedding_count INTEGER NOT NULL DEFAULT 0,
+  command_count INTEGER NOT NULL DEFAULT 0,
+  error TEXT NOT NULL DEFAULT '',
+  payload_json TEXT NOT NULL DEFAULT '{}'
+);
+
+CREATE INDEX IF NOT EXISTS idx_dev_runs_started_at ON dev_runs(started_at);
+CREATE INDEX IF NOT EXISTS idx_dev_runs_status ON dev_runs(status);
+
+CREATE TABLE IF NOT EXISTS dev_corpus (
+  corpus_id TEXT PRIMARY KEY,
+  run_id TEXT NOT NULL DEFAULT '',
+  source_type TEXT NOT NULL DEFAULT '',
+  source_path TEXT NOT NULL DEFAULT '',
+  title TEXT NOT NULL DEFAULT '',
+  content_hash TEXT NOT NULL DEFAULT '',
+  content_text TEXT NOT NULL DEFAULT '',
+  metadata_json TEXT NOT NULL DEFAULT '{}',
+  created_at TEXT NOT NULL DEFAULT ''
+);
+
+CREATE INDEX IF NOT EXISTS idx_dev_corpus_run_id ON dev_corpus(run_id);
+CREATE INDEX IF NOT EXISTS idx_dev_corpus_source_type ON dev_corpus(source_type);
+CREATE INDEX IF NOT EXISTS idx_dev_corpus_source_path ON dev_corpus(source_path);
+
+CREATE TABLE IF NOT EXISTS dev_chunks (
+  chunk_id TEXT PRIMARY KEY,
+  corpus_id TEXT NOT NULL DEFAULT '',
+  run_id TEXT NOT NULL DEFAULT '',
+  chunk_index INTEGER NOT NULL DEFAULT 0,
+  source_type TEXT NOT NULL DEFAULT '',
+  source_path TEXT NOT NULL DEFAULT '',
+  title TEXT NOT NULL DEFAULT '',
+  chunk_text TEXT NOT NULL DEFAULT '',
+  token_estimate INTEGER NOT NULL DEFAULT 0,
+  metadata_json TEXT NOT NULL DEFAULT '{}',
+  created_at TEXT NOT NULL DEFAULT ''
+);
+
+CREATE INDEX IF NOT EXISTS idx_dev_chunks_corpus_id ON dev_chunks(corpus_id);
+CREATE INDEX IF NOT EXISTS idx_dev_chunks_run_id ON dev_chunks(run_id);
+CREATE INDEX IF NOT EXISTS idx_dev_chunks_source_type ON dev_chunks(source_type);
+
+CREATE VIRTUAL TABLE IF NOT EXISTS dev_chunks_fts USING fts5(
+  chunk_id UNINDEXED,
+  source_type,
+  source_path,
+  title,
+  chunk_text
+);
+
+CREATE TABLE IF NOT EXISTS dev_embeddings (
+  chunk_id TEXT NOT NULL DEFAULT '',
+  corpus_id TEXT NOT NULL DEFAULT '',
+  run_id TEXT NOT NULL DEFAULT '',
+  source_type TEXT NOT NULL DEFAULT '',
+  source_path TEXT NOT NULL DEFAULT '',
+  embedding_model TEXT NOT NULL DEFAULT '',
+  dimensions INTEGER NOT NULL DEFAULT 0,
+  vector_json TEXT NOT NULL DEFAULT '[]',
+  metadata_json TEXT NOT NULL DEFAULT '{}',
+  updated_at TEXT NOT NULL DEFAULT '',
+  PRIMARY KEY (chunk_id, embedding_model)
+);
+
+CREATE INDEX IF NOT EXISTS idx_dev_embeddings_model ON dev_embeddings(embedding_model);
+CREATE INDEX IF NOT EXISTS idx_dev_embeddings_run_id ON dev_embeddings(run_id);
+CREATE INDEX IF NOT EXISTS idx_dev_embeddings_source_type ON dev_embeddings(source_type);
+
 CREATE TABLE IF NOT EXISTS trend_summaries (
   run_date TEXT PRIMARY KEY,
   total_projects INTEGER NOT NULL DEFAULT 0,

@@ -141,6 +141,22 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
     def v1_database_facets(limit: int = Query(default=20, ge=1, le=100)) -> dict[str, Any]:
         return repository.database_facets(limit=limit)
 
+    @app.post("/v1/dev-context/index", status_code=202, dependencies=admin_write_dependencies)
+    def v1_dev_context_index(payload: dict[str, Any] | None = Body(default=None)) -> dict[str, Any]:
+        return repository.dev_context_index(payload)
+
+    @app.get("/v1/dev-context/search")
+    def v1_dev_context_search(
+        q: str = Query(..., min_length=1),
+        source_type: str | None = None,
+        limit: int = Query(default=20, ge=1, le=100),
+    ) -> dict[str, Any]:
+        return repository.dev_context_search(query=q, source_type=source_type, limit=limit)
+
+    @app.get("/v1/dev-context/runs/{run_id:path}")
+    def v1_dev_context_run(run_id: str) -> dict[str, Any]:
+        return repository.dev_context_run(run_id)
+
     @app.get("/v1/projects")
     def v1_projects(
         language: str | None = None,
