@@ -19,6 +19,7 @@ class WorkflowTest(unittest.TestCase):
         self.assertIn("skip_main_delivery:", workflow)
         self.assertIn("plan_rag_maintenance:", workflow)
         self.assertIn("run_rag_evaluation:", workflow)
+        self.assertIn("run_dev_context_index:", workflow)
         self.assertIn("ARCHIVE_BRANCH: weekly-archive", workflow)
         self.assertIn("scripts/publish_archive_branch.py", workflow)
         self.assertIn("git checkout \"origin/$ARCHIVE_BRANCH\" -- data reports || true", workflow)
@@ -56,6 +57,19 @@ class WorkflowTest(unittest.TestCase):
         self.assertIn("RAG_EVALUATION_AUTO_BUILD", workflow)
         self.assertIn("WORKFLOW_RUN_RAG_EVALUATION", workflow)
         self.assertLess(workflow.index("scripts/run_rag_search_evaluation.py"), workflow.index("scripts/build_pages.py"))
+
+    def test_weekly_workflow_refreshes_dev_context_before_pages(self) -> None:
+        workflow = (ROOT / ".github" / "workflows" / "weekly.yml").read_text(encoding="utf-8")
+
+        self.assertIn("scripts/plan_dev_context_index.py", workflow)
+        self.assertIn("--run-checks false", workflow)
+        self.assertIn("--output .dev-context-job.json", workflow)
+        self.assertIn("scripts/run_planned_job.py --job-file .dev-context-job.json", workflow)
+        self.assertLess(workflow.index("scripts/plan_dev_context_index.py"), workflow.index("scripts/build_pages.py"))
+        self.assertLess(
+            workflow.index("scripts/run_planned_job.py --job-file .dev-context-job.json"),
+            workflow.index("scripts/build_pages.py"),
+        )
 
     def test_archive_branch_publish_scope_is_limited_to_generated_archive(self) -> None:
         script = (ROOT / "scripts" / "publish_archive_branch.py").read_text(encoding="utf-8")

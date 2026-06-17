@@ -36,6 +36,7 @@ EXECUTABLE_JOB_KINDS = {
     "rag_corpus_rebuild",
     "rag_embedding_build",
     "rag_search_evaluation",
+    "dev_context_index",
 }
 
 
@@ -100,6 +101,8 @@ class ApiRepository:
                 "rag_maintenance_report": True,
                 "rag_backfill_jobs": True,
                 "dev_context_index": True,
+                "dev_context_index_jobs": True,
+                "dev_context_index_plan": True,
                 "dev_context_search": True,
                 "dev_context_ask": True,
                 "dev_context_runs": True,
@@ -593,6 +596,62 @@ class ApiRepository:
                 "search_engine": retrieval.get("search_engine") or "",
                 "count": retrieval.get("count") or 0,
             },
+        }
+
+    def plan_dev_context_index(self, payload: dict[str, Any] | None = None) -> dict[str, Any]:
+        payload = payload if isinstance(payload, dict) else {}
+        request = {
+            "run_checks": _bool_value(payload.get("run_checks"), False),
+            "replace": _bool_value(payload.get("replace"), False),
+            "max_command_chars": max(2000, min(_int_value(payload.get("max_command_chars")) or 120000, 250000)),
+            "confirm_execution": True,
+            "requested_by": str(payload.get("requested_by") or "api").strip()[:120],
+            "trigger_source": str(payload.get("trigger_source") or "dev_context_index_plan_api").strip()[:80],
+        }
+        duplicate = self._find_active_duplicate_job(request, kind="dev_context_index")
+        if duplicate:
+            return {
+                "schema_version": 1,
+                "accepted": True,
+                "planned_job_created": False,
+                "job_id": duplicate.get("job_id") or "",
+                "status": duplicate.get("status") or "",
+                "request": request,
+                "duplicate_of": duplicate.get("job_id") or "",
+                "job": duplicate,
+            }
+
+        submitted_at = datetime.now(UTC).isoformat().replace("+00:00", "Z")
+        job_id = _dev_context_index_plan_job_id(submitted_at, request)
+        job = {
+            "job_id": job_id,
+            "kind": "dev_context_index",
+            "status": "planned",
+            "run_date": "",
+            "submitted_at": submitted_at,
+            "started_at": "",
+            "finished_at": "",
+            "request": request,
+            "result": {},
+            "error": "",
+        }
+        self._persist_preview_job(job)
+        self._record_job_event(
+            job_id,
+            "job_created",
+            "planned",
+            str(request.get("requested_by") or "api"),
+            "已创建开发上下文索引 planned 任务。",
+            {"request": request},
+        )
+        return {
+            "schema_version": 1,
+            "accepted": True,
+            "planned_job_created": True,
+            "job_id": job_id,
+            "status": "planned",
+            "request": request,
+            "job": job,
         }
 
     def dev_context_run(self, run_id: str) -> dict[str, Any]:
@@ -2768,6 +2827,12 @@ class ApiRepository:
         if kind == "rag_search_evaluation":
             warnings.append("该任务会写入 RAG 检索评估结果，用于后续质量趋势分析。")
 
+        if kind == "dev_context_index":
+            if _truthy(request.get("run_checks")):
+                warnings.append("该任务会运行单元测试和安全检查，执行时间可能较长。")
+            else:
+                warnings.append("该任务会轻量刷新开发上下文索引，不重复运行完整测试。")
+
         executable = not blockers
         return {
             "schema_version": 1,
@@ -2793,6 +2858,9 @@ class ApiRepository:
                 "confirm_execution": _truthy(request.get("confirm_execution")),
                 "maintenance_action": request.get("maintenance_action") or "",
                 "dimensions": _positive_int(request.get("dimensions")),
+                "run_checks": _truthy(request.get("run_checks")),
+                "replace": _truthy(request.get("replace")),
+                "max_command_chars": _positive_int(request.get("max_command_chars")),
                 "trigger_source": request.get("trigger_source") or "",
                 "requested_by": request.get("requested_by") or "",
             },
@@ -3830,6 +3898,13 @@ def _rag_maintenance_plan_job_id(kind: str, submitted_at: str, request: dict[str
     digest = sha1(fingerprint.encode("utf-8")).hexdigest()[:10]
     prefix = "rag-corpus-plan" if kind == "rag_corpus_rebuild" else "rag-embedding-plan"
     return f"{prefix}:{compact_time}:{digest}"
+
+
+def _dev_context_index_plan_job_id(submitted_at: str, request: dict[str, Any]) -> str:
+    compact_time = submitted_at.replace("-", "").replace(":", "").replace(".", "").replace("Z", "")
+    fingerprint = json.dumps(request, ensure_ascii=False, sort_keys=True)
+    digest = sha1(fingerprint.encode("utf-8")).hexdigest()[:10]
+    return f"dev-context-index-plan:{compact_time}:{digest}"
 
 
 def _rag_backfill_job_result(result: dict[str, Any]) -> dict[str, Any]:

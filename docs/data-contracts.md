@@ -185,6 +185,7 @@ GET /v1/rag/diagnostics
 GET /v1/feedback
 POST /v1/feedback
 POST /v1/dev-context/index
+POST /v1/dev-context/index-plan
 GET /v1/dev-context/search
 POST /v1/dev-context/ask
 GET /v1/dev-context/runs/{id}
@@ -211,7 +212,7 @@ feedback_memory
 
 页面层反馈入口复用同一数据契约：`project.html` 和 `recommendations.html` 只向 `POST /v1/feedback` 写入仓库名、profile、评分、标签、备注和来源；`admin.html` 只读取 `GET /v1/feedback?limit=200` 的列表与汇总，不公开管理口令、请求头或任何密钥。
 
-`/v1/dev-context/index` 会采集开发材料并写入 SQLite 开发上下文表。当前保存内容包括 README、API 文档、数据契约、操作日志、Git diff、测试输出和安全检查输出；写入前会对明显密钥形态做脱敏。`/v1/dev-context/search` 只返回匹配分块、来源、摘要和 metadata，不返回管理口令或请求头。`/v1/dev-context/ask` 复用已索引分块生成规则版回答，响应字段固定为 `answer`、`citations`、`evidence`、`confidence`、`question_type`、`retrieval` 和 `next_actions`；该接口不调用外部模型，不写入新的敏感数据。
+`/v1/dev-context/index` 会采集开发材料并写入 SQLite 开发上下文表。当前保存内容包括 README、API 文档、数据契约、操作日志、Git diff、测试输出和安全检查输出；写入前会对明显密钥形态做脱敏。`/v1/dev-context/index-plan` 只创建 `dev_context_index` planned job，任务请求公开 `run_checks`、`replace`、`max_command_chars`、`requested_by`、`trigger_source` 和 `confirm_execution`，不保存管理口令或请求头。`/v1/dev-context/search` 只返回匹配分块、来源、摘要和 metadata，不返回管理口令或请求头。`/v1/dev-context/ask` 复用已索引分块生成规则版回答，响应字段固定为 `answer`、`citations`、`evidence`、`confidence`、`question_type`、`retrieval` 和 `next_actions`；该接口不调用外部模型，不写入新的敏感数据。
 
 ## 六、`docs/jobs.json`
 
@@ -231,11 +232,11 @@ error
 report_url
 ```
 
-`kind` 当前支持 `weekly_report`、`rag_backfill`、`rag_corpus_rebuild`、`rag_embedding_build` 和 `rag_search_evaluation`。`weekly_report` 表示周报任务，`rag_backfill` 表示 RAG 解释回填任务，`rag_corpus_rebuild` 表示从 JSON 归档重建 SQLite RAG 语料与证据块，`rag_embedding_build` 表示从 `rag_chunks` 构建本地 embedding 索引，`rag_search_evaluation` 表示一次 RAG 检索质量评估任务。
+`kind` 当前支持 `weekly_report`、`rag_backfill`、`rag_corpus_rebuild`、`rag_embedding_build`、`rag_search_evaluation` 和 `dev_context_index`。`weekly_report` 表示周报任务，`rag_backfill` 表示 RAG 解释回填任务，`rag_corpus_rebuild` 表示从 JSON 归档重建 SQLite RAG 语料与证据块，`rag_embedding_build` 表示从 `rag_chunks` 构建本地 embedding 索引，`rag_search_evaluation` 表示一次 RAG 检索质量评估任务，`dev_context_index` 表示一次开发上下文索引刷新任务。
 
-`request` 只公开 `profile`、`sources`、`dry_run`、`requested_dry_run`、`confirm_delivery`、`delivery_allowed`、`days_back`、`trigger_source`、`requested_by`、`safety_warnings`、`queries`、`language`、`category`、`source`、`limit`、`rag_limit`、`mode`、`model`、`auto_build`、`confirm_execution`、`maintenance_action`、`coverage_limit`、`min_gap_count` 和 `dimensions`。这些字段用于任务审计、检索评估和受控推送/补库确认，不应包含 Token、Chat ID、Webhook 或其他密钥。
+`request` 只公开 `profile`、`sources`、`dry_run`、`requested_dry_run`、`confirm_delivery`、`delivery_allowed`、`days_back`、`trigger_source`、`requested_by`、`safety_warnings`、`queries`、`language`、`category`、`source`、`limit`、`rag_limit`、`mode`、`model`、`auto_build`、`confirm_execution`、`maintenance_action`、`coverage_limit`、`min_gap_count`、`dimensions`、`run_checks`、`replace` 和 `max_command_chars`。这些字段用于任务审计、检索评估、开发上下文索引和受控推送/补库确认，不应包含 Token、Chat ID、Webhook 或其他密钥。
 
-`result` 只公开运行日期、状态、项目数量、Kimi/降级状态、Telegram 状态、报告路径、报告链接、SQLite 同步状态、RAG 回填数量、回填前覆盖概况、语料/向量维护计数、检索评估摘要、回填项目摘要和截断后的错误摘要。RAG 回填任务中的 `processed_repositories` 只保留仓库名、状态、质量分、质量等级和解释编号，不保存完整解释正文；RAG 检索评估任务只保存样本查询、聚合命中结果、模式对比结果和概要建议，不保存密钥或私有请求头。
+`result` 只公开运行日期、状态、项目数量、Kimi/降级状态、Telegram 状态、报告路径、报告链接、SQLite 同步状态、RAG 回填数量、回填前覆盖概况、语料/向量维护计数、检索评估摘要、开发上下文索引运行编号、来源数、分块数、embedding 数、命令数、回填项目摘要和截断后的错误摘要。RAG 回填任务中的 `processed_repositories` 只保留仓库名、状态、质量分、质量等级和解释编号，不保存完整解释正文；RAG 检索评估任务只保存样本查询、聚合命中结果、模式对比结果和概要建议；开发上下文索引任务只保存计数和 `run_id`，详细片段仍通过 `dev_chunks`/`dev_corpus` 查询，不保存密钥或私有请求头。
 
 ## 七、SQLite 表
 

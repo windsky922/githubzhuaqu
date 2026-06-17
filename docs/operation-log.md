@@ -2,6 +2,26 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-06-17 追加：开发上下文 RAG 自动维护闭环
+
+### 1. 开发目的
+
+开发上下文 RAG 已经具备手动索引、搜索和规则版问答能力，但仍需要人工点击索引。为了让这层开发记忆在周报、RAG 评估和 Pages 归档前自动刷新，本次把开发上下文索引接入 planned job、任务执行器和 GitHub Actions。
+
+### 2. 修改内容
+
+1. 新增 `kind=dev_context_index` planned job，执行结果写入 `jobs.result`，包含 `run_id`、来源数、分块数、embedding 数和命令数。
+2. 新增 `POST /v1/dev-context/index-plan`，可创建开发上下文索引任务，支持 `run_checks`、`replace`、`max_command_chars`、`requested_by` 和 `trigger_source`。
+3. `scripts/run_planned_job.py` 支持执行 `dev_context_index`，内部复用 `ApiRepository.dev_context_index()`，并保留 `/v1/dev-context/runs/{id}` 查询详情。
+4. 新增 `scripts/plan_dev_context_index.py`，供本地命令和 GitHub Actions 创建索引任务。
+5. weekly workflow 在生成 Pages 前执行轻量开发上下文索引，默认 `run_checks=false`，避免重复跑完整测试。
+6. 管理页展示最近开发上下文索引任务，包含状态、分块数、embedding 数、错误摘要和索引详情链接。
+7. 同步更新 README、API 文档、数据契约、页面生成测试、workflow 测试、runner 测试和 API 测试。
+
+### 3. 边界说明
+
+本次不接外部 LLM、不做复杂聊天 UI、不自动修复代码。自动索引只刷新本地 SQLite 开发上下文记忆层；默认轻量模式不重复执行单元测试和安全检查，完整检查仍由 workflow 前置测试步骤负责。
+
 ## 2026-06-16 追加：开发上下文 RAG 问答入口
 
 ### 1. 开发目的

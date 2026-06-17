@@ -5,12 +5,14 @@ import json
 import shutil
 import unittest
 import uuid
-from contextlib import redirect_stderr
+from contextlib import redirect_stderr, redirect_stdout
 from io import StringIO
 from pathlib import Path
 from unittest.mock import patch
 
 from scripts.create_planned_job import _truthy
+from scripts.plan_dev_context_index import _truthy as _dev_context_truthy
+from scripts.plan_dev_context_index import main as plan_dev_context_index_main
 from scripts.run_planned_job import _job_id_from_file, main as run_planned_job_script_main
 from src.job_runner import run_planned_job
 from src.models import RunSummary
@@ -149,6 +151,45 @@ class JobRunnerTest(unittest.TestCase):
         finally:
             shutil.rmtree(root, ignore_errors=True)
 
+    def test_runs_planned_dev_context_index_job(self) -> None:
+        root = Path.cwd() / f".tmp-job-runner-dev-context-{uuid.uuid4().hex}"
+        try:
+            _write_fixture(root)
+            db_path = root / "data" / "github_weekly.sqlite"
+            _write_job(
+                db_path,
+                {
+                    "job_id": "dev-context-index-plan:test",
+                    "kind": "dev_context_index",
+                    "status": "planned",
+                    "submitted_at": "2026-06-17T00:00:00Z",
+                    "request": {
+                        "run_checks": False,
+                        "replace": False,
+                        "max_command_chars": 120000,
+                        "confirm_execution": True,
+                        "requested_by": "test",
+                        "trigger_source": "test",
+                    },
+                },
+            )
+
+            result = run_planned_job(root=root, db_path=db_path, job_id="dev-context-index-plan:test")
+
+            self.assertTrue(result["executed"])
+            self.assertEqual(result["status"], "succeeded")
+            self.assertTrue(result["result"]["run_id"].startswith("dev-context:"))
+            self.assertGreater(result["result"]["chunk_count"], 0)
+            self.assertEqual(result["result"]["embedding_count"], result["result"]["chunk_count"])
+            self.assertFalse(result["result"]["run_checks"])
+            job = _read_job(db_path, "dev-context-index-plan:test")
+            self.assertEqual(job["status"], "succeeded")
+            job_result = json.loads(job["result_json"])
+            self.assertEqual(job_result["run_id"], result["result"]["run_id"])
+            self.assertIn("runner_finished", _read_job_event_types(db_path, "dev-context-index-plan:test"))
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
     def test_returns_not_found_when_no_planned_job_exists(self) -> None:
         root = Path.cwd() / f".tmp-job-runner-{uuid.uuid4().hex}"
         try:
@@ -173,6 +214,8 @@ class JobRunnerTest(unittest.TestCase):
         self.assertTrue(_truthy("true"))
         self.assertTrue(_truthy("1"))
         self.assertFalse(_truthy("false"))
+        self.assertTrue(_dev_context_truthy("yes"))
+        self.assertFalse(_dev_context_truthy("off"))
 
     def test_run_planned_job_script_rejects_invalid_job_file(self) -> None:
         root = Path.cwd() / f".tmp-job-runner-{uuid.uuid4().hex}"
@@ -183,6 +226,36 @@ class JobRunnerTest(unittest.TestCase):
             with patch("sys.argv", ["run_planned_job.py", "--job-file", str(bad_file)]):
                 with redirect_stderr(StringIO()):
                     self.assertEqual(run_planned_job_script_main(), 1)
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
+    def test_plan_dev_context_index_script_writes_job_file(self) -> None:
+        root = Path.cwd() / f".tmp-dev-context-plan-script-{uuid.uuid4().hex}"
+        try:
+            _write_fixture(root)
+            output = root / "dev-context-job.json"
+            with patch(
+                "sys.argv",
+                [
+                    "plan_dev_context_index.py",
+                    "--root",
+                    str(root),
+                    "--run-checks",
+                    "false",
+                    "--requested-by",
+                    "test",
+                    "--output",
+                    str(output),
+                ],
+            ):
+                with redirect_stdout(StringIO()):
+                    self.assertEqual(plan_dev_context_index_main(), 0)
+
+            data = json.loads(output.read_text(encoding="utf-8"))
+            self.assertTrue(data["planned_job_created"])
+            self.assertTrue(data["job_id"].startswith("dev-context-index-plan:"))
+            self.assertEqual(data["job"]["kind"], "dev_context_index")
+            self.assertFalse(data["request"]["run_checks"])
         finally:
             shutil.rmtree(root, ignore_errors=True)
 

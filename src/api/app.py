@@ -145,6 +145,10 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
     def v1_dev_context_index(payload: dict[str, Any] | None = Body(default=None)) -> dict[str, Any]:
         return repository.dev_context_index(payload)
 
+    @app.post("/v1/dev-context/index-plan", status_code=202, dependencies=admin_write_dependencies)
+    def v1_dev_context_index_plan(payload: dict[str, Any] | None = Body(default=None)) -> dict[str, Any]:
+        return repository.plan_dev_context_index(payload)
+
     @app.get("/v1/dev-context/search")
     def v1_dev_context_search(
         q: str = Query(..., min_length=1),
@@ -479,7 +483,7 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
         status: str | None = Query(default=None, pattern="^(planned|running|succeeded|failed)?$"),
         kind: str | None = Query(
             default=None,
-            pattern="^(weekly_report|rag_backfill|rag_corpus_rebuild|rag_embedding_build|rag_search_evaluation)?$",
+            pattern="^(weekly_report|rag_backfill|rag_corpus_rebuild|rag_embedding_build|rag_search_evaluation|dev_context_index)?$",
         ),
         profile: str | None = None,
         query: str | None = None,

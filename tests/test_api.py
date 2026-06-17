@@ -91,11 +91,20 @@ class ApiRepositoryTest(unittest.TestCase):
             dev_index = repository.dev_context_index({"run_checks": False})
             dev_search = repository.dev_context_search(query="反馈入口", limit=5)
             dev_ask = repository.dev_context_ask({"question": "最近测试为什么失败？", "limit": 5})
+            dev_plan = repository.plan_dev_context_index(
+                {"run_checks": False, "requested_by": "test", "trigger_source": "test"}
+            )
+            dev_plan_check = repository.job_execution_check(dev_plan["job_id"])
+            dev_plan_execute = repository.execute_job(
+                dev_plan["job_id"],
+                {"confirm_execution": True, "requested_by": "test"},
+            )
+            dev_plan_jobs = repository.jobs(kind="dev_context_index", status="succeeded", limit=5)
             dev_run = repository.dev_context_run(dev_index["run_id"])
             dev_database_summary = repository.database_summary()
             latest = repository.latest_weekly()
             health = repository.v1_health()
-            jobs = repository.jobs(status="succeeded")
+            jobs = repository.jobs(status="succeeded", kind="weekly_report")
             job_detail = repository.job_detail("run:2026-05-09")
             trigger = repository.trigger_run_preview(
                 {
@@ -326,6 +335,16 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertTrue(dev_ask["citations"])
             self.assertIn(dev_ask["confidence"], {"low", "medium", "high"})
             self.assertTrue(dev_ask["next_actions"])
+            self.assertTrue(dev_plan["planned_job_created"])
+            self.assertEqual(dev_plan["job"]["kind"], "dev_context_index")
+            self.assertTrue(dev_plan_check["executable"])
+            self.assertEqual(dev_plan_check["kind"], "dev_context_index")
+            self.assertFalse(dev_plan_check["request"]["run_checks"])
+            self.assertTrue(dev_plan_execute["executed"])
+            self.assertEqual(dev_plan_execute["status"], "succeeded")
+            self.assertGreater(dev_plan_execute["runner_result"]["result"]["chunk_count"], 0)
+            self.assertTrue(dev_plan_jobs["jobs"])
+            self.assertEqual(dev_plan_jobs["jobs"][0]["kind"], "dev_context_index")
             self.assertTrue(dev_run["found"])
             self.assertEqual(dev_run["run"]["run_id"], dev_index["run_id"])
             self.assertGreaterEqual(dev_database_summary["table_counts"]["dev_corpus"], 1)
@@ -349,6 +368,8 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertTrue(health["capabilities"]["database_trends"])
             self.assertTrue(health["capabilities"]["database_facets"])
             self.assertTrue(health["capabilities"]["dev_context_index"])
+            self.assertTrue(health["capabilities"]["dev_context_index_jobs"])
+            self.assertTrue(health["capabilities"]["dev_context_index_plan"])
             self.assertTrue(health["capabilities"]["dev_context_search"])
             self.assertTrue(health["capabilities"]["dev_context_ask"])
             self.assertTrue(health["capabilities"]["dev_context_runs"])
@@ -767,8 +788,10 @@ class ApiRepositoryTest(unittest.TestCase):
                     json={"full_name": "owner/agent", "rating": 1, "source": "route-test"},
                 )
                 unconfigured_dev_context = client.post("/v1/dev-context/index", json={"run_checks": False})
+                unconfigured_dev_context_plan = client.post("/v1/dev-context/index-plan", json={"run_checks": False})
             self.assertEqual(unconfigured.status_code, 403)
             self.assertEqual(unconfigured_dev_context.status_code, 403)
+            self.assertEqual(unconfigured_dev_context_plan.status_code, 403)
 
             with patch.dict(os.environ, {"ADMIN_API_TOKEN": "test"}, clear=False):
                 missing = client.post(
@@ -776,6 +799,7 @@ class ApiRepositoryTest(unittest.TestCase):
                     json={"full_name": "owner/agent", "rating": 1, "source": "route-test"},
                 )
                 missing_dev_context = client.post("/v1/dev-context/index", json={"run_checks": False})
+                missing_dev_context_plan = client.post("/v1/dev-context/index-plan", json={"run_checks": False})
                 invalid = client.post(
                     "/v1/feedback",
                     headers={"X-Admin-Token": "bad"},
@@ -791,6 +815,11 @@ class ApiRepositoryTest(unittest.TestCase):
                     headers={"X-Admin-Token": "test"},
                     json={"run_checks": False},
                 )
+                valid_dev_context_plan = client.post(
+                    "/v1/dev-context/index-plan",
+                    headers={"X-Admin-Token": "test"},
+                    json={"run_checks": False},
+                )
                 bearer_valid = client.post(
                     "/v1/runs/trigger",
                     headers={"Authorization": "Bearer test"},
@@ -799,9 +828,11 @@ class ApiRepositoryTest(unittest.TestCase):
 
             self.assertEqual(missing.status_code, 401)
             self.assertEqual(missing_dev_context.status_code, 401)
+            self.assertEqual(missing_dev_context_plan.status_code, 401)
             self.assertEqual(invalid.status_code, 401)
             self.assertEqual(valid.status_code, 201)
             self.assertEqual(valid_dev_context.status_code, 202)
+            self.assertEqual(valid_dev_context_plan.status_code, 202)
             self.assertTrue(valid.json()["created"])
             self.assertEqual(bearer_valid.status_code, 202)
         finally:
@@ -852,6 +883,19 @@ class ApiRepositoryTest(unittest.TestCase):
             v1_database_trends = client.get("/v1/database/trends", params={"limit": 5})
             v1_database_facets = client.get("/v1/database/facets", params={"limit": 5})
             v1_dev_context_index = client.post("/v1/dev-context/index", json={"run_checks": False})
+            v1_dev_context_plan = client.post("/v1/dev-context/index-plan", json={"run_checks": False})
+            v1_dev_context_plan_check = client.get(
+                "/v1/job-execution-check",
+                params={"job_id": v1_dev_context_plan.json()["job_id"]},
+            )
+            v1_dev_context_plan_execute = client.post(
+                f"/v1/jobs/{v1_dev_context_plan.json()['job_id']}/execute",
+                json={"confirm_execution": True, "requested_by": "route-test"},
+            )
+            v1_dev_context_jobs = client.get(
+                "/v1/jobs",
+                params={"kind": "dev_context_index", "status": "succeeded", "limit": 5},
+            )
             v1_dev_context_search = client.get("/v1/dev-context/search", params={"q": "反馈入口", "limit": 5})
             v1_dev_context_ask = client.post(
                 "/v1/dev-context/ask",
@@ -1097,6 +1141,10 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(v1_database_trends.status_code, 200)
             self.assertEqual(v1_database_facets.status_code, 200)
             self.assertEqual(v1_dev_context_index.status_code, 202)
+            self.assertEqual(v1_dev_context_plan.status_code, 202)
+            self.assertEqual(v1_dev_context_plan_check.status_code, 200)
+            self.assertEqual(v1_dev_context_plan_execute.status_code, 200)
+            self.assertEqual(v1_dev_context_jobs.status_code, 200)
             self.assertEqual(v1_dev_context_search.status_code, 200)
             self.assertEqual(v1_dev_context_ask.status_code, 200)
             self.assertEqual(v1_dev_context_run.status_code, 200)
@@ -1170,6 +1218,14 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertTrue(v1_database_summary.json()["rag_readiness"]["ready_for_chunk_retrieval"])
             self.assertEqual(v1_dev_context_index.json()["status"], "succeeded")
             self.assertGreater(v1_dev_context_index.json()["chunk_count"], 0)
+            self.assertTrue(v1_dev_context_plan.json()["planned_job_created"])
+            self.assertEqual(v1_dev_context_plan.json()["job"]["kind"], "dev_context_index")
+            self.assertTrue(v1_dev_context_plan_check.json()["executable"])
+            self.assertEqual(v1_dev_context_plan_check.json()["kind"], "dev_context_index")
+            self.assertTrue(v1_dev_context_plan_execute.json()["executed"])
+            self.assertEqual(v1_dev_context_plan_execute.json()["status"], "succeeded")
+            self.assertGreater(v1_dev_context_plan_execute.json()["runner_result"]["result"]["chunk_count"], 0)
+            self.assertEqual(v1_dev_context_jobs.json()["jobs"][0]["kind"], "dev_context_index")
             self.assertGreater(v1_dev_context_search.json()["count"], 0)
             self.assertIn("answer", v1_dev_context_ask.json())
             self.assertEqual(v1_dev_context_ask.json()["question_type"], "api_contract")

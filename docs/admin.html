@@ -468,6 +468,7 @@
         <button id="runDevContextSearch" type="button">搜索</button>
       </div>
       <div id="devContextResults" class="search-results"></div>
+      <div id="devContextJobs" class="search-results"></div>
       <div id="ragQualitySummary" class="search-results"></div>
       <div id="ragEvaluationTrends" class="search-results"></div>
       <div class="search-form">
@@ -581,6 +582,7 @@
     const corpusSearchResults = document.getElementById("corpusSearchResults");
     const ragSearchResults = document.getElementById("ragSearchResults");
     const devContextResults = document.getElementById("devContextResults");
+    const devContextJobs = document.getElementById("devContextJobs");
     const ragQualitySummary = document.getElementById("ragQualitySummary");
     const ragEvaluationTrends = document.getElementById("ragEvaluationTrends");
     const ragMaintenanceResults = document.getElementById("ragMaintenanceResults");
@@ -964,6 +966,7 @@
         ].join("");
         latestLinks.innerHTML = latestLinksHtml(latestRun, failedJobs[0], plannedJobs[0]);
         latestJobResult.innerHTML = latestJobResultHtml(latestJob(jobs));
+        devContextJobs.innerHTML = devContextJobsHtml(jobs);
         workflowBoard.innerHTML = workflowBoardHtml(projects, runs, jobs);
         renderJobWorkbench();
       });
@@ -1504,6 +1507,22 @@
         <span>${escapeHtml(data.question_type || "-")} · ${escapeHtml(data.confidence || "-")} · ${escapeHtml(retrieval.search_engine || "-")} · 证据 ${escapeHtml(retrieval.count || 0)}</span>
         <p>${escapeHtml(data.answer || "")}</p>
       </article>${nextActionsHtml}${emptyEvidence}${evidenceHtml}`;
+    }
+
+    function devContextJobsHtml(jobs) {
+      const devJobs = (jobs || []).filter(job => job.kind === "dev_context_index").slice(0, 5);
+      if (!devJobs.length) return '<p>暂无开发上下文索引任务。</p>';
+      return devJobs.map(job => {
+        const result = job.result || {};
+        const error = job.error || result.error || "";
+        const runId = result.run_id || "";
+        const runLink = runId && shouldUseApi() ? `<a href="/v1/dev-context/runs/${encodeURIComponent(runId)}">索引详情</a>` : "索引详情";
+        return `<article class="search-row">
+          <strong><a href="${escapeAttribute(jobDetailUrl(job.job_id || ""))}">${escapeHtml(job.job_id || "-")}</a></strong>
+          <span>${escapeHtml(job.status || "-")} · 分块 ${escapeHtml(result.chunk_count || 0)} · embedding ${escapeHtml(result.embedding_count || 0)} · ${escapeHtml(job.finished_at || job.submitted_at || "-")}</span>
+          <p>${error ? `错误：${escapeHtml(error)}` : `运行：${runLink}`}</p>
+        </article>`;
+      }).join("");
     }
 
     function facetRow(name, value, detail) {

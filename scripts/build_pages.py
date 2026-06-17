@@ -950,6 +950,7 @@ def _admin_dashboard_content() -> str:
         <button id="runDevContextSearch" type="button">搜索</button>
       </div>
       <div id="devContextResults" class="search-results"></div>
+      <div id="devContextJobs" class="search-results"></div>
       <div id="ragQualitySummary" class="search-results"></div>
       <div id="ragEvaluationTrends" class="search-results"></div>
       <div class="search-form">
@@ -1063,6 +1064,7 @@ def _admin_dashboard_content() -> str:
     const corpusSearchResults = document.getElementById("corpusSearchResults");
     const ragSearchResults = document.getElementById("ragSearchResults");
     const devContextResults = document.getElementById("devContextResults");
+    const devContextJobs = document.getElementById("devContextJobs");
     const ragQualitySummary = document.getElementById("ragQualitySummary");
     const ragEvaluationTrends = document.getElementById("ragEvaluationTrends");
     const ragMaintenanceResults = document.getElementById("ragMaintenanceResults");
@@ -1446,6 +1448,7 @@ def _admin_dashboard_content() -> str:
         ].join("");
         latestLinks.innerHTML = latestLinksHtml(latestRun, failedJobs[0], plannedJobs[0]);
         latestJobResult.innerHTML = latestJobResultHtml(latestJob(jobs));
+        devContextJobs.innerHTML = devContextJobsHtml(jobs);
         workflowBoard.innerHTML = workflowBoardHtml(projects, runs, jobs);
         renderJobWorkbench();
       });
@@ -1986,6 +1989,22 @@ def _admin_dashboard_content() -> str:
         <span>${escapeHtml(data.question_type || "-")} · ${escapeHtml(data.confidence || "-")} · ${escapeHtml(retrieval.search_engine || "-")} · 证据 ${escapeHtml(retrieval.count || 0)}</span>
         <p>${escapeHtml(data.answer || "")}</p>
       </article>${nextActionsHtml}${emptyEvidence}${evidenceHtml}`;
+    }
+
+    function devContextJobsHtml(jobs) {
+      const devJobs = (jobs || []).filter(job => job.kind === "dev_context_index").slice(0, 5);
+      if (!devJobs.length) return '<p>暂无开发上下文索引任务。</p>';
+      return devJobs.map(job => {
+        const result = job.result || {};
+        const error = job.error || result.error || "";
+        const runId = result.run_id || "";
+        const runLink = runId && shouldUseApi() ? `<a href="/v1/dev-context/runs/${encodeURIComponent(runId)}">索引详情</a>` : "索引详情";
+        return `<article class="search-row">
+          <strong><a href="${escapeAttribute(jobDetailUrl(job.job_id || ""))}">${escapeHtml(job.job_id || "-")}</a></strong>
+          <span>${escapeHtml(job.status || "-")} · 分块 ${escapeHtml(result.chunk_count || 0)} · embedding ${escapeHtml(result.embedding_count || 0)} · ${escapeHtml(job.finished_at || job.submitted_at || "-")}</span>
+          <p>${error ? `错误：${escapeHtml(error)}` : `运行：${runLink}`}</p>
+        </article>`;
+      }).join("");
     }
 
     function facetRow(name, value, detail) {
@@ -6062,6 +6081,8 @@ def _jobs_dashboard_content() -> str:
           <option value="rag_backfill">rag_backfill</option>
           <option value="rag_corpus_rebuild">rag_corpus_rebuild</option>
           <option value="rag_embedding_build">rag_embedding_build</option>
+          <option value="rag_search_evaluation">rag_search_evaluation</option>
+          <option value="dev_context_index">dev_context_index</option>
         </select>
       </label>
       <label>Profile
@@ -7310,7 +7331,7 @@ def _job_detail_content() -> str:
     function ragResultSummaryHtml(job) {
       const result = job.result || {};
       const kind = job.kind || "";
-      if (!["rag_corpus_rebuild", "rag_embedding_build", "rag_backfill"].includes(kind)) return "";
+      if (!["rag_corpus_rebuild", "rag_embedding_build", "rag_backfill", "dev_context_index"].includes(kind)) return "";
       const rows = [
         ["执行模式", result.dry_run ? "预览，不写库" : "已写入 SQLite"],
         ["任务状态", result.status || "-"],
@@ -7335,6 +7356,15 @@ def _job_detail_content() -> str:
           ["处理项目", result.processed_count || 0],
           ["回填前覆盖率", percent((result.coverage_before || {}).coverage_rate || 0)],
           ["回填前缺口", (result.coverage_before || {}).gap_count || 0]
+        );
+      } else if (kind === "dev_context_index") {
+        rows.push(
+          ["索引运行", result.run_id || "-"],
+          ["来源数量", result.source_count || 0],
+          ["分块数量", result.chunk_count || 0],
+          ["embedding", result.embedding_count || 0],
+          ["命令数量", result.command_count || 0],
+          ["运行测试", result.run_checks ? "是" : "否"]
         );
       }
       const repositories = Array.isArray(result.processed_repositories) ? result.processed_repositories : [];

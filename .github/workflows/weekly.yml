@@ -27,6 +27,10 @@ on:
         description: "是否执行一次 RAG 检索质量评估并写入 jobs"
         required: false
         default: "true"
+      run_dev_context_index:
+        description: "是否在生成 Pages 前轻量刷新开发上下文索引"
+        required: false
+        default: "true"
   schedule:
     - cron: "0 0 * * 1"
 
@@ -141,6 +145,22 @@ jobs:
             --limit "$RAG_EVALUATION_LIMIT" \
             --auto-build "$RAG_EVALUATION_AUTO_BUILD" \
             --requested-by "github_actions"
+
+      - name: 刷新开发上下文索引
+        env:
+          WORKFLOW_RUN_DEV_CONTEXT_INDEX: ${{ inputs.run_dev_context_index || 'true' }}
+        run: |
+          if [ "$WORKFLOW_RUN_DEV_CONTEXT_INDEX" != "true" ]; then
+            echo "已跳过开发上下文索引。"
+            exit 0
+          fi
+          python scripts/plan_dev_context_index.py \
+            --run-checks false \
+            --replace false \
+            --trigger-source "github_actions" \
+            --requested-by "github_actions" \
+            --output .dev-context-job.json
+          python scripts/run_planned_job.py --job-file .dev-context-job.json
 
       - name: 生成周报归档页面
         run: python scripts/build_pages.py

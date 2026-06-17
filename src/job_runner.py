@@ -104,6 +104,8 @@ def _execute_job_by_kind(root: Path, db_path: Path, kind: str, request: dict[str
         return _execute_rag_embedding_build(db_path=db_path, request=request)
     if kind == "rag_search_evaluation":
         return _execute_rag_search_evaluation(root=root, db_path=db_path, request=request)
+    if kind == "dev_context_index":
+        return _execute_dev_context_index(root=root, db_path=db_path, request=request)
     raise ValueError(f"不支持的任务类型：{kind}")
 
 
@@ -243,6 +245,35 @@ def _execute_rag_search_evaluation(root: Path, db_path: Path, request: dict[str,
         "auto_build": bool(result.get("auto_build")),
         "aggregate": result.get("aggregate") if isinstance(result.get("aggregate"), dict) else {},
         "summary": result.get("summary") if isinstance(result.get("summary"), list) else [],
+        "request_context": _request_context(request),
+    }
+
+
+def _execute_dev_context_index(root: Path, db_path: Path, request: dict[str, Any]) -> dict[str, Any]:
+    from src.api.repository import ApiRepository
+
+    repository = ApiRepository(root=root, db_path=db_path)
+    result = repository.dev_context_index(
+        {
+            "run_checks": _bool_value(request.get("run_checks"), False),
+            "replace": _bool_value(request.get("replace"), False),
+            "max_command_chars": _positive_int(request.get("max_command_chars")) or 120000,
+            "requested_by": request.get("requested_by") or "job_runner",
+            "trigger_source": request.get("trigger_source") or "dev_context_index_job",
+        }
+    )
+    return {
+        "run_date": _now()[:10],
+        "status": result.get("status") or "ok",
+        "run_id": result.get("run_id") or "",
+        "source_count": result.get("source_count") or 0,
+        "chunk_count": result.get("chunk_count") or 0,
+        "embedding_count": result.get("embedding_count") or 0,
+        "command_count": result.get("command_count") or 0,
+        "started_at": result.get("started_at") or "",
+        "finished_at": result.get("finished_at") or "",
+        "run_checks": _bool_value(request.get("run_checks"), False),
+        "replace": _bool_value(request.get("replace"), False),
         "request_context": _request_context(request),
     }
 
@@ -391,6 +422,9 @@ def _request_context(request: dict[str, Any]) -> dict[str, Any]:
             "coverage_limit",
             "min_gap_count",
             "dimensions",
+            "run_checks",
+            "replace",
+            "max_command_chars",
         )
         if request.get(key) not in (None, "", [])
     }
