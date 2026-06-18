@@ -204,13 +204,19 @@ projects
 `/v1/recommendations` 会在存在匹配反馈时为项目附加：
 
 ```text
+project_profile
+recommendation_score
+ranking_factors
 preference_score
 feedback_memory
+feedback_reason
+rag_reason
+recommendation_reason
 ```
 
-`feedback_memory` 只包含反馈计数、平均评分、最近评分、标签、最近备注和排序调整值，不包含密钥或私有请求头。
+`project_profile` 是项目研究档案，包含 `project_positioning`、`use_cases`、`strengths`、`risks`、`quality_summary`、`tracking_reason`、`rag_summary` 和 `agent_judgement`。`ranking_factors` 包含 `base_score`、`quality_score`、`trend_score`、`rag_relevance_score`、`preference_score`、`tracking_score` 和 `risk_penalty`。`feedback_memory` 只包含反馈计数、平均评分、最近评分、标签、最近备注和排序调整值，不包含密钥或私有请求头。三个 reason 字段只保存派生解释文本，不包含管理口令、请求头或推送密钥。
 
-页面层反馈入口复用同一数据契约：`project.html` 和 `recommendations.html` 只向 `POST /v1/feedback` 写入仓库名、profile、评分、标签、备注和来源；`admin.html` 只读取 `GET /v1/feedback?limit=200` 的列表与汇总，不公开管理口令、请求头或任何密钥。
+页面层反馈入口复用同一数据契约：`project.html` 和 `recommendations.html` 只向 `POST /v1/feedback` 写入仓库名、profile、评分、标签、备注和来源；`admin.html` 读取 `GET /v1/feedback?limit=200` 的列表与汇总，并读取 `/v1/recommendations?limit=20` 展示受反馈影响的推荐项目，不公开管理口令、请求头或任何密钥。
 
 `/v1/dev-context/index` 会采集开发材料并写入 SQLite 开发上下文表。当前保存内容包括 README、API 文档、数据契约、操作日志、Git diff、测试输出和安全检查输出；写入前会对明显密钥形态做脱敏。`/v1/dev-context/index-plan` 只创建 `dev_context_index` planned job，任务请求公开 `run_checks`、`replace`、`max_command_chars`、`requested_by`、`trigger_source` 和 `confirm_execution`，不保存管理口令或请求头。`/v1/dev-context/search` 只返回匹配分块、来源、摘要和 metadata，不返回管理口令或请求头。`/v1/dev-context/ask` 复用已索引分块生成规则版回答，响应字段固定为 `answer`、`citations`、`evidence`、`confidence`、`question_type`、`retrieval` 和 `next_actions`；该接口不调用外部模型，不写入新的敏感数据。
 
@@ -272,9 +278,9 @@ migration_meta
 1. `runs` 保存运行摘要索引。
 2. `repositories` 保存仓库基础信息。
 3. `selections` 保存每次运行入选项目及排序信息。
-4. `project_corpus` 保存从入选项目派生的公开文本语料，用于本地搜索、后续向量检索和 RAG。
+4. `project_corpus` 保存从入选项目派生的公开文本语料和 `payload_json.project_profile`，用于本地搜索、后续向量检索和 RAG。
 5. `project_corpus_fts` 保存 `project_corpus` 的 SQLite FTS5 搜索索引，可由派生语料重建。
-6. `rag_chunks` 保存从 `project_corpus` 拆分出的短文本证据块，用于 RAG 检索、引用和后续 embedding。
+6. `rag_chunks` 保存从 `project_corpus` 拆分出的短文本证据块，`payload_json.project_profile` 会随证据块保留，用于 RAG 检索、引用和后续 embedding。
 7. `rag_chunks_fts` 保存 `rag_chunks` 的 SQLite FTS5 搜索索引，可由派生语料重建。
 8. `rag_embeddings` 保存从 `rag_chunks` 派生的本地 embedding 向量索引；当前默认模型为 `local-hash-v1`，可重建，不保存密钥。
 9. `rag_explanations` 保存 RAG 解释结果、引用、检索参数、解释摘要和规则版质量评估，用于后续质量评估和模型替换对比；不保存密钥。

@@ -44,6 +44,10 @@ class SqliteStorageTest(unittest.TestCase):
                 self.assertEqual(table_count(connection, "repositories"), 2)
                 self.assertEqual(table_count(connection, "jobs"), 1)
                 self.assertEqual(table_count(connection, "job_events"), 0)
+                profile_rows = connection.execute("SELECT payload_json FROM project_corpus").fetchall()
+                self.assertTrue(profile_rows)
+                for profile_row in profile_rows:
+                    self.assertIn("project_profile", json.loads(profile_row["payload_json"]))
                 row = connection.execute(
                     "SELECT full_name, language, stargazers_count FROM repositories WHERE full_name = ?",
                     ("owner/project",),
@@ -53,17 +57,24 @@ class SqliteStorageTest(unittest.TestCase):
                 job = connection.execute("SELECT job_id, status FROM jobs WHERE job_id = ?", ("run:2026-05-03",)).fetchone()
                 self.assertEqual(job["status"], "succeeded")
                 corpus = connection.execute(
-                    "SELECT full_name, search_text FROM project_corpus WHERE full_name = ?",
+                    "SELECT full_name, search_text, payload_json FROM project_corpus WHERE full_name = ?",
                     ("owner/project",),
                 ).fetchone()
                 self.assertIn("owner/project", corpus["search_text"])
                 self.assertIn("AI Agent", corpus["search_text"])
+                self.assertIn("项目定位", corpus["search_text"])
+                corpus_payload = json.loads(corpus["payload_json"])
+                self.assertIn("project_profile", corpus_payload)
+                self.assertIn("agent_judgement", corpus_payload["project_profile"])
                 chunk = connection.execute(
-                    "SELECT full_name, chunk_text FROM rag_chunks WHERE full_name = ?",
+                    "SELECT full_name, chunk_text, payload_json FROM rag_chunks WHERE full_name = ?",
                     ("owner/project",),
                 ).fetchone()
                 self.assertIn("owner/project", chunk["chunk_text"])
                 self.assertIn("AI Agent", chunk["chunk_text"])
+                self.assertIn("项目定位", chunk["chunk_text"])
+                chunk_payload = json.loads(chunk["payload_json"])
+                self.assertIn("project_profile", chunk_payload)
             finally:
                 connection.close()
         finally:

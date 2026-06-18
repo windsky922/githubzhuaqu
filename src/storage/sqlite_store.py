@@ -342,6 +342,23 @@ def upsert_project_corpus(connection: sqlite3.Connection, row: sqlite3.Row) -> N
     language = str(row["language"] or selection_payload.get("language") or repository_payload.get("language") or "")
     category = str(row["category"] or selection_payload.get("category") or "Other")
     sources = _json_list(row["sources_json"])
+    selection_reasons = _json_list(row["selection_reasons_json"])
+    security_flags = _json_list(row["security_flags_json"])
+    quality_flags = _list_value(selection_payload.get("quality_flags"))
+    project_profile = _project_profile(
+        full_name=full_name,
+        description=str(row["description"] or selection_payload.get("description") or ""),
+        readme_summary=str(selection_payload.get("readme_summary") or selection_payload.get("readme_excerpt") or ""),
+        language=language,
+        category=category,
+        selection_reasons=selection_reasons,
+        security_flags=security_flags,
+        quality_flags=quality_flags,
+        quality_score=_int_value(selection_payload.get("quality_score")),
+        quality_level=str(selection_payload.get("quality_level") or ""),
+        star_growth=_int_value(selection_payload.get("star_growth")),
+        trending_rank=_int_value(selection_payload.get("trending_rank")),
+    )
     text_parts = [
         full_name,
         title,
@@ -351,9 +368,10 @@ def upsert_project_corpus(connection: sqlite3.Connection, row: sqlite3.Row) -> N
         category,
         language,
         " ".join(str(item) for item in sources if item),
-        " ".join(str(item) for item in _json_list(row["selection_reasons_json"]) if item),
-        " ".join(str(item) for item in _json_list(row["security_flags_json"]) if item),
+        " ".join(str(item) for item in selection_reasons if item),
+        " ".join(str(item) for item in security_flags if item),
         " ".join(str(item) for item in _list_value(selection_payload.get("topics")) if item),
+        _project_profile_text(project_profile),
     ]
     payload = {
         "run_date": run_date,
@@ -363,8 +381,10 @@ def upsert_project_corpus(connection: sqlite3.Connection, row: sqlite3.Row) -> N
         "category": category,
         "sources": sources,
         "quality_level": selection_payload.get("quality_level") or "",
+        "quality_score": _int_value(selection_payload.get("quality_score")),
         "trending_rank": _int_value(selection_payload.get("trending_rank")),
         "star_growth": _int_value(selection_payload.get("star_growth")),
+        "project_profile": project_profile,
     }
     corpus_id = sha1(f"{run_date}:{full_name}".encode("utf-8")).hexdigest()
     search_text = _clean_text(" ".join(text_parts))
@@ -672,6 +692,128 @@ def _json_list(text: str) -> list[Any]:
 
 def _list_value(value: Any) -> list[Any]:
     return value if isinstance(value, list) else []
+
+
+def _project_profile(
+    *,
+    full_name: str,
+    description: str,
+    readme_summary: str,
+    language: str,
+    category: str,
+    selection_reasons: list[Any],
+    security_flags: list[Any],
+    quality_flags: list[Any],
+    quality_score: int,
+    quality_level: str,
+    star_growth: int,
+    trending_rank: int,
+) -> dict[str, Any]:
+    project_positioning = _first_text(
+        [
+            f"{full_name} 是一个 {category or '未分类'} 方向的 {language or '未知语言'} 项目。",
+            description,
+            readme_summary,
+        ]
+    )
+    use_cases = _compact_list(
+        [
+            f"用于评估 {category} 方向的开源方案。" if category else "",
+            f"适合关注 {language} 技术栈的开发者。" if language else "",
+            "适合继续观察近期 GitHub Trending 热度。" if trending_rank else "",
+        ]
+    )
+    strengths = _compact_list(
+        [
+            f"近期新增 Star {star_growth}。" if star_growth else "",
+            f"进入 GitHub Trending 第 {trending_rank} 位。" if trending_rank else "",
+            f"质量等级 {quality_level or 'unknown'}，质量分 {quality_score}。" if quality_score else "",
+            *[str(item) for item in selection_reasons[:3] if item],
+        ]
+    )
+    risks = _compact_list([str(item) for item in security_flags if item] or ["暂无明确风险提示。"])
+    quality_summary = (
+        f"质量分 {quality_score}，等级 {quality_level or 'unknown'}。"
+        if quality_score
+        else "暂无质量分，需结合 README 完整度、活跃度和风险提示继续判断。"
+    )
+    if quality_flags:
+        quality_summary += " 质量提示：" + "；".join(str(item) for item in quality_flags[:4] if item)
+    tracking_reason = _tracking_reason(star_growth=star_growth, trending_rank=trending_rank, security_flags=security_flags)
+    rag_summary = (
+        f"项目档案包含定位、适用场景、优势、风险、质量判断和历史入选理由，可用于 RAG 检索：{full_name}。"
+    )
+    agent_judgement = _agent_judgement(
+        quality_score=quality_score,
+        star_growth=star_growth,
+        trending_rank=trending_rank,
+        security_flags=security_flags,
+    )
+    return {
+        "project_profile": True,
+        "project_positioning": project_positioning,
+        "use_cases": use_cases,
+        "strengths": strengths,
+        "risks": risks,
+        "quality_summary": quality_summary,
+        "tracking_reason": tracking_reason,
+        "rag_summary": rag_summary,
+        "agent_judgement": agent_judgement,
+    }
+
+
+def _project_profile_text(profile: dict[str, Any]) -> str:
+    parts = [
+        "项目定位：" + str(profile.get("project_positioning") or ""),
+        "适用场景：" + "；".join(str(item) for item in _list_value(profile.get("use_cases")) if item),
+        "优势信号：" + "；".join(str(item) for item in _list_value(profile.get("strengths")) if item),
+        "风险点：" + "；".join(str(item) for item in _list_value(profile.get("risks")) if item),
+        "质量判断：" + str(profile.get("quality_summary") or ""),
+        "跟踪理由：" + str(profile.get("tracking_reason") or ""),
+        "RAG 摘要：" + str(profile.get("rag_summary") or ""),
+        "Agent 判断：" + str(profile.get("agent_judgement") or ""),
+    ]
+    return " ".join(part for part in parts if part.strip())
+
+
+def _first_text(values: list[str]) -> str:
+    for value in values:
+        text = str(value or "").strip()
+        if text:
+            return text
+    return "暂无项目定位，需要补充 README 摘要或项目描述。"
+
+
+def _compact_list(values: list[Any]) -> list[str]:
+    items = []
+    seen = set()
+    for value in values:
+        text = str(value or "").strip()
+        key = text.lower()
+        if text and key not in seen:
+            seen.add(key)
+            items.append(text)
+    return items[:6]
+
+
+def _tracking_reason(*, star_growth: int, trending_rank: int, security_flags: list[Any]) -> str:
+    if security_flags:
+        return "存在风险提示，建议谨慎跟踪并优先核查许可证、凭据和依赖安全。"
+    if trending_rank and trending_rank <= 5:
+        return "进入 Trending 前列，建议继续跟踪近期活跃度和社区反馈。"
+    if star_growth >= 50:
+        return "近期 Star 增长明显，建议继续观察增长是否可持续。"
+    return "可作为普通候选项目归档，后续根据反馈和新增信号决定是否继续跟踪。"
+
+
+def _agent_judgement(*, quality_score: int, star_growth: int, trending_rank: int, security_flags: list[Any]) -> str:
+    if security_flags:
+        return "暂不直接作为高优先级推荐，需先复核风险提示。"
+    if quality_score >= 80 and (star_growth >= 20 or (trending_rank and trending_rank <= 10)):
+        return "值得优先研究，可进入推荐和订阅摘要候选。"
+    if quality_score >= 60:
+        return "具备观察价值，建议结合 README、Issue 和 Release 活跃度继续判断。"
+    return "信息不足或质量信号偏弱，建议低优先级跟踪。"
 
 
 def _clean_text(value: str) -> str:

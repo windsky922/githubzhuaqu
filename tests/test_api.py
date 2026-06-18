@@ -583,9 +583,14 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(project_rag_bundle["full_name"], "owner/agent")
             self.assertEqual(project_rag_bundle["feedback_memory"]["count"], 1)
             self.assertEqual(project_rag_bundle["feedback_memory"]["summary"]["average_rating"], 2)
+            self.assertIn("project_profile", project_rag_bundle)
+            self.assertIn("project_positioning", project_rag_bundle["project_profile"])
+            self.assertIn("agent_judgement", project_rag_bundle["project_profile"])
+            self.assertIn("tracking_reason", project_rag_bundle["project_profile"])
             self.assertGreaterEqual(project_rag_bundle["explanation_summary"]["count"], 1)
             self.assertIn("owner/agent", project_rag_bundle["explanations"][0]["repositories"])
             self.assertIn("contexts", project_rag_bundle)
+            self.assertIn("project_profile", project_rag_bundle["contexts"][0]["metadata"])
             self.assertGreaterEqual(rag_quality_summary["total_count"], 1)
             self.assertGreaterEqual(rag_quality_summary["average_quality_score"], 1)
             self.assertIn(rag_explain["quality"]["level"], rag_quality_summary["quality_levels"])
@@ -655,6 +660,98 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertTrue(preference_comparison["preference"]["active"])
             self.assertEqual(preference_comparison["preference"]["language"], "Python")
             self.assertEqual(preference_comparison["recommendation"]["scoring_model"], "rule:v2-preference")
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
+    def test_feedback_drives_recommendation_ranking_and_explanations(self):
+        root = Path.cwd() / f".tmp-api-feedback-ranking-{uuid.uuid4().hex}"
+        try:
+            _write_fixture(root)
+            repository = ApiRepository(root=root, db_path=root / "data" / "github_weekly.sqlite")
+
+            baseline = repository.recommendations(profile="agent_development", language="Python", limit=10)
+            self.assertEqual(baseline["recommendations"][0]["full_name"], "owner/agent")
+            baseline_agent = baseline["recommendations"][0]
+            self.assertIn("recommendation_score", baseline_agent)
+            self.assertIn("ranking_factors", baseline_agent)
+            self.assertIn("rag_reason", baseline_agent)
+            self.assertIn("project_profile", baseline_agent)
+            self.assertIn("项目 RAG 档案显示", baseline_agent["rag_reason"])
+            self.assertIn("feedback_reason", baseline_agent)
+            self.assertIn("recommendation_reason", baseline_agent)
+            self.assertEqual(
+                baseline_agent["recommendation_score"],
+                sum(baseline_agent["ranking_factors"].values()),
+            )
+
+            root_risk = Path.cwd() / f".tmp-api-feedback-risk-{uuid.uuid4().hex}"
+            _write_fixture(root_risk)
+            _append_risky_fixture_project(root_risk)
+            try:
+                risk_repository = ApiRepository(root=root_risk, db_path=root_risk / "data" / "github_weekly.sqlite")
+                risk_recommendations = risk_repository.recommendations(
+                    profile="agent_development",
+                    language="Python",
+                    limit=10,
+                )
+                risky_project = next(
+                    item for item in risk_recommendations["recommendations"] if item["full_name"] == "owner/risky-agent"
+                )
+                self.assertLess(risky_project["ranking_factors"]["risk_penalty"], 0)
+                self.assertIn("存在风险扣分", risky_project["recommendation_reason"])
+            finally:
+                shutil.rmtree(root_risk, ignore_errors=True)
+
+            repository.create_project_feedback(
+                {
+                    "full_name": "owner/agent-helper",
+                    "profile": "agent_development",
+                    "rating": 2,
+                    "labels": ["useful"],
+                    "source": "unit-test",
+                }
+            )
+            positive = repository.recommendations(profile="agent_development", language="Python", limit=10)
+            self.assertEqual(positive["recommendations"][0]["full_name"], "owner/agent-helper")
+            self.assertGreater(positive["recommendations"][0]["ranking_factors"]["preference_score"], 0)
+            self.assertIn("排序被提升", positive["recommendations"][0]["feedback_reason"])
+
+            repository.create_project_feedback(
+                {
+                    "full_name": "owner/agent",
+                    "profile": "agent_development",
+                    "rating": -2,
+                    "labels": ["not_fit"],
+                    "source": "unit-test",
+                }
+            )
+            negative = repository.recommendations(profile="agent_development", language="Python", limit=10)
+            agent_after_negative = next(item for item in negative["recommendations"] if item["full_name"] == "owner/agent")
+            helper_after_negative = next(
+                item for item in negative["recommendations"] if item["full_name"] == "owner/agent-helper"
+            )
+            self.assertLess(agent_after_negative["recommendation_score"], helper_after_negative["recommendation_score"])
+            self.assertLess(agent_after_negative["ranking_factors"]["preference_score"], 0)
+            self.assertIn("排序被降低", agent_after_negative["feedback_reason"])
+
+            root_watch = Path.cwd() / f".tmp-api-feedback-watch-{uuid.uuid4().hex}"
+            _write_fixture(root_watch)
+            try:
+                watch_repository = ApiRepository(root=root_watch, db_path=root_watch / "data" / "github_weekly.sqlite")
+                watch_repository.create_project_feedback(
+                    {
+                        "full_name": "owner/agent",
+                        "profile": "agent_development",
+                        "rating": 1,
+                        "labels": ["watch"],
+                        "source": "unit-test",
+                    }
+                )
+                watched = watch_repository.recommendations(profile="agent_development", language="Python", limit=10)
+                self.assertEqual(watched["recommendations"][0]["full_name"], "owner/agent")
+                self.assertEqual(watched["recommendations"][0]["ranking_factors"]["tracking_score"], 12)
+            finally:
+                shutil.rmtree(root_watch, ignore_errors=True)
         finally:
             shutil.rmtree(root, ignore_errors=True)
 
@@ -1336,7 +1433,14 @@ class ApiRepositoryTest(unittest.TestCase):
                 v1_recommendations_after_feedback.json()["recommendations"][0]["feedback_memory"]["latest_rating"],
                 2,
             )
+            self.assertIn("project_profile", v1_recommendations_after_feedback.json()["recommendations"][0])
+            self.assertIn(
+                "项目 RAG 档案显示",
+                v1_recommendations_after_feedback.json()["recommendations"][0]["rag_reason"],
+            )
             self.assertEqual(v1_project_rag_after_feedback.json()["feedback_memory"]["count"], 1)
+            self.assertIn("project_profile", v1_project_rag_after_feedback.json())
+            self.assertIn("agent_judgement", v1_project_rag_after_feedback.json()["project_profile"])
             self.assertEqual(v1_database_summary_after_feedback.json()["table_counts"]["project_feedback"], 1)
             self.assertTrue(v1_database_summary_after_feedback.json()["rag_readiness"]["ready_for_feedback_memory"])
             self.assertFalse(v1_trigger.json()["execution_supported"])
@@ -1482,6 +1586,32 @@ def _write_fixture(root: Path) -> None:
         ),
         encoding="utf-8",
     )
+
+
+def _append_risky_fixture_project(root: Path) -> None:
+    selected_path = root / "data" / "selected" / "2026-05-09.json"
+    projects = json.loads(selected_path.read_text(encoding="utf-8"))
+    projects.append(
+        {
+            "full_name": "owner/risky-agent",
+            "html_url": "https://github.com/owner/risky-agent",
+            "description": "agent workflow automation with risky setup",
+            "language": "Python",
+            "stargazers_count": 300,
+            "forks_count": 30,
+            "score": 95,
+            "star_growth": 240,
+            "trending_rank": 2,
+            "category": "AI Agent",
+            "sources": ["github_trending"],
+            "selection_reasons": ["进入 GitHub Trending 周榜第 2 位。"],
+            "security_flags": ["未识别到许可证。", "README 提到需要私有 Token。"],
+            "quality_score": 88,
+            "quality_level": "high",
+            "quality_flags": [],
+        }
+    )
+    selected_path.write_text(json.dumps(projects, ensure_ascii=False), encoding="utf-8")
 
 
 if __name__ == "__main__":

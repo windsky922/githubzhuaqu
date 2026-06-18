@@ -343,6 +343,7 @@
           rag_explanation_count: number((rag.explanation_summary || {}).count),
           rag_explanation_summary: rag.explanation_summary || {},
           feedback_memory: rag.feedback_memory || detail.feedback_memory || {},
+          project_profile: rag.project_profile || detail.project_profile || {},
         }))
         .catch(() => detail);
     }
@@ -391,6 +392,7 @@
         rag_explanation_count: 0,
         rag_explanation_summary: {},
         feedback_memory: {},
+        project_profile: {},
         data_source: "静态 JSON"
       };
     }
@@ -433,6 +435,10 @@
             <button type="button" data-project-feedback="watch"${shouldUseApi() ? "" : " disabled"}>继续跟踪</button>
           </div>
           <div id="projectFeedbackStatus" class="feedback-status" aria-live="polite">${shouldUseApi() ? "" : "反馈写入需要本地后端或 api=1。"}</div>
+        </section>
+        <section class="section" style="margin-top:12px">
+          <h2>Agent 研究摘要</h2>
+          ${projectProfileHtml(detail.project_profile)}
         </section>
         <section class="grid">
           <div class="section"><h2>推荐理由</h2>${listHtml(detail.selection_reasons || [], "暂无推荐理由。")}</div>
@@ -530,6 +536,7 @@
           rag_explanations: [],
           rag_explanation_count: 0,
           feedback_memory: {},
+          project_profile: {},
         });
       }
       const params = new URLSearchParams();
@@ -545,7 +552,24 @@
           explanations: [],
           explanation_summary: { count: 0, recommendations: [] },
           feedback_memory: {},
+          project_profile: {},
         }));
+    }
+
+    function projectProfileHtml(profile) {
+      if (!profile || !Object.keys(profile).length) return "<p>项目研究档案需要本地后端或 api=1 模式读取。</p>";
+      return `
+        <div class="grid">
+          <div><h3>项目定位</h3><p>${escapeHtml(profile.project_positioning || "暂无项目定位。")}</p></div>
+          <div><h3>适用场景</h3>${listHtml(profile.use_cases || [], "暂无适用场景。")}</div>
+          <div><h3>优势信号</h3>${listHtml(profile.strengths || [], "暂无优势信号。")}</div>
+          <div><h3>风险点</h3>${listHtml(profile.risks || [], "暂无风险点。")}</div>
+          <div><h3>质量判断</h3><p>${escapeHtml(profile.quality_summary || "暂无质量判断。")}</p></div>
+          <div><h3>跟踪理由</h3><p>${escapeHtml(profile.tracking_reason || "暂无跟踪理由。")}</p></div>
+          <div class="wide"><h3>RAG 摘要</h3><p>${escapeHtml(profile.rag_summary || "暂无 RAG 摘要。")}</p></div>
+          <div class="wide"><h3>Agent 判断</h3><p>${escapeHtml(profile.agent_judgement || "暂无 Agent 判断。")}</p></div>
+        </div>
+      `;
     }
 
     function feedbackMemoryHtml(memory) {

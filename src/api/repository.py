@@ -182,6 +182,15 @@ class ApiRepository:
         projects = _dedupe_projects_by_full_name(projects)
         feedback_records = self.project_feedback(profile=normalized_profile, limit=200).get("feedback", [])
         feedback_memory = _feedback_memory_by_full_name(feedback_records)
+        project_profiles = self._project_profiles_by_full_name([project.get("full_name") or "" for project in projects])
+        projects = [
+            {
+                **project,
+                "project_profile": project_profiles.get(str(project.get("full_name") or "").lower())
+                or _project_profile_from_project(project, feedback_memory.get(str(project.get("full_name") or "").lower())),
+            }
+            for project in projects
+        ]
         projects = _apply_feedback_memory(projects, feedback_memory)[:limit]
         return {
             "schema_version": 1,
@@ -2155,6 +2164,7 @@ class ApiRepository:
                 "found": False,
                 "full_name": normalized,
                 "query": "",
+                "project_profile": {},
                 "retrieval": {},
                 "contexts": [],
                 "citations": [],
@@ -2190,6 +2200,9 @@ class ApiRepository:
         explanations = self.rag_explanations(repo=detail.get("full_name") or normalized, limit=explanation_limit)
         explanation_items = explanations.get("explanations") if isinstance(explanations.get("explanations"), list) else []
         feedback = self.project_feedback(full_name=detail.get("full_name") or normalized, limit=20)
+        feedback_summary = feedback.get("summary") if isinstance(feedback.get("summary"), dict) else {}
+        project_profile = self._project_profile_for_full_name(detail.get("full_name") or normalized) or _project_profile_from_detail(detail)
+        project_profile = _merge_project_profile_runtime_signals(project_profile, feedback_summary, explanation_items)
         return {
             "schema_version": 1,
             "found": True,
@@ -2205,6 +2218,7 @@ class ApiRepository:
                 "total_star_growth": _int_value(detail.get("total_star_growth")),
                 "best_trending_rank": _int_value(detail.get("best_trending_rank")),
             },
+            "project_profile": project_profile,
             "retrieval": retrieval.get("retrieval") if isinstance(retrieval.get("retrieval"), dict) else {},
             "contexts": retrieval.get("contexts") if isinstance(retrieval.get("contexts"), list) else [],
             "citations": retrieval.get("citations") if isinstance(retrieval.get("citations"), list) else [],
@@ -2218,6 +2232,41 @@ class ApiRepository:
                 "feedback": feedback.get("feedback") if isinstance(feedback.get("feedback"), list) else [],
             },
         }
+
+    def _project_profile_for_full_name(self, full_name: str) -> dict[str, Any]:
+        profiles = self._project_profiles_by_full_name([full_name])
+        return profiles.get(_normalize_full_name(full_name).lower(), {})
+
+    def _project_profiles_by_full_name(self, full_names: list[str]) -> dict[str, dict[str, Any]]:
+        normalized = [_normalize_full_name(name) for name in full_names if _normalize_full_name(name)]
+        if not normalized:
+            return {}
+        self.ensure_sqlite_index()
+        placeholders = ",".join("?" for _ in normalized)
+        connection = connect(self.db_path)
+        try:
+            initialize(connection)
+            rows = connection.execute(
+                f"""
+                SELECT full_name, payload_json
+                FROM project_corpus
+                WHERE lower(full_name) IN ({placeholders})
+                ORDER BY run_date DESC
+                """,
+                [name.lower() for name in normalized],
+            ).fetchall()
+        finally:
+            connection.close()
+        profiles: dict[str, dict[str, Any]] = {}
+        for row in rows:
+            key = str(row["full_name"] or "").lower()
+            if key in profiles:
+                continue
+            payload = _json_object(row["payload_json"])
+            profile = payload.get("project_profile") if isinstance(payload.get("project_profile"), dict) else {}
+            if profile:
+                profiles[key] = profile
+        return profiles
 
     def _persist_rag_explanation(self, result: dict[str, Any]) -> dict[str, Any]:
         explanation = result.get("explanation") if isinstance(result.get("explanation"), dict) else {}
@@ -4356,6 +4405,7 @@ def _rag_document(row: Any, terms: list[str]) -> dict[str, Any]:
             "quality_level": payload.get("quality_level") or "",
             "trending_rank": _int_value(payload.get("trending_rank")),
             "star_growth": _int_value(payload.get("star_growth")),
+            "project_profile": payload.get("project_profile") if isinstance(payload.get("project_profile"), dict) else {},
         },
         "evidence": _rag_evidence(text, terms),
     }
@@ -4411,6 +4461,7 @@ def _rag_context(row: Any, terms: list[str]) -> dict[str, Any]:
             "quality_level": payload.get("quality_level") or "",
             "trending_rank": _int_value(payload.get("trending_rank")),
             "star_growth": _int_value(payload.get("star_growth")),
+            "project_profile": payload.get("project_profile") if isinstance(payload.get("project_profile"), dict) else {},
         },
     }
 
@@ -5942,16 +5993,20 @@ def _apply_feedback_memory(
     feedback_memory: dict[str, dict[str, Any]],
 ) -> list[dict[str, Any]]:
     enriched = []
-    has_feedback = False
     for project in projects:
         full_name = _normalize_full_name(str(project.get("full_name") or ""))
         memory = feedback_memory.get(full_name.lower()) if full_name else None
         item = dict(project)
-        original_score = _int_value(item.get("score"))
         adjustment = _int_value(memory.get("preference_adjustment")) if memory else 0
-        item["preference_score"] = original_score + adjustment
+        ranking_factors = _recommendation_ranking_factors(item, memory)
+        recommendation_score = sum(ranking_factors.values())
+        item["ranking_factors"] = ranking_factors
+        item["recommendation_score"] = recommendation_score
+        item["preference_score"] = ranking_factors["preference_score"]
+        item["feedback_reason"] = _feedback_recommendation_reason(memory)
+        item["rag_reason"] = _rag_recommendation_reason(item)
+        item["recommendation_reason"] = _recommendation_reason(item, ranking_factors)
         if memory:
-            has_feedback = True
             item["feedback_memory"] = {
                 "count": _int_value(memory.get("count")),
                 "average_rating": memory.get("average_rating") or 0,
@@ -5961,11 +6016,10 @@ def _apply_feedback_memory(
                 "preference_adjustment": adjustment,
             }
         enriched.append(item)
-    if not has_feedback:
-        return enriched
     return sorted(
         enriched,
         key=lambda project: (
+            _int_value(project.get("recommendation_score")),
             _int_value(project.get("preference_score")),
             _int_value(project.get("score")),
             _int_value(project.get("star_growth")),
@@ -5973,6 +6027,246 @@ def _apply_feedback_memory(
         ),
         reverse=True,
     )
+
+
+def _recommendation_ranking_factors(project: dict[str, Any], memory: dict[str, Any] | None) -> dict[str, int]:
+    base_score = min(40, max(0, _int_value(project.get("score"))))
+    quality_score = min(25, max(0, _int_value(project.get("quality_score")) // 4))
+    star_growth = _int_value(project.get("star_growth"))
+    trending_rank = _int_value(project.get("trending_rank"))
+    trend_score = min(25, max(0, star_growth // 10))
+    if trending_rank:
+        trend_score += max(0, 16 - min(trending_rank, 15))
+    rag_relevance_score = _recommendation_rag_score(project)
+    preference_score = _int_value(memory.get("preference_adjustment")) if memory else 0
+    tracking_score = _recommendation_tracking_score(memory)
+    risk_penalty = -min(30, len(_list_strings(project.get("security_flags"))) * 8)
+    return {
+        "base_score": base_score,
+        "quality_score": quality_score,
+        "trend_score": trend_score,
+        "rag_relevance_score": rag_relevance_score,
+        "preference_score": preference_score,
+        "tracking_score": tracking_score,
+        "risk_penalty": risk_penalty,
+    }
+
+
+def _recommendation_rag_score(project: dict[str, Any]) -> int:
+    profile = project.get("project_profile") if isinstance(project.get("project_profile"), dict) else {}
+    if profile:
+        score = 10
+        for key in ["project_positioning", "quality_summary", "tracking_reason", "agent_judgement"]:
+            if str(profile.get(key) or "").strip():
+                score += 3
+        for key in ["use_cases", "strengths", "risks"]:
+            score += min(3, len(_list_strings(profile.get(key))))
+        return min(24, score)
+    reasons = " ".join(_list_strings(project.get("selection_reasons"))).lower()
+    description = str(project.get("description") or "").lower()
+    category = str(project.get("category") or "").lower()
+    text = " ".join([str(project.get("full_name") or "").lower(), description, category, reasons])
+    score = 8 if text else 0
+    for term in ["rag", "agent", "llm", "workflow", "tool", "retrieval", "embedding"]:
+        if term in text:
+            score += 3
+    if _list_strings(project.get("selection_reasons")):
+        score += 4
+    return min(24, score)
+
+
+def _recommendation_tracking_score(memory: dict[str, Any] | None) -> int:
+    if not memory:
+        return 0
+    labels = {label.lower() for label in _list_strings(memory.get("labels"))}
+    latest_rating = _int_value(memory.get("latest_rating"))
+    if "watch" in labels or "tracking" in labels or "continue_tracking" in labels:
+        return 12
+    if latest_rating > 0 and ("useful" in labels or "agent" in labels):
+        return 6
+    return 0
+
+
+def _feedback_recommendation_reason(memory: dict[str, Any] | None) -> str:
+    if not memory:
+        return "暂无该项目的反馈记忆，当前排序主要依据热度、质量、RAG 相关性和风险信号。"
+    adjustment = _int_value(memory.get("preference_adjustment"))
+    labels = "、".join(_list_strings(memory.get("labels"))[:4])
+    latest_rating = _int_value(memory.get("latest_rating"))
+    if adjustment > 0:
+        return f"历史反馈偏正向，最近评分 {latest_rating}，因此推荐排序被提升。" + (f" 标签：{labels}。" if labels else "")
+    if adjustment < 0:
+        return f"历史反馈偏负向，最近评分 {latest_rating}，因此推荐排序被降低。" + (f" 标签：{labels}。" if labels else "")
+    return "已有反馈记录，但整体偏好影响接近中性。"
+
+
+def _rag_recommendation_reason(project: dict[str, Any]) -> str:
+    profile = project.get("project_profile") if isinstance(project.get("project_profile"), dict) else {}
+    if profile:
+        judgement = str(profile.get("agent_judgement") or "").strip()
+        tracking = str(profile.get("tracking_reason") or "").strip()
+        positioning = str(profile.get("project_positioning") or "").strip()
+        parts = _unique_strings([positioning, judgement, tracking])
+        return "项目 RAG 档案显示：" + " ".join(parts[:3])
+    score = _recommendation_rag_score(project)
+    category = str(project.get("category") or "未分类")
+    if score >= 18:
+        return f"项目描述、方向或入选理由与 {category} 主题高度相关，可进入项目 RAG 档案继续检索解释。"
+    if score >= 10:
+        return f"项目已有摘要和入选理由可用于 RAG 召回，当前与 {category} 方向存在中等相关性。"
+    return "当前 RAG 相关信号较弱，后续需要更多 README、历史解释或用户反馈补充判断。"
+
+
+def _recommendation_reason(project: dict[str, Any], factors: dict[str, int]) -> str:
+    reasons = []
+    if _int_value(project.get("quality_score")):
+        reasons.append(f"质量分 {_int_value(project.get('quality_score'))}")
+    if _int_value(project.get("star_growth")):
+        reasons.append(f"新增 Star {_int_value(project.get('star_growth'))}")
+    if _int_value(project.get("trending_rank")):
+        reasons.append(f"Trending 第 {_int_value(project.get('trending_rank'))} 位")
+    if factors.get("preference_score", 0) > 0:
+        reasons.append("用户反馈提升")
+    elif factors.get("preference_score", 0) < 0:
+        reasons.append("用户反馈降低")
+    if factors.get("risk_penalty", 0) < 0:
+        reasons.append("存在风险扣分")
+    return "；".join(reasons) + "。" if reasons else "基于综合热度、质量信号和历史入选记录推荐。"
+
+
+def _project_profile_from_project(project: dict[str, Any], memory: dict[str, Any] | None = None) -> dict[str, Any]:
+    security_flags = _list_strings(project.get("security_flags"))
+    quality_flags = _list_strings(project.get("quality_flags"))
+    selection_reasons = _list_strings(project.get("selection_reasons"))
+    quality_score = _int_value(project.get("quality_score"))
+    star_growth = _int_value(project.get("star_growth"))
+    trending_rank = _int_value(project.get("trending_rank"))
+    full_name = str(project.get("full_name") or "")
+    category = str(project.get("category") or "未分类")
+    language = str(project.get("language") or "未知语言")
+    positioning = str(project.get("description") or "").strip() or f"{full_name} 是一个 {category} 方向的 {language} 项目。"
+    use_cases = _unique_strings(
+        [
+            f"用于评估 {category} 方向的开源方案。" if category else "",
+            f"适合关注 {language} 技术栈的开发者。" if language else "",
+            "适合继续观察近期 GitHub Trending 热度。" if trending_rank else "",
+        ]
+    )
+    strengths = _unique_strings(
+        [
+            f"近期新增 Star {star_growth}。" if star_growth else "",
+            f"进入 GitHub Trending 第 {trending_rank} 位。" if trending_rank else "",
+            f"质量分 {quality_score}。" if quality_score else "",
+            *selection_reasons[:3],
+        ]
+    )
+    risks = security_flags or ["暂无明确风险提示。"]
+    quality_summary = (
+        f"质量分 {quality_score}，等级 {project.get('quality_level') or 'unknown'}。"
+        if quality_score
+        else "暂无质量分，需继续结合 README、Issue 和 Release 活跃度判断。"
+    )
+    if quality_flags:
+        quality_summary += " 质量提示：" + "；".join(quality_flags[:4])
+    tracking_reason = _profile_tracking_reason(
+        star_growth=star_growth,
+        trending_rank=trending_rank,
+        security_flags=security_flags,
+        memory=memory,
+    )
+    return {
+        "project_profile": True,
+        "project_positioning": positioning,
+        "use_cases": use_cases[:6],
+        "strengths": strengths[:6],
+        "risks": risks[:6],
+        "quality_summary": quality_summary,
+        "tracking_reason": tracking_reason,
+        "rag_summary": f"项目档案覆盖定位、适用场景、优势、风险、质量和历史入选理由，可用于 RAG 检索：{full_name}。",
+        "agent_judgement": _profile_agent_judgement(
+            quality_score=quality_score,
+            star_growth=star_growth,
+            trending_rank=trending_rank,
+            security_flags=security_flags,
+            memory=memory,
+        ),
+    }
+
+
+def _project_profile_from_detail(detail: dict[str, Any]) -> dict[str, Any]:
+    latest = {}
+    history = detail.get("history") if isinstance(detail.get("history"), list) else []
+    if history:
+        latest = history[0] if isinstance(history[0], dict) else {}
+    project = {
+        "full_name": detail.get("full_name") or "",
+        "description": detail.get("description") or "",
+        "language": detail.get("language") or "",
+        "category": detail.get("category") or "",
+        "star_growth": detail.get("total_star_growth") or latest.get("star_growth") or 0,
+        "trending_rank": detail.get("best_trending_rank") or latest.get("trending_rank") or 0,
+        "quality_score": detail.get("latest_quality_score") or latest.get("quality_score") or 0,
+        "quality_level": detail.get("latest_quality_level") or latest.get("quality_level") or "unknown",
+        "selection_reasons": detail.get("selection_reasons") or [],
+        "security_flags": detail.get("security_flags") or [],
+        "quality_flags": detail.get("quality_flags") or [],
+    }
+    return _project_profile_from_project(project)
+
+
+def _merge_project_profile_runtime_signals(
+    profile: dict[str, Any],
+    feedback_summary: dict[str, Any],
+    explanations: list[dict[str, Any]],
+) -> dict[str, Any]:
+    item = dict(profile)
+    average_rating = feedback_summary.get("average_rating")
+    if average_rating:
+        item["tracking_reason"] = str(item.get("tracking_reason") or "") + f" 用户反馈均分 {average_rating}。"
+    if explanations:
+        item["rag_summary"] = str(item.get("rag_summary") or "") + f" 已有 {len(explanations)} 条 RAG 解释历史可复用。"
+    return item
+
+
+def _profile_tracking_reason(
+    *,
+    star_growth: int,
+    trending_rank: int,
+    security_flags: list[str],
+    memory: dict[str, Any] | None,
+) -> str:
+    labels = {label.lower() for label in _list_strings(memory.get("labels"))} if memory else set()
+    if "watch" in labels or "tracking" in labels or "continue_tracking" in labels:
+        return "用户已标记继续跟踪，推荐保留在观察池。"
+    if security_flags:
+        return "存在风险提示，建议谨慎跟踪并先复核许可证、凭据和依赖安全。"
+    if trending_rank and trending_rank <= 5:
+        return "进入 Trending 前列，建议继续跟踪近期活跃度和社区反馈。"
+    if star_growth >= 50:
+        return "近期 Star 增长明显，建议继续观察增长是否可持续。"
+    return "可作为普通候选项目归档，后续根据反馈和新增信号决定是否继续跟踪。"
+
+
+def _profile_agent_judgement(
+    *,
+    quality_score: int,
+    star_growth: int,
+    trending_rank: int,
+    security_flags: list[str],
+    memory: dict[str, Any] | None,
+) -> str:
+    latest_rating = _int_value(memory.get("latest_rating")) if memory else 0
+    if latest_rating < 0:
+        return "用户反馈偏负向，暂不作为高优先级推荐。"
+    if security_flags:
+        return "暂不直接作为高优先级推荐，需先复核风险提示。"
+    if latest_rating > 0:
+        return "用户反馈偏正向，值得继续跟踪并进入订阅摘要候选。"
+    if quality_score >= 80 and (star_growth >= 20 or (trending_rank and trending_rank <= 10)):
+        return "值得优先研究，可进入推荐和订阅摘要候选。"
+    if quality_score >= 60:
+        return "具备观察价值，建议结合 README、Issue 和 Release 活跃度继续判断。"
+    return "信息不足或质量信号偏弱，建议低优先级跟踪。"
 
 
 def _feedback_memory_response(feedback: list[dict[str, Any]]) -> dict[str, Any]:

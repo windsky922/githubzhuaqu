@@ -31,6 +31,10 @@
     .pill { border: 1px solid #d8dee4; border-radius: 999px; padding: 3px 8px; color: #57606a; background: #f6f8fa; font-size: 12px; }
     .pill.preference { border-color: #bbf7d0; color: #15803d; background: #f0fdf4; }
     .reasons { margin: 0; padding-left: 18px; color: #57606a; line-height: 1.55; }
+    .ranking-factors { display: flex; flex-wrap: wrap; gap: 6px; }
+    .ranking-factors span { border: 1px solid #d8dee4; border-radius: 6px; padding: 3px 6px; color: #57606a; background: #ffffff; font-size: 12px; }
+    .agent-explain { display: grid; gap: 6px; color: #57606a; font-size: 13px; line-height: 1.5; }
+    .agent-explain p { margin: 0; }
     .feedback { border-top: 1px solid #d8dee4; padding-top: 10px; display: grid; gap: 8px; }
     .feedback-actions { display: flex; flex-wrap: wrap; gap: 8px; }
     .feedback-actions button { width: auto; background: #ffffff; color: #0969da; border-color: #d0d7de; padding: 7px 10px; }
@@ -271,8 +275,11 @@
             <span class="pill">新增 Star ${number(project.star_growth)}</span>
             <span class="pill">Trending ${project.trending_rank ? "#" + number(project.trending_rank) : "-"}</span>
             <span class="pill">质量 ${number(project.quality_score)}</span>
+            <span class="pill">推荐分 ${number(project.recommendation_score)}</span>
             <span class="pill preference">偏好 ${signedNumber(project.preference_score)}</span>
           </div>
+          ${rankingFactorsHtml(project.ranking_factors)}
+          ${agentExplanationHtml(project)}
           <ul class="reasons">${reasonsHtml(project)}</ul>
           <div class="feedback">
             ${feedbackMemoryHtml(project.feedback_memory)}
@@ -299,10 +306,31 @@
     }
 
     function feedbackMemoryHtml(memory) {
-      if (!memory || !Number(memory.record_count || 0)) return '<p class="feedback-memory">暂无反馈记忆。</p>';
+      const count = Number(memory && (memory.record_count || memory.count) || 0);
+      if (!memory || !count) return '<p class="feedback-memory">暂无反馈记忆。</p>';
       const labels = Array.isArray(memory.labels) ? memory.labels.slice(0, 3).join(", ") : "";
       const note = memory.latest_note ? ` / ${memory.latest_note}` : "";
-      return `<p class="feedback-memory">反馈 ${number(memory.record_count)} 条，均分 ${number(memory.average_rating)}，最近 ${signedNumber(memory.latest_rating)}${labels ? ` / ${escapeHtml(labels)}` : ""}${escapeHtml(note)}</p>`;
+      return `<p class="feedback-memory">反馈 ${number(count)} 条，均分 ${number(memory.average_rating)}，最近 ${signedNumber(memory.latest_rating)}${labels ? ` / ${escapeHtml(labels)}` : ""}${escapeHtml(note)}</p>`;
+    }
+
+    function rankingFactorsHtml(factors) {
+      if (!factors || typeof factors !== "object") return "";
+      const labels = {
+        base_score: "基础",
+        quality_score: "质量",
+        trend_score: "趋势",
+        rag_relevance_score: "RAG",
+        preference_score: "反馈",
+        tracking_score: "跟踪",
+        risk_penalty: "风险"
+      };
+      return `<div class="ranking-factors">${Object.keys(labels).map(key => `<span>${labels[key]} ${signedNumber(factors[key] || 0)}</span>`).join("")}</div>`;
+    }
+
+    function agentExplanationHtml(project) {
+      const lines = [project.recommendation_reason, project.rag_reason, project.feedback_reason].filter(Boolean);
+      if (!lines.length) return "";
+      return `<div class="agent-explain">${lines.map(line => `<p>${escapeHtml(line)}</p>`).join("")}</div>`;
     }
 
     function bindRecommendationFeedback() {

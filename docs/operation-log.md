@@ -2,6 +2,44 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-06-18 追加：项目级 RAG 档案增强
+
+### 1. 开发目的
+
+上一阶段推荐闭环已经能把反馈、质量、热度和风险纳入排序。本次把每个入选项目升级为可检索的研究对象：为项目生成结构化 `project_profile`，让 RAG 检索、项目详情页和推荐解释能引用项目定位、适用场景、优势、风险、质量判断、跟踪理由和 Agent 判断。
+
+### 2. 修改内容
+
+1. `project_corpus.payload_json` 和 `rag_chunks.payload_json` 新增 `project_profile`，不新增 SQLite 表。
+2. RAG 语料文本新增“项目定位 / 适用场景 / 优势信号 / 风险点 / 质量判断 / 跟踪理由 / RAG 摘要 / Agent 判断”，FTS5 和后续向量检索都能召回这些内容。
+3. `/v1/projects/{owner}/{repo}/rag` 返回 `project_profile`，并在 `contexts.metadata.project_profile` 中携带对应证据块的项目档案。
+4. `/v1/recommendations` 推荐结果返回 `project_profile`，`rag_reason` 优先引用项目档案信号，而不是只依赖规则关键词。
+5. `project.html` 新增“Agent 研究摘要”，展示项目定位、适用场景、优势、风险、质量、跟踪理由、RAG 摘要和 Agent 判断。
+6. 同步更新 README、API 文档、数据契约、存储测试、API 测试和页面生成测试。
+
+### 3. 边界说明
+
+本次仍使用本地规则生成项目档案，不调用外部模型，不新增表，不引入外部向量数据库。旧 SQLite 库如已有 `project_corpus` 记录，需要执行 RAG 语料重建任务或重新迁移 JSON 归档后，历史语料中的 `project_profile` 才会完整刷新。
+
+## 2026-06-17 追加：反馈驱动推荐 Agent 闭环第一阶段
+
+### 1. 开发目的
+
+项目定位已从每周热点周报工具推进为 GitHub 项目研究 Agent。本次围绕推荐闭环增强，让用户反馈、项目质量、热度、RAG 相关性、继续跟踪意图和风险提示共同影响推荐排序，并把排序原因返回给 API 和推荐页。
+
+### 2. 修改内容
+
+1. `/v1/recommendations` 推荐项目新增 `recommendation_score`、`ranking_factors`、`feedback_reason`、`rag_reason` 和 `recommendation_reason`。
+2. 推荐排序改为使用基础分、质量分、趋势分、RAG 相关分、反馈偏好分、继续跟踪分和风险扣分的组合分。
+3. 正反馈会提高 `preference_score`，负反馈会降低推荐分，“继续跟踪”会额外提高 `tracking_score`。
+4. `recommendations.html` 展示推荐分、评分因子、推荐解释、RAG 解释和反馈解释，并修复项目级反馈记忆只读取 `record_count` 导致误显示暂无反馈的问题。
+5. `admin.html` 在反馈汇总下展示受反馈影响的推荐项目，用于检查反馈是否已经进入推荐链路。
+6. 同步更新 README、API 文档、数据契约、API 测试和页面生成测试。
+
+### 3. 边界说明
+
+本次不新增 SQLite 表，不引入外部向量数据库，不接复杂 Agent 框架。RAG 相关分先基于现有项目摘要、方向和入选理由派生，后续可替换为更强的项目档案检索结果。
+
 ## 2026-06-17 追加：开发上下文 RAG 自动维护闭环
 
 ### 1. 开发目的

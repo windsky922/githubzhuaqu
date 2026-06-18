@@ -1003,8 +1003,9 @@
         fetch("/v1/rag/quality-summary?limit=5", { cache: "no-store" }).then(jsonOrThrow),
         fetch("/v1/rag/search-evaluation-trends?limit=8", { cache: "no-store" }).then(jsonOrThrow),
         fetch("/v1/feedback?limit=200", { cache: "no-store" }).then(jsonOrThrow).catch(() => ({ feedback: [], count: 0 })),
+        fetch("/v1/recommendations?limit=20", { cache: "no-store" }).then(jsonOrThrow).catch(() => ({ recommendations: [] })),
       ])
-        .then(([summary, facets, trends, diagnostics, qualitySummary, evaluationTrends, feedback]) => {
+        .then(([summary, facets, trends, diagnostics, qualitySummary, evaluationTrends, feedback, recommendations]) => {
           const counts = summary.table_counts || {};
           databaseOverview.innerHTML = [
             metric("仓库记录", counts.repositories || 0),
@@ -1012,7 +1013,7 @@
             metric("语料记录", counts.project_corpus || 0),
             metric("订阅记录", counts.subscriptions || 0),
           ].join("");
-          feedbackSummary.innerHTML = feedbackSummaryHtml(feedback);
+          feedbackSummary.innerHTML = feedbackSummaryHtml(feedback, recommendations);
           databaseFacets.innerHTML = databaseFacetsHtml(facets);
           databaseTrends.innerHTML = databaseTrendsHtml(trends);
           ragQualitySummary.innerHTML = ragDiagnosticsHtml(diagnostics) + ragQualitySummaryHtml(qualitySummary);
@@ -1248,8 +1249,11 @@
       ].join("");
     }
 
-    function feedbackSummaryHtml(data) {
+    function feedbackSummaryHtml(data, recommendationsData) {
       const feedback = Array.isArray(data.feedback) ? data.feedback : [];
+      const recommendations = Array.isArray(recommendationsData && recommendationsData.recommendations)
+        ? recommendationsData.recommendations
+        : [];
       const count = Number(data.count || feedback.length || 0);
       const average = feedback.length
         ? feedback.reduce((total, item) => total + Number(item.rating || 0), 0) / feedback.length
@@ -1261,6 +1265,15 @@
         <span>${escapeHtml(item.profile || "default")} · 评分 ${escapeHtml(item.rating || 0)} · ${escapeHtml(item.source || "-")} · ${escapeHtml(item.created_at || "")}</span>
         <p>${escapeHtml(item.note || "")}</p>
       </article>`).join("");
+      const impacted = recommendations
+        .filter(item => item.ranking_factors && (Number(item.ranking_factors.preference_score || 0) || Number(item.ranking_factors.tracking_score || 0)))
+        .slice(0, 5)
+        .map(item => `<article class="search-row">
+          <strong>${escapeHtml(item.full_name || "-")}</strong>
+          <span>推荐分 ${number(item.recommendation_score)} · 反馈 ${signedNumber(item.ranking_factors.preference_score || 0)} · 跟踪 ${signedNumber(item.ranking_factors.tracking_score || 0)}</span>
+          <p>${escapeHtml(item.feedback_reason || "")}</p>
+        </article>`)
+        .join("");
       return [
         "<h3>反馈记忆汇总</h3>",
         `<div class="overview">${[
@@ -1270,6 +1283,8 @@
           metric("负向反馈", negative),
         ].join("")}</div>`,
         latest || "<p>暂无项目反馈。可先在项目详情页或推荐页写入有用/不适合/继续跟踪。</p>",
+        "<h3>反馈影响推荐</h3>",
+        impacted || "<p>暂无受反馈提升或降低的推荐项目。</p>",
       ].join("");
     }
 

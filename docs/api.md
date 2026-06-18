@@ -145,7 +145,8 @@ Authorization: Bearer <本地管理口令>
 1. `recommendations`：推荐项目数组。
 2. `selection_summary`：本次推荐的筛选条件、命中数量、Trending 命中和首选项目说明。
 3. `profile`、`language`、`category`、`query`：前端回显当前筛选条件。
-4. `feedback_memory`：当前筛选范围内的反馈记忆摘要。若 SQLite 中存在匹配 profile 的反馈，推荐项目会额外返回 `feedback_memory` 和 `preference_score`，正向反馈会提高排序，负向反馈会降低排序。
+4. `feedback_memory`：当前筛选范围内的反馈记忆摘要。
+5. 推荐项目会额外返回 `recommendation_score`、`ranking_factors`、`preference_score`、`feedback_memory`、`feedback_reason`、`rag_reason` 和 `recommendation_reason`。其中 `ranking_factors` 拆分基础分、质量分、趋势分、RAG 相关分、反馈偏好分、继续跟踪分和风险扣分；正向反馈会提高排序，负向反馈会降低排序，“继续跟踪”会额外提高 `tracking_score`。
 
 对应的 v1 入口为：
 
@@ -797,7 +798,7 @@ python scripts/plan_rag_maintenance.py --limit 20 --coverage-limit 200
 
 ### `GET /v1/projects/{owner}/{repo}/rag`
 
-返回单个项目的 RAG 聚合包，用于项目详情页、后续 Agent 工具调用和 LangChain/RAG 编排。该接口会读取项目详情、执行本地 RAG 检索，并合并该项目已经入库的解释历史，不调用外部模型、不请求 GitHub/Kimi/Telegram。
+返回单个项目的 RAG 聚合包，用于项目详情页、后续 Agent 工具调用和 LangChain/RAG 编排。该接口会读取项目详情、结构化项目研究档案、执行本地 RAG 检索，并合并该项目已经入库的解释历史，不调用外部模型、不请求 GitHub/Kimi/Telegram。
 
 支持参数：
 
@@ -812,9 +813,10 @@ python scripts/plan_rag_maintenance.py --limit 20 --coverage-limit 200
 返回字段包含：
 
 1. `project`：项目摘要，包含语言、方向、历史入选次数、新增 Star 和最好 Trending 排名。
-2. `contexts`、`citations`、`prompt_context`：可直接交给后续问答链的证据与引用。
-3. `explanations`：该项目已入库的 RAG 解释历史。
-4. `explanation_summary`：该项目解释数量、平均质量分、质量等级分布和改进建议。
+2. `project_profile`：项目研究档案，包含 `project_positioning`、`use_cases`、`strengths`、`risks`、`quality_summary`、`tracking_reason`、`rag_summary` 和 `agent_judgement`。
+3. `contexts`、`citations`、`prompt_context`：可直接交给后续问答链的证据与引用；`contexts.metadata.project_profile` 会携带对应证据块的项目档案。
+4. `explanations`：该项目已入库的 RAG 解释历史。
+5. `explanation_summary`：该项目解释数量、平均质量分、质量等级分布和改进建议。
 
 示例：
 
@@ -1002,9 +1004,9 @@ GET /v1/feedback?profile=agent_development&limit=20
 
 响应会返回 `feedback` 列表和 `summary` 汇总，其中 `summary.ready_for_preference_memory=true` 表示已经具备后续个性化记忆建模的基础样本。
 
-当前推荐接口已经会读取这些反馈：`GET /v1/recommendations` 会把匹配 profile 的反馈聚合为项目级 `feedback_memory`，并生成 `preference_score` 参与排序。`GET /v1/projects/{owner}/{repo}/rag` 也会返回该项目的 `feedback_memory`，让 RAG 解释和项目详情页能看到用户历史判断。
+当前推荐接口已经会读取这些反馈和项目档案：`GET /v1/recommendations` 会把匹配 profile 的反馈聚合为项目级 `feedback_memory`，读取 `project_profile`，并生成 `recommendation_score`、`ranking_factors`、`preference_score`、`feedback_reason`、`rag_reason` 和 `recommendation_reason` 参与排序与解释。`GET /v1/projects/{owner}/{repo}/rag` 也会返回该项目的 `feedback_memory` 和 `project_profile`，让 RAG 解释和项目详情页能看到用户历史判断。
 
-前端入口已经接入反馈闭环：`project.html?repo=...&api=1` 和 `recommendations.html?api=1` 会通过 `POST /v1/feedback` 写入“有用 / 不适合 / 继续跟踪”反馈；`admin.html?api=1` 会读取 `GET /v1/feedback?limit=200` 展示反馈记忆汇总。所有页面写请求仍需提供管理口令，来源为 `?admin_token=...` 或 `localStorage.github_weekly_admin_token`。
+前端入口已经接入反馈闭环：`project.html?repo=...&api=1` 和 `recommendations.html?api=1` 会通过 `POST /v1/feedback` 写入“有用 / 不适合 / 继续跟踪”反馈；`admin.html?api=1` 会读取 `GET /v1/feedback?limit=200` 展示反馈记忆汇总，并读取 `/v1/recommendations?limit=20` 展示受反馈影响的推荐项目。所有页面写请求仍需提供管理口令，来源为 `?admin_token=...` 或 `localStorage.github_weekly_admin_token`。
 
 ### `/v1/dev-context` 开发上下文 RAG
 
@@ -1066,7 +1068,7 @@ explorer.html?api=0&profile=python
 
 1. 默认通过 `project.html?repo=owner/name` 读取静态 `projects.json` 并在浏览器中聚合详情。
 2. 在本地后端或 URL 带 `api=1` 时，优先读取 `/api/projects/{owner}/{repo}`。
-3. API 模式下会额外调用 `/v1/projects/{owner}/{repo}/rag`，一次展示该项目相关的 RAG 证据块、引用、`prompt_context`、解释历史和解释质量摘要。
+3. API 模式下会额外调用 `/v1/projects/{owner}/{repo}/rag`，一次展示该项目相关的 Agent 研究摘要、RAG 证据块、引用、`prompt_context`、解释历史和解释质量摘要。
 4. API 不可用时自动回退到静态 `projects.json`。
 
 示例：

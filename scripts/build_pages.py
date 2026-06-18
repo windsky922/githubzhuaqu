@@ -1485,8 +1485,9 @@ def _admin_dashboard_content() -> str:
         fetch("/v1/rag/quality-summary?limit=5", { cache: "no-store" }).then(jsonOrThrow),
         fetch("/v1/rag/search-evaluation-trends?limit=8", { cache: "no-store" }).then(jsonOrThrow),
         fetch("/v1/feedback?limit=200", { cache: "no-store" }).then(jsonOrThrow).catch(() => ({ feedback: [], count: 0 })),
+        fetch("/v1/recommendations?limit=20", { cache: "no-store" }).then(jsonOrThrow).catch(() => ({ recommendations: [] })),
       ])
-        .then(([summary, facets, trends, diagnostics, qualitySummary, evaluationTrends, feedback]) => {
+        .then(([summary, facets, trends, diagnostics, qualitySummary, evaluationTrends, feedback, recommendations]) => {
           const counts = summary.table_counts || {};
           databaseOverview.innerHTML = [
             metric("仓库记录", counts.repositories || 0),
@@ -1494,7 +1495,7 @@ def _admin_dashboard_content() -> str:
             metric("语料记录", counts.project_corpus || 0),
             metric("订阅记录", counts.subscriptions || 0),
           ].join("");
-          feedbackSummary.innerHTML = feedbackSummaryHtml(feedback);
+          feedbackSummary.innerHTML = feedbackSummaryHtml(feedback, recommendations);
           databaseFacets.innerHTML = databaseFacetsHtml(facets);
           databaseTrends.innerHTML = databaseTrendsHtml(trends);
           ragQualitySummary.innerHTML = ragDiagnosticsHtml(diagnostics) + ragQualitySummaryHtml(qualitySummary);
@@ -1730,8 +1731,11 @@ def _admin_dashboard_content() -> str:
       ].join("");
     }
 
-    function feedbackSummaryHtml(data) {
+    function feedbackSummaryHtml(data, recommendationsData) {
       const feedback = Array.isArray(data.feedback) ? data.feedback : [];
+      const recommendations = Array.isArray(recommendationsData && recommendationsData.recommendations)
+        ? recommendationsData.recommendations
+        : [];
       const count = Number(data.count || feedback.length || 0);
       const average = feedback.length
         ? feedback.reduce((total, item) => total + Number(item.rating || 0), 0) / feedback.length
@@ -1743,6 +1747,15 @@ def _admin_dashboard_content() -> str:
         <span>${escapeHtml(item.profile || "default")} · 评分 ${escapeHtml(item.rating || 0)} · ${escapeHtml(item.source || "-")} · ${escapeHtml(item.created_at || "")}</span>
         <p>${escapeHtml(item.note || "")}</p>
       </article>`).join("");
+      const impacted = recommendations
+        .filter(item => item.ranking_factors && (Number(item.ranking_factors.preference_score || 0) || Number(item.ranking_factors.tracking_score || 0)))
+        .slice(0, 5)
+        .map(item => `<article class="search-row">
+          <strong>${escapeHtml(item.full_name || "-")}</strong>
+          <span>推荐分 ${number(item.recommendation_score)} · 反馈 ${signedNumber(item.ranking_factors.preference_score || 0)} · 跟踪 ${signedNumber(item.ranking_factors.tracking_score || 0)}</span>
+          <p>${escapeHtml(item.feedback_reason || "")}</p>
+        </article>`)
+        .join("");
       return [
         "<h3>反馈记忆汇总</h3>",
         `<div class="overview">${[
@@ -1752,6 +1765,8 @@ def _admin_dashboard_content() -> str:
           metric("负向反馈", negative),
         ].join("")}</div>`,
         latest || "<p>暂无项目反馈。可先在项目详情页或推荐页写入有用/不适合/继续跟踪。</p>",
+        "<h3>反馈影响推荐</h3>",
+        impacted || "<p>暂无受反馈提升或降低的推荐项目。</p>",
       ].join("");
     }
 
@@ -2632,6 +2647,10 @@ def _recommendations_content() -> str:
     .pill { border: 1px solid #d8dee4; border-radius: 999px; padding: 3px 8px; color: #57606a; background: #f6f8fa; font-size: 12px; }
     .pill.preference { border-color: #bbf7d0; color: #15803d; background: #f0fdf4; }
     .reasons { margin: 0; padding-left: 18px; color: #57606a; line-height: 1.55; }
+    .ranking-factors { display: flex; flex-wrap: wrap; gap: 6px; }
+    .ranking-factors span { border: 1px solid #d8dee4; border-radius: 6px; padding: 3px 6px; color: #57606a; background: #ffffff; font-size: 12px; }
+    .agent-explain { display: grid; gap: 6px; color: #57606a; font-size: 13px; line-height: 1.5; }
+    .agent-explain p { margin: 0; }
     .feedback { border-top: 1px solid #d8dee4; padding-top: 10px; display: grid; gap: 8px; }
     .feedback-actions { display: flex; flex-wrap: wrap; gap: 8px; }
     .feedback-actions button { width: auto; background: #ffffff; color: #0969da; border-color: #d0d7de; padding: 7px 10px; }
@@ -2872,8 +2891,11 @@ def _recommendations_content() -> str:
             <span class="pill">新增 Star ${number(project.star_growth)}</span>
             <span class="pill">Trending ${project.trending_rank ? "#" + number(project.trending_rank) : "-"}</span>
             <span class="pill">质量 ${number(project.quality_score)}</span>
+            <span class="pill">推荐分 ${number(project.recommendation_score)}</span>
             <span class="pill preference">偏好 ${signedNumber(project.preference_score)}</span>
           </div>
+          ${rankingFactorsHtml(project.ranking_factors)}
+          ${agentExplanationHtml(project)}
           <ul class="reasons">${reasonsHtml(project)}</ul>
           <div class="feedback">
             ${feedbackMemoryHtml(project.feedback_memory)}
@@ -2900,10 +2922,31 @@ def _recommendations_content() -> str:
     }
 
     function feedbackMemoryHtml(memory) {
-      if (!memory || !Number(memory.record_count || 0)) return '<p class="feedback-memory">暂无反馈记忆。</p>';
+      const count = Number(memory && (memory.record_count || memory.count) || 0);
+      if (!memory || !count) return '<p class="feedback-memory">暂无反馈记忆。</p>';
       const labels = Array.isArray(memory.labels) ? memory.labels.slice(0, 3).join(", ") : "";
       const note = memory.latest_note ? ` / ${memory.latest_note}` : "";
-      return `<p class="feedback-memory">反馈 ${number(memory.record_count)} 条，均分 ${number(memory.average_rating)}，最近 ${signedNumber(memory.latest_rating)}${labels ? ` / ${escapeHtml(labels)}` : ""}${escapeHtml(note)}</p>`;
+      return `<p class="feedback-memory">反馈 ${number(count)} 条，均分 ${number(memory.average_rating)}，最近 ${signedNumber(memory.latest_rating)}${labels ? ` / ${escapeHtml(labels)}` : ""}${escapeHtml(note)}</p>`;
+    }
+
+    function rankingFactorsHtml(factors) {
+      if (!factors || typeof factors !== "object") return "";
+      const labels = {
+        base_score: "基础",
+        quality_score: "质量",
+        trend_score: "趋势",
+        rag_relevance_score: "RAG",
+        preference_score: "反馈",
+        tracking_score: "跟踪",
+        risk_penalty: "风险"
+      };
+      return `<div class="ranking-factors">${Object.keys(labels).map(key => `<span>${labels[key]} ${signedNumber(factors[key] || 0)}</span>`).join("")}</div>`;
+    }
+
+    function agentExplanationHtml(project) {
+      const lines = [project.recommendation_reason, project.rag_reason, project.feedback_reason].filter(Boolean);
+      if (!lines.length) return "";
+      return `<div class="agent-explain">${lines.map(line => `<p>${escapeHtml(line)}</p>`).join("")}</div>`;
     }
 
     function bindRecommendationFeedback() {
@@ -4877,6 +4920,7 @@ def _project_detail_content() -> str:
           rag_explanation_count: number((rag.explanation_summary || {}).count),
           rag_explanation_summary: rag.explanation_summary || {},
           feedback_memory: rag.feedback_memory || detail.feedback_memory || {},
+          project_profile: rag.project_profile || detail.project_profile || {},
         }))
         .catch(() => detail);
     }
@@ -4925,6 +4969,7 @@ def _project_detail_content() -> str:
         rag_explanation_count: 0,
         rag_explanation_summary: {},
         feedback_memory: {},
+        project_profile: {},
         data_source: "静态 JSON"
       };
     }
@@ -4967,6 +5012,10 @@ def _project_detail_content() -> str:
             <button type="button" data-project-feedback="watch"${shouldUseApi() ? "" : " disabled"}>继续跟踪</button>
           </div>
           <div id="projectFeedbackStatus" class="feedback-status" aria-live="polite">${shouldUseApi() ? "" : "反馈写入需要本地后端或 api=1。"}</div>
+        </section>
+        <section class="section" style="margin-top:12px">
+          <h2>Agent 研究摘要</h2>
+          ${projectProfileHtml(detail.project_profile)}
         </section>
         <section class="grid">
           <div class="section"><h2>推荐理由</h2>${listHtml(detail.selection_reasons || [], "暂无推荐理由。")}</div>
@@ -5064,6 +5113,7 @@ def _project_detail_content() -> str:
           rag_explanations: [],
           rag_explanation_count: 0,
           feedback_memory: {},
+          project_profile: {},
         });
       }
       const params = new URLSearchParams();
@@ -5079,7 +5129,24 @@ def _project_detail_content() -> str:
           explanations: [],
           explanation_summary: { count: 0, recommendations: [] },
           feedback_memory: {},
+          project_profile: {},
         }));
+    }
+
+    function projectProfileHtml(profile) {
+      if (!profile || !Object.keys(profile).length) return "<p>项目研究档案需要本地后端或 api=1 模式读取。</p>";
+      return `
+        <div class="grid">
+          <div><h3>项目定位</h3><p>${escapeHtml(profile.project_positioning || "暂无项目定位。")}</p></div>
+          <div><h3>适用场景</h3>${listHtml(profile.use_cases || [], "暂无适用场景。")}</div>
+          <div><h3>优势信号</h3>${listHtml(profile.strengths || [], "暂无优势信号。")}</div>
+          <div><h3>风险点</h3>${listHtml(profile.risks || [], "暂无风险点。")}</div>
+          <div><h3>质量判断</h3><p>${escapeHtml(profile.quality_summary || "暂无质量判断。")}</p></div>
+          <div><h3>跟踪理由</h3><p>${escapeHtml(profile.tracking_reason || "暂无跟踪理由。")}</p></div>
+          <div class="wide"><h3>RAG 摘要</h3><p>${escapeHtml(profile.rag_summary || "暂无 RAG 摘要。")}</p></div>
+          <div class="wide"><h3>Agent 判断</h3><p>${escapeHtml(profile.agent_judgement || "暂无 Agent 判断。")}</p></div>
+        </div>
+      `;
     }
 
     function feedbackMemoryHtml(memory) {
