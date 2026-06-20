@@ -1019,6 +1019,11 @@ def _admin_dashboard_content() -> str:
       </div>
       <div id="jobWorkbench" class="workbench-list"></div>
     </section>
+    <section class="panel">
+      <h2>项目 Agent 任务</h2>
+      <div id="projectAgentTaskSummary" class="overview"></div>
+      <div id="projectAgentTaskWorkbench" class="workbench-list"></div>
+    </section>
     <section class="grid" aria-label="管理入口">
       <article class="card">
         <h2>项目</h2>
@@ -1057,6 +1062,8 @@ def _admin_dashboard_content() -> str:
     const latestJobResult = document.getElementById("latestJobResult");
     const workflowBoard = document.getElementById("workflowBoard");
     const jobWorkbench = document.getElementById("jobWorkbench");
+    const projectAgentTaskSummary = document.getElementById("projectAgentTaskSummary");
+    const projectAgentTaskWorkbench = document.getElementById("projectAgentTaskWorkbench");
     const databaseOverview = document.getElementById("databaseOverview");
     const feedbackSummary = document.getElementById("feedbackSummary");
     const databaseFacets = document.getElementById("databaseFacets");
@@ -1112,6 +1119,7 @@ def _admin_dashboard_content() -> str:
 
     loadHealth();
     loadOverview();
+    loadProjectAgentTasks();
     loadDatabaseInsights();
     setupCreateTask();
       setupCorpusSearch();
@@ -1459,6 +1467,50 @@ def _admin_dashboard_content() -> str:
       return fetch("/v1/jobs?limit=200", { cache: "no-store" })
         .then(jsonOrThrow)
         .catch(loadAdminJobsJson);
+    }
+
+    function loadProjectAgentTasks() {
+      if (!shouldUseApi()) {
+        projectAgentTaskSummary.innerHTML = metric("模式", "静态");
+        projectAgentTaskWorkbench.innerHTML = "<p>启动本地后端或添加 api=1 后查看项目 Agent 任务。</p>";
+        return;
+      }
+      fetch("/v1/agent-tasks?limit=100", { cache: "no-store" })
+        .then(jsonOrThrow)
+        .then(data => renderProjectAgentTasks(data))
+        .catch(error => {
+          projectAgentTaskWorkbench.innerHTML = `<p>项目 Agent 任务读取失败：${escapeHtml(error.message || error)}</p>`;
+        });
+    }
+
+    function renderProjectAgentTasks(data) {
+      const summary = data.summary || {};
+      const tasks = Array.isArray(data.tasks) ? data.tasks : [];
+      projectAgentTaskSummary.innerHTML = [
+        metric("任务总数", number(summary.total_count)),
+        metric("活跃任务", number(summary.active_count)),
+        metric("覆盖项目", number(summary.repository_count)),
+      ].join("");
+      if (!tasks.length) {
+        projectAgentTaskWorkbench.innerHTML = "<p>暂无项目 Agent 任务。</p>";
+        return;
+      }
+      projectAgentTaskWorkbench.innerHTML = tasks.slice(0, 20).map(task => `
+        <div class="workbench-item">
+          <strong><a href="project.html?repo=${encodeURIComponent(task.full_name || "")}&api=1">${escapeHtml(task.full_name || "未知项目")}</a></strong>
+          <span>${escapeHtml(agentProjectTaskTypeLabel(task.task_type))} / ${escapeHtml(agentProjectTaskStatusLabel(task.status))} / 优先级 ${number(task.priority)}</span>
+          <p>${escapeHtml(task.reason || "暂无任务原因。")}</p>
+          ${task.result_summary ? `<p>执行结果：${escapeHtml(task.result_summary)}</p>` : ""}
+        </div>
+      `).join("");
+    }
+
+    function agentProjectTaskTypeLabel(value) {
+      return ({ observe: "观察", review_risk: "风险复查", deep_analysis: "深度分析", notify: "订阅推送", ignore: "忽略", continue_tracking: "继续跟踪" })[value] || value || "观察";
+    }
+
+    function agentProjectTaskStatusLabel(value) {
+      return ({ planned: "待执行", in_progress: "执行中", completed: "已完成", failed: "失败", cancelled: "已取消" })[value] || value || "未知";
     }
 
     function loadAdminJobsJson() {
@@ -4822,6 +4874,14 @@ def _project_detail_content() -> str:
       color: var(--muted);
       font-size: 13px;
     }
+    .workbench-list { display: grid; gap: 8px; }
+    .workbench-item { border-top: 1px solid var(--line); padding: 10px 0; display: grid; gap: 7px; }
+    .workbench-item:first-child { border-top: 0; }
+    .workbench-item span { color: var(--muted); font-size: 13px; }
+    .workbench-item p { margin: 0; }
+    .workbench-item .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .workbench-item input { min-width: min(320px, 100%); flex: 1 1 240px; }
+    .workbench-item button { width: auto; min-width: 80px; }
     .feedback-status.error {
       color: var(--risk);
     }
@@ -4921,6 +4981,8 @@ def _project_detail_content() -> str:
           rag_explanation_summary: rag.explanation_summary || {},
           feedback_memory: rag.feedback_memory || detail.feedback_memory || {},
           project_profile: rag.project_profile || detail.project_profile || {},
+          agent_tasks: rag.agent_tasks || { count: 0, tasks: [], summary: {} },
+          next_actions: Array.isArray(rag.next_actions) ? rag.next_actions : [],
         }))
         .catch(() => detail);
     }
@@ -4970,6 +5032,8 @@ def _project_detail_content() -> str:
         rag_explanation_summary: {},
         feedback_memory: {},
         project_profile: {},
+        agent_tasks: { count: 0, tasks: [], summary: {} },
+        next_actions: [],
         data_source: "静态 JSON"
       };
     }
@@ -5017,6 +5081,11 @@ def _project_detail_content() -> str:
           <h2>Agent 研究摘要</h2>
           ${projectProfileHtml(detail.project_profile)}
         </section>
+        <section class="section" style="margin-top:12px">
+          <h2>Agent 下一步动作</h2>
+          ${agentTasksHtml(detail.agent_tasks, detail.next_actions)}
+          <div id="projectAgentTaskStatus" class="feedback-status" aria-live="polite">${shouldUseApi() ? "" : "任务操作需要本地后端或 api=1。"}</div>
+        </section>
         <section class="grid">
           <div class="section"><h2>推荐理由</h2>${listHtml(detail.selection_reasons || [], "暂无推荐理由。")}</div>
           <div class="section"><h2>趋势判断</h2>${listHtml(detail.trend_summary || [], "暂无趋势判断。")}</div>
@@ -5037,6 +5106,7 @@ def _project_detail_content() -> str:
         </section>
       `;
       bindProjectFeedback(detail);
+      bindProjectAgentTasks(detail);
     }
 
     function historyTable(history) {
@@ -5130,6 +5200,8 @@ def _project_detail_content() -> str:
           explanation_summary: { count: 0, recommendations: [] },
           feedback_memory: {},
           project_profile: {},
+          agent_tasks: { count: 0, tasks: [], summary: {} },
+          next_actions: [],
         }));
     }
 
@@ -5156,6 +5228,86 @@ def _project_detail_content() -> str:
       const labels = Array.isArray(summary.labels) ? summary.labels.slice(0, 4).join(", ") : "";
       const latestNote = summary.latest_note ? ` / ${summary.latest_note}` : "";
       return `<p>反馈 ${number(count)} 条，平均评分 ${number(summary.average_rating)}，最近评分 ${signedNumber(summary.latest_rating)}${labels ? ` / ${escapeHtml(labels)}` : ""}${escapeHtml(latestNote)}</p>`;
+    }
+
+    function agentTasksHtml(memory, nextActions) {
+      const tasks = memory && Array.isArray(memory.tasks) ? memory.tasks : [];
+      const suggestions = Array.isArray(nextActions) ? nextActions.filter(item => item && item.status === "suggested") : [];
+      const taskRows = tasks.map(task => {
+        const actions = [];
+        if (task.status === "planned") actions.push(`<button type="button" data-agent-task-update="in_progress" data-agent-task-id="${escapeAttribute(task.task_id || "")}"${shouldUseApi() ? "" : " disabled"}>开始</button>`);
+        if (task.status === "in_progress") actions.push(`<input type="text" data-agent-task-result="${escapeAttribute(task.task_id || "")}" maxlength="2000" placeholder="执行结果摘要"><button type="button" data-agent-task-update="completed" data-agent-task-id="${escapeAttribute(task.task_id || "")}"${shouldUseApi() ? "" : " disabled"}>完成</button>`);
+        if (task.status === "failed" || task.status === "cancelled") actions.push(`<button type="button" data-agent-task-update="planned" data-agent-task-id="${escapeAttribute(task.task_id || "")}"${shouldUseApi() ? "" : " disabled"}>重新计划</button>`);
+        return `<div class="workbench-item"><strong>${escapeHtml(agentTaskTypeLabel(task.task_type))}</strong><span>优先级 ${number(task.priority)} / ${escapeHtml(agentTaskStatusLabel(task.status))}</span><p>${escapeHtml(task.reason || "暂无任务原因。")}</p>${task.result_summary ? `<p>结果：${escapeHtml(task.result_summary)}</p>` : ""}<div class="actions">${actions.join("")}</div></div>`;
+      });
+      const suggestionRows = suggestions.map((action, index) => `<div class="workbench-item"><strong>${escapeHtml(agentTaskTypeLabel(action.task_type))}</strong><span>建议优先级 ${number(action.priority)}</span><p>${escapeHtml(action.reason || "")}</p><button type="button" data-agent-task-create="${index}"${shouldUseApi() ? "" : " disabled"}>创建任务</button></div>`);
+      const rows = [...taskRows, ...suggestionRows];
+      return rows.length ? `<div class="workbench-list">${rows.join("")}</div>` : "<p>暂无 Agent 任务。</p>";
+    }
+
+    function bindProjectAgentTasks(detail) {
+      document.querySelectorAll("[data-agent-task-create]").forEach(button => {
+        button.addEventListener("click", () => createProjectAgentTask(button, detail));
+      });
+      document.querySelectorAll("[data-agent-task-update]").forEach(button => {
+        button.addEventListener("click", () => updateProjectAgentTask(button));
+      });
+    }
+
+    async function createProjectAgentTask(button, detail) {
+      if (!shouldUseApi()) return;
+      const status = document.getElementById("projectAgentTaskStatus");
+      const action = (detail.next_actions || [])[Number(button.dataset.agentTaskCreate)];
+      if (!action) return;
+      try {
+        status.textContent = "创建任务中...";
+        const response = await fetch(`/v1/projects/${encodeURIComponentOwnerRepo(detail.full_name || repoName())}/agent-tasks`, {
+          method: "POST",
+          headers: adminWriteHeaders(),
+          body: JSON.stringify({
+            task_type: action.task_type,
+            priority: action.priority,
+            reason: action.reason,
+            source: "project_page",
+            payload: { subscription_action: action.subscription_action || "watch" }
+          })
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        status.textContent = "任务已创建，正在刷新。";
+        window.location.reload();
+      } catch (error) {
+        status.textContent = `任务创建失败：${error.message}`;
+      }
+    }
+
+    async function updateProjectAgentTask(button) {
+      if (!shouldUseApi()) return;
+      const status = document.getElementById("projectAgentTaskStatus");
+      try {
+        status.textContent = "更新任务中...";
+        const taskId = button.dataset.agentTaskId || "";
+        const resultInput = document.querySelector(`[data-agent-task-result="${taskId}"]`);
+        const payload = { status: button.dataset.agentTaskUpdate || "planned" };
+        if (payload.status === "completed" && resultInput) payload.result_summary = resultInput.value.trim();
+        const response = await fetch(`/v1/agent-tasks/${encodeURIComponent(taskId)}`, {
+          method: "PATCH",
+          headers: adminWriteHeaders(),
+          body: JSON.stringify(payload)
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        status.textContent = "任务状态已更新，正在刷新。";
+        window.location.reload();
+      } catch (error) {
+        status.textContent = `任务更新失败：${error.message}`;
+      }
+    }
+
+    function agentTaskTypeLabel(value) {
+      return ({ observe: "观察", review_risk: "风险复查", deep_analysis: "深度分析", notify: "订阅推送", ignore: "忽略", continue_tracking: "继续跟踪" })[value] || value || "观察";
+    }
+
+    function agentTaskStatusLabel(value) {
+      return ({ planned: "待执行", in_progress: "执行中", completed: "已完成", failed: "失败", cancelled: "已取消", suggested: "建议" })[value] || value || "未知";
     }
 
     function bindProjectFeedback(detail) {

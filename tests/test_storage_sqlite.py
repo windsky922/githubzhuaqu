@@ -27,6 +27,7 @@ class SqliteStorageTest(unittest.TestCase):
             self.assertGreaterEqual(counts["rag_chunks_fts"], 2)
             self.assertEqual(counts["rag_embeddings"], 0)
             self.assertEqual(counts["rag_explanations"], 0)
+            self.assertGreaterEqual(counts["project_agent_tasks"], 1)
             self.assertEqual(counts["trend_summaries"], 1)
             self.assertEqual(counts["sent_repositories"], 1)
             self.assertEqual(counts["star_history"], 2)
@@ -35,6 +36,7 @@ class SqliteStorageTest(unittest.TestCase):
             try:
                 self.assertEqual(table_count(connection, "runs"), 1)
                 self.assertEqual(table_count(connection, "selections"), 2)
+                self.assertGreaterEqual(table_count(connection, "project_agent_tasks"), 1)
                 self.assertEqual(table_count(connection, "project_corpus"), 2)
                 self.assertEqual(table_count(connection, "project_corpus_fts"), 2)
                 self.assertGreaterEqual(table_count(connection, "rag_chunks"), 2)
@@ -63,9 +65,11 @@ class SqliteStorageTest(unittest.TestCase):
                 self.assertIn("owner/project", corpus["search_text"])
                 self.assertIn("AI Agent", corpus["search_text"])
                 self.assertIn("项目定位", corpus["search_text"])
+                self.assertIn("Agent 任务记忆", corpus["search_text"])
                 corpus_payload = json.loads(corpus["payload_json"])
                 self.assertIn("project_profile", corpus_payload)
                 self.assertIn("agent_judgement", corpus_payload["project_profile"])
+                self.assertTrue(corpus_payload["agent_tasks"])
                 chunk = connection.execute(
                     "SELECT full_name, chunk_text, payload_json FROM rag_chunks WHERE full_name = ?",
                     ("owner/project",),

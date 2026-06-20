@@ -231,6 +231,27 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
     def v1_project_similar(owner: str, repo: str, limit: int = Query(default=10, ge=1, le=50)) -> dict[str, Any]:
         return repository.similar_projects(f"{owner}/{repo}", limit=limit)
 
+    @app.get("/v1/projects/{owner}/{repo}/agent-tasks")
+    def v1_project_agent_tasks(
+        owner: str,
+        repo: str,
+        status: str | None = Query(default=None, pattern="^(planned|in_progress|completed|failed|cancelled)?$"),
+        limit: int = Query(default=50, ge=1, le=200),
+    ) -> dict[str, Any]:
+        return repository.project_agent_tasks(full_name=f"{owner}/{repo}", status=status, limit=limit)
+
+    @app.post(
+        "/v1/projects/{owner}/{repo}/agent-tasks",
+        status_code=201,
+        dependencies=admin_write_dependencies,
+    )
+    def v1_create_project_agent_task(
+        owner: str,
+        repo: str,
+        payload: dict[str, Any] | None = Body(default=None),
+    ) -> dict[str, Any]:
+        return repository.create_project_agent_task(f"{owner}/{repo}", payload)
+
     @app.get("/v1/projects/{owner}/{repo}/rag")
     def v1_project_rag(
         owner: str,
@@ -534,6 +555,22 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
     @app.post("/v1/feedback", status_code=201, dependencies=admin_write_dependencies)
     def v1_create_project_feedback(payload: dict[str, Any] | None = Body(default=None)) -> dict[str, Any]:
         return repository.create_project_feedback(payload)
+
+    @app.get("/v1/agent-tasks")
+    def v1_project_agent_task_list(
+        full_name: str | None = None,
+        profile: str | None = None,
+        status: str | None = Query(default=None, pattern="^(planned|in_progress|completed|failed|cancelled)?$"),
+        limit: int = Query(default=50, ge=1, le=500),
+    ) -> dict[str, Any]:
+        return repository.project_agent_tasks(full_name=full_name, profile=profile, status=status, limit=limit)
+
+    @app.patch("/v1/agent-tasks/{task_id:path}", dependencies=admin_write_dependencies)
+    def v1_update_project_agent_task(
+        task_id: str,
+        payload: dict[str, Any] | None = Body(default=None),
+    ) -> dict[str, Any]:
+        return repository.update_project_agent_task(task_id, payload)
 
     @app.get("/v1/job-execution-check")
     def v1_job_execution_check(job_id: str = Query(..., min_length=1)) -> dict[str, Any]:

@@ -58,7 +58,7 @@ X-Admin-Token: <本地管理口令>
 Authorization: Bearer <本地管理口令>
 ```
 
-如果未配置 `ADMIN_API_TOKEN`，管理写接口返回 `403`；如果配置后请求未带正确口令，返回 `401`。受保护接口包括 `/v1/runs/trigger`、`/v1/jobs/{job_id}/execute`、`/v1/jobs/{job_id}/retry`、`/v1/rag/*` 写入/计划接口、`/v1/subscriptions` 写入接口和 `POST /v1/feedback`。
+如果未配置 `ADMIN_API_TOKEN`，管理写接口返回 `403`；如果配置后请求未带正确口令，返回 `401`。受保护接口包括 `/v1/runs/trigger`、`/v1/jobs/{job_id}/execute`、`/v1/jobs/{job_id}/retry`、`/v1/rag/*` 写入/计划接口、`/v1/subscriptions` 写入接口、`POST /v1/feedback` 和项目 Agent 任务写接口。
 
 本地页面会从 `?admin_token=...` 或浏览器 `localStorage.github_weekly_admin_token` 读取口令，并仅在写请求中发送 `X-Admin-Token`。不要把真实口令提交到仓库、文档或 GitHub Pages。
 
@@ -798,7 +798,7 @@ python scripts/plan_rag_maintenance.py --limit 20 --coverage-limit 200
 
 ### `GET /v1/projects/{owner}/{repo}/rag`
 
-返回单个项目的 RAG 聚合包，用于项目详情页、后续 Agent 工具调用和 LangChain/RAG 编排。该接口会读取项目详情、结构化项目研究档案、执行本地 RAG 检索，并合并该项目已经入库的解释历史，不调用外部模型、不请求 GitHub/Kimi/Telegram。
+返回单个项目的 RAG 聚合包，用于项目详情页、后续 Agent 工具调用和 LangChain/RAG 编排。该接口会读取项目详情、结构化项目研究档案、项目 Agent 任务及执行结果，执行本地 RAG 检索，并合并该项目已经入库的解释历史，不调用外部模型、不请求 GitHub/Kimi/Telegram。
 
 支持参数：
 
@@ -1004,9 +1004,35 @@ GET /v1/feedback?profile=agent_development&limit=20
 
 响应会返回 `feedback` 列表和 `summary` 汇总，其中 `summary.ready_for_preference_memory=true` 表示已经具备后续个性化记忆建模的基础样本。
 
-当前推荐接口已经会读取这些反馈和项目档案：`GET /v1/recommendations` 会把匹配 profile 的反馈聚合为项目级 `feedback_memory`，读取 `project_profile`，并生成 `recommendation_score`、`ranking_factors`、`preference_score`、`feedback_reason`、`rag_reason` 和 `recommendation_reason` 参与排序与解释。`GET /v1/projects/{owner}/{repo}/rag` 也会返回该项目的 `feedback_memory` 和 `project_profile`，让 RAG 解释和项目详情页能看到用户历史判断。
+当前推荐接口已经会读取这些反馈、项目档案和 Agent 任务：`GET /v1/recommendations` 会把匹配 profile 的反馈聚合为项目级 `feedback_memory`，读取 `project_profile`，并生成 `recommendation_score`、`ranking_factors`、`preference_score`、解释字段和结构化 `next_actions`。`GET /v1/projects/{owner}/{repo}/rag` 会返回该项目的 `feedback_memory`、`project_profile`、`agent_tasks` 和 `next_actions`。
 
 前端入口已经接入反馈闭环：`project.html?repo=...&api=1` 和 `recommendations.html?api=1` 会通过 `POST /v1/feedback` 写入“有用 / 不适合 / 继续跟踪”反馈；`admin.html?api=1` 会读取 `GET /v1/feedback?limit=200` 展示反馈记忆汇总，并读取 `/v1/recommendations?limit=20` 展示受反馈影响的推荐项目。所有页面写请求仍需提供管理口令，来源为 `?admin_token=...` 或 `localStorage.github_weekly_admin_token`。
+
+### `/v1/agent-tasks` 项目 Agent 任务
+
+项目 Agent 任务用于承载“观察、判断、行动、复盘”工作流。任务类型包括 `observe`、`review_risk`、`deep_analysis`、`notify`、`ignore` 和 `continue_tracking`；状态包括 `planned`、`in_progress`、`completed`、`failed` 和 `cancelled`。
+
+接口：
+
+1. `GET /v1/agent-tasks`：按 `full_name`、`profile`、`status` 查询任务。
+2. `GET /v1/projects/{owner}/{repo}/agent-tasks`：查询单项目任务。
+3. `POST /v1/projects/{owner}/{repo}/agent-tasks`：创建项目任务，相同去重键返回已有任务。
+4. `PATCH /v1/agent-tasks/{task_id}`：更新优先级、原因、执行结果或任务状态。
+
+创建请求示例：
+
+```json
+{
+  "task_type": "deep_analysis",
+  "priority": 2,
+  "reason": "验证项目核心能力和真实落地场景。",
+  "profile": "agent_development",
+  "source": "project_page",
+  "payload": {"subscription_action": "notify"}
+}
+```
+
+状态迁移受到限制：完成任务不能重新打开；失败任务可以重新计划；进入 `in_progress` 时记录 `started_at`，进入终态时记录 `finished_at`。任务更新后会重建项目语料，使原因和 `result_summary` 可被 RAG 召回。
 
 ### `/v1/dev-context` 开发上下文 RAG
 

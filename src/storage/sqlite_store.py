@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+from datetime import UTC, datetime
 from hashlib import sha1
 from pathlib import Path
 from typing import Any
@@ -40,11 +41,15 @@ def import_json_archive(root: Path, db_path: Path) -> dict[str, int]:
         initialize(connection)
         selection_count = import_selections(connection, root)
         corpus_count = rebuild_project_corpus(connection)
+        created_agent_task_count = sync_project_agent_tasks(connection)
+        if created_agent_task_count:
+            corpus_count = rebuild_project_corpus(connection)
         counts = {
             "runs": import_runs(connection, root),
             "selections": selection_count,
             "project_corpus": corpus_count,
             "project_corpus_fts": corpus_count,
+            "project_agent_tasks": table_count(connection, "project_agent_tasks"),
             "rag_chunks": table_count(connection, "rag_chunks"),
             "rag_chunks_fts": table_count(connection, "rag_chunks_fts"),
             "rag_embeddings": table_count(connection, "rag_embeddings"),
@@ -359,6 +364,27 @@ def upsert_project_corpus(connection: sqlite3.Connection, row: sqlite3.Row) -> N
         star_growth=_int_value(selection_payload.get("star_growth")),
         trending_rank=_int_value(selection_payload.get("trending_rank")),
     )
+    agent_tasks = [
+        {
+            "task_id": task["task_id"],
+            "task_type": task["task_type"],
+            "priority": _int_value(task["priority"]),
+            "status": task["status"],
+            "reason": task["reason"],
+            "result_summary": task["result_summary"],
+            "updated_at": task["updated_at"],
+        }
+        for task in connection.execute(
+            """
+            SELECT task_id, task_type, priority, status, reason, result_summary, updated_at
+            FROM project_agent_tasks
+            WHERE LOWER(full_name) = LOWER(?)
+            ORDER BY updated_at DESC, priority ASC, task_id DESC
+            LIMIT 20
+            """,
+            (full_name,),
+        ).fetchall()
+    ]
     text_parts = [
         full_name,
         title,
@@ -372,6 +398,7 @@ def upsert_project_corpus(connection: sqlite3.Connection, row: sqlite3.Row) -> N
         " ".join(str(item) for item in security_flags if item),
         " ".join(str(item) for item in _list_value(selection_payload.get("topics")) if item),
         _project_profile_text(project_profile),
+        _project_agent_task_memory_text(agent_tasks),
     ]
     payload = {
         "run_date": run_date,
@@ -385,6 +412,7 @@ def upsert_project_corpus(connection: sqlite3.Connection, row: sqlite3.Row) -> N
         "trending_rank": _int_value(selection_payload.get("trending_rank")),
         "star_growth": _int_value(selection_payload.get("star_growth")),
         "project_profile": project_profile,
+        "agent_tasks": agent_tasks,
     }
     corpus_id = sha1(f"{run_date}:{full_name}".encode("utf-8")).hexdigest()
     search_text = _clean_text(" ".join(text_parts))
@@ -623,6 +651,147 @@ def insert_job_event(connection: sqlite3.Connection, data: dict[str, Any]) -> No
     )
 
 
+def upsert_project_agent_task(connection: sqlite3.Connection, data: dict[str, Any]) -> None:
+    payload = data.get("payload") if isinstance(data.get("payload"), dict) else data
+    connection.execute(
+        """
+        INSERT INTO project_agent_tasks(
+          task_id, full_name, profile, task_type, priority, status, reason,
+          result_summary, source, dedupe_key, created_at, updated_at,
+          started_at, finished_at, payload_json
+        )
+        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(task_id) DO UPDATE SET
+          full_name = excluded.full_name,
+          profile = excluded.profile,
+          task_type = excluded.task_type,
+          priority = excluded.priority,
+          status = excluded.status,
+          reason = excluded.reason,
+          result_summary = excluded.result_summary,
+          source = excluded.source,
+          dedupe_key = excluded.dedupe_key,
+          updated_at = excluded.updated_at,
+          started_at = excluded.started_at,
+          finished_at = excluded.finished_at,
+          payload_json = excluded.payload_json
+        """,
+        (
+            str(data.get("task_id") or ""),
+            str(data.get("full_name") or ""),
+            str(data.get("profile") or ""),
+            str(data.get("task_type") or "observe"),
+            max(1, min(_int_value(data.get("priority")) or 3, 5)),
+            str(data.get("status") or "planned"),
+            str(data.get("reason") or ""),
+            str(data.get("result_summary") or ""),
+            str(data.get("source") or ""),
+            str(data.get("dedupe_key") or ""),
+            str(data.get("created_at") or ""),
+            str(data.get("updated_at") or ""),
+            str(data.get("started_at") or ""),
+            str(data.get("finished_at") or ""),
+            _json_text(payload),
+        ),
+    )
+
+
+def sync_project_agent_tasks(connection: sqlite3.Connection, limit: int = 20) -> int:
+    rows = connection.execute(
+        """
+        WITH ranked AS (
+          SELECT full_name, run_date, payload_json,
+                 CAST(json_extract(payload_json, '$.quality_score') AS INTEGER) AS quality_score,
+                 CAST(json_extract(payload_json, '$.trending_rank') AS INTEGER) AS trending_rank,
+                 CAST(json_extract(payload_json, '$.star_growth') AS INTEGER) AS star_growth,
+                 ROW_NUMBER() OVER (
+                   PARTITION BY LOWER(full_name)
+                   ORDER BY run_date DESC, corpus_id DESC
+                 ) AS row_number
+          FROM project_corpus
+        )
+        SELECT full_name, run_date, payload_json
+        FROM ranked
+        WHERE row_number = 1
+          AND (quality_score >= 60 OR trending_rank BETWEEN 1 AND 20 OR star_growth > 0)
+        ORDER BY run_date DESC, quality_score DESC, star_growth DESC, full_name ASC
+        LIMIT ?
+        """,
+        (max(1, min(_int_value(limit) or 20, 100)),),
+    ).fetchall()
+    created = 0
+    now = datetime.now(UTC).isoformat().replace("+00:00", "Z")
+    for row in rows:
+        payload = _json_object(row["payload_json"])
+        profile = payload.get("project_profile") if isinstance(payload.get("project_profile"), dict) else {}
+        quality_score = _int_value(payload.get("quality_score"))
+        risks = _list_value(profile.get("risks"))
+        if risks:
+            task_type = "review_risk"
+            priority = 1
+            reason = f"项目档案记录了 {len(risks)} 个风险点，需要复查风险变化。"
+        elif quality_score >= 80:
+            task_type = "deep_analysis"
+            priority = 2
+            reason = "项目质量信号较强，建议补充深度分析并验证落地价值。"
+        else:
+            task_type = "continue_tracking"
+            priority = 3
+            reason = str(profile.get("tracking_reason") or "项目已进入周榜，建议持续观察趋势和版本变化。")
+        full_name = str(row["full_name"] or "")
+        run_date = str(row["run_date"] or "")
+        dedupe_key = f"weekly:{run_date}:{full_name.lower()}:{task_type}"
+        task_id = "agent-task:" + sha1(dedupe_key.encode("utf-8")).hexdigest()[:16]
+        exists = connection.execute(
+            "SELECT 1 FROM project_agent_tasks WHERE dedupe_key = ?",
+            (dedupe_key,),
+        ).fetchone()
+        if exists:
+            continue
+        upsert_project_agent_task(
+            connection,
+            {
+                "task_id": task_id,
+                "full_name": full_name,
+                "profile": "",
+                "task_type": task_type,
+                "priority": priority,
+                "status": "planned",
+                "reason": reason,
+                "result_summary": "",
+                "source": "weekly_sync",
+                "dedupe_key": dedupe_key,
+                "created_at": now,
+                "updated_at": now,
+                "started_at": "",
+                "finished_at": "",
+                "payload": {
+                    "run_date": run_date,
+                    "project_profile": profile,
+                    "subscription_action": "notify" if priority <= 2 else "watch",
+                },
+            },
+        )
+        created += 1
+    connection.commit()
+    return created
+
+
+def _project_agent_task_memory_text(tasks: list[dict[str, Any]]) -> str:
+    if not tasks:
+        return ""
+    lines = ["Agent 任务记忆"]
+    for task in tasks:
+        line = (
+            f"{task.get('task_type') or 'observe'} | 状态 {task.get('status') or 'planned'} | "
+            f"优先级 {task.get('priority') or 3} | 原因 {task.get('reason') or '未记录'}"
+        )
+        if task.get("result_summary"):
+            line += f" | 执行结果 {task['result_summary']}"
+        lines.append(line)
+    return "\n".join(lines)
+
+
 def table_count(connection: sqlite3.Connection, table_name: str) -> int:
     if table_name not in {
         "runs",
@@ -635,6 +804,7 @@ def table_count(connection: sqlite3.Connection, table_name: str) -> int:
         "rag_embeddings",
         "rag_explanations",
         "project_feedback",
+        "project_agent_tasks",
         "dev_corpus",
         "dev_chunks",
         "dev_chunks_fts",

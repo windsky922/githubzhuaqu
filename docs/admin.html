@@ -537,6 +537,11 @@
       </div>
       <div id="jobWorkbench" class="workbench-list"></div>
     </section>
+    <section class="panel">
+      <h2>项目 Agent 任务</h2>
+      <div id="projectAgentTaskSummary" class="overview"></div>
+      <div id="projectAgentTaskWorkbench" class="workbench-list"></div>
+    </section>
     <section class="grid" aria-label="管理入口">
       <article class="card">
         <h2>项目</h2>
@@ -575,6 +580,8 @@
     const latestJobResult = document.getElementById("latestJobResult");
     const workflowBoard = document.getElementById("workflowBoard");
     const jobWorkbench = document.getElementById("jobWorkbench");
+    const projectAgentTaskSummary = document.getElementById("projectAgentTaskSummary");
+    const projectAgentTaskWorkbench = document.getElementById("projectAgentTaskWorkbench");
     const databaseOverview = document.getElementById("databaseOverview");
     const feedbackSummary = document.getElementById("feedbackSummary");
     const databaseFacets = document.getElementById("databaseFacets");
@@ -630,6 +637,7 @@
 
     loadHealth();
     loadOverview();
+    loadProjectAgentTasks();
     loadDatabaseInsights();
     setupCreateTask();
       setupCorpusSearch();
@@ -977,6 +985,50 @@
       return fetch("/v1/jobs?limit=200", { cache: "no-store" })
         .then(jsonOrThrow)
         .catch(loadAdminJobsJson);
+    }
+
+    function loadProjectAgentTasks() {
+      if (!shouldUseApi()) {
+        projectAgentTaskSummary.innerHTML = metric("模式", "静态");
+        projectAgentTaskWorkbench.innerHTML = "<p>启动本地后端或添加 api=1 后查看项目 Agent 任务。</p>";
+        return;
+      }
+      fetch("/v1/agent-tasks?limit=100", { cache: "no-store" })
+        .then(jsonOrThrow)
+        .then(data => renderProjectAgentTasks(data))
+        .catch(error => {
+          projectAgentTaskWorkbench.innerHTML = `<p>项目 Agent 任务读取失败：${escapeHtml(error.message || error)}</p>`;
+        });
+    }
+
+    function renderProjectAgentTasks(data) {
+      const summary = data.summary || {};
+      const tasks = Array.isArray(data.tasks) ? data.tasks : [];
+      projectAgentTaskSummary.innerHTML = [
+        metric("任务总数", number(summary.total_count)),
+        metric("活跃任务", number(summary.active_count)),
+        metric("覆盖项目", number(summary.repository_count)),
+      ].join("");
+      if (!tasks.length) {
+        projectAgentTaskWorkbench.innerHTML = "<p>暂无项目 Agent 任务。</p>";
+        return;
+      }
+      projectAgentTaskWorkbench.innerHTML = tasks.slice(0, 20).map(task => `
+        <div class="workbench-item">
+          <strong><a href="project.html?repo=${encodeURIComponent(task.full_name || "")}&api=1">${escapeHtml(task.full_name || "未知项目")}</a></strong>
+          <span>${escapeHtml(agentProjectTaskTypeLabel(task.task_type))} / ${escapeHtml(agentProjectTaskStatusLabel(task.status))} / 优先级 ${number(task.priority)}</span>
+          <p>${escapeHtml(task.reason || "暂无任务原因。")}</p>
+          ${task.result_summary ? `<p>执行结果：${escapeHtml(task.result_summary)}</p>` : ""}
+        </div>
+      `).join("");
+    }
+
+    function agentProjectTaskTypeLabel(value) {
+      return ({ observe: "观察", review_risk: "风险复查", deep_analysis: "深度分析", notify: "订阅推送", ignore: "忽略", continue_tracking: "继续跟踪" })[value] || value || "观察";
+    }
+
+    function agentProjectTaskStatusLabel(value) {
+      return ({ planned: "待执行", in_progress: "执行中", completed: "已完成", failed: "失败", cancelled: "已取消" })[value] || value || "未知";
     }
 
     function loadAdminJobsJson() {

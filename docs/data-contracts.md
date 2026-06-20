@@ -212,9 +212,10 @@ feedback_memory
 feedback_reason
 rag_reason
 recommendation_reason
+next_actions
 ```
 
-`project_profile` 是项目研究档案，包含 `project_positioning`、`use_cases`、`strengths`、`risks`、`quality_summary`、`tracking_reason`、`rag_summary` 和 `agent_judgement`。`ranking_factors` 包含 `base_score`、`quality_score`、`trend_score`、`rag_relevance_score`、`preference_score`、`tracking_score` 和 `risk_penalty`。`feedback_memory` 只包含反馈计数、平均评分、最近评分、标签、最近备注和排序调整值，不包含密钥或私有请求头。三个 reason 字段只保存派生解释文本，不包含管理口令、请求头或推送密钥。
+`project_profile` 是项目研究档案，包含 `project_positioning`、`use_cases`、`strengths`、`risks`、`quality_summary`、`tracking_reason`、`rag_summary` 和 `agent_judgement`。`ranking_factors` 包含 `base_score`、`quality_score`、`trend_score`、`rag_relevance_score`、`preference_score`、`tracking_score` 和 `risk_penalty`。`next_actions` 是项目级 Agent 动作列表，包含 `task_id`、`task_type`、`priority`、`status`、`reason`、`source` 和 `subscription_action`。`feedback_memory` 只包含反馈计数、平均评分、最近评分、标签、最近备注和排序调整值，不包含密钥或私有请求头。三个 reason 字段只保存派生解释文本，不包含管理口令、请求头或推送密钥。
 
 页面层反馈入口复用同一数据契约：`project.html` 和 `recommendations.html` 只向 `POST /v1/feedback` 写入仓库名、profile、评分、标签、备注和来源；`admin.html` 读取 `GET /v1/feedback?limit=200` 的列表与汇总，并读取 `/v1/recommendations?limit=20` 展示受反馈影响的推荐项目，不公开管理口令、请求头或任何密钥。
 
@@ -259,6 +260,7 @@ rag_chunks_fts
 rag_embeddings
 rag_explanations
 project_feedback
+project_agent_tasks
 dev_runs
 dev_corpus
 dev_chunks
@@ -278,18 +280,19 @@ migration_meta
 1. `runs` 保存运行摘要索引。
 2. `repositories` 保存仓库基础信息。
 3. `selections` 保存每次运行入选项目及排序信息。
-4. `project_corpus` 保存从入选项目派生的公开文本语料和 `payload_json.project_profile`，用于本地搜索、后续向量检索和 RAG。
+4. `project_corpus` 保存从入选项目派生的公开文本语料、`payload_json.project_profile` 和 `payload_json.agent_tasks`，用于本地搜索、后续向量检索和 RAG。
 5. `project_corpus_fts` 保存 `project_corpus` 的 SQLite FTS5 搜索索引，可由派生语料重建。
-6. `rag_chunks` 保存从 `project_corpus` 拆分出的短文本证据块，`payload_json.project_profile` 会随证据块保留，用于 RAG 检索、引用和后续 embedding。
+6. `rag_chunks` 保存从 `project_corpus` 拆分出的短文本证据块，`payload_json.project_profile` 和 `payload_json.agent_tasks` 会随证据块保留，用于 RAG 检索、引用和后续 embedding。
 7. `rag_chunks_fts` 保存 `rag_chunks` 的 SQLite FTS5 搜索索引，可由派生语料重建。
 8. `rag_embeddings` 保存从 `rag_chunks` 派生的本地 embedding 向量索引；当前默认模型为 `local-hash-v1`，可重建，不保存密钥。
 9. `rag_explanations` 保存 RAG 解释结果、引用、检索参数、解释摘要和规则版质量评估，用于后续质量评估和模型替换对比；不保存密钥。
 10. `project_feedback` 保存用户对项目的显式反馈，包括仓库名、profile、评分、标签、备注和来源，用于后续个性化记忆、RAG 重排和推荐校准；不保存密钥。
-11. `dev_runs` 保存每次开发上下文索引任务的状态、来源数量、分块数量、embedding 数量和错误摘要。
-12. `dev_corpus` 保存开发上下文原始材料，包括文档、Git diff、测试输出和安全检查输出；写入前应脱敏。
-13. `dev_chunks` 保存从开发上下文材料拆分出的短文本片段。
-14. `dev_chunks_fts` 保存 `dev_chunks` 的 SQLite FTS5 搜索索引。
-15. `dev_embeddings` 保存从 `dev_chunks` 派生的本地确定性 embedding；当前只作为后续向量检索预留，不接外部向量库。
+11. `project_agent_tasks` 保存项目级任务类型、优先级、状态、原因、执行结果、来源、去重键和生命周期时间。`payload_json.subscription_action` 只描述后续订阅动作，不保存推送密钥。
+12. `dev_runs` 保存每次开发上下文索引任务的状态、来源数量、分块数量、embedding 数量和错误摘要。
+13. `dev_corpus` 保存开发上下文原始材料，包括文档、Git diff、测试输出和安全检查输出；写入前应脱敏。
+14. `dev_chunks` 保存从开发上下文材料拆分出的短文本片段。
+15. `dev_chunks_fts` 保存 `dev_chunks` 的 SQLite FTS5 搜索索引。
+16. `dev_embeddings` 保存从 `dev_chunks` 派生的本地确定性 embedding；当前只作为后续向量检索预留，不接外部向量库。
 16. `trend_summaries` 保存趋势摘要。
 17. `sent_repositories` 保存已推送仓库状态。
 18. `star_history` 保存 Star 历史。

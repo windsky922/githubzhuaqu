@@ -161,6 +161,29 @@ CREATE INDEX IF NOT EXISTS idx_project_feedback_full_name_updated_at ON project_
 CREATE INDEX IF NOT EXISTS idx_project_feedback_profile_updated_at ON project_feedback(profile, updated_at);
 CREATE INDEX IF NOT EXISTS idx_project_feedback_rating_updated_at ON project_feedback(rating, updated_at);
 
+CREATE TABLE IF NOT EXISTS project_agent_tasks (
+  task_id TEXT PRIMARY KEY,
+  full_name TEXT NOT NULL DEFAULT '',
+  profile TEXT NOT NULL DEFAULT '',
+  task_type TEXT NOT NULL DEFAULT 'observe',
+  priority INTEGER NOT NULL DEFAULT 3,
+  status TEXT NOT NULL DEFAULT 'planned',
+  reason TEXT NOT NULL DEFAULT '',
+  result_summary TEXT NOT NULL DEFAULT '',
+  source TEXT NOT NULL DEFAULT '',
+  dedupe_key TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL DEFAULT '',
+  updated_at TEXT NOT NULL DEFAULT '',
+  started_at TEXT NOT NULL DEFAULT '',
+  finished_at TEXT NOT NULL DEFAULT '',
+  payload_json TEXT NOT NULL DEFAULT '{}'
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_project_agent_tasks_dedupe_key ON project_agent_tasks(dedupe_key) WHERE dedupe_key <> '';
+CREATE INDEX IF NOT EXISTS idx_project_agent_tasks_full_name_updated_at ON project_agent_tasks(full_name, updated_at);
+CREATE INDEX IF NOT EXISTS idx_project_agent_tasks_status_priority ON project_agent_tasks(status, priority, updated_at);
+CREATE INDEX IF NOT EXISTS idx_project_agent_tasks_profile_updated_at ON project_agent_tasks(profile, updated_at);
+
 CREATE TABLE IF NOT EXISTS dev_runs (
   run_id TEXT PRIMARY KEY,
   status TEXT NOT NULL DEFAULT '',

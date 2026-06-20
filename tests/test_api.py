@@ -755,6 +755,64 @@ class ApiRepositoryTest(unittest.TestCase):
         finally:
             shutil.rmtree(root, ignore_errors=True)
 
+    def test_project_agent_task_loop_updates_recommendations_and_rag(self):
+        root = Path.cwd() / f".tmp-api-agent-task-{uuid.uuid4().hex}"
+        try:
+            _write_fixture(root)
+            repository = ApiRepository(root=root, db_path=root / "data" / "github_weekly.sqlite")
+
+            recommendations = repository.recommendations(profile="agent_development", language="Python", limit=10)
+            project = next(item for item in recommendations["recommendations"] if item["full_name"] == "owner/agent")
+            self.assertTrue(project["next_actions"])
+            self.assertIn("agent_task_summary", recommendations)
+
+            created = repository.create_project_agent_task(
+                "owner/agent",
+                {
+                    "task_type": "deep_analysis",
+                    "priority": 2,
+                    "reason": "验证项目级 Agent 任务闭环。",
+                    "source": "unit-test",
+                    "payload": {"subscription_action": "notify"},
+                },
+            )
+            self.assertTrue(created["created"])
+            task_id = created["task"]["task_id"]
+
+            duplicate = repository.create_project_agent_task(
+                "owner/agent",
+                {
+                    "task_type": "deep_analysis",
+                    "priority": 2,
+                    "reason": "验证项目级 Agent 任务闭环。",
+                    "source": "unit-test",
+                    "payload": {"subscription_action": "notify"},
+                },
+            )
+            self.assertFalse(duplicate["created"])
+            self.assertTrue(duplicate["deduplicated"])
+
+            started = repository.update_project_agent_task(task_id, {"status": "in_progress"})
+            self.assertEqual(started["task"]["status"], "in_progress")
+            completed = repository.update_project_agent_task(
+                task_id,
+                {"status": "completed", "result_summary": "验证任务闭环完成，继续进入订阅候选。"},
+            )
+            self.assertEqual(completed["task"]["status"], "completed")
+            self.assertTrue(completed["task"]["finished_at"])
+
+            tasks = repository.project_agent_tasks(full_name="owner/agent", limit=20)
+            self.assertTrue(any(item["task_id"] == task_id for item in tasks["tasks"]))
+            self.assertGreaterEqual(tasks["summary"]["repository_count"], 1)
+
+            rag = repository.project_rag_bundle("owner/agent", limit=8)
+            self.assertTrue(rag["agent_tasks"]["tasks"])
+            self.assertTrue(rag["next_actions"])
+            corpus_text = " ".join(item.get("text") or item.get("chunk_text") or "" for item in rag["contexts"])
+            self.assertIn("验证任务闭环完成", corpus_text)
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
     def test_rag_maintenance_plan_creates_corpus_rebuild_before_backfill(self):
         root = Path.cwd() / f".tmp-api-empty-rag-{uuid.uuid4().hex}"
         try:
@@ -886,9 +944,14 @@ class ApiRepositoryTest(unittest.TestCase):
                 )
                 unconfigured_dev_context = client.post("/v1/dev-context/index", json={"run_checks": False})
                 unconfigured_dev_context_plan = client.post("/v1/dev-context/index-plan", json={"run_checks": False})
+                unconfigured_agent_task = client.post(
+                    "/v1/projects/owner/agent/agent-tasks",
+                    json={"task_type": "observe", "reason": "route auth test"},
+                )
             self.assertEqual(unconfigured.status_code, 403)
             self.assertEqual(unconfigured_dev_context.status_code, 403)
             self.assertEqual(unconfigured_dev_context_plan.status_code, 403)
+            self.assertEqual(unconfigured_agent_task.status_code, 403)
 
             with patch.dict(os.environ, {"ADMIN_API_TOKEN": "test"}, clear=False):
                 missing = client.post(
@@ -917,6 +980,11 @@ class ApiRepositoryTest(unittest.TestCase):
                     headers={"X-Admin-Token": "test"},
                     json={"run_checks": False},
                 )
+                valid_agent_task = client.post(
+                    "/v1/projects/owner/agent/agent-tasks",
+                    headers={"X-Admin-Token": "test"},
+                    json={"task_type": "observe", "priority": 3, "reason": "route auth test"},
+                )
                 bearer_valid = client.post(
                     "/v1/runs/trigger",
                     headers={"Authorization": "Bearer test"},
@@ -930,6 +998,20 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(valid.status_code, 201)
             self.assertEqual(valid_dev_context.status_code, 202)
             self.assertEqual(valid_dev_context_plan.status_code, 202)
+            self.assertEqual(valid_agent_task.status_code, 201)
+            self.assertTrue(valid_agent_task.json()["created"])
+            task_id = valid_agent_task.json()["task"]["task_id"]
+            task_list = client.get("/v1/projects/owner/agent/agent-tasks")
+            self.assertEqual(task_list.status_code, 200)
+            self.assertTrue(task_list.json()["tasks"])
+            with patch.dict(os.environ, {"ADMIN_API_TOKEN": "test"}, clear=False):
+                task_update = client.patch(
+                    f"/v1/agent-tasks/{task_id}",
+                    headers={"X-Admin-Token": "test"},
+                    json={"status": "in_progress"},
+                )
+            self.assertEqual(task_update.status_code, 200)
+            self.assertEqual(task_update.json()["task"]["status"], "in_progress")
             self.assertTrue(valid.json()["created"])
             self.assertEqual(bearer_valid.status_code, 202)
         finally:

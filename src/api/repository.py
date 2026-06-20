@@ -26,6 +26,7 @@ from src.storage.sqlite_store import (
     insert_job_event,
     rebuild_project_corpus,
     table_count,
+    upsert_project_agent_task,
     upsert_job,
 )
 
@@ -37,6 +38,22 @@ EXECUTABLE_JOB_KINDS = {
     "rag_embedding_build",
     "rag_search_evaluation",
     "dev_context_index",
+}
+PROJECT_AGENT_TASK_TYPES = {
+    "observe",
+    "review_risk",
+    "deep_analysis",
+    "notify",
+    "ignore",
+    "continue_tracking",
+}
+PROJECT_AGENT_TASK_STATUSES = {"planned", "in_progress", "completed", "failed", "cancelled"}
+PROJECT_AGENT_TASK_TRANSITIONS = {
+    "planned": {"planned", "in_progress", "completed", "cancelled"},
+    "in_progress": {"in_progress", "completed", "failed", "cancelled"},
+    "failed": {"failed", "planned", "in_progress", "cancelled"},
+    "completed": {"completed"},
+    "cancelled": {"cancelled", "planned"},
 }
 
 
@@ -67,6 +84,7 @@ class ApiRepository:
                 "projects_query": True,
                 "project_detail": True,
                 "recommendations": True,
+                "project_agent_tasks": True,
                 "subscriptions": True,
                 "subscription_recommendations": True,
                 "subscription_trigger": True,
@@ -192,6 +210,23 @@ class ApiRepository:
             for project in projects
         ]
         projects = _apply_feedback_memory(projects, feedback_memory)[:limit]
+        task_records = self.project_agent_tasks(limit=500).get("tasks", [])
+        task_records = [
+            task
+            for task in task_records
+            if not normalized_profile or not task.get("profile") or task.get("profile") == normalized_profile
+        ]
+        task_memory = _project_agent_tasks_by_full_name(task_records)
+        projects = [
+            {
+                **project,
+                "next_actions": _project_next_actions(
+                    project,
+                    task_memory.get(str(project.get("full_name") or "").lower(), []),
+                ),
+            }
+            for project in projects
+        ]
         return {
             "schema_version": 1,
             "profile": normalized_profile or "",
@@ -208,6 +243,7 @@ class ApiRepository:
                 query=normalized_query,
             ),
             "feedback_memory": _feedback_memory_response(feedback_records),
+            "agent_task_summary": _project_agent_task_summary(task_records),
             "recommendations": projects,
         }
 
@@ -2165,6 +2201,8 @@ class ApiRepository:
                 "full_name": normalized,
                 "query": "",
                 "project_profile": {},
+                "agent_tasks": {"count": 0, "tasks": [], "summary": _project_agent_task_summary([])},
+                "next_actions": [],
                 "retrieval": {},
                 "contexts": [],
                 "citations": [],
@@ -2201,8 +2239,17 @@ class ApiRepository:
         explanation_items = explanations.get("explanations") if isinstance(explanations.get("explanations"), list) else []
         feedback = self.project_feedback(full_name=detail.get("full_name") or normalized, limit=20)
         feedback_summary = feedback.get("summary") if isinstance(feedback.get("summary"), dict) else {}
+        agent_tasks = self.project_agent_tasks(full_name=detail.get("full_name") or normalized, limit=50)
         project_profile = self._project_profile_for_full_name(detail.get("full_name") or normalized) or _project_profile_from_detail(detail)
         project_profile = _merge_project_profile_runtime_signals(project_profile, feedback_summary, explanation_items)
+        next_actions = _project_next_actions(
+            {
+                **detail,
+                "project_profile": project_profile,
+                "quality_score": detail.get("latest_quality_score") or detail.get("quality_score") or 0,
+            },
+            agent_tasks.get("tasks") if isinstance(agent_tasks.get("tasks"), list) else [],
+        )
         return {
             "schema_version": 1,
             "found": True,
@@ -2219,6 +2266,8 @@ class ApiRepository:
                 "best_trending_rank": _int_value(detail.get("best_trending_rank")),
             },
             "project_profile": project_profile,
+            "agent_tasks": agent_tasks,
+            "next_actions": next_actions,
             "retrieval": retrieval.get("retrieval") if isinstance(retrieval.get("retrieval"), dict) else {},
             "contexts": retrieval.get("contexts") if isinstance(retrieval.get("contexts"), list) else [],
             "citations": retrieval.get("citations") if isinstance(retrieval.get("citations"), list) else [],
@@ -3352,6 +3401,10 @@ class ApiRepository:
         now = datetime.now(UTC).isoformat().replace("+00:00", "Z")
         data["created_at"] = now
         data["updated_at"] = now
+        if data["status"] == "in_progress":
+            data["started_at"] = now
+        if data["status"] in {"completed", "failed", "cancelled"}:
+            data["finished_at"] = now
         data["subscription_id"] = _subscription_id(data)
         self._upsert_subscription(data)
         return {
@@ -3383,6 +3436,128 @@ class ApiRepository:
             "subscription_id": updates["subscription_id"],
             "subscription": updates,
         }
+
+    def create_project_agent_task(
+        self,
+        full_name: str,
+        payload: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        self.ensure_sqlite_index()
+        data = _project_agent_task_payload(payload or {}, full_name=full_name)
+        error = _project_agent_task_validation_error(data)
+        if error:
+            return {"schema_version": 1, "accepted": False, "created": False, "error": error, "task": {}}
+        now = _utc_now()
+        data["created_at"] = now
+        data["updated_at"] = now
+        data["dedupe_key"] = data["dedupe_key"] or _project_agent_task_dedupe_key(data)
+        existing = self._project_agent_task_by_dedupe_key(data["dedupe_key"])
+        if existing:
+            return {
+                "schema_version": 1,
+                "accepted": True,
+                "created": False,
+                "deduplicated": True,
+                "task": existing,
+            }
+        data["task_id"] = data["task_id"] or _project_agent_task_id(data)
+        self._upsert_project_agent_task(data)
+        return {
+            "schema_version": 1,
+            "accepted": True,
+            "created": True,
+            "deduplicated": False,
+            "task": data,
+        }
+
+    def project_agent_tasks(
+        self,
+        *,
+        full_name: str | None = None,
+        profile: str | None = None,
+        status: str | None = None,
+        limit: int = 50,
+    ) -> dict[str, Any]:
+        self.ensure_sqlite_index()
+        limit = max(1, min(_int_value(limit) or 50, 500))
+        conditions = []
+        parameters: list[Any] = []
+        if _blank_to_none(full_name):
+            conditions.append("LOWER(full_name) = LOWER(?)")
+            parameters.append(_normalize_full_name(str(full_name)))
+        if _blank_to_none(profile):
+            conditions.append("profile = ?")
+            parameters.append(str(profile).strip())
+        if _blank_to_none(status):
+            conditions.append("status = ?")
+            parameters.append(str(status).strip())
+        sql = """
+            SELECT task_id, full_name, profile, task_type, priority, status, reason,
+                   result_summary, source, dedupe_key, created_at, updated_at,
+                   started_at, finished_at, payload_json
+            FROM project_agent_tasks
+        """
+        if conditions:
+            sql += " WHERE " + " AND ".join(conditions)
+        sql += " ORDER BY CASE status WHEN 'in_progress' THEN 0 WHEN 'planned' THEN 1 ELSE 2 END, priority ASC, updated_at DESC LIMIT ?"
+        parameters.append(limit)
+        connection = connect(self.db_path)
+        try:
+            initialize(connection)
+            rows = connection.execute(sql, parameters).fetchall()
+        finally:
+            connection.close()
+        tasks = [_project_agent_task_from_row(row) for row in rows]
+        return {
+            "schema_version": 1,
+            "count": len(tasks),
+            "tasks": tasks,
+            "summary": _project_agent_task_summary(tasks),
+        }
+
+    def update_project_agent_task(
+        self,
+        task_id: str,
+        payload: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        self.ensure_sqlite_index()
+        current = self._project_agent_task_by_id(task_id)
+        if not current:
+            return {"schema_version": 1, "found": False, "updated": False, "error": "任务不存在。", "task": {}}
+        incoming = payload or {}
+        next_status = str(incoming.get("status") or current["status"]).strip()
+        if next_status not in PROJECT_AGENT_TASK_STATUSES:
+            return {"schema_version": 1, "found": True, "updated": False, "error": "不支持的任务状态。", "task": current}
+        if next_status not in PROJECT_AGENT_TASK_TRANSITIONS.get(current["status"], {current["status"]}):
+            return {
+                "schema_version": 1,
+                "found": True,
+                "updated": False,
+                "error": f"任务状态不能从 {current['status']} 变更为 {next_status}。",
+                "task": current,
+            }
+        updated = {
+            **current,
+            "status": next_status,
+            "priority": max(1, min(_int_value(incoming.get("priority")) or current["priority"], 5)),
+            "reason": str(incoming.get("reason") if "reason" in incoming else current["reason"]).strip()[:1000],
+            "result_summary": str(
+                incoming.get("result_summary") if "result_summary" in incoming else current["result_summary"]
+            ).strip()[:2000],
+            "updated_at": _utc_now(),
+        }
+        if next_status == "in_progress" and not updated.get("started_at"):
+            updated["started_at"] = updated["updated_at"]
+        if next_status in {"completed", "failed", "cancelled"}:
+            updated["finished_at"] = updated["updated_at"]
+        elif next_status == "planned":
+            updated["started_at"] = ""
+            updated["finished_at"] = ""
+        current_payload = current.get("payload") if isinstance(current.get("payload"), dict) else {}
+        incoming_payload = incoming.get("payload") if isinstance(incoming.get("payload"), dict) else {}
+        updated["payload"] = {**current_payload, **incoming_payload}
+        self._upsert_project_agent_task(updated)
+        return {"schema_version": 1, "found": True, "updated": True, "task": updated}
 
     def create_project_feedback(self, payload: dict[str, Any] | None = None) -> dict[str, Any]:
         self.ensure_sqlite_index()
@@ -3683,6 +3858,55 @@ class ApiRepository:
                     json.dumps(data, ensure_ascii=False, sort_keys=True),
                 ),
             )
+            connection.commit()
+        finally:
+            connection.close()
+
+    def _project_agent_task_by_id(self, task_id: str) -> dict[str, Any]:
+        normalized = str(task_id or "").strip()
+        if not normalized:
+            return {}
+        connection = connect(self.db_path)
+        try:
+            initialize(connection)
+            row = connection.execute(
+                """
+                SELECT task_id, full_name, profile, task_type, priority, status, reason,
+                       result_summary, source, dedupe_key, created_at, updated_at,
+                       started_at, finished_at, payload_json
+                FROM project_agent_tasks WHERE task_id = ?
+                """,
+                (normalized,),
+            ).fetchone()
+        finally:
+            connection.close()
+        return _project_agent_task_from_row(row) if row else {}
+
+    def _project_agent_task_by_dedupe_key(self, dedupe_key: str) -> dict[str, Any]:
+        if not dedupe_key:
+            return {}
+        connection = connect(self.db_path)
+        try:
+            initialize(connection)
+            row = connection.execute(
+                """
+                SELECT task_id, full_name, profile, task_type, priority, status, reason,
+                       result_summary, source, dedupe_key, created_at, updated_at,
+                       started_at, finished_at, payload_json
+                FROM project_agent_tasks WHERE dedupe_key = ?
+                """,
+                (dedupe_key,),
+            ).fetchone()
+        finally:
+            connection.close()
+        return _project_agent_task_from_row(row) if row else {}
+
+    def _upsert_project_agent_task(self, data: dict[str, Any]) -> None:
+        connection = connect(self.db_path)
+        try:
+            initialize(connection)
+            upsert_project_agent_task(connection, data)
+            rebuild_project_corpus(connection)
             connection.commit()
         finally:
             connection.close()
@@ -5877,6 +6101,181 @@ def _project_feedback_payload(payload: dict[str, Any]) -> dict[str, Any]:
         "created_at": str(payload.get("created_at") or ""),
         "updated_at": str(payload.get("updated_at") or ""),
     }
+
+
+def _utc_now() -> str:
+    return datetime.now(UTC).isoformat().replace("+00:00", "Z")
+
+
+def _project_agent_task_payload(payload: dict[str, Any], *, full_name: str = "") -> dict[str, Any]:
+    task_type = str(payload.get("task_type") or "observe").strip()
+    status = str(payload.get("status") or "planned").strip()
+    return {
+        "task_id": str(payload.get("task_id") or "").strip()[:120],
+        "full_name": _normalize_full_name(full_name or str(payload.get("full_name") or payload.get("repo") or ""))[:180],
+        "profile": str(payload.get("profile") or "").strip()[:80],
+        "task_type": task_type,
+        "priority": max(1, min(_int_value(payload.get("priority")) or 3, 5)),
+        "status": status,
+        "reason": str(payload.get("reason") or "").strip()[:1000],
+        "result_summary": str(payload.get("result_summary") or "").strip()[:2000],
+        "source": str(payload.get("source") or "api").strip()[:80],
+        "dedupe_key": str(payload.get("dedupe_key") or "").strip()[:300],
+        "created_at": str(payload.get("created_at") or ""),
+        "updated_at": str(payload.get("updated_at") or ""),
+        "started_at": str(payload.get("started_at") or ""),
+        "finished_at": str(payload.get("finished_at") or ""),
+        "payload": payload.get("payload") if isinstance(payload.get("payload"), dict) else {},
+    }
+
+
+def _project_agent_task_validation_error(data: dict[str, Any]) -> str:
+    if not data.get("full_name"):
+        return "full_name 不能为空。"
+    if data.get("task_type") not in PROJECT_AGENT_TASK_TYPES:
+        return "不支持的任务类型。"
+    if data.get("status") not in PROJECT_AGENT_TASK_STATUSES:
+        return "不支持的任务状态。"
+    if not data.get("reason"):
+        return "reason 不能为空。"
+    return ""
+
+
+def _project_agent_task_dedupe_key(data: dict[str, Any]) -> str:
+    stable = json.dumps(
+        {
+            "full_name": str(data.get("full_name") or "").lower(),
+            "profile": data.get("profile") or "",
+            "task_type": data.get("task_type") or "observe",
+            "reason": data.get("reason") or "",
+            "source": data.get("source") or "api",
+        },
+        ensure_ascii=False,
+        sort_keys=True,
+    )
+    return "agent-task-dedupe:" + sha1(stable.encode("utf-8")).hexdigest()[:20]
+
+
+def _project_agent_task_id(data: dict[str, Any]) -> str:
+    stable = f"{data.get('dedupe_key') or _project_agent_task_dedupe_key(data)}:{data.get('created_at') or ''}"
+    return "agent-task:" + sha1(stable.encode("utf-8")).hexdigest()[:16]
+
+
+def _project_agent_task_from_row(row: Any) -> dict[str, Any]:
+    return {
+        "task_id": row["task_id"],
+        "full_name": row["full_name"],
+        "profile": row["profile"],
+        "task_type": row["task_type"],
+        "priority": _int_value(row["priority"]),
+        "status": row["status"],
+        "reason": row["reason"],
+        "result_summary": row["result_summary"],
+        "source": row["source"],
+        "dedupe_key": row["dedupe_key"],
+        "created_at": row["created_at"],
+        "updated_at": row["updated_at"],
+        "started_at": row["started_at"],
+        "finished_at": row["finished_at"],
+        "payload": _json_object(row["payload_json"]),
+    }
+
+
+def _project_agent_task_summary(tasks: list[dict[str, Any]]) -> dict[str, Any]:
+    status_counts: dict[str, int] = {}
+    type_counts: dict[str, int] = {}
+    repositories: set[str] = set()
+    for task in tasks:
+        status = str(task.get("status") or "planned")
+        task_type = str(task.get("task_type") or "observe")
+        status_counts[status] = status_counts.get(status, 0) + 1
+        type_counts[task_type] = type_counts.get(task_type, 0) + 1
+        if task.get("full_name"):
+            repositories.add(str(task["full_name"]))
+    return {
+        "total_count": len(tasks),
+        "active_count": sum(status_counts.get(status, 0) for status in ("planned", "in_progress")),
+        "repository_count": len(repositories),
+        "status_counts": status_counts,
+        "type_counts": type_counts,
+    }
+
+
+def _project_agent_tasks_by_full_name(tasks: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
+    grouped: dict[str, list[dict[str, Any]]] = {}
+    for task in tasks:
+        key = str(task.get("full_name") or "").lower()
+        if key:
+            grouped.setdefault(key, []).append(task)
+    return grouped
+
+
+def _project_next_actions(project: dict[str, Any], tasks: list[dict[str, Any]] | None = None) -> list[dict[str, Any]]:
+    active = [task for task in tasks or [] if task.get("status") in {"planned", "in_progress"}]
+    if active:
+        return [
+            {
+                "task_id": task.get("task_id") or "",
+                "task_type": task.get("task_type") or "observe",
+                "priority": _int_value(task.get("priority")) or 3,
+                "status": task.get("status") or "planned",
+                "reason": task.get("reason") or "",
+                "source": task.get("source") or "task_memory",
+                "subscription_action": _json_object_value(task.get("payload"), "subscription_action"),
+            }
+            for task in active[:3]
+        ]
+    profile = project.get("project_profile") if isinstance(project.get("project_profile"), dict) else {}
+    risks = _list_strings(profile.get("risks")) or _list_strings(project.get("security_flags"))
+    quality_score = _int_value(project.get("quality_score"))
+    if risks:
+        action = {
+            "task_id": "",
+            "task_type": "review_risk",
+            "priority": 1,
+            "status": "suggested",
+            "reason": f"复查项目档案中的 {len(risks)} 个风险点，并记录风险变化。",
+            "source": "recommendation_agent",
+            "subscription_action": "watch",
+        }
+    elif quality_score >= 80:
+        action = {
+            "task_id": "",
+            "task_type": "deep_analysis",
+            "priority": 2,
+            "status": "suggested",
+            "reason": "质量信号较强，建议验证核心能力、维护活跃度和真实落地场景。",
+            "source": "recommendation_agent",
+            "subscription_action": "notify",
+        }
+    else:
+        action = {
+            "task_id": "",
+            "task_type": "continue_tracking",
+            "priority": 3,
+            "status": "suggested",
+            "reason": str(profile.get("tracking_reason") or "持续观察 Star 增量、版本发布和风险变化。"),
+            "source": "recommendation_agent",
+            "subscription_action": "watch",
+        }
+    actions = [action]
+    if _int_value(project.get("recommendation_score")) >= 70 and action["task_type"] != "review_risk":
+        actions.append(
+            {
+                "task_id": "",
+                "task_type": "notify",
+                "priority": 2,
+                "status": "suggested",
+                "reason": "推荐分较高，可进入订阅推送候选队列。",
+                "source": "recommendation_agent",
+                "subscription_action": "notify",
+            }
+        )
+    return actions
+
+
+def _json_object_value(value: Any, key: str) -> Any:
+    return value.get(key) if isinstance(value, dict) else ""
 
 
 def _project_feedback_id(data: dict[str, Any]) -> str:
