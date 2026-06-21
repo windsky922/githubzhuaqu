@@ -350,6 +350,69 @@ CREATE TABLE IF NOT EXISTS subscriptions (
 CREATE INDEX IF NOT EXISTS idx_subscriptions_status_updated_at ON subscriptions(status, updated_at);
 CREATE INDEX IF NOT EXISTS idx_subscriptions_profile_language ON subscriptions(profile, language);
 
+CREATE TABLE IF NOT EXISTS subscription_events (
+  event_id TEXT PRIMARY KEY,
+  event_type TEXT NOT NULL DEFAULT '',
+  full_name TEXT NOT NULL DEFAULT '',
+  source_run_id TEXT NOT NULL DEFAULT '',
+  severity TEXT NOT NULL DEFAULT 'info',
+  status TEXT NOT NULL DEFAULT 'detected',
+  title TEXT NOT NULL DEFAULT '',
+  summary TEXT NOT NULL DEFAULT '',
+  evidence_json TEXT NOT NULL DEFAULT '[]',
+  citations_json TEXT NOT NULL DEFAULT '[]',
+  dedupe_key TEXT NOT NULL DEFAULT '',
+  detected_at TEXT NOT NULL DEFAULT '',
+  updated_at TEXT NOT NULL DEFAULT '',
+  payload_json TEXT NOT NULL DEFAULT '{}'
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_subscription_events_dedupe_key ON subscription_events(dedupe_key) WHERE dedupe_key <> '';
+CREATE INDEX IF NOT EXISTS idx_subscription_events_full_name_detected_at ON subscription_events(full_name, detected_at);
+CREATE INDEX IF NOT EXISTS idx_subscription_events_type_severity ON subscription_events(event_type, severity, detected_at);
+CREATE INDEX IF NOT EXISTS idx_subscription_events_status_detected_at ON subscription_events(status, detected_at);
+
+CREATE TABLE IF NOT EXISTS notification_candidates (
+  candidate_id TEXT PRIMARY KEY,
+  subscription_id TEXT NOT NULL DEFAULT '',
+  event_id TEXT NOT NULL DEFAULT '',
+  full_name TEXT NOT NULL DEFAULT '',
+  status TEXT NOT NULL DEFAULT 'pending',
+  channels_json TEXT NOT NULL DEFAULT '[]',
+  title TEXT NOT NULL DEFAULT '',
+  message TEXT NOT NULL DEFAULT '',
+  dedupe_key TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL DEFAULT '',
+  updated_at TEXT NOT NULL DEFAULT '',
+  payload_json TEXT NOT NULL DEFAULT '{}'
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_notification_candidates_dedupe_key ON notification_candidates(dedupe_key) WHERE dedupe_key <> '';
+CREATE INDEX IF NOT EXISTS idx_notification_candidates_status_created_at ON notification_candidates(status, created_at);
+CREATE INDEX IF NOT EXISTS idx_notification_candidates_subscription_created_at ON notification_candidates(subscription_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_notification_candidates_event_id ON notification_candidates(event_id);
+
+CREATE TABLE IF NOT EXISTS notification_deliveries (
+  delivery_id TEXT PRIMARY KEY,
+  candidate_id TEXT NOT NULL DEFAULT '',
+  subscription_id TEXT NOT NULL DEFAULT '',
+  event_id TEXT NOT NULL DEFAULT '',
+  channel TEXT NOT NULL DEFAULT '',
+  status TEXT NOT NULL DEFAULT 'planned',
+  attempt_count INTEGER NOT NULL DEFAULT 0,
+  started_at TEXT NOT NULL DEFAULT '',
+  finished_at TEXT NOT NULL DEFAULT '',
+  error TEXT NOT NULL DEFAULT '',
+  response_json TEXT NOT NULL DEFAULT '{}',
+  dedupe_key TEXT NOT NULL DEFAULT '',
+  payload_json TEXT NOT NULL DEFAULT '{}'
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_notification_deliveries_dedupe_key ON notification_deliveries(dedupe_key) WHERE dedupe_key <> '';
+CREATE INDEX IF NOT EXISTS idx_notification_deliveries_candidate_channel ON notification_deliveries(candidate_id, channel);
+CREATE INDEX IF NOT EXISTS idx_notification_deliveries_status_finished_at ON notification_deliveries(status, finished_at);
+CREATE INDEX IF NOT EXISTS idx_notification_deliveries_subscription_event ON notification_deliveries(subscription_id, event_id);
+
 CREATE TABLE IF NOT EXISTS migration_meta (
   key TEXT PRIMARY KEY,
   value TEXT NOT NULL

@@ -51,6 +51,9 @@ def import_json_archive(root: Path, db_path: Path) -> dict[str, int]:
             "project_corpus_fts": corpus_count,
             "project_agent_tasks": table_count(connection, "project_agent_tasks"),
             "project_agent_task_runs": table_count(connection, "project_agent_task_runs"),
+            "subscription_events": table_count(connection, "subscription_events"),
+            "notification_candidates": table_count(connection, "notification_candidates"),
+            "notification_deliveries": table_count(connection, "notification_deliveries"),
             "rag_chunks": table_count(connection, "rag_chunks"),
             "rag_chunks_fts": table_count(connection, "rag_chunks_fts"),
             "rag_embeddings": table_count(connection, "rag_embeddings"),
@@ -760,6 +763,107 @@ def upsert_project_agent_task_run(connection: sqlite3.Connection, data: dict[str
     )
 
 
+def upsert_subscription_event(connection: sqlite3.Connection, data: dict[str, Any]) -> None:
+    connection.execute(
+        """
+        INSERT INTO subscription_events(
+          event_id, event_type, full_name, source_run_id, severity, status, title,
+          summary, evidence_json, citations_json, dedupe_key, detected_at, updated_at, payload_json
+        ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(event_id) DO UPDATE SET
+          event_type = excluded.event_type,
+          full_name = excluded.full_name,
+          source_run_id = excluded.source_run_id,
+          severity = excluded.severity,
+          status = excluded.status,
+          title = excluded.title,
+          summary = excluded.summary,
+          evidence_json = excluded.evidence_json,
+          citations_json = excluded.citations_json,
+          dedupe_key = excluded.dedupe_key,
+          updated_at = excluded.updated_at,
+          payload_json = excluded.payload_json
+        """,
+        (
+            str(data.get("event_id") or ""), str(data.get("event_type") or ""),
+            str(data.get("full_name") or ""), str(data.get("source_run_id") or ""),
+            str(data.get("severity") or "info"), str(data.get("status") or "detected"),
+            str(data.get("title") or ""), str(data.get("summary") or ""),
+            _json_text(data.get("evidence") if isinstance(data.get("evidence"), list) else data.get("evidence_json")),
+            _json_text(data.get("citations") if isinstance(data.get("citations"), list) else data.get("citations_json")),
+            str(data.get("dedupe_key") or ""), str(data.get("detected_at") or ""),
+            str(data.get("updated_at") or ""),
+            _json_text(data.get("payload") if isinstance(data.get("payload"), dict) else data.get("payload_json")),
+        ),
+    )
+
+
+def upsert_notification_candidate(connection: sqlite3.Connection, data: dict[str, Any]) -> None:
+    connection.execute(
+        """
+        INSERT INTO notification_candidates(
+          candidate_id, subscription_id, event_id, full_name, status, channels_json,
+          title, message, dedupe_key, created_at, updated_at, payload_json
+        ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(candidate_id) DO UPDATE SET
+          subscription_id = excluded.subscription_id,
+          event_id = excluded.event_id,
+          full_name = excluded.full_name,
+          status = excluded.status,
+          channels_json = excluded.channels_json,
+          title = excluded.title,
+          message = excluded.message,
+          dedupe_key = excluded.dedupe_key,
+          updated_at = excluded.updated_at,
+          payload_json = excluded.payload_json
+        """,
+        (
+            str(data.get("candidate_id") or ""), str(data.get("subscription_id") or ""),
+            str(data.get("event_id") or ""), str(data.get("full_name") or ""),
+            str(data.get("status") or "pending"),
+            _json_text(data.get("channels") if isinstance(data.get("channels"), list) else data.get("channels_json")),
+            str(data.get("title") or ""), str(data.get("message") or ""),
+            str(data.get("dedupe_key") or ""), str(data.get("created_at") or ""),
+            str(data.get("updated_at") or ""),
+            _json_text(data.get("payload") if isinstance(data.get("payload"), dict) else data.get("payload_json")),
+        ),
+    )
+
+
+def upsert_notification_delivery(connection: sqlite3.Connection, data: dict[str, Any]) -> None:
+    connection.execute(
+        """
+        INSERT INTO notification_deliveries(
+          delivery_id, candidate_id, subscription_id, event_id, channel, status,
+          attempt_count, started_at, finished_at, error, response_json, dedupe_key, payload_json
+        ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(delivery_id) DO UPDATE SET
+          candidate_id = excluded.candidate_id,
+          subscription_id = excluded.subscription_id,
+          event_id = excluded.event_id,
+          channel = excluded.channel,
+          status = excluded.status,
+          attempt_count = excluded.attempt_count,
+          started_at = excluded.started_at,
+          finished_at = excluded.finished_at,
+          error = excluded.error,
+          response_json = excluded.response_json,
+          dedupe_key = excluded.dedupe_key,
+          payload_json = excluded.payload_json
+        """,
+        (
+            str(data.get("delivery_id") or ""), str(data.get("candidate_id") or ""),
+            str(data.get("subscription_id") or ""), str(data.get("event_id") or ""),
+            str(data.get("channel") or ""), str(data.get("status") or "planned"),
+            _int_value(data.get("attempt_count")), str(data.get("started_at") or ""),
+            str(data.get("finished_at") or ""), str(data.get("error") or ""),
+            _json_text(data.get("response") if isinstance(data.get("response"), dict) else data.get("response_json")),
+            str(data.get("dedupe_key") or ""),
+            _json_text(data.get("payload") if isinstance(data.get("payload"), dict) else data.get("payload_json")),
+        ),
+    )
+
+
 def sync_project_agent_tasks(connection: sqlite3.Connection, limit: int = 20) -> int:
     rows = connection.execute(
         """
@@ -884,6 +988,9 @@ def table_count(connection: sqlite3.Connection, table_name: str) -> int:
         "project_feedback",
         "project_agent_tasks",
         "project_agent_task_runs",
+        "subscription_events",
+        "notification_candidates",
+        "notification_deliveries",
         "dev_corpus",
         "dev_chunks",
         "dev_chunks_fts",

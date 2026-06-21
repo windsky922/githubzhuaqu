@@ -321,6 +321,21 @@ SQLITE_COLUMNS = {
         "error",
         "payload_json",
     },
+    "subscription_events": {
+        "event_id", "event_type", "full_name", "source_run_id", "severity", "status",
+        "title", "summary", "evidence_json", "citations_json", "dedupe_key",
+        "detected_at", "updated_at", "payload_json",
+    },
+    "notification_candidates": {
+        "candidate_id", "subscription_id", "event_id", "full_name", "status",
+        "channels_json", "title", "message", "dedupe_key", "created_at",
+        "updated_at", "payload_json",
+    },
+    "notification_deliveries": {
+        "delivery_id", "candidate_id", "subscription_id", "event_id", "channel",
+        "status", "attempt_count", "started_at", "finished_at", "error",
+        "response_json", "dedupe_key", "payload_json",
+    },
     "dev_runs": {
         "run_id",
         "status",

@@ -262,6 +262,9 @@ rag_explanations
 project_feedback
 project_agent_tasks
 project_agent_task_runs
+subscription_events
+notification_candidates
+notification_deliveries
 dev_runs
 dev_corpus
 dev_chunks
@@ -290,7 +293,10 @@ migration_meta
 10. `project_feedback` 保存用户对项目的显式反馈，包括仓库名、profile、评分、标签、备注和来源，用于后续个性化记忆、RAG 重排和推荐校准；不保存密钥。
 11. `project_agent_tasks` 保存项目级任务类型、优先级、状态、原因、执行结果、来源、去重键和生命周期时间。`payload_json.subscription_action` 只描述后续订阅动作，不保存推送密钥。
 12. `project_agent_task_runs` 保存每次任务执行的输入、证据、引用、结构化结果、错误和生命周期。运行状态为 `running`、`succeeded` 或 `failed`；失败记录保留已采集证据。
-13. `dev_runs` 保存每次开发上下文索引任务的状态、来源数量、分块数量、embedding 数量和错误摘要。
+13. `subscription_events` 保存项目变化事件、严重度、来源运行、证据、引用和稳定去重键。
+14. `notification_candidates` 保存订阅规则匹配后生成的待确认推送内容和目标渠道，不代表已经发送。
+15. `notification_deliveries` 保存逐渠道投递状态、尝试次数、错误和响应摘要；`dedupe_key` 约束同一订阅、事件、渠道的重复发送。
+16. `dev_runs` 保存每次开发上下文索引任务的状态、来源数量、分块数量、embedding 数量和错误摘要。
 13. `dev_corpus` 保存开发上下文原始材料，包括文档、Git diff、测试输出和安全检查输出；写入前应脱敏。
 14. `dev_chunks` 保存从开发上下文材料拆分出的短文本片段。
 15. `dev_chunks_fts` 保存 `dev_chunks` 的 SQLite FTS5 搜索索引。
