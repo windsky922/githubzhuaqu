@@ -993,27 +993,33 @@
         projectAgentTaskWorkbench.innerHTML = "<p>启动本地后端或添加 api=1 后查看项目 Agent 任务。</p>";
         return;
       }
-      fetch("/v1/agent-tasks?limit=100", { cache: "no-store" })
-        .then(jsonOrThrow)
-        .then(data => renderProjectAgentTasks(data))
+      Promise.all([
+        fetch("/v1/agent-tasks?limit=100", { cache: "no-store" }).then(jsonOrThrow),
+        fetch("/v1/agent-task-runs?limit=30", { cache: "no-store" }).then(jsonOrThrow),
+      ])
+        .then(([tasks, runs]) => renderProjectAgentTasks(tasks, runs))
         .catch(error => {
           projectAgentTaskWorkbench.innerHTML = `<p>项目 Agent 任务读取失败：${escapeHtml(error.message || error)}</p>`;
         });
     }
 
-    function renderProjectAgentTasks(data) {
+    function renderProjectAgentTasks(data, runData) {
       const summary = data.summary || {};
       const tasks = Array.isArray(data.tasks) ? data.tasks : [];
+      const runs = runData && Array.isArray(runData.runs) ? runData.runs : [];
+      const runSummary = runData && runData.summary ? runData.summary : {};
       projectAgentTaskSummary.innerHTML = [
         metric("任务总数", number(summary.total_count)),
-        metric("活跃任务", number(summary.active_count)),
-        metric("覆盖项目", number(summary.repository_count)),
+        metric("待处理", number((summary.status_counts || {}).planned)),
+        metric("执行成功", number(runSummary.succeeded)),
+        metric("执行失败", number(runSummary.failed)),
+        metric("运行中", number(runSummary.running)),
       ].join("");
-      if (!tasks.length) {
+      if (!tasks.length && !runs.length) {
         projectAgentTaskWorkbench.innerHTML = "<p>暂无项目 Agent 任务。</p>";
         return;
       }
-      projectAgentTaskWorkbench.innerHTML = tasks.slice(0, 20).map(task => `
+      const taskRows = tasks.slice(0, 15).map(task => `
         <div class="workbench-item">
           <strong><a href="project.html?repo=${encodeURIComponent(task.full_name || "")}&api=1">${escapeHtml(task.full_name || "未知项目")}</a></strong>
           <span>${escapeHtml(agentProjectTaskTypeLabel(task.task_type))} / ${escapeHtml(agentProjectTaskStatusLabel(task.status))} / 优先级 ${number(task.priority)}</span>
@@ -1021,6 +1027,14 @@
           ${task.result_summary ? `<p>执行结果：${escapeHtml(task.result_summary)}</p>` : ""}
         </div>
       `).join("");
+      const runRows = runs.slice(0, 10).map(run => `
+        <div class="workbench-item">
+          <strong><a href="project.html?repo=${encodeURIComponent(run.full_name || "")}&api=1">${escapeHtml(run.full_name || "未知项目")}</a></strong>
+          <span>${escapeHtml(agentProjectTaskTypeLabel(run.task_type))} / ${escapeHtml(agentProjectRunStatusLabel(run.status))} / ${escapeHtml(run.started_at || "")}</span>
+          <p>${escapeHtml((run.result || {}).execution_summary || run.error || "暂无执行摘要。")}</p>
+        </div>
+      `).join("");
+      projectAgentTaskWorkbench.innerHTML = `${taskRows}${runRows ? `<h3>最近执行记录</h3>${runRows}` : ""}`;
     }
 
     function agentProjectTaskTypeLabel(value) {
@@ -1029,6 +1043,10 @@
 
     function agentProjectTaskStatusLabel(value) {
       return ({ planned: "待执行", in_progress: "执行中", completed: "已完成", failed: "失败", cancelled: "已取消" })[value] || value || "未知";
+    }
+
+    function agentProjectRunStatusLabel(value) {
+      return ({ running: "运行中", succeeded: "成功", failed: "失败" })[value] || value || "未知";
     }
 
     function loadAdminJobsJson() {

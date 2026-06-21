@@ -68,6 +68,20 @@ Authorization: Bearer <本地管理口令>
 
 如果本地没有 `data/github_weekly.sqlite`，查询项目接口会从 `data/` 下的 JSON 归档自动重建 SQLite 派生索引。
 
+### 项目 Agent 任务执行
+
+项目任务执行遵循“预检查 -> 事务抢占 -> 只读处理 -> 保存证据与结果 -> 写回 RAG”的流程：
+
+| 接口 | 说明 |
+|---|---|
+| `GET /v1/agent-tasks/{task_id}/execution-check` | 返回机器可读执行条件，不写数据库 |
+| `POST /v1/agent-tasks/{task_id}/execute` | 执行 planned 任务，受管理口令保护 |
+| `POST /v1/agent-tasks/{task_id}/retry` | 重试 failed 任务，受管理口令保护 |
+| `GET /v1/agent-tasks/{task_id}/runs` | 查询单任务执行历史 |
+| `GET /v1/agent-task-runs` | 查询最近执行记录，供管理页汇总 |
+
+处理器支持 `observe`、`review_risk`、`deep_analysis`、`continue_tracking`、`notify` 和 `ignore`。结果统一包含 `execution_summary`、`decision`、`confidence`、`evidence`、`citations`、`changes`、`risk_changes`、`recommended_actions` 和 `subscription_candidate`。`notify` 只创建订阅候选，不直接调用推送通道。
+
 ## 三、接口
 
 ### `GET /api/health`

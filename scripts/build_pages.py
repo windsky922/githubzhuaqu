@@ -1475,27 +1475,33 @@ def _admin_dashboard_content() -> str:
         projectAgentTaskWorkbench.innerHTML = "<p>启动本地后端或添加 api=1 后查看项目 Agent 任务。</p>";
         return;
       }
-      fetch("/v1/agent-tasks?limit=100", { cache: "no-store" })
-        .then(jsonOrThrow)
-        .then(data => renderProjectAgentTasks(data))
+      Promise.all([
+        fetch("/v1/agent-tasks?limit=100", { cache: "no-store" }).then(jsonOrThrow),
+        fetch("/v1/agent-task-runs?limit=30", { cache: "no-store" }).then(jsonOrThrow),
+      ])
+        .then(([tasks, runs]) => renderProjectAgentTasks(tasks, runs))
         .catch(error => {
           projectAgentTaskWorkbench.innerHTML = `<p>项目 Agent 任务读取失败：${escapeHtml(error.message || error)}</p>`;
         });
     }
 
-    function renderProjectAgentTasks(data) {
+    function renderProjectAgentTasks(data, runData) {
       const summary = data.summary || {};
       const tasks = Array.isArray(data.tasks) ? data.tasks : [];
+      const runs = runData && Array.isArray(runData.runs) ? runData.runs : [];
+      const runSummary = runData && runData.summary ? runData.summary : {};
       projectAgentTaskSummary.innerHTML = [
         metric("任务总数", number(summary.total_count)),
-        metric("活跃任务", number(summary.active_count)),
-        metric("覆盖项目", number(summary.repository_count)),
+        metric("待处理", number((summary.status_counts || {}).planned)),
+        metric("执行成功", number(runSummary.succeeded)),
+        metric("执行失败", number(runSummary.failed)),
+        metric("运行中", number(runSummary.running)),
       ].join("");
-      if (!tasks.length) {
+      if (!tasks.length && !runs.length) {
         projectAgentTaskWorkbench.innerHTML = "<p>暂无项目 Agent 任务。</p>";
         return;
       }
-      projectAgentTaskWorkbench.innerHTML = tasks.slice(0, 20).map(task => `
+      const taskRows = tasks.slice(0, 15).map(task => `
         <div class="workbench-item">
           <strong><a href="project.html?repo=${encodeURIComponent(task.full_name || "")}&api=1">${escapeHtml(task.full_name || "未知项目")}</a></strong>
           <span>${escapeHtml(agentProjectTaskTypeLabel(task.task_type))} / ${escapeHtml(agentProjectTaskStatusLabel(task.status))} / 优先级 ${number(task.priority)}</span>
@@ -1503,6 +1509,14 @@ def _admin_dashboard_content() -> str:
           ${task.result_summary ? `<p>执行结果：${escapeHtml(task.result_summary)}</p>` : ""}
         </div>
       `).join("");
+      const runRows = runs.slice(0, 10).map(run => `
+        <div class="workbench-item">
+          <strong><a href="project.html?repo=${encodeURIComponent(run.full_name || "")}&api=1">${escapeHtml(run.full_name || "未知项目")}</a></strong>
+          <span>${escapeHtml(agentProjectTaskTypeLabel(run.task_type))} / ${escapeHtml(agentProjectRunStatusLabel(run.status))} / ${escapeHtml(run.started_at || "")}</span>
+          <p>${escapeHtml((run.result || {}).execution_summary || run.error || "暂无执行摘要。")}</p>
+        </div>
+      `).join("");
+      projectAgentTaskWorkbench.innerHTML = `${taskRows}${runRows ? `<h3>最近执行记录</h3>${runRows}` : ""}`;
     }
 
     function agentProjectTaskTypeLabel(value) {
@@ -1511,6 +1525,10 @@ def _admin_dashboard_content() -> str:
 
     function agentProjectTaskStatusLabel(value) {
       return ({ planned: "待执行", in_progress: "执行中", completed: "已完成", failed: "失败", cancelled: "已取消" })[value] || value || "未知";
+    }
+
+    function agentProjectRunStatusLabel(value) {
+      return ({ running: "运行中", succeeded: "成功", failed: "失败" })[value] || value || "未知";
     }
 
     function loadAdminJobsJson() {
@@ -5083,7 +5101,7 @@ def _project_detail_content() -> str:
         </section>
         <section class="section" style="margin-top:12px">
           <h2>Agent 下一步动作</h2>
-          ${agentTasksHtml(detail.agent_tasks, detail.next_actions)}
+          ${agentTasksHtml(detail.agent_tasks, detail.next_actions, detail.agent_task_runs)}
           <div id="projectAgentTaskStatus" class="feedback-status" aria-live="polite">${shouldUseApi() ? "" : "任务操作需要本地后端或 api=1。"}</div>
         </section>
         <section class="grid">
@@ -5201,6 +5219,7 @@ def _project_detail_content() -> str:
           feedback_memory: {},
           project_profile: {},
           agent_tasks: { count: 0, tasks: [], summary: {} },
+          agent_task_runs: { count: 0, runs: [], summary: {} },
           next_actions: [],
         }));
     }
@@ -5230,27 +5249,36 @@ def _project_detail_content() -> str:
       return `<p>反馈 ${number(count)} 条，平均评分 ${number(summary.average_rating)}，最近评分 ${signedNumber(summary.latest_rating)}${labels ? ` / ${escapeHtml(labels)}` : ""}${escapeHtml(latestNote)}</p>`;
     }
 
-    function agentTasksHtml(memory, nextActions) {
+    function agentTasksHtml(memory, nextActions, runMemory) {
       const tasks = memory && Array.isArray(memory.tasks) ? memory.tasks : [];
       const suggestions = Array.isArray(nextActions) ? nextActions.filter(item => item && item.status === "suggested") : [];
       const taskRows = tasks.map(task => {
         const actions = [];
-        if (task.status === "planned") actions.push(`<button type="button" data-agent-task-update="in_progress" data-agent-task-id="${escapeAttribute(task.task_id || "")}"${shouldUseApi() ? "" : " disabled"}>开始</button>`);
-        if (task.status === "in_progress") actions.push(`<input type="text" data-agent-task-result="${escapeAttribute(task.task_id || "")}" maxlength="2000" placeholder="执行结果摘要"><button type="button" data-agent-task-update="completed" data-agent-task-id="${escapeAttribute(task.task_id || "")}"${shouldUseApi() ? "" : " disabled"}>完成</button>`);
-        if (task.status === "failed" || task.status === "cancelled") actions.push(`<button type="button" data-agent-task-update="planned" data-agent-task-id="${escapeAttribute(task.task_id || "")}"${shouldUseApi() ? "" : " disabled"}>重新计划</button>`);
+        if (task.status === "planned" || task.status === "failed") actions.push(`<button type="button" data-agent-task-check data-agent-task-id="${escapeAttribute(task.task_id || "")}"${shouldUseApi() ? "" : " disabled"}>执行检查</button>`);
+        if (task.status === "planned") actions.push(`<button type="button" data-agent-task-execute="execute" data-agent-task-id="${escapeAttribute(task.task_id || "")}"${shouldUseApi() ? "" : " disabled"}>执行</button>`);
+        if (task.status === "failed") actions.push(`<button type="button" data-agent-task-execute="retry" data-agent-task-id="${escapeAttribute(task.task_id || "")}"${shouldUseApi() ? "" : " disabled"}>重试</button>`);
+        actions.push(`<button type="button" data-agent-task-runs data-agent-task-id="${escapeAttribute(task.task_id || "")}"${shouldUseApi() ? "" : " disabled"}>历史</button>`);
         return `<div class="workbench-item"><strong>${escapeHtml(agentTaskTypeLabel(task.task_type))}</strong><span>优先级 ${number(task.priority)} / ${escapeHtml(agentTaskStatusLabel(task.status))}</span><p>${escapeHtml(task.reason || "暂无任务原因。")}</p>${task.result_summary ? `<p>结果：${escapeHtml(task.result_summary)}</p>` : ""}<div class="actions">${actions.join("")}</div></div>`;
       });
       const suggestionRows = suggestions.map((action, index) => `<div class="workbench-item"><strong>${escapeHtml(agentTaskTypeLabel(action.task_type))}</strong><span>建议优先级 ${number(action.priority)}</span><p>${escapeHtml(action.reason || "")}</p><button type="button" data-agent-task-create="${index}"${shouldUseApi() ? "" : " disabled"}>创建任务</button></div>`);
       const rows = [...taskRows, ...suggestionRows];
-      return rows.length ? `<div class="workbench-list">${rows.join("")}</div>` : "<p>暂无 Agent 任务。</p>";
+      const runs = runMemory && Array.isArray(runMemory.runs) ? runMemory.runs : [];
+      const runRows = runs.slice(0, 10).map(run => `<div class="workbench-item"><strong>${escapeHtml(agentTaskTypeLabel(run.task_type))}</strong><span>${escapeHtml(agentRunStatusLabel(run.status))} / ${escapeHtml(run.started_at || "")}</span><p>${escapeHtml((run.result || {}).execution_summary || run.error || "暂无执行摘要。")}</p></div>`);
+      return `${rows.length ? `<div class="workbench-list">${rows.join("")}</div>` : "<p>暂无 Agent 任务。</p>"}${runRows.length ? `<h3>最近执行</h3><div class="workbench-list">${runRows.join("")}</div>` : ""}`;
     }
 
     function bindProjectAgentTasks(detail) {
       document.querySelectorAll("[data-agent-task-create]").forEach(button => {
         button.addEventListener("click", () => createProjectAgentTask(button, detail));
       });
-      document.querySelectorAll("[data-agent-task-update]").forEach(button => {
-        button.addEventListener("click", () => updateProjectAgentTask(button));
+      document.querySelectorAll("[data-agent-task-check]").forEach(button => {
+        button.addEventListener("click", () => inspectProjectAgentTask(button, "execution-check"));
+      });
+      document.querySelectorAll("[data-agent-task-execute]").forEach(button => {
+        button.addEventListener("click", () => executeProjectAgentTask(button));
+      });
+      document.querySelectorAll("[data-agent-task-runs]").forEach(button => {
+        button.addEventListener("click", () => inspectProjectAgentTask(button, "runs"));
       });
     }
 
@@ -5280,25 +5308,46 @@ def _project_detail_content() -> str:
       }
     }
 
-    async function updateProjectAgentTask(button) {
+    async function inspectProjectAgentTask(button, endpoint) {
       if (!shouldUseApi()) return;
       const status = document.getElementById("projectAgentTaskStatus");
       try {
-        status.textContent = "更新任务中...";
         const taskId = button.dataset.agentTaskId || "";
-        const resultInput = document.querySelector(`[data-agent-task-result="${taskId}"]`);
-        const payload = { status: button.dataset.agentTaskUpdate || "planned" };
-        if (payload.status === "completed" && resultInput) payload.result_summary = resultInput.value.trim();
-        const response = await fetch(`/v1/agent-tasks/${encodeURIComponent(taskId)}`, {
-          method: "PATCH",
+        status.textContent = endpoint === "runs" ? "读取执行历史中..." : "执行检查中...";
+        const response = await fetch(`/v1/agent-tasks/${encodeURIComponent(taskId)}/${endpoint}`, { cache: "no-store" });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        if (endpoint === "runs") {
+          const latest = (data.runs || [])[0] || {};
+          status.textContent = `执行记录 ${number(data.count)} 条；最近状态 ${agentRunStatusLabel(latest.status)}；${(latest.result || {}).execution_summary || latest.error || "暂无摘要"}`;
+        } else {
+          const failed = (data.checks || []).filter(item => !item.passed).map(item => item.message).join("；");
+          status.textContent = data.executable ? "检查通过，可以执行。" : `检查未通过：${failed || "状态不允许执行"}`;
+        }
+      } catch (error) {
+        status.textContent = `任务信息读取失败：${error.message}`;
+      }
+    }
+
+    async function executeProjectAgentTask(button) {
+      if (!shouldUseApi()) return;
+      const status = document.getElementById("projectAgentTaskStatus");
+      try {
+        const taskId = button.dataset.agentTaskId || "";
+        const endpoint = button.dataset.agentTaskExecute || "execute";
+        status.textContent = endpoint === "retry" ? "任务重试中..." : "任务执行中...";
+        const response = await fetch(`/v1/agent-tasks/${encodeURIComponent(taskId)}/${endpoint}`, {
+          method: "POST",
           headers: adminWriteHeaders(),
-          body: JSON.stringify(payload)
+          body: JSON.stringify({ dry_run: false })
         });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        status.textContent = "任务状态已更新，正在刷新。";
+        const data = await response.json();
+        if (!data.executed) throw new Error((data.checks || []).filter(item => !item.passed).map(item => item.message).join("；") || "任务不可执行");
+        status.textContent = data.status === "succeeded" ? "任务执行完成，正在刷新。" : `任务执行失败：${data.error || "未知错误"}`;
         window.location.reload();
       } catch (error) {
-        status.textContent = `任务更新失败：${error.message}`;
+        status.textContent = `任务执行失败：${error.message}`;
       }
     }
 
@@ -5308,6 +5357,10 @@ def _project_detail_content() -> str:
 
     function agentTaskStatusLabel(value) {
       return ({ planned: "待执行", in_progress: "执行中", completed: "已完成", failed: "失败", cancelled: "已取消", suggested: "建议" })[value] || value || "未知";
+    }
+
+    function agentRunStatusLabel(value) {
+      return ({ running: "运行中", succeeded: "成功", failed: "失败" })[value] || value || "未知";
     }
 
     function bindProjectFeedback(detail) {

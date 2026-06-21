@@ -565,6 +565,37 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
     ) -> dict[str, Any]:
         return repository.project_agent_tasks(full_name=full_name, profile=profile, status=status, limit=limit)
 
+    @app.get("/v1/agent-task-runs")
+    def v1_project_agent_task_run_list(limit: int = Query(default=50, ge=1, le=500)) -> dict[str, Any]:
+        return repository.project_agent_task_runs(limit=limit)
+
+    @app.get("/v1/agent-tasks/{task_id:path}/execution-check")
+    def v1_project_agent_task_execution_check(task_id: str) -> dict[str, Any]:
+        return repository.project_agent_task_execution_check(task_id)
+
+    @app.post("/v1/agent-tasks/{task_id:path}/execute", dependencies=admin_write_dependencies)
+    def v1_execute_project_agent_task(
+        task_id: str,
+        payload: dict[str, Any] | None = Body(default=None),
+    ) -> dict[str, Any]:
+        data = payload or {}
+        return repository.execute_project_agent_task(task_id, dry_run=bool(data.get("dry_run", False)))
+
+    @app.post("/v1/agent-tasks/{task_id:path}/retry", dependencies=admin_write_dependencies)
+    def v1_retry_project_agent_task(
+        task_id: str,
+        payload: dict[str, Any] | None = Body(default=None),
+    ) -> dict[str, Any]:
+        data = payload or {}
+        return repository.execute_project_agent_task(task_id, retry=True, dry_run=bool(data.get("dry_run", False)))
+
+    @app.get("/v1/agent-tasks/{task_id:path}/runs")
+    def v1_project_agent_task_runs(
+        task_id: str,
+        limit: int = Query(default=50, ge=1, le=500),
+    ) -> dict[str, Any]:
+        return repository.project_agent_task_runs(task_id=task_id, limit=limit)
+
     @app.patch("/v1/agent-tasks/{task_id:path}", dependencies=admin_write_dependencies)
     def v1_update_project_agent_task(
         task_id: str,

@@ -31,6 +31,10 @@ on:
         description: "是否在生成 Pages 前轻量刷新开发上下文索引"
         required: false
         default: "true"
+      run_agent_tasks:
+        description: "是否执行优先级 1/2 的项目 Agent 只读任务"
+        required: false
+        default: "false"
   schedule:
     - cron: "0 0 * * 1"
 
@@ -161,6 +165,21 @@ jobs:
             --requested-by "github_actions" \
             --output .dev-context-job.json
           python scripts/run_planned_job.py --job-file .dev-context-job.json
+
+      - name: 执行项目 Agent 只读任务
+        continue-on-error: true
+        env:
+          WORKFLOW_RUN_AGENT_TASKS: ${{ inputs.run_agent_tasks || 'false' }}
+          AGENT_TASK_LIMIT: ${{ vars.AGENT_TASK_LIMIT || '3' }}
+          AGENT_TASK_PRIORITY: ${{ vars.AGENT_TASK_PRIORITY || '2' }}
+        run: |
+          if [ "$WORKFLOW_RUN_AGENT_TASKS" != "true" ]; then
+            echo "已跳过项目 Agent 任务执行。"
+            exit 0
+          fi
+          python scripts/run_project_agent_tasks.py \
+            --limit "$AGENT_TASK_LIMIT" \
+            --priority "$AGENT_TASK_PRIORITY"
 
       - name: 生成周报归档页面
         run: python scripts/build_pages.py

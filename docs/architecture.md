@@ -2,6 +2,20 @@
 
 本文档记录第一阶段最小可用版本的实际实现架构。
 
+## 项目级 Agent 执行层
+
+```text
+project_agent_tasks
+-> execution-check
+-> src/agent/task_executor.py
+-> 只读项目语料与历史快照
+-> project_agent_task_runs（证据、引用、结果、错误）
+-> project_corpus / rag_chunks 执行记忆
+-> 推荐下一步动作
+```
+
+执行器不修改 GitHub 仓库、不调用外部推送，也不读取推送密钥。任务抢占和运行记录创建在同一 SQLite 事务中完成，同一任务不能并发执行；completed 默认不可重复，failed 必须通过显式重试入口执行。GitHub Actions 仅在 `run_agent_tasks=true` 时限量运行，并设置 `continue-on-error`，不会阻塞周报归档与 Telegram 链接推送。
+
 ## 运行流程
 
 ```text

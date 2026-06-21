@@ -50,6 +50,7 @@ def import_json_archive(root: Path, db_path: Path) -> dict[str, int]:
             "project_corpus": corpus_count,
             "project_corpus_fts": corpus_count,
             "project_agent_tasks": table_count(connection, "project_agent_tasks"),
+            "project_agent_task_runs": table_count(connection, "project_agent_task_runs"),
             "rag_chunks": table_count(connection, "rag_chunks"),
             "rag_chunks_fts": table_count(connection, "rag_chunks_fts"),
             "rag_embeddings": table_count(connection, "rag_embeddings"),
@@ -385,6 +386,30 @@ def upsert_project_corpus(connection: sqlite3.Connection, row: sqlite3.Row) -> N
             (full_name,),
         ).fetchall()
     ]
+    agent_task_runs = [
+        {
+            "run_id": run["run_id"],
+            "task_id": run["task_id"],
+            "task_type": run["task_type"],
+            "status": run["status"],
+            "started_at": run["started_at"],
+            "finished_at": run["finished_at"],
+            "result": _json_object(run["result_json"]),
+            "error": run["error"],
+        }
+        for run in connection.execute(
+            """
+            SELECT r.run_id, r.task_id, r.status, r.started_at, r.finished_at,
+                   r.result_json, r.error, t.task_type
+            FROM project_agent_task_runs r
+            JOIN project_agent_tasks t ON t.task_id = r.task_id
+            WHERE LOWER(t.full_name) = LOWER(?)
+            ORDER BY r.started_at DESC, r.run_id DESC
+            LIMIT 20
+            """,
+            (full_name,),
+        ).fetchall()
+    ]
     text_parts = [
         full_name,
         title,
@@ -399,6 +424,7 @@ def upsert_project_corpus(connection: sqlite3.Connection, row: sqlite3.Row) -> N
         " ".join(str(item) for item in _list_value(selection_payload.get("topics")) if item),
         _project_profile_text(project_profile),
         _project_agent_task_memory_text(agent_tasks),
+        _project_agent_run_memory_text(agent_task_runs),
     ]
     payload = {
         "run_date": run_date,
@@ -413,6 +439,7 @@ def upsert_project_corpus(connection: sqlite3.Connection, row: sqlite3.Row) -> N
         "star_growth": _int_value(selection_payload.get("star_growth")),
         "project_profile": project_profile,
         "agent_tasks": agent_tasks,
+        "agent_task_runs": agent_task_runs,
     }
     corpus_id = sha1(f"{run_date}:{full_name}".encode("utf-8")).hexdigest()
     search_text = _clean_text(" ".join(text_parts))
@@ -696,6 +723,43 @@ def upsert_project_agent_task(connection: sqlite3.Connection, data: dict[str, An
     )
 
 
+def upsert_project_agent_task_run(connection: sqlite3.Connection, data: dict[str, Any]) -> None:
+    payload = data.get("payload") if isinstance(data.get("payload"), dict) else data.get("payload_json")
+    connection.execute(
+        """
+        INSERT INTO project_agent_task_runs(
+          run_id, task_id, status, started_at, finished_at, input_json,
+          evidence_json, citations_json, result_json, error, payload_json
+        )
+        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(run_id) DO UPDATE SET
+          task_id = excluded.task_id,
+          status = excluded.status,
+          started_at = excluded.started_at,
+          finished_at = excluded.finished_at,
+          input_json = excluded.input_json,
+          evidence_json = excluded.evidence_json,
+          citations_json = excluded.citations_json,
+          result_json = excluded.result_json,
+          error = excluded.error,
+          payload_json = excluded.payload_json
+        """,
+        (
+            str(data.get("run_id") or ""),
+            str(data.get("task_id") or ""),
+            str(data.get("status") or "running"),
+            str(data.get("started_at") or ""),
+            str(data.get("finished_at") or ""),
+            _json_text(data.get("input") if isinstance(data.get("input"), dict) else data.get("input_json")),
+            _json_text(data.get("evidence") if isinstance(data.get("evidence"), list) else data.get("evidence_json")),
+            _json_text(data.get("citations") if isinstance(data.get("citations"), list) else data.get("citations_json")),
+            _json_text(data.get("result") if isinstance(data.get("result"), dict) else data.get("result_json")),
+            str(data.get("error") or ""),
+            _json_text(payload),
+        ),
+    )
+
+
 def sync_project_agent_tasks(connection: sqlite3.Connection, limit: int = 20) -> int:
     rows = connection.execute(
         """
@@ -792,6 +856,20 @@ def _project_agent_task_memory_text(tasks: list[dict[str, Any]]) -> str:
     return "\n".join(lines)
 
 
+def _project_agent_run_memory_text(runs: list[dict[str, Any]]) -> str:
+    if not runs:
+        return ""
+    lines = ["Agent 执行记忆"]
+    for run in runs:
+        result = run.get("result") if isinstance(run.get("result"), dict) else {}
+        line = (
+            f"{run.get('task_type') or 'observe'} | 状态 {run.get('status') or 'unknown'} | "
+            f"决策 {result.get('decision') or '未形成'} | 摘要 {result.get('execution_summary') or run.get('error') or '未记录'}"
+        )
+        lines.append(line)
+    return "\n".join(lines)
+
+
 def table_count(connection: sqlite3.Connection, table_name: str) -> int:
     if table_name not in {
         "runs",
@@ -805,6 +883,7 @@ def table_count(connection: sqlite3.Connection, table_name: str) -> int:
         "rag_explanations",
         "project_feedback",
         "project_agent_tasks",
+        "project_agent_task_runs",
         "dev_corpus",
         "dev_chunks",
         "dev_chunks_fts",

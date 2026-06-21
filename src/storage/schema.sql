@@ -184,6 +184,23 @@ CREATE INDEX IF NOT EXISTS idx_project_agent_tasks_full_name_updated_at ON proje
 CREATE INDEX IF NOT EXISTS idx_project_agent_tasks_status_priority ON project_agent_tasks(status, priority, updated_at);
 CREATE INDEX IF NOT EXISTS idx_project_agent_tasks_profile_updated_at ON project_agent_tasks(profile, updated_at);
 
+CREATE TABLE IF NOT EXISTS project_agent_task_runs (
+  run_id TEXT PRIMARY KEY,
+  task_id TEXT NOT NULL DEFAULT '',
+  status TEXT NOT NULL DEFAULT 'running',
+  started_at TEXT NOT NULL DEFAULT '',
+  finished_at TEXT NOT NULL DEFAULT '',
+  input_json TEXT NOT NULL DEFAULT '{}',
+  evidence_json TEXT NOT NULL DEFAULT '[]',
+  citations_json TEXT NOT NULL DEFAULT '[]',
+  result_json TEXT NOT NULL DEFAULT '{}',
+  error TEXT NOT NULL DEFAULT '',
+  payload_json TEXT NOT NULL DEFAULT '{}'
+);
+
+CREATE INDEX IF NOT EXISTS idx_project_agent_task_runs_task_started_at ON project_agent_task_runs(task_id, started_at);
+CREATE INDEX IF NOT EXISTS idx_project_agent_task_runs_status_started_at ON project_agent_task_runs(status, started_at);
+
 CREATE TABLE IF NOT EXISTS dev_runs (
   run_id TEXT PRIMARY KEY,
   status TEXT NOT NULL DEFAULT '',

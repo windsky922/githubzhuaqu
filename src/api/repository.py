@@ -85,6 +85,7 @@ class ApiRepository:
                 "project_detail": True,
                 "recommendations": True,
                 "project_agent_tasks": True,
+                "project_agent_task_execution": True,
                 "subscriptions": True,
                 "subscription_recommendations": True,
                 "subscription_trigger": True,
@@ -2202,6 +2203,7 @@ class ApiRepository:
                 "query": "",
                 "project_profile": {},
                 "agent_tasks": {"count": 0, "tasks": [], "summary": _project_agent_task_summary([])},
+                "agent_task_runs": {"count": 0, "runs": [], "summary": {"running": 0, "succeeded": 0, "failed": 0}},
                 "next_actions": [],
                 "retrieval": {},
                 "contexts": [],
@@ -2240,6 +2242,7 @@ class ApiRepository:
         feedback = self.project_feedback(full_name=detail.get("full_name") or normalized, limit=20)
         feedback_summary = feedback.get("summary") if isinstance(feedback.get("summary"), dict) else {}
         agent_tasks = self.project_agent_tasks(full_name=detail.get("full_name") or normalized, limit=50)
+        agent_task_runs = self.project_agent_task_runs(full_name=detail.get("full_name") or normalized, limit=50)
         project_profile = self._project_profile_for_full_name(detail.get("full_name") or normalized) or _project_profile_from_detail(detail)
         project_profile = _merge_project_profile_runtime_signals(project_profile, feedback_summary, explanation_items)
         next_actions = _project_next_actions(
@@ -2267,6 +2270,7 @@ class ApiRepository:
             },
             "project_profile": project_profile,
             "agent_tasks": agent_tasks,
+            "agent_task_runs": agent_task_runs,
             "next_actions": next_actions,
             "retrieval": retrieval.get("retrieval") if isinstance(retrieval.get("retrieval"), dict) else {},
             "contexts": retrieval.get("contexts") if isinstance(retrieval.get("contexts"), list) else [],
@@ -2603,6 +2607,8 @@ class ApiRepository:
                 "rag_embeddings",
                 "rag_explanations",
                 "project_feedback",
+                "project_agent_tasks",
+                "project_agent_task_runs",
                 "dev_corpus",
                 "dev_chunks",
                 "dev_chunks_fts",
@@ -3494,7 +3500,10 @@ class ApiRepository:
         sql = """
             SELECT task_id, full_name, profile, task_type, priority, status, reason,
                    result_summary, source, dedupe_key, created_at, updated_at,
-                   started_at, finished_at, payload_json
+                   started_at, finished_at, payload_json,
+                   (SELECT result_json FROM project_agent_task_runs r
+                    WHERE r.task_id = project_agent_tasks.task_id AND r.status = 'succeeded'
+                    ORDER BY r.started_at DESC, r.run_id DESC LIMIT 1) AS latest_result_json
             FROM project_agent_tasks
         """
         if conditions:
@@ -3558,6 +3567,42 @@ class ApiRepository:
         updated["payload"] = {**current_payload, **incoming_payload}
         self._upsert_project_agent_task(updated)
         return {"schema_version": 1, "found": True, "updated": True, "task": updated}
+
+    def project_agent_task_execution_check(self, task_id: str, *, retry: bool = False) -> dict[str, Any]:
+        self.ensure_sqlite_index()
+        from src.agent.task_executor import project_agent_task_execution_check
+
+        return project_agent_task_execution_check(self.db_path, task_id, retry=retry)
+
+    def execute_project_agent_task(
+        self,
+        task_id: str,
+        *,
+        retry: bool = False,
+        dry_run: bool = False,
+    ) -> dict[str, Any]:
+        self.ensure_sqlite_index()
+        from src.agent.task_executor import execute_project_agent_task
+
+        return execute_project_agent_task(self.root, self.db_path, task_id, retry=retry, dry_run=dry_run)
+
+    def project_agent_task_runs(
+        self,
+        task_id: str | None = None,
+        *,
+        full_name: str | None = None,
+        limit: int = 50,
+    ) -> dict[str, Any]:
+        self.ensure_sqlite_index()
+        from src.agent.task_executor import project_agent_task_runs
+
+        normalized = _normalize_full_name(str(full_name)) if _blank_to_none(full_name) else None
+        return project_agent_task_runs(
+            self.db_path,
+            task_id=task_id,
+            full_name=normalized,
+            limit=limit,
+        )
 
     def create_project_feedback(self, payload: dict[str, Any] | None = None) -> dict[str, Any]:
         self.ensure_sqlite_index()
@@ -3659,6 +3704,7 @@ class ApiRepository:
             or not self._sqlite_table_exists("dev_chunks_fts")
             or not self._sqlite_table_exists("dev_embeddings")
             or not self._sqlite_table_exists("dev_runs")
+            or not self._sqlite_table_exists("project_agent_task_runs")
         ):
             connection = connect(self.db_path)
             try:
@@ -6162,7 +6208,7 @@ def _project_agent_task_id(data: dict[str, Any]) -> str:
 
 
 def _project_agent_task_from_row(row: Any) -> dict[str, Any]:
-    return {
+    task = {
         "task_id": row["task_id"],
         "full_name": row["full_name"],
         "profile": row["profile"],
@@ -6179,6 +6225,9 @@ def _project_agent_task_from_row(row: Any) -> dict[str, Any]:
         "finished_at": row["finished_at"],
         "payload": _json_object(row["payload_json"]),
     }
+    if "latest_result_json" in row.keys():
+        task["latest_execution"] = _json_object(row["latest_result_json"])
+    return task
 
 
 def _project_agent_task_summary(tasks: list[dict[str, Any]]) -> dict[str, Any]:
@@ -6258,9 +6307,25 @@ def _project_next_actions(project: dict[str, Any], tasks: list[dict[str, Any]] |
             "source": "recommendation_agent",
             "subscription_action": "watch",
         }
-    actions = [action]
+    completed_types = {
+        str(task.get("task_type") or "")
+        for task in tasks or []
+        if task.get("status") == "completed"
+        and isinstance(task.get("latest_execution"), dict)
+        and task["latest_execution"].get("decision")
+    }
+    completed_decisions = {
+        str(task["latest_execution"].get("decision") or "")
+        for task in tasks or []
+        if task.get("status") == "completed" and isinstance(task.get("latest_execution"), dict)
+    }
+    if "ignore" in completed_decisions:
+        return []
+    actions = [] if action["task_type"] in completed_types else [action]
     if _int_value(project.get("recommendation_score")) >= 70 and action["task_type"] != "review_risk":
-        actions.append(
+        notify_completed = "notify" in completed_types or "subscription_candidate" in completed_decisions
+        if not notify_completed:
+            actions.append(
             {
                 "task_id": "",
                 "task_type": "notify",
@@ -6270,7 +6335,7 @@ def _project_next_actions(project: dict[str, Any], tasks: list[dict[str, Any]] |
                 "source": "recommendation_agent",
                 "subscription_action": "notify",
             }
-        )
+            )
     return actions
 
 
