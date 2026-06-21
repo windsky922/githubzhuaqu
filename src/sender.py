@@ -22,6 +22,7 @@ class DeliveryMessage:
     subscription_recommendation_urls: list[tuple[str, str]]
     text: str
     html_text: str
+    markdown_text: str = ""
 
 
 @dataclass(frozen=True)
@@ -52,8 +53,21 @@ def build_report_message(settings: Settings) -> str:
 
 def send_report_to_channels(report: str, settings: Settings) -> list[DeliveryResult]:
     message = build_delivery_message(settings)
+    return send_delivery_message(message, settings, configured_delivery_channels())
+
+
+def send_delivery_message(
+    message: DeliveryMessage | None,
+    settings: Settings,
+    channels: list[str],
+) -> list[DeliveryResult]:
     results = []
-    for channel in configured_delivery_channels():
+    normalized_channels = []
+    for value in channels:
+        channel = _normalize_channel(str(value))
+        if channel and channel not in normalized_channels:
+            normalized_channels.append(channel)
+    for channel in normalized_channels:
         if channel == "telegram":
             results.append(_send_telegram(message, settings))
         elif channel == "feishu":
@@ -276,6 +290,8 @@ def _normalize_channel(value: str) -> str:
 
 
 def _delivery_markdown(message: DeliveryMessage) -> str:
+    if message.markdown_text:
+        return message.markdown_text
     lines = [
         f"周报正文：[打开周报正文]({message.url})",
         f"项目筛选：[打开项目筛选]({message.explorer_url})",

@@ -1,15 +1,19 @@
 from __future__ import annotations
 
+import html
 import json
 from datetime import UTC, datetime
 from hashlib import sha1
 from pathlib import Path
 from typing import Any
 
+from src.sender import DeliveryMessage, DeliveryResult, send_delivery_message
+from src.settings import Settings
 from src.storage.sqlite_store import (
     connect,
     initialize,
     upsert_notification_candidate,
+    upsert_notification_delivery,
     upsert_subscription_event,
 )
 
@@ -123,6 +127,251 @@ def build_notification_candidates(
             "created_count": len(new_candidates),
             "persisted_count": 0 if dry_run else len(new_candidates),
             "candidates": new_candidates,
+        }
+    finally:
+        connection.close()
+
+
+def subscription_events(
+    db_path: Path,
+    *,
+    full_name: str = "",
+    event_type: str = "",
+    severity: str = "",
+    status: str = "",
+    limit: int = 100,
+) -> dict[str, Any]:
+    connection = connect(db_path)
+    try:
+        initialize(connection)
+        conditions: list[str] = []
+        parameters: list[Any] = []
+        for column, value in (("event_type", event_type), ("severity", severity), ("status", status)):
+            if value:
+                conditions.append(f"{column} = ?")
+                parameters.append(value)
+        if full_name:
+            conditions.append("LOWER(full_name) = LOWER(?)")
+            parameters.append(full_name)
+        sql = "SELECT * FROM subscription_events"
+        if conditions:
+            sql += " WHERE " + " AND ".join(conditions)
+        sql += " ORDER BY detected_at DESC, event_id DESC LIMIT ?"
+        parameters.append(max(1, min(limit, 500)))
+        events = [_subscription_event_from_row(row) for row in connection.execute(sql, parameters).fetchall()]
+        return {"schema_version": 1, "count": len(events), "events": events}
+    finally:
+        connection.close()
+
+
+def notification_candidates(
+    db_path: Path,
+    *,
+    status: str = "",
+    subscription_id: str = "",
+    full_name: str = "",
+    limit: int = 100,
+) -> dict[str, Any]:
+    connection = connect(db_path)
+    try:
+        initialize(connection)
+        conditions: list[str] = []
+        parameters: list[Any] = []
+        for column, value in (("status", status), ("subscription_id", subscription_id)):
+            if value:
+                conditions.append(f"{column} = ?")
+                parameters.append(value)
+        if full_name:
+            conditions.append("LOWER(full_name) = LOWER(?)")
+            parameters.append(full_name)
+        sql = "SELECT * FROM notification_candidates"
+        if conditions:
+            sql += " WHERE " + " AND ".join(conditions)
+        sql += " ORDER BY created_at DESC, candidate_id DESC LIMIT ?"
+        parameters.append(max(1, min(limit, 500)))
+        candidates = [_notification_candidate_from_row(row) for row in connection.execute(sql, parameters).fetchall()]
+        return {"schema_version": 1, "count": len(candidates), "candidates": candidates}
+    finally:
+        connection.close()
+
+
+def notification_deliveries(
+    db_path: Path,
+    *,
+    candidate_id: str = "",
+    status: str = "",
+    channel: str = "",
+    limit: int = 100,
+) -> dict[str, Any]:
+    connection = connect(db_path)
+    try:
+        initialize(connection)
+        conditions: list[str] = []
+        parameters: list[Any] = []
+        for column, value in (("candidate_id", candidate_id), ("status", status), ("channel", _normalize_channel(channel))):
+            if value:
+                conditions.append(f"{column} = ?")
+                parameters.append(value)
+        sql = "SELECT * FROM notification_deliveries"
+        if conditions:
+            sql += " WHERE " + " AND ".join(conditions)
+        sql += " ORDER BY finished_at DESC, started_at DESC, delivery_id DESC LIMIT ?"
+        parameters.append(max(1, min(limit, 500)))
+        deliveries = [_notification_delivery_from_row(row) for row in connection.execute(sql, parameters).fetchall()]
+        return {"schema_version": 1, "count": len(deliveries), "deliveries": deliveries}
+    finally:
+        connection.close()
+
+
+def deliver_notification_candidate(
+    db_path: Path,
+    settings: Settings,
+    candidate_id: str,
+    *,
+    dry_run: bool = True,
+    confirm_delivery: bool = False,
+    channels: list[str] | None = None,
+    retry_failed: bool = False,
+    requested_by: str = "api",
+) -> dict[str, Any]:
+    connection = connect(db_path)
+    try:
+        initialize(connection)
+        row = connection.execute(
+            "SELECT * FROM notification_candidates WHERE candidate_id = ?",
+            (candidate_id,),
+        ).fetchone()
+        if not row:
+            return {
+                "schema_version": 1, "found": False, "accepted": False,
+                "candidate_id": candidate_id, "results": [], "error": "推送候选不存在。",
+            }
+        candidate = _notification_candidate_from_row(row)
+        candidate_channels = _normalize_channels(candidate["channels"])
+        selected_channels = _normalize_channels(channels if channels is not None else candidate_channels)
+        selected_channels = [channel for channel in selected_channels if channel in candidate_channels]
+        if not selected_channels:
+            return {
+                "schema_version": 1, "found": True, "accepted": False, "candidate": candidate,
+                "dry_run": dry_run, "confirm_delivery": confirm_delivery, "results": [],
+                "error": "没有可投递的候选渠道。",
+            }
+        existing = {
+            item["channel"]: item
+            for item in notification_deliveries(db_path, candidate_id=candidate_id, limit=100)["deliveries"]
+        }
+        preview_results = [
+            {
+                "channel": channel,
+                "status": "already_succeeded" if existing.get(channel, {}).get("status") == "succeeded" else "would_send",
+                "attempt_count": int(existing.get(channel, {}).get("attempt_count") or 0),
+            }
+            for channel in selected_channels
+        ]
+        if dry_run:
+            return {
+                "schema_version": 1, "found": True, "accepted": True, "executed": False,
+                "dry_run": True, "confirm_delivery": confirm_delivery, "candidate": candidate,
+                "results": preview_results,
+            }
+        if not confirm_delivery:
+            return {
+                "schema_version": 1, "found": True, "accepted": False, "executed": False,
+                "dry_run": False, "confirm_delivery": False, "candidate": candidate,
+                "results": preview_results, "error": "真实发送必须显式设置 confirm_delivery=true。",
+            }
+
+        claimed: list[dict[str, Any]] = []
+        skipped: list[dict[str, Any]] = []
+        now = _utc_now()
+        connection.execute("BEGIN IMMEDIATE")
+        for channel in selected_channels:
+            delivery_row = connection.execute(
+                "SELECT * FROM notification_deliveries WHERE candidate_id = ? AND channel = ?",
+                (candidate_id, channel),
+            ).fetchone()
+            current = _notification_delivery_from_row(delivery_row) if delivery_row else {}
+            current_status = str(current.get("status") or "")
+            if current_status == "succeeded":
+                skipped.append({"channel": channel, "status": "already_succeeded", "sent": False, "skipped": True})
+                continue
+            if current_status == "running":
+                skipped.append({"channel": channel, "status": "already_running", "sent": False, "skipped": True})
+                continue
+            if current_status in {"failed", "skipped"} and not retry_failed:
+                skipped.append({"channel": channel, "status": "retry_required", "sent": False, "skipped": True})
+                continue
+            dedupe_key = f"delivery:{candidate['subscription_id']}:{candidate['event_id']}:{channel}"
+            delivery_id = "delivery:" + sha1(dedupe_key.encode("utf-8")).hexdigest()[:20]
+            attempt_count = int(current.get("attempt_count") or 0) + 1
+            delivery = {
+                "delivery_id": delivery_id,
+                "candidate_id": candidate_id,
+                "subscription_id": candidate["subscription_id"],
+                "event_id": candidate["event_id"],
+                "channel": channel,
+                "status": "running",
+                "attempt_count": attempt_count,
+                "started_at": now,
+                "finished_at": "",
+                "error": "",
+                "response": {},
+                "dedupe_key": dedupe_key,
+                "payload": {
+                    "requested_by": requested_by[:120], "retry_failed": retry_failed,
+                    "confirm_delivery": True, "dry_run": False,
+                },
+            }
+            upsert_notification_delivery(connection, delivery)
+            claimed.append(delivery)
+        connection.commit()
+
+        message = _candidate_delivery_message(candidate)
+        results = list(skipped)
+        for delivery in claimed:
+            channel = delivery["channel"]
+            try:
+                channel_results = send_delivery_message(message, settings, [channel])
+                result = channel_results[0] if channel_results else DeliveryResult(
+                    channel=channel, sent=False, error="发送器未返回渠道结果。"
+                )
+            except Exception as error:
+                result = DeliveryResult(channel=channel, sent=False, error=str(error))
+            status = "succeeded" if result.sent else "skipped" if result.skipped else "failed"
+            finished_at = _utc_now()
+            delivery.update({
+                "status": status,
+                "finished_at": finished_at,
+                "error": str(result.error or "")[:2000],
+                "response": result.to_dict(),
+            })
+            upsert_notification_delivery(connection, delivery)
+            connection.commit()
+            results.append({
+                "channel": channel, "status": status, "sent": result.sent,
+                "skipped": result.skipped, "error": str(result.error or ""),
+                "attempt_count": delivery["attempt_count"], "delivery_id": delivery["delivery_id"],
+            })
+
+        final_rows = connection.execute(
+            "SELECT channel, status FROM notification_deliveries WHERE candidate_id = ?",
+            (candidate_id,),
+        ).fetchall()
+        candidate_status = _candidate_status(candidate_channels, {row["channel"]: row["status"] for row in final_rows})
+        connection.execute(
+            "UPDATE notification_candidates SET status = ?, updated_at = ? WHERE candidate_id = ?",
+            (candidate_status, _utc_now(), candidate_id),
+        )
+        if any(item.get("status") == "succeeded" for item in results):
+            connection.execute(
+                "UPDATE subscription_events SET status = 'notified', updated_at = ? WHERE event_id = ?",
+                (_utc_now(), candidate["event_id"]),
+            )
+        connection.commit()
+        return {
+            "schema_version": 1, "found": True, "accepted": True,
+            "executed": bool(claimed), "dry_run": False, "confirm_delivery": True,
+            "candidate_id": candidate_id, "candidate_status": candidate_status, "results": results,
         }
     finally:
         connection.close()
@@ -360,6 +609,91 @@ def _event_from_row(row: Any) -> dict[str, Any]:
         "evidence": _json_list(row["evidence_json"]), "citations": _json_list(row["citations_json"]),
         "payload": _json_object(row["payload_json"]),
     }
+
+
+def _subscription_event_from_row(row: Any) -> dict[str, Any]:
+    return {
+        "event_id": row["event_id"], "event_type": row["event_type"], "full_name": row["full_name"],
+        "source_run_id": row["source_run_id"], "severity": row["severity"], "status": row["status"],
+        "title": row["title"], "summary": row["summary"],
+        "evidence": _json_list(row["evidence_json"]), "citations": _json_list(row["citations_json"]),
+        "dedupe_key": row["dedupe_key"], "detected_at": row["detected_at"], "updated_at": row["updated_at"],
+        "payload": _json_object(row["payload_json"]),
+    }
+
+
+def _notification_candidate_from_row(row: Any) -> dict[str, Any]:
+    return {
+        "candidate_id": row["candidate_id"], "subscription_id": row["subscription_id"],
+        "event_id": row["event_id"], "full_name": row["full_name"], "status": row["status"],
+        "channels": _normalize_channels(_json_list(row["channels_json"])),
+        "title": row["title"], "message": row["message"], "dedupe_key": row["dedupe_key"],
+        "created_at": row["created_at"], "updated_at": row["updated_at"],
+        "payload": _json_object(row["payload_json"]),
+    }
+
+
+def _notification_delivery_from_row(row: Any) -> dict[str, Any]:
+    return {
+        "delivery_id": row["delivery_id"], "candidate_id": row["candidate_id"],
+        "subscription_id": row["subscription_id"], "event_id": row["event_id"],
+        "channel": row["channel"], "status": row["status"],
+        "attempt_count": _int_value(row["attempt_count"]), "started_at": row["started_at"],
+        "finished_at": row["finished_at"], "error": row["error"],
+        "response": _json_object(row["response_json"]), "dedupe_key": row["dedupe_key"],
+        "payload": _json_object(row["payload_json"]),
+    }
+
+
+def _candidate_delivery_message(candidate: dict[str, Any]) -> DeliveryMessage:
+    payload = candidate.get("payload") if isinstance(candidate.get("payload"), dict) else {}
+    citations = payload.get("citations") if isinstance(payload.get("citations"), list) else []
+    source_url = next(
+        (str(item.get("source_path") or "") for item in citations if isinstance(item, dict) and item.get("source_path")),
+        f"https://github.com/{candidate['full_name']}",
+    )
+    text = str(candidate.get("message") or candidate.get("title") or "项目事件通知")
+    if source_url and source_url not in text:
+        text = f"{text}\n项目：{source_url}"
+    escaped_text = html.escape(text)
+    return DeliveryMessage(
+        title=str(candidate.get("title") or "项目事件通知"),
+        url=source_url,
+        explorer_url="",
+        runs_url="",
+        subscriptions_url="",
+        subscription_recommendation_urls=[],
+        text=text,
+        html_text=escaped_text,
+        markdown_text=text,
+    )
+
+
+def _candidate_status(channels: list[str], status_by_channel: dict[str, str]) -> str:
+    statuses = [status_by_channel.get(channel, "") for channel in channels]
+    if statuses and all(status == "succeeded" for status in statuses):
+        return "delivered"
+    if any(status == "succeeded" for status in statuses):
+        return "partial"
+    if any(status == "running" for status in statuses):
+        return "delivering"
+    if any(status in {"failed", "skipped"} for status in statuses):
+        return "failed"
+    return "pending"
+
+
+def _normalize_channels(values: list[Any]) -> list[str]:
+    channels = []
+    for value in values:
+        channel = _normalize_channel(str(value))
+        if channel in {"telegram", "feishu", "wechat"} and channel not in channels:
+            channels.append(channel)
+    return channels
+
+
+def _normalize_channel(value: str) -> str:
+    channel = str(value or "").strip().lower()
+    return {"lark": "feishu", "wecom": "wechat", "weixin": "wechat"}.get(channel, channel)
 
 
 def _candidate_message(event: dict[str, Any]) -> str:

@@ -58,7 +58,7 @@ X-Admin-Token: <本地管理口令>
 Authorization: Bearer <本地管理口令>
 ```
 
-如果未配置 `ADMIN_API_TOKEN`，管理写接口返回 `403`；如果配置后请求未带正确口令，返回 `401`。受保护接口包括 `/v1/runs/trigger`、`/v1/jobs/{job_id}/execute`、`/v1/jobs/{job_id}/retry`、`/v1/rag/*` 写入/计划接口、`/v1/subscriptions` 写入接口、`POST /v1/feedback` 和项目 Agent 任务写接口。
+如果未配置 `ADMIN_API_TOKEN`，管理写接口返回 `403`；如果配置后请求未带正确口令，返回 `401`。受保护接口包括 `/v1/runs/trigger`、`/v1/jobs/{job_id}/execute`、`/v1/jobs/{job_id}/retry`、`/v1/rag/*` 写入/计划接口、`/v1/subscriptions` 写入接口、事件检测、候选构建、候选投递、`POST /v1/feedback` 和项目 Agent 任务写接口。
 
 本地页面会从 `?admin_token=...` 或浏览器 `localStorage.github_weekly_admin_token` 读取口令，并仅在写请求中发送 `X-Admin-Token`。不要把真实口令提交到仓库、文档或 GitHub Pages。
 
@@ -81,6 +81,31 @@ Authorization: Bearer <本地管理口令>
 | `GET /v1/agent-task-runs` | 查询最近执行记录，供管理页汇总 |
 
 处理器支持 `observe`、`review_risk`、`deep_analysis`、`continue_tracking`、`notify` 和 `ignore`。结果统一包含 `execution_summary`、`decision`、`confidence`、`evidence`、`citations`、`changes`、`risk_changes`、`recommended_actions` 和 `subscription_candidate`。`notify` 只创建订阅候选，不直接调用推送通道。
+
+### 事件订阅与确认投递
+
+| 接口 | 说明 |
+|---|---|
+| `POST /v1/subscription-events/detect` | 检测项目变化事件，受管理口令保护 |
+| `GET /v1/subscription-events` | 按项目、类型、严重度和状态查询事件 |
+| `POST /v1/notification-candidates/build` | 按启用订阅构建去重候选，受管理口令保护 |
+| `GET /v1/notification-candidates` | 查询待确认或已处理候选 |
+| `POST /v1/notification-candidates/{id}/deliver` | 预览或确认逐渠道投递，受管理口令保护 |
+| `GET /v1/notification-deliveries` | 查询逐渠道投递审计记录 |
+
+候选投递默认 `dry_run=true`。真实外发必须同时满足 `dry_run=false` 和 `confirm_delivery=true`：
+
+```json
+{
+  "dry_run": false,
+  "confirm_delivery": true,
+  "channels": ["telegram", "feishu"],
+  "retry_failed": false,
+  "requested_by": "admin"
+}
+```
+
+同一订阅、事件、渠道只保留一条投递记录。成功渠道不会重复发送；失败或配置缺失渠道必须显式设置 `retry_failed=true` 才会增加尝试次数。Telegram、飞书和企业微信继续从环境变量或 GitHub Secrets 读取配置，API 和数据库不保存 Token、Chat ID 或 Webhook。
 
 ## 三、接口
 

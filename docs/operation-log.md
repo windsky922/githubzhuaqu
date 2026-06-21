@@ -2,6 +2,20 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-06-21 追加：确认式多渠道发送与投递审计
+
+1. sender 新增通用 `DeliveryMessage` 显式渠道分发，事件通知复用现有 Telegram、飞书和企业微信密钥读取、超时与错误隔离逻辑。
+2. 候选投递默认只预览；真实外发必须同时设置 `dry_run=false` 和 `confirm_delivery=true`。
+3. 投递前使用 SQLite `BEGIN IMMEDIATE` 逐渠道抢占；成功和运行中渠道不会重复发送，失败渠道只有 `retry_failed=true` 才会增加尝试次数。
+4. 候选汇总状态支持 `pending`、`delivering`、`partial`、`failed`、`delivered`，每个渠道保存状态、尝试次数、错误和安全响应摘要。
+5. 新增事件、候选、投递查询与写入 API；写接口继续由 `ADMIN_API_TOKEN` 保护。
+6. 定向测试覆盖默认预览、未确认阻止、部分成功、成功去重、失败显式重试、渠道别名和 API 管理鉴权。
+
+### 问题记录
+
+1. 一次通过工具包装执行的 `rg` PowerShell 查询没有返回预期匹配；改用 `ctx_execute_file` 按 UTF-8 读取并定位能力字段，确认代码存在后继续修改。后续复杂引号查询优先使用文件处理器。
+2. 首次同时更新 README 与架构文档时，架构段落上下文校验失败，整次补丁未写入。后续拆分补丁并缩小匹配上下文，避免单个文件的换行或字符差异阻断其他文档更新。
+
 ## 2026-06-21 追加：项目变化检测与订阅候选构建
 
 1. 新增 `src/notifications/service.py`，从最近两期 `selections` 识别 Trending、Star 增长、质量、风险和版本变化，并使用 `project_corpus` 补充项目语义和证据。

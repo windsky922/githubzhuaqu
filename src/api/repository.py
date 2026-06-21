@@ -89,6 +89,9 @@ class ApiRepository:
                 "subscriptions": True,
                 "subscription_recommendations": True,
                 "subscription_trigger": True,
+                "subscription_events": True,
+                "notification_candidates": True,
+                "notification_delivery": True,
                 "project_feedback": True,
                 "feedback_memory": True,
                 "database_summary": True,
@@ -3408,6 +3411,113 @@ class ApiRepository:
             "count": len(subscriptions),
             "subscriptions": subscriptions,
         }
+
+    def subscription_events(
+        self,
+        *,
+        full_name: str | None = None,
+        event_type: str | None = None,
+        severity: str | None = None,
+        status: str | None = None,
+        limit: int = 100,
+    ) -> dict[str, Any]:
+        self.ensure_sqlite_index()
+        from src.notifications.service import subscription_events
+
+        return subscription_events(
+            self.db_path,
+            full_name=str(full_name or "").strip(),
+            event_type=str(event_type or "").strip(),
+            severity=str(severity or "").strip(),
+            status=str(status or "").strip(),
+            limit=limit,
+        )
+
+    def detect_subscription_events(self, payload: dict[str, Any] | None = None) -> dict[str, Any]:
+        self.ensure_sqlite_index()
+        from src.notifications.service import detect_subscription_events
+
+        data = payload or {}
+        return detect_subscription_events(
+            self.db_path,
+            full_name=str(data.get("full_name") or data.get("repo") or "").strip(),
+            limit=max(1, min(_int_value(data.get("limit")) or 500, 2000)),
+            dry_run=data.get("dry_run") is True,
+        )
+
+    def notification_candidates(
+        self,
+        *,
+        status: str | None = None,
+        subscription_id: str | None = None,
+        full_name: str | None = None,
+        limit: int = 100,
+    ) -> dict[str, Any]:
+        self.ensure_sqlite_index()
+        from src.notifications.service import notification_candidates
+
+        return notification_candidates(
+            self.db_path,
+            status=str(status or "").strip(),
+            subscription_id=str(subscription_id or "").strip(),
+            full_name=str(full_name or "").strip(),
+            limit=limit,
+        )
+
+    def build_notification_candidates(self, payload: dict[str, Any] | None = None) -> dict[str, Any]:
+        self.ensure_sqlite_index()
+        from src.notifications.service import build_notification_candidates
+
+        data = payload or {}
+        return build_notification_candidates(
+            self.db_path,
+            limit=max(1, min(_int_value(data.get("limit")) or 500, 2000)),
+            dry_run=data.get("dry_run") is True,
+        )
+
+    def notification_deliveries(
+        self,
+        *,
+        candidate_id: str | None = None,
+        status: str | None = None,
+        channel: str | None = None,
+        limit: int = 100,
+    ) -> dict[str, Any]:
+        self.ensure_sqlite_index()
+        from src.notifications.service import notification_deliveries
+
+        return notification_deliveries(
+            self.db_path,
+            candidate_id=str(candidate_id or "").strip(),
+            status=str(status or "").strip(),
+            channel=str(channel or "").strip(),
+            limit=limit,
+        )
+
+    def deliver_notification_candidate(
+        self,
+        candidate_id: str,
+        payload: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        self.ensure_sqlite_index()
+        from src.notifications.service import deliver_notification_candidate
+        from src.settings import load_settings
+
+        data = payload or {}
+        today = datetime.now(UTC).date().isoformat()
+        settings = load_settings(today, today, root=self.root)
+        raw_channels = data.get("channels")
+        channels = raw_channels if isinstance(raw_channels, list) else None
+        return deliver_notification_candidate(
+            self.db_path,
+            settings,
+            candidate_id,
+            dry_run=data.get("dry_run", True) is not False,
+            confirm_delivery=data.get("confirm_delivery") is True,
+            channels=channels,
+            retry_failed=data.get("retry_failed") is True,
+            requested_by=str(data.get("requested_by") or "api").strip(),
+        )
 
     def create_subscription(self, payload: dict[str, Any] | None = None) -> dict[str, Any]:
         self.ensure_sqlite_index()

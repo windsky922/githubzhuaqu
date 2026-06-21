@@ -544,6 +544,55 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
     ) -> dict[str, Any]:
         return repository.update_subscription(subscription_id, payload)
 
+    @app.post("/v1/subscription-events/detect", dependencies=admin_write_dependencies)
+    def v1_detect_subscription_events(payload: dict[str, Any] | None = Body(default=None)) -> dict[str, Any]:
+        return repository.detect_subscription_events(payload)
+
+    @app.get("/v1/subscription-events")
+    def v1_subscription_events(
+        full_name: str | None = None,
+        event_type: str | None = None,
+        severity: str | None = Query(default=None, pattern="^(info|low|medium|high|critical)?$"),
+        status: str | None = None,
+        limit: int = Query(default=100, ge=1, le=500),
+    ) -> dict[str, Any]:
+        return repository.subscription_events(
+            full_name=full_name, event_type=event_type, severity=severity, status=status, limit=limit
+        )
+
+    @app.post("/v1/notification-candidates/build", dependencies=admin_write_dependencies)
+    def v1_build_notification_candidates(payload: dict[str, Any] | None = Body(default=None)) -> dict[str, Any]:
+        return repository.build_notification_candidates(payload)
+
+    @app.get("/v1/notification-candidates")
+    def v1_notification_candidates(
+        status: str | None = None,
+        subscription_id: str | None = None,
+        full_name: str | None = None,
+        limit: int = Query(default=100, ge=1, le=500),
+    ) -> dict[str, Any]:
+        return repository.notification_candidates(
+            status=status, subscription_id=subscription_id, full_name=full_name, limit=limit
+        )
+
+    @app.post("/v1/notification-candidates/{candidate_id:path}/deliver", dependencies=admin_write_dependencies)
+    def v1_deliver_notification_candidate(
+        candidate_id: str,
+        payload: dict[str, Any] | None = Body(default=None),
+    ) -> dict[str, Any]:
+        return repository.deliver_notification_candidate(candidate_id, payload)
+
+    @app.get("/v1/notification-deliveries")
+    def v1_notification_deliveries(
+        candidate_id: str | None = None,
+        status: str | None = None,
+        channel: str | None = None,
+        limit: int = Query(default=100, ge=1, le=500),
+    ) -> dict[str, Any]:
+        return repository.notification_deliveries(
+            candidate_id=candidate_id, status=status, channel=channel, limit=limit
+        )
+
     @app.get("/v1/feedback")
     def v1_project_feedback(
         full_name: str | None = None,

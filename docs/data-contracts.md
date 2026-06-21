@@ -317,6 +317,10 @@ migration_meta
 4. `notification_candidates` 由启用订阅与事件匹配生成，状态初始为 `pending`，`payload_json.requires_confirmation` 必须为 `true`。
 5. 候选去重键由订阅和事件共同确定。重复构建不新增候选，也不重置已存在候选的状态。
 6. `notification_candidates` 只表达待确认意图，不代表发送成功；真实发送结果必须进入 `notification_deliveries`。
+7. 候选状态包括 `pending`、`delivering`、`partial`、`failed`、`delivered`；投递状态包括 `running`、`succeeded`、`failed`、`skipped`。
+8. `notification_deliveries.dedupe_key` 由订阅、事件和规范化渠道共同确定；失败重试更新同一记录并递增 `attempt_count`，不得创建第二条渠道记录。
+9. 真实外发必须同时满足 `dry_run=false` 和 `confirm_delivery=true`。预览和未确认请求不得写入投递记录，也不得调用外部渠道。
+10. 渠道成功后对应事件状态更新为 `notified`；逐渠道响应只保存安全结果摘要，不保存密钥、Webhook 或请求头。
 
 当前只读查询入口位于：
 

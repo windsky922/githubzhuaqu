@@ -94,10 +94,10 @@ def _merge_unique(existing: object, extra: list[str]) -> list[str]:
     return result
 
 
-def load_settings(run_date: str, since_date: str) -> Settings:
-    interests = load_project_interests(ROOT)
+def load_settings(run_date: str, since_date: str, root: Path = ROOT) -> Settings:
+    interests = load_project_interests(root)
     return Settings(
-        root=ROOT,
+        root=root,
         run_date=run_date,
         since_date=since_date,
         days_back=_int_env("DAYS_BACK", 7),

@@ -5,6 +5,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 from src.sender import (
+    DeliveryMessage,
     build_delivery_message,
     build_report_message,
     configured_delivery_channels,
@@ -12,6 +13,7 @@ from src.sender import (
     report_url,
     runs_url,
     send_report,
+    send_delivery_message,
     send_report_to_channels,
     subscription_recommendation_urls,
     subscriptions_url,
@@ -186,6 +188,28 @@ class SenderTest(unittest.TestCase):
         self.assertEqual(results[0].error, "Feishu webhook is not configured")
         self.assertTrue(results[1].skipped)
         self.assertEqual(results[1].error, "WeChat webhook is not configured")
+
+    def test_send_delivery_message_uses_explicit_channels_and_custom_markdown(self):
+        message = DeliveryMessage(
+            title="项目风险变化",
+            url="https://github.com/owner/repo",
+            explorer_url="",
+            runs_url="",
+            subscriptions_url="",
+            subscription_recommendation_urls=[],
+            text="owner/repo 新增风险",
+            html_text="owner/repo 新增风险",
+            markdown_text="owner/repo **新增风险**",
+        )
+        with patch.dict(os.environ, {"DELIVERY_CHANNELS": "telegram"}), patch(
+            "src.sender._post_json"
+        ) as post_json:
+            results = send_delivery_message(message, settings(), ["feishu", "wecom"])
+
+        self.assertEqual([result.channel for result in results], ["feishu", "wechat"])
+        self.assertEqual(post_json.call_count, 0)
+        self.assertTrue(all(result.skipped for result in results))
+        self.assertTrue(all("not configured" in result.error for result in results))
 
     def test_post_json_accepts_success_response(self):
         response = MagicMock()

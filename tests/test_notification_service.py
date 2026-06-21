@@ -5,10 +5,13 @@ import shutil
 import unittest
 import uuid
 from pathlib import Path
+from unittest.mock import patch
 
 from src.api.repository import ApiRepository
 from src.notifications.service import build_notification_candidates, detect_subscription_events
+from src.sender import DeliveryResult
 from src.storage.sqlite_store import connect, initialize, table_count
+from tests.test_api import _api_route_dependencies_installed
 
 
 class NotificationServiceTest(unittest.TestCase):
@@ -73,6 +76,110 @@ class NotificationServiceTest(unittest.TestCase):
             self.assertEqual(table_count(connection, "notification_candidates"), 2)
         finally:
             connection.close()
+
+    def test_delivery_requires_confirmation_deduplicates_and_retries_failed_channel(self):
+        repository, candidate_id = self._prepare_delivery_candidate()
+
+        with patch("src.notifications.service.send_delivery_message") as send:
+            preview = repository.deliver_notification_candidate(candidate_id, {})
+            blocked = repository.deliver_notification_candidate(
+                candidate_id, {"dry_run": False, "confirm_delivery": False}
+            )
+        self.assertTrue(preview["accepted"])
+        self.assertFalse(preview["executed"])
+        self.assertFalse(blocked["accepted"])
+        send.assert_not_called()
+        self.assertEqual(repository.notification_deliveries(candidate_id=candidate_id)["count"], 0)
+
+        def first_attempt(message, settings, channels):
+            channel = channels[0]
+            if channel == "telegram":
+                return [DeliveryResult(channel=channel, sent=True)]
+            return [DeliveryResult(channel=channel, sent=False, error="expected failure")]
+
+        with patch("src.notifications.service.send_delivery_message", side_effect=first_attempt) as send:
+            delivered = repository.deliver_notification_candidate(
+                candidate_id,
+                {"dry_run": False, "confirm_delivery": True, "requested_by": "unit-test"},
+            )
+        self.assertTrue(delivered["executed"])
+        self.assertEqual(delivered["candidate_status"], "partial")
+        self.assertEqual(send.call_count, 2)
+
+        with patch("src.notifications.service.send_delivery_message") as send:
+            duplicate = repository.deliver_notification_candidate(
+                candidate_id, {"dry_run": False, "confirm_delivery": True}
+            )
+        self.assertFalse(duplicate["executed"])
+        self.assertEqual({item["status"] for item in duplicate["results"]}, {"already_succeeded", "retry_required"})
+        send.assert_not_called()
+
+        with patch(
+            "src.notifications.service.send_delivery_message",
+            return_value=[DeliveryResult(channel="feishu", sent=True)],
+        ) as send:
+            retried = repository.deliver_notification_candidate(
+                candidate_id,
+                {"dry_run": False, "confirm_delivery": True, "retry_failed": True},
+            )
+        self.assertTrue(retried["executed"])
+        self.assertEqual(retried["candidate_status"], "delivered")
+        self.assertEqual(send.call_args.args[2], ["feishu"])
+        deliveries = repository.notification_deliveries(candidate_id=candidate_id)["deliveries"]
+        self.assertEqual(len(deliveries), 2)
+        self.assertEqual({item["channel"]: item["attempt_count"] for item in deliveries}, {"telegram": 1, "feishu": 2})
+        events = repository.subscription_events(status="notified")["events"]
+        self.assertTrue(events)
+
+    @unittest.skipUnless(_api_route_dependencies_installed(), "本地未安装 FastAPI 或 httpx")
+    def test_notification_routes_require_admin_and_default_to_preview(self):
+        import os
+        from fastapi.testclient import TestClient
+        from src.api.app import create_app
+
+        _, candidate_id = self._prepare_delivery_candidate()
+        client = TestClient(create_app(root=self.root, db_path=self.db_path))
+        events = client.get("/v1/subscription-events")
+        candidates = client.get("/v1/notification-candidates")
+        with patch.dict(os.environ, {"ADMIN_API_TOKEN": "test"}, clear=False):
+            blocked_detect = client.post("/v1/subscription-events/detect", json={"dry_run": True})
+            blocked = client.post("/v1/notification-candidates/build", json={})
+            blocked_deliver = client.post(
+                f"/v1/notification-candidates/{candidate_id}/deliver", json={}
+            )
+            built = client.post(
+                "/v1/notification-candidates/build", headers={"X-Admin-Token": "test"}, json={}
+            )
+            preview = client.post(
+                f"/v1/notification-candidates/{candidate_id}/deliver",
+                headers={"X-Admin-Token": "test"},
+                json={},
+            )
+        deliveries = client.get("/v1/notification-deliveries")
+
+        self.assertEqual(events.status_code, 200)
+        self.assertEqual(candidates.status_code, 200)
+        self.assertEqual(blocked_detect.status_code, 401)
+        self.assertEqual(blocked.status_code, 401)
+        self.assertEqual(blocked_deliver.status_code, 401)
+        self.assertEqual(built.status_code, 200)
+        self.assertTrue(preview.json()["dry_run"])
+        self.assertFalse(preview.json()["executed"])
+        self.assertEqual(deliveries.json()["count"], 0)
+
+    def _prepare_delivery_candidate(self) -> tuple[ApiRepository, str]:
+        repository = ApiRepository(root=self.root, db_path=self.db_path)
+        repository.create_subscription({
+            "name": "风险投递测试",
+            "full_names": ["owner/repo"],
+            "event_types": ["risk_added"],
+            "min_severity": "high",
+            "channels": ["telegram", "feishu"],
+        })
+        detect_subscription_events(self.db_path)
+        built = build_notification_candidates(self.db_path)
+        self.assertEqual(built["created_count"], 1)
+        return repository, built["candidates"][0]["candidate_id"]
 
     @staticmethod
     def _seed_snapshots(connection) -> None:

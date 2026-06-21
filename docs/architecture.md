@@ -10,12 +10,17 @@
 -> subscription_events（证据、引用、严重度、稳定去重键）
 -> subscriptions 规则匹配
 -> notification_candidates（pending、必须确认）
--> 后续逐渠道确认投递
+-> dry_run 预览 / confirm_delivery 双重门禁
+-> SQLite 逐渠道事务抢占
+-> sender 通用 DeliveryMessage 分发
+-> notification_deliveries（状态、尝试、错误、响应摘要）
 ```
 
 当前事件检测支持进入 Trending、Star 增长显著、质量分变化、风险新增、风险解除、新版本和 Agent 决策变化。快照事件使用 `selections` 计算前后差异，并由 `project_corpus` 补充语言、方向、搜索文本和公开来源；Agent 事件复用任务执行结果中的证据与引用。
 
-订阅规则支持项目、profile、语言、方向、关键词、事件类型、最低严重度、渠道和频率。候选 ID 由“订阅 ID + 事件 ID”稳定生成，重复检测和重复构建不会新增记录，也不会重置已有状态。本层只生成 `pending` 候选，不调用 Telegram、飞书或企业微信。
+订阅规则支持项目、profile、语言、方向、关键词、事件类型、最低严重度、渠道和频率。候选 ID 由“订阅 ID + 事件 ID”稳定生成，重复检测和重复构建不会新增记录，也不会重置已有状态。
+
+候选投递默认只预览。真实发送必须同时满足 `dry_run=false` 和 `confirm_delivery=true`；每个渠道在发送前通过 SQLite 事务写入 `running` 抢占状态，并复用 `src/sender.py` 的密钥读取、20 秒超时和错误隔离。成功渠道禁止重复发送；失败渠道只有显式重试才更新同一审计记录并增加 `attempt_count`。现有每周周报链接推送不经过该事件门禁，保持原流程独立运行。
 
 ## 项目级 Agent 执行层
 
