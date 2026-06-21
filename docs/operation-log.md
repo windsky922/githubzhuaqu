@@ -2,6 +2,23 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-06-21 追加：项目变化检测与订阅候选构建
+
+1. 新增 `src/notifications/service.py`，从最近两期 `selections` 识别 Trending、Star 增长、质量、风险和版本变化，并使用 `project_corpus` 补充项目语义和证据。
+2. 将成功的 `project_agent_task_runs` 转换为有证据的 Agent 决策事件；`notify` 任务的 `subscription_candidate` 只进入事件和候选，不执行外部发送。
+3. 订阅规则新增项目、事件类型、最低严重度和频率字段，并继续支持 profile、语言、方向、关键词和渠道。
+4. 候选按“订阅 + 事件”稳定去重；重复检测与构建不新增记录、不重置已有状态。
+5. 新增定向测试，覆盖 7 类事件、证据引用、规则匹配和幂等构建。
+
+### 问题记录
+
+1. 首次在 `context-mode` 的 shell 运行器中使用 PowerShell cmdlet，因该运行器实际使用 POSIX shell 而失败。后续文件提取改用 `ctx_execute_file` 的 JavaScript 运行器；面向用户的命令仍保持 PowerShell。
+2. 首次按名称猜测了不存在的 `tests/test_project_agent_task_executor.py`。通过 `rg --files tests` 确认实际文件为 `tests/test_agent_task_executor.py`，后续执行定向测试前先确认测试文件名。
+3. 一次 `rg` 复合正则因 PowerShell 字符串转义形成未闭合分组。后续将查询拆成简单模式，避免在多层命令包装中使用不必要的复杂转义。
+4. 全量测试发现开发上下文问答将中文“测试失败”固定改写为英文 `test`，且 FTS5 默认中文分词无法稳定命中短子串。已改为从原问题选择实际出现的中英文诊断关键词，并在 FTS 零结果时回退到现有 `LIKE` 检索。
+5. 首次同时修改代码与操作日志时漏写第二个 `Update File` 补丁头，导致补丁校验失败且未产生文件改动。已拆分为两个明确的文件更新段后重新执行。
+6. 后续补充 FTS 回退时再次遗漏第二个文件补丁头，补丁同样在校验阶段失败且未改文件。已立即改用每个目标文件独立 `Update File` 段，并将此类多文件补丁作为提交前重点检查项。
+
 ## 2026-06-21 追加：事件订阅数据模型
 
 1. 新增 `subscription_events`，保存项目变化事件、证据、引用、严重度、来源运行和稳定去重键。

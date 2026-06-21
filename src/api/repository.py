@@ -572,6 +572,14 @@ class ApiRepository:
                     source_type=_blank_to_none(source_type),
                     limit=limit * 3,
                 )
+                if not rows:
+                    search_engine = "like"
+                    rows = _dev_context_search_like(
+                        connection,
+                        terms=terms,
+                        source_type=_blank_to_none(source_type),
+                        limit=limit * 3,
+                    )
             except sqlite3.Error:
                 search_engine = "like"
                 rows = _dev_context_search_like(
@@ -6070,6 +6078,10 @@ def _subscription_from_row(row: Any) -> dict[str, Any]:
         "sort": row["sort"],
         "limit": _int_value(row["limit_count"]),
         "channels": _list_strings(_json_list(row["channels_json"])),
+        "full_names": _list_strings(payload.get("full_names")),
+        "event_types": _list_strings(payload.get("event_types")),
+        "min_severity": str(payload.get("min_severity") or "info"),
+        "frequency": str(payload.get("frequency") or "immediate"),
         "created_at": row["created_at"],
         "updated_at": row["updated_at"],
         "payload": payload,
@@ -6095,6 +6107,20 @@ def _subscription_payload(payload: dict[str, Any]) -> dict[str, Any]:
     category = str(payload.get("category") or "").strip()[:120]
     query = str(payload.get("query") or "").strip()[:160]
     name = str(payload.get("name") or "").strip()[:120]
+    full_names = _normalize_project_list(payload.get("full_names") or payload.get("projects") or [])[:50]
+    event_types = [
+        item for item in _list_strings(payload.get("event_types"))
+        if item in {
+            "trending_entered", "star_growth_spike", "quality_changed", "risk_added",
+            "risk_resolved", "release_detected", "agent_decision_changed",
+        }
+    ]
+    min_severity = str(payload.get("min_severity") or "info").strip().lower()
+    if min_severity not in {"info", "low", "medium", "high", "critical"}:
+        min_severity = "info"
+    frequency = str(payload.get("frequency") or "immediate").strip().lower()
+    if frequency not in {"immediate", "daily", "weekly"}:
+        frequency = "immediate"
     if not name:
         name = profile or language or category or query or "默认订阅"
     return {
@@ -6108,6 +6134,10 @@ def _subscription_payload(payload: dict[str, Any]) -> dict[str, Any]:
         "sort": sort,
         "limit": limit,
         "channels": channels or ["telegram"],
+        "full_names": full_names,
+        "event_types": event_types,
+        "min_severity": min_severity,
+        "frequency": frequency,
         "created_at": str(payload.get("created_at") or ""),
         "updated_at": str(payload.get("updated_at") or ""),
     }
@@ -6124,6 +6154,10 @@ def _subscription_id(data: dict[str, Any]) -> str:
             "category": data.get("category") or "",
             "query": data.get("query") or "",
             "channels": data.get("channels") or [],
+            "full_names": data.get("full_names") or [],
+            "event_types": data.get("event_types") or [],
+            "min_severity": data.get("min_severity") or "info",
+            "frequency": data.get("frequency") or "immediate",
             "created_at": data.get("created_at") or "",
         },
         ensure_ascii=False,
@@ -7319,8 +7353,12 @@ def _dev_context_search_summary(results: list[dict[str, Any]], terms: list[str])
 def _dev_context_question_query(question: str) -> str:
     text = question.strip()
     question_type = _dev_context_question_type(text)
+    if question_type == "test_diagnosis":
+        lower = text.lower()
+        for term in ("测试", "失败", "报错", "test", "failed", "error"):
+            if term in text or term in lower:
+                return term
     query_by_type = {
-        "test_diagnosis": "test",
         "recent_changes": "diff",
         "api_contract": "API",
         "next_step": "下一步",

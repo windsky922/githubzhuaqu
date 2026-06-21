@@ -309,6 +309,15 @@ migration_meta
 21. `subscriptions` 保存本地订阅偏好，只记录筛选条件和通道名称，不记录 Token、Chat ID 或 Webhook。
 22. `migration_meta` 保存迁移元数据。
 
+事件订阅扩展契约：
+
+1. `subscriptions.payload_json` 可保存 `full_names`、`event_types`、`min_severity` 和 `frequency`；`frequency` 当前允许 `immediate`、`daily`、`weekly`。
+2. `subscription_events.event_type` 当前允许 `trending_entered`、`star_growth_spike`、`quality_changed`、`risk_added`、`risk_resolved`、`release_detected`、`agent_decision_changed`。
+3. 每条 `subscription_events` 必须包含非空 `evidence_json` 和 `citations_json`；事件检测只写入新事件，不覆盖后续处理状态。
+4. `notification_candidates` 由启用订阅与事件匹配生成，状态初始为 `pending`，`payload_json.requires_confirmation` 必须为 `true`。
+5. 候选去重键由订阅和事件共同确定。重复构建不新增候选，也不重置已存在候选的状态。
+6. `notification_candidates` 只表达待确认意图，不代表发送成功；真实发送结果必须进入 `notification_deliveries`。
+
 当前只读查询入口位于：
 
 ```text
