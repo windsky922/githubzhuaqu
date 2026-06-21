@@ -22,6 +22,10 @@
 
 候选投递默认只预览。真实发送必须同时满足 `dry_run=false` 和 `confirm_delivery=true`；每个渠道在发送前通过 SQLite 事务写入 `running` 抢占状态，并复用 `src/sender.py` 的密钥读取、20 秒超时和错误隔离。成功渠道禁止重复发送；失败渠道只有显式重试才更新同一审计记录并增加 `attempt_count`。现有每周周报链接推送不经过该事件门禁，保持原流程独立运行。
 
+通知记忆通过三个出口进入 Agent：推荐接口返回项目级 `event_memory` 和排序解释，RAG 问答在通知相关问题中召回 `notification_memory`，单项目 RAG 聚合返回事件、候选和投递审计摘要。项目详情页负责创建项目订阅，管理页负责检测、构建、预览、确认和失败重试；`scripts/manage_notifications.py` 为本地和自动化提供同一服务入口。
+
+GitHub Actions 默认执行事件检测与候选构建，但 `send_event_notifications` 默认为 `false`。只有显式开启该输入时，工作流才会同时传入 `--no-dry-run` 和 `--confirm-delivery`；通知步骤设置为非阻塞，不影响 Pages 生成和现有每周链接推送。
+
 ## 项目级 Agent 执行层
 
 ```text

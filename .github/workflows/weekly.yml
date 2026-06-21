@@ -35,6 +35,14 @@ on:
         description: "是否执行优先级 1/2 的项目 Agent 只读任务"
         required: false
         default: "false"
+      build_notification_candidates:
+        description: "是否检测项目事件并构建待确认推送候选"
+        required: false
+        default: "true"
+      send_event_notifications:
+        description: "是否显式确认发送事件推送；默认关闭"
+        required: false
+        default: "false"
   schedule:
     - cron: "0 0 * * 1"
 
@@ -180,6 +188,41 @@ jobs:
           python scripts/run_project_agent_tasks.py \
             --limit "$AGENT_TASK_LIMIT" \
             --priority "$AGENT_TASK_PRIORITY"
+
+      - name: 检测订阅事件并构建候选
+        continue-on-error: true
+        env:
+          WORKFLOW_BUILD_NOTIFICATION_CANDIDATES: ${{ inputs.build_notification_candidates || 'true' }}
+          NOTIFICATION_EVENT_LIMIT: ${{ vars.NOTIFICATION_EVENT_LIMIT || '500' }}
+        run: |
+          if [ "$WORKFLOW_BUILD_NOTIFICATION_CANDIDATES" != "true" ]; then
+            echo "已跳过订阅事件检测与候选构建。"
+            exit 0
+          fi
+          python scripts/manage_notifications.py detect --limit "$NOTIFICATION_EVENT_LIMIT"
+          python scripts/manage_notifications.py build --limit "$NOTIFICATION_EVENT_LIMIT"
+
+      - name: 显式确认发送事件通知
+        continue-on-error: true
+        env:
+          WORKFLOW_SEND_EVENT_NOTIFICATIONS: ${{ inputs.send_event_notifications || 'false' }}
+          NOTIFICATION_DELIVERY_LIMIT: ${{ vars.NOTIFICATION_DELIVERY_LIMIT || '20' }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          FEISHU_WEBHOOK_URL: ${{ secrets.FEISHU_WEBHOOK_URL }}
+          WECHAT_WEBHOOK_URL: ${{ secrets.WECHAT_WEBHOOK_URL }}
+          WECOM_WEBHOOK_URL: ${{ secrets.WECOM_WEBHOOK_URL }}
+          REPORT_BASE_URL: ${{ vars.REPORT_BASE_URL || secrets.REPORT_BASE_URL }}
+        run: |
+          if [ "$WORKFLOW_SEND_EVENT_NOTIFICATIONS" != "true" ]; then
+            echo "事件通知真实发送默认关闭，仅保留待确认候选。"
+            exit 0
+          fi
+          python scripts/manage_notifications.py deliver-pending \
+            --limit "$NOTIFICATION_DELIVERY_LIMIT" \
+            --no-dry-run \
+            --confirm-delivery \
+            --requested-by "github_actions"
 
       - name: 生成周报归档页面
         run: python scripts/build_pages.py

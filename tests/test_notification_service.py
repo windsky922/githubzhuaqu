@@ -66,11 +66,15 @@ class NotificationServiceTest(unittest.TestCase):
         detect_subscription_events(self.db_path)
         first = build_notification_candidates(self.db_path)
         second = build_notification_candidates(self.db_path)
+        recommendations = repository.recommendations(limit=10)
 
         self.assertEqual(first["created_count"], 2)
         self.assertEqual(second["created_count"], 0)
         self.assertTrue(all(item["status"] == "pending" for item in first["candidates"]))
         self.assertTrue(all(item["payload"]["requires_confirmation"] for item in first["candidates"]))
+        recommendation = next(item for item in recommendations["recommendations"] if item["full_name"] == "owner/repo")
+        self.assertGreater(recommendation["event_memory"]["count"], 0)
+        self.assertIn("最近事件", recommendation["event_reason"])
         connection = connect(self.db_path)
         try:
             self.assertEqual(table_count(connection, "notification_candidates"), 2)
@@ -130,6 +134,13 @@ class NotificationServiceTest(unittest.TestCase):
         self.assertEqual({item["channel"]: item["attempt_count"] for item in deliveries}, {"telegram": 1, "feishu": 2})
         events = repository.subscription_events(status="notified")["events"]
         self.assertTrue(events)
+        rag = repository.rag_ask(query="owner/repo 为什么触发通知？", limit=5)
+        self.assertGreater(rag["notification_memory"]["event_count"], 0)
+        self.assertIn("通知记忆", rag["answer"])
+        bundle = repository.project_rag_bundle("owner/repo", limit=5)
+        self.assertTrue(bundle["found"])
+        self.assertGreater(bundle["notification_memory"]["event_count"], 0)
+        self.assertEqual(bundle["notification_memory"]["delivery_count"], 2)
 
     @unittest.skipUnless(_api_route_dependencies_installed(), "本地未安装 FastAPI 或 httpx")
     def test_notification_routes_require_admin_and_default_to_preview(self):
@@ -183,6 +194,18 @@ class NotificationServiceTest(unittest.TestCase):
 
     @staticmethod
     def _seed_snapshots(connection) -> None:
+        connection.execute(
+            """
+            INSERT INTO repositories(
+              full_name, html_url, description, language, stargazers_count, forks_count,
+              license_name, archived, fork, pushed_at, payload_json
+            ) VALUES(
+              'owner/repo', 'https://github.com/owner/repo', 'agent workflow toolkit', 'Python',
+              1200, 120, 'MIT', 0, 0, '2026-06-21T00:00:00Z',
+              '{"full_name":"owner/repo","html_url":"https://github.com/owner/repo","description":"agent workflow toolkit","language":"Python"}'
+            )
+            """
+        )
         rows = [
             ("2026-06-14", 0, 100, 60, ["旧风险"], ["旧质量风险"], "v1.0.0"),
             ("2026-06-21", 1, 500, 80, ["新风险"], [], "v2.0.0"),

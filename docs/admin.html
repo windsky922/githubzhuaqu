@@ -542,6 +542,16 @@
       <div id="projectAgentTaskSummary" class="overview"></div>
       <div id="projectAgentTaskWorkbench" class="workbench-list"></div>
     </section>
+    <section class="panel">
+      <h2>事件订阅与推送候选</h2>
+      <div class="toolbar">
+        <button id="detectSubscriptionEvents" type="button">检测事件</button>
+        <button id="buildNotificationCandidates" type="button">构建候选</button>
+        <span id="notificationActionStatus" class="task-status"></span>
+      </div>
+      <div id="notificationSummary" class="overview"></div>
+      <div id="notificationWorkbench" class="workbench-list"></div>
+    </section>
     <section class="grid" aria-label="管理入口">
       <article class="card">
         <h2>项目</h2>
@@ -582,6 +592,11 @@
     const jobWorkbench = document.getElementById("jobWorkbench");
     const projectAgentTaskSummary = document.getElementById("projectAgentTaskSummary");
     const projectAgentTaskWorkbench = document.getElementById("projectAgentTaskWorkbench");
+    const notificationSummary = document.getElementById("notificationSummary");
+    const notificationWorkbench = document.getElementById("notificationWorkbench");
+    const notificationActionStatus = document.getElementById("notificationActionStatus");
+    const detectSubscriptionEvents = document.getElementById("detectSubscriptionEvents");
+    const buildNotificationCandidates = document.getElementById("buildNotificationCandidates");
     const databaseOverview = document.getElementById("databaseOverview");
     const feedbackSummary = document.getElementById("feedbackSummary");
     const databaseFacets = document.getElementById("databaseFacets");
@@ -638,6 +653,7 @@
     loadHealth();
     loadOverview();
     loadProjectAgentTasks();
+    loadNotificationAdmin();
     loadDatabaseInsights();
     setupCreateTask();
       setupCorpusSearch();
@@ -647,6 +663,9 @@
     setupRagMaintenance();
     bindWorkbenchFilters();
     jobWorkbench.addEventListener("click", handleWorkbenchAction);
+    notificationWorkbench.addEventListener("click", handleNotificationAction);
+    detectSubscriptionEvents.addEventListener("click", () => runNotificationBuild("events"));
+    buildNotificationCandidates.addEventListener("click", () => runNotificationBuild("candidates"));
 
     function bindWorkbenchFilters() {
       document.querySelectorAll("[data-job-filter]").forEach(button => {
@@ -1047,6 +1066,108 @@
 
     function agentProjectRunStatusLabel(value) {
       return ({ running: "运行中", succeeded: "成功", failed: "失败" })[value] || value || "未知";
+    }
+
+    function loadNotificationAdmin() {
+      if (!shouldUseApi()) {
+        detectSubscriptionEvents.disabled = true;
+        buildNotificationCandidates.disabled = true;
+        notificationSummary.innerHTML = metric("模式", "静态");
+        notificationWorkbench.innerHTML = "<p>启动本地后端或添加 api=1 后查看推送候选。</p>";
+        return;
+      }
+      Promise.all([
+        fetch("/v1/notification-candidates?limit=100", { cache: "no-store" }).then(jsonOrThrow),
+        fetch("/v1/notification-deliveries?limit=200", { cache: "no-store" }).then(jsonOrThrow),
+      ])
+        .then(([candidateData, deliveryData]) => renderNotificationAdmin(candidateData, deliveryData))
+        .catch(error => {
+          notificationWorkbench.innerHTML = `<p>通知数据读取失败：${escapeHtml(error.message || error)}</p>`;
+        });
+    }
+
+    function renderNotificationAdmin(candidateData, deliveryData) {
+      const candidates = Array.isArray(candidateData.candidates) ? candidateData.candidates : [];
+      const deliveries = Array.isArray(deliveryData.deliveries) ? deliveryData.deliveries : [];
+      const pending = candidates.filter(item => item.status === "pending").length;
+      const failed = deliveries.filter(item => item.status === "failed" || item.status === "skipped");
+      const succeeded = deliveries.filter(item => item.status === "succeeded").length;
+      const finished = succeeded + failed.length;
+      const successRate = finished ? `${Math.round((succeeded / finished) * 100)}%` : "-";
+      notificationSummary.innerHTML = [
+        metric("待确认候选", pending),
+        metric("投递成功率", successRate),
+        metric("失败渠道", failed.length),
+        metric("投递记录", deliveries.length),
+      ].join("");
+      if (!candidates.length) {
+        notificationWorkbench.innerHTML = "<p>暂无推送候选。</p>";
+        return;
+      }
+      notificationWorkbench.innerHTML = candidates.slice(0, 25).map(candidate => {
+        const retry = candidate.status === "failed" || candidate.status === "partial";
+        return `<article class="workbench-item">
+          <strong><a href="project.html?repo=${encodeURIComponent(candidate.full_name || "")}&api=1">${escapeHtml(candidate.full_name || "未知项目")}</a></strong>
+          <span>${escapeHtml(candidate.status || "pending")} / ${escapeHtml((candidate.channels || []).join(", "))}</span>
+          <p>${escapeHtml(candidate.message || candidate.title || "")}</p>
+          <div class="actions">
+            <button type="button" data-notification-action="preview" data-candidate-id="${escapeAttribute(candidate.candidate_id || "")}">预览</button>
+            <button type="button" data-notification-action="deliver" data-candidate-id="${escapeAttribute(candidate.candidate_id || "")}">确认发送</button>
+            ${retry ? `<button type="button" data-notification-action="retry" data-candidate-id="${escapeAttribute(candidate.candidate_id || "")}">重试失败渠道</button>` : ""}
+          </div>
+        </article>`;
+      }).join("");
+    }
+
+    function runNotificationBuild(kind) {
+      const endpoint = kind === "events" ? "/v1/subscription-events/detect" : "/v1/notification-candidates/build";
+      notificationActionStatus.textContent = kind === "events" ? "检测事件中..." : "构建候选中...";
+      fetch(endpoint, {
+        method: "POST",
+        headers: adminWriteHeaders(),
+        body: JSON.stringify({ dry_run: false }),
+      })
+        .then(jsonOrThrow)
+        .then(data => {
+          notificationActionStatus.textContent = kind === "events" ? `新增事件 ${number(data.persisted_count)} 条。` : `新增候选 ${number(data.persisted_count)} 条。`;
+          return loadNotificationAdmin();
+        })
+        .catch(error => {
+          notificationActionStatus.textContent = `操作失败：${error.message || error}`;
+        });
+    }
+
+    function handleNotificationAction(event) {
+      const button = event.target.closest("[data-notification-action]");
+      if (!button) return;
+      const action = button.dataset.notificationAction || "preview";
+      const candidateId = button.dataset.candidateId || "";
+      const realDelivery = action !== "preview";
+      if (realDelivery && !window.confirm(`确认发送候选 ${candidateId}？`)) return;
+      button.disabled = true;
+      notificationActionStatus.textContent = action === "preview" ? "生成发送预览中..." : "逐渠道发送中...";
+      fetch(`/v1/notification-candidates/${encodeURIComponent(candidateId)}/deliver`, {
+        method: "POST",
+        headers: adminWriteHeaders(),
+        body: JSON.stringify({
+          dry_run: !realDelivery,
+          confirm_delivery: realDelivery,
+          retry_failed: action === "retry",
+          requested_by: "admin_page",
+        }),
+      })
+        .then(jsonOrThrow)
+        .then(data => {
+          const results = (data.results || []).map(item => `${item.channel}:${item.status}`).join("，");
+          notificationActionStatus.textContent = `${data.executed ? "已执行" : "未执行"}；${results || data.error || "无渠道结果"}`;
+          return loadNotificationAdmin();
+        })
+        .catch(error => {
+          notificationActionStatus.textContent = `投递失败：${error.message || error}`;
+        })
+        .finally(() => {
+          button.disabled = false;
+        });
     }
 
     function loadAdminJobsJson() {

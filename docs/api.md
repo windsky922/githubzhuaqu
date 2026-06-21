@@ -107,6 +107,20 @@ Authorization: Bearer <本地管理口令>
 
 同一订阅、事件、渠道只保留一条投递记录。成功渠道不会重复发送；失败或配置缺失渠道必须显式设置 `retry_failed=true` 才会增加尝试次数。Telegram、飞书和企业微信继续从环境变量或 GitHub Secrets 读取配置，API 和数据库不保存 Token、Chat ID 或 Webhook。
 
+本地命令入口：
+
+```powershell
+python scripts\manage_notifications.py detect --limit 500
+python scripts\manage_notifications.py build --limit 500
+python scripts\manage_notifications.py preview <candidate_id>
+python scripts\manage_notifications.py deliver <candidate_id>
+python scripts\manage_notifications.py deliver --no-dry-run --confirm-delivery <candidate_id>
+```
+
+`deliver` 和 `deliver-pending` 默认都是 dry-run。真实发送必须同时提供 `--no-dry-run` 与 `--confirm-delivery`；失败渠道重试还需要 `--retry-failed`。
+
+通知记忆同时进入现有 Agent/RAG 返回契约：`GET /v1/recommendations` 的项目项包含 `event_memory` 和 `event_reason`；`POST /v1/rag/ask` 在订阅、通知、推送、触发等相关问题中返回 `notification_memory` 并把证据加入回答；`GET /v1/projects/{owner}/{repo}/rag` 返回该项目最近事件、候选和逐渠道投递摘要。新增字段不改变原有 `answer_model` 版本标识。
+
 ## 三、接口
 
 ### `GET /api/health`

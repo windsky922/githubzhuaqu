@@ -20,6 +20,8 @@ class WorkflowTest(unittest.TestCase):
         self.assertIn("plan_rag_maintenance:", workflow)
         self.assertIn("run_rag_evaluation:", workflow)
         self.assertIn("run_dev_context_index:", workflow)
+        self.assertIn("build_notification_candidates:", workflow)
+        self.assertIn("send_event_notifications:", workflow)
         self.assertIn("ARCHIVE_BRANCH: weekly-archive", workflow)
         self.assertIn("scripts/publish_archive_branch.py", workflow)
         self.assertIn("git checkout \"origin/$ARCHIVE_BRANCH\" -- data reports || true", workflow)
@@ -70,6 +72,17 @@ class WorkflowTest(unittest.TestCase):
             workflow.index("scripts/run_planned_job.py --job-file .dev-context-job.json"),
             workflow.index("scripts/build_pages.py"),
         )
+
+    def test_weekly_workflow_builds_candidates_and_gates_real_delivery(self) -> None:
+        workflow = (ROOT / ".github" / "workflows" / "weekly.yml").read_text(encoding="utf-8")
+
+        self.assertIn("scripts/manage_notifications.py detect", workflow)
+        self.assertIn("scripts/manage_notifications.py build", workflow)
+        self.assertIn("WORKFLOW_SEND_EVENT_NOTIFICATIONS", workflow)
+        self.assertIn("--no-dry-run", workflow)
+        self.assertIn("--confirm-delivery", workflow)
+        self.assertIn("continue-on-error: true", workflow)
+        self.assertLess(workflow.index("scripts/manage_notifications.py detect"), workflow.index("scripts/build_pages.py"))
 
     def test_archive_branch_publish_scope_is_limited_to_generated_archive(self) -> None:
         script = (ROOT / "scripts" / "publish_archive_branch.py").read_text(encoding="utf-8")

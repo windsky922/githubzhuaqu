@@ -336,8 +336,9 @@
           .then(jsonOrThrow)
           .catch(() => ({})),
         loadProjectRag(repo, detail),
+        loadProjectSubscriptions(repo),
       ])
-        .then(([data, rag]) => ({
+        .then(([data, rag, subscriptions]) => ({
           ...detail,
           similar_projects: Array.isArray(data.similar_projects) ? data.similar_projects : detail.similar_projects || [],
           similar_summary: Array.isArray(data.selection_summary) ? data.selection_summary : [],
@@ -353,6 +354,9 @@
           feedback_memory: rag.feedback_memory || detail.feedback_memory || {},
           project_profile: rag.project_profile || detail.project_profile || {},
           agent_tasks: rag.agent_tasks || { count: 0, tasks: [], summary: {} },
+          agent_task_runs: rag.agent_task_runs || { count: 0, runs: [], summary: {} },
+          notification_memory: rag.notification_memory || { event_count: 0, candidate_count: 0, delivery_count: 0, events: [], candidates: [], deliveries: [], summary: [] },
+          project_subscriptions: subscriptions,
           next_actions: Array.isArray(rag.next_actions) ? rag.next_actions : [],
         }))
         .catch(() => detail);
@@ -404,6 +408,9 @@
         feedback_memory: {},
         project_profile: {},
         agent_tasks: { count: 0, tasks: [], summary: {} },
+        agent_task_runs: { count: 0, runs: [], summary: {} },
+        notification_memory: { event_count: 0, candidate_count: 0, delivery_count: 0, events: [], candidates: [], deliveries: [], summary: [] },
+        project_subscriptions: [],
         next_actions: [],
         data_source: "静态 JSON"
       };
@@ -457,6 +464,14 @@
           ${agentTasksHtml(detail.agent_tasks, detail.next_actions, detail.agent_task_runs)}
           <div id="projectAgentTaskStatus" class="feedback-status" aria-live="polite">${shouldUseApi() ? "" : "任务操作需要本地后端或 api=1。"}</div>
         </section>
+        <section class="section" style="margin-top:12px">
+          <h2>项目事件与订阅</h2>
+          ${notificationMemoryHtml(detail.notification_memory)}
+          <div class="actions">
+            <button type="button" data-project-subscribe${shouldUseApi() && !(detail.project_subscriptions || []).length ? "" : " disabled"}>${(detail.project_subscriptions || []).length ? "已订阅项目变化" : "订阅项目变化"}</button>
+          </div>
+          <div id="projectSubscriptionStatus" class="feedback-status" aria-live="polite">${shouldUseApi() ? "" : "订阅写入需要本地后端或 api=1。"}</div>
+        </section>
         <section class="grid">
           <div class="section"><h2>推荐理由</h2>${listHtml(detail.selection_reasons || [], "暂无推荐理由。")}</div>
           <div class="section"><h2>趋势判断</h2>${listHtml(detail.trend_summary || [], "暂无趋势判断。")}</div>
@@ -478,6 +493,7 @@
       `;
       bindProjectFeedback(detail);
       bindProjectAgentTasks(detail);
+      bindProjectSubscription(detail);
     }
 
     function historyTable(history) {
@@ -573,8 +589,19 @@
           project_profile: {},
           agent_tasks: { count: 0, tasks: [], summary: {} },
           agent_task_runs: { count: 0, runs: [], summary: {} },
+          notification_memory: { event_count: 0, candidate_count: 0, delivery_count: 0, events: [], candidates: [], deliveries: [], summary: [] },
           next_actions: [],
         }));
+    }
+
+    function loadProjectSubscriptions(repo) {
+      if (!shouldUseApi()) return Promise.resolve([]);
+      return fetch("/v1/subscriptions?status=enabled&limit=200", { cache: "no-store" })
+        .then(jsonOrThrow)
+        .then(data => (data.subscriptions || []).filter(subscription =>
+          (subscription.full_names || []).some(name => String(name || "").toLowerCase() === repo.toLowerCase())
+        ))
+        .catch(() => []);
     }
 
     function projectProfileHtml(profile) {
@@ -600,6 +627,48 @@
       const labels = Array.isArray(summary.labels) ? summary.labels.slice(0, 4).join(", ") : "";
       const latestNote = summary.latest_note ? ` / ${summary.latest_note}` : "";
       return `<p>反馈 ${number(count)} 条，平均评分 ${number(summary.average_rating)}，最近评分 ${signedNumber(summary.latest_rating)}${labels ? ` / ${escapeHtml(labels)}` : ""}${escapeHtml(latestNote)}</p>`;
+    }
+
+    function notificationMemoryHtml(memory) {
+      const data = memory || {};
+      const events = Array.isArray(data.events) ? data.events : [];
+      const summaries = Array.isArray(data.summary) ? data.summary : [];
+      const metrics = `<div class="summary">${metric("事件", number(data.event_count))}${metric("候选", number(data.candidate_count))}${metric("投递", number(data.delivery_count))}</div>`;
+      if (!events.length) return `${metrics}<p>暂无项目变化事件。</p>`;
+      const rows = events.slice(0, 8).map(event => `<div class="workbench-item"><strong>${escapeHtml(event.title || event.event_type || "项目变化")}</strong><span>${escapeHtml(event.severity || "info")} / ${escapeHtml(event.detected_at || "")}</span><p>${escapeHtml(event.summary || "")}</p></div>`).join("");
+      return `${metrics}${summaries.length ? listHtml(summaries, "") : ""}<div class="workbench-list">${rows}</div>`;
+    }
+
+    function bindProjectSubscription(detail) {
+      const button = document.querySelector("[data-project-subscribe]");
+      if (!button || button.disabled) return;
+      button.addEventListener("click", () => createProjectSubscription(button, detail));
+    }
+
+    async function createProjectSubscription(button, detail) {
+      const status = document.getElementById("projectSubscriptionStatus");
+      try {
+        button.disabled = true;
+        status.textContent = "保存订阅中...";
+        const response = await fetch("/v1/subscriptions", {
+          method: "POST",
+          headers: adminWriteHeaders(),
+          body: JSON.stringify({
+            name: `${detail.full_name || repoName()} 项目变化`,
+            full_names: [detail.full_name || repoName()],
+            event_types: ["trending_entered", "star_growth_spike", "quality_changed", "risk_added", "risk_resolved", "release_detected", "agent_decision_changed"],
+            min_severity: "medium",
+            frequency: "immediate",
+            channels: ["telegram"],
+          }),
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        status.textContent = "项目变化订阅已保存。";
+        button.textContent = "已订阅项目变化";
+      } catch (error) {
+        button.disabled = false;
+        status.textContent = `订阅保存失败：${error.message}`;
+      }
     }
 
     function agentTasksHtml(memory, nextActions, runMemory) {

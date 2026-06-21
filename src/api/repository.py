@@ -204,12 +204,18 @@ class ApiRepository:
         projects = _dedupe_projects_by_full_name(projects)
         feedback_records = self.project_feedback(profile=normalized_profile, limit=200).get("feedback", [])
         feedback_memory = _feedback_memory_by_full_name(feedback_records)
+        event_records = self.subscription_events(limit=500).get("events", [])
+        event_memory = _subscription_event_memory_by_full_name(event_records)
         project_profiles = self._project_profiles_by_full_name([project.get("full_name") or "" for project in projects])
         projects = [
             {
                 **project,
                 "project_profile": project_profiles.get(str(project.get("full_name") or "").lower())
                 or _project_profile_from_project(project, feedback_memory.get(str(project.get("full_name") or "").lower())),
+                "event_memory": event_memory.get(str(project.get("full_name") or "").lower(), _empty_event_memory()),
+                "event_reason": _recommendation_event_reason(
+                    event_memory.get(str(project.get("full_name") or "").lower(), {})
+                ),
             }
             for project in projects
         ]
@@ -247,6 +253,7 @@ class ApiRepository:
                 query=normalized_query,
             ),
             "feedback_memory": _feedback_memory_response(feedback_records),
+            "event_memory": _event_memory_response(event_records),
             "agent_task_summary": _project_agent_task_summary(task_records),
             "recommendations": projects,
         }
@@ -1382,13 +1389,20 @@ class ApiRepository:
         evidence = explanation.get("evidence") if isinstance(explanation.get("evidence"), list) else []
         citations = explained.get("citations") if isinstance(explained.get("citations"), list) else []
         contexts = explained.get("contexts") if isinstance(explained.get("contexts"), list) else []
+        notification_memory = _notification_rag_memory(self.db_path, query, limit=limit)
+        notification_evidence = notification_memory.get("evidence") if isinstance(notification_memory.get("evidence"), list) else []
+        notification_citations = notification_memory.get("citations") if isinstance(notification_memory.get("citations"), list) else []
+        if notification_memory.get("event_count"):
+            answer = f"{answer}\n\n通知记忆：{notification_memory.get('summary') or ''}".strip()
+            evidence = [*evidence, *notification_evidence]
+            citations = [*citations, *notification_citations]
         return {
             "schema_version": 1,
             "query": explained.get("query") or query,
             "answer": answer,
             "answer_model": "rule:rag-ask-v1",
-            "confidence": explanation.get("confidence") or "low",
-            "count": len(contexts),
+            "confidence": "medium" if notification_memory.get("event_count") and not contexts else explanation.get("confidence") or "low",
+            "count": len(contexts) + len(notification_evidence),
             "retrieval": explained.get("retrieval") or {},
             "citations": citations,
             "evidence": evidence,
@@ -1398,6 +1412,7 @@ class ApiRepository:
             "cached": bool(explained.get("cached")),
             "next_actions": _rag_answer_next_actions(explanation=explanation, quality=quality, citations=citations),
             "contexts": contexts,
+            "notification_memory": notification_memory,
         }
 
     def rag_explanations(
@@ -2215,6 +2230,7 @@ class ApiRepository:
                 "project_profile": {},
                 "agent_tasks": {"count": 0, "tasks": [], "summary": _project_agent_task_summary([])},
                 "agent_task_runs": {"count": 0, "runs": [], "summary": {"running": 0, "succeeded": 0, "failed": 0}},
+                "notification_memory": {"event_count": 0, "candidate_count": 0, "delivery_count": 0, "events": [], "candidates": [], "deliveries": []},
                 "next_actions": [],
                 "retrieval": {},
                 "contexts": [],
@@ -2254,6 +2270,13 @@ class ApiRepository:
         feedback_summary = feedback.get("summary") if isinstance(feedback.get("summary"), dict) else {}
         agent_tasks = self.project_agent_tasks(full_name=detail.get("full_name") or normalized, limit=50)
         agent_task_runs = self.project_agent_task_runs(full_name=detail.get("full_name") or normalized, limit=50)
+        project_events = self.subscription_events(full_name=detail.get("full_name") or normalized, limit=50)
+        project_candidates = self.notification_candidates(full_name=detail.get("full_name") or normalized, limit=50)
+        candidate_ids = {item.get("candidate_id") for item in project_candidates.get("candidates", [])}
+        project_deliveries = [
+            item for item in self.notification_deliveries(limit=200).get("deliveries", [])
+            if item.get("candidate_id") in candidate_ids
+        ]
         project_profile = self._project_profile_for_full_name(detail.get("full_name") or normalized) or _project_profile_from_detail(detail)
         project_profile = _merge_project_profile_runtime_signals(project_profile, feedback_summary, explanation_items)
         next_actions = _project_next_actions(
@@ -2282,6 +2305,17 @@ class ApiRepository:
             "project_profile": project_profile,
             "agent_tasks": agent_tasks,
             "agent_task_runs": agent_task_runs,
+            "notification_memory": {
+                "event_count": project_events.get("count", 0),
+                "candidate_count": project_candidates.get("count", 0),
+                "delivery_count": len(project_deliveries),
+                "events": project_events.get("events", []),
+                "candidates": project_candidates.get("candidates", []),
+                "deliveries": project_deliveries,
+                "summary": _project_notification_summary(
+                    project_events.get("events", []), project_candidates.get("candidates", []), project_deliveries
+                ),
+            },
             "next_actions": next_actions,
             "retrieval": retrieval.get("retrieval") if isinstance(retrieval.get("retrieval"), dict) else {},
             "contexts": retrieval.get("contexts") if isinstance(retrieval.get("contexts"), list) else [],
@@ -6885,6 +6919,126 @@ def _feedback_memory_response(feedback: list[dict[str, Any]]) -> dict[str, Any]:
         "label_counts": summary.get("label_counts", {}),
         "repository_counts": summary.get("repository_counts", {}),
         "ready_for_preference_memory": summary.get("ready_for_preference_memory", False),
+    }
+
+
+def _empty_event_memory() -> dict[str, Any]:
+    return {"count": 0, "event_types": [], "severity_counts": {}, "latest_event": {}, "latest_detected_at": ""}
+
+
+def _subscription_event_memory_by_full_name(events: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    grouped: dict[str, dict[str, Any]] = {}
+    for event in events:
+        full_name = str(event.get("full_name") or "").lower()
+        if not full_name:
+            continue
+        memory = grouped.setdefault(full_name, _empty_event_memory())
+        memory["count"] = _int_value(memory.get("count")) + 1
+        event_type = str(event.get("event_type") or "")
+        if event_type and event_type not in memory["event_types"]:
+            memory["event_types"].append(event_type)
+        severity = str(event.get("severity") or "info")
+        memory["severity_counts"][severity] = _int_value(memory["severity_counts"].get(severity)) + 1
+        detected_at = str(event.get("detected_at") or "")
+        if detected_at >= str(memory.get("latest_detected_at") or ""):
+            memory["latest_detected_at"] = detected_at
+            memory["latest_event"] = {
+                "event_id": event.get("event_id") or "", "event_type": event_type,
+                "severity": severity, "title": event.get("title") or "",
+                "summary": event.get("summary") or "", "detected_at": detected_at,
+            }
+    return grouped
+
+
+def _event_memory_response(events: list[dict[str, Any]]) -> dict[str, Any]:
+    grouped = _subscription_event_memory_by_full_name(events)
+    return {"event_count": len(events), "project_count": len(grouped), "projects": grouped}
+
+
+def _recommendation_event_reason(memory: dict[str, Any]) -> str:
+    if not memory or not _int_value(memory.get("count")):
+        return "暂无项目变化事件记忆。"
+    latest = memory.get("latest_event") if isinstance(memory.get("latest_event"), dict) else {}
+    return (
+        f"最近事件：{latest.get('title') or latest.get('event_type') or '项目变化'}"
+        f"（{latest.get('severity') or 'info'}），累计 {_int_value(memory.get('count'))} 条变化记录。"
+    )
+
+
+def _project_notification_summary(
+    events: list[dict[str, Any]],
+    candidates: list[dict[str, Any]],
+    deliveries: list[dict[str, Any]],
+) -> list[str]:
+    summaries = [f"检测到 {len(events)} 条项目事件，生成 {len(candidates)} 条推送候选，记录 {len(deliveries)} 次逐渠道投递。"]
+    if events:
+        latest = events[0]
+        summaries.append(f"最近事件：{latest.get('title') or latest.get('event_type')}；{latest.get('summary') or ''}")
+    if deliveries:
+        succeeded = sum(1 for item in deliveries if item.get("status") == "succeeded")
+        failed = sum(1 for item in deliveries if item.get("status") in {"failed", "skipped"})
+        summaries.append(f"渠道成功 {succeeded} 次，失败或跳过 {failed} 次。")
+    return summaries
+
+
+def _notification_rag_memory(db_path: Path, query: str, *, limit: int) -> dict[str, Any]:
+    lower_query = str(query or "").lower()
+    relevant_terms = ("通知", "推送", "订阅", "触发", "notification", "delivery", "subscribe")
+    empty = {
+        "event_count": 0, "candidate_count": 0, "delivery_count": 0,
+        "summary": "", "events": [], "deliveries": [], "evidence": [], "citations": [],
+    }
+    if not any(term in lower_query for term in relevant_terms):
+        return empty
+    connection = connect(db_path)
+    try:
+        initialize(connection)
+        rows = connection.execute(
+            "SELECT * FROM subscription_events ORDER BY detected_at DESC, event_id DESC LIMIT ?",
+            (max(1, min(limit * 5, 100)),),
+        ).fetchall()
+        all_events = [_subscription_event_row_for_memory(row) for row in rows]
+        named = [event for event in all_events if str(event.get("full_name") or "").lower() in lower_query]
+        events = (named or all_events)[:max(1, min(limit, 20))]
+        event_ids = [event["event_id"] for event in events]
+        candidates: list[dict[str, Any]] = []
+        deliveries: list[dict[str, Any]] = []
+        if event_ids:
+            placeholders = ",".join("?" for _ in event_ids)
+            candidates = [dict(row) for row in connection.execute(
+                f"SELECT candidate_id, subscription_id, event_id, status FROM notification_candidates WHERE event_id IN ({placeholders})",
+                event_ids,
+            ).fetchall()]
+            candidate_ids = [item["candidate_id"] for item in candidates]
+            if candidate_ids:
+                candidate_placeholders = ",".join("?" for _ in candidate_ids)
+                deliveries = [dict(row) for row in connection.execute(
+                    f"SELECT delivery_id, candidate_id, subscription_id, event_id, channel, status, attempt_count, finished_at, error FROM notification_deliveries WHERE candidate_id IN ({candidate_placeholders}) ORDER BY finished_at DESC",
+                    candidate_ids,
+                ).fetchall()]
+    finally:
+        connection.close()
+    evidence = [{
+        "evidence_id": f"notification-event:{event['event_id']}", "source_type": "subscription_event",
+        "source_id": event["event_id"], "full_name": event["full_name"], "title": event["title"],
+        "excerpt": event["summary"], "observed_at": event["detected_at"],
+    } for event in events]
+    citations = [{
+        "citation_id": f"notification-citation:{index}", "evidence_id": item["evidence_id"],
+        "title": item["title"], "source_type": item["source_type"], "source_id": item["source_id"],
+    } for index, item in enumerate(evidence, start=1)]
+    return {
+        "event_count": len(events), "candidate_count": len(candidates), "delivery_count": len(deliveries),
+        "summary": " ".join(_project_notification_summary(events, candidates, deliveries)),
+        "events": events, "deliveries": deliveries, "evidence": evidence, "citations": citations,
+    }
+
+
+def _subscription_event_row_for_memory(row: Any) -> dict[str, Any]:
+    return {
+        "event_id": row["event_id"], "event_type": row["event_type"], "full_name": row["full_name"],
+        "severity": row["severity"], "status": row["status"], "title": row["title"],
+        "summary": row["summary"], "detected_at": row["detected_at"],
     }
 
 
