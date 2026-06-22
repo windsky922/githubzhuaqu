@@ -292,7 +292,7 @@
     function ragResultSummaryHtml(job) {
       const result = job.result || {};
       const kind = job.kind || "";
-      if (!["rag_corpus_rebuild", "rag_embedding_build", "rag_backfill"].includes(kind)) return "";
+      if (!["rag_corpus_rebuild", "rag_embedding_build", "rag_backfill", "dev_context_index"].includes(kind)) return "";
       const rows = [
         ["执行模式", result.dry_run ? "预览，不写库" : "已写入 SQLite"],
         ["任务状态", result.status || "-"],
@@ -317,6 +317,15 @@
           ["处理项目", result.processed_count || 0],
           ["回填前覆盖率", percent((result.coverage_before || {}).coverage_rate || 0)],
           ["回填前缺口", (result.coverage_before || {}).gap_count || 0]
+        );
+      } else if (kind === "dev_context_index") {
+        rows.push(
+          ["索引运行", result.run_id || "-"],
+          ["来源数量", result.source_count || 0],
+          ["分块数量", result.chunk_count || 0],
+          ["embedding", result.embedding_count || 0],
+          ["命令数量", result.command_count || 0],
+          ["运行测试", result.run_checks ? "是" : "否"]
         );
       }
       const repositories = Array.isArray(result.processed_repositories) ? result.processed_repositories : [];
@@ -394,7 +403,7 @@
       setAction("执行中...", "");
       fetch(`/v1/jobs/${encodeURIComponent(jobId)}/execute`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: adminWriteHeaders(),
         body: JSON.stringify({ confirm_execution: true, requested_by: "job_detail_page" }),
       })
         .then(jsonOrThrow)
@@ -415,7 +424,7 @@
       setAction("重试创建中...", "");
       fetch(`/v1/jobs/${encodeURIComponent(jobId)}/retry`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: adminWriteHeaders(),
         body: JSON.stringify({ requested_by: "job_detail_page" }),
       })
         .then(jsonOrThrow)
@@ -496,6 +505,19 @@
     function jsonOrThrow(response) {
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       return response.json();
+    }
+
+    function adminWriteHeaders() {
+      const token = adminToken();
+      const headers = { "Content-Type": "application/json" };
+      if (token) headers["X-Admin-Token"] = token;
+      return headers;
+    }
+
+    function adminToken() {
+      const token = params.get("admin_token") || window.localStorage.getItem("github_weekly_admin_token") || "";
+      if (params.get("admin_token")) window.localStorage.setItem("github_weekly_admin_token", params.get("admin_token"));
+      return token.trim();
     }
 
     function escapeHtml(value) {

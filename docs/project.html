@@ -219,6 +219,43 @@
       line-height: 1.5;
       margin: 10px 0 0;
     }
+    .feedback-panel {
+      margin: 12px 0;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+    }
+    .feedback-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .feedback-actions button {
+      width: auto;
+      min-width: 96px;
+    }
+    .feedback-actions button:disabled {
+      cursor: not-allowed;
+      opacity: .55;
+    }
+    .feedback-status {
+      min-height: 18px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .workbench-list { display: grid; gap: 8px; }
+    .workbench-item { border-top: 1px solid var(--line); padding: 10px 0; display: grid; gap: 7px; }
+    .workbench-item:first-child { border-top: 0; }
+    .workbench-item span { color: var(--muted); font-size: 13px; }
+    .workbench-item p { margin: 0; }
+    .workbench-item .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .workbench-item input { min-width: min(320px, 100%); flex: 1 1 240px; }
+    .workbench-item button { width: auto; min-width: 80px; }
+    .feedback-status.error {
+      color: var(--risk);
+    }
     table {
       width: 100%;
       border-collapse: collapse;
@@ -273,6 +310,8 @@
     const content = document.getElementById("content");
     const title = document.getElementById("title");
 
+    adminToken();
+
     Promise.resolve()
       .then(loadDetail)
       .then(render)
@@ -297,8 +336,9 @@
           .then(jsonOrThrow)
           .catch(() => ({})),
         loadProjectRag(repo, detail),
+        loadProjectSubscriptions(repo),
       ])
-        .then(([data, rag]) => ({
+        .then(([data, rag, subscriptions]) => ({
           ...detail,
           similar_projects: Array.isArray(data.similar_projects) ? data.similar_projects : detail.similar_projects || [],
           similar_summary: Array.isArray(data.selection_summary) ? data.selection_summary : [],
@@ -311,6 +351,13 @@
           rag_explanations: Array.isArray(rag.explanations) ? rag.explanations : [],
           rag_explanation_count: number((rag.explanation_summary || {}).count),
           rag_explanation_summary: rag.explanation_summary || {},
+          feedback_memory: rag.feedback_memory || detail.feedback_memory || {},
+          project_profile: rag.project_profile || detail.project_profile || {},
+          agent_tasks: rag.agent_tasks || { count: 0, tasks: [], summary: {} },
+          agent_task_runs: rag.agent_task_runs || { count: 0, runs: [], summary: {} },
+          notification_memory: rag.notification_memory || { event_count: 0, candidate_count: 0, delivery_count: 0, events: [], candidates: [], deliveries: [], summary: [] },
+          project_subscriptions: subscriptions,
+          next_actions: Array.isArray(rag.next_actions) ? rag.next_actions : [],
         }))
         .catch(() => detail);
     }
@@ -358,6 +405,13 @@
         rag_explanations: [],
         rag_explanation_count: 0,
         rag_explanation_summary: {},
+        feedback_memory: {},
+        project_profile: {},
+        agent_tasks: { count: 0, tasks: [], summary: {} },
+        agent_task_runs: { count: 0, runs: [], summary: {} },
+        notification_memory: { event_count: 0, candidate_count: 0, delivery_count: 0, events: [], candidates: [], deliveries: [], summary: [] },
+        project_subscriptions: [],
+        next_actions: [],
         data_source: "静态 JSON"
       };
     }
@@ -391,6 +445,33 @@
           ${metric("最近入选", detail.latest_run_date || "-")}
           ${metric("质量分", number(detail.latest_quality_score))}
         </section>
+        <section class="feedback-panel">
+          <h2>项目反馈</h2>
+          ${feedbackMemoryHtml(detail.feedback_memory)}
+          <div class="feedback-actions" data-repo="${escapeAttribute(detail.full_name || "")}">
+            <button type="button" data-project-feedback="useful"${shouldUseApi() ? "" : " disabled"}>有用</button>
+            <button type="button" data-project-feedback="not_fit"${shouldUseApi() ? "" : " disabled"}>不适合</button>
+            <button type="button" data-project-feedback="watch"${shouldUseApi() ? "" : " disabled"}>继续跟踪</button>
+          </div>
+          <div id="projectFeedbackStatus" class="feedback-status" aria-live="polite">${shouldUseApi() ? "" : "反馈写入需要本地后端或 api=1。"}</div>
+        </section>
+        <section class="section" style="margin-top:12px">
+          <h2>Agent 研究摘要</h2>
+          ${projectProfileHtml(detail.project_profile)}
+        </section>
+        <section class="section" style="margin-top:12px">
+          <h2>Agent 下一步动作</h2>
+          ${agentTasksHtml(detail.agent_tasks, detail.next_actions, detail.agent_task_runs)}
+          <div id="projectAgentTaskStatus" class="feedback-status" aria-live="polite">${shouldUseApi() ? "" : "任务操作需要本地后端或 api=1。"}</div>
+        </section>
+        <section class="section" style="margin-top:12px">
+          <h2>项目事件与订阅</h2>
+          ${notificationMemoryHtml(detail.notification_memory)}
+          <div class="actions">
+            <button type="button" data-project-subscribe${shouldUseApi() && !(detail.project_subscriptions || []).length ? "" : " disabled"}>${(detail.project_subscriptions || []).length ? "已订阅项目变化" : "订阅项目变化"}</button>
+          </div>
+          <div id="projectSubscriptionStatus" class="feedback-status" aria-live="polite">${shouldUseApi() ? "" : "订阅写入需要本地后端或 api=1。"}</div>
+        </section>
         <section class="grid">
           <div class="section"><h2>推荐理由</h2>${listHtml(detail.selection_reasons || [], "暂无推荐理由。")}</div>
           <div class="section"><h2>趋势判断</h2>${listHtml(detail.trend_summary || [], "暂无趋势判断。")}</div>
@@ -410,6 +491,9 @@
           <div class="table-shell">${historyTable(detail.history || [])}</div>
         </section>
       `;
+      bindProjectFeedback(detail);
+      bindProjectAgentTasks(detail);
+      bindProjectSubscription(detail);
     }
 
     function historyTable(history) {
@@ -485,6 +569,8 @@
           prompt_context: "",
           rag_explanations: [],
           rag_explanation_count: 0,
+          feedback_memory: {},
+          project_profile: {},
         });
       }
       const params = new URLSearchParams();
@@ -499,7 +585,263 @@
           prompt_context: "",
           explanations: [],
           explanation_summary: { count: 0, recommendations: [] },
+          feedback_memory: {},
+          project_profile: {},
+          agent_tasks: { count: 0, tasks: [], summary: {} },
+          agent_task_runs: { count: 0, runs: [], summary: {} },
+          notification_memory: { event_count: 0, candidate_count: 0, delivery_count: 0, events: [], candidates: [], deliveries: [], summary: [] },
+          next_actions: [],
         }));
+    }
+
+    function loadProjectSubscriptions(repo) {
+      if (!shouldUseApi()) return Promise.resolve([]);
+      return fetch("/v1/subscriptions?status=enabled&limit=200", { cache: "no-store" })
+        .then(jsonOrThrow)
+        .then(data => (data.subscriptions || []).filter(subscription =>
+          (subscription.full_names || []).some(name => String(name || "").toLowerCase() === repo.toLowerCase())
+        ))
+        .catch(() => []);
+    }
+
+    function projectProfileHtml(profile) {
+      if (!profile || !Object.keys(profile).length) return "<p>项目研究档案需要本地后端或 api=1 模式读取。</p>";
+      return `
+        <div class="grid">
+          <div><h3>项目定位</h3><p>${escapeHtml(profile.project_positioning || "暂无项目定位。")}</p></div>
+          <div><h3>适用场景</h3>${listHtml(profile.use_cases || [], "暂无适用场景。")}</div>
+          <div><h3>优势信号</h3>${listHtml(profile.strengths || [], "暂无优势信号。")}</div>
+          <div><h3>风险点</h3>${listHtml(profile.risks || [], "暂无风险点。")}</div>
+          <div><h3>质量判断</h3><p>${escapeHtml(profile.quality_summary || "暂无质量判断。")}</p></div>
+          <div><h3>跟踪理由</h3><p>${escapeHtml(profile.tracking_reason || "暂无跟踪理由。")}</p></div>
+          <div class="wide"><h3>RAG 摘要</h3><p>${escapeHtml(profile.rag_summary || "暂无 RAG 摘要。")}</p></div>
+          <div class="wide"><h3>Agent 判断</h3><p>${escapeHtml(profile.agent_judgement || "暂无 Agent 判断。")}</p></div>
+        </div>
+      `;
+    }
+
+    function feedbackMemoryHtml(memory) {
+      const summary = memory && memory.summary ? memory.summary : memory || {};
+      const count = Number(memory && memory.count !== undefined ? memory.count : summary.record_count || 0);
+      if (!count) return "<p>暂无反馈记忆。</p>";
+      const labels = Array.isArray(summary.labels) ? summary.labels.slice(0, 4).join(", ") : "";
+      const latestNote = summary.latest_note ? ` / ${summary.latest_note}` : "";
+      return `<p>反馈 ${number(count)} 条，平均评分 ${number(summary.average_rating)}，最近评分 ${signedNumber(summary.latest_rating)}${labels ? ` / ${escapeHtml(labels)}` : ""}${escapeHtml(latestNote)}</p>`;
+    }
+
+    function notificationMemoryHtml(memory) {
+      const data = memory || {};
+      const events = Array.isArray(data.events) ? data.events : [];
+      const summaries = Array.isArray(data.summary) ? data.summary : [];
+      const metrics = `<div class="summary">${metric("事件", number(data.event_count))}${metric("候选", number(data.candidate_count))}${metric("投递", number(data.delivery_count))}</div>`;
+      if (!events.length) return `${metrics}<p>暂无项目变化事件。</p>`;
+      const rows = events.slice(0, 8).map(event => `<div class="workbench-item"><strong>${escapeHtml(event.title || event.event_type || "项目变化")}</strong><span>${escapeHtml(event.severity || "info")} / ${escapeHtml(event.detected_at || "")}</span><p>${escapeHtml(event.summary || "")}</p></div>`).join("");
+      return `${metrics}${summaries.length ? listHtml(summaries, "") : ""}<div class="workbench-list">${rows}</div>`;
+    }
+
+    function bindProjectSubscription(detail) {
+      const button = document.querySelector("[data-project-subscribe]");
+      if (!button || button.disabled) return;
+      button.addEventListener("click", () => createProjectSubscription(button, detail));
+    }
+
+    async function createProjectSubscription(button, detail) {
+      const status = document.getElementById("projectSubscriptionStatus");
+      try {
+        button.disabled = true;
+        status.textContent = "保存订阅中...";
+        const response = await fetch("/v1/subscriptions", {
+          method: "POST",
+          headers: adminWriteHeaders(),
+          body: JSON.stringify({
+            name: `${detail.full_name || repoName()} 项目变化`,
+            full_names: [detail.full_name || repoName()],
+            event_types: ["trending_entered", "star_growth_spike", "quality_changed", "risk_added", "risk_resolved", "release_detected", "agent_decision_changed"],
+            min_severity: "medium",
+            frequency: "immediate",
+            channels: ["telegram"],
+          }),
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        status.textContent = "项目变化订阅已保存。";
+        button.textContent = "已订阅项目变化";
+      } catch (error) {
+        button.disabled = false;
+        status.textContent = `订阅保存失败：${error.message}`;
+      }
+    }
+
+    function agentTasksHtml(memory, nextActions, runMemory) {
+      const tasks = memory && Array.isArray(memory.tasks) ? memory.tasks : [];
+      const suggestions = Array.isArray(nextActions) ? nextActions.filter(item => item && item.status === "suggested") : [];
+      const taskRows = tasks.map(task => {
+        const actions = [];
+        if (task.status === "planned" || task.status === "failed") actions.push(`<button type="button" data-agent-task-check data-agent-task-id="${escapeAttribute(task.task_id || "")}"${shouldUseApi() ? "" : " disabled"}>执行检查</button>`);
+        if (task.status === "planned") actions.push(`<button type="button" data-agent-task-execute="execute" data-agent-task-id="${escapeAttribute(task.task_id || "")}"${shouldUseApi() ? "" : " disabled"}>执行</button>`);
+        if (task.status === "failed") actions.push(`<button type="button" data-agent-task-execute="retry" data-agent-task-id="${escapeAttribute(task.task_id || "")}"${shouldUseApi() ? "" : " disabled"}>重试</button>`);
+        actions.push(`<button type="button" data-agent-task-runs data-agent-task-id="${escapeAttribute(task.task_id || "")}"${shouldUseApi() ? "" : " disabled"}>历史</button>`);
+        return `<div class="workbench-item"><strong>${escapeHtml(agentTaskTypeLabel(task.task_type))}</strong><span>优先级 ${number(task.priority)} / ${escapeHtml(agentTaskStatusLabel(task.status))}</span><p>${escapeHtml(task.reason || "暂无任务原因。")}</p>${task.result_summary ? `<p>结果：${escapeHtml(task.result_summary)}</p>` : ""}<div class="actions">${actions.join("")}</div></div>`;
+      });
+      const suggestionRows = suggestions.map((action, index) => `<div class="workbench-item"><strong>${escapeHtml(agentTaskTypeLabel(action.task_type))}</strong><span>建议优先级 ${number(action.priority)}</span><p>${escapeHtml(action.reason || "")}</p><button type="button" data-agent-task-create="${index}"${shouldUseApi() ? "" : " disabled"}>创建任务</button></div>`);
+      const rows = [...taskRows, ...suggestionRows];
+      const runs = runMemory && Array.isArray(runMemory.runs) ? runMemory.runs : [];
+      const runRows = runs.slice(0, 10).map(run => `<div class="workbench-item"><strong>${escapeHtml(agentTaskTypeLabel(run.task_type))}</strong><span>${escapeHtml(agentRunStatusLabel(run.status))} / ${escapeHtml(run.started_at || "")}</span><p>${escapeHtml((run.result || {}).execution_summary || run.error || "暂无执行摘要。")}</p></div>`);
+      return `${rows.length ? `<div class="workbench-list">${rows.join("")}</div>` : "<p>暂无 Agent 任务。</p>"}${runRows.length ? `<h3>最近执行</h3><div class="workbench-list">${runRows.join("")}</div>` : ""}`;
+    }
+
+    function bindProjectAgentTasks(detail) {
+      document.querySelectorAll("[data-agent-task-create]").forEach(button => {
+        button.addEventListener("click", () => createProjectAgentTask(button, detail));
+      });
+      document.querySelectorAll("[data-agent-task-check]").forEach(button => {
+        button.addEventListener("click", () => inspectProjectAgentTask(button, "execution-check"));
+      });
+      document.querySelectorAll("[data-agent-task-execute]").forEach(button => {
+        button.addEventListener("click", () => executeProjectAgentTask(button));
+      });
+      document.querySelectorAll("[data-agent-task-runs]").forEach(button => {
+        button.addEventListener("click", () => inspectProjectAgentTask(button, "runs"));
+      });
+    }
+
+    async function createProjectAgentTask(button, detail) {
+      if (!shouldUseApi()) return;
+      const status = document.getElementById("projectAgentTaskStatus");
+      const action = (detail.next_actions || [])[Number(button.dataset.agentTaskCreate)];
+      if (!action) return;
+      try {
+        status.textContent = "创建任务中...";
+        const response = await fetch(`/v1/projects/${encodeURIComponentOwnerRepo(detail.full_name || repoName())}/agent-tasks`, {
+          method: "POST",
+          headers: adminWriteHeaders(),
+          body: JSON.stringify({
+            task_type: action.task_type,
+            priority: action.priority,
+            reason: action.reason,
+            source: "project_page",
+            payload: { subscription_action: action.subscription_action || "watch" }
+          })
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        status.textContent = "任务已创建，正在刷新。";
+        window.location.reload();
+      } catch (error) {
+        status.textContent = `任务创建失败：${error.message}`;
+      }
+    }
+
+    async function inspectProjectAgentTask(button, endpoint) {
+      if (!shouldUseApi()) return;
+      const status = document.getElementById("projectAgentTaskStatus");
+      try {
+        const taskId = button.dataset.agentTaskId || "";
+        status.textContent = endpoint === "runs" ? "读取执行历史中..." : "执行检查中...";
+        const response = await fetch(`/v1/agent-tasks/${encodeURIComponent(taskId)}/${endpoint}`, { cache: "no-store" });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        if (endpoint === "runs") {
+          const latest = (data.runs || [])[0] || {};
+          status.textContent = `执行记录 ${number(data.count)} 条；最近状态 ${agentRunStatusLabel(latest.status)}；${(latest.result || {}).execution_summary || latest.error || "暂无摘要"}`;
+        } else {
+          const failed = (data.checks || []).filter(item => !item.passed).map(item => item.message).join("；");
+          status.textContent = data.executable ? "检查通过，可以执行。" : `检查未通过：${failed || "状态不允许执行"}`;
+        }
+      } catch (error) {
+        status.textContent = `任务信息读取失败：${error.message}`;
+      }
+    }
+
+    async function executeProjectAgentTask(button) {
+      if (!shouldUseApi()) return;
+      const status = document.getElementById("projectAgentTaskStatus");
+      try {
+        const taskId = button.dataset.agentTaskId || "";
+        const endpoint = button.dataset.agentTaskExecute || "execute";
+        status.textContent = endpoint === "retry" ? "任务重试中..." : "任务执行中...";
+        const response = await fetch(`/v1/agent-tasks/${encodeURIComponent(taskId)}/${endpoint}`, {
+          method: "POST",
+          headers: adminWriteHeaders(),
+          body: JSON.stringify({ dry_run: false })
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        if (!data.executed) throw new Error((data.checks || []).filter(item => !item.passed).map(item => item.message).join("；") || "任务不可执行");
+        status.textContent = data.status === "succeeded" ? "任务执行完成，正在刷新。" : `任务执行失败：${data.error || "未知错误"}`;
+        window.location.reload();
+      } catch (error) {
+        status.textContent = `任务执行失败：${error.message}`;
+      }
+    }
+
+    function agentTaskTypeLabel(value) {
+      return ({ observe: "观察", review_risk: "风险复查", deep_analysis: "深度分析", notify: "订阅推送", ignore: "忽略", continue_tracking: "继续跟踪" })[value] || value || "观察";
+    }
+
+    function agentTaskStatusLabel(value) {
+      return ({ planned: "待执行", in_progress: "执行中", completed: "已完成", failed: "失败", cancelled: "已取消", suggested: "建议" })[value] || value || "未知";
+    }
+
+    function agentRunStatusLabel(value) {
+      return ({ running: "运行中", succeeded: "成功", failed: "失败" })[value] || value || "未知";
+    }
+
+    function bindProjectFeedback(detail) {
+      document.querySelectorAll("[data-project-feedback]").forEach(button => {
+        button.addEventListener("click", () => submitProjectFeedback(button, detail));
+      });
+    }
+
+    async function submitProjectFeedback(button, detail) {
+      if (!shouldUseApi()) return;
+      const status = document.getElementById("projectFeedbackStatus");
+      const action = button.dataset.projectFeedback || "";
+      const payload = projectFeedbackPayload(detail.full_name || repoName(), action);
+      try {
+        setFeedbackStatus(status, "写入中...", false);
+        const response = await fetch("/v1/feedback", {
+          method: "POST",
+          headers: adminWriteHeaders(),
+          body: JSON.stringify(payload)
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        setFeedbackStatus(status, "反馈已写入，刷新后会影响推荐排序。", false);
+      } catch (error) {
+        setFeedbackStatus(status, `反馈写入失败：${error.message || error}`, true);
+      }
+    }
+
+    function projectFeedbackPayload(fullName, action) {
+      const ratings = { useful: 2, not_fit: -2, watch: 1 };
+      const notes = { useful: "project useful", not_fit: "project not fit", watch: "continue tracking" };
+      const params = new URLSearchParams(window.location.search);
+      return {
+        full_name: fullName,
+        profile: params.get("profile") || "",
+        rating: ratings[action] || 0,
+        labels: [action],
+        note: notes[action] || action,
+        source: "project_page"
+      };
+    }
+
+    function setFeedbackStatus(target, message, isError) {
+      if (!target) return;
+      target.textContent = message;
+      target.classList.toggle("error", Boolean(isError));
+    }
+
+    function adminWriteHeaders() {
+      const token = adminToken();
+      const headers = { "Content-Type": "application/json" };
+      if (token) headers["X-Admin-Token"] = token;
+      return headers;
+    }
+
+    function adminToken() {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get("admin_token") || window.localStorage.getItem("github_weekly_admin_token") || "";
+      if (params.get("admin_token")) window.localStorage.setItem("github_weekly_admin_token", params.get("admin_token"));
+      return token.trim();
     }
 
     function ragEvidenceHtml(detail) {
@@ -660,6 +1002,11 @@
     function number(value) {
       const parsed = Number(value || 0);
       return Number.isFinite(parsed) ? parsed : 0;
+    }
+
+    function signedNumber(value) {
+      const numberValue = number(value);
+      return numberValue > 0 ? `+${numberValue}` : numberValue;
     }
 
     function escapeHtml(value) {

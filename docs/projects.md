@@ -4,6 +4,16 @@
 
 | 日期 | 项目 | 来源 | Trending 排名 | 方向 | 语言 | Star | 新增 Star | 风险提示 | 链接 |
 |---|---|---|---:|---|---|---:|---:|---:|---|
+| 2026-06-22 | DeusData/codebase-memory-mcp | GitHub Trending | 1 | LLM Tooling | C | 10499 | 0 | 0 | [https://github.com/DeusData/codebase-memory-mcp](https://github.com/DeusData/codebase-memory-mcp) |
+| 2026-06-22 | chopratejas/headroom | GitHub Search + GitHub Trending | 2 | AI Agent | Python | 44832 | 17084 | 0 | [https://github.com/chopratejas/headroom](https://github.com/chopratejas/headroom) |
+| 2026-06-22 | Panniantong/Agent-Reach | GitHub Search + GitHub Trending | 3 | AI Agent | Python | 37022 | 8124 | 0 | [https://github.com/Panniantong/Agent-Reach](https://github.com/Panniantong/Agent-Reach) |
+| 2026-06-22 | iptv-org/iptv | GitHub Search + GitHub Trending | 4 | Other | TypeScript | 127185 | 5856 | 0 | [https://github.com/iptv-org/iptv](https://github.com/iptv-org/iptv) |
+| 2026-06-22 | n0-computer/iroh | GitHub Trending | 5 | Other | Rust | 10460 | 0 | 0 | [https://github.com/n0-computer/iroh](https://github.com/n0-computer/iroh) |
+| 2026-06-22 | google-research/timesfm | GitHub Trending | 6 | Other | Python | 24920 | 0 | 0 | [https://github.com/google-research/timesfm](https://github.com/google-research/timesfm) |
+| 2026-06-22 | NVIDIA/SkillSpector | GitHub Trending | 7 | AI Agent | Python | 9087 | 3613 | 0 | [https://github.com/NVIDIA/SkillSpector](https://github.com/NVIDIA/SkillSpector) |
+| 2026-06-22 | asgeirtj/system_prompts_leaks | GitHub Trending | 8 | AI Agent | JavaScript | 44540 | 0 | 0 | [https://github.com/asgeirtj/system_prompts_leaks](https://github.com/asgeirtj/system_prompts_leaks) |
+| 2026-06-22 | addyosmani/agent-skills | GitHub Trending | 11 | AI Agent | Shell | 64859 | 5234 | 0 | [https://github.com/addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) |
+| 2026-06-22 | LMCache/LMCache | GitHub Trending | 15 | LLM Tooling | Python | 9556 | 0 | 0 | [https://github.com/LMCache/LMCache](https://github.com/LMCache/LMCache) |
 | 2026-06-15 | mvanhorn/last30days-skill | GitHub Trending | 1 | AI Agent | Python | 42139 | 10692 | 0 | [https://github.com/mvanhorn/last30days-skill](https://github.com/mvanhorn/last30days-skill) |
 | 2026-06-15 | apple/container | GitHub Trending | 2 | Other | Swift | 37059 | 0 | 0 | [https://github.com/apple/container](https://github.com/apple/container) |
 | 2026-06-15 | chopratejas/headroom | GitHub Search + GitHub Trending | 4 | AI Agent | Python | 27748 | 10650 | 0 | [https://github.com/chopratejas/headroom](https://github.com/chopratejas/headroom) |

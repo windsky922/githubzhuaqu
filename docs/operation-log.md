@@ -2,6 +2,306 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-06-21 追加：通知记忆、管理工作台与自动化入口
+
+1. 推荐结果新增项目级 `event_memory` 和 `event_reason`；RAG 问答与单项目 RAG 聚合新增 `notification_memory`，统一引用事件、候选和投递审计。
+2. 项目详情页新增“订阅项目变化”入口，默认覆盖七类事件；管理页新增事件检测、候选构建、发送预览、确认投递和失败重试工作台。
+3. 新增 `scripts/manage_notifications.py`，支持 detect、build、preview、deliver 和 deliver-pending；投递命令默认 dry-run，真实发送继续要求双重显式确认。
+4. GitHub Actions 默认检测事件并构建候选，真实事件通知默认关闭；即使通知步骤失败，也不会阻塞 Pages 和现有每周周报链接推送。
+5. 新增 CLI、workflow、页面和通知记忆定向测试，固定默认安全行为、执行顺序和公开响应契约。
+
+### 问题记录
+
+1. 前期按名称猜测了不存在的 `scripts/run_agent_tasks.py`，实际脚本是 `scripts/run_project_agent_tasks.py`。后续引用项目脚本前先用 `rg --files scripts` 确认真实路径。
+2. PowerShell 执行策略阻止直接加载 npm 生成的 `context-mode.ps1`。项目检查改用可执行入口或定向 PowerShell 命令；面向用户的命令仍保持 PowerShell，并避免修改系统执行策略。
+3. PowerShell 未显式指定编码时把 UTF-8 中文文档显示为乱码。后续读取中文文件统一使用 `Get-Content -Encoding utf8`，不因终端显示问题改写文件编码。
+4. 本地后端健康检查返回 200，但应用内浏览器无法访问主机回环地址，且其安全策略同时禁止打开本地 `file://` 页面。已停止临时服务且未绕过策略；本阶段以 162 项自动化测试、页面生成测试和静态产物检查作为验证依据，浏览器截图仍是残余验证缺口。
+
+## 2026-06-21 追加：确认式多渠道发送与投递审计
+
+1. sender 新增通用 `DeliveryMessage` 显式渠道分发，事件通知复用现有 Telegram、飞书和企业微信密钥读取、超时与错误隔离逻辑。
+2. 候选投递默认只预览；真实外发必须同时设置 `dry_run=false` 和 `confirm_delivery=true`。
+3. 投递前使用 SQLite `BEGIN IMMEDIATE` 逐渠道抢占；成功和运行中渠道不会重复发送，失败渠道只有 `retry_failed=true` 才会增加尝试次数。
+4. 候选汇总状态支持 `pending`、`delivering`、`partial`、`failed`、`delivered`，每个渠道保存状态、尝试次数、错误和安全响应摘要。
+5. 新增事件、候选、投递查询与写入 API；写接口继续由 `ADMIN_API_TOKEN` 保护。
+6. 定向测试覆盖默认预览、未确认阻止、部分成功、成功去重、失败显式重试、渠道别名和 API 管理鉴权。
+
+### 问题记录
+
+1. 一次通过工具包装执行的 `rg` PowerShell 查询没有返回预期匹配；改用 `ctx_execute_file` 按 UTF-8 读取并定位能力字段，确认代码存在后继续修改。后续复杂引号查询优先使用文件处理器。
+2. 首次同时更新 README 与架构文档时，架构段落上下文校验失败，整次补丁未写入。后续拆分补丁并缩小匹配上下文，避免单个文件的换行或字符差异阻断其他文档更新。
+3. 通知 RAG 辅助函数首次按错误的函数名定位插入点，补丁校验失败且未改文件；通过源码符号搜索确认真实函数后重新应用。
+4. 通知记忆接入后曾把 `answer_model` 从 v1 改为 v2，触发既有公开契约测试失败。该增强没有改变回答引擎类别，已恢复 v1 标识并通过独立 `notification_memory` 字段扩展响应。
+5. 新增推荐与项目 RAG 通知记忆测试时，测试夹具缺少 `repositories` 事实记录，导致项目查询正确返回空。已补齐最小仓库记录，保持生产查询契约不变。
+
+## 2026-06-21 追加：项目变化检测与订阅候选构建
+
+1. 新增 `src/notifications/service.py`，从最近两期 `selections` 识别 Trending、Star 增长、质量、风险和版本变化，并使用 `project_corpus` 补充项目语义和证据。
+2. 将成功的 `project_agent_task_runs` 转换为有证据的 Agent 决策事件；`notify` 任务的 `subscription_candidate` 只进入事件和候选，不执行外部发送。
+3. 订阅规则新增项目、事件类型、最低严重度和频率字段，并继续支持 profile、语言、方向、关键词和渠道。
+4. 候选按“订阅 + 事件”稳定去重；重复检测与构建不新增记录、不重置已有状态。
+5. 新增定向测试，覆盖 7 类事件、证据引用、规则匹配和幂等构建。
+
+### 问题记录
+
+1. 首次在 `context-mode` 的 shell 运行器中使用 PowerShell cmdlet，因该运行器实际使用 POSIX shell 而失败。后续文件提取改用 `ctx_execute_file` 的 JavaScript 运行器；面向用户的命令仍保持 PowerShell。
+2. 首次按名称猜测了不存在的 `tests/test_project_agent_task_executor.py`。通过 `rg --files tests` 确认实际文件为 `tests/test_agent_task_executor.py`，后续执行定向测试前先确认测试文件名。
+3. 一次 `rg` 复合正则因 PowerShell 字符串转义形成未闭合分组。后续将查询拆成简单模式，避免在多层命令包装中使用不必要的复杂转义。
+4. 全量测试发现开发上下文问答将中文“测试失败”固定改写为英文 `test`，且 FTS5 默认中文分词无法稳定命中短子串。已改为从原问题选择实际出现的中英文诊断关键词，并在 FTS 零结果时回退到现有 `LIKE` 检索。
+5. 首次同时修改代码与操作日志时漏写第二个 `Update File` 补丁头，导致补丁校验失败且未产生文件改动。已拆分为两个明确的文件更新段后重新执行。
+6. 后续补充 FTS 回退时再次遗漏第二个文件补丁头，补丁同样在校验阶段失败且未改文件。已立即改用每个目标文件独立 `Update File` 段，并将此类多文件补丁作为提交前重点检查项。
+
+## 2026-06-21 追加：事件订阅数据模型
+
+1. 新增 `subscription_events`，保存项目变化事件、证据、引用、严重度、来源运行和稳定去重键。
+2. 新增 `notification_candidates`，保存订阅规则匹配后生成、尚未发送的推送候选。
+3. 新增 `notification_deliveries`，保存逐渠道发送尝试、状态、错误和响应摘要。
+4. 三张表均加入 SQLite 白名单、导入计数、数据契约和存储测试；本阶段不执行任何真实外部发送。
+
+## 2026-06-20 追加：项目级 Agent 只读执行引擎
+
+### 1. 开发目的
+
+把项目任务从人工状态记录升级为可预检查、可执行、可重试、可审计的只读闭环，并让执行结论进入项目 RAG 和推荐记忆；现有每周周报与链接推送保持独立稳定。
+
+### 2. 修改内容
+
+1. 新增 `project_agent_task_runs`，逐次保存输入、证据、引用、结构化结果、错误和执行时间。
+2. 新增六类本地只读处理器、事务抢占、并发阻止、completed 防重复和 failed 显式重试。
+3. 新增执行预检查、执行、重试、单任务历史和全局最近运行 API；写接口继续受 `ADMIN_API_TOKEN` 保护。
+4. 执行结果写回 `project_corpus` 和 `rag_chunks`，项目 RAG 返回执行历史，推荐动作跳过已经成功完成的同类任务。
+5. 项目页增加预检查、执行、重试和历史；管理页增加待处理、成功、失败、运行中及最近运行汇总。
+6. 新增批处理脚本与 GitHub Actions 显式开关，默认最多 3 条、仅优先级 1/2，失败不阻塞周报发布和推送。
+
+### 3. 问题记录
+
+1. 定向测试首次使用了不存在的 `tests.test_api_repository` 和 `tests.test_api_app` 模块，导致 unittest 加载失败。仓库实际 API 测试集中在 `tests.test_api`；后续先用 `rg --files tests` 确认模块名再执行定向测试。
+2. 初版失败任务仍可走普通 execute，未满足“显式 retry”。已把普通执行限制为 planned，把重试限制为 failed，并新增失败后普通执行被拒绝的测试。
+3. 页面补丁首次误把订阅状态更新从 PATCH 改成 POST。页面生成测试及时发现回归，现已恢复订阅 PATCH，并单独确认 Agent execute/retry 使用 POST。
+4. 首次用 `py` 和短生命周期 `Start-Process` 启动本地后端时，前者在当前工具环境找不到 Python，后者随父进程退出，浏览器连接被拒绝。改用 `python -m uvicorn` 的后台执行模式后完成桌面与 390px 窄屏验证；两页均无横向溢出或控件文本溢出。
+
+## 2026-06-19 追加：项目级 Agent 任务闭环
+
+### 1. 开发目的
+
+把项目从可检索、可解释的研究对象升级为可持续执行和复盘的 Agent 工作对象，形成“观察、判断、行动、复盘”闭环，同时保留每周推送并为订阅任务预留稳定边界。
+
+### 2. 修改内容
+
+1. 新增 `project_agent_tasks`，保存任务类型、优先级、状态、原因、执行结果、来源、去重键和生命周期时间。
+2. 新增项目任务查询、创建、更新 API，并使用管理口令保护写操作。
+3. `/v1/recommendations` 返回 `next_actions`，优先引用活跃任务，没有任务时根据风险、质量和推荐分生成建议。
+4. 每周 SQLite 同步自动为最新入选项目生成去重任务，任务通过 `subscription_action` 与订阅推送模块衔接。
+5. 项目任务原因和执行结果写入 `project_corpus` 与 `rag_chunks`，单项目 RAG 返回任务历史和下一步动作。
+6. 项目详情页支持创建、开始、完成和重新计划任务；管理页展示任务总数、活跃任务和覆盖项目。
+7. 同步更新 README、API 文档、数据契约和自动化测试。
+
+### 3. 边界说明
+
+当前执行动作仍由本地用户确认，不自动调用外部模型或推送通道。`notify` 和 `payload.subscription_action` 只表达订阅候选，不保存 Token、Chat ID 或 Webhook，也不改变现有每周推送流程。
+
+## 2026-06-18 追加：项目级 RAG 档案增强
+
+### 1. 开发目的
+
+上一阶段推荐闭环已经能把反馈、质量、热度和风险纳入排序。本次把每个入选项目升级为可检索的研究对象：为项目生成结构化 `project_profile`，让 RAG 检索、项目详情页和推荐解释能引用项目定位、适用场景、优势、风险、质量判断、跟踪理由和 Agent 判断。
+
+### 2. 修改内容
+
+1. `project_corpus.payload_json` 和 `rag_chunks.payload_json` 新增 `project_profile`，不新增 SQLite 表。
+2. RAG 语料文本新增“项目定位 / 适用场景 / 优势信号 / 风险点 / 质量判断 / 跟踪理由 / RAG 摘要 / Agent 判断”，FTS5 和后续向量检索都能召回这些内容。
+3. `/v1/projects/{owner}/{repo}/rag` 返回 `project_profile`，并在 `contexts.metadata.project_profile` 中携带对应证据块的项目档案。
+4. `/v1/recommendations` 推荐结果返回 `project_profile`，`rag_reason` 优先引用项目档案信号，而不是只依赖规则关键词。
+5. `project.html` 新增“Agent 研究摘要”，展示项目定位、适用场景、优势、风险、质量、跟踪理由、RAG 摘要和 Agent 判断。
+6. 同步更新 README、API 文档、数据契约、存储测试、API 测试和页面生成测试。
+
+### 3. 边界说明
+
+本次仍使用本地规则生成项目档案，不调用外部模型，不新增表，不引入外部向量数据库。旧 SQLite 库如已有 `project_corpus` 记录，需要执行 RAG 语料重建任务或重新迁移 JSON 归档后，历史语料中的 `project_profile` 才会完整刷新。
+
+## 2026-06-17 追加：反馈驱动推荐 Agent 闭环第一阶段
+
+### 1. 开发目的
+
+项目定位已从每周热点周报工具推进为 GitHub 项目研究 Agent。本次围绕推荐闭环增强，让用户反馈、项目质量、热度、RAG 相关性、继续跟踪意图和风险提示共同影响推荐排序，并把排序原因返回给 API 和推荐页。
+
+### 2. 修改内容
+
+1. `/v1/recommendations` 推荐项目新增 `recommendation_score`、`ranking_factors`、`feedback_reason`、`rag_reason` 和 `recommendation_reason`。
+2. 推荐排序改为使用基础分、质量分、趋势分、RAG 相关分、反馈偏好分、继续跟踪分和风险扣分的组合分。
+3. 正反馈会提高 `preference_score`，负反馈会降低推荐分，“继续跟踪”会额外提高 `tracking_score`。
+4. `recommendations.html` 展示推荐分、评分因子、推荐解释、RAG 解释和反馈解释，并修复项目级反馈记忆只读取 `record_count` 导致误显示暂无反馈的问题。
+5. `admin.html` 在反馈汇总下展示受反馈影响的推荐项目，用于检查反馈是否已经进入推荐链路。
+6. 同步更新 README、API 文档、数据契约、API 测试和页面生成测试。
+
+### 3. 边界说明
+
+本次不新增 SQLite 表，不引入外部向量数据库，不接复杂 Agent 框架。RAG 相关分先基于现有项目摘要、方向和入选理由派生，后续可替换为更强的项目档案检索结果。
+
+## 2026-06-17 追加：开发上下文 RAG 自动维护闭环
+
+### 1. 开发目的
+
+开发上下文 RAG 已经具备手动索引、搜索和规则版问答能力，但仍需要人工点击索引。为了让这层开发记忆在周报、RAG 评估和 Pages 归档前自动刷新，本次把开发上下文索引接入 planned job、任务执行器和 GitHub Actions。
+
+### 2. 修改内容
+
+1. 新增 `kind=dev_context_index` planned job，执行结果写入 `jobs.result`，包含 `run_id`、来源数、分块数、embedding 数和命令数。
+2. 新增 `POST /v1/dev-context/index-plan`，可创建开发上下文索引任务，支持 `run_checks`、`replace`、`max_command_chars`、`requested_by` 和 `trigger_source`。
+3. `scripts/run_planned_job.py` 支持执行 `dev_context_index`，内部复用 `ApiRepository.dev_context_index()`，并保留 `/v1/dev-context/runs/{id}` 查询详情。
+4. 新增 `scripts/plan_dev_context_index.py`，供本地命令和 GitHub Actions 创建索引任务。
+5. weekly workflow 在生成 Pages 前执行轻量开发上下文索引，默认 `run_checks=false`，避免重复跑完整测试。
+6. 管理页展示最近开发上下文索引任务，包含状态、分块数、embedding 数、错误摘要和索引详情链接。
+7. 同步更新 README、API 文档、数据契约、页面生成测试、workflow 测试、runner 测试和 API 测试。
+
+### 3. 边界说明
+
+本次不接外部 LLM、不做复杂聊天 UI、不自动修复代码。自动索引只刷新本地 SQLite 开发上下文记忆层；默认轻量模式不重复执行单元测试和安全检查，完整检查仍由 workflow 前置测试步骤负责。
+
+## 2026-06-16 追加：开发上下文 RAG 问答入口
+
+### 1. 开发目的
+
+上一阶段已经把 README、API 文档、数据契约、操作日志、Git diff、测试输出和安全检查输出沉淀到 SQLite 开发上下文表。为了让这层记忆能直接服务代码审查、运行诊断、API/数据契约核对和下一步开发决策，本次在索引与搜索之上增加规则版问答入口。
+
+### 2. 修改内容
+
+1. 后端新增 `POST /v1/dev-context/ask`，复用 `dev_chunks_fts` 检索结果生成本地规则版回答。
+2. 问答响应固定包含 `answer`、`citations`、`evidence`、`confidence`、`question_type`、`retrieval` 和 `next_actions`。
+3. 支持测试诊断、最近变更、API/数据契约一致性、下一步开发和安全架构风险等常见开发问题。
+4. 管理页新增开发上下文“问答”按钮，展示回答、下一步动作和召回证据。
+5. 同步更新 README、API 文档、数据契约、页面生成测试和 API 测试。
+
+### 3. 边界说明
+
+当前问答能力不调用外部模型、不访问 GitHub/Kimi/Telegram，也不写入新的敏感数据。它只基于已索引的本地开发上下文做规则汇总；如果证据不准，应先重新索引或换更具体的问题。
+
+## 2026-06-16 追加：开发上下文 RAG 记忆层第一阶段
+
+### 1. 开发目的
+
+项目已经具备 GitHub 项目 RAG、反馈记忆和轻量管理页。为了让系统能服务代码审查、运行诊断、历史追踪和开发决策，本次新增开发上下文 RAG 记忆层第一阶段：先把开发材料沉淀到 SQLite，再提供基础 FTS5 检索。
+
+### 2. 修改内容
+
+1. SQLite 新增 `dev_runs`、`dev_corpus`、`dev_chunks`、`dev_chunks_fts` 和 `dev_embeddings`。
+2. 后端新增 `/v1/dev-context/index`、`/v1/dev-context/search` 和 `/v1/dev-context/runs/{id}`。
+3. 索引入口会采集 README、API 文档、数据契约、操作日志、Git diff、单元测试输出和安全检查输出，并对明显密钥形态做脱敏。
+4. 开发上下文分块写入 FTS5，同时写入本地确定性 embedding，先保留本地 SQLite 记忆层，不接外部向量库。
+5. 管理页新增开发上下文索引按钮和搜索入口。
+6. 同步更新 README、API 文档、数据契约、页面生成测试和 API 测试。
+
+### 3. 后续空间
+
+下一阶段可以在此基础上增加 `/v1/dev-context/ask`，把 FTS5 召回片段整理成开发诊断回答；也可以引入 GitHub Actions 日志摘要和更细的测试失败归因。当前阶段不做复杂聊天 UI、多用户权限或完整自动决策。
+
+## 2026-06-16 追加：项目反馈入口接入详情页和推荐页
+
+### 1. 开发目的
+
+项目反馈后端、反馈记忆和推荐排序已经具备基础能力，但用户还缺少直接写入反馈的页面入口。本次把“有用 / 不适合 / 继续跟踪”反馈接入项目详情页和个性化推荐页，并在管理页展示反馈记忆汇总，形成最小反馈闭环。
+
+### 2. 修改内容
+
+1. `project.html` 在本地 API 模式下展示项目级 `feedback_memory`，并通过 `POST /v1/feedback` 写入单项目反馈。
+2. `recommendations.html` 展示 `preference_score` 和项目反馈记忆摘要，支持对推荐结果直接提交反馈后刷新推荐排序。
+3. `admin.html` 新增反馈记忆汇总，读取 `/v1/feedback?limit=200` 展示反馈总量、平均评分、正负反馈和最近记录。
+4. 页面写请求复用 `X-Admin-Token` 管理口令，不新增密钥配置或用户系统。
+5. 同步更新 README、API 文档、数据契约和页面生成测试。
+
+### 3. 后续空间
+
+后续可以基于反馈样本做更细的 profile 偏好建模、负反馈降权策略解释、RAG 召回重排和订阅推荐校准。当前阶段不引入复杂用户系统，继续保持轻量本地管理闭环。
+
+## 2026-06-16 追加：管理 API 写接口安全边界
+
+### 1. 开发目的
+
+后端已经提供任务触发、任务执行、RAG 维护计划、订阅写入和项目反馈等管理型写接口。为了给后续反馈闭环、开发上下文 RAG 和长期自动化维护提供安全基础，本次为这些写接口增加统一管理口令边界，避免本地 FastAPI 暴露时被未授权调用。
+
+### 2. 修改内容
+
+1. FastAPI 新增统一 `ADMIN_API_TOKEN` 鉴权依赖。
+2. 所有 `POST`/`PATCH` 管理写接口必须提供 `X-Admin-Token` 或 `Authorization: Bearer ...`。
+3. 未配置管理口令时写接口返回 `403`；配置后缺少或错误口令返回 `401`。
+4. 本地管理页、订阅页、任务页和任务详情页的写请求统一从 `?admin_token=...` 或 `localStorage.github_weekly_admin_token` 读取口令并发送 `X-Admin-Token`。
+5. 补充 FastAPI 路由测试、`.env.example`、README 和 API 文档。
+
+### 3. 后续空间
+
+后续接入项目详情页反馈入口、开发上下文 RAG 索引或更多维护任务时，应默认复用这套管理写接口安全边界。只读接口继续保持公开可访问，写接口不应回退为无鉴权。
+
+## 2026-06-15 追加：沉淀命令行问题与代码编写规范
+
+### 1. 开发目的
+
+项目长期开发中多次出现 PowerShell 语法、Git 推送、rebase、环境变量、Kimi/Telegram 配置、Actions YAML、SQLite CLI、WSL 混用和中文编码问题。为降低后续重复排错成本，本次把这些问题整理成项目级规范文档。
+
+### 2. 修改内容
+
+1. 新增 `docs/command-line-and-coding-standards.md`，总结已出现的命令行问题、原因、修正命令和后续规范。
+2. 明确 PowerShell 与 Bash/WSL 命令不得混用，Windows 示例默认使用 PowerShell。
+3. 固化本地开发检查顺序、提交顺序、环境变量规范、外部请求规范、GitHub Actions 规范、SQLite/RAG 表变更规范和测试规范。
+4. README 文档索引新增该规范入口。
+
+### 3. 后续空间
+
+后续可基于该规范补充 `scripts/local_check.py` 和本地环境变量检查脚本，把手工规范进一步变成可运行检查。
+
+## 2026-06-15 追加：反馈记忆接入推荐与项目 RAG
+
+### 1. 开发目的
+
+上一轮已经能把用户对项目的评分、标签和备注写入 SQLite，但这些反馈还没有参与推荐或 RAG 展示。为了让数据库/RAG 进入真正的个性化闭环，本次把 `project_feedback` 接入推荐排序和单项目 RAG 聚合。
+
+### 2. 修改内容
+
+1. `/v1/recommendations` 会扩大候选池，读取匹配 profile 的反馈记录，并为项目附加 `feedback_memory`。
+2. 推荐项目新增 `preference_score`，把正向反馈提高排序，把负向反馈降低排序，同时保留原始 `score`。
+3. 推荐响应新增全局 `feedback_memory` 摘要，用于判断当前筛选范围是否已经有可用反馈样本。
+4. `/v1/projects/{owner}/{repo}/rag` 新增项目级 `feedback_memory`，让项目详情页和后续 Agent 能看到历史用户判断。
+5. 更新后端测试、README、API 文档和数据契约。
+
+### 3. 后续空间
+
+下一步可以把反馈写入按钮接入管理首页或项目详情页，形成“查看项目 -> 标记有用/不适合 -> 影响后续推荐”的本地闭环。当前先完成后端数据和排序闭环。
+
+## 2026-06-15 追加：新增项目反馈记忆 API
+
+### 1. 开发目的
+
+当前 RAG 已经具备语料检索、解释、质量评估和维护计划能力，但还缺少用户显式反馈入口。为了让后续个性化推荐和 RAG 重排可以学习“哪些项目对用户有用、哪些项目不符合当前需求”，本次新增最小可用的项目反馈记忆能力。
+
+### 2. 修改内容
+
+1. SQLite 新增 `project_feedback` 表，用于保存仓库名、profile、评分、标签、备注、来源和审计时间。
+2. 后端新增 `POST /v1/feedback` 和 `GET /v1/feedback`，支持写入和查询项目反馈。
+3. `/v1/database/summary` 新增反馈记录计数和 `ready_for_feedback_memory` 信号。
+4. `/v1/health` 新增 `project_feedback` 和 `feedback_memory` 能力标记。
+5. 更新 README、API 文档、数据契约和后端测试，确保该能力有明确的长期边界。
+
+### 3. 后续空间
+
+下一步可以把反馈接入管理首页、项目详情页和推荐排序。当前先保留为后端数据入口，不急于做复杂前端和模型训练，避免在样本不足时过早复杂化。
+
+## 2026-06-15 追加：RAG 维护计划健康分支创建检索评估任务
+
+### 1. 开发目的
+
+RAG 维护计划此前只在发现语料、embedding 或解释覆盖缺口时创建修复任务；当覆盖已经健康时只返回状态，不会沉淀新的检索质量样本。为让数据库/RAG 维护链路形成“修复缺口 -> 健康自检 -> 趋势观测”的闭环，本次把健康分支接入 `rag_search_evaluation` planned job。
+
+### 2. 修改内容
+
+1. `plan_rag_maintenance` 在 `gap_count < min_gap_count` 时创建 `kind=rag_search_evaluation` 任务。
+2. 新增返回原因 `rag_coverage_healthy_search_evaluation`，保留 `diagnostics`、`coverage`、`gap_count` 和 `min_gap_count`。
+3. `scripts/plan_rag_maintenance.py` 新增 `--evaluation-limit` 参数，用于控制健康状态下的评估样本数量。
+4. 修复 planned 任务去重 key，纳入 `queries` 和单数 `source`，避免不同 RAG 检索评估查询被误判为重复任务。
+5. 更新 README、API 文档和后端测试。
+
+### 3. 后续空间
+
+后续可以让维护计划根据最近趋势自动调整评估 query 样本，但当前先保持规则简单：缺口优先修复，健康后执行检索质量评估。
+
 ## 2026-06-14 追加：管理首页展示 RAG 检索评估趋势
 
 ### 1. 开发目的

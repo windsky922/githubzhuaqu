@@ -182,6 +182,13 @@ GET /v1/rag/vector-search
 GET /v1/rag/explain
 GET /v1/rag/ask
 GET /v1/rag/diagnostics
+GET /v1/feedback
+POST /v1/feedback
+POST /v1/dev-context/index
+POST /v1/dev-context/index-plan
+GET /v1/dev-context/search
+POST /v1/dev-context/ask
+GET /v1/dev-context/runs/{id}
 ```
 
 `/api/projects` 复用历史归档查询能力，支持按语言、方向、profile、来源、风险提示、质量分、Trending 排名和关键词筛选。返回结构保持为：
@@ -193,6 +200,26 @@ projects
 ```
 
 其中 `projects` 内部字段与归档查询结果保持一致。后续如需新增字段，应先更新本文档、`docs/api.md` 和对应测试。
+
+`/v1/recommendations` 会在存在匹配反馈时为项目附加：
+
+```text
+project_profile
+recommendation_score
+ranking_factors
+preference_score
+feedback_memory
+feedback_reason
+rag_reason
+recommendation_reason
+next_actions
+```
+
+`project_profile` 是项目研究档案，包含 `project_positioning`、`use_cases`、`strengths`、`risks`、`quality_summary`、`tracking_reason`、`rag_summary` 和 `agent_judgement`。`ranking_factors` 包含 `base_score`、`quality_score`、`trend_score`、`rag_relevance_score`、`preference_score`、`tracking_score` 和 `risk_penalty`。`next_actions` 是项目级 Agent 动作列表，包含 `task_id`、`task_type`、`priority`、`status`、`reason`、`source` 和 `subscription_action`。`feedback_memory` 只包含反馈计数、平均评分、最近评分、标签、最近备注和排序调整值，不包含密钥或私有请求头。三个 reason 字段只保存派生解释文本，不包含管理口令、请求头或推送密钥。
+
+页面层反馈入口复用同一数据契约：`project.html` 和 `recommendations.html` 只向 `POST /v1/feedback` 写入仓库名、profile、评分、标签、备注和来源；`admin.html` 读取 `GET /v1/feedback?limit=200` 的列表与汇总，并读取 `/v1/recommendations?limit=20` 展示受反馈影响的推荐项目，不公开管理口令、请求头或任何密钥。
+
+`/v1/dev-context/index` 会采集开发材料并写入 SQLite 开发上下文表。当前保存内容包括 README、API 文档、数据契约、操作日志、Git diff、测试输出和安全检查输出；写入前会对明显密钥形态做脱敏。`/v1/dev-context/index-plan` 只创建 `dev_context_index` planned job，任务请求公开 `run_checks`、`replace`、`max_command_chars`、`requested_by`、`trigger_source` 和 `confirm_execution`，不保存管理口令或请求头。`/v1/dev-context/search` 只返回匹配分块、来源、摘要和 metadata，不返回管理口令或请求头。`/v1/dev-context/ask` 复用已索引分块生成规则版回答，响应字段固定为 `answer`、`citations`、`evidence`、`confidence`、`question_type`、`retrieval` 和 `next_actions`；该接口不调用外部模型，不写入新的敏感数据。
 
 ## 六、`docs/jobs.json`
 
@@ -212,11 +239,11 @@ error
 report_url
 ```
 
-`kind` 当前支持 `weekly_report`、`rag_backfill`、`rag_corpus_rebuild`、`rag_embedding_build` 和 `rag_search_evaluation`。`weekly_report` 表示周报任务，`rag_backfill` 表示 RAG 解释回填任务，`rag_corpus_rebuild` 表示从 JSON 归档重建 SQLite RAG 语料与证据块，`rag_embedding_build` 表示从 `rag_chunks` 构建本地 embedding 索引，`rag_search_evaluation` 表示一次 RAG 检索质量评估任务。
+`kind` 当前支持 `weekly_report`、`rag_backfill`、`rag_corpus_rebuild`、`rag_embedding_build`、`rag_search_evaluation` 和 `dev_context_index`。`weekly_report` 表示周报任务，`rag_backfill` 表示 RAG 解释回填任务，`rag_corpus_rebuild` 表示从 JSON 归档重建 SQLite RAG 语料与证据块，`rag_embedding_build` 表示从 `rag_chunks` 构建本地 embedding 索引，`rag_search_evaluation` 表示一次 RAG 检索质量评估任务，`dev_context_index` 表示一次开发上下文索引刷新任务。
 
-`request` 只公开 `profile`、`sources`、`dry_run`、`requested_dry_run`、`confirm_delivery`、`delivery_allowed`、`days_back`、`trigger_source`、`requested_by`、`safety_warnings`、`queries`、`language`、`category`、`source`、`limit`、`rag_limit`、`mode`、`model`、`auto_build`、`confirm_execution`、`maintenance_action`、`coverage_limit`、`min_gap_count` 和 `dimensions`。这些字段用于任务审计、检索评估和受控推送/补库确认，不应包含 Token、Chat ID、Webhook 或其他密钥。
+`request` 只公开 `profile`、`sources`、`dry_run`、`requested_dry_run`、`confirm_delivery`、`delivery_allowed`、`days_back`、`trigger_source`、`requested_by`、`safety_warnings`、`queries`、`language`、`category`、`source`、`limit`、`rag_limit`、`mode`、`model`、`auto_build`、`confirm_execution`、`maintenance_action`、`coverage_limit`、`min_gap_count`、`dimensions`、`run_checks`、`replace` 和 `max_command_chars`。这些字段用于任务审计、检索评估、开发上下文索引和受控推送/补库确认，不应包含 Token、Chat ID、Webhook 或其他密钥。
 
-`result` 只公开运行日期、状态、项目数量、Kimi/降级状态、Telegram 状态、报告路径、报告链接、SQLite 同步状态、RAG 回填数量、回填前覆盖概况、语料/向量维护计数、检索评估摘要、回填项目摘要和截断后的错误摘要。RAG 回填任务中的 `processed_repositories` 只保留仓库名、状态、质量分、质量等级和解释编号，不保存完整解释正文；RAG 检索评估任务只保存样本查询、聚合命中结果、模式对比结果和概要建议，不保存密钥或私有请求头。
+`result` 只公开运行日期、状态、项目数量、Kimi/降级状态、Telegram 状态、报告路径、报告链接、SQLite 同步状态、RAG 回填数量、回填前覆盖概况、语料/向量维护计数、检索评估摘要、开发上下文索引运行编号、来源数、分块数、embedding 数、命令数、回填项目摘要和截断后的错误摘要。RAG 回填任务中的 `processed_repositories` 只保留仓库名、状态、质量分、质量等级和解释编号，不保存完整解释正文；RAG 检索评估任务只保存样本查询、聚合命中结果、模式对比结果和概要建议；开发上下文索引任务只保存计数和 `run_id`，详细片段仍通过 `dev_chunks`/`dev_corpus` 查询，不保存密钥或私有请求头。
 
 ## 七、SQLite 表
 
@@ -232,6 +259,17 @@ rag_chunks
 rag_chunks_fts
 rag_embeddings
 rag_explanations
+project_feedback
+project_agent_tasks
+project_agent_task_runs
+subscription_events
+notification_candidates
+notification_deliveries
+dev_runs
+dev_corpus
+dev_chunks
+dev_chunks_fts
+dev_embeddings
 trend_summaries
 sent_repositories
 star_history
@@ -246,19 +284,43 @@ migration_meta
 1. `runs` 保存运行摘要索引。
 2. `repositories` 保存仓库基础信息。
 3. `selections` 保存每次运行入选项目及排序信息。
-4. `project_corpus` 保存从入选项目派生的公开文本语料，用于本地搜索、后续向量检索和 RAG。
+4. `project_corpus` 保存从入选项目派生的公开文本语料、`payload_json.project_profile`、`payload_json.agent_tasks` 和 `payload_json.agent_task_runs`，用于本地搜索、后续向量检索和 RAG。
 5. `project_corpus_fts` 保存 `project_corpus` 的 SQLite FTS5 搜索索引，可由派生语料重建。
-6. `rag_chunks` 保存从 `project_corpus` 拆分出的短文本证据块，用于 RAG 检索、引用和后续 embedding。
+6. `rag_chunks` 保存从 `project_corpus` 拆分出的短文本证据块，`payload_json.project_profile` 和 `payload_json.agent_tasks` 会随证据块保留，用于 RAG 检索、引用和后续 embedding。
 7. `rag_chunks_fts` 保存 `rag_chunks` 的 SQLite FTS5 搜索索引，可由派生语料重建。
 8. `rag_embeddings` 保存从 `rag_chunks` 派生的本地 embedding 向量索引；当前默认模型为 `local-hash-v1`，可重建，不保存密钥。
 9. `rag_explanations` 保存 RAG 解释结果、引用、检索参数、解释摘要和规则版质量评估，用于后续质量评估和模型替换对比；不保存密钥。
-10. `trend_summaries` 保存趋势摘要。
-11. `sent_repositories` 保存已推送仓库状态。
-12. `star_history` 保存 Star 历史。
-13. `jobs` 保存历史周报任务和触发预览任务状态。
-14. `job_events` 保存任务创建、重复命中、执行请求、执行阻止和执行完成等审计事件。
-15. `subscriptions` 保存本地订阅偏好，只记录筛选条件和通道名称，不记录 Token、Chat ID 或 Webhook。
-16. `migration_meta` 保存迁移元数据。
+10. `project_feedback` 保存用户对项目的显式反馈，包括仓库名、profile、评分、标签、备注和来源，用于后续个性化记忆、RAG 重排和推荐校准；不保存密钥。
+11. `project_agent_tasks` 保存项目级任务类型、优先级、状态、原因、执行结果、来源、去重键和生命周期时间。`payload_json.subscription_action` 只描述后续订阅动作，不保存推送密钥。
+12. `project_agent_task_runs` 保存每次任务执行的输入、证据、引用、结构化结果、错误和生命周期。运行状态为 `running`、`succeeded` 或 `failed`；失败记录保留已采集证据。
+13. `subscription_events` 保存项目变化事件、严重度、来源运行、证据、引用和稳定去重键。
+14. `notification_candidates` 保存订阅规则匹配后生成的待确认推送内容和目标渠道，不代表已经发送。
+15. `notification_deliveries` 保存逐渠道投递状态、尝试次数、错误和响应摘要；`dedupe_key` 约束同一订阅、事件、渠道的重复发送。
+16. `dev_runs` 保存每次开发上下文索引任务的状态、来源数量、分块数量、embedding 数量和错误摘要。
+13. `dev_corpus` 保存开发上下文原始材料，包括文档、Git diff、测试输出和安全检查输出；写入前应脱敏。
+14. `dev_chunks` 保存从开发上下文材料拆分出的短文本片段。
+15. `dev_chunks_fts` 保存 `dev_chunks` 的 SQLite FTS5 搜索索引。
+16. `dev_embeddings` 保存从 `dev_chunks` 派生的本地确定性 embedding；当前只作为后续向量检索预留，不接外部向量库。
+16. `trend_summaries` 保存趋势摘要。
+17. `sent_repositories` 保存已推送仓库状态。
+18. `star_history` 保存 Star 历史。
+19. `jobs` 保存历史周报任务和触发预览任务状态。
+20. `job_events` 保存任务创建、重复命中、执行请求、执行阻止和执行完成等审计事件。
+21. `subscriptions` 保存本地订阅偏好，只记录筛选条件和通道名称，不记录 Token、Chat ID 或 Webhook。
+22. `migration_meta` 保存迁移元数据。
+
+事件订阅扩展契约：
+
+1. `subscriptions.payload_json` 可保存 `full_names`、`event_types`、`min_severity` 和 `frequency`；`frequency` 当前允许 `immediate`、`daily`、`weekly`。
+2. `subscription_events.event_type` 当前允许 `trending_entered`、`star_growth_spike`、`quality_changed`、`risk_added`、`risk_resolved`、`release_detected`、`agent_decision_changed`。
+3. 每条 `subscription_events` 必须包含非空 `evidence_json` 和 `citations_json`；事件检测只写入新事件，不覆盖后续处理状态。
+4. `notification_candidates` 由启用订阅与事件匹配生成，状态初始为 `pending`，`payload_json.requires_confirmation` 必须为 `true`。
+5. 候选去重键由订阅和事件共同确定。重复构建不新增候选，也不重置已存在候选的状态。
+6. `notification_candidates` 只表达待确认意图，不代表发送成功；真实发送结果必须进入 `notification_deliveries`。
+7. 候选状态包括 `pending`、`delivering`、`partial`、`failed`、`delivered`；投递状态包括 `running`、`succeeded`、`failed`、`skipped`。
+8. `notification_deliveries.dedupe_key` 由订阅、事件和规范化渠道共同确定；失败重试更新同一记录并递增 `attempt_count`，不得创建第二条渠道记录。
+9. 真实外发必须同时满足 `dry_run=false` 和 `confirm_delivery=true`。预览和未确认请求不得写入投递记录，也不得调用外部渠道。
+10. 渠道成功后对应事件状态更新为 `notified`；逐渠道响应只保存安全结果摘要，不保存密钥、Webhook 或请求头。
 
 当前只读查询入口位于：
 

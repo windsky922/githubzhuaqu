@@ -408,6 +408,7 @@
     <section class="panel">
       <h2>数据库与语料</h2>
       <div id="databaseOverview" class="overview"></div>
+      <div id="feedbackSummary" class="result-panel"></div>
       <div class="split">
         <div>
           <h3>主要分面</h3>
@@ -448,6 +449,26 @@
         <button id="runRagSearch" type="button">检索</button>
       </div>
       <div id="ragSearchResults" class="search-results"></div>
+      <h3>开发上下文 RAG</h3>
+      <div class="search-form">
+        <label>开发上下文问题
+          <input id="devContextQuery" type="text" placeholder="反馈入口 / 最近测试失败 / RAG 维护">
+        </label>
+        <label>来源
+          <select id="devContextSource">
+            <option value="">全部</option>
+            <option value="document">文档</option>
+            <option value="git_diff">Git diff</option>
+            <option value="test_output">测试输出</option>
+            <option value="security_check">安全检查</option>
+          </select>
+        </label>
+        <button id="indexDevContext" type="button">索引开发上下文</button>
+        <button id="askDevContext" type="button">问答</button>
+        <button id="runDevContextSearch" type="button">搜索</button>
+      </div>
+      <div id="devContextResults" class="search-results"></div>
+      <div id="devContextJobs" class="search-results"></div>
       <div id="ragQualitySummary" class="search-results"></div>
       <div id="ragEvaluationTrends" class="search-results"></div>
       <div class="search-form">
@@ -516,6 +537,21 @@
       </div>
       <div id="jobWorkbench" class="workbench-list"></div>
     </section>
+    <section class="panel">
+      <h2>项目 Agent 任务</h2>
+      <div id="projectAgentTaskSummary" class="overview"></div>
+      <div id="projectAgentTaskWorkbench" class="workbench-list"></div>
+    </section>
+    <section class="panel">
+      <h2>事件订阅与推送候选</h2>
+      <div class="toolbar">
+        <button id="detectSubscriptionEvents" type="button">检测事件</button>
+        <button id="buildNotificationCandidates" type="button">构建候选</button>
+        <span id="notificationActionStatus" class="task-status"></span>
+      </div>
+      <div id="notificationSummary" class="overview"></div>
+      <div id="notificationWorkbench" class="workbench-list"></div>
+    </section>
     <section class="grid" aria-label="管理入口">
       <article class="card">
         <h2>项目</h2>
@@ -554,11 +590,21 @@
     const latestJobResult = document.getElementById("latestJobResult");
     const workflowBoard = document.getElementById("workflowBoard");
     const jobWorkbench = document.getElementById("jobWorkbench");
+    const projectAgentTaskSummary = document.getElementById("projectAgentTaskSummary");
+    const projectAgentTaskWorkbench = document.getElementById("projectAgentTaskWorkbench");
+    const notificationSummary = document.getElementById("notificationSummary");
+    const notificationWorkbench = document.getElementById("notificationWorkbench");
+    const notificationActionStatus = document.getElementById("notificationActionStatus");
+    const detectSubscriptionEvents = document.getElementById("detectSubscriptionEvents");
+    const buildNotificationCandidates = document.getElementById("buildNotificationCandidates");
     const databaseOverview = document.getElementById("databaseOverview");
+    const feedbackSummary = document.getElementById("feedbackSummary");
     const databaseFacets = document.getElementById("databaseFacets");
     const databaseTrends = document.getElementById("databaseTrends");
     const corpusSearchResults = document.getElementById("corpusSearchResults");
     const ragSearchResults = document.getElementById("ragSearchResults");
+    const devContextResults = document.getElementById("devContextResults");
+    const devContextJobs = document.getElementById("devContextJobs");
     const ragQualitySummary = document.getElementById("ragQualitySummary");
     const ragEvaluationTrends = document.getElementById("ragEvaluationTrends");
     const ragMaintenanceResults = document.getElementById("ragMaintenanceResults");
@@ -585,6 +631,13 @@
       language: document.getElementById("ragLanguage"),
       button: document.getElementById("runRagSearch"),
     };
+    const devContextControls = {
+      query: document.getElementById("devContextQuery"),
+      source: document.getElementById("devContextSource"),
+      indexButton: document.getElementById("indexDevContext"),
+      askButton: document.getElementById("askDevContext"),
+      searchButton: document.getElementById("runDevContextSearch"),
+    };
     const ragBackfillControls = {
       limit: document.getElementById("ragBackfillLimit"),
       previewButton: document.getElementById("previewRagBackfill"),
@@ -599,14 +652,20 @@
 
     loadHealth();
     loadOverview();
+    loadProjectAgentTasks();
+    loadNotificationAdmin();
     loadDatabaseInsights();
     setupCreateTask();
-    setupCorpusSearch();
-    setupRagSearch();
-    setupRagBackfill();
+      setupCorpusSearch();
+      setupRagSearch();
+      setupDevContext();
+      setupRagBackfill();
     setupRagMaintenance();
     bindWorkbenchFilters();
     jobWorkbench.addEventListener("click", handleWorkbenchAction);
+    notificationWorkbench.addEventListener("click", handleNotificationAction);
+    detectSubscriptionEvents.addEventListener("click", () => runNotificationBuild("events"));
+    buildNotificationCandidates.addEventListener("click", () => runNotificationBuild("candidates"));
 
     function bindWorkbenchFilters() {
       document.querySelectorAll("[data-job-filter]").forEach(button => {
@@ -648,6 +707,22 @@
       ragControls.button.addEventListener("click", runRagSearch);
       ragControls.query.addEventListener("keydown", event => {
         if (event.key === "Enter") runRagSearch();
+      });
+    }
+
+    function setupDevContext() {
+      if (!shouldUseApi()) {
+        devContextControls.indexButton.disabled = true;
+        devContextControls.askButton.disabled = true;
+        devContextControls.searchButton.disabled = true;
+        devContextResults.innerHTML = '<p>开发上下文索引需要本地后端或 api=1 模式。</p>';
+        return;
+      }
+      devContextControls.indexButton.addEventListener("click", indexDevContext);
+      devContextControls.askButton.addEventListener("click", askDevContext);
+      devContextControls.searchButton.addEventListener("click", runDevContextSearch);
+      devContextControls.query.addEventListener("keydown", event => {
+        if (event.key === "Enter") askDevContext();
       });
     }
 
@@ -727,6 +802,77 @@
         });
     }
 
+    function indexDevContext() {
+      if (!shouldUseApi()) return;
+      devContextResults.innerHTML = '<p>开发上下文索引中，可能会运行测试和安全检查...</p>';
+      fetch("/v1/dev-context/index", {
+        method: "POST",
+        headers: adminWriteHeaders(),
+        body: JSON.stringify({
+          run_checks: true,
+          requested_by: "admin_page",
+          source: "admin_page"
+        })
+      })
+        .then(jsonOrThrow)
+        .then(data => {
+          devContextResults.innerHTML = devContextIndexHtml(data);
+          if (devContextControls.query.value.trim()) runDevContextSearch();
+          loadDatabaseInsights();
+        })
+        .catch(error => {
+          devContextResults.innerHTML = `<p>开发上下文索引失败：${escapeHtml(error.message || error)}</p>`;
+        });
+    }
+
+    function runDevContextSearch() {
+      const query = devContextControls.query.value.trim();
+      if (!query) {
+        devContextResults.innerHTML = '<p>请输入开发上下文问题或关键词。</p>';
+        return;
+      }
+      const params = new URLSearchParams();
+      params.set("q", query);
+      params.set("limit", "8");
+      if (devContextControls.source.value) params.set("source_type", devContextControls.source.value);
+      devContextResults.innerHTML = '<p>开发上下文搜索中...</p>';
+      fetch(`/v1/dev-context/search?${params.toString()}`, { cache: "no-store" })
+        .then(jsonOrThrow)
+        .then(data => {
+          devContextResults.innerHTML = devContextSearchHtml(data);
+        })
+        .catch(error => {
+          devContextResults.innerHTML = `<p>开发上下文搜索失败：${escapeHtml(error.message || error)}</p>`;
+        });
+    }
+
+    function askDevContext() {
+      const question = devContextControls.query.value.trim();
+      if (!question) {
+        devContextResults.innerHTML = '<p>请输入开发上下文问题。</p>';
+        return;
+      }
+      const payload = { question, limit: 8 };
+      if (devContextControls.source.value) payload.source_type = devContextControls.source.value;
+      devContextControls.askButton.disabled = true;
+      devContextResults.innerHTML = '<p>开发上下文问答生成中...</p>';
+      fetch("/v1/dev-context/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+        .then(jsonOrThrow)
+        .then(data => {
+          devContextResults.innerHTML = devContextAskHtml(data);
+        })
+        .catch(error => {
+          devContextResults.innerHTML = `<p>开发上下文问答失败：${escapeHtml(error.message || error)}</p>`;
+        })
+        .finally(() => {
+          devContextControls.askButton.disabled = false;
+        });
+    }
+
     function runRagBackfill(dryRun) {
       const limit = Math.max(1, Math.min(Number(ragBackfillControls.limit.value || 5), 100));
       if (!dryRun && !ragBackfillControls.confirm.checked) {
@@ -743,7 +889,7 @@
       ragBackfillResults.innerHTML = dryRun ? '<p>正在预览 RAG 回填...</p>' : '<p>正在写入 RAG 解释历史...</p>';
       fetch("/v1/rag/backfill-explanations", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: adminWriteHeaders(),
         body: JSON.stringify(payload),
       })
         .then(jsonOrThrow)
@@ -775,7 +921,7 @@
       ragMaintenanceResults.innerHTML = '<p>正在生成 RAG 维护计划...</p>';
       fetch("/v1/rag/maintenance-plan", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: adminWriteHeaders(),
         body: JSON.stringify(payload),
       })
         .then(jsonOrThrow)
@@ -807,7 +953,7 @@
       };
       fetch("/v1/runs/trigger", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: adminWriteHeaders(),
         body: JSON.stringify(payload),
       })
         .then(jsonOrThrow)
@@ -847,6 +993,7 @@
         ].join("");
         latestLinks.innerHTML = latestLinksHtml(latestRun, failedJobs[0], plannedJobs[0]);
         latestJobResult.innerHTML = latestJobResultHtml(latestJob(jobs));
+        devContextJobs.innerHTML = devContextJobsHtml(jobs);
         workflowBoard.innerHTML = workflowBoardHtml(projects, runs, jobs);
         renderJobWorkbench();
       });
@@ -859,6 +1006,170 @@
         .catch(loadAdminJobsJson);
     }
 
+    function loadProjectAgentTasks() {
+      if (!shouldUseApi()) {
+        projectAgentTaskSummary.innerHTML = metric("模式", "静态");
+        projectAgentTaskWorkbench.innerHTML = "<p>启动本地后端或添加 api=1 后查看项目 Agent 任务。</p>";
+        return;
+      }
+      Promise.all([
+        fetch("/v1/agent-tasks?limit=100", { cache: "no-store" }).then(jsonOrThrow),
+        fetch("/v1/agent-task-runs?limit=30", { cache: "no-store" }).then(jsonOrThrow),
+      ])
+        .then(([tasks, runs]) => renderProjectAgentTasks(tasks, runs))
+        .catch(error => {
+          projectAgentTaskWorkbench.innerHTML = `<p>项目 Agent 任务读取失败：${escapeHtml(error.message || error)}</p>`;
+        });
+    }
+
+    function renderProjectAgentTasks(data, runData) {
+      const summary = data.summary || {};
+      const tasks = Array.isArray(data.tasks) ? data.tasks : [];
+      const runs = runData && Array.isArray(runData.runs) ? runData.runs : [];
+      const runSummary = runData && runData.summary ? runData.summary : {};
+      projectAgentTaskSummary.innerHTML = [
+        metric("任务总数", number(summary.total_count)),
+        metric("待处理", number((summary.status_counts || {}).planned)),
+        metric("执行成功", number(runSummary.succeeded)),
+        metric("执行失败", number(runSummary.failed)),
+        metric("运行中", number(runSummary.running)),
+      ].join("");
+      if (!tasks.length && !runs.length) {
+        projectAgentTaskWorkbench.innerHTML = "<p>暂无项目 Agent 任务。</p>";
+        return;
+      }
+      const taskRows = tasks.slice(0, 15).map(task => `
+        <div class="workbench-item">
+          <strong><a href="project.html?repo=${encodeURIComponent(task.full_name || "")}&api=1">${escapeHtml(task.full_name || "未知项目")}</a></strong>
+          <span>${escapeHtml(agentProjectTaskTypeLabel(task.task_type))} / ${escapeHtml(agentProjectTaskStatusLabel(task.status))} / 优先级 ${number(task.priority)}</span>
+          <p>${escapeHtml(task.reason || "暂无任务原因。")}</p>
+          ${task.result_summary ? `<p>执行结果：${escapeHtml(task.result_summary)}</p>` : ""}
+        </div>
+      `).join("");
+      const runRows = runs.slice(0, 10).map(run => `
+        <div class="workbench-item">
+          <strong><a href="project.html?repo=${encodeURIComponent(run.full_name || "")}&api=1">${escapeHtml(run.full_name || "未知项目")}</a></strong>
+          <span>${escapeHtml(agentProjectTaskTypeLabel(run.task_type))} / ${escapeHtml(agentProjectRunStatusLabel(run.status))} / ${escapeHtml(run.started_at || "")}</span>
+          <p>${escapeHtml((run.result || {}).execution_summary || run.error || "暂无执行摘要。")}</p>
+        </div>
+      `).join("");
+      projectAgentTaskWorkbench.innerHTML = `${taskRows}${runRows ? `<h3>最近执行记录</h3>${runRows}` : ""}`;
+    }
+
+    function agentProjectTaskTypeLabel(value) {
+      return ({ observe: "观察", review_risk: "风险复查", deep_analysis: "深度分析", notify: "订阅推送", ignore: "忽略", continue_tracking: "继续跟踪" })[value] || value || "观察";
+    }
+
+    function agentProjectTaskStatusLabel(value) {
+      return ({ planned: "待执行", in_progress: "执行中", completed: "已完成", failed: "失败", cancelled: "已取消" })[value] || value || "未知";
+    }
+
+    function agentProjectRunStatusLabel(value) {
+      return ({ running: "运行中", succeeded: "成功", failed: "失败" })[value] || value || "未知";
+    }
+
+    function loadNotificationAdmin() {
+      if (!shouldUseApi()) {
+        detectSubscriptionEvents.disabled = true;
+        buildNotificationCandidates.disabled = true;
+        notificationSummary.innerHTML = metric("模式", "静态");
+        notificationWorkbench.innerHTML = "<p>启动本地后端或添加 api=1 后查看推送候选。</p>";
+        return;
+      }
+      Promise.all([
+        fetch("/v1/notification-candidates?limit=100", { cache: "no-store" }).then(jsonOrThrow),
+        fetch("/v1/notification-deliveries?limit=200", { cache: "no-store" }).then(jsonOrThrow),
+      ])
+        .then(([candidateData, deliveryData]) => renderNotificationAdmin(candidateData, deliveryData))
+        .catch(error => {
+          notificationWorkbench.innerHTML = `<p>通知数据读取失败：${escapeHtml(error.message || error)}</p>`;
+        });
+    }
+
+    function renderNotificationAdmin(candidateData, deliveryData) {
+      const candidates = Array.isArray(candidateData.candidates) ? candidateData.candidates : [];
+      const deliveries = Array.isArray(deliveryData.deliveries) ? deliveryData.deliveries : [];
+      const pending = candidates.filter(item => item.status === "pending").length;
+      const failed = deliveries.filter(item => item.status === "failed" || item.status === "skipped");
+      const succeeded = deliveries.filter(item => item.status === "succeeded").length;
+      const finished = succeeded + failed.length;
+      const successRate = finished ? `${Math.round((succeeded / finished) * 100)}%` : "-";
+      notificationSummary.innerHTML = [
+        metric("待确认候选", pending),
+        metric("投递成功率", successRate),
+        metric("失败渠道", failed.length),
+        metric("投递记录", deliveries.length),
+      ].join("");
+      if (!candidates.length) {
+        notificationWorkbench.innerHTML = "<p>暂无推送候选。</p>";
+        return;
+      }
+      notificationWorkbench.innerHTML = candidates.slice(0, 25).map(candidate => {
+        const retry = candidate.status === "failed" || candidate.status === "partial";
+        return `<article class="workbench-item">
+          <strong><a href="project.html?repo=${encodeURIComponent(candidate.full_name || "")}&api=1">${escapeHtml(candidate.full_name || "未知项目")}</a></strong>
+          <span>${escapeHtml(candidate.status || "pending")} / ${escapeHtml((candidate.channels || []).join(", "))}</span>
+          <p>${escapeHtml(candidate.message || candidate.title || "")}</p>
+          <div class="actions">
+            <button type="button" data-notification-action="preview" data-candidate-id="${escapeAttribute(candidate.candidate_id || "")}">预览</button>
+            <button type="button" data-notification-action="deliver" data-candidate-id="${escapeAttribute(candidate.candidate_id || "")}">确认发送</button>
+            ${retry ? `<button type="button" data-notification-action="retry" data-candidate-id="${escapeAttribute(candidate.candidate_id || "")}">重试失败渠道</button>` : ""}
+          </div>
+        </article>`;
+      }).join("");
+    }
+
+    function runNotificationBuild(kind) {
+      const endpoint = kind === "events" ? "/v1/subscription-events/detect" : "/v1/notification-candidates/build";
+      notificationActionStatus.textContent = kind === "events" ? "检测事件中..." : "构建候选中...";
+      fetch(endpoint, {
+        method: "POST",
+        headers: adminWriteHeaders(),
+        body: JSON.stringify({ dry_run: false }),
+      })
+        .then(jsonOrThrow)
+        .then(data => {
+          notificationActionStatus.textContent = kind === "events" ? `新增事件 ${number(data.persisted_count)} 条。` : `新增候选 ${number(data.persisted_count)} 条。`;
+          return loadNotificationAdmin();
+        })
+        .catch(error => {
+          notificationActionStatus.textContent = `操作失败：${error.message || error}`;
+        });
+    }
+
+    function handleNotificationAction(event) {
+      const button = event.target.closest("[data-notification-action]");
+      if (!button) return;
+      const action = button.dataset.notificationAction || "preview";
+      const candidateId = button.dataset.candidateId || "";
+      const realDelivery = action !== "preview";
+      if (realDelivery && !window.confirm(`确认发送候选 ${candidateId}？`)) return;
+      button.disabled = true;
+      notificationActionStatus.textContent = action === "preview" ? "生成发送预览中..." : "逐渠道发送中...";
+      fetch(`/v1/notification-candidates/${encodeURIComponent(candidateId)}/deliver`, {
+        method: "POST",
+        headers: adminWriteHeaders(),
+        body: JSON.stringify({
+          dry_run: !realDelivery,
+          confirm_delivery: realDelivery,
+          retry_failed: action === "retry",
+          requested_by: "admin_page",
+        }),
+      })
+        .then(jsonOrThrow)
+        .then(data => {
+          const results = (data.results || []).map(item => `${item.channel}:${item.status}`).join("，");
+          notificationActionStatus.textContent = `${data.executed ? "已执行" : "未执行"}；${results || data.error || "无渠道结果"}`;
+          return loadNotificationAdmin();
+        })
+        .catch(error => {
+          notificationActionStatus.textContent = `投递失败：${error.message || error}`;
+        })
+        .finally(() => {
+          button.disabled = false;
+        });
+    }
+
     function loadAdminJobsJson() {
       return fetch("jobs.json", { cache: "no-store" })
         .then(jsonOrThrow)
@@ -868,6 +1179,7 @@
     function loadDatabaseInsights() {
       if (!shouldUseApi()) {
         databaseOverview.innerHTML = metric("数据库模式", "静态");
+        feedbackSummary.innerHTML = '<p>启动本地后端或添加 api=1 后显示反馈记忆汇总。</p>';
         databaseFacets.innerHTML = '<p>启动本地后端或添加 api=1 后显示数据库分面。</p>';
         databaseTrends.innerHTML = '<p>启动本地后端或添加 api=1 后显示运行趋势。</p>';
         ragQualitySummary.innerHTML = '<p>启动本地后端或添加 api=1 后显示 RAG 诊断和质量概览。</p>';
@@ -881,8 +1193,10 @@
         fetch("/v1/rag/diagnostics?limit=5", { cache: "no-store" }).then(jsonOrThrow),
         fetch("/v1/rag/quality-summary?limit=5", { cache: "no-store" }).then(jsonOrThrow),
         fetch("/v1/rag/search-evaluation-trends?limit=8", { cache: "no-store" }).then(jsonOrThrow),
+        fetch("/v1/feedback?limit=200", { cache: "no-store" }).then(jsonOrThrow).catch(() => ({ feedback: [], count: 0 })),
+        fetch("/v1/recommendations?limit=20", { cache: "no-store" }).then(jsonOrThrow).catch(() => ({ recommendations: [] })),
       ])
-        .then(([summary, facets, trends, diagnostics, qualitySummary, evaluationTrends]) => {
+        .then(([summary, facets, trends, diagnostics, qualitySummary, evaluationTrends, feedback, recommendations]) => {
           const counts = summary.table_counts || {};
           databaseOverview.innerHTML = [
             metric("仓库记录", counts.repositories || 0),
@@ -890,6 +1204,7 @@
             metric("语料记录", counts.project_corpus || 0),
             metric("订阅记录", counts.subscriptions || 0),
           ].join("");
+          feedbackSummary.innerHTML = feedbackSummaryHtml(feedback, recommendations);
           databaseFacets.innerHTML = databaseFacetsHtml(facets);
           databaseTrends.innerHTML = databaseTrendsHtml(trends);
           ragQualitySummary.innerHTML = ragDiagnosticsHtml(diagnostics) + ragQualitySummaryHtml(qualitySummary);
@@ -897,6 +1212,7 @@
         })
         .catch(error => {
           databaseOverview.innerHTML = metric("数据库状态", "读取失败");
+          feedbackSummary.innerHTML = "";
           databaseFacets.innerHTML = `<p>数据库分面读取失败：${escapeHtml(error.message || error)}</p>`;
           databaseTrends.innerHTML = "";
           ragQualitySummary.innerHTML = "";
@@ -987,7 +1303,7 @@
       target.textContent = "执行中...";
       fetch(`/v1/jobs/${encodeURIComponent(jobId)}/execute`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: adminWriteHeaders(),
         body: JSON.stringify({ confirm_execution: true, requested_by: "admin_page" }),
       })
         .then(jsonOrThrow)
@@ -1020,7 +1336,7 @@
       target.textContent = "重试创建中...";
       fetch(`/v1/jobs/${encodeURIComponent(jobId)}/retry`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: adminWriteHeaders(),
         body: JSON.stringify({ requested_by: "admin_page" }),
       })
         .then(jsonOrThrow)
@@ -1121,6 +1437,45 @@
         '<h4>来源</h4>',
         ...(sources.length ? sources : [facetRow("无", "-", "-")]),
         facetRow("文本搜索", ready.ready_for_text_search ? "已准备" : "未准备", "project_corpus"),
+      ].join("");
+    }
+
+    function feedbackSummaryHtml(data, recommendationsData) {
+      const feedback = Array.isArray(data.feedback) ? data.feedback : [];
+      const recommendations = Array.isArray(recommendationsData && recommendationsData.recommendations)
+        ? recommendationsData.recommendations
+        : [];
+      const count = Number(data.count || feedback.length || 0);
+      const average = feedback.length
+        ? feedback.reduce((total, item) => total + Number(item.rating || 0), 0) / feedback.length
+        : 0;
+      const positive = feedback.filter(item => Number(item.rating || 0) > 0).length;
+      const negative = feedback.filter(item => Number(item.rating || 0) < 0).length;
+      const latest = feedback.slice(0, 5).map(item => `<article class="search-row">
+        <strong>${escapeHtml(item.full_name || "-")}</strong>
+        <span>${escapeHtml(item.profile || "default")} · 评分 ${escapeHtml(item.rating || 0)} · ${escapeHtml(item.source || "-")} · ${escapeHtml(item.created_at || "")}</span>
+        <p>${escapeHtml(item.note || "")}</p>
+      </article>`).join("");
+      const impacted = recommendations
+        .filter(item => item.ranking_factors && (Number(item.ranking_factors.preference_score || 0) || Number(item.ranking_factors.tracking_score || 0)))
+        .slice(0, 5)
+        .map(item => `<article class="search-row">
+          <strong>${escapeHtml(item.full_name || "-")}</strong>
+          <span>推荐分 ${number(item.recommendation_score)} · 反馈 ${signedNumber(item.ranking_factors.preference_score || 0)} · 跟踪 ${signedNumber(item.ranking_factors.tracking_score || 0)}</span>
+          <p>${escapeHtml(item.feedback_reason || "")}</p>
+        </article>`)
+        .join("");
+      return [
+        "<h3>反馈记忆汇总</h3>",
+        `<div class="overview">${[
+          metric("反馈记录", count),
+          metric("平均评分", average.toFixed(2)),
+          metric("正向反馈", positive),
+          metric("负向反馈", negative),
+        ].join("")}</div>`,
+        latest || "<p>暂无项目反馈。可先在项目详情页或推荐页写入有用/不适合/继续跟踪。</p>",
+        "<h3>反馈影响推荐</h3>",
+        impacted || "<p>暂无受反馈提升或降低的推荐项目。</p>",
       ].join("");
     }
 
@@ -1323,6 +1678,59 @@
       return `${answerHtml}${summary}${nextActionsHtml}${contextHtml}<label>Prompt Context<textarea readonly>${escapeHtml(promptContext)}</textarea></label>`;
     }
 
+    function devContextIndexHtml(data) {
+      return `<article class="search-row">
+        <strong>开发上下文索引完成</strong>
+        <span>${escapeHtml(data.run_id || "-")} · ${escapeHtml(data.status || "-")}</span>
+        <p>来源 ${escapeHtml(data.source_count || 0)}，分块 ${escapeHtml(data.chunk_count || 0)}，embedding ${escapeHtml(data.embedding_count || 0)}，命令 ${escapeHtml(data.command_count || 0)}。</p>
+      </article>`;
+    }
+
+    function devContextSearchHtml(data) {
+      const summary = (data.summary || []).map(item => `<p>${escapeHtml(item)}</p>`).join("");
+      const results = data.results || [];
+      if (!results.length) return `${summary}<p>没有搜索结果。可先点击“索引开发上下文”。</p>`;
+      return `${summary}${results.map(result => `<article class="search-row">
+        <strong>${escapeHtml(result.title || result.source_path || "-")}</strong>
+        <span>${escapeHtml(result.source_type || "-")} · ${escapeHtml(result.source_path || "-")} · ${escapeHtml(result.run_id || "-")}</span>
+        <p>${escapeHtml(result.snippet || "")}</p>
+      </article>`).join("")}`;
+    }
+
+    function devContextAskHtml(data) {
+      const retrieval = data.retrieval || {};
+      const nextActions = (data.next_actions || []).map(item => `<li>${escapeHtml(item)}</li>`).join("");
+      const nextActionsHtml = nextActions ? `<article class="search-row"><strong>下一步动作</strong><ul>${nextActions}</ul></article>` : "";
+      const evidence = data.evidence || [];
+      const evidenceHtml = evidence.map(item => `<article class="search-row">
+        <strong>${escapeHtml(item.index || "-")} · ${escapeHtml(item.title || item.source_path || "-")}</strong>
+        <span>${escapeHtml(item.source_type || "-")} · ${escapeHtml(item.source_path || "-")} · ${escapeHtml(item.run_id || "-")}</span>
+        <p>${escapeHtml(item.snippet || "")}</p>
+      </article>`).join("");
+      const emptyEvidence = evidence.length ? "" : "<p>没有召回证据。可先点击“索引开发上下文”，或换一个更具体的问题。</p>";
+      return `<article class="search-row">
+        <strong>开发上下文回答</strong>
+        <span>${escapeHtml(data.question_type || "-")} · ${escapeHtml(data.confidence || "-")} · ${escapeHtml(retrieval.search_engine || "-")} · 证据 ${escapeHtml(retrieval.count || 0)}</span>
+        <p>${escapeHtml(data.answer || "")}</p>
+      </article>${nextActionsHtml}${emptyEvidence}${evidenceHtml}`;
+    }
+
+    function devContextJobsHtml(jobs) {
+      const devJobs = (jobs || []).filter(job => job.kind === "dev_context_index").slice(0, 5);
+      if (!devJobs.length) return '<p>暂无开发上下文索引任务。</p>';
+      return devJobs.map(job => {
+        const result = job.result || {};
+        const error = job.error || result.error || "";
+        const runId = result.run_id || "";
+        const runLink = runId && shouldUseApi() ? `<a href="/v1/dev-context/runs/${encodeURIComponent(runId)}">索引详情</a>` : "索引详情";
+        return `<article class="search-row">
+          <strong><a href="${escapeAttribute(jobDetailUrl(job.job_id || ""))}">${escapeHtml(job.job_id || "-")}</a></strong>
+          <span>${escapeHtml(job.status || "-")} · 分块 ${escapeHtml(result.chunk_count || 0)} · embedding ${escapeHtml(result.embedding_count || 0)} · ${escapeHtml(job.finished_at || job.submitted_at || "-")}</span>
+          <p>${error ? `错误：${escapeHtml(error)}` : `运行：${runLink}`}</p>
+        </article>`;
+      }).join("");
+    }
+
     function facetRow(name, value, detail) {
       return `<div class="facet-row"><strong>${escapeHtml(name)}</strong><span>${escapeHtml(value)} · ${escapeHtml(detail)}</span></div>`;
     }
@@ -1469,6 +1877,20 @@
     function jsonOrThrow(response) {
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       return response.json();
+    }
+
+    function adminWriteHeaders() {
+      const token = adminToken();
+      const headers = { "Content-Type": "application/json" };
+      if (token) headers["X-Admin-Token"] = token;
+      return headers;
+    }
+
+    function adminToken() {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get("admin_token") || window.localStorage.getItem("github_weekly_admin_token") || "";
+      if (params.get("admin_token")) window.localStorage.setItem("github_weekly_admin_token", params.get("admin_token"));
+      return token.trim();
     }
 
     function jobDetailUrl(jobId) {

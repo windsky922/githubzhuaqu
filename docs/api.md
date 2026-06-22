@@ -40,11 +40,86 @@ http://127.0.0.1:8000/api/health
 http://127.0.0.1:8000/admin.html?api=1
 ```
 
+### 管理写接口鉴权
+
+本地后端的只读接口不需要鉴权；所有会写入 SQLite、创建任务、执行任务、重试任务、写入反馈或修改订阅的管理型接口都需要管理口令。
+
+配置方式：
+
+```powershell
+$env:ADMIN_API_TOKEN="<本地管理口令>"
+py -m uvicorn src.api.app:app --reload
+```
+
+调用方式任选其一：
+
+```text
+X-Admin-Token: <本地管理口令>
+Authorization: Bearer <本地管理口令>
+```
+
+如果未配置 `ADMIN_API_TOKEN`，管理写接口返回 `403`；如果配置后请求未带正确口令，返回 `401`。受保护接口包括 `/v1/runs/trigger`、`/v1/jobs/{job_id}/execute`、`/v1/jobs/{job_id}/retry`、`/v1/rag/*` 写入/计划接口、`/v1/subscriptions` 写入接口、事件检测、候选构建、候选投递、`POST /v1/feedback` 和项目 Agent 任务写接口。
+
+本地页面会从 `?admin_token=...` 或浏览器 `localStorage.github_weekly_admin_token` 读取口令，并仅在写请求中发送 `X-Admin-Token`。不要把真实口令提交到仓库、文档或 GitHub Pages。
+
 根路径 `http://127.0.0.1:8000/` 会跳转到管理首页。`/v1/*` 路径是 JSON API，例如 `/v1/jobs?limit=50` 返回机器可读任务数据，不是 HTML 页面。
 
-管理首页中的 RAG 区域会调用 `/v1/rag/ask`、`/v1/rag/retrieve`、`/v1/rag/vector-search` 和 `/v1/rag/hybrid-search`，用于查看问答结果、证据块、引用和 `prompt_context`；后端还提供 `/v1/rag/search-compare`、`/v1/rag/search-evaluation` 和 `/v1/rag/search-evaluation-trends`，用于比较、批量评估和长期观察三种检索模式的召回差异。管理首页会展示检索评估趋势，包括最近评估任务、平均样本数、零命中样本和推荐模式分布。RAG 诊断会调用 `/v1/rag/diagnostics`，用于判断语料、证据块、embedding、解释历史和问答能力是否可用；RAG 质量概览会调用 `/v1/rag/quality-summary`，用于查看解释数量、质量分布、改进建议和低质量样本；RAG 维护计划按钮会调用 `/v1/rag/maintenance-plan`，按诊断结果创建语料重建、embedding 构建或解释回填 planned 任务；维护历史可以通过 `/v1/rag/maintenance-report` 查看最近 RAG 维护任务状态、计数变化和下一步建议；RAG 回填区会调用 `/v1/rag/backfill-explanations`，先预览缺口项目，确认后再写入 SQLite。向量检索会在 `auto_build=true` 时自动构建本地 `local-hash-v1` 索引，也可以先手动运行 `py scripts\build_rag_embeddings.py`。
+管理首页中的 RAG 区域会调用 `/v1/rag/ask`、`/v1/rag/retrieve`、`/v1/rag/vector-search` 和 `/v1/rag/hybrid-search`，用于查看问答结果、证据块、引用和 `prompt_context`；开发上下文区域会调用 `/v1/dev-context/index`、`/v1/dev-context/search` 和 `/v1/dev-context/ask`，用于索引开发材料、检索证据和生成规则版审查/诊断回答，并会展示最近 `dev_context_index` 任务状态。后端还提供 `/v1/rag/search-compare`、`/v1/rag/search-evaluation` 和 `/v1/rag/search-evaluation-trends`，用于比较、批量评估和长期观察三种检索模式的召回差异。管理首页会展示检索评估趋势，包括最近评估任务、平均样本数、零命中样本和推荐模式分布。RAG 诊断会调用 `/v1/rag/diagnostics`，用于判断语料、证据块、embedding、解释历史和问答能力是否可用；RAG 质量概览会调用 `/v1/rag/quality-summary`，用于查看解释数量、质量分布、改进建议和低质量样本；RAG 维护计划按钮会调用 `/v1/rag/maintenance-plan`，按诊断结果创建语料重建、embedding 构建或解释回填 planned 任务；维护历史可以通过 `/v1/rag/maintenance-report` 查看最近 RAG 维护任务状态、计数变化和下一步建议；RAG 回填区会调用 `/v1/rag/backfill-explanations`，先预览缺口项目，确认后再写入 SQLite。向量检索会在 `auto_build=true` 时自动构建本地 `local-hash-v1` 索引，也可以先手动运行 `py scripts\build_rag_embeddings.py`。
 
 如果本地没有 `data/github_weekly.sqlite`，查询项目接口会从 `data/` 下的 JSON 归档自动重建 SQLite 派生索引。
+
+### 项目 Agent 任务执行
+
+项目任务执行遵循“预检查 -> 事务抢占 -> 只读处理 -> 保存证据与结果 -> 写回 RAG”的流程：
+
+| 接口 | 说明 |
+|---|---|
+| `GET /v1/agent-tasks/{task_id}/execution-check` | 返回机器可读执行条件，不写数据库 |
+| `POST /v1/agent-tasks/{task_id}/execute` | 执行 planned 任务，受管理口令保护 |
+| `POST /v1/agent-tasks/{task_id}/retry` | 重试 failed 任务，受管理口令保护 |
+| `GET /v1/agent-tasks/{task_id}/runs` | 查询单任务执行历史 |
+| `GET /v1/agent-task-runs` | 查询最近执行记录，供管理页汇总 |
+
+处理器支持 `observe`、`review_risk`、`deep_analysis`、`continue_tracking`、`notify` 和 `ignore`。结果统一包含 `execution_summary`、`decision`、`confidence`、`evidence`、`citations`、`changes`、`risk_changes`、`recommended_actions` 和 `subscription_candidate`。`notify` 只创建订阅候选，不直接调用推送通道。
+
+### 事件订阅与确认投递
+
+| 接口 | 说明 |
+|---|---|
+| `POST /v1/subscription-events/detect` | 检测项目变化事件，受管理口令保护 |
+| `GET /v1/subscription-events` | 按项目、类型、严重度和状态查询事件 |
+| `POST /v1/notification-candidates/build` | 按启用订阅构建去重候选，受管理口令保护 |
+| `GET /v1/notification-candidates` | 查询待确认或已处理候选 |
+| `POST /v1/notification-candidates/{id}/deliver` | 预览或确认逐渠道投递，受管理口令保护 |
+| `GET /v1/notification-deliveries` | 查询逐渠道投递审计记录 |
+
+候选投递默认 `dry_run=true`。真实外发必须同时满足 `dry_run=false` 和 `confirm_delivery=true`：
+
+```json
+{
+  "dry_run": false,
+  "confirm_delivery": true,
+  "channels": ["telegram", "feishu"],
+  "retry_failed": false,
+  "requested_by": "admin"
+}
+```
+
+同一订阅、事件、渠道只保留一条投递记录。成功渠道不会重复发送；失败或配置缺失渠道必须显式设置 `retry_failed=true` 才会增加尝试次数。Telegram、飞书和企业微信继续从环境变量或 GitHub Secrets 读取配置，API 和数据库不保存 Token、Chat ID 或 Webhook。
+
+本地命令入口：
+
+```powershell
+python scripts\manage_notifications.py detect --limit 500
+python scripts\manage_notifications.py build --limit 500
+python scripts\manage_notifications.py preview <candidate_id>
+python scripts\manage_notifications.py deliver <candidate_id>
+python scripts\manage_notifications.py deliver --no-dry-run --confirm-delivery <candidate_id>
+```
+
+`deliver` 和 `deliver-pending` 默认都是 dry-run。真实发送必须同时提供 `--no-dry-run` 与 `--confirm-delivery`；失败渠道重试还需要 `--retry-failed`。
+
+通知记忆同时进入现有 Agent/RAG 返回契约：`GET /v1/recommendations` 的项目项包含 `event_memory` 和 `event_reason`；`POST /v1/rag/ask` 在订阅、通知、推送、触发等相关问题中返回 `notification_memory` 并把证据加入回答；`GET /v1/projects/{owner}/{repo}/rag` 返回该项目最近事件、候选和逐渠道投递摘要。新增字段不改变原有 `answer_model` 版本标识。
 
 ## 三、接口
 
@@ -123,6 +198,8 @@ http://127.0.0.1:8000/admin.html?api=1
 1. `recommendations`：推荐项目数组。
 2. `selection_summary`：本次推荐的筛选条件、命中数量、Trending 命中和首选项目说明。
 3. `profile`、`language`、`category`、`query`：前端回显当前筛选条件。
+4. `feedback_memory`：当前筛选范围内的反馈记忆摘要。
+5. 推荐项目会额外返回 `recommendation_score`、`ranking_factors`、`preference_score`、`feedback_memory`、`feedback_reason`、`rag_reason` 和 `recommendation_reason`。其中 `ranking_factors` 拆分基础分、质量分、趋势分、RAG 相关分、反馈偏好分、继续跟踪分和风险扣分；正向反馈会提高排序，负向反馈会降低排序，“继续跟踪”会额外提高 `tracking_score`。
 
 对应的 v1 入口为：
 
@@ -138,7 +215,7 @@ http://127.0.0.1:8000/admin.html?api=1
 
 返回 SQLite 派生索引的数据库概览，用于本地管理台、数据健康检查和后续 RAG 索引准备。该接口会返回：
 
-1. `table_counts`：`runs`、`repositories`、`selections`、`jobs`、`job_events`、`subscriptions` 等表的记录数。
+1. `table_counts`：`runs`、`repositories`、`selections`、`jobs`、`job_events`、`subscriptions`、`project_feedback` 等表的记录数。
 2. `latest_run` 和 `latest_job`：最近一次运行和最近一个任务。
 3. `job_status_counts` 和 `subscription_status_counts`：任务状态和订阅状态分布。
 4. `top_languages` 和 `top_categories`：当前归档中主要语言和项目方向分布。
@@ -724,9 +801,9 @@ POST /v1/jobs/{job_id}/execute
 1. 如果 `project_corpus` 或 `rag_chunks` 还没有准备好，创建 `kind=rag_corpus_rebuild` 任务，并返回 `reason=rag_diagnostics_needs_corpus`。
 2. 如果语料已准备但缺少 embedding，创建 `kind=rag_embedding_build` 任务，并返回 `reason=rag_diagnostics_needs_embeddings`。
 3. 如果 embedding 已准备但解释覆盖仍有缺口，创建 `kind=rag_backfill` 任务，并返回 `reason=rag_coverage_gap_detected`。
-4. 如果 `gap_count` 小于 `min_gap_count`，只返回健康状态，不创建任务。
+4. 如果 `gap_count` 小于 `min_gap_count`，创建 `kind=rag_search_evaluation` 任务，并返回 `reason=rag_coverage_healthy_search_evaluation`，用于持续评估 FTS5、向量和混合检索质量。
 
-返回结果会包含 `diagnostics`、`coverage`、`gap_count` 和 `min_gap_count`，方便 GitHub Actions、后台管理页或后续 Agent 判断下一步应先建语料、补向量，还是创建解释回填任务。三类任务都会写入 `jobs` 表，可以继续通过 `GET /v1/job-execution-check?job_id=...` 和 `POST /v1/jobs/{job_id}/execute` 检查与执行。
+返回结果会包含 `diagnostics`、`coverage`、`gap_count` 和 `min_gap_count`，方便 GitHub Actions、后台管理页或后续 Agent 判断下一步应先建语料、补向量、创建解释回填任务，还是创建检索评估任务。四类任务都会写入 `jobs` 表，可以继续通过 `GET /v1/job-execution-check?job_id=...` 和 `POST /v1/jobs/{job_id}/execute` 检查与执行。
 
 任务详情页 `job.html?job=...&api=1` 会针对 RAG 维护任务展示结构化执行摘要：语料、证据块、embedding 的 before/after 计数、回填候选数、处理数和处理仓库列表，同时保留原始 JSON 结果用于调试。
 
@@ -774,7 +851,7 @@ python scripts/plan_rag_maintenance.py --limit 20 --coverage-limit 200
 
 ### `GET /v1/projects/{owner}/{repo}/rag`
 
-返回单个项目的 RAG 聚合包，用于项目详情页、后续 Agent 工具调用和 LangChain/RAG 编排。该接口会读取项目详情、执行本地 RAG 检索，并合并该项目已经入库的解释历史，不调用外部模型、不请求 GitHub/Kimi/Telegram。
+返回单个项目的 RAG 聚合包，用于项目详情页、后续 Agent 工具调用和 LangChain/RAG 编排。该接口会读取项目详情、结构化项目研究档案、项目 Agent 任务及执行结果，执行本地 RAG 检索，并合并该项目已经入库的解释历史，不调用外部模型、不请求 GitHub/Kimi/Telegram。
 
 支持参数：
 
@@ -789,9 +866,10 @@ python scripts/plan_rag_maintenance.py --limit 20 --coverage-limit 200
 返回字段包含：
 
 1. `project`：项目摘要，包含语言、方向、历史入选次数、新增 Star 和最好 Trending 排名。
-2. `contexts`、`citations`、`prompt_context`：可直接交给后续问答链的证据与引用。
-3. `explanations`：该项目已入库的 RAG 解释历史。
-4. `explanation_summary`：该项目解释数量、平均质量分、质量等级分布和改进建议。
+2. `project_profile`：项目研究档案，包含 `project_positioning`、`use_cases`、`strengths`、`risks`、`quality_summary`、`tracking_reason`、`rag_summary` 和 `agent_judgement`。
+3. `contexts`、`citations`、`prompt_context`：可直接交给后续问答链的证据与引用；`contexts.metadata.project_profile` 会携带对应证据块的项目档案。
+4. `explanations`：该项目已入库的 RAG 解释历史。
+5. `explanation_summary`：该项目解释数量、平均质量分、质量等级分布和改进建议。
 
 示例：
 
@@ -933,6 +1011,109 @@ POST /v1/subscriptions/sub:xxxx/trigger
 
 该接口只创建 planned 任务，不在 HTTP 请求里执行采集、生成或推送。订阅必须是 `enabled` 状态；如果传入 `dry_run=false`，仍需要 `confirm_delivery=true`，否则会自动降级为 `dry_run=true`。
 
+### `/v1` 项目反馈接口
+
+项目反馈接口用于沉淀用户对单个仓库的显式评价，作为后续个性化记忆、RAG 重排和推荐校准的数据基础。该接口只写入 SQLite 派生索引，不读取、不返回任何 Token、Chat ID、Webhook 或请求头。
+
+当前入口包括：
+
+1. `POST /v1/feedback`：写入一条项目反馈。
+2. `GET /v1/feedback`：按仓库名或 profile 查询反馈记录。
+
+`POST /v1/feedback` 请求体支持：
+
+| 字段 | 说明 |
+|---|---|
+| `full_name` | 必填，仓库名，例如 `owner/repo` |
+| `profile` | 可选，反馈所属偏好方向，例如 `agent_development` |
+| `rating` | 可选，整数评分，范围为 `-2` 到 `2` |
+| `labels` | 可选，标签列表，例如 `useful`、`too_complex` |
+| `note` | 可选，用户备注，会截断保存，避免写入过长原文 |
+| `source` | 可选，反馈来源，例如 `admin_page` 或 `telegram` |
+
+示例：
+
+```text
+POST /v1/feedback
+```
+
+```json
+{
+  "full_name": "owner/agent",
+  "profile": "agent_development",
+  "rating": 2,
+  "labels": ["useful", "agent"],
+  "note": "适合作为 Agent 工作流参考",
+  "source": "admin_page"
+}
+```
+
+查询示例：
+
+```text
+GET /v1/feedback?full_name=owner/agent&limit=20
+GET /v1/feedback?profile=agent_development&limit=20
+```
+
+响应会返回 `feedback` 列表和 `summary` 汇总，其中 `summary.ready_for_preference_memory=true` 表示已经具备后续个性化记忆建模的基础样本。
+
+当前推荐接口已经会读取这些反馈、项目档案和 Agent 任务：`GET /v1/recommendations` 会把匹配 profile 的反馈聚合为项目级 `feedback_memory`，读取 `project_profile`，并生成 `recommendation_score`、`ranking_factors`、`preference_score`、解释字段和结构化 `next_actions`。`GET /v1/projects/{owner}/{repo}/rag` 会返回该项目的 `feedback_memory`、`project_profile`、`agent_tasks` 和 `next_actions`。
+
+前端入口已经接入反馈闭环：`project.html?repo=...&api=1` 和 `recommendations.html?api=1` 会通过 `POST /v1/feedback` 写入“有用 / 不适合 / 继续跟踪”反馈；`admin.html?api=1` 会读取 `GET /v1/feedback?limit=200` 展示反馈记忆汇总，并读取 `/v1/recommendations?limit=20` 展示受反馈影响的推荐项目。所有页面写请求仍需提供管理口令，来源为 `?admin_token=...` 或 `localStorage.github_weekly_admin_token`。
+
+### `/v1/agent-tasks` 项目 Agent 任务
+
+项目 Agent 任务用于承载“观察、判断、行动、复盘”工作流。任务类型包括 `observe`、`review_risk`、`deep_analysis`、`notify`、`ignore` 和 `continue_tracking`；状态包括 `planned`、`in_progress`、`completed`、`failed` 和 `cancelled`。
+
+接口：
+
+1. `GET /v1/agent-tasks`：按 `full_name`、`profile`、`status` 查询任务。
+2. `GET /v1/projects/{owner}/{repo}/agent-tasks`：查询单项目任务。
+3. `POST /v1/projects/{owner}/{repo}/agent-tasks`：创建项目任务，相同去重键返回已有任务。
+4. `PATCH /v1/agent-tasks/{task_id}`：更新优先级、原因、执行结果或任务状态。
+
+创建请求示例：
+
+```json
+{
+  "task_type": "deep_analysis",
+  "priority": 2,
+  "reason": "验证项目核心能力和真实落地场景。",
+  "profile": "agent_development",
+  "source": "project_page",
+  "payload": {"subscription_action": "notify"}
+}
+```
+
+状态迁移受到限制：完成任务不能重新打开；失败任务可以重新计划；进入 `in_progress` 时记录 `started_at`，进入终态时记录 `finished_at`。任务更新后会重建项目语料，使原因和 `result_summary` 可被 RAG 召回。
+
+### `/v1/dev-context` 开发上下文 RAG
+
+开发上下文接口用于把本仓库的开发材料沉淀到 SQLite，作为后续代码审查、运行诊断、历史追踪和开发决策问答的记忆层。当前阶段提供本地索引、FTS5 检索和规则版问答，不接入外部模型。
+
+当前入口包括：
+
+1. `POST /v1/dev-context/index`：采集并索引开发上下文，写入 `dev_runs`、`dev_corpus`、`dev_chunks`、`dev_chunks_fts` 和 `dev_embeddings`。
+2. `POST /v1/dev-context/index-plan`：创建 `kind=dev_context_index`、`status=planned` 的开发上下文索引任务，可由 `scripts/run_planned_job.py` 或 `/v1/jobs/{id}/execute` 执行。
+3. `GET /v1/dev-context/search?q=...`：按关键词检索开发上下文片段，支持可选 `source_type=document|git_diff|test_output|security_check`。
+4. `POST /v1/dev-context/ask`：基于已索引的开发上下文生成规则版回答，返回 `answer`、`citations`、`evidence`、`confidence`、`question_type`、`retrieval` 和 `next_actions`。
+5. `GET /v1/dev-context/runs/{id}`：查看一次索引任务的来源和样例分块。
+
+`POST /v1/dev-context/index` 和 `POST /v1/dev-context/index-plan` 是管理写接口，必须提供 `X-Admin-Token` 或 `Authorization: Bearer ...`。直接索引默认会采集 README、API 文档、数据契约、操作日志、`git diff`、单元测试输出和安全检查输出；接口会对明显密钥形态做脱敏，并给外部命令设置超时。测试、调试或 GitHub Actions 轻量刷新时可传入 `{"run_checks": false}` 跳过单元测试和安全检查。
+
+示例：
+
+```text
+POST /v1/dev-context/index
+POST /v1/dev-context/index-plan {"run_checks":false,"replace":false}
+GET /v1/dev-context/search?q=最近测试失败&limit=8
+GET /v1/dev-context/search?q=反馈入口&source_type=document
+POST /v1/dev-context/ask {"question":"哪些 API 和数据契约相关？","limit":8}
+GET /v1/dev-context/runs/dev-context:xxxx
+```
+
+`POST /v1/dev-context/ask` 支持测试诊断、最近变更、API/数据契约一致性、下一步开发和安全架构风险等问题类型。它只读取 SQLite 中已经脱敏的开发上下文分块，不调用 GitHub、Kimi、Telegram 或外部 embedding 服务。管理页 `admin.html?api=1` 已提供“索引开发上下文”、搜索、问答和最近索引任务入口。GitHub Actions 会在生成 Pages 前运行 `scripts/plan_dev_context_index.py --run-checks false --output .dev-context-job.json`，再交给 `scripts/run_planned_job.py --job-file .dev-context-job.json` 执行。
+
 ### `/v1` 任务接口
 
 `/v1` 是后端服务化入口，当前已经支持：
@@ -966,7 +1147,7 @@ explorer.html?api=0&profile=python
 
 1. 默认通过 `project.html?repo=owner/name` 读取静态 `projects.json` 并在浏览器中聚合详情。
 2. 在本地后端或 URL 带 `api=1` 时，优先读取 `/api/projects/{owner}/{repo}`。
-3. API 模式下会额外调用 `/v1/projects/{owner}/{repo}/rag`，一次展示该项目相关的 RAG 证据块、引用、`prompt_context`、解释历史和解释质量摘要。
+3. API 模式下会额外调用 `/v1/projects/{owner}/{repo}/rag`，一次展示该项目相关的 Agent 研究摘要、RAG 证据块、引用、`prompt_context`、解释历史和解释质量摘要。
 4. API 不可用时自动回退到静态 `projects.json`。
 
 示例：

@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GitHub 周报 2026-06-22</title>
+  <style>
+    body { margin: 0; background: #f6f7f9; color: #1f2933; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height: 1.7; }
+    main { max-width: 960px; margin: 0 auto; padding: 32px 20px 56px; }
+    article { background: #fff; border: 1px solid #d8dee8; padding: 28px; }
+    h1, h2, h3, h4 { line-height: 1.3; }
+    a { color: #0969da; }
+    code { background: #eef2f7; padding: 2px 5px; }
+    table { width: 100%; border-collapse: collapse; margin: 18px 0; display: block; overflow-x: auto; }
+    th, td { border: 1px solid #d8dee8; padding: 8px 10px; text-align: left; vertical-align: top; }
+    th { background: #f1f4f8; }
+    hr { border: 0; border-top: 1px solid #d8dee8; margin: 24px 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <article>
+      <p><strong>GitHub 每周热点项目周报</strong></p>
+      <p>*统计周期：2026-06-15 至 2026-06-22*</p>
+      <hr>
+      <h3>1. 本周总体趋势</h3>
+      <p>本周 GitHub Trending 周榜呈现 <strong>AI Agent 基础设施</strong> 爆发态势。在入选的 10 个项目中，<strong>AI Agent</strong> 相关项目占据 5 席，<strong>LLM Tooling</strong> 占据 2 席，合计占比 70%。<strong>Python</strong> 以 5 个项目的绝对优势成为本周最活跃语言，其次是 C、TypeScript、Rust 和 JavaScript。</p>
+      <p>本周累计新增 Star 达 <strong>39,911</strong>，其中 <code>chopratejas/headroom</code> 单项目贡献 17,084 新增 Star，成为增长最快的项目。所有入选项目均来自 <strong>GitHub Trending 周榜</strong>（排名 1-8、11、15 位），具备官方热度背书。值得关注的是，<strong>MCP (Model Context Protocol)</strong> 协议相关工具开始占据榜首位置，标志着 AI 开发工具链正从&quot;功能实现&quot;向&quot;标准化协议&quot;演进。</p>
+      <hr>
+      <h3>2. 热点项目总览</h3>
+      <table>
+        <thead><tr><th>周榜排名</th><th>项目</th><th>语言</th><th>Star</th><th>本周新增</th><th>类别</th></tr></thead>
+        <tbody>
+        <tr><td>1</td><td><a href="https://github.com/DeusData/codebase-memory-mcp">https://github.com/DeusData/codebase-memory-mcp</a></td><td>C</td><td>10,499</td><td>-</td><td>LLM Tooling</td></tr>
+        <tr><td>2</td><td><a href="https://github.com/chopratejas/headroom">https://github.com/chopratejas/headroom</a></td><td>Python</td><td>44,832</td><td>+17,084</td><td>AI Agent</td></tr>
+        <tr><td>3</td><td><a href="https://github.com/Panniantong/Agent-Reach">https://github.com/Panniantong/Agent-Reach</a></td><td>Python</td><td>37,022</td><td>+8,124</td><td>AI Agent</td></tr>
+        <tr><td>4</td><td><a href="https://github.com/iptv-org/iptv">https://github.com/iptv-org/iptv</a></td><td>TypeScript</td><td>127,185</td><td>+5,856</td><td>Other</td></tr>
+        <tr><td>5</td><td><a href="https://github.com/n0-computer/iroh">https://github.com/n0-computer/iroh</a></td><td>Rust</td><td>10,460</td><td>-</td><td>Other</td></tr>
+        <tr><td>6</td><td><a href="https://github.com/google-research/timesfm">https://github.com/google-research/timesfm</a></td><td>Python</td><td>24,920</td><td>-</td><td>Other</td></tr>
+        <tr><td>7</td><td><a href="https://github.com/NVIDIA/SkillSpector">https://github.com/NVIDIA/SkillSpector</a></td><td>Python</td><td>9,087</td><td>+3,613</td><td>AI Agent</td></tr>
+        <tr><td>8</td><td><a href="https://github.com/asgeirtj/system_prompts_leaks">https://github.com/asgeirtj/system_prompts_leaks</a></td><td>JavaScript</td><td>44,540</td><td>-</td><td>AI Agent</td></tr>
+        <tr><td>11</td><td><a href="https://github.com/addyosmani/agent-skills">https://github.com/addyosmani/agent-skills</a></td><td>Shell</td><td>64,859</td><td>+5,234</td><td>AI Agent</td></tr>
+        <tr><td>15</td><td><a href="https://github.com/LMCache/LMCache">https://github.com/LMCache/LMCache</a></td><td>Python</td><td>9,556</td><td>-</td><td>LLM Tooling</td></tr>
+        </tbody>
+      </table>
+      <hr>
+      <h3>3. 重点项目分析</h3>
+      <h4>DeusData/codebase-memory-mcp（周榜第 1）</h4>
+      <p>该项目是本周 GitHub Trending 周榜冠军，入选原因为<strong>进入周榜第 1 位</strong>且匹配 Python 工具与开发者工具方向。作为基于 <strong>C 语言</strong>编写的高性能 MCP 服务器，它通过将代码库索引为持久化知识图谱，实现了毫秒级索引（Linux 内核 28M 行代码仅需 3 分钟）和亚毫秒级查询响应。项目质量评分为 100（high），采用 MIT 协议，零依赖单二进制文件设计适合生产环境部署。</p>
+      <h4>chopratejas/headroom（周榜第 2，新增 Star 17,084）</h4>
+      <p>本周增长最快的项目，新增 Star 达 17,084。该项目作为 <strong>AI Agent 的上下文压缩层</strong>，可在工具输出、日志和 RAG 块到达 LLM 前进行压缩，实现 60-95% 的 Token 减少。支持作为库、代理或 MCP 服务器使用，采用 Python 开发，Apache-2.0 协议。质量评分 100，代码成熟度适合生产环境集成。</p>
+      <h4>Panniantong/Agent-Reach（周榜第 3，新增 Star 8,124）</h4>
+      <p>该项目解决 AI Agent 访问互联网的痛点，提供<strong>零 API 费用</strong>的 CLI 工具，支持读取 Twitter、Reddit、YouTube、GitHub、Bilibili、小红书等平台。采用 Python 开发，MIT 协议，质量评分 100。项目针对中国开发者优化了 B 站和小红书的反爬机制，适合需要让 Agent 获取实时网络数据的场景。</p>
+      <h4>NVIDIA/SkillSpector（周榜第 7，新增 Star 3,613）</h4>
+      <p>NVIDIA 官方出品的 <strong>AI Agent 技能安全扫描器</strong>，用于检测 Agent 技能（Claude Code、Codex CLI、Gemini CLI 等）中的漏洞、恶意模式和安全风险。采用 Python 开发，Apache-2.0 协议，质量评分 92（high）。随着 AI Agent 执行权限扩大，该项目填补了<strong>技能安装前安全审计</strong>的空白，企业级用户应重点关注。</p>
+      <h4>addyosmani/agent-skills（周榜第 11，新增 Star 5,234）</h4>
+      <p>由 Google 工程专家 Addy Osmani 维护的<strong>生产级工程技能库</strong>，将资深工程师的工作流、质量门禁和最佳实践打包为 AI Agent 可执行的技能。采用 Shell 脚本实现，MIT 协议，质量评分 100。项目强调&quot;技能即代码&quot;理念，适合希望提升 AI 编码代理工程化水平的开发者参考。</p>
+      <hr>
+      <h3>4. 最适合用户学习的项目</h3>
+      <p>根据您关注的 <strong>Java 后端与工程实践</strong>、<strong>Python 工具与应用开发</strong>、<strong>Agent 开发</strong>及<strong>开发者工具</strong>方向，本周推荐以下学习优先级：</p>
+      <p>1. <strong>chopratejas/headroom</strong>（Python）</p>
+      <p>学习价值：上下文压缩是 LLM 应用落地的核心优化点。该项目展示了如何通过 FastAPI 构建高性能代理服务，以及如何实现 Token 优化策略，适合提升 Python 工程化能力。</p>
+      <p>2. <strong>addyosmani/agent-skills</strong>（Shell）</p>
+      <p>学习价值：生产级工程规范的具体实现。通过阅读 Shell 脚本实现的工作流，学习如何将代码审查、测试策略等最佳实践编码为可复用的 Agent 技能，提升工程标准化思维。</p>
+      <p>3. <strong>DeusData/codebase-memory-mcp</strong>（C）</p>
+      <p>学习价值：高性能工具开发范例。尽管使用 C 语言，但其架构设计（知识图谱索引、Tree-sitter 解析、SQLite 存储）对理解如何构建低延迟开发工具具有参考价值，特别是 MCP 协议服务端实现。</p>
+      <hr>
+      <h3>5. 本周结论</h3>
+      <p>本周趋势明确显示 <strong>MCP 协议</strong>正在成为 AI 开发工具的事实标准，从代码智能（codebase-memory-mcp）到上下文压缩（headroom）均提供 MCP 服务器适配。<strong>Agent 基础设施</strong>竞赛进入白热化阶段：互联网接入（Agent-Reach）、安全审计（SkillSpector）和工程规范（agent-skills）构成完整工具链闭环。</p>
+      <p>对于后端开发者，建议关注 <strong>Token 优化</strong>和<strong>工具安全</strong>两个新兴领域；对于 Python 开发者，本周 5 个 Python 项目覆盖从系统级工具到应用层代理，展现了 Python 在 AI 工程中的统治地位。所有入选项目质量评分均在 92 分以上，无安全风险标记，可放心用于生产环境研究。</p>
+      <h2>附录：项目链接与来源补全</h2>
+      <p>• chopratejas/headroom；<a href="https://github.com/chopratejas/headroom">https://github.com/chopratejas/headroom</a>；来源：GitHub Search + GitHub Trending；Trending 排名：2</p>
+      <p>• Panniantong/Agent-Reach；<a href="https://github.com/Panniantong/Agent-Reach">https://github.com/Panniantong/Agent-Reach</a>；来源：GitHub Search + GitHub Trending；Trending 排名：3</p>
+      <p>• iptv-org/iptv；<a href="https://github.com/iptv-org/iptv">https://github.com/iptv-org/iptv</a>；来源：GitHub Search + GitHub Trending；Trending 排名：4</p>
+    </article>
+  </main>
+</body>
+</html>

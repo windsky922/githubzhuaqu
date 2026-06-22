@@ -2,6 +2,44 @@
 
 本文档记录第一阶段最小可用版本的实际实现架构。
 
+## 事件订阅与候选层
+
+```text
+历史 selections + 最新 project_corpus + project_agent_task_runs
+-> src/notifications/service.py 项目变化检测
+-> subscription_events（证据、引用、严重度、稳定去重键）
+-> subscriptions 规则匹配
+-> notification_candidates（pending、必须确认）
+-> dry_run 预览 / confirm_delivery 双重门禁
+-> SQLite 逐渠道事务抢占
+-> sender 通用 DeliveryMessage 分发
+-> notification_deliveries（状态、尝试、错误、响应摘要）
+```
+
+当前事件检测支持进入 Trending、Star 增长显著、质量分变化、风险新增、风险解除、新版本和 Agent 决策变化。快照事件使用 `selections` 计算前后差异，并由 `project_corpus` 补充语言、方向、搜索文本和公开来源；Agent 事件复用任务执行结果中的证据与引用。
+
+订阅规则支持项目、profile、语言、方向、关键词、事件类型、最低严重度、渠道和频率。候选 ID 由“订阅 ID + 事件 ID”稳定生成，重复检测和重复构建不会新增记录，也不会重置已有状态。
+
+候选投递默认只预览。真实发送必须同时满足 `dry_run=false` 和 `confirm_delivery=true`；每个渠道在发送前通过 SQLite 事务写入 `running` 抢占状态，并复用 `src/sender.py` 的密钥读取、20 秒超时和错误隔离。成功渠道禁止重复发送；失败渠道只有显式重试才更新同一审计记录并增加 `attempt_count`。现有每周周报链接推送不经过该事件门禁，保持原流程独立运行。
+
+通知记忆通过三个出口进入 Agent：推荐接口返回项目级 `event_memory` 和排序解释，RAG 问答在通知相关问题中召回 `notification_memory`，单项目 RAG 聚合返回事件、候选和投递审计摘要。项目详情页负责创建项目订阅，管理页负责检测、构建、预览、确认和失败重试；`scripts/manage_notifications.py` 为本地和自动化提供同一服务入口。
+
+GitHub Actions 默认执行事件检测与候选构建，但 `send_event_notifications` 默认为 `false`。只有显式开启该输入时，工作流才会同时传入 `--no-dry-run` 和 `--confirm-delivery`；通知步骤设置为非阻塞，不影响 Pages 生成和现有每周链接推送。
+
+## 项目级 Agent 执行层
+
+```text
+project_agent_tasks
+-> execution-check
+-> src/agent/task_executor.py
+-> 只读项目语料与历史快照
+-> project_agent_task_runs（证据、引用、结果、错误）
+-> project_corpus / rag_chunks 执行记忆
+-> 推荐下一步动作
+```
+
+执行器不修改 GitHub 仓库、不调用外部推送，也不读取推送密钥。任务抢占和运行记录创建在同一 SQLite 事务中完成，同一任务不能并发执行；completed 默认不可重复，failed 必须通过显式重试入口执行。GitHub Actions 仅在 `run_agent_tasks=true` 时限量运行，并设置 `continue-on-error`，不会阻塞周报归档与 Telegram 链接推送。
+
 ## 运行流程
 
 ```text
