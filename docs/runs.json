@@ -16,16 +16,16 @@
       "star_history_updated_count": 224,
       "kimi_used": true,
       "fallback_used": false,
-      "telegram_sent": false,
+      "telegram_sent": true,
       "telegram_report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-06-29.html",
       "telegram_explorer_url": "https://windsky922.github.io/githubzhuaqu/explorer.html?date=2026-06-29",
       "telegram_runs_url": "https://windsky922.github.io/githubzhuaqu/runs.html",
       "delivery_results": [
         {
           "channel": "telegram",
-          "sent": false,
-          "error": "Telegram send skipped",
-          "skipped": true
+          "sent": true,
+          "error": "",
+          "skipped": false
         }
       ],
       "collector_error_count": 0,
