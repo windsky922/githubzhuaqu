@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GitHub 周报 2026-06-29</title>
+  <style>
+    body { margin: 0; background: #f6f7f9; color: #1f2933; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height: 1.7; }
+    main { max-width: 960px; margin: 0 auto; padding: 32px 20px 56px; }
+    article { background: #fff; border: 1px solid #d8dee8; padding: 28px; }
+    h1, h2, h3, h4 { line-height: 1.3; }
+    a { color: #0969da; }
+    code { background: #eef2f7; padding: 2px 5px; }
+    table { width: 100%; border-collapse: collapse; margin: 18px 0; display: block; overflow-x: auto; }
+    th, td { border: 1px solid #d8dee8; padding: 8px 10px; text-align: left; vertical-align: top; }
+    th { background: #f1f4f8; }
+    hr { border: 0; border-top: 1px solid #d8dee8; margin: 24px 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <article>
+      <p><strong>GitHub 热点项目周报</strong></p>
+      <p>*2026.06.22 - 2026.06.29*</p>
+      <hr>
+      <h2>1. 本周总体趋势</h2>
+      <p>本周 GitHub Trending 周榜呈现 <strong>AI Agent 基础设施全面爆发</strong>的态势。在入选的 10 个核心项目中，<strong>AI Agent 方向独占 6 席</strong>，累计新增 Star 达 60,432，显示出开发者对智能体工具链的强烈需求。</p>
+      <p><strong>技术栈分布</strong>：Python 以 5 个项目的主导地位成为 Agent 开发首选语言；C 语言在高性能代码分析工具中展现优势；TypeScript、Go、Swift 等语言在特定场景（IDE、DevOps、桌面应用）中各领风骚。</p>
+      <p><strong>关键信号</strong>：</p>
+      <p>• <strong>视频生成与编辑</strong>成为 Agent 应用落地的热点场景（OpenMontage、palmier-pro）</p>
+      <p>• <strong>MCP（Model Context Protocol）生态</strong>持续扩展，代码智能与网络访问能力成为基础设施（codebase-memory-mcp、Agent-Reach）</p>
+      <p>• <strong>垂直领域 Agent</strong>（金融分析、招聘评估、网络安全）进入实用化阶段</p>
+      <hr>
+      <h2>2. 热点项目总览</h2>
+      <table>
+        <thead><tr><th>排名</th><th>项目名称</th><th>语言</th><th>Star 总数</th><th>本周新增</th><th>类别</th><th>链接</th></tr></thead>
+        <tbody>
+        <tr><td>1</td><td>OpenMontage</td><td>Python</td><td>27,179</td><td>+18,010</td><td>AI Agent</td><td><a href="https://github.com/calesthio/OpenMontage">https://github.com/calesthio/OpenMontage</a></td></tr>
+        <tr><td>2</td><td>codebase-memory-mcp</td><td>C</td><td>19,915</td><td>+9,416</td><td>LLM Tooling</td><td><a href="https://github.com/DeusData/codebase-memory-mcp">https://github.com/DeusData/codebase-memory-mcp</a></td></tr>
+        <tr><td>3</td><td>no-mistakes</td><td>Go</td><td>4,103</td><td>-</td><td>Developer Tool</td><td><a href="https://github.com/kunchenguid/no-mistakes">https://github.com/kunchenguid/no-mistakes</a></td></tr>
+        <tr><td>4</td><td>palmier-pro</td><td>Swift</td><td>9,322</td><td>-</td><td>AI Video</td><td><a href="https://github.com/palmier-io/palmier-pro">https://github.com/palmier-io/palmier-pro</a></td></tr>
+        <tr><td>7</td><td>simplex-chat</td><td>Haskell</td><td>15,200</td><td>-</td><td>Privacy Chat</td><td><a href="https://github.com/simplex-chat/simplex-chat">https://github.com/simplex-chat/simplex-chat</a></td></tr>
+        <tr><td>8</td><td>hiring-agent</td><td>Python</td><td>3,192</td><td>-</td><td>AI Agent</td><td><a href="https://github.com/interviewstreet/hiring-agent">https://github.com/interviewstreet/hiring-agent</a></td></tr>
+        <tr><td>9</td><td>daily_stock_analysis</td><td>Python</td><td>51,213</td><td>+16,378</td><td>AI Agent</td><td><a href="https://github.com/ZhuLinsen/daily_stock_analysis">https://github.com/ZhuLinsen/daily_stock_analysis</a></td></tr>
+        <tr><td>10</td><td>orca</td><td>TypeScript</td><td>8,673</td><td>-</td><td>AI Agent</td><td><a href="https://github.com/stablyai/orca">https://github.com/stablyai/orca</a></td></tr>
+        <tr><td>11</td><td>Agent-Reach</td><td>Python</td><td>44,622</td><td>+7,600</td><td>AI Agent</td><td><a href="https://github.com/Panniantong/Agent-Reach">https://github.com/Panniantong/Agent-Reach</a></td></tr>
+        <tr><td>12</td><td>Anthropic-Cybersecurity-Skills</td><td>Python</td><td>22,701</td><td>+9,028</td><td>AI Agent</td><td><a href="https://github.com/mukul975/Anthropic-Cybersecurity-Skills">https://github.com/mukul975/Anthropic-Cybersecurity-Skills</a></td></tr>
+        </tbody>
+      </table>
+      <p>*注：排名基于 GitHub Trending 周榜；新增 Star 数据对比自上次记录。*</p>
+      <hr>
+      <h2>3. 重点项目分析</h2>
+      <h3>OpenMontage - 登顶 Trending #1 的 Agentic 视频生产系统</h3>
+      <p>本项目本周以 <strong>18,010 新增 Star</strong> 的惊人增速登顶 GitHub Trending 周榜第 1 位。作为首个开源的 Agentic 视频生产系统，其构建了一套包含 12 条流水线、52 个工具、500+ Agent 技能的完整工作流。基于 Python 开发，采用 AGPL-3.0 协议。用户可通过自然语言描述需求，由 Agent 自动完成调研、脚本编写、素材生成、剪辑与合成。项目质量评分为 100 分（高成熟度），适合关注 AIGC 视频落地的开发者深入研究。</p>
+      <h3>codebase-memory-mcp - 毫秒级代码知识图谱引擎</h3>
+      <p>位居 Trending 周榜第 2 位，本周新增 <strong>9,416 Star</strong>。该项目使用 C 语言开发，是一个高性能的 MCP（Model Context Protocol）服务器，可将代码库索引为持久化知识图谱。据 README 描述，其能在毫秒级完成普通仓库的全量索引，即使是 Linux 内核（2800 万行代码、7.5 万文件）也能在 3 分钟内完成，查询响应低于 1 毫秒。采用 MIT 协议，作为单静态二进制文件分发，零依赖。该项目代表了 AI 编程助手基础设施的性能极致。</p>
+      <h3>daily_stock_analysis - LLM 驱动的多市场金融分析系统</h3>
+      <p>本周 Trending 第 9 位，但新增 Star 高达 <strong>16,378</strong>，总 Star 数已突破 5.1 万。这是一个基于 Python 的 A股/港股/美股/日股/韩股智能分析系统，利用大模型进行多源行情整合、实时新闻分析与决策看板生成。支持零成本定时运行，可推送至企业微信、飞书、Telegram 等平台。项目成熟度极高（质量评分 100），适合关注金融科技与 Agent 应用结合的开发者。</p>
+      <h3>Agent-Reach - 为 AI Agent 装上互联网之眼</h3>
+      <p>排名 Trending 第 11 位，本周新增 <strong>7,600 Star</strong>。该项目解决了当前 AI Agent 无法直接访问互联网内容的痛点，提供统一的 CLI 工具，支持无 API 费用地读取 Twitter、Reddit、YouTube、Bilibili、小红书等平台内容。基于 Python 开发，可作为 MCP 服务器集成到 Claude Code、Cursor 等工具中。对于需要构建具备实时信息获取能力 Agent 的开发者，这是目前最完整的开源解决方案之一。</p>
+      <h3>Anthropic-Cybersecurity-Skills - 网络安全技能框架</h3>
+      <p>位居 Trending 第 12 位，新增 <strong>9,028 Star</strong>。项目整理了 817 个结构化网络安全技能，映射至 MITRE ATT&amp;CK、NIST CSF 2.0 等 6 大框架，覆盖 29 个安全领域。支持 Claude Code、GitHub Copilot、Codex CLI 等 20+ 平台。<strong>注意</strong>：项目包含恶意软件分析相关内容（<code>malware-analysis</code> 标签），且安全标记提示需人工确认项目用途，建议谨慎评估使用场景，仅用于合法的安全研究与教育目的。</p>
+      <hr>
+      <h2>4. 最适合用户学习的项目</h2>
+      <p>根据您的学习偏好（<strong>Python 工具开发</strong>、<strong>Agent 构建</strong>、<strong>开发者工具</strong>），本周推荐以下学习路径：</p>
+      <p><strong>入门级：Agent-Reach</strong></p>
+      <p>Python 实现，代码结构清晰，展示了如何通过爬虫与 API 封装为 Agent 提供工具能力（Tool Use）。适合学习 MCP 协议与网络数据获取的最佳实践。</p>
+      <p><strong>进阶级：OpenMontage</strong></p>
+      <p>研究其 12 条生产流水线的设计模式，学习如何将复杂创意工作流拆解为 Agent 可执行的原子任务。项目质量极高（100 分），文档完善，适合作为 Agentic Workflow 的架构参考。</p>
+      <p><strong>基础设施级：codebase-memory-mcp</strong></p>
+      <p>若关注高性能工具开发，可学习其如何用 C 语言结合 Tree-sitter 实现亚毫秒级代码查询。了解知识图谱在代码智能中的应用，以及 MCP 协议的高性能实现。</p>
+      <p><strong>特别提醒</strong>：对于 <strong>Java 后端开发者</strong>，本周 Trending 榜单中 Java 项目较少，建议关注 <code>daily_stock_analysis</code> 的架构设计，其定时任务调度与多平台推送机制对后端工程实践具有参考价值。</p>
+      <hr>
+      <h2>5. 本周结论</h2>
+      <p>1. <strong>Agent 基础设施标准化</strong>：MCP 协议正成为连接 AI Agent 与外部能力的标准接口（codebase-memory-mcp、Agent-Reach 均提供 MCP 支持），建议开发者优先学习该协议。</p>
+      <p>2. <strong>垂直场景落地加速</strong>：从视频生产（OpenMontage）到金融分析（daily_stock_analysis），Agent 应用正在从通用对话向专业领域深度渗透，具备领域知识的开发者将获得先发优势。</p>
+      <p>3. <strong>性能与隐私并重</strong>：C 语言编写的代码分析工具（codebase-memory-mcp）和 Haskell 编写的隐私通讯工具（simplex-chat）同时入榜，显示社区对<strong>高性能</strong>与<strong>隐私保护</strong>的双重追求。</p>
+      <p>4. <strong>风险提示</strong>：涉及网络安全（Anthropic-Cybersecurity-Skills）的项目虽热度高，但包含敏感技术领域，使用时需严格遵守法律法规，确保用于合法的安全研究场景。</p>
+      <p>*下周建议关注：Java 生态在 Agent 工具链中的补位，以及更多多模态（视频/音频）Agent 框架的涌现。*</p>
+      <h2>附录：项目链接与来源补全</h2>
+      <p>• calesthio/OpenMontage；<a href="https://github.com/calesthio/OpenMontage">https://github.com/calesthio/OpenMontage</a>；来源：GitHub Search + GitHub Trending；Trending 排名：1</p>
+      <p>• ZhuLinsen/daily_stock_analysis；<a href="https://github.com/ZhuLinsen/daily_stock_analysis">https://github.com/ZhuLinsen/daily_stock_analysis</a>；来源：GitHub Search + GitHub Trending；Trending 排名：9</p>
+      <p>• Panniantong/Agent-Reach；<a href="https://github.com/Panniantong/Agent-Reach">https://github.com/Panniantong/Agent-Reach</a>；来源：GitHub Search + GitHub Trending；Trending 排名：11</p>
+    </article>
+  </main>
+</body>
+</html>

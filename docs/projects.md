@@ -4,6 +4,16 @@
 
 | 日期 | 项目 | 来源 | Trending 排名 | 方向 | 语言 | Star | 新增 Star | 风险提示 | 链接 |
 |---|---|---|---:|---|---|---:|---:|---:|---|
+| 2026-06-29 | calesthio/OpenMontage | GitHub Search + GitHub Trending | 1 | AI Agent | Python | 27179 | 18010 | 0 | [https://github.com/calesthio/OpenMontage](https://github.com/calesthio/OpenMontage) |
+| 2026-06-29 | DeusData/codebase-memory-mcp | GitHub Trending | 2 | LLM Tooling | C | 19915 | 9416 | 0 | [https://github.com/DeusData/codebase-memory-mcp](https://github.com/DeusData/codebase-memory-mcp) |
+| 2026-06-29 | kunchenguid/no-mistakes | GitHub Trending | 3 | Other | Go | 4103 | 0 | 0 | [https://github.com/kunchenguid/no-mistakes](https://github.com/kunchenguid/no-mistakes) |
+| 2026-06-29 | palmier-io/palmier-pro | GitHub Trending | 4 | LLM Tooling | Swift | 9322 | 0 | 0 | [https://github.com/palmier-io/palmier-pro](https://github.com/palmier-io/palmier-pro) |
+| 2026-06-29 | simplex-chat/simplex-chat | GitHub Trending | 7 | Other | Haskell | 15200 | 0 | 0 | [https://github.com/simplex-chat/simplex-chat](https://github.com/simplex-chat/simplex-chat) |
+| 2026-06-29 | interviewstreet/hiring-agent | GitHub Trending | 8 | AI Agent | Python | 3192 | 0 | 0 | [https://github.com/interviewstreet/hiring-agent](https://github.com/interviewstreet/hiring-agent) |
+| 2026-06-29 | ZhuLinsen/daily_stock_analysis | GitHub Search + GitHub Trending | 9 | AI Agent | Python | 51213 | 16378 | 0 | [https://github.com/ZhuLinsen/daily_stock_analysis](https://github.com/ZhuLinsen/daily_stock_analysis) |
+| 2026-06-29 | stablyai/orca | GitHub Trending | 10 | AI Agent | TypeScript | 8673 | 0 | 0 | [https://github.com/stablyai/orca](https://github.com/stablyai/orca) |
+| 2026-06-29 | Panniantong/Agent-Reach | GitHub Search + GitHub Trending | 11 | AI Agent | Python | 44622 | 7600 | 0 | [https://github.com/Panniantong/Agent-Reach](https://github.com/Panniantong/Agent-Reach) |
+| 2026-06-29 | mukul975/Anthropic-Cybersecurity-Skills | GitHub Trending | 12 | AI Agent | Python | 22701 | 9028 | 1 | [https://github.com/mukul975/Anthropic-Cybersecurity-Skills](https://github.com/mukul975/Anthropic-Cybersecurity-Skills) |
 | 2026-06-22 | DeusData/codebase-memory-mcp | GitHub Trending | 1 | LLM Tooling | C | 10499 | 0 | 0 | [https://github.com/DeusData/codebase-memory-mcp](https://github.com/DeusData/codebase-memory-mcp) |
 | 2026-06-22 | chopratejas/headroom | GitHub Search + GitHub Trending | 2 | AI Agent | Python | 44832 | 17084 | 0 | [https://github.com/chopratejas/headroom](https://github.com/chopratejas/headroom) |
 | 2026-06-22 | Panniantong/Agent-Reach | GitHub Search + GitHub Trending | 3 | AI Agent | Python | 37022 | 8124 | 0 | [https://github.com/Panniantong/Agent-Reach](https://github.com/Panniantong/Agent-Reach) |
