@@ -8,8 +8,8 @@
   {
     "full_name": "1024-lab/smart-admin",
     "html_url": "https://github.com/1024-lab/smart-admin",
-    "stargazers_count": 3746,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 3753,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "1jehuang/jcode",
@@ -20,8 +20,8 @@
   {
     "full_name": "1Panel-dev/1Panel",
     "html_url": "https://github.com/1Panel-dev/1Panel",
-    "stargazers_count": 36022,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 36104,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "1Panel-dev/MaxKB",
@@ -30,10 +30,16 @@
     "last_seen_at": "2026-06-15"
   },
   {
+    "full_name": "3b1b/manim",
+    "html_url": "https://github.com/3b1b/manim",
+    "stargazers_count": 88106,
+    "last_seen_at": "2026-07-06"
+  },
+  {
     "full_name": "521xueweihan/HelloGitHub",
     "html_url": "https://github.com/521xueweihan/HelloGitHub",
-    "stargazers_count": 163088,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 164069,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "6551-Team/ai-auto-trading",
@@ -80,8 +86,8 @@
   {
     "full_name": "affaan-m/ECC",
     "html_url": "https://github.com/affaan-m/ECC",
-    "stargazers_count": 223097,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 226351,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "affaan-m/everything-claude-code",
@@ -98,8 +104,8 @@
   {
     "full_name": "agentscope-ai/agentscope",
     "html_url": "https://github.com/agentscope-ai/agentscope",
-    "stargazers_count": 27263,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 27479,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "AIDC-AI/Pixelle-Video",
@@ -152,8 +158,8 @@
   {
     "full_name": "alibaba/arthas",
     "html_url": "https://github.com/alibaba/arthas",
-    "stargazers_count": 37403,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 37414,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "alibaba/canal",
@@ -164,26 +170,32 @@
   {
     "full_name": "alibaba/nacos",
     "html_url": "https://github.com/alibaba/nacos",
-    "stargazers_count": 33095,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 33121,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "alibaba/page-agent",
     "html_url": "https://github.com/alibaba/page-agent",
-    "stargazers_count": 20495,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 23982,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "alibaba/spring-cloud-alibaba",
     "html_url": "https://github.com/alibaba/spring-cloud-alibaba",
-    "stargazers_count": 29117,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 29120,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "Alishahryar1/free-claude-code",
     "html_url": "https://github.com/Alishahryar1/free-claude-code",
     "stargazers_count": 22035,
     "last_seen_at": "2026-05-07"
+  },
+  {
+    "full_name": "allenai/olmocr",
+    "html_url": "https://github.com/allenai/olmocr",
+    "stargazers_count": 18799,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "AndrewVos/endless-toil",
@@ -200,8 +212,8 @@
   {
     "full_name": "angular/angular",
     "html_url": "https://github.com/angular/angular",
-    "stargazers_count": 100475,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 100483,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "Anil-matcha/Open-Generative-AI",
@@ -212,8 +224,8 @@
   {
     "full_name": "anomalyco/opencode",
     "html_url": "https://github.com/anomalyco/opencode",
-    "stargazers_count": 180257,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 182667,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "ansible/ansible",
@@ -230,14 +242,14 @@
   {
     "full_name": "ant-design/ant-design",
     "html_url": "https://github.com/ant-design/ant-design",
-    "stargazers_count": 98494,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 98586,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "anthropics/claude-code",
     "html_url": "https://github.com/anthropics/claude-code",
-    "stargazers_count": 134839,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 136327,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "anthropics/financial-services",
@@ -254,56 +266,62 @@
   {
     "full_name": "anthropics/skills",
     "html_url": "https://github.com/anthropics/skills",
-    "stargazers_count": 156304,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 158467,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "Anuken/Mindustry",
     "html_url": "https://github.com/Anuken/Mindustry",
-    "stargazers_count": 28057,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 28125,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "apache/airflow",
     "html_url": "https://github.com/apache/airflow",
-    "stargazers_count": 45963,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 46041,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "apache/camel",
     "html_url": "https://github.com/apache/camel",
-    "stargazers_count": 6248,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 6254,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "apache/dubbo",
     "html_url": "https://github.com/apache/dubbo",
-    "stargazers_count": 41523,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 41527,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "apache/flink",
     "html_url": "https://github.com/apache/flink",
-    "stargazers_count": 26125,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 26147,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "apache/kafka",
     "html_url": "https://github.com/apache/kafka",
-    "stargazers_count": 33011,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 33121,
+    "last_seen_at": "2026-07-06"
+  },
+  {
+    "full_name": "apache/maven",
+    "html_url": "https://github.com/apache/maven",
+    "stargazers_count": 5287,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "apache/spark",
     "html_url": "https://github.com/apache/spark",
-    "stargazers_count": 43521,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 43567,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "apereo/cas",
     "html_url": "https://github.com/apereo/cas",
-    "stargazers_count": 11349,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 11351,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "apernet/hysteria",
@@ -314,20 +332,20 @@
   {
     "full_name": "apify/crawlee",
     "html_url": "https://github.com/apify/crawlee",
-    "stargazers_count": 24188,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 24502,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "apolloconfig/apollo",
     "html_url": "https://github.com/apolloconfig/apollo",
-    "stargazers_count": 29771,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 29783,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "appium/appium",
     "html_url": "https://github.com/appium/appium",
-    "stargazers_count": 21699,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 21727,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "apple/container",
@@ -338,8 +356,8 @@
   {
     "full_name": "appsmithorg/appsmith",
     "html_url": "https://github.com/appsmithorg/appsmith",
-    "stargazers_count": 40183,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 40255,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "aquasecurity/trivy",
@@ -350,8 +368,8 @@
   {
     "full_name": "arendst/Tasmota",
     "html_url": "https://github.com/arendst/Tasmota",
-    "stargazers_count": 24524,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 24538,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "asgeirtj/system_prompts_leaks",
@@ -362,20 +380,20 @@
   {
     "full_name": "assafelovic/gpt-researcher",
     "html_url": "https://github.com/assafelovic/gpt-researcher",
-    "stargazers_count": 27950,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 28091,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "AstrBotDevs/AstrBot",
     "html_url": "https://github.com/AstrBotDevs/AstrBot",
-    "stargazers_count": 35516,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 35866,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "Atmosphere/atmosphere",
     "html_url": "https://github.com/Atmosphere/atmosphere",
-    "stargazers_count": 3782,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 3784,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "avaco-cloud/Vercel-XHTTP",
@@ -392,14 +410,14 @@
   {
     "full_name": "avelino/awesome-go",
     "html_url": "https://github.com/avelino/awesome-go",
-    "stargazers_count": 176664,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 177282,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "awesome-selfhosted/awesome-selfhosted",
     "html_url": "https://github.com/awesome-selfhosted/awesome-selfhosted",
-    "stargazers_count": 301681,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 303097,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "aws/agent-toolkit-for-aws",
@@ -452,14 +470,14 @@
   {
     "full_name": "BerriAI/litellm",
     "html_url": "https://github.com/BerriAI/litellm",
-    "stargazers_count": 51884,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 52687,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "binarywang/WxJava",
     "html_url": "https://github.com/binarywang/WxJava",
-    "stargazers_count": 32901,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 32913,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "BloopAI/vibe-kanban",
@@ -470,20 +488,26 @@
   {
     "full_name": "BroadleafCommerce/BroadleafCommerce",
     "html_url": "https://github.com/BroadleafCommerce/BroadleafCommerce",
-    "stargazers_count": 1906,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 1908,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "browser-use/browser-use",
     "html_url": "https://github.com/browser-use/browser-use",
-    "stargazers_count": 101195,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 102932,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "browser-use/bux",
     "html_url": "https://github.com/browser-use/bux",
     "stargazers_count": 200,
     "last_seen_at": "2026-04-28"
+  },
+  {
+    "full_name": "browser-use/video-use",
+    "html_url": "https://github.com/browser-use/video-use",
+    "stargazers_count": 15057,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "browserbase/skills",
@@ -512,26 +536,26 @@
   {
     "full_name": "bumptech/glide",
     "html_url": "https://github.com/bumptech/glide",
-    "stargazers_count": 35025,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 35023,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "bytedance/deer-flow",
     "html_url": "https://github.com/bytedance/deer-flow",
-    "stargazers_count": 75280,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 76185,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "bytedance/UI-TARS-desktop",
     "html_url": "https://github.com/bytedance/UI-TARS-desktop",
-    "stargazers_count": 37027,
-    "last_seen_at": "2026-06-22"
+    "stargazers_count": 37699,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "calesthio/OpenMontage",
     "html_url": "https://github.com/calesthio/OpenMontage",
-    "stargazers_count": 27180,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 33724,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "camel-ai/owl",
@@ -614,8 +638,8 @@
   {
     "full_name": "clash-verge-rev/clash-verge-rev",
     "html_url": "https://github.com/clash-verge-rev/clash-verge-rev",
-    "stargazers_count": 128459,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 129756,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "Clawdi-AI/clawdi",
@@ -638,14 +662,14 @@
   {
     "full_name": "code-yeongyu/oh-my-openagent",
     "html_url": "https://github.com/code-yeongyu/oh-my-openagent",
-    "stargazers_count": 63969,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 64924,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "codecentric/spring-boot-admin",
     "html_url": "https://github.com/codecentric/spring-boot-admin",
-    "stargazers_count": 12837,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 12839,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "codecrafters-io/build-your-own-x",
@@ -656,8 +680,8 @@
   {
     "full_name": "coder/code-server",
     "html_url": "https://github.com/coder/code-server",
-    "stargazers_count": 78102,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 78196,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "colbymchenry/codegraph",
@@ -668,14 +692,14 @@
   {
     "full_name": "coleam00/Archon",
     "html_url": "https://github.com/coleam00/Archon",
-    "stargazers_count": 22618,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 22726,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "Comfy-Org/ComfyUI",
     "html_url": "https://github.com/Comfy-Org/ComfyUI",
-    "stargazers_count": 118670,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 119553,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "ComposioHQ/awesome-claude-skills",
@@ -698,14 +722,14 @@
   {
     "full_name": "conductor-oss/conductor",
     "html_url": "https://github.com/conductor-oss/conductor",
-    "stargazers_count": 31970,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 31991,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "continuedev/continue",
     "html_url": "https://github.com/continuedev/continue",
-    "stargazers_count": 34554,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 34701,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "CookSleep/gpt_image_playground",
@@ -716,8 +740,8 @@
   {
     "full_name": "CopilotKit/CopilotKit",
     "html_url": "https://github.com/CopilotKit/CopilotKit",
-    "stargazers_count": 35603,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 35777,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "crewAIInc/crewAI",
@@ -740,8 +764,8 @@
   {
     "full_name": "D4Vinci/Scrapling",
     "html_url": "https://github.com/D4Vinci/Scrapling",
-    "stargazers_count": 66838,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 68258,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "DanOps-1/gpt-pp-team",
@@ -758,20 +782,20 @@
   {
     "full_name": "datawhalechina/hello-agents",
     "html_url": "https://github.com/datawhalechina/hello-agents",
-    "stargazers_count": 62440,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 64119,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "daytonaio/daytona",
     "html_url": "https://github.com/daytonaio/daytona",
-    "stargazers_count": 72367,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 72281,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "dbeaver/dbeaver",
     "html_url": "https://github.com/dbeaver/dbeaver",
-    "stargazers_count": 50756,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 50873,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "decolua/9router",
@@ -788,14 +812,14 @@
   {
     "full_name": "deepset-ai/haystack",
     "html_url": "https://github.com/deepset-ai/haystack",
-    "stargazers_count": 25770,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 25832,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "DerekYRC/mini-spring",
     "html_url": "https://github.com/DerekYRC/mini-spring",
-    "stargazers_count": 6361,
-    "last_seen_at": "2026-06-22"
+    "stargazers_count": 6364,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "DerekYRC/mini-spring-cloud",
@@ -806,8 +830,8 @@
   {
     "full_name": "DeusData/codebase-memory-mcp",
     "html_url": "https://github.com/DeusData/codebase-memory-mcp",
-    "stargazers_count": 19915,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 26797,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "dezgit2025/auto-memory",
@@ -816,10 +840,16 @@
     "last_seen_at": "2026-04-28"
   },
   {
+    "full_name": "diegosouzapw/OmniRoute",
+    "html_url": "https://github.com/diegosouzapw/OmniRoute",
+    "stargazers_count": 11930,
+    "last_seen_at": "2026-07-06"
+  },
+  {
     "full_name": "DietrichGebert/ponytail",
     "html_url": "https://github.com/DietrichGebert/ponytail",
-    "stargazers_count": 64775,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 74948,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "DigitalPlatDev/FreeDomain",
@@ -836,8 +866,8 @@
   {
     "full_name": "django/django",
     "html_url": "https://github.com/django/django",
-    "stargazers_count": 88131,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 88101,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "dmtrKovalenko/fff",
@@ -854,8 +884,8 @@
   {
     "full_name": "docling-project/docling",
     "html_url": "https://github.com/docling-project/docling",
-    "stargazers_count": 62318,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 62711,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "docusealco/docuseal",
@@ -872,8 +902,8 @@
   {
     "full_name": "doocs/leetcode",
     "html_url": "https://github.com/doocs/leetcode",
-    "stargazers_count": 36230,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 36258,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "earthtojake/text-to-cad",
@@ -884,8 +914,8 @@
   {
     "full_name": "EbookFoundation/free-programming-books",
     "html_url": "https://github.com/EbookFoundation/free-programming-books",
-    "stargazers_count": 390921,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 391338,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "Einsia/OpenChronicle",
@@ -896,8 +926,8 @@
   {
     "full_name": "elastic/elasticsearch",
     "html_url": "https://github.com/elastic/elasticsearch",
-    "stargazers_count": 77187,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 77445,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "elizaOS/eliza",
@@ -932,8 +962,8 @@
   {
     "full_name": "esengine/DeepSeek-Reasonix",
     "html_url": "https://github.com/esengine/DeepSeek-Reasonix",
-    "stargazers_count": 25249,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 26048,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "esengine/reasonix",
@@ -944,8 +974,8 @@
   {
     "full_name": "eugenp/tutorials",
     "html_url": "https://github.com/eugenp/tutorials",
-    "stargazers_count": 37336,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 37339,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "EveryInc/compound-engineering-plugin",
@@ -956,14 +986,14 @@
   {
     "full_name": "excalidraw/excalidraw",
     "html_url": "https://github.com/excalidraw/excalidraw",
-    "stargazers_count": 126383,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 126845,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "f/prompts.chat",
     "html_url": "https://github.com/f/prompts.chat",
-    "stargazers_count": 164482,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 164793,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "facebook/pyrefly",
@@ -980,14 +1010,14 @@
   {
     "full_name": "fastapi/fastapi",
     "html_url": "https://github.com/fastapi/fastapi",
-    "stargazers_count": 99755,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 100053,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "fastlane/fastlane",
     "html_url": "https://github.com/fastlane/fastlane",
-    "stargazers_count": 41720,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 41744,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "feder-cr/Jobs_Applier_AI_Agent_AIHawk",
@@ -1016,8 +1046,8 @@
   {
     "full_name": "firecrawl/firecrawl",
     "html_url": "https://github.com/firecrawl/firecrawl",
-    "stargazers_count": 140844,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 145168,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "fkyah3/opencode-yg",
@@ -1046,8 +1076,8 @@
   {
     "full_name": "flutter/flutter",
     "html_url": "https://github.com/flutter/flutter",
-    "stargazers_count": 177622,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 177638,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "ForecastForge/binance-trading-bot",
@@ -1064,8 +1094,8 @@
   {
     "full_name": "freeCodeCamp/freeCodeCamp",
     "html_url": "https://github.com/freeCodeCamp/freeCodeCamp",
-    "stargazers_count": 450697,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 451137,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "freestylefly/awesome-gpt-image-2",
@@ -1112,8 +1142,8 @@
   {
     "full_name": "getmaxun/maxun",
     "html_url": "https://github.com/getmaxun/maxun",
-    "stargazers_count": 16025,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 16284,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "getsentry/sentry-java",
@@ -1130,8 +1160,8 @@
   {
     "full_name": "github/spec-kit",
     "html_url": "https://github.com/github/spec-kit",
-    "stargazers_count": 116187,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 118183,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "go-spring/go-spring",
@@ -1142,8 +1172,8 @@
   {
     "full_name": "google-gemini/gemini-cli",
     "html_url": "https://github.com/google-gemini/gemini-cli",
-    "stargazers_count": 105635,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 105779,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "google-labs-code/design.md",
@@ -1172,32 +1202,38 @@
   {
     "full_name": "google/guava",
     "html_url": "https://github.com/google/guava",
-    "stargazers_count": 51498,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 51512,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "googleworkspace/cli",
     "html_url": "https://github.com/googleworkspace/cli",
-    "stargazers_count": 29085,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 29425,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "gotson/komga",
     "html_url": "https://github.com/gotson/komga",
-    "stargazers_count": 6394,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 6422,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "grafana/grafana",
     "html_url": "https://github.com/grafana/grafana",
-    "stargazers_count": 75156,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 75325,
+    "last_seen_at": "2026-07-06"
+  },
+  {
+    "full_name": "Graphify-Labs/graphify",
+    "html_url": "https://github.com/Graphify-Labs/graphify",
+    "stargazers_count": 78196,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "grimmory-tools/grimmory",
     "html_url": "https://github.com/grimmory-tools/grimmory",
-    "stargazers_count": 3583,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 3636,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "Growth-Circle/cadis",
@@ -1238,8 +1274,8 @@
   {
     "full_name": "halo-dev/halo",
     "html_url": "https://github.com/halo-dev/halo",
-    "stargazers_count": 39161,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 39229,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "hantsy/spring-reactive-sample",
@@ -1256,8 +1292,8 @@
   {
     "full_name": "harry0703/MoneyPrinterTurbo",
     "html_url": "https://github.com/harry0703/MoneyPrinterTurbo",
-    "stargazers_count": 93939,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 95843,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "hashicorp/vagrant",
@@ -1274,8 +1310,8 @@
   {
     "full_name": "headroomlabs-ai/headroom",
     "html_url": "https://github.com/headroomlabs-ai/headroom",
-    "stargazers_count": 53165,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 56842,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "hesreallyhim/awesome-claude-code",
@@ -1298,8 +1334,8 @@
   {
     "full_name": "hiyouga/LlamaFactory",
     "html_url": "https://github.com/hiyouga/LlamaFactory",
-    "stargazers_count": 72702,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 72977,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "HKUDS/AI-Trader",
@@ -1322,14 +1358,14 @@
   {
     "full_name": "home-assistant/core",
     "html_url": "https://github.com/home-assistant/core",
-    "stargazers_count": 88039,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 88216,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "hoppscotch/hoppscotch",
     "html_url": "https://github.com/hoppscotch/hoppscotch",
-    "stargazers_count": 79664,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 79740,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "hs-web/hsweb-framework",
@@ -1352,14 +1388,14 @@
   {
     "full_name": "huggingface/transformers",
     "html_url": "https://github.com/huggingface/transformers",
-    "stargazers_count": 162001,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 162285,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "huginn/huginn",
     "html_url": "https://github.com/huginn/huginn",
-    "stargazers_count": 49541,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 49572,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "HunxByts/GhostTrack",
@@ -1382,8 +1418,8 @@
   {
     "full_name": "iluwatar/java-design-patterns",
     "html_url": "https://github.com/iluwatar/java-design-patterns",
-    "stargazers_count": 94134,
-    "last_seen_at": "2026-06-22"
+    "stargazers_count": 94191,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "Imbad0202/academic-research-skills",
@@ -1394,14 +1430,14 @@
   {
     "full_name": "immich-app/immich",
     "html_url": "https://github.com/immich-app/immich",
-    "stargazers_count": 104621,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 106150,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "ImranR98/Obtainium",
     "html_url": "https://github.com/ImranR98/Obtainium",
-    "stargazers_count": 17892,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 18014,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "in28minutes/master-spring-and-spring-boot",
@@ -1412,8 +1448,8 @@
   {
     "full_name": "infiniflow/ragflow",
     "html_url": "https://github.com/infiniflow/ragflow",
-    "stargazers_count": 83797,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 84351,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "InsForge/InsForge",
@@ -1430,8 +1466,8 @@
   {
     "full_name": "iptv-org/iptv",
     "html_url": "https://github.com/iptv-org/iptv",
-    "stargazers_count": 129091,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 130600,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "jamiepine/voicebox",
@@ -1460,8 +1496,8 @@
   {
     "full_name": "javahongxi/whatsmars",
     "html_url": "https://github.com/javahongxi/whatsmars",
-    "stargazers_count": 1966,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 1968,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "jay-sahnan/signal",
@@ -1472,26 +1508,26 @@
   {
     "full_name": "JCodesMore/ai-website-cloner-template",
     "html_url": "https://github.com/JCodesMore/ai-website-cloner-template",
-    "stargazers_count": 22969,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 25873,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "jeecgboot/JeecgBoot",
     "html_url": "https://github.com/jeecgboot/JeecgBoot",
-    "stargazers_count": 46905,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 46944,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "jenkinsci/jenkins",
     "html_url": "https://github.com/jenkinsci/jenkins",
-    "stargazers_count": 25497,
-    "last_seen_at": "2026-06-22"
+    "stargazers_count": 25545,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "jhipster/generator-jhipster",
     "html_url": "https://github.com/jhipster/generator-jhipster",
-    "stargazers_count": 22420,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 22428,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "joeseesun/qiaomu-blog-opensource",
@@ -1502,8 +1538,8 @@
   {
     "full_name": "jonashackt/spring-boot-vuejs",
     "html_url": "https://github.com/jonashackt/spring-boot-vuejs",
-    "stargazers_count": 2125,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 2126,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "josephmisiti/awesome-machine-learning",
@@ -1520,8 +1556,8 @@
   {
     "full_name": "JuliusBrussee/caveman",
     "html_url": "https://github.com/JuliusBrussee/caveman",
-    "stargazers_count": 72571,
-    "last_seen_at": "2026-06-15"
+    "stargazers_count": 84939,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "kagkarlsson/db-scheduler",
@@ -1532,14 +1568,14 @@
   {
     "full_name": "kestra-io/kestra",
     "html_url": "https://github.com/kestra-io/kestra",
-    "stargazers_count": 27152,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 27249,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "keycloak/keycloak",
     "html_url": "https://github.com/keycloak/keycloak",
-    "stargazers_count": 35411,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 35507,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "khoj-ai/khoj",
@@ -1556,8 +1592,8 @@
   {
     "full_name": "koala73/worldmonitor",
     "html_url": "https://github.com/koala73/worldmonitor",
-    "stargazers_count": 60717,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 61399,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "Kong/insomnia",
@@ -1574,26 +1610,26 @@
   {
     "full_name": "labring/FastGPT",
     "html_url": "https://github.com/labring/FastGPT",
-    "stargazers_count": 28687,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 28820,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "langchain-ai/langchain",
     "html_url": "https://github.com/langchain-ai/langchain",
-    "stargazers_count": 140423,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 141019,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "langflow-ai/langflow",
     "html_url": "https://github.com/langflow-ai/langflow",
-    "stargazers_count": 150167,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 151206,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "langgenius/dify",
     "html_url": "https://github.com/langgenius/dify",
-    "stargazers_count": 146883,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 147801,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "lavalink-devs/Lavalink",
@@ -1610,20 +1646,20 @@
   {
     "full_name": "leon-ai/leon",
     "html_url": "https://github.com/leon-ai/leon",
-    "stargazers_count": 17344,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 17345,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "Leonxlnx/taste-skill",
     "html_url": "https://github.com/Leonxlnx/taste-skill",
-    "stargazers_count": 48521,
-    "last_seen_at": "2026-06-22"
+    "stargazers_count": 57636,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "lets-mica/mica",
     "html_url": "https://github.com/lets-mica/mica",
     "stargazers_count": 2239,
-    "last_seen_at": "2026-06-29"
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "levelsio/superlevels",
@@ -1641,13 +1677,13 @@
     "full_name": "LianjiaTech/retrofit-spring-boot-starter",
     "html_url": "https://github.com/LianjiaTech/retrofit-spring-boot-starter",
     "stargazers_count": 1913,
-    "last_seen_at": "2026-06-29"
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "libgdx/libgdx",
     "html_url": "https://github.com/libgdx/libgdx",
-    "stargazers_count": 25046,
-    "last_seen_at": "2026-04-30"
+    "stargazers_count": 25198,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "limitless-org/Edmonk-polymarket-trading-bot-profitable",
@@ -1658,8 +1694,8 @@
   {
     "full_name": "linlinjava/litemall",
     "html_url": "https://github.com/linlinjava/litemall",
-    "stargazers_count": 20304,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 20311,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "LMCache/LMCache",
@@ -1670,8 +1706,14 @@
   {
     "full_name": "lobehub/lobehub",
     "html_url": "https://github.com/lobehub/lobehub",
-    "stargazers_count": 79197,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 79496,
+    "last_seen_at": "2026-07-06"
+  },
+  {
+    "full_name": "logto-io/logto",
+    "html_url": "https://github.com/logto-io/logto",
+    "stargazers_count": 13836,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "lowlighter/metrics",
@@ -1718,8 +1760,8 @@
   {
     "full_name": "massgravel/Microsoft-Activation-Scripts",
     "html_url": "https://github.com/massgravel/Microsoft-Activation-Scripts",
-    "stargazers_count": 178425,
-    "last_seen_at": "2026-06-15"
+    "stargazers_count": 181950,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "masteranime/n8n-claude-skills",
@@ -1754,20 +1796,20 @@
   {
     "full_name": "mem0ai/mem0",
     "html_url": "https://github.com/mem0ai/mem0",
-    "stargazers_count": 59639,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 60152,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "MemPalace/mempalace",
     "html_url": "https://github.com/MemPalace/mempalace",
-    "stargazers_count": 56705,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 56996,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "mermaid-js/mermaid",
     "html_url": "https://github.com/mermaid-js/mermaid",
-    "stargazers_count": 88911,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 89045,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "meshery/meshery",
@@ -1778,8 +1820,8 @@
   {
     "full_name": "metasfresh/metasfresh",
     "html_url": "https://github.com/metasfresh/metasfresh",
-    "stargazers_count": 2356,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 2359,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "microsoft/agent-governance-toolkit",
@@ -1790,8 +1832,8 @@
   {
     "full_name": "microsoft/generative-ai-for-beginners",
     "html_url": "https://github.com/microsoft/generative-ai-for-beginners",
-    "stargazers_count": 112369,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 112676,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "microsoft/markitdown",
@@ -1802,8 +1844,8 @@
   {
     "full_name": "microsoft/playwright",
     "html_url": "https://github.com/microsoft/playwright",
-    "stargazers_count": 91824,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 92265,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "microsoft/PowerToys",
@@ -1814,14 +1856,14 @@
   {
     "full_name": "microsoft/TypeScript",
     "html_url": "https://github.com/microsoft/TypeScript",
-    "stargazers_count": 109426,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 109478,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "microsoft/vscode",
     "html_url": "https://github.com/microsoft/vscode",
-    "stargazers_count": 187001,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 187143,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "millionco/react-doctor",
@@ -1838,8 +1880,8 @@
   {
     "full_name": "Mintplex-Labs/anything-llm",
     "html_url": "https://github.com/Mintplex-Labs/anything-llm",
-    "stargazers_count": 62251,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 62633,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "MisterBooo/LeetCodeAnimation",
@@ -1856,14 +1898,20 @@
   {
     "full_name": "modelcontextprotocol/servers",
     "html_url": "https://github.com/modelcontextprotocol/servers",
-    "stargazers_count": 87535,
-    "last_seen_at": "2026-06-22"
+    "stargazers_count": 88093,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "modelscope/FunASR",
     "html_url": "https://github.com/modelscope/FunASR",
     "stargazers_count": 16955,
     "last_seen_at": "2026-06-03"
+  },
+  {
+    "full_name": "msitarzewski/agency-agents",
+    "html_url": "https://github.com/msitarzewski/agency-agents",
+    "stargazers_count": 127552,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "mudler/LocalAI",
@@ -1904,8 +1952,8 @@
   {
     "full_name": "mybatis/spring-boot-starter",
     "html_url": "https://github.com/mybatis/spring-boot-starter",
-    "stargazers_count": 4249,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 4250,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "n0-computer/iroh",
@@ -1916,8 +1964,8 @@
   {
     "full_name": "n8n-io/n8n",
     "html_url": "https://github.com/n8n-io/n8n",
-    "stargazers_count": 194401,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 195321,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "NanmiCoder/MediaCrawler",
@@ -1934,14 +1982,14 @@
   {
     "full_name": "NationalSecurityAgency/ghidra",
     "html_url": "https://github.com/NationalSecurityAgency/ghidra",
-    "stargazers_count": 70243,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 70482,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "NativeScript/NativeScript",
     "html_url": "https://github.com/NativeScript/NativeScript",
-    "stargazers_count": 25542,
-    "last_seen_at": "2026-06-22"
+    "stargazers_count": 25550,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "nesquena/hermes-webui",
@@ -1952,32 +2000,32 @@
   {
     "full_name": "nestjs/nest",
     "html_url": "https://github.com/nestjs/nest",
-    "stargazers_count": 76106,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 76038,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "netdata/netdata",
     "html_url": "https://github.com/netdata/netdata",
-    "stargazers_count": 79435,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 79506,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "Netflix/dgs-framework",
     "html_url": "https://github.com/Netflix/dgs-framework",
     "stargazers_count": 3376,
-    "last_seen_at": "2026-06-29"
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "netty/netty",
     "html_url": "https://github.com/netty/netty",
-    "stargazers_count": 34994,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 35009,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "nextlevelbuilder/ui-ux-pro-max-skill",
     "html_url": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill",
-    "stargazers_count": 97522,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 101286,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "nexus9888/hermes-memory-skills",
@@ -1988,8 +2036,8 @@
   {
     "full_name": "nilbuild/developer-roadmap",
     "html_url": "https://github.com/nilbuild/developer-roadmap",
-    "stargazers_count": 358554,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 359421,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "NirDiamant/agents-towards-production",
@@ -2000,8 +2048,8 @@
   {
     "full_name": "NousResearch/hermes-agent",
     "html_url": "https://github.com/NousResearch/hermes-agent",
-    "stargazers_count": 205049,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 209724,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "NullLatency/FlowDriver",
@@ -2024,26 +2072,26 @@
   {
     "full_name": "obra/superpowers",
     "html_url": "https://github.com/obra/superpowers",
-    "stargazers_count": 240747,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 246956,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "ogulcancelik/herdr",
     "html_url": "https://github.com/ogulcancelik/herdr",
-    "stargazers_count": 3909,
-    "last_seen_at": "2026-06-03"
+    "stargazers_count": 12138,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "ohmyzsh/ohmyzsh",
     "html_url": "https://github.com/ohmyzsh/ohmyzsh",
-    "stargazers_count": 188439,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 188403,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "ollama/ollama",
     "html_url": "https://github.com/ollama/ollama",
-    "stargazers_count": 175089,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 175554,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "op7418/guizang-ppt-skill",
@@ -2060,8 +2108,14 @@
   {
     "full_name": "open-webui/open-webui",
     "html_url": "https://github.com/open-webui/open-webui",
-    "stargazers_count": 143358,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 144344,
+    "last_seen_at": "2026-07-06"
+  },
+  {
+    "full_name": "openai/codex-plugin-cc",
+    "html_url": "https://github.com/openai/codex-plugin-cc",
+    "stargazers_count": 25556,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "openai/plugins",
@@ -2084,8 +2138,8 @@
   {
     "full_name": "OpenBB-finance/OpenBB",
     "html_url": "https://github.com/OpenBB-finance/OpenBB",
-    "stargazers_count": 69809,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 70095,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "openclaw/clawsweeper",
@@ -2096,8 +2150,8 @@
   {
     "full_name": "openclaw/openclaw",
     "html_url": "https://github.com/openclaw/openclaw",
-    "stargazers_count": 380891,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 381845,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "opencv/opencv",
@@ -2108,14 +2162,14 @@
   {
     "full_name": "OpenHands/OpenHands",
     "html_url": "https://github.com/OpenHands/OpenHands",
-    "stargazers_count": 78602,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 79537,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "oraios/serena",
     "html_url": "https://github.com/oraios/serena",
-    "stargazers_count": 25871,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 26118,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "Orbital-Alpha/polymarket-copy-trading-bot",
@@ -2168,14 +2222,14 @@
   {
     "full_name": "Panniantong/Agent-Reach",
     "html_url": "https://github.com/Panniantong/Agent-Reach",
-    "stargazers_count": 44622,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 51360,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "pathwaycom/llm-app",
     "html_url": "https://github.com/pathwaycom/llm-app",
-    "stargazers_count": 59363,
-    "last_seen_at": "2026-06-15"
+    "stargazers_count": 59129,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "pbakaus/impeccable",
@@ -2198,8 +2252,8 @@
   {
     "full_name": "pewdiepie-archdaemon/odysseus",
     "html_url": "https://github.com/pewdiepie-archdaemon/odysseus",
-    "stargazers_count": 79024,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 80950,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "phuryn/pm-skills",
@@ -2210,14 +2264,14 @@
   {
     "full_name": "pig-mesh/pig",
     "html_url": "https://github.com/pig-mesh/pig",
-    "stargazers_count": 6650,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 6645,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "pingcap/tidb",
     "html_url": "https://github.com/pingcap/tidb",
-    "stargazers_count": 40219,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 40253,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "planetf1/otelite",
@@ -2238,10 +2292,16 @@
     "last_seen_at": "2026-04-28"
   },
   {
+    "full_name": "practical-tutorials/project-based-learning",
+    "html_url": "https://github.com/practical-tutorials/project-based-learning",
+    "stargazers_count": 272209,
+    "last_seen_at": "2026-07-06"
+  },
+  {
     "full_name": "PrefectHQ/prefect",
     "html_url": "https://github.com/PrefectHQ/prefect",
-    "stargazers_count": 22711,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 22771,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "PrimeOrder-Labs/polymarket-copy-trading-bot",
@@ -2252,20 +2312,20 @@
   {
     "full_name": "public-apis/public-apis",
     "html_url": "https://github.com/public-apis/public-apis",
-    "stargazers_count": 444803,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 446919,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "punkpeye/awesome-mcp-servers",
     "html_url": "https://github.com/punkpeye/awesome-mcp-servers",
-    "stargazers_count": 89932,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 90340,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "puppeteer/puppeteer",
     "html_url": "https://github.com/puppeteer/puppeteer",
-    "stargazers_count": 95266,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 95281,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "python/cpython",
@@ -2276,8 +2336,8 @@
   {
     "full_name": "pytorch/pytorch",
     "html_url": "https://github.com/pytorch/pytorch",
-    "stargazers_count": 101186,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 101520,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "Q00/ouroboros",
@@ -2306,14 +2366,14 @@
   {
     "full_name": "react/react",
     "html_url": "https://github.com/react/react",
-    "stargazers_count": 246284,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 246269,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "ReactiveX/RxJava",
     "html_url": "https://github.com/ReactiveX/RxJava",
-    "stargazers_count": 48235,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 48233,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "realworld-apps/realworld",
@@ -2352,6 +2412,12 @@
     "last_seen_at": "2026-04-28"
   },
   {
+    "full_name": "Robbyant/lingbot-map",
+    "html_url": "https://github.com/Robbyant/lingbot-map",
+    "stargazers_count": 9916,
+    "last_seen_at": "2026-07-06"
+  },
+  {
     "full_name": "roboflow/supervision",
     "html_url": "https://github.com/roboflow/supervision",
     "stargazers_count": 44220,
@@ -2372,8 +2438,8 @@
   {
     "full_name": "rtk-ai/rtk",
     "html_url": "https://github.com/rtk-ai/rtk",
-    "stargazers_count": 66793,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 68713,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "rubenlagus/TelegramBots",
@@ -2444,14 +2510,14 @@
   {
     "full_name": "sansan0/TrendRadar",
     "html_url": "https://github.com/sansan0/TrendRadar",
-    "stargazers_count": 60008,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 60278,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "santifer/career-ops",
     "html_url": "https://github.com/santifer/career-ops",
-    "stargazers_count": 56397,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 58690,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "seandavi/agentic-coding-intro",
@@ -2468,14 +2534,14 @@
   {
     "full_name": "SeleniumHQ/selenium",
     "html_url": "https://github.com/SeleniumHQ/selenium",
-    "stargazers_count": 34235,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 34265,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "semantic-release/semantic-release",
     "html_url": "https://github.com/semantic-release/semantic-release",
-    "stargazers_count": 23841,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 23858,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "seulee26/mckinsey-pptx",
@@ -2486,8 +2552,8 @@
   {
     "full_name": "shadcn-ui/ui",
     "html_url": "https://github.com/shadcn-ui/ui",
-    "stargazers_count": 117676,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 118178,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "shareAI-lab/learn-claude-code",
@@ -2498,8 +2564,8 @@
   {
     "full_name": "sherlock-project/sherlock",
     "html_url": "https://github.com/sherlock-project/sherlock",
-    "stargazers_count": 85815,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 86117,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "Shubhamsaboo/awesome-llm-apps",
@@ -2516,20 +2582,20 @@
   {
     "full_name": "Significant-Gravitas/AutoGPT",
     "html_url": "https://github.com/Significant-Gravitas/AutoGPT",
-    "stargazers_count": 185201,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 185391,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "simplex-chat/simplex-chat",
     "html_url": "https://github.com/simplex-chat/simplex-chat",
-    "stargazers_count": 15200,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 17930,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "simstudioai/sim",
     "html_url": "https://github.com/simstudioai/sim",
-    "stargazers_count": 28892,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 28953,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "sinameraji/kimiflare",
@@ -2540,8 +2606,8 @@
   {
     "full_name": "sindresorhus/awesome",
     "html_url": "https://github.com/sindresorhus/awesome",
-    "stargazers_count": 479672,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 481858,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "siyuan-note/siyuan",
@@ -2552,14 +2618,14 @@
   {
     "full_name": "skylot/jadx",
     "html_url": "https://github.com/skylot/jadx",
-    "stargazers_count": 49224,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 49424,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "Skyvern-AI/skyvern",
     "html_url": "https://github.com/Skyvern-AI/skyvern",
-    "stargazers_count": 22024,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 22121,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "Snailclimb/JavaGuide",
@@ -2582,26 +2648,26 @@
   {
     "full_name": "spring-cloud/spring-cloud-config",
     "html_url": "https://github.com/spring-cloud/spring-cloud-config",
-    "stargazers_count": 2044,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 2045,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "spring-cloud/spring-cloud-gateway",
     "html_url": "https://github.com/spring-cloud/spring-cloud-gateway",
-    "stargazers_count": 4882,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 4887,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "spring-cloud/spring-cloud-kubernetes",
     "html_url": "https://github.com/spring-cloud/spring-cloud-kubernetes",
     "stargazers_count": 3534,
-    "last_seen_at": "2026-06-29"
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "spring-cloud/spring-cloud-netflix",
     "html_url": "https://github.com/spring-cloud/spring-cloud-netflix",
-    "stargazers_count": 4969,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 4970,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "spring-guides/gs-rest-service",
@@ -2612,14 +2678,14 @@
   {
     "full_name": "spring-projects/spring-boot",
     "html_url": "https://github.com/spring-projects/spring-boot",
-    "stargazers_count": 81044,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 81069,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "spring-projects/spring-framework",
     "html_url": "https://github.com/spring-projects/spring-framework",
-    "stargazers_count": 60070,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 60092,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "spring-projects/spring-modulith",
@@ -2643,7 +2709,7 @@
     "full_name": "square/okhttp",
     "html_url": "https://github.com/square/okhttp",
     "stargazers_count": 46993,
-    "last_seen_at": "2026-06-29"
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "square/retrofit",
@@ -2654,26 +2720,32 @@
   {
     "full_name": "stablyai/orca",
     "html_url": "https://github.com/stablyai/orca",
-    "stargazers_count": 8673,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 12421,
+    "last_seen_at": "2026-07-06"
+  },
+  {
+    "full_name": "Starmel/OpenSuperWhisper",
+    "html_url": "https://github.com/Starmel/OpenSuperWhisper",
+    "stargazers_count": 1814,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "Stirling-Tools/Stirling-PDF",
     "html_url": "https://github.com/Stirling-Tools/Stirling-PDF",
-    "stargazers_count": 84980,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 86201,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "storybookjs/storybook",
     "html_url": "https://github.com/storybookjs/storybook",
-    "stargazers_count": 90463,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 90497,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "supabase/supabase",
     "html_url": "https://github.com/supabase/supabase",
-    "stargazers_count": 104970,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 105777,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "supermemoryai/supermemory",
@@ -2708,8 +2780,8 @@
   {
     "full_name": "tailwindlabs/tailwindcss",
     "html_url": "https://github.com/tailwindlabs/tailwindcss",
-    "stargazers_count": 95775,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 95804,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "tashfeenahmed/freellmapi",
@@ -2720,14 +2792,14 @@
   {
     "full_name": "TauricResearch/TradingAgents",
     "html_url": "https://github.com/TauricResearch/TradingAgents",
-    "stargazers_count": 89493,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 91097,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "TeamNewPipe/NewPipe",
     "html_url": "https://github.com/TeamNewPipe/NewPipe",
-    "stargazers_count": 38761,
-    "last_seen_at": "2026-06-22"
+    "stargazers_count": 38894,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "techa03/goodsKill",
@@ -2756,8 +2828,8 @@
   {
     "full_name": "tensorflow/tensorflow",
     "html_url": "https://github.com/tensorflow/tensorflow",
-    "stargazers_count": 196088,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 196116,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "termux/termux-app",
@@ -2768,8 +2840,8 @@
   {
     "full_name": "TheAlgorithms/Java",
     "html_url": "https://github.com/TheAlgorithms/Java",
-    "stargazers_count": 65936,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 65963,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "TheAlgorithms/Python",
@@ -2780,8 +2852,8 @@
   {
     "full_name": "thedotmack/claude-mem",
     "html_url": "https://github.com/thedotmack/claude-mem",
-    "stargazers_count": 84916,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 85999,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "therealaleph/MasterHttpRelayVPN-RUST",
@@ -2804,14 +2876,14 @@
   {
     "full_name": "topoteretes/cognee",
     "html_url": "https://github.com/topoteretes/cognee",
-    "stargazers_count": 24940,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 27136,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "torvalds/linux",
     "html_url": "https://github.com/torvalds/linux",
-    "stargazers_count": 237922,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 238534,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "Tracer-Cloud/opensre",
@@ -2864,8 +2936,8 @@
   {
     "full_name": "twbs/bootstrap",
     "html_url": "https://github.com/twbs/bootstrap",
-    "stargazers_count": 174411,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 174426,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "Udacity-ai/pumpfun-ai-trading-bot",
@@ -2882,20 +2954,26 @@
   {
     "full_name": "unslothai/unsloth",
     "html_url": "https://github.com/unslothai/unsloth",
-    "stargazers_count": 67549,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 67829,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "upstash/context7",
     "html_url": "https://github.com/upstash/context7",
-    "stargazers_count": 58258,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 58627,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "usebruno/bruno",
     "html_url": "https://github.com/usebruno/bruno",
-    "stargazers_count": 45205,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 45372,
+    "last_seen_at": "2026-07-06"
+  },
+  {
+    "full_name": "usestrix/strix",
+    "html_url": "https://github.com/usestrix/strix",
+    "stargazers_count": 37217,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "vectordotdev/vector",
@@ -2918,8 +2996,8 @@
   {
     "full_name": "vinta/awesome-python",
     "html_url": "https://github.com/vinta/awesome-python",
-    "stargazers_count": 305320,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 306538,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "virattt/dexter",
@@ -2936,20 +3014,20 @@
   {
     "full_name": "vitejs/vite",
     "html_url": "https://github.com/vitejs/vite",
-    "stargazers_count": 81685,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 81789,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "vladmihalcea/hypersistence-utils",
     "html_url": "https://github.com/vladmihalcea/hypersistence-utils",
-    "stargazers_count": 2656,
-    "last_seen_at": "2026-06-15"
+    "stargazers_count": 2661,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "vllm-project/vllm",
     "html_url": "https://github.com/vllm-project/vllm",
-    "stargazers_count": 84708,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 85441,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "volcengine/OpenViking",
@@ -2978,8 +3056,8 @@
   {
     "full_name": "wshobson/agents",
     "html_url": "https://github.com/wshobson/agents",
-    "stargazers_count": 37298,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 37553,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "wuyoscar/gpt_image_2_skill",
@@ -2990,14 +3068,20 @@
   {
     "full_name": "x1xhlol/system-prompts-and-models-of-ai-tools",
     "html_url": "https://github.com/x1xhlol/system-prompts-and-models-of-ai-tools",
-    "stargazers_count": 140475,
-    "last_seen_at": "2026-06-15"
+    "stargazers_count": 141570,
+    "last_seen_at": "2026-07-06"
+  },
+  {
+    "full_name": "xbtlin/ai-berkshire",
+    "html_url": "https://github.com/xbtlin/ai-berkshire",
+    "stargazers_count": 10372,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "xiaojieonly/Ehviewer_CN_SXJ",
     "html_url": "https://github.com/xiaojieonly/Ehviewer_CN_SXJ",
-    "stargazers_count": 23697,
-    "last_seen_at": "2026-04-30"
+    "stargazers_count": 25133,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "XiaomiMiMo/MiMo-V2.5-ASR",
@@ -3008,8 +3092,8 @@
   {
     "full_name": "xuxueli/xxl-job",
     "html_url": "https://github.com/xuxueli/xxl-job",
-    "stargazers_count": 30281,
-    "last_seen_at": "2026-06-22"
+    "stargazers_count": 30331,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "xuxueli/xxl-sso",
@@ -3032,8 +3116,8 @@
   {
     "full_name": "Yeachan-Heo/oh-my-claudecode",
     "html_url": "https://github.com/Yeachan-Heo/oh-my-claudecode",
-    "stargazers_count": 37121,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 37439,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "yikart/AiToEarn",
@@ -3044,8 +3128,8 @@
   {
     "full_name": "Yin-Hongwei/music-website",
     "html_url": "https://github.com/Yin-Hongwei/music-website",
-    "stargazers_count": 6716,
-    "last_seen_at": "2026-06-22"
+    "stargazers_count": 6718,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "youngyangyang04/leetcode-master",
@@ -3056,20 +3140,20 @@
   {
     "full_name": "yt-dlp/yt-dlp",
     "html_url": "https://github.com/yt-dlp/yt-dlp",
-    "stargazers_count": 174030,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 175460,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "yuliskov/SmartTube",
     "html_url": "https://github.com/yuliskov/SmartTube",
-    "stargazers_count": 30795,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 31002,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "YunaiV/ruoyi-vue-pro",
     "html_url": "https://github.com/YunaiV/ruoyi-vue-pro",
-    "stargazers_count": 37987,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 38073,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "yusufkaraaslan/Skill_Seekers",
@@ -3084,6 +3168,12 @@
     "last_seen_at": "2026-05-05"
   },
   {
+    "full_name": "Zackriya-Solutions/meetily",
+    "html_url": "https://github.com/Zackriya-Solutions/meetily",
+    "stargazers_count": 17240,
+    "last_seen_at": "2026-07-06"
+  },
+  {
     "full_name": "Zafer-Liu/VizPilot_AI",
     "html_url": "https://github.com/Zafer-Liu/VizPilot_AI",
     "stargazers_count": 93,
@@ -3092,8 +3182,8 @@
   {
     "full_name": "zalando/logbook",
     "html_url": "https://github.com/zalando/logbook",
-    "stargazers_count": 2048,
-    "last_seen_at": "2026-06-22"
+    "stargazers_count": 2050,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "zed-industries/zed",
@@ -3104,8 +3194,8 @@
   {
     "full_name": "zeroclaw-labs/zeroclaw",
     "html_url": "https://github.com/zeroclaw-labs/zeroclaw",
-    "stargazers_count": 32085,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 32163,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "zhayujie/CowAgent",
@@ -3116,8 +3206,8 @@
   {
     "full_name": "ZhuLinsen/daily_stock_analysis",
     "html_url": "https://github.com/ZhuLinsen/daily_stock_analysis",
-    "stargazers_count": 51213,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 54742,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "zillagorila/Shapez-2-Factory-Game-Multiplayer",
@@ -3140,13 +3230,13 @@
   {
     "full_name": "zxing/zxing",
     "html_url": "https://github.com/zxing/zxing",
-    "stargazers_count": 33996,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 34009,
+    "last_seen_at": "2026-07-06"
   },
   {
     "full_name": "zxwk1998/vue-admin-better",
     "html_url": "https://github.com/zxwk1998/vue-admin-better",
-    "stargazers_count": 18858,
-    "last_seen_at": "2026-06-29"
+    "stargazers_count": 18863,
+    "last_seen_at": "2026-07-06"
   }
 ]

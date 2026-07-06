@@ -4,26 +4,27 @@
 
 ## 最新周报
 
-- [2026-06-29](weekly/2026-06-29.html)
+- [2026-07-06](weekly/2026-07-06.html)
 
 ## 最新运行摘要
 
 - 入选项目：10 个
-- 采集候选：322 个
+- 采集候选：321 个
 - 生成方式：Kimi
-- Telegram：已推送
+- Telegram：未推送
 - 采集错误：0 条
 
 ## 最新趋势要点
 
 - AI Agent 是本期最集中的方向，共 6 个项目。
-- Python 是本期出现最多的主要语言，共 5 个项目。
-- 本期入选项目累计新增 Star 60432。
-- calesthio/OpenMontage 是本期 GitHub Trending 排名最高的项目，周榜排名 1。
-- calesthio/OpenMontage 是本期新增 Star 最高的项目，新增 18010。
+- Python 是本期出现最多的主要语言，共 4 个项目。
+- 本期入选项目累计新增 Star 27872。
+- usestrix/strix 是本期 GitHub Trending 排名最高的项目，周榜排名 1。
+- ogulcancelik/herdr 是本期新增 Star 最高的项目，新增 8229。
 
 ## 全部周报
 
+- [2026-07-06](weekly/2026-07-06.html)：10 个项目，Kimi，Telegram 未推送，主语言 Python，主方向 AI Agent，新增 Star 27872，Trending 项目 10
 - [2026-06-29](weekly/2026-06-29.html)：10 个项目，Kimi，Telegram 已推送，主语言 Python，主方向 AI Agent，新增 Star 60432，Trending 项目 10
 - [2026-06-22](weekly/2026-06-22.html)：10 个项目，Kimi，Telegram 已推送，主语言 Python，主方向 AI Agent，新增 Star 39911，Trending 项目 10
 - [2026-06-15](weekly/2026-06-15.html)：10 个项目，Kimi，Telegram 已推送，主语言 Python，主方向 AI Agent，新增 Star 74445，Trending 项目 10

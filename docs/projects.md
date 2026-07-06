@@ -4,6 +4,16 @@
 
 | 日期 | 项目 | 来源 | Trending 排名 | 方向 | 语言 | Star | 新增 Star | 风险提示 | 链接 |
 |---|---|---|---:|---|---|---:|---:|---:|---|
+| 2026-07-06 | usestrix/strix | GitHub Trending | 1 | AI Agent | Python | 37217 | 0 | 0 | [https://github.com/usestrix/strix](https://github.com/usestrix/strix) |
+| 2026-07-06 | xbtlin/ai-berkshire | GitHub Trending | 2 | AI Agent | Python | 10372 | 0 | 0 | [https://github.com/xbtlin/ai-berkshire](https://github.com/xbtlin/ai-berkshire) |
+| 2026-07-06 | diegosouzapw/OmniRoute | GitHub Trending | 3 | AI Agent | TypeScript | 11930 | 0 | 0 | [https://github.com/diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute) |
+| 2026-07-06 | simplex-chat/simplex-chat | GitHub Trending | 4 | Other | Haskell | 17930 | 2730 | 0 | [https://github.com/simplex-chat/simplex-chat](https://github.com/simplex-chat/simplex-chat) |
+| 2026-07-06 | Robbyant/lingbot-map | GitHub Trending | 5 | Automation | Python | 9916 | 0 | 0 | [https://github.com/Robbyant/lingbot-map](https://github.com/Robbyant/lingbot-map) |
+| 2026-07-06 | ogulcancelik/herdr | GitHub Trending | 6 | AI Agent | Rust | 12138 | 8229 | 0 | [https://github.com/ogulcancelik/herdr](https://github.com/ogulcancelik/herdr) |
+| 2026-07-06 | logto-io/logto | GitHub Trending | 7 | Machine Learning | TypeScript | 13836 | 0 | 0 | [https://github.com/logto-io/logto](https://github.com/logto-io/logto) |
+| 2026-07-06 | alibaba/page-agent | GitHub Search + GitHub Trending | 10 | AI Agent | TypeScript | 23982 | 3487 | 0 | [https://github.com/alibaba/page-agent](https://github.com/alibaba/page-agent) |
+| 2026-07-06 | calesthio/OpenMontage | GitHub Search + GitHub Trending | 17 | AI Agent | Python | 33724 | 6544 | 0 | [https://github.com/calesthio/OpenMontage](https://github.com/calesthio/OpenMontage) |
+| 2026-07-06 | DeusData/codebase-memory-mcp | GitHub Trending | 15 | LLM Tooling | C | 26797 | 6882 | 0 | [https://github.com/DeusData/codebase-memory-mcp](https://github.com/DeusData/codebase-memory-mcp) |
 | 2026-06-29 | calesthio/OpenMontage | GitHub Search + GitHub Trending | 1 | AI Agent | Python | 27179 | 18010 | 0 | [https://github.com/calesthio/OpenMontage](https://github.com/calesthio/OpenMontage) |
 | 2026-06-29 | DeusData/codebase-memory-mcp | GitHub Trending | 2 | LLM Tooling | C | 19915 | 9416 | 0 | [https://github.com/DeusData/codebase-memory-mcp](https://github.com/DeusData/codebase-memory-mcp) |
 | 2026-06-29 | kunchenguid/no-mistakes | GitHub Trending | 3 | Other | Go | 4103 | 0 | 0 | [https://github.com/kunchenguid/no-mistakes](https://github.com/kunchenguid/no-mistakes) |

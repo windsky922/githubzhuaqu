@@ -1,0 +1,143 @@
+{
+  "schema_version": 1,
+  "total_projects": 10,
+  "trending_project_count": 10,
+  "trending_top10_selected_count": 8,
+  "trending_selected_rate": 1.0,
+  "total_star_growth": 27872,
+  "top_languages": [
+    {
+      "name": "Python",
+      "count": 4
+    },
+    {
+      "name": "TypeScript",
+      "count": 3
+    },
+    {
+      "name": "Haskell",
+      "count": 1
+    },
+    {
+      "name": "Rust",
+      "count": 1
+    },
+    {
+      "name": "C",
+      "count": 1
+    }
+  ],
+  "top_categories": [
+    {
+      "name": "AI Agent",
+      "count": 6
+    },
+    {
+      "name": "Other",
+      "count": 1
+    },
+    {
+      "name": "Automation",
+      "count": 1
+    },
+    {
+      "name": "Machine Learning",
+      "count": 1
+    },
+    {
+      "name": "LLM Tooling",
+      "count": 1
+    }
+  ],
+  "top_trending": [
+    {
+      "full_name": "usestrix/strix",
+      "html_url": "https://github.com/usestrix/strix",
+      "trending_rank": 1,
+      "stargazers_count": 37217,
+      "language": "Python",
+      "category": "AI Agent"
+    },
+    {
+      "full_name": "xbtlin/ai-berkshire",
+      "html_url": "https://github.com/xbtlin/ai-berkshire",
+      "trending_rank": 2,
+      "stargazers_count": 10372,
+      "language": "Python",
+      "category": "AI Agent"
+    },
+    {
+      "full_name": "diegosouzapw/OmniRoute",
+      "html_url": "https://github.com/diegosouzapw/OmniRoute",
+      "trending_rank": 3,
+      "stargazers_count": 11930,
+      "language": "TypeScript",
+      "category": "AI Agent"
+    },
+    {
+      "full_name": "simplex-chat/simplex-chat",
+      "html_url": "https://github.com/simplex-chat/simplex-chat",
+      "trending_rank": 4,
+      "stargazers_count": 17930,
+      "language": "Haskell",
+      "category": "Other"
+    },
+    {
+      "full_name": "Robbyant/lingbot-map",
+      "html_url": "https://github.com/Robbyant/lingbot-map",
+      "trending_rank": 5,
+      "stargazers_count": 9916,
+      "language": "Python",
+      "category": "Automation"
+    }
+  ],
+  "top_star_growth": [
+    {
+      "full_name": "ogulcancelik/herdr",
+      "html_url": "https://github.com/ogulcancelik/herdr",
+      "star_growth": 8229,
+      "stargazers_count": 12138,
+      "language": "Rust",
+      "category": "AI Agent"
+    },
+    {
+      "full_name": "DeusData/codebase-memory-mcp",
+      "html_url": "https://github.com/DeusData/codebase-memory-mcp",
+      "star_growth": 6882,
+      "stargazers_count": 26797,
+      "language": "C",
+      "category": "LLM Tooling"
+    },
+    {
+      "full_name": "calesthio/OpenMontage",
+      "html_url": "https://github.com/calesthio/OpenMontage",
+      "star_growth": 6544,
+      "stargazers_count": 33724,
+      "language": "Python",
+      "category": "AI Agent"
+    },
+    {
+      "full_name": "alibaba/page-agent",
+      "html_url": "https://github.com/alibaba/page-agent",
+      "star_growth": 3487,
+      "stargazers_count": 23982,
+      "language": "TypeScript",
+      "category": "AI Agent"
+    },
+    {
+      "full_name": "simplex-chat/simplex-chat",
+      "html_url": "https://github.com/simplex-chat/simplex-chat",
+      "star_growth": 2730,
+      "stargazers_count": 17930,
+      "language": "Haskell",
+      "category": "Other"
+    }
+  ],
+  "summary_points": [
+    "AI Agent 是本期最集中的方向，共 6 个项目。",
+    "Python 是本期出现最多的主要语言，共 4 个项目。",
+    "本期入选项目累计新增 Star 27872。",
+    "usestrix/strix 是本期 GitHub Trending 排名最高的项目，周榜排名 1。",
+    "ogulcancelik/herdr 是本期新增 Star 最高的项目，新增 8229。"
+  ]
+}
