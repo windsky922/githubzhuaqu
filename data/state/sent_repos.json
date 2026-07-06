@@ -55,6 +55,11 @@
     "first_sent_at": "2026-04-29"
   },
   {
+    "full_name": "alibaba/page-agent",
+    "html_url": "https://github.com/alibaba/page-agent",
+    "first_sent_at": "2026-07-06"
+  },
+  {
     "full_name": "Alishahryar1/free-claude-code",
     "html_url": "https://github.com/Alishahryar1/free-claude-code",
     "first_sent_at": "2026-04-29"
@@ -238,6 +243,11 @@
     "full_name": "DeusData/codebase-memory-mcp",
     "html_url": "https://github.com/DeusData/codebase-memory-mcp",
     "first_sent_at": "2026-06-22"
+  },
+  {
+    "full_name": "diegosouzapw/OmniRoute",
+    "html_url": "https://github.com/diegosouzapw/OmniRoute",
+    "first_sent_at": "2026-07-06"
   },
   {
     "full_name": "DigitalPlatDev/FreeDomain",
@@ -428,6 +438,11 @@
     "full_name": "lobehub/lobehub",
     "html_url": "https://github.com/lobehub/lobehub",
     "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "logto-io/logto",
+    "html_url": "https://github.com/logto-io/logto",
+    "first_sent_at": "2026-07-06"
   },
   {
     "full_name": "lsdefine/GenericAgent",
@@ -625,6 +640,11 @@
     "first_sent_at": "2026-06-03"
   },
   {
+    "full_name": "Robbyant/lingbot-map",
+    "html_url": "https://github.com/Robbyant/lingbot-map",
+    "first_sent_at": "2026-07-06"
+  },
+  {
     "full_name": "roboflow/supervision",
     "html_url": "https://github.com/roboflow/supervision",
     "first_sent_at": "2026-06-15"
@@ -760,6 +780,11 @@
     "first_sent_at": "2026-04-29"
   },
   {
+    "full_name": "usestrix/strix",
+    "html_url": "https://github.com/usestrix/strix",
+    "first_sent_at": "2026-07-06"
+  },
+  {
     "full_name": "vinta/awesome-python",
     "html_url": "https://github.com/vinta/awesome-python",
     "first_sent_at": "2026-04-29"
@@ -788,6 +813,11 @@
     "full_name": "wshobson/agents",
     "html_url": "https://github.com/wshobson/agents",
     "first_sent_at": "2026-06-03"
+  },
+  {
+    "full_name": "xbtlin/ai-berkshire",
+    "html_url": "https://github.com/xbtlin/ai-berkshire",
+    "first_sent_at": "2026-07-06"
   },
   {
     "full_name": "Yeachan-Heo/oh-my-claudecode",
