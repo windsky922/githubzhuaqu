@@ -2,6 +2,13 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-07-07 追加：证据约束 RAG Ask 接入 Kimi
+
+1. 新增统一 LLM 客户端 `src/llm/client.py`，复用 `KIMI_API_KEY`、`KIMI_BASE_URL`、`KIMI_MODEL`、超时和重试环境变量，不在代码中保存密钥。
+2. 新增 `src/rag/answering.py` 和 `prompts/rag_ask.md`，让 `/v1/rag/ask` 先基于 RAG 证据回答；无证据拒答，模型未配置或失败时自动回退规则版。
+3. `/v1/rag/ask` 新增 `answer_mode`、`fallback_reason` 和 `model_status`，并继续保留 `answer_model`、`citations`、`evidence`、`source_explanation_id` 与通知记忆。
+4. 管理页 RAG 回答卡片显示模型配置状态、是否使用模型和降级原因，便于区分真实模型回答与规则版 fallback。
+
 ## 2026-07-07 追加：项目研究 Agent v1 审查报告
 
 1. 新增 `docs/project-review-agent-v1-roadmap.md`，沉淀本轮从第一性原理和对抗性审查得到的项目定位、主要风险、遗漏点、下一阶段目标和长期路线。

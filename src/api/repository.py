@@ -19,6 +19,7 @@ from src.rag.embeddings import (
     hash_embedding,
     vector_from_json,
 )
+from src.rag.answering import answer_rag_question
 from src.storage.sqlite_store import (
     connect,
     import_json_archive,
@@ -1383,12 +1384,23 @@ class ApiRepository:
             model=model,
             auto_build=auto_build,
         )
+        answer_result = answer_rag_question(
+            root=self.root,
+            query=str(explained.get("query") or query or ""),
+            retrieval={
+                "query": explained.get("query") or query,
+                "contexts": explained.get("contexts") if isinstance(explained.get("contexts"), list) else [],
+                "citations": explained.get("citations") if isinstance(explained.get("citations"), list) else [],
+                "retrieval": explained.get("retrieval") or {},
+                "prompt_context": explained.get("prompt_context") or "",
+            },
+        )
         explanation = explained.get("explanation") if isinstance(explained.get("explanation"), dict) else {}
-        quality = explained.get("quality") if isinstance(explained.get("quality"), dict) else {}
-        answer = str(explanation.get("answer") or "当前没有足够 RAG 证据形成回答。")
-        evidence = explanation.get("evidence") if isinstance(explanation.get("evidence"), list) else []
-        citations = explained.get("citations") if isinstance(explained.get("citations"), list) else []
-        contexts = explained.get("contexts") if isinstance(explained.get("contexts"), list) else []
+        quality = explained.get("quality") if isinstance(explained.get("quality"), dict) else answer_result.get("quality") or {}
+        answer = str(answer_result.get("answer") or explanation.get("answer") or "当前没有足够 RAG 证据形成回答。")
+        evidence = answer_result.get("evidence") if isinstance(answer_result.get("evidence"), list) else []
+        citations = answer_result.get("citations") if isinstance(answer_result.get("citations"), list) else []
+        contexts = answer_result.get("contexts") if isinstance(answer_result.get("contexts"), list) else []
         notification_memory = _notification_rag_memory(self.db_path, query, limit=limit)
         notification_evidence = notification_memory.get("evidence") if isinstance(notification_memory.get("evidence"), list) else []
         notification_citations = notification_memory.get("citations") if isinstance(notification_memory.get("citations"), list) else []
@@ -1400,19 +1412,22 @@ class ApiRepository:
             "schema_version": 1,
             "query": explained.get("query") or query,
             "answer": answer,
-            "answer_model": "rule:rag-ask-v1",
-            "confidence": "medium" if notification_memory.get("event_count") and not contexts else explanation.get("confidence") or "low",
+            "answer_model": answer_result.get("answer_model") or "rule:rag-ask-v1",
+            "answer_mode": answer_result.get("answer_mode") or "fallback_rule",
+            "fallback_reason": answer_result.get("fallback_reason") or "",
+            "confidence": "medium" if notification_memory.get("event_count") and not contexts else answer_result.get("confidence") or explanation.get("confidence") or "low",
             "count": len(contexts) + len(notification_evidence),
-            "retrieval": explained.get("retrieval") or {},
+            "retrieval": answer_result.get("retrieval") or explained.get("retrieval") or {},
             "citations": citations,
             "evidence": evidence,
             "quality": quality,
-            "prompt_context": explained.get("prompt_context") or "",
+            "prompt_context": answer_result.get("prompt_context") or explained.get("prompt_context") or "",
             "source_explanation_id": explained.get("explanation_id") or "",
             "cached": bool(explained.get("cached")),
             "next_actions": _rag_answer_next_actions(explanation=explanation, quality=quality, citations=citations),
             "contexts": contexts,
             "notification_memory": notification_memory,
+            "model_status": answer_result.get("model_status") or {},
         }
 
     def rag_explanations(

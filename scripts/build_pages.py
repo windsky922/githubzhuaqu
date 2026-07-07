@@ -2139,10 +2139,20 @@ def _admin_dashboard_content() -> str:
       const citations = data.citations || [];
       const promptContext = data.prompt_context || "";
       const retrieval = data.retrieval || {};
+      const modelStatus = data.model_status || {};
+      const modelText = [
+        data.answer_model || "-",
+        data.answer_mode || "-",
+        data.confidence || "-",
+        modelStatus.configured ? "模型已配置" : "模型未配置",
+        modelStatus.used ? "已使用模型" : "未使用模型"
+      ].join(" · ");
+      const fallbackText = data.fallback_reason ? `<p>降级原因：${escapeHtml(data.fallback_reason)}</p>` : "";
       const answerHtml = data.answer ? `<article class="search-row">
         <strong>RAG 回答</strong>
         <p>${escapeHtml(data.answer)}</p>
-        <span>${escapeHtml(data.answer_model || "-")} · ${escapeHtml(data.confidence || "-")} · ${escapeHtml(data.source_explanation_id || "-")}</span>
+        ${fallbackText}
+        <span>${escapeHtml(modelText)} · ${escapeHtml(data.source_explanation_id || "-")}</span>
       </article>` : "";
       const nextActions = (data.next_actions || []).map(item => `<li>${escapeHtml(item)}</li>`).join("");
       const nextActionsHtml = nextActions ? `<article class="search-row"><strong>下一步动作</strong><ul>${nextActions}</ul></article>` : "";

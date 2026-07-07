@@ -26,6 +26,19 @@
 
 GitHub Actions 默认执行事件检测与候选构建，但 `send_event_notifications` 默认为 `false`。只有显式开启该输入时，工作流才会同时传入 `--no-dry-run` 和 `--confirm-delivery`；通知步骤设置为非阻塞，不影响 Pages 生成和现有每周链接推送。
 
+## 证据约束 RAG Ask 层
+
+```text
+/v1/rag/ask
+-> rag_explain 生成证据、引用和解释编号
+-> src/rag/answering.py 检查证据充足性
+-> src/llm/client.py 调用 Kimi 兼容聊天接口
+-> prompts/rag_ask.md 约束模型只能基于证据回答并标注引用
+-> 未配置、超时、限流、错误或无证据时规则降级/拒答
+```
+
+`/v1/rag/ask` 不是普通聊天接口。它必须先有 RAG 证据，再尝试真实模型回答；没有证据时直接拒答。模型失败不会阻断接口，响应会保留 `citations`、`evidence`、`answer_mode`、`fallback_reason` 和 `model_status`，管理页据此展示模型状态和降级原因。提示词保存在 `prompts/rag_ask.md`，业务代码只负责装配结构化证据。
+
 ## 项目级 Agent 执行层
 
 ```text

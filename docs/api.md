@@ -64,7 +64,7 @@ Authorization: Bearer <本地管理口令>
 
 根路径 `http://127.0.0.1:8000/` 会跳转到管理首页。`/v1/*` 路径是 JSON API，例如 `/v1/jobs?limit=50` 返回机器可读任务数据，不是 HTML 页面。
 
-管理首页中的 RAG 区域会调用 `/v1/rag/ask`、`/v1/rag/retrieve`、`/v1/rag/vector-search` 和 `/v1/rag/hybrid-search`，用于查看问答结果、证据块、引用和 `prompt_context`；开发上下文区域会调用 `/v1/dev-context/index`、`/v1/dev-context/search` 和 `/v1/dev-context/ask`，用于索引开发材料、检索证据和生成规则版审查/诊断回答，并会展示最近 `dev_context_index` 任务状态。后端还提供 `/v1/rag/search-compare`、`/v1/rag/search-evaluation` 和 `/v1/rag/search-evaluation-trends`，用于比较、批量评估和长期观察三种检索模式的召回差异。管理首页会展示检索评估趋势，包括最近评估任务、平均样本数、零命中样本和推荐模式分布。RAG 诊断会调用 `/v1/rag/diagnostics`，用于判断语料、证据块、embedding、解释历史和问答能力是否可用；RAG 质量概览会调用 `/v1/rag/quality-summary`，用于查看解释数量、质量分布、改进建议和低质量样本；RAG 维护计划按钮会调用 `/v1/rag/maintenance-plan`，按诊断结果创建语料重建、embedding 构建或解释回填 planned 任务；维护历史可以通过 `/v1/rag/maintenance-report` 查看最近 RAG 维护任务状态、计数变化和下一步建议；RAG 回填区会调用 `/v1/rag/backfill-explanations`，先预览缺口项目，确认后再写入 SQLite。向量检索会在 `auto_build=true` 时自动构建本地 `local-hash-v1` 索引，也可以先手动运行 `py scripts\build_rag_embeddings.py`。
+管理首页中的 RAG 区域会调用 `/v1/rag/ask`、`/v1/rag/retrieve`、`/v1/rag/vector-search` 和 `/v1/rag/hybrid-search`，用于查看问答结果、模型状态、降级原因、证据块、引用和 `prompt_context`；开发上下文区域会调用 `/v1/dev-context/index`、`/v1/dev-context/search` 和 `/v1/dev-context/ask`，用于索引开发材料、检索证据和生成规则版审查/诊断回答，并会展示最近 `dev_context_index` 任务状态。后端还提供 `/v1/rag/search-compare`、`/v1/rag/search-evaluation` 和 `/v1/rag/search-evaluation-trends`，用于比较、批量评估和长期观察三种检索模式的召回差异。管理首页会展示检索评估趋势，包括最近评估任务、平均样本数、零命中样本和推荐模式分布。RAG 诊断会调用 `/v1/rag/diagnostics`，用于判断语料、证据块、embedding、解释历史和问答能力是否可用；RAG 质量概览会调用 `/v1/rag/quality-summary`，用于查看解释数量、质量分布、改进建议和低质量样本；RAG 维护计划按钮会调用 `/v1/rag/maintenance-plan`，按诊断结果创建语料重建、embedding 构建或解释回填 planned 任务；维护历史可以通过 `/v1/rag/maintenance-report` 查看最近 RAG 维护任务状态、计数变化和下一步建议；RAG 回填区会调用 `/v1/rag/backfill-explanations`，先预览缺口项目，确认后再写入 SQLite。向量检索会在 `auto_build=true` 时自动构建本地 `local-hash-v1` 索引，也可以先手动运行 `py scripts\build_rag_embeddings.py`。
 
 如果本地没有 `data/github_weekly.sqlite`，查询项目接口会从 `data/` 下的 JSON 归档自动重建 SQLite 派生索引。
 
@@ -591,13 +591,13 @@ py scripts\run_rag_search_evaluation.py --queries "agent workflow;python automat
 /v1/rag/explain?q=agent%20workflow&mode=hybrid&auto_build=true
 ```
 
-这是当前 RAG 从“召回证据”升级到“解释输出”的第一层接口。后续如果接入真实 LLM，应优先复用 `citations` 和 `prompt_context`，并要求模型按引用编号回答。
+这是当前 RAG 从“召回证据”升级到“解释输出”的第一层接口。`/v1/rag/ask` 会继续复用 `citations` 和 `prompt_context`，并要求模型按引用编号回答。
 
 ### `GET /v1/rag/ask`
 
-面向前端和后续 Agent 编排的 RAG 问答入口。它复用 `/v1/rag/explain` 的检索、解释和 SQLite 解释历史写入能力，但返回结构更接近“可直接展示或交给下一步工具”的问答结果。
+面向前端和后续 Agent 编排的 RAG 问答入口。它复用 `/v1/rag/explain` 的检索、解释和 SQLite 解释历史写入能力，再把证据交给统一 LLM 客户端生成回答；未配置、超时、限流或响应异常时自动回退规则版。
 
-当前版本仍是本地规则版，不调用外部模型、不读取密钥。后续接入 Kimi、LangChain 或其他问答链时，应优先保持该接口的 `answer + citations + prompt_context + next_actions` 数据边界稳定。
+真实模型只在 `KIMI_API_KEY` 和 `KIMI_MODEL` 同时配置时启用。没有证据时接口返回 `answer_mode=refusal`，不调用模型，也不编造项目结论。
 
 支持参数与 `/v1/rag/explain` 一致：
 
@@ -614,14 +614,17 @@ py scripts\run_rag_search_evaluation.py --queries "agent workflow;python automat
 
 返回字段包含：
 
-1. `answer`：当前规则版回答。
-2. `answer_model`：回答生成策略，当前为 `rule:rag-ask-v1`。
-3. `citations`：回答引用的项目、日期和 chunk ID。
-4. `evidence`：裁剪后的证据摘要。
-5. `quality`：解释质量分与质量等级。
-6. `prompt_context`：后续接入模型时可直接使用的上下文。
-7. `next_actions`：建议的下一步核验或补库动作。
-8. `source_explanation_id`：本次问答复用或写入的 RAG 解释编号。
+1. `answer`：模型或规则版回答。
+2. `answer_model`：回答生成策略，例如 `kimi:moonshot-v1-8k` 或 `rule:rag-ask-v1`。
+3. `answer_mode`：`llm`、`fallback_rule` 或 `refusal`。
+4. `fallback_reason`：未使用真实模型时的原因，正常模型回答为空字符串。
+5. `citations`：回答引用的项目、日期和 chunk ID。
+6. `evidence`：裁剪后的证据摘要。
+7. `quality`：解释质量分与质量等级。
+8. `prompt_context`：后续模型回答使用的上下文。
+9. `next_actions`：建议的下一步核验或补库动作。
+10. `source_explanation_id`：本次问答复用或写入的 RAG 解释编号。
+11. `model_status`：模型是否配置、是否尝试、是否实际使用、模型名和超时配置。
 
 示例：
 
