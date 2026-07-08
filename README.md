@@ -381,6 +381,8 @@ python scripts/query_archive.py --profile agent_development --query workflow --f
 python scripts/build_rag_embeddings.py
 ```
 
+本地前端现在提供两个 RAG 入口：`admin.html?api=1` 用于管理、诊断和证据检查；`agent.html?api=1` 用于面向用户的一句话项目匹配对话。项目匹配页默认使用 `/v1/rag/ask?mode=hybrid&limit=3&auto_build=true`，前端只展示简短回答、Top 项目卡片和折叠证据，不保存密钥，不新增后端会话。
+
 当前 embedding 使用本地确定性 `local-hash-v1`，不调用外部模型、不需要密钥。它用于打通向量索引表和检索 API，后续可以替换为真实 embedding 模型。
 
 回填缺少解释历史的项目：

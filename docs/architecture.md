@@ -41,6 +41,8 @@ GitHub Actions 默认执行事件检测与候选构建，但 `send_event_notific
 
 管理页 RAG 对话工作台是该接口的 GPT 式前端封装，不新增后端会话状态。对话历史只保存在浏览器 localStorage，最多 20 轮；每轮问题独立检索，历史回答只用于页面回看，不进入 `prompt_context`，也不作为事实证据。
 
+`agent.html?api=1` 是面向普通用户的项目匹配前端：用户只输入一句需求，前端默认调用 `/v1/rag/ask?mode=hybrid&limit=3&auto_build=true`，并把答案压缩成简短回答、Top 项目卡片和折叠证据。它不新增数据库表、不保存聊天历史到后端，也不把前端历史或模型回答当作事实来源；真实依据仍只来自本轮 `citations`、`evidence`、`contexts` 和 `prompt_context`。
+
 ## 项目级 Agent 执行层
 
 ```text

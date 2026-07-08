@@ -42,6 +42,9 @@ def build_pages(root: Path = ROOT) -> list[Path]:
     admin_page = root / "docs" / "admin.html"
     admin_page.write_text(_admin_dashboard_content(), encoding="utf-8")
     written.append(admin_page)
+    agent_page = root / "docs" / "agent.html"
+    agent_page.write_text(_agent_match_content(), encoding="utf-8")
+    written.append(agent_page)
     explorer = root / "docs" / "explorer.html"
     explorer.write_text(_explorer_content(), encoding="utf-8")
     written.append(explorer)
@@ -125,6 +128,7 @@ def _index_content(root: Path, reports: list[Path]) -> str:
             "",
             "## 项目文档",
             "",
+            "- [项目匹配 Agent](agent.html)",
             "- [本地管理首页](admin.html)",
             "- [项目筛选页](explorer.html)",
             "- [项目详情页](project.html)",
@@ -477,6 +481,658 @@ def _projects_content(root: Path) -> str:
         lines.append("| - | 暂无项目 | - | - | - | - | 0 | 0 | 0 | - |")
     lines.extend(["", "## 返回", "", "- [周报归档首页](index.html)", ""])
     return "\n".join(lines)
+
+
+def _agent_match_content() -> str:
+    return """<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GitHub 项目研究 Agent</title>
+  <style>
+    :root {
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --text: #172033;
+      --muted: #667085;
+      --line: #d8dee8;
+      --accent: #2563eb;
+      --accent-weak: #eff6ff;
+      --ok: #15803d;
+      --bad: #b42318;
+      --warn: #a16207;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+      line-height: 1.55;
+    }
+    header {
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+    }
+    .wrap {
+      width: min(1080px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 0;
+    }
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.2;
+    }
+    nav {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-weight: 700;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    main { padding: 22px 0 40px; }
+    .agent-shell {
+      min-height: calc(100vh - 126px);
+      display: grid;
+      grid-template-rows: 1fr auto;
+      gap: 14px;
+    }
+    .messages {
+      overflow: auto;
+      display: grid;
+      align-content: start;
+      gap: 16px;
+      padding-bottom: 8px;
+    }
+    .empty {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      padding: 20px;
+      display: grid;
+      gap: 10px;
+    }
+    .empty strong { font-size: 18px; }
+    .examples {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .example {
+      border: 1px solid var(--line);
+      background: #f9fafb;
+      color: var(--text);
+      padding: 8px 10px;
+      font: inherit;
+      cursor: pointer;
+    }
+    .turn {
+      display: grid;
+      gap: 10px;
+    }
+    .bubble {
+      max-width: 880px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      padding: 14px;
+      overflow-wrap: anywhere;
+    }
+    .bubble.user {
+      justify-self: end;
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #ffffff;
+      max-width: 720px;
+    }
+    .bubble.assistant { justify-self: start; }
+    .bubble.error {
+      border-color: #fda29b;
+      background: #fff3f2;
+    }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+    .summary {
+      margin: 0 0 12px;
+      white-space: pre-wrap;
+    }
+    .match-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .match-card {
+      border: 1px solid var(--line);
+      background: #fbfcfe;
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+    }
+    .match-card strong {
+      overflow-wrap: anywhere;
+    }
+    .match-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .button,
+    button {
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: #ffffff;
+      padding: 10px 12px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .button.secondary,
+    button.secondary {
+      background: #ffffff;
+      color: var(--accent);
+    }
+    button:disabled {
+      opacity: 0.58;
+      cursor: not-allowed;
+    }
+    .composer {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+    }
+    textarea,
+    input,
+    select {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: #ffffff;
+      color: var(--text);
+      font: inherit;
+      padding: 10px 12px;
+    }
+    textarea {
+      min-height: 76px;
+      resize: vertical;
+    }
+    .composer-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 10px;
+      align-items: end;
+    }
+    details {
+      border-top: 1px solid var(--line);
+      margin-top: 12px;
+      padding-top: 10px;
+    }
+    summary {
+      cursor: pointer;
+      color: var(--accent);
+      font-weight: 700;
+    }
+    .advanced {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+    label {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .status {
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .quality.bad { color: var(--bad); }
+    .quality.ok { color: var(--ok); }
+    .evidence-list {
+      margin: 8px 0 0;
+      padding-left: 18px;
+    }
+    .evidence-list li { margin-bottom: 8px; }
+    @media (max-width: 860px) {
+      .topbar { align-items: flex-start; flex-direction: column; }
+      .match-grid { grid-template-columns: 1fr; }
+      .composer-row { grid-template-columns: 1fr; }
+      .advanced { grid-template-columns: 1fr; }
+      .bubble,
+      .bubble.user { max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap topbar">
+      <div>
+        <h1>GitHub 项目研究 Agent</h1>
+        <div class="status">一句话描述需求，Agent 返回最匹配项目和证据。</div>
+      </div>
+      <nav>
+        <a href="index.html">归档首页</a>
+        <a href="admin.html?api=1">管理页</a>
+        <a href="explorer.html">项目筛选</a>
+        <a href="recommendations.html">推荐页</a>
+      </nav>
+    </div>
+  </header>
+  <main class="wrap">
+    <section class="agent-shell">
+      <div id="agentMatchMessages" class="messages"></div>
+      <form id="agentMatchForm" class="composer">
+        <textarea id="agentMatchQuery" placeholder="例如：我想找适合继续跟踪的 Agent workflow 项目，最好能用于本地开发和自动化。"></textarea>
+        <div class="composer-row">
+          <div id="agentMatchStatus" class="status">默认快速匹配：hybrid，limit=3。详细证据折叠显示。</div>
+          <button id="clearAgentMatch" class="secondary" type="button">清空</button>
+          <button id="sendAgentMatch" type="submit">发送</button>
+        </div>
+        <details>
+          <summary>高级参数</summary>
+          <div class="advanced">
+            <label>模式
+              <select id="agentMatchMode">
+                <option value="hybrid" selected>hybrid</option>
+                <option value="fts5">fts5</option>
+                <option value="vector">vector</option>
+              </select>
+            </label>
+            <label>limit
+              <input id="agentMatchLimit" type="number" min="1" max="10" value="3">
+            </label>
+            <label>language
+              <input id="agentMatchLanguage" placeholder="Python / TypeScript">
+            </label>
+            <label>category
+              <input id="agentMatchCategory" placeholder="AI Agent">
+            </label>
+            <label>source
+              <input id="agentMatchSource" placeholder="github_trending">
+            </label>
+          </div>
+        </details>
+      </form>
+    </section>
+  </main>
+  <script>
+    const agentMatchControls = {
+      form: document.getElementById("agentMatchForm"),
+      query: document.getElementById("agentMatchQuery"),
+      mode: document.getElementById("agentMatchMode"),
+      limit: document.getElementById("agentMatchLimit"),
+      language: document.getElementById("agentMatchLanguage"),
+      category: document.getElementById("agentMatchCategory"),
+      source: document.getElementById("agentMatchSource"),
+      sendButton: document.getElementById("sendAgentMatch"),
+      clearButton: document.getElementById("clearAgentMatch"),
+      messages: document.getElementById("agentMatchMessages"),
+      status: document.getElementById("agentMatchStatus"),
+    };
+    const agentMatchState = {
+      messages: loadAgentMatchHistory(),
+      pending: false,
+    };
+
+    setupAgentMatch();
+
+    function setupAgentMatch() {
+      renderAgentMatch();
+      agentMatchControls.form.addEventListener("submit", event => {
+        event.preventDefault();
+        sendAgentMatchMessage();
+      });
+      agentMatchControls.clearButton.addEventListener("click", clearAgentMatchHistory);
+      agentMatchControls.query.addEventListener("keydown", event => {
+        if (event.key === "Enter" && !event.shiftKey) {
+          event.preventDefault();
+          sendAgentMatchMessage();
+        }
+      });
+      if (!shouldUseApi()) {
+        agentMatchControls.sendButton.disabled = true;
+        agentMatchControls.status.textContent = "请使用 agent.html?api=1 并启动本地后端。";
+      }
+    }
+
+    async function sendAgentMatchMessage() {
+      if (agentMatchState.pending || !shouldUseApi()) return;
+      const question = agentMatchControls.query.value.trim();
+      if (!question) {
+        agentMatchControls.status.textContent = "先输入一个需求问题。";
+        return;
+      }
+      const message = {
+        id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        asked_at: new Date().toISOString(),
+        question,
+        retrieval_question: question,
+        mode: agentMatchControls.mode.value || "hybrid",
+        limit: Number(agentMatchControls.limit.value || 3),
+        language: agentMatchControls.language.value.trim(),
+        category: agentMatchControls.category.value.trim(),
+        source: agentMatchControls.source.value.trim(),
+        loading: true,
+      };
+      agentMatchState.messages.push(message);
+      agentMatchState.pending = true;
+      agentMatchControls.query.value = "";
+      setAgentMatchBusy(true);
+      renderAgentMatch();
+      try {
+        const params = new URLSearchParams();
+        params.set("q", message.retrieval_question);
+        params.set("mode", message.mode);
+        params.set("limit", String(message.limit || 3));
+        if (message.mode === "vector" || message.mode === "hybrid") params.set("auto_build", "true");
+        if (message.language) params.set("language", message.language);
+        if (message.category) params.set("category", message.category);
+        if (message.source) params.set("source", message.source);
+        const response = await fetch(`/v1/rag/ask?${params.toString()}`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        message.loading = false;
+        message.response = agentMatchResponseSnapshot(data);
+        saveAgentMatchHistory(agentMatchState.messages);
+        agentMatchControls.status.textContent = "匹配完成。";
+      } catch (error) {
+        message.loading = false;
+        message.error = String(error && error.message ? error.message : error);
+        saveAgentMatchHistory(agentMatchState.messages);
+        agentMatchControls.status.textContent = "请求失败。";
+      } finally {
+        agentMatchState.pending = false;
+        setAgentMatchBusy(false);
+        renderAgentMatch();
+      }
+    }
+
+    function renderAgentMatch() {
+      if (!agentMatchState.messages.length) {
+        agentMatchControls.messages.innerHTML = `<div class="empty">
+          <strong>直接问：什么项目最适合我？</strong>
+          <p>只需要输入一句需求。前端不要求你填写复杂表单；高级参数可选。回答默认短、快，并把证据放在折叠区。</p>
+          <div class="examples">
+            <button class="example" type="button" data-query="哪些 Agent workflow 项目值得继续跟踪？">Agent workflow</button>
+            <button class="example" type="button" data-query="我想找适合本地自动化和 GUI Agent 的项目，哪个最匹配？">GUI 自动化</button>
+            <button class="example" type="button" data-query="我想学习多 Agent 编排，哪些开源项目最值得研究？">多 Agent 编排</button>
+          </div>
+        </div>`;
+        document.querySelectorAll(".example").forEach(button => {
+          button.addEventListener("click", () => {
+            agentMatchControls.query.value = button.dataset.query || "";
+            agentMatchControls.query.focus();
+          });
+        });
+        return;
+      }
+      agentMatchControls.messages.innerHTML = agentMatchState.messages.map(agentMatchMessageHtml).join("");
+      agentMatchControls.messages.scrollTop = agentMatchControls.messages.scrollHeight;
+    }
+
+    function agentMatchMessageHtml(message) {
+      const filters = [
+        `mode=${message.mode || "hybrid"}`,
+        `limit=${message.limit || 3}`,
+        message.language ? `language=${message.language}` : "",
+        message.category ? `category=${message.category}` : "",
+        message.source ? `source=${message.source}` : "",
+      ].filter(Boolean).join(" · ");
+      if (message.loading) {
+        return `<article class="turn">
+          <div class="bubble user">${escapeHtml(message.question || "")}</div>
+          <div class="bubble assistant">
+            <div class="meta"><span>${escapeHtml(message.asked_at || "")}</span><span>${escapeHtml(filters)}</span></div>
+            <p class="summary">正在检索证据并匹配项目...</p>
+          </div>
+        </article>`;
+      }
+      if (message.error) {
+        return `<article class="turn">
+          <div class="bubble user">${escapeHtml(message.question || "")}</div>
+          <div class="bubble assistant error">
+            <div class="meta"><span>${escapeHtml(message.asked_at || "")}</span><span>${escapeHtml(filters)}</span></div>
+            <p class="summary">请求失败：${escapeHtml(message.error)}</p>
+          </div>
+        </article>`;
+      }
+      const response = message.response || {};
+      const quality = response.answer_quality || {};
+      const qualityClass = quality.passed ? "ok" : "bad";
+      const qualityText = quality.passed ? "质量通过" : `质量失败：${(quality.issues || []).join("；") || "-"}`;
+      const fallback = response.fallback_reason ? `<p class="quality bad">降级：${escapeHtml(response.fallback_reason)}</p>` : "";
+      const refusal = response.answer_mode === "refusal" ? `<p class="quality bad">无可用证据，已拒答。</p>` : "";
+      const promptContext = response.prompt_context
+        ? `<details><summary>prompt_context</summary><textarea readonly>${escapeHtml(response.prompt_context)}</textarea></details>`
+        : "";
+      return `<article class="turn">
+        <div class="bubble user">${escapeHtml(message.question || "")}</div>
+        <div class="bubble assistant">
+          <div class="meta">
+            <span>${escapeHtml(message.asked_at || "")}</span>
+            <span>${escapeHtml(filters)}</span>
+            <span>${escapeHtml(response.answer_model || "-")}</span>
+            <span>${escapeHtml(response.answer_mode || "-")}</span>
+            <span>confidence ${escapeHtml(response.confidence || "-")}</span>
+          </div>
+          <p class="summary">${escapeHtml(compactAgentAnswer(response.answer || ""))}</p>
+          ${projectMatchCardsHtml(response)}
+          ${fallback}
+          ${refusal}
+          <p class="quality ${qualityClass}">${escapeHtml(qualityText)}</p>
+          <details>
+            <summary>证据与详情</summary>
+            <p>本轮检索问题：${escapeHtml(message.retrieval_question || message.question || "")}</p>
+            ${agentMatchCitationsHtml(response.citations || [])}
+            ${agentMatchEvidenceHtml(response.evidence || [])}
+            ${promptContext}
+          </details>
+        </div>
+      </article>`;
+    }
+
+    function compactAgentAnswer(answer) {
+      const lines = String(answer || "").split(/\\n+/).map(line => line.trim()).filter(Boolean);
+      if (!lines.length) return "没有可展示的回答。";
+      return lines.slice(0, 6).join("\\n");
+    }
+
+    function projectMatchCardsHtml(response) {
+      const matches = projectMatches(response).slice(0, 3);
+      if (!matches.length) return "";
+      return `<div class="match-grid">${matches.map((item, index) => {
+        const repo = item.full_name || "-";
+        const reason = item.reason || "证据已召回，展开详情查看。";
+        const detailUrl = projectDetailUrl(repo);
+        const compareUrlValue = compareUrl(matches.map(match => match.full_name).filter(Boolean));
+        const github = item.html_url ? `<a class="button secondary" href="${escapeAttribute(item.html_url)}" target="_blank" rel="noreferrer">GitHub</a>` : "";
+        return `<article class="match-card">
+          <strong>${index + 1}. ${escapeHtml(repo)}</strong>
+          <p>${escapeHtml(reason)}</p>
+          <div class="actions">
+            <a class="button secondary" href="${escapeAttribute(detailUrl)}">详情</a>
+            <a class="button secondary" href="${escapeAttribute(compareUrlValue)}">对比</a>
+            ${github}
+          </div>
+        </article>`;
+      }).join("")}</div>`;
+    }
+
+    function projectMatches(response) {
+      const evidenceByRepo = new Map();
+      (response.evidence || []).forEach(item => {
+        const repo = item.full_name || "";
+        if (!repo || evidenceByRepo.has(repo)) return;
+        const matched = Array.isArray(item.matched_evidence) ? item.matched_evidence.join("；") : "";
+        evidenceByRepo.set(repo, item.quote || matched || "");
+      });
+      const seen = new Set();
+      const matches = [];
+      (response.citations || []).forEach(item => {
+        const repo = item.full_name || "";
+        if (!repo || seen.has(repo)) return;
+        seen.add(repo);
+        matches.push({
+          full_name: repo,
+          html_url: item.html_url || "",
+          reason: evidenceByRepo.get(repo) || item.run_date || item.chunk_id || "",
+        });
+      });
+      (response.contexts || []).forEach(item => {
+        const meta = item.metadata || {};
+        const repo = meta.full_name || "";
+        if (!repo || seen.has(repo)) return;
+        seen.add(repo);
+        const evidence = Array.isArray(item.evidence) ? item.evidence[0] : "";
+        matches.push({
+          full_name: repo,
+          html_url: meta.html_url || "",
+          reason: evidence || item.text || "",
+        });
+      });
+      return matches;
+    }
+
+    function agentMatchCitationsHtml(citations) {
+      const items = (citations || []).slice(0, 5);
+      if (!items.length) return "<p>暂无引用。</p>";
+      return `<h3>引用</h3><ul class="evidence-list">${items.map(item => {
+        const link = item.html_url ? ` <a href="${escapeAttribute(item.html_url)}" target="_blank" rel="noreferrer">GitHub</a>` : "";
+        return `<li>[${escapeHtml(item.index || "-")}] ${escapeHtml(item.full_name || "-")} · ${escapeHtml(item.run_date || "-")} · ${escapeHtml(item.chunk_id || "-")}${link}</li>`;
+      }).join("")}</ul>`;
+    }
+
+    function agentMatchEvidenceHtml(evidence) {
+      const items = (evidence || []).slice(0, 5);
+      if (!items.length) return "<p>暂无证据摘要。</p>";
+      return `<h3>证据摘要</h3><ul class="evidence-list">${items.map(item => {
+        const matched = Array.isArray(item.matched_evidence) ? item.matched_evidence.join("；") : "";
+        return `<li><strong>${escapeHtml(item.full_name || "-")}</strong><p>${escapeHtml(item.quote || matched || "")}</p></li>`;
+      }).join("")}</ul>`;
+    }
+
+    function agentMatchResponseSnapshot(data) {
+      const quality = data.answer_quality || {};
+      return {
+        answer: data.answer || "",
+        answer_model: data.answer_model || "",
+        answer_mode: data.answer_mode || "",
+        confidence: data.confidence || "",
+        fallback_reason: data.fallback_reason || "",
+        answer_quality: {
+          passed: Boolean(quality.passed),
+          issues: Array.isArray(quality.issues) ? quality.issues.slice(0, 10) : [],
+        },
+        citations: (data.citations || []).slice(0, 5).map(item => ({
+          index: item.index || "",
+          full_name: item.full_name || "",
+          html_url: item.html_url || "",
+          run_date: item.run_date || "",
+          chunk_id: item.chunk_id || "",
+        })),
+        evidence: (data.evidence || []).slice(0, 5).map(item => ({
+          full_name: item.full_name || "",
+          run_date: item.run_date || "",
+          chunk_id: item.chunk_id || "",
+          quote: item.quote || "",
+          matched_evidence: Array.isArray(item.matched_evidence) ? item.matched_evidence.slice(0, 5) : [],
+        })),
+        contexts: (data.contexts || []).slice(0, 5).map(item => ({
+          text: item.text || "",
+          evidence: Array.isArray(item.evidence) ? item.evidence.slice(0, 3) : [],
+          metadata: {
+            full_name: (item.metadata || {}).full_name || "",
+            html_url: (item.metadata || {}).html_url || "",
+          },
+        })),
+        prompt_context: data.prompt_context || "",
+      };
+    }
+
+    function loadAgentMatchHistory() {
+      try {
+        const raw = window.localStorage.getItem("github_weekly_agent_match_history");
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed.slice(-20) : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function saveAgentMatchHistory(messages) {
+      window.localStorage.setItem("github_weekly_agent_match_history", JSON.stringify((messages || []).slice(-20)));
+    }
+
+    function clearAgentMatchHistory() {
+      agentMatchState.messages = [];
+      window.localStorage.removeItem("github_weekly_agent_match_history");
+      renderAgentMatch();
+      agentMatchControls.status.textContent = "已清空本地对话。";
+    }
+
+    function setAgentMatchBusy(isBusy) {
+      agentMatchControls.sendButton.disabled = isBusy;
+      agentMatchControls.clearButton.disabled = isBusy;
+    }
+
+    function shouldUseApi() {
+      return new URLSearchParams(window.location.search).get("api") === "1";
+    }
+
+    function projectDetailUrl(repo) {
+      const params = new URLSearchParams();
+      if (repo && repo !== "-") params.set("repo", repo);
+      if (shouldUseApi()) params.set("api", "1");
+      return `project.html?${params.toString()}`;
+    }
+
+    function compareUrl(repos) {
+      const params = new URLSearchParams();
+      const clean = (repos || []).filter(Boolean).slice(0, 3);
+      if (clean.length) params.set("repos", clean.join(","));
+      if (shouldUseApi()) params.set("api", "1");
+      return `compare.html?${params.toString()}`;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;",
+      }[char]));
+    }
+
+    function escapeAttribute(value) {
+      return escapeHtml(value);
+    }
+  </script>
+</body>
+</html>
+"""
 
 
 def _admin_dashboard_content() -> str:

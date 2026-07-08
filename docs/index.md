@@ -39,6 +39,7 @@
 
 ## 项目文档
 
+- [项目匹配 Agent](agent.html)
 - [本地管理首页](admin.html)
 - [项目筛选页](explorer.html)
 - [项目详情页](project.html)
