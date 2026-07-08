@@ -39,6 +39,8 @@ GitHub Actions 默认执行事件检测与候选构建，但 `send_event_notific
 
 `/v1/rag/ask` 不是普通聊天接口。它必须先有 RAG 证据，再尝试真实模型回答；没有证据时直接拒答。模型失败不会阻断接口，响应会保留 `citations`、`evidence`、`answer_mode`、`fallback_reason` 和 `model_status`，管理页据此展示模型状态和降级原因。提示词保存在 `prompts/rag_ask.md`，业务代码只负责装配结构化证据。
 
+管理页 RAG 对话工作台是该接口的前端封装，不新增后端会话状态。对话历史只保存在浏览器 localStorage，最多 20 轮；每轮问题独立检索，历史回答只用于页面回看，不进入 `prompt_context`，也不作为事实证据。
+
 ## 项目级 Agent 执行层
 
 ```text

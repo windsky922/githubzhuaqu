@@ -449,6 +449,35 @@
         <button id="runRagSearch" type="button">检索</button>
       </div>
       <div id="ragSearchResults" class="search-results"></div>
+      <h3>RAG 对话</h3>
+      <div class="search-form">
+        <label>问题
+          <input id="ragChatQuery" type="text" placeholder="哪些 Agent workflow 项目值得继续跟踪？">
+        </label>
+        <label>检索方式
+          <select id="ragChatMode">
+            <option value="hybrid">hybrid</option>
+            <option value="fts5">fts5</option>
+            <option value="vector">vector</option>
+          </select>
+        </label>
+        <label>数量
+          <input id="ragChatLimit" type="number" min="1" max="30" value="5">
+        </label>
+        <label>语言
+          <input id="ragChatLanguage" type="text" placeholder="Python">
+        </label>
+        <label>方向
+          <input id="ragChatCategory" type="text" placeholder="AI Agent">
+        </label>
+        <label>来源
+          <input id="ragChatSource" type="text" placeholder="github_trending">
+        </label>
+        <button id="sendRagChat" type="button">发送</button>
+        <button id="clearRagChat" type="button">清空对话</button>
+      </div>
+      <p id="ragChatStatus" class="task-status"></p>
+      <div id="ragChatMessages" class="search-results"></div>
       <h3>开发上下文 RAG</h3>
       <div class="search-form">
         <label>开发上下文问题
@@ -603,6 +632,8 @@
     const databaseTrends = document.getElementById("databaseTrends");
     const corpusSearchResults = document.getElementById("corpusSearchResults");
     const ragSearchResults = document.getElementById("ragSearchResults");
+    const ragChatMessages = document.getElementById("ragChatMessages");
+    const ragChatStatus = document.getElementById("ragChatStatus");
     const devContextResults = document.getElementById("devContextResults");
     const devContextJobs = document.getElementById("devContextJobs");
     const ragQualitySummary = document.getElementById("ragQualitySummary");
@@ -631,6 +662,17 @@
       language: document.getElementById("ragLanguage"),
       button: document.getElementById("runRagSearch"),
     };
+    const ragChatControls = {
+      query: document.getElementById("ragChatQuery"),
+      mode: document.getElementById("ragChatMode"),
+      limit: document.getElementById("ragChatLimit"),
+      language: document.getElementById("ragChatLanguage"),
+      category: document.getElementById("ragChatCategory"),
+      source: document.getElementById("ragChatSource"),
+      sendButton: document.getElementById("sendRagChat"),
+      clearButton: document.getElementById("clearRagChat"),
+    };
+    const ragChatState = { messages: loadRagChatHistory() };
     const devContextControls = {
       query: document.getElementById("devContextQuery"),
       source: document.getElementById("devContextSource"),
@@ -658,6 +700,7 @@
     setupCreateTask();
       setupCorpusSearch();
       setupRagSearch();
+      setupRagChat();
       setupDevContext();
       setupRagBackfill();
     setupRagMaintenance();
@@ -707,6 +750,21 @@
       ragControls.button.addEventListener("click", runRagSearch);
       ragControls.query.addEventListener("keydown", event => {
         if (event.key === "Enter") runRagSearch();
+      });
+    }
+
+    function setupRagChat() {
+      renderRagChat();
+      if (!shouldUseApi()) {
+        ragChatControls.sendButton.disabled = true;
+        ragChatStatus.textContent = "RAG 对话需要本地后端或 api=1 模式。";
+        return;
+      }
+      ragChatStatus.textContent = "每轮独立调用 /v1/rag/ask；历史只保存在当前浏览器。";
+      ragChatControls.sendButton.addEventListener("click", sendRagChatMessage);
+      ragChatControls.clearButton.addEventListener("click", clearRagChatHistory);
+      ragChatControls.query.addEventListener("keydown", event => {
+        if (event.key === "Enter") sendRagChatMessage();
       });
     }
 
@@ -799,6 +857,65 @@
         })
         .finally(() => {
           ragControls.button.disabled = false;
+        });
+    }
+
+    function sendRagChatMessage() {
+      const question = ragChatControls.query.value.trim();
+      if (!question) {
+        ragChatStatus.textContent = "请输入 RAG 对话问题。";
+        return;
+      }
+      const params = new URLSearchParams();
+      const mode = ragChatControls.mode.value || "hybrid";
+      const limit = Math.max(1, Math.min(Number(ragChatControls.limit.value || 5), 30));
+      params.set("q", question);
+      params.set("mode", mode);
+      params.set("limit", String(limit));
+      if (mode === "vector" || mode === "hybrid") params.set("auto_build", "true");
+      if (ragChatControls.language.value.trim()) params.set("language", ragChatControls.language.value.trim());
+      if (ragChatControls.category.value.trim()) params.set("category", ragChatControls.category.value.trim());
+      if (ragChatControls.source.value.trim()) params.set("source", ragChatControls.source.value.trim());
+      ragChatControls.sendButton.disabled = true;
+      ragChatStatus.textContent = "正在生成证据约束回答...";
+      fetch(`/v1/rag/ask?${params.toString()}`, { cache: "no-store" })
+        .then(jsonOrThrow)
+        .then(data => {
+          const message = {
+            id: `rag-chat-${Date.now()}`,
+            asked_at: new Date().toISOString(),
+            question,
+            mode,
+            limit,
+            language: ragChatControls.language.value.trim(),
+            category: ragChatControls.category.value.trim(),
+            source: ragChatControls.source.value.trim(),
+            response: ragChatResponseSnapshot(data),
+          };
+          ragChatState.messages.unshift(message);
+          ragChatState.messages = ragChatState.messages.slice(0, 20);
+          saveRagChatHistory(ragChatState.messages);
+          renderRagChat();
+          ragChatControls.query.value = "";
+          ragChatStatus.textContent = "已生成回答。";
+        })
+        .catch(error => {
+          const message = {
+            id: `rag-chat-${Date.now()}`,
+            asked_at: new Date().toISOString(),
+            question,
+            mode,
+            limit,
+            error: String(error.message || error),
+          };
+          ragChatState.messages.unshift(message);
+          ragChatState.messages = ragChatState.messages.slice(0, 20);
+          saveRagChatHistory(ragChatState.messages);
+          renderRagChat();
+          ragChatStatus.textContent = "RAG 对话失败。";
+        })
+        .finally(() => {
+          ragChatControls.sendButton.disabled = false;
         });
     }
 
@@ -1690,6 +1807,120 @@
         </article>`;
       }).join("");
       return `${answerHtml}${summary}${nextActionsHtml}${contextHtml}<label>Prompt Context<textarea readonly>${escapeHtml(promptContext)}</textarea></label>`;
+    }
+
+    function renderRagChat() {
+      if (!ragChatState.messages.length) {
+        ragChatMessages.innerHTML = "<p>暂无 RAG 对话。每轮都会独立检索证据，不把历史回答当事实来源。</p>";
+        return;
+      }
+      ragChatMessages.innerHTML = ragChatState.messages.map(ragChatMessageHtml).join("");
+    }
+
+    function ragChatMessageHtml(message) {
+      const response = message.response || {};
+      const quality = response.answer_quality || {};
+      const qualityIssues = (quality.issues || []).join("；") || "无";
+      const filters = [
+        message.mode ? `mode=${message.mode}` : "",
+        message.limit ? `limit=${message.limit}` : "",
+        message.language ? `language=${message.language}` : "",
+        message.category ? `category=${message.category}` : "",
+        message.source ? `source=${message.source}` : "",
+      ].filter(Boolean).join(" · ");
+      if (message.error) {
+        return `<article class="search-row">
+          <strong>用户问题：${escapeHtml(message.question || "")}</strong>
+          <span>${escapeHtml(message.asked_at || "")} · ${escapeHtml(filters || "-")}</span>
+          <p>请求失败：${escapeHtml(message.error)}</p>
+        </article>`;
+      }
+      const fallback = response.fallback_reason ? `<p>降级原因：${escapeHtml(response.fallback_reason)}</p>` : "";
+      const promptContext = response.prompt_context
+        ? `<details><summary>查看 prompt_context</summary><textarea readonly>${escapeHtml(response.prompt_context)}</textarea></details>`
+        : "";
+      return `<article class="search-row">
+        <strong>用户问题：${escapeHtml(message.question || "")}</strong>
+        <span>${escapeHtml(message.asked_at || "")} · ${escapeHtml(filters || "-")}</span>
+        <p>${escapeHtml(response.answer || "")}</p>
+        <span>${escapeHtml(response.answer_model || "-")} · ${escapeHtml(response.answer_mode || "-")} · ${escapeHtml(response.confidence || "-")} · 质量 ${escapeHtml(String(Boolean(quality.passed)))}</span>
+        ${fallback}
+        <p>质量闸门：${escapeHtml(qualityIssues)}</p>
+        ${ragChatCitationsHtml(response.citations || [])}
+        ${ragChatEvidenceHtml(response.evidence || [])}
+        ${promptContext}
+      </article>`;
+    }
+
+    function ragChatCitationsHtml(citations) {
+      const items = (citations || []).slice(0, 5);
+      if (!items.length) return "<p>暂无引用。</p>";
+      return `<div><strong>引用证据</strong><ul>${items.map(item => {
+        const label = `[${item.index || "-"}] ${item.full_name || "-"} / ${item.run_date || "-"} / ${item.chunk_id || "-"}`;
+        const link = item.html_url ? ` · <a href="${escapeAttribute(item.html_url)}" target="_blank" rel="noreferrer">GitHub</a>` : "";
+        return `<li>${escapeHtml(label)}${link}</li>`;
+      }).join("")}</ul></div>`;
+    }
+
+    function ragChatEvidenceHtml(evidence) {
+      const items = (evidence || []).slice(0, 5);
+      if (!items.length) return "<p>暂无证据摘要。</p>";
+      return `<div><strong>证据摘要</strong><ul>${items.map(item => {
+        const matched = (item.matched_evidence || []).join("；");
+        return `<li><span>${escapeHtml(item.full_name || "-")} / ${escapeHtml(item.chunk_id || "-")}</span><p>${escapeHtml(item.quote || "")}</p>${matched ? `<span>${escapeHtml(matched)}</span>` : ""}</li>`;
+      }).join("")}</ul></div>`;
+    }
+
+    function ragChatResponseSnapshot(data) {
+      const quality = data.answer_quality || {};
+      return {
+        answer: data.answer || "",
+        answer_model: data.answer_model || "",
+        answer_mode: data.answer_mode || "",
+        confidence: data.confidence || "",
+        fallback_reason: data.fallback_reason || "",
+        answer_quality: {
+          passed: Boolean(quality.passed),
+          issues: Array.isArray(quality.issues) ? quality.issues.slice(0, 10) : [],
+        },
+        citations: (data.citations || []).slice(0, 5).map(item => ({
+          index: item.index || "",
+          full_name: item.full_name || "",
+          html_url: item.html_url || "",
+          run_date: item.run_date || "",
+          chunk_id: item.chunk_id || "",
+        })),
+        evidence: (data.evidence || []).slice(0, 5).map(item => ({
+          full_name: item.full_name || "",
+          run_date: item.run_date || "",
+          chunk_id: item.chunk_id || "",
+          quote: item.quote || "",
+          matched_evidence: Array.isArray(item.matched_evidence) ? item.matched_evidence.slice(0, 5) : [],
+        })),
+        prompt_context: data.prompt_context || "",
+        source_explanation_id: data.source_explanation_id || "",
+      };
+    }
+
+    function loadRagChatHistory() {
+      try {
+        const raw = window.localStorage.getItem("github_weekly_rag_chat_history");
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed.slice(0, 20) : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function saveRagChatHistory(messages) {
+      window.localStorage.setItem("github_weekly_rag_chat_history", JSON.stringify((messages || []).slice(0, 20)));
+    }
+
+    function clearRagChatHistory() {
+      ragChatState.messages = [];
+      window.localStorage.removeItem("github_weekly_rag_chat_history");
+      renderRagChat();
+      ragChatStatus.textContent = "已清空本地 RAG 对话历史。";
     }
 
     function devContextIndexHtml(data) {

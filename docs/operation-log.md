@@ -2,6 +2,13 @@
 
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
+## 2026-07-08 追加：管理页证据约束 RAG 对话工作台
+
+1. 管理页新增 RAG 对话区域，复用 `/v1/rag/ask`，支持连续提问、模式选择、limit 和语言/方向/来源过滤。
+2. 对话历史只保存在浏览器 `localStorage.github_weekly_rag_chat_history`，最多 20 轮；后端不新增会话表，不保存 API Key 或管理口令。
+3. 每轮回答展示 `answer_model`、`answer_mode`、`confidence`、`fallback_reason`、`answer_quality`、前 5 条 citations/evidence 和可折叠 `prompt_context`。
+4. 对话工作台每轮独立检索，不把历史回答当事实证据；无证据、fallback 和质量闸门问题在页面显式展示。
+
 ## 2026-07-07 追加：证据约束 RAG Ask 接入 Kimi
 
 1. 新增统一 LLM 客户端 `src/llm/client.py`，复用 `KIMI_API_KEY`、`KIMI_BASE_URL`、`KIMI_MODEL`、超时和重试环境变量，不在代码中保存密钥。
