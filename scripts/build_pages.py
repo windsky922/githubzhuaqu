@@ -4187,11 +4187,11 @@ def _recommendations_content() -> str:
           headers: adminWriteHeaders(),
           body: JSON.stringify(payload)
         });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        if (!response.ok) throw await feedbackHttpError(response);
         setFeedbackStatus(status, "反馈已写入，正在刷新推荐排序。", false);
         await loadRecommendations(false);
       } catch (error) {
-        setFeedbackStatus(status, `反馈写入失败：${error.message || error}`, true);
+        setFeedbackStatus(status, `反馈写入失败：${feedbackErrorMessage(error)}`, true);
       }
     }
 
@@ -4219,6 +4219,31 @@ def _recommendations_content() -> str:
       const headers = { "Content-Type": "application/json" };
       if (token) headers["X-Admin-Token"] = token;
       return headers;
+    }
+
+    async function feedbackHttpError(response) {
+      let detail = "";
+      try {
+        const data = await response.json();
+        detail = data.detail || "";
+      } catch (error) {
+        detail = "";
+      }
+      const error = new Error(detail || `HTTP ${response.status}`);
+      error.status = response.status;
+      error.detail = detail;
+      return error;
+    }
+
+    function feedbackErrorMessage(error) {
+      const status = Number(error && error.status);
+      if (status === 403) {
+        return "后端未配置 ADMIN_API_TOKEN。请在启动后端的 PowerShell 中设置 $env:ADMIN_API_TOKEN 后重启服务。";
+      }
+      if (status === 401) {
+        return "管理口令无效或未传入。请用 ?admin_token=你的口令 打开页面，或写入 localStorage.github_weekly_admin_token。";
+      }
+      return (error && (error.detail || error.message)) || String(error);
     }
 
     function adminToken() {
@@ -6598,10 +6623,10 @@ def _project_detail_content() -> str:
           headers: adminWriteHeaders(),
           body: JSON.stringify(payload)
         });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        if (!response.ok) throw await feedbackHttpError(response);
         setFeedbackStatus(status, "反馈已写入，刷新后会影响推荐排序。", false);
       } catch (error) {
-        setFeedbackStatus(status, `反馈写入失败：${error.message || error}`, true);
+        setFeedbackStatus(status, `反馈写入失败：${feedbackErrorMessage(error)}`, true);
       }
     }
 
@@ -6630,6 +6655,31 @@ def _project_detail_content() -> str:
       const headers = { "Content-Type": "application/json" };
       if (token) headers["X-Admin-Token"] = token;
       return headers;
+    }
+
+    async function feedbackHttpError(response) {
+      let detail = "";
+      try {
+        const data = await response.json();
+        detail = data.detail || "";
+      } catch (error) {
+        detail = "";
+      }
+      const error = new Error(detail || `HTTP ${response.status}`);
+      error.status = response.status;
+      error.detail = detail;
+      return error;
+    }
+
+    function feedbackErrorMessage(error) {
+      const status = Number(error && error.status);
+      if (status === 403) {
+        return "后端未配置 ADMIN_API_TOKEN。请在启动后端的 PowerShell 中设置 $env:ADMIN_API_TOKEN 后重启服务。";
+      }
+      if (status === 401) {
+        return "管理口令无效或未传入。请用 ?admin_token=你的口令 打开页面，或写入 localStorage.github_weekly_admin_token。";
+      }
+      return (error && (error.detail || error.message)) || String(error);
     }
 
     function adminToken() {
