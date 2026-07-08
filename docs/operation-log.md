@@ -8,6 +8,7 @@
 2. 对话历史只保存在浏览器 `localStorage.github_weekly_rag_chat_history`，最多 20 轮；后端不新增会话表，不保存 API Key 或管理口令。
 3. 每轮回答展示 `answer_model`、`answer_mode`、`confidence`、`fallback_reason`、`answer_quality`、前 5 条 citations/evidence 和可折叠 `prompt_context`。
 4. 对话工作台每轮独立检索，不把历史回答当事实证据；无证据、fallback 和质量闸门问题在页面显式展示。
+5. 对话区升级为 GPT 式聊天布局：滚动消息区、用户/助手气泡、底部输入栏、Enter 发送和 Shift+Enter 换行，证据与 prompt_context 保持折叠查看。
 
 ## 2026-07-07 追加：证据约束 RAG Ask 接入 Kimi
 

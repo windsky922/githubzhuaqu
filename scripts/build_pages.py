@@ -635,6 +635,109 @@ def _admin_dashboard_content() -> str:
       margin-top: 12px;
       align-items: end;
     }
+    .rag-chat-shell {
+      margin-top: 12px;
+      border: 1px solid var(--line);
+      background: #f8fafc;
+      display: grid;
+      grid-template-rows: minmax(280px, 520px) auto;
+      min-height: 480px;
+    }
+    .rag-chat-messages {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: 16px;
+      overflow-y: auto;
+    }
+    .rag-chat-empty {
+      margin: auto;
+      max-width: 520px;
+      text-align: center;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+    .rag-chat-turn {
+      display: grid;
+      gap: 10px;
+    }
+    .rag-chat-bubble {
+      max-width: min(760px, 92%);
+      border: 1px solid var(--line);
+      background: var(--panel);
+      padding: 12px;
+      line-height: 1.55;
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
+    }
+    .rag-chat-bubble.user {
+      justify-self: end;
+      background: #eff6ff;
+      border-color: #bfdbfe;
+    }
+    .rag-chat-bubble.assistant {
+      justify-self: start;
+    }
+    .rag-chat-bubble.error {
+      border-color: #fecaca;
+      background: #fff1f2;
+    }
+    .rag-chat-meta,
+    .rag-chat-chip-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .rag-chat-chip {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 2px 8px;
+      background: #fff;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .rag-chat-evidence {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .rag-chat-evidence details {
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 8px;
+    }
+    .rag-chat-evidence summary {
+      cursor: pointer;
+      font-weight: 700;
+    }
+    .rag-chat-composer {
+      border-top: 1px solid var(--line);
+      background: var(--panel);
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+    }
+    .rag-chat-composer textarea {
+      min-height: 78px;
+    }
+    .rag-chat-controls {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+      align-items: end;
+    }
+    .rag-chat-actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
     .workflow-grid {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -932,34 +1035,42 @@ def _admin_dashboard_content() -> str:
       </div>
       <div id="ragSearchResults" class="search-results"></div>
       <h3>RAG 对话</h3>
-      <div class="search-form">
-        <label>问题
-          <input id="ragChatQuery" type="text" placeholder="哪些 Agent workflow 项目值得继续跟踪？">
-        </label>
-        <label>检索方式
-          <select id="ragChatMode">
-            <option value="hybrid">hybrid</option>
-            <option value="fts5">fts5</option>
-            <option value="vector">vector</option>
-          </select>
-        </label>
-        <label>数量
-          <input id="ragChatLimit" type="number" min="1" max="30" value="5">
-        </label>
-        <label>语言
-          <input id="ragChatLanguage" type="text" placeholder="Python">
-        </label>
-        <label>方向
-          <input id="ragChatCategory" type="text" placeholder="AI Agent">
-        </label>
-        <label>来源
-          <input id="ragChatSource" type="text" placeholder="github_trending">
-        </label>
-        <button id="sendRagChat" type="button">发送</button>
-        <button id="clearRagChat" type="button">清空对话</button>
+      <div class="rag-chat-shell">
+        <div id="ragChatMessages" class="rag-chat-messages"></div>
+        <div class="rag-chat-composer">
+          <label>问题
+            <textarea id="ragChatQuery" placeholder="哪些 Agent workflow 项目值得继续跟踪？"></textarea>
+          </label>
+          <div class="rag-chat-controls">
+            <label>检索方式
+              <select id="ragChatMode">
+                <option value="hybrid">hybrid</option>
+                <option value="fts5">fts5</option>
+                <option value="vector">vector</option>
+              </select>
+            </label>
+            <label>数量
+              <input id="ragChatLimit" type="number" min="1" max="30" value="5">
+            </label>
+            <label>语言
+              <input id="ragChatLanguage" type="text" placeholder="Python">
+            </label>
+            <label>方向
+              <input id="ragChatCategory" type="text" placeholder="AI Agent">
+            </label>
+            <label>来源
+              <input id="ragChatSource" type="text" placeholder="github_trending">
+            </label>
+          </div>
+          <div class="rag-chat-actions">
+            <p id="ragChatStatus" class="task-status"></p>
+            <div class="links">
+              <button id="clearRagChat" class="secondary-button" type="button">清空对话</button>
+              <button id="sendRagChat" type="button">发送</button>
+            </div>
+          </div>
+        </div>
       </div>
-      <p id="ragChatStatus" class="task-status"></p>
-      <div id="ragChatMessages" class="search-results"></div>
       <h3>开发上下文 RAG</h3>
       <div class="search-form">
         <label>开发上下文问题
@@ -1246,7 +1357,10 @@ def _admin_dashboard_content() -> str:
       ragChatControls.sendButton.addEventListener("click", sendRagChatMessage);
       ragChatControls.clearButton.addEventListener("click", clearRagChatHistory);
       ragChatControls.query.addEventListener("keydown", event => {
-        if (event.key === "Enter") sendRagChatMessage();
+        if (event.key === "Enter" && !event.shiftKey) {
+          event.preventDefault();
+          sendRagChatMessage();
+        }
       });
     }
 
@@ -1374,8 +1488,8 @@ def _admin_dashboard_content() -> str:
             source: ragChatControls.source.value.trim(),
             response: ragChatResponseSnapshot(data),
           };
-          ragChatState.messages.unshift(message);
-          ragChatState.messages = ragChatState.messages.slice(0, 20);
+          ragChatState.messages.push(message);
+          ragChatState.messages = ragChatState.messages.slice(-20);
           saveRagChatHistory(ragChatState.messages);
           renderRagChat();
           ragChatControls.query.value = "";
@@ -1390,8 +1504,8 @@ def _admin_dashboard_content() -> str:
             limit,
             error: String(error.message || error),
           };
-          ragChatState.messages.unshift(message);
-          ragChatState.messages = ragChatState.messages.slice(0, 20);
+          ragChatState.messages.push(message);
+          ragChatState.messages = ragChatState.messages.slice(-20);
           saveRagChatHistory(ragChatState.messages);
           renderRagChat();
           ragChatStatus.textContent = "RAG 对话失败。";
@@ -2293,10 +2407,11 @@ def _admin_dashboard_content() -> str:
 
     function renderRagChat() {
       if (!ragChatState.messages.length) {
-        ragChatMessages.innerHTML = "<p>暂无 RAG 对话。每轮都会独立检索证据，不把历史回答当事实来源。</p>";
+        ragChatMessages.innerHTML = '<div class="rag-chat-empty"><strong>证据约束 RAG 对话</strong><p>每轮都会独立检索证据，不把历史回答当事实来源。输入问题后可查看模型回答、引用证据、降级原因和质量闸门结果。</p></div>';
         return;
       }
       ragChatMessages.innerHTML = ragChatState.messages.map(ragChatMessageHtml).join("");
+      ragChatMessages.scrollTop = ragChatMessages.scrollHeight;
     }
 
     function ragChatMessageHtml(message) {
@@ -2311,46 +2426,57 @@ def _admin_dashboard_content() -> str:
         message.source ? `source=${message.source}` : "",
       ].filter(Boolean).join(" · ");
       if (message.error) {
-        return `<article class="search-row">
-          <strong>用户问题：${escapeHtml(message.question || "")}</strong>
-          <span>${escapeHtml(message.asked_at || "")} · ${escapeHtml(filters || "-")}</span>
-          <p>请求失败：${escapeHtml(message.error)}</p>
+        return `<article class="rag-chat-turn">
+          <div class="rag-chat-bubble user">${escapeHtml(message.question || "")}</div>
+          <div class="rag-chat-bubble assistant error">
+            <div class="rag-chat-meta"><span>${escapeHtml(message.asked_at || "")}</span><span>${escapeHtml(filters || "-")}</span></div>
+            <p>请求失败：${escapeHtml(message.error)}</p>
+          </div>
         </article>`;
       }
       const fallback = response.fallback_reason ? `<p>降级原因：${escapeHtml(response.fallback_reason)}</p>` : "";
       const promptContext = response.prompt_context
         ? `<details><summary>查看 prompt_context</summary><textarea readonly>${escapeHtml(response.prompt_context)}</textarea></details>`
         : "";
-      return `<article class="search-row">
-        <strong>用户问题：${escapeHtml(message.question || "")}</strong>
-        <span>${escapeHtml(message.asked_at || "")} · ${escapeHtml(filters || "-")}</span>
-        <p>${escapeHtml(response.answer || "")}</p>
-        <span>${escapeHtml(response.answer_model || "-")} · ${escapeHtml(response.answer_mode || "-")} · ${escapeHtml(response.confidence || "-")} · 质量 ${escapeHtml(String(Boolean(quality.passed)))}</span>
-        ${fallback}
-        <p>质量闸门：${escapeHtml(qualityIssues)}</p>
-        ${ragChatCitationsHtml(response.citations || [])}
-        ${ragChatEvidenceHtml(response.evidence || [])}
-        ${promptContext}
+      return `<article class="rag-chat-turn">
+        <div class="rag-chat-bubble user">${escapeHtml(message.question || "")}</div>
+        <div class="rag-chat-bubble assistant">
+          <div class="rag-chat-meta"><span>${escapeHtml(message.asked_at || "")}</span><span>${escapeHtml(filters || "-")}</span></div>
+          <div class="rag-chat-chip-row">
+            <span class="rag-chat-chip">${escapeHtml(response.answer_model || "-")}</span>
+            <span class="rag-chat-chip">${escapeHtml(response.answer_mode || "-")}</span>
+            <span class="rag-chat-chip">confidence ${escapeHtml(response.confidence || "-")}</span>
+            <span class="rag-chat-chip">quality ${escapeHtml(String(Boolean(quality.passed)))}</span>
+          </div>
+          <p>${escapeHtml(response.answer || "")}</p>
+          ${fallback}
+          <p>质量闸门：${escapeHtml(qualityIssues)}</p>
+          <div class="rag-chat-evidence">
+            ${ragChatCitationsHtml(response.citations || [])}
+            ${ragChatEvidenceHtml(response.evidence || [])}
+            ${promptContext}
+          </div>
+        </div>
       </article>`;
     }
 
     function ragChatCitationsHtml(citations) {
       const items = (citations || []).slice(0, 5);
       if (!items.length) return "<p>暂无引用。</p>";
-      return `<div><strong>引用证据</strong><ul>${items.map(item => {
+      return `<details open><summary>引用证据</summary><ul>${items.map(item => {
         const label = `[${item.index || "-"}] ${item.full_name || "-"} / ${item.run_date || "-"} / ${item.chunk_id || "-"}`;
         const link = item.html_url ? ` · <a href="${escapeAttribute(item.html_url)}" target="_blank" rel="noreferrer">GitHub</a>` : "";
         return `<li>${escapeHtml(label)}${link}</li>`;
-      }).join("")}</ul></div>`;
+      }).join("")}</ul></details>`;
     }
 
     function ragChatEvidenceHtml(evidence) {
       const items = (evidence || []).slice(0, 5);
       if (!items.length) return "<p>暂无证据摘要。</p>";
-      return `<div><strong>证据摘要</strong><ul>${items.map(item => {
+      return `<details><summary>证据摘要</summary><ul>${items.map(item => {
         const matched = (item.matched_evidence || []).join("；");
         return `<li><span>${escapeHtml(item.full_name || "-")} / ${escapeHtml(item.chunk_id || "-")}</span><p>${escapeHtml(item.quote || "")}</p>${matched ? `<span>${escapeHtml(matched)}</span>` : ""}</li>`;
-      }).join("")}</ul></div>`;
+      }).join("")}</ul></details>`;
     }
 
     function ragChatResponseSnapshot(data) {
