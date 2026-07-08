@@ -74,6 +74,8 @@ class RagAnsweringTest(unittest.TestCase):
         self.assertEqual(result["answer_mode"], "fallback_rule")
         self.assertIn("Kimi API 未配置", result["fallback_reason"])
         self.assertIn("owner/agent", result["answer"])
+        self.assertIn("[1]", result["answer"])
+        self.assertTrue(result["answer_quality"]["passed"])
 
     def test_llm_answer_adds_citation_when_missing(self):
         client = _FakeClient(answer="可以优先研究 owner/agent。")

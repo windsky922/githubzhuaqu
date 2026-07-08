@@ -522,6 +522,8 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(rag_ask["answer_model"], "rule:rag-ask-v1")
             self.assertIn("owner/agent", rag_ask["answer"])
             self.assertTrue(rag_ask["citations"])
+            self.assertIn("answer_quality", rag_ask)
+            self.assertTrue(rag_ask["answer_quality"]["passed"])
             self.assertTrue(rag_ask["next_actions"])
             self.assertTrue(rag_ask["source_explanation_id"].startswith("ragx:"))
             self.assertGreaterEqual(rag_hybrid_search["count"], 1)

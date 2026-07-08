@@ -9,6 +9,7 @@
 3. 每轮回答展示 `answer_model`、`answer_mode`、`confidence`、`fallback_reason`、`answer_quality`、前 5 条 citations/evidence 和可折叠 `prompt_context`。
 4. 对话工作台每轮独立检索，不把历史回答当事实证据；无证据、fallback 和质量闸门问题在页面显式展示。
 5. 对话区升级为 GPT 式聊天布局：滚动消息区、用户/助手气泡、底部输入栏、Enter 发送和 Shift+Enter 换行，证据与 prompt_context 保持折叠查看。
+6. 修复 RAG Ask API 未向前端透传 `answer_quality` 的问题；规则降级回答补充引用编号，避免页面出现 `quality false` 但“质量闸门：无”的矛盾状态。
 
 ## 2026-07-07 追加：证据约束 RAG Ask 接入 Kimi
 

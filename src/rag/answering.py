@@ -133,13 +133,20 @@ def _rule_answer(*, query: str, contexts: list[dict[str, Any]], retrieval: dict[
     top = contexts[0].get("metadata", {}) if contexts else {}
     top_repo = top.get("full_name") or (repositories[0] if repositories else "")
     mode = (retrieval.get("retrieval") or {}).get("mode") or "rag"
+    citation_markers = _citation_markers(contexts)
     answer = [
-        f"基于 {mode} 证据，问题“{query}”当前优先关注 {top_repo}。",
-        f"证据覆盖 {len(repositories)} 个项目：{'、'.join(repositories[:5]) or '未识别项目'}。",
-        f"来源包括：{'、'.join(sources[:5]) or '未标明来源'}。",
+        f"基于 {mode} 证据，问题“{query}”当前优先关注 {top_repo}{citation_markers[:3] or ''}。",
+        f"证据覆盖 {len(repositories)} 个项目：{'、'.join(repositories[:5]) or '未识别项目'}{citation_markers or ''}。",
+        f"来源包括：{'、'.join(sources[:5]) or '未标明来源'}{citation_markers[:3] or ''}。",
         "该回答为规则降级版，只根据已召回证据给出低到中置信结论，不补充证据外信息。",
     ]
     return "\n".join(answer)
+
+
+def _citation_markers(contexts: list[dict[str, Any]]) -> str:
+    if not contexts:
+        return ""
+    return "".join(f"[{index}]" for index in range(1, min(len(contexts), 5) + 1))
 
 
 def _evidence_from_contexts(contexts: list[dict[str, Any]]) -> list[dict[str, Any]]:

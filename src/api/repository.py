@@ -1428,6 +1428,7 @@ class ApiRepository:
             "contexts": contexts,
             "notification_memory": notification_memory,
             "model_status": answer_result.get("model_status") or {},
+            "answer_quality": answer_result.get("answer_quality") or {},
         }
 
     def rag_explanations(
