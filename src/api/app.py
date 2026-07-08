@@ -39,6 +39,14 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
     app = FastAPI(title="GitHub Weekly Agent API", version="0.1.0")
     admin_write_dependencies = [Depends(require_admin_token)]
 
+    @app.middleware("http")
+    async def add_json_utf8_charset(request: Any, call_next: Any) -> Any:
+        response = await call_next(request)
+        content_type = response.headers.get("content-type", "")
+        if content_type.startswith("application/json") and "charset=" not in content_type.lower():
+            response.headers["content-type"] = "application/json; charset=utf-8"
+        return response
+
     @app.get("/api/health")
     def health() -> dict[str, Any]:
         return repository.health()
