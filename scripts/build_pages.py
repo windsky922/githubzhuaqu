@@ -2148,10 +2148,14 @@ def _admin_dashboard_content() -> str:
         modelStatus.used ? "已使用模型" : "未使用模型"
       ].join(" · ");
       const fallbackText = data.fallback_reason ? `<p>降级原因：${escapeHtml(data.fallback_reason)}</p>` : "";
+      const answerQuality = data.answer_quality || {};
+      const qualityIssues = (answerQuality.issues || []).join("；");
+      const qualityText = qualityIssues ? `<p>质量闸门：${escapeHtml(qualityIssues)}</p>` : "";
       const answerHtml = data.answer ? `<article class="search-row">
         <strong>RAG 回答</strong>
         <p>${escapeHtml(data.answer)}</p>
         ${fallbackText}
+        ${qualityText}
         <span>${escapeHtml(modelText)} · ${escapeHtml(data.source_explanation_id || "-")}</span>
       </article>` : "";
       const nextActions = (data.next_actions || []).map(item => `<li>${escapeHtml(item)}</li>`).join("");

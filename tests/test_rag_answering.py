@@ -102,6 +102,41 @@ class RagAnsweringTest(unittest.TestCase):
         self.assertEqual(result["fallback_reason"], "timeout")
         self.assertIn("owner/agent", result["answer"])
 
+    def test_invalid_llm_citation_uses_rule_fallback(self):
+        result = answer_rag_question(
+            root=Path.cwd(),
+            query="agent workflow",
+            retrieval=_retrieval([_context()]),
+            client=_FakeClient(answer="owner/agent 适合继续研究，因为它覆盖 agent workflow 场景 [99]。"),
+        )
+
+        self.assertEqual(result["answer_model"], "rule:rag-ask-v1")
+        self.assertEqual(result["answer_mode"], "fallback_rule")
+        self.assertIn("llm_quality_failed", result["fallback_reason"])
+        self.assertIn("invalid_citation:99", result["fallback_reason"])
+
+    def test_unknown_repository_in_llm_answer_uses_rule_fallback(self):
+        result = answer_rag_question(
+            root=Path.cwd(),
+            query="agent workflow",
+            retrieval=_retrieval([_context()]),
+            client=_FakeClient(answer="unknown/repo 比 owner/agent 更值得继续研究，因为它覆盖 agent workflow 场景 [1]。"),
+        )
+
+        self.assertEqual(result["answer_mode"], "fallback_rule")
+        self.assertIn("unknown_repository:unknown/repo", result["fallback_reason"])
+
+    def test_short_llm_answer_uses_rule_fallback(self):
+        result = answer_rag_question(
+            root=Path.cwd(),
+            query="agent workflow",
+            retrieval=_retrieval([_context()]),
+            client=_FakeClient(answer="好 [1]"),
+        )
+
+        self.assertEqual(result["answer_mode"], "fallback_rule")
+        self.assertIn("answer_too_short", result["fallback_reason"])
+
     def test_missing_prompt_file_uses_rule_fallback(self):
         result = answer_rag_question(
             root=Path.cwd() / ".missing-rag-answering-root",

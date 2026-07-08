@@ -9,6 +9,7 @@
 3. `/v1/rag/ask` 新增 `answer_mode`、`fallback_reason` 和 `model_status`，并继续保留 `answer_model`、`citations`、`evidence`、`source_explanation_id` 与通知记忆。
 4. 管理页 RAG 回答卡片显示模型配置状态、是否使用模型和降级原因，便于区分真实模型回答与规则版 fallback。
 5. 真实 Kimi 验证发现 PowerShell `Invoke-RestMethod` 会把无 charset 的中文 JSON 按错误编码显示；后端 JSON 响应统一补充 `charset=utf-8`，`curl + Python` 验证原始响应本身为正确 UTF-8。
+6. 新增 `src/rag/answer_quality.py` 作为 LLM 回答质量闸门；空回答、无有效引用、引用不存在编号或提到证据外仓库时自动回退规则版，并把原因写入 `fallback_reason` 和 `answer_quality`。
 
 ## 2026-07-07 追加：项目研究 Agent v1 审查报告
 

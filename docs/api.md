@@ -625,6 +625,7 @@ py scripts\run_rag_search_evaluation.py --queries "agent workflow;python automat
 9. `next_actions`：建议的下一步核验或补库动作。
 10. `source_explanation_id`：本次问答复用或写入的 RAG 解释编号。
 11. `model_status`：模型是否配置、是否尝试、是否实际使用、模型名和超时配置。
+12. `answer_quality`：回答质量闸门结果，包括引用编号、证据外仓库名和失败原因；不通过时接口自动回退规则版。
 
 示例：
 

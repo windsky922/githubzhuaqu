@@ -5,6 +5,7 @@ from typing import Any
 
 from src.llm.client import KimiChatClient, LlmClientError
 from src.llm.prompts import rag_ask_messages
+from src.rag.answer_quality import validate_rag_answer
 
 
 RULE_MODEL = "rule:rag-ask-v1"
@@ -48,6 +49,9 @@ def answer_rag_question(
                 evidence=evidence,
             )
             answer = _ensure_citation_marker(model_client.chat(messages), citations)
+            answer_quality = validate_rag_answer(answer=answer, citations=citations, contexts=contexts)
+            if not answer_quality["passed"]:
+                raise LlmClientError("llm_quality_failed: " + "; ".join(answer_quality["issues"]))
             return _response(
                 query=query,
                 answer=answer,
@@ -59,6 +63,7 @@ def answer_rag_question(
                 citations=citations,
                 evidence=evidence,
                 model_status={**model_status, "attempted": True, "used": True},
+                answer_quality=answer_quality,
             )
         except (LlmClientError, OSError) as error:
             fallback_reason = str(error)
@@ -91,6 +96,7 @@ def _response(
     citations: list[dict[str, Any]],
     evidence: list[dict[str, Any]],
     model_status: dict[str, Any],
+    answer_quality: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     contexts = _list_of_dicts(retrieval.get("contexts"))
     return {
@@ -112,6 +118,8 @@ def _response(
         "next_actions": _next_actions(contexts=contexts, citations=citations, answer_mode=answer_mode),
         "contexts": contexts,
         "model_status": model_status,
+        "answer_quality": answer_quality
+        or validate_rag_answer(answer=answer, citations=citations, contexts=contexts),
     }
 
 
