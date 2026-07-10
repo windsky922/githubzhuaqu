@@ -90,9 +90,47 @@ def query_archive(
     trending_top: int | None = None,
     query: str | None = None,
     limit: int = 20,
+    offset: int = 0,
     sort: str = "recent",
 ) -> list[dict[str, Any]]:
+    rows, _ = query_archive_page(
+        db_path=db_path,
+        root=root,
+        language=language,
+        category=category,
+        profile=profile,
+        source=source,
+        risk=risk,
+        quality_level=quality_level,
+        min_quality=min_quality,
+        trending_top=trending_top,
+        query=query,
+        limit=limit,
+        offset=offset,
+        sort=sort,
+    )
+    return rows
+
+
+def query_archive_page(
+    *,
+    db_path: Path,
+    root: Path = ROOT,
+    language: str | None = None,
+    category: str | None = None,
+    profile: str | None = None,
+    source: str | None = None,
+    risk: str | None = None,
+    quality_level: str | None = None,
+    min_quality: int | None = None,
+    trending_top: int | None = None,
+    query: str | None = None,
+    limit: int = 20,
+    offset: int = 0,
+    sort: str = "recent",
+) -> tuple[list[dict[str, Any]], int]:
     limit = max(1, min(limit, 200))
+    offset = max(0, int(offset or 0))
     profile_config = _load_profile(root, profile) if profile else None
     min_quality = _bounded_quality(min_quality)
     trending_top = _bounded_positive(trending_top)
@@ -148,17 +186,20 @@ def query_archive(
     """
     if conditions:
         sql += " WHERE " + " AND ".join(conditions)
-    sql += f"""
-        ORDER BY {_order_clause(sort)}
-        LIMIT ?
-    """
     needs_python_filter = bool(profile_config or quality_level or min_quality is not None or sort == "quality")
-    parameters.append(max(limit * 20, 200) if needs_python_filter else limit)
 
     connection = connect(db_path)
     try:
         initialize(connection)
-        rows = [_row_to_project(row) for row in connection.execute(sql, parameters).fetchall()]
+        if needs_python_filter:
+            raw_sql = sql + f" ORDER BY {_order_clause(sort)}"
+            rows = [_row_to_project(row) for row in connection.execute(raw_sql, parameters).fetchall()]
+            total = 0
+        else:
+            total_sql = "SELECT COUNT(*) " + sql[sql.index("FROM selections"):]
+            total = int(connection.execute(total_sql, parameters).fetchone()[0])
+            page_sql = sql + f" ORDER BY {_order_clause(sort)} LIMIT ? OFFSET ?"
+            rows = [_row_to_project(row) for row in connection.execute(page_sql, [*parameters, limit, offset]).fetchall()]
     finally:
         connection.close()
 
@@ -167,7 +208,10 @@ def query_archive(
     if quality_level or min_quality is not None:
         rows = [row for row in rows if _matches_quality(row, quality_level=quality_level, min_quality=min_quality)]
     rows = _sort_rows(rows, sort)
-    return rows[:limit]
+    if needs_python_filter:
+        total = len(rows)
+        rows = rows[offset:offset + limit]
+    return rows, total
 
 
 def table_output(rows: list[dict[str, Any]]) -> str:

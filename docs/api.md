@@ -68,7 +68,9 @@ Authorization: Bearer <本地管理口令>
 
 管理首页的 GPT 式 RAG 对话工作台仍然逐轮调用 `/v1/rag/ask`。对话历史只保存在浏览器 `localStorage.github_weekly_rag_chat_history`，最多 20 轮；后端不保存会话，不把历史回答作为事实证据，也不写入 SQLite。
 
-React 项目匹配工作台位于 `app/#/agent?api=1`，旧 `agent.html?api=1` 自动跳转。它默认调用 `/v1/rag/ask/stream`，只保留一句话需求输入，并把回答渲染为简短结论、Top 项目卡片和折叠证据。会话只保存在浏览器 `localStorage.github_weekly_agent_match_conversations_v1`，不保存 API Key、管理口令或请求头；历史回答不进入下一轮检索，也不作为事实证据。
+React 项目匹配工作台位于 `app/#/agent?api=1`，旧 `agent.html?api=1` 自动跳转。它默认调用 `/v1/rag/ask/stream`，只保留一句话需求输入，并把回答渲染为“最匹配项目、候选项目、折叠证据”。SSE 草稿只标记为质量校验中，`final` 到达后才成为正式结论；失败、拒答和规则降级会显示用户可理解的状态。会话只保存在浏览器 `localStorage.github_weekly_agent_match_conversations_v1`，不保存 API Key、管理口令或请求头；历史回答不进入下一轮检索，也不作为事实证据。
+
+`GET /api/projects` 与 `GET /v1/projects` 支持可选 `offset`（默认 0）和既有 `limit`（最大 200）。响应保留 `projects` 与 `count`，并新增 `total`、`offset`、`limit`、`has_more`，供 React 筛选页按每页 50 条展示完整历史归档。项目对比选择只保存在浏览器 `localStorage.github_weekly_project_compare_v1`，最多 3 个仓库；URL 中的 `repos` 参数优先于本地暂存。
 
 如果本地没有 `data/github_weekly.sqlite`，查询项目接口会从 `data/` 下的 JSON 归档自动重建 SQLite 派生索引。
 

@@ -29,6 +29,18 @@ export type Project = {
   [key: string]: unknown;
 };
 
+export type ProjectPage = { projects: Project[]; count: number; total: number; offset: number; limit: number; has_more: boolean; static_fallback?: boolean };
+export type ComparisonProject = Project & Record<string, unknown>;
+export type Comparison = {
+  count: number;
+  missing: string[];
+  projects: ComparisonProject[];
+  matrix: Array<{ key: string; label: string; values: Record<string, unknown> }>;
+  best_by: Record<string, string>;
+  recommendation: { summary?: string; reasons?: string[]; cautions?: string[] } | Record<string, unknown>;
+  selection_summary: string[];
+};
+
 export type RagAnswer = {
   query: string;
   answer: string;

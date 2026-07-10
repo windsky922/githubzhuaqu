@@ -64,6 +64,7 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
         trending_top: int | None = Query(default=None, ge=1),
         query: str | None = None,
         limit: int = Query(default=20, ge=1, le=200),
+        offset: int = Query(default=0, ge=0),
         sort: str = Query(default="recent", pattern="^(recent|position|score|star-growth|trending|quality)$"),
     ) -> dict[str, Any]:
         return repository.projects(
@@ -77,6 +78,7 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
             trending_top=trending_top,
             query=query,
             limit=limit,
+            offset=offset,
             sort=sort,
         )
 
@@ -186,6 +188,7 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
         trending_top: int | None = Query(default=None, ge=1),
         query: str | None = None,
         limit: int = Query(default=20, ge=1, le=200),
+        offset: int = Query(default=0, ge=0),
         sort: str = Query(default="recent", pattern="^(recent|position|score|star-growth|trending|quality)$"),
     ) -> dict[str, Any]:
         return repository.projects(
@@ -199,6 +202,7 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
             trending_top=trending_top,
             query=query,
             limit=limit,
+            offset=offset,
             sort=sort,
         )
 

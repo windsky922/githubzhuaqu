@@ -1,13 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
-import { projects } from "../lib/api";
-import { ProjectCard } from "../components/ProjectCard";
+import { ExternalLink, FileText, Trash2 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { compareProjects } from "../lib/api";
+import { useCompareSelection } from "../lib/compareSelection";
+
+function display(value: unknown) { if (Array.isArray(value)) return value.join("；") || "未标注"; if (value === null || value === undefined || value === "") return "未标注"; return String(value); }
 
 export function ComparePage() {
-  const [params] = useSearchParams();
-  const selected = params.get("repos")?.split(",").filter(Boolean) || [];
-  const { data = [], isLoading } = useQuery({ queryKey: ["projects", "compare"], queryFn: () => projects() });
-  const matches = useMemo(() => selected.length ? data.filter((project) => selected.includes(project.full_name)) : data.slice(0, 3), [data, selected]);
-  return <main className="page"><header className="page-heading"><div><p className="eyebrow">横向判断</p><h1>项目对比</h1><p className="page-copy">比较候选项目的技术方向、热度与归档研究信息。</p></div></header>{isLoading ? <div className="empty-state">正在加载对比候选…</div> : <section className="project-grid">{matches.map((project) => <ProjectCard key={project.full_name} project={project} />)}</section>}</main>;
+  const compare = useCompareSelection();
+  const { data, isLoading, error } = useQuery({ queryKey: ["project-comparison", compare.selection], queryFn: () => compareProjects(compare.selection), enabled: compare.selection.length > 0 });
+  return <main className="page"><header className="page-heading"><div><p className="eyebrow">横向判断</p><h1>项目对比</h1><p className="page-copy">最多对比 3 个候选项目，重点查看技术参数、活跃度与归档质量信号。</p></div>{compare.selection.length ? <button className="button" type="button" onClick={compare.clear}>清空对比</button> : null}</header>{!compare.selection.length ? <section className="compare-empty"><h2>先选择项目再开始对比。</h2><p>在项目筛选、研究推荐或 Agent 回答中点击“加入对比”。</p><Link className="button primary" to="/explore">前往项目筛选</Link></section> : isLoading ? <div className="empty-state">正在生成技术参数对比…</div> : error || !data ? <div className="error-state">对比数据加载失败。</div> : <section className="comparison-stack">{data.missing.length ? <div className="answer-notice warn">以下项目不在当前归档中：{data.missing.join("、")}</div> : null}<div className="comparison-projects">{data.projects.map((project) => { const [owner, repo] = project.full_name.split("/"); return <article className="comparison-project" key={project.full_name}><div><strong>{project.full_name}</strong><span>{project.description || "未提供描述"}</span></div><div className="project-actions"><Link className="small-link" to={`/projects/${encodeURIComponent(owner || "")}/${encodeURIComponent(repo || "")}`}><FileText size={13} />详情</Link>{project.html_url ? <a className="small-link" href={project.html_url} target="_blank" rel="noreferrer"><ExternalLink size={13} />GitHub</a> : null}<button className="small-link compare-action" type="button" onClick={() => compare.remove(project.full_name)}><Trash2 size={13} />移除</button></div></article>; })}</div><div className="comparison-table-wrap"><table className="comparison-table"><thead><tr><th>技术参数</th>{data.projects.map((project) => <th key={project.full_name}>{project.full_name}</th>)}</tr></thead><tbody>{data.matrix.map((row) => <tr key={row.key}><th>{row.label}</th>{data.projects.map((project) => <td className={Object.values(data.best_by).includes(project.full_name) && ["total_star_growth", "latest_star_growth", "latest_quality_score"].includes(row.key) ? "best-value" : ""} key={project.full_name}>{display(row.values[project.full_name])}</td>)}</tr>)}</tbody></table></div>{data.selection_summary.length ? <section className="comparison-notes"><h2>归档摘要</h2>{data.selection_summary.map((item, index) => <p key={index}>{item}</p>)}</section> : null}</section>}</main>;
 }

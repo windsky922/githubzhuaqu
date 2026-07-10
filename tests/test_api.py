@@ -15,6 +15,45 @@ def _api_route_dependencies_installed() -> bool:
 
 
 class ApiRepositoryTest(unittest.TestCase):
+    def test_projects_returns_pagination_metadata(self):
+        root = Path.cwd() / f".tmp-api-test-{uuid.uuid4().hex}"
+        try:
+            _write_fixture(root)
+            repository = ApiRepository(root=root, db_path=root / "data" / "github_weekly.sqlite")
+            page = repository.projects(limit=1, offset=1)
+
+            self.assertEqual(page["count"], 1)
+            self.assertEqual(page["total"], 3)
+            self.assertEqual(page["offset"], 1)
+            self.assertEqual(page["limit"], 1)
+            self.assertTrue(page["has_more"])
+            self.assertIn("full_name", page["projects"][0])
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
+    @unittest.skipUnless(_api_route_dependencies_installed(), "本地未安装 FastAPI 或 httpx，跳过 API 路由测试")
+    def test_project_pagination_routes_are_consistent(self):
+        from fastapi.testclient import TestClient
+        from src.api.app import create_app
+
+        root = Path.cwd() / f".tmp-api-test-{uuid.uuid4().hex}"
+        try:
+            _write_fixture(root)
+            client = TestClient(create_app(root=root, db_path=root / "data" / "github_weekly.sqlite"))
+            legacy = client.get("/api/projects", params={"limit": 1, "offset": 1})
+            versioned = client.get("/v1/projects", params={"limit": 1, "offset": 1})
+
+            self.assertEqual(legacy.status_code, 200)
+            self.assertEqual(versioned.status_code, 200)
+            for payload in (legacy.json(), versioned.json()):
+                self.assertEqual(payload["offset"], 1)
+                self.assertEqual(payload["limit"], 1)
+                self.assertEqual(payload["total"], 3)
+                self.assertEqual(payload["count"], 1)
+                self.assertTrue(payload["has_more"])
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
     def test_reads_projects_runs_profiles_and_latest_report(self):
         root = Path.cwd() / f".tmp-api-test-{uuid.uuid4().hex}"
         try:

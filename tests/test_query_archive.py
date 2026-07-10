@@ -4,11 +4,25 @@ import unittest
 import uuid
 from pathlib import Path
 
-from scripts.query_archive import query_archive, table_output
+from scripts.query_archive import query_archive, query_archive_page, table_output
 from src.storage.sqlite_store import import_json_archive
 
 
 class QueryArchiveTest(unittest.TestCase):
+    def test_query_page_returns_total_and_offset(self):
+        root = Path.cwd() / f".tmp-query-archive-test-{uuid.uuid4().hex}"
+        try:
+            _write_archive(root)
+            db_path = root / "data" / "github_weekly.sqlite"
+            import_json_archive(root, db_path)
+            rows, total = query_archive_page(db_path=db_path, root=root, limit=1, offset=1)
+
+            self.assertEqual(total, 2)
+            self.assertEqual(len(rows), 1)
+            self.assertEqual(rows[0]["full_name"], "owner/tool")
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
     def test_queries_history_by_language_source_and_keyword(self):
         root = Path.cwd() / f".tmp-query-archive-test-{uuid.uuid4().hex}"
         try:

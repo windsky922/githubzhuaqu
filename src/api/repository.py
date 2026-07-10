@@ -9,7 +9,7 @@ from hashlib import sha1
 from pathlib import Path
 from typing import Any
 
-from scripts.query_archive import query_archive
+from scripts.query_archive import query_archive, query_archive_page
 from src.job_runner import run_planned_job
 from src.rag.embeddings import (
     DEFAULT_DIMENSIONS,
@@ -154,10 +154,11 @@ class ApiRepository:
         trending_top: int | None = None,
         query: str | None = None,
         limit: int = 20,
+        offset: int = 0,
         sort: str = "recent",
     ) -> dict[str, Any]:
         self.ensure_sqlite_index()
-        rows = query_archive(
+        rows, total = query_archive_page(
             db_path=self.db_path,
             root=self.root,
             language=_blank_to_none(language),
@@ -170,11 +171,16 @@ class ApiRepository:
             trending_top=trending_top,
             query=_blank_to_none(query),
             limit=limit,
+            offset=offset,
             sort=sort,
         )
         return {
             "schema_version": 1,
             "count": len(rows),
+            "total": total,
+            "offset": max(0, int(offset or 0)),
+            "limit": max(1, min(int(limit or 20), 200)),
+            "has_more": max(0, int(offset or 0)) + len(rows) < total,
             "projects": rows,
         }
 

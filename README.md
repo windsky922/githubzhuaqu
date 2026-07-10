@@ -382,7 +382,9 @@ python scripts/query_archive.py --profile agent_development --query workflow --f
 python scripts/build_rag_embeddings.py
 ```
 
-本地前端现在提供两个 RAG 入口：`admin.html?api=1` 用于管理、诊断和证据检查；`app/#/agent?api=1` 是 React 项目匹配工作台，旧 `agent.html?api=1` 会自动跳转。工作台默认使用 `/v1/rag/ask/stream?mode=hybrid&limit=3&auto_build=true`，以 SSE 展示“待质量校验草稿”，最终只保留通过证据质量闸门的回答；无证据或质量失败会明确显示 refusal/规则降级。对话只保存在浏览器 `localStorage`，不保存密钥，不新增后端会话。
+本地前端现在提供两个 RAG 入口：`admin.html?api=1` 用于管理、诊断和证据检查；`app/#/agent?api=1` 是 React 项目匹配工作台，旧 `agent.html?api=1` 会自动跳转。工作台使用顶部导航、会话历史、移动端抽屉和 GPT 式输入区；每轮回答先展示最匹配项目，再展示候选与折叠证据。它默认使用 `/v1/rag/ask/stream?mode=hybrid&limit=3&auto_build=true`，以 SSE 展示“待质量校验草稿”，最终只保留通过证据质量闸门的回答；无证据或质量失败会明确显示 refusal/规则降级。对话只保存在浏览器 `localStorage`，不保存密钥，不新增后端会话。
+
+React 开发入口为 `http://127.0.0.1:5173/#/agent?api=1`，发布构建入口为 `http://127.0.0.1:8000/app/#/agent?api=1`；页面会标记当前环境。项目筛选使用后端分页，每页 50 条，不再受默认 20 条项目限制。项目可加入浏览器本地对比暂存，最多 3 个，并通过 URL `repos` 参数分享对比视图。
 
 当前 embedding 使用本地确定性 `local-hash-v1`，不调用外部模型、不需要密钥。它用于打通向量索引表和检索 API，后续可以替换为真实 embedding 模型。
 
