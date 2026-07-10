@@ -1,5 +1,12 @@
 # 操作日志
 
+## 2026-07-10 追加：P0-1 项目匹配评估集与固定基线
+
+1. 新增 `evals/project_match_cases.jsonl`，包含 52 条中文需求、期望仓库、语言/方向/来源硬约束及澄清预期。
+2. 新增 `scripts/evaluate_project_match.py` 与定向测试，在固定 fixture 语料上直接调用 FTS5、`local-hash-v1` 和 hybrid 检索，不调用 `/v1/rag/ask` 或保存模型回答。
+3. 基线统一输出 Recall@3、Recall@10、MRR@10、硬约束违反率、零命中率和澄清正确率；固定语料中 FTS5 的 Recall@3 为 0.0962、零命中率为 0.9038，确认中文自然需求检索是后续 P0 优先改进点。
+4. 未修改 RAG Ask/Stream 响应契约、未新增后端会话或 SQLite 表；已通过前端 lint/test/build、Python 全量测试、安全检查和 diff 检查。
+
 ## 2026-07-10 追加：项目研究 Agent V2 对抗性审查报告
 
 1. 新增 `docs/project-review-agent-v2-roadmap.md`，从候选覆盖、检索、语料、回答质量、反馈闭环、数据新鲜度、隐私、CI 和工程演进九个维度复核 V2。
