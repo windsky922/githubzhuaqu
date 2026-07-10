@@ -39,6 +39,12 @@ def validate_rag_answer(
     return {
         "passed": not issues,
         "issues": issues,
+        "citation_validity": not any(
+            issue == "missing_citation" or issue.startswith("invalid_citation:") for issue in issues
+        ),
+        "evidence_relevance": "not_evaluated",
+        "claim_support": "not_evaluated",
+        "data_freshness": "unknown",
         "used_citation_indexes": sorted(used_indexes),
         "valid_citation_indexes": sorted(valid_indexes),
         "mentioned_repositories": sorted(mentioned_repositories),
@@ -88,4 +94,3 @@ def _int_value(value: Any) -> int:
         return int(value)
     except (TypeError, ValueError):
         return 0
-

@@ -13,6 +13,10 @@ class RagAnswerQualityTest(unittest.TestCase):
 
         self.assertTrue(result["passed"])
         self.assertEqual(result["issues"], [])
+        self.assertTrue(result["citation_validity"])
+        self.assertEqual(result["evidence_relevance"], "not_evaluated")
+        self.assertEqual(result["claim_support"], "not_evaluated")
+        self.assertEqual(result["data_freshness"], "unknown")
 
     def test_rejects_invalid_citation_index(self):
         result = validate_rag_answer(
@@ -23,6 +27,7 @@ class RagAnswerQualityTest(unittest.TestCase):
 
         self.assertFalse(result["passed"])
         self.assertIn("invalid_citation:99", result["issues"])
+        self.assertFalse(result["citation_validity"])
 
     def test_rejects_unknown_repository(self):
         result = validate_rag_answer(
@@ -47,4 +52,3 @@ class RagAnswerQualityTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { answerStatus } from "../components/StatusBadge";
+import { answerConfidenceSemantics } from "../components/AgentWorkspace";
 import { matchProjects } from "./AgentPage";
 
 describe("项目匹配回答状态", () => {
@@ -19,5 +20,16 @@ describe("项目匹配回答状态", () => {
       expect.objectContaining({ full_name: "openai/example", evidenceCount: 2 }),
       expect.objectContaining({ full_name: "org/second", evidenceCount: 1 }),
     ]);
+  });
+
+  it("把兼容 confidence 显示为证据覆盖并标记匹配未校准", () => {
+    const semantics = answerConfidenceSemantics({
+      confidence: "high",
+      evidence_coverage: "high",
+      match_confidence: "unknown",
+    });
+    expect(semantics.coverageLabel).toBe("证据覆盖：高");
+    expect(semantics.matchLabel).toBe("匹配把握：尚未校准");
+    expect(Object.values(semantics).join(" ")).not.toContain("置信度");
   });
 });

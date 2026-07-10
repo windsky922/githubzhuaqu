@@ -1,5 +1,12 @@
 # 操作日志
 
+## 2026-07-10 追加：P0-2 Ask 质量与置信度语义修正
+
+1. `/v1/rag/ask` 与 `/v1/rag/ask/stream` 的 `final` 保留旧 `confidence` 字段，并新增等值 `evidence_coverage` 与固定为 `unknown` 的 `match_confidence`，避免把证据数量解释为匹配正确率。
+2. `answer_quality` 保留 `passed`、`issues`，新增引用有效性、证据相关性、主张支持度和数据新鲜度；当前只实际校验引用，其他维度明确标记为未评估或未知。
+3. React 项目匹配工作台和管理页改为展示“证据覆盖”“匹配把握尚未校准”及质量边界说明；SSE 事件名、顺序和既有字段保持不变。
+4. 未修改检索权重、SQLite schema、历史解释或服务端会话；同步补充后端、API/SSE、前端和页面生成测试。
+
 ## 2026-07-10 追加：P0-1 项目匹配评估集与固定基线
 
 1. 新增 `evals/project_match_cases.jsonl`，包含 52 条中文需求、期望仓库、语言/方向/来源硬约束及澄清预期。

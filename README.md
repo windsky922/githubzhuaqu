@@ -390,6 +390,8 @@ React 开发入口为 `http://127.0.0.1:5173/#/agent?api=1`，发布构建入口
 
 当前 embedding 使用本地确定性 `local-hash-v1`，不调用外部模型、不需要密钥。它用于打通向量索引表和检索 API，后续可以替换为真实 embedding 模型。
 
+RAG Ask 的旧 `confidence` 字段继续保留以兼容现有客户端，但它只表示证据覆盖量，不代表项目匹配正确率。新客户端应读取同值的 `evidence_coverage`，并把 `match_confidence=unknown` 展示为“匹配把握尚未校准”。`answer_quality` 当前能确认引用格式与证据边界，尚未评估证据相关性、主张支持度和数据新鲜度。
+
 ### 项目匹配检索基线
 
 `evals/project_match_cases.jsonl` 保存 52 条中文项目需求及其期望仓库、硬约束和是否应澄清。运行 `python scripts/evaluate_project_match.py` 会在固定 fixture 语料上输出 FTS5、`local-hash-v1` 和 hybrid 的 Recall@3、Recall@10、MRR@10、硬约束违反率、零命中率和澄清正确率；不调用问答接口，也不保存模型回答。传入 `--root <weekly-archive-root>` 可测量指定归档，但只有期望仓库与该归档一致时才适合作为对比基线。

@@ -56,6 +56,15 @@ def _retrieval(contexts):
 
 
 class RagAnsweringTest(unittest.TestCase):
+    def assert_quality_semantics(self, result, expected_coverage):
+        self.assertEqual(result["confidence"], expected_coverage)
+        self.assertEqual(result["evidence_coverage"], expected_coverage)
+        self.assertEqual(result["match_confidence"], "unknown")
+        self.assertIn("citation_validity", result["answer_quality"])
+        self.assertEqual(result["answer_quality"]["evidence_relevance"], "not_evaluated")
+        self.assertEqual(result["answer_quality"]["claim_support"], "not_evaluated")
+        self.assertEqual(result["answer_quality"]["data_freshness"], "unknown")
+
     def test_refuses_without_evidence(self):
         client = _FakeClient()
 
@@ -69,6 +78,7 @@ class RagAnsweringTest(unittest.TestCase):
         self.assertEqual(result["answer_mode"], "refusal")
         self.assertEqual(result["fallback_reason"], "no_evidence")
         self.assertEqual(client.calls, 0)
+        self.assert_quality_semantics(result, "low")
 
     def test_unconfigured_client_uses_rule_fallback(self):
         result = answer_rag_question(
@@ -84,6 +94,18 @@ class RagAnsweringTest(unittest.TestCase):
         self.assertIn("owner/agent", result["answer"])
         self.assertIn("[1]", result["answer"])
         self.assertTrue(result["answer_quality"]["passed"])
+        self.assert_quality_semantics(result, "low")
+
+    def test_evidence_coverage_preserves_legacy_thresholds(self):
+        for count, expected in ((1, "low"), (2, "medium"), (5, "high")):
+            contexts = [_context(index) for index in range(1, count + 1)]
+            result = answer_rag_question(
+                root=Path.cwd(),
+                query="agent workflow",
+                retrieval=_retrieval(contexts),
+                client=_FakeClient(configured=False),
+            )
+            self.assert_quality_semantics(result, expected)
 
     def test_llm_answer_adds_citation_when_missing(self):
         client = _FakeClient(answer="可以优先研究 owner/agent。")
@@ -173,6 +195,7 @@ class RagAnsweringTest(unittest.TestCase):
         self.assertEqual("".join(item["data"]["text"] for item in events if item["event"] == "delta"), "优先研究 owner/agent 的 agent workflow 自动化能力。 [1]")
         self.assertEqual(events[-1]["event"], "final")
         self.assertEqual(events[-1]["data"]["answer_mode"], "llm")
+        self.assert_quality_semantics(events[-1]["data"], "low")
 
     def test_stream_quality_failure_replaces_draft_with_rule_fallback(self):
         events = list(
@@ -202,14 +225,14 @@ class RagAnsweringTest(unittest.TestCase):
         self.assertEqual(events[-1]["data"]["answer_mode"], "refusal")
 
 
-def _context():
+def _context(index=1):
     return {
-        "chunk_id": "chunk:1",
-        "text": "owner/agent 是 agent workflow automation 项目。",
+        "chunk_id": f"chunk:{index}",
+        "text": f"owner/agent-{index} 是 agent workflow automation 项目。",
         "evidence": ["agent workflow automation"],
         "metadata": {
-            "full_name": "owner/agent",
-            "html_url": "https://github.com/owner/agent",
+            "full_name": f"owner/agent-{index}" if index != 1 else "owner/agent",
+            "html_url": f"https://github.com/owner/agent-{index}",
             "run_date": "2026-05-09",
             "language": "Python",
             "category": "AI Agent",

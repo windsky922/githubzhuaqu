@@ -48,11 +48,20 @@ export type RagAnswer = {
   answer_mode: "llm" | "fallback_rule" | "refusal" | string;
   fallback_reason: string;
   confidence: string;
+  evidence_coverage: string;
+  match_confidence: string;
   count: number;
   citations: Citation[];
   evidence: Evidence[];
   prompt_context: string;
-  answer_quality: { passed?: boolean; issues?: string[] };
+  answer_quality: {
+    passed?: boolean;
+    issues?: string[];
+    citation_validity?: boolean;
+    evidence_relevance?: "not_evaluated" | string;
+    claim_support?: "not_evaluated" | string;
+    data_freshness?: "unknown" | string;
+  };
   retrieval?: { mode?: string };
   model_status?: { configured?: boolean; used?: boolean };
   [key: string]: unknown;

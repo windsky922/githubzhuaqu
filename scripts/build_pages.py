@@ -976,13 +976,15 @@ def _agent_match_content() -> str:
             <span>${escapeHtml(filters)}</span>
             <span>${escapeHtml(response.answer_model || "-")}</span>
             <span>${escapeHtml(response.answer_mode || "-")}</span>
-            <span>confidence ${escapeHtml(response.confidence || "-")}</span>
+            <span>证据覆盖 ${escapeHtml(response.evidence_coverage || response.confidence || "-")}</span>
+            <span>匹配把握 尚未校准</span>
           </div>
           <p class="summary">${escapeHtml(compactAgentAnswer(response.answer || ""))}</p>
           ${projectMatchCardsHtml(response)}
           ${fallback}
           ${refusal}
           <p class="quality ${qualityClass}">${escapeHtml(qualityText)}</p>
+          <p>质量边界：当前只校验引用有效性，不能证明项目相关性或结论正确。</p>
           <details>
             <summary>证据与详情</summary>
             <p>本轮检索问题：${escapeHtml(message.retrieval_question || message.question || "")}</p>
@@ -1081,10 +1083,16 @@ def _agent_match_content() -> str:
         answer_model: data.answer_model || "",
         answer_mode: data.answer_mode || "",
         confidence: data.confidence || "",
+        evidence_coverage: data.evidence_coverage || data.confidence || "",
+        match_confidence: data.match_confidence || "unknown",
         fallback_reason: data.fallback_reason || "",
         answer_quality: {
           passed: Boolean(quality.passed),
           issues: Array.isArray(quality.issues) ? quality.issues.slice(0, 10) : [],
+          citation_validity: Boolean(quality.citation_validity),
+          evidence_relevance: quality.evidence_relevance || "not_evaluated",
+          claim_support: quality.claim_support || "not_evaluated",
+          data_freshness: quality.data_freshness || "unknown",
         },
         citations: (data.citations || []).slice(0, 5).map(item => ({
           index: item.index || "",
@@ -3071,14 +3079,15 @@ def _admin_dashboard_content() -> str:
       const modelText = [
         data.answer_model || "-",
         data.answer_mode || "-",
-        data.confidence || "-",
+        `证据覆盖 ${data.evidence_coverage || data.confidence || "-"}`,
+        "匹配把握 尚未校准",
         modelStatus.configured ? "模型已配置" : "模型未配置",
         modelStatus.used ? "已使用模型" : "未使用模型"
       ].join(" · ");
       const fallbackText = data.fallback_reason ? `<p>降级原因：${escapeHtml(data.fallback_reason)}</p>` : "";
       const answerQuality = data.answer_quality || {};
       const qualityIssues = (answerQuality.issues || []).join("；");
-      const qualityText = qualityIssues ? `<p>质量闸门：${escapeHtml(qualityIssues)}</p>` : "";
+      const qualityText = `${qualityIssues ? `<p>质量闸门：${escapeHtml(qualityIssues)}</p>` : ""}<p>质量边界：当前只校验引用有效性，不能证明项目相关性或结论正确。</p>`;
       const answerHtml = data.answer ? `<article class="search-row">
         <strong>RAG 回答</strong>
         <p>${escapeHtml(data.answer)}</p>
@@ -3142,12 +3151,14 @@ def _admin_dashboard_content() -> str:
           <div class="rag-chat-chip-row">
             <span class="rag-chat-chip">${escapeHtml(response.answer_model || "-")}</span>
             <span class="rag-chat-chip">${escapeHtml(response.answer_mode || "-")}</span>
-            <span class="rag-chat-chip">confidence ${escapeHtml(response.confidence || "-")}</span>
+            <span class="rag-chat-chip">证据覆盖 ${escapeHtml(response.evidence_coverage || response.confidence || "-")}</span>
+            <span class="rag-chat-chip">匹配把握 尚未校准</span>
             <span class="rag-chat-chip">quality ${escapeHtml(String(Boolean(quality.passed)))}</span>
           </div>
           <p>${escapeHtml(response.answer || "")}</p>
           ${fallback}
           <p>质量闸门：${escapeHtml(qualityIssues)}</p>
+          <p>质量边界：当前只校验引用有效性，不能证明项目相关性或结论正确。</p>
           <div class="rag-chat-evidence">
             ${ragChatCitationsHtml(response.citations || [])}
             ${ragChatEvidenceHtml(response.evidence || [])}
@@ -3183,10 +3194,16 @@ def _admin_dashboard_content() -> str:
         answer_model: data.answer_model || "",
         answer_mode: data.answer_mode || "",
         confidence: data.confidence || "",
+        evidence_coverage: data.evidence_coverage || data.confidence || "",
+        match_confidence: data.match_confidence || "unknown",
         fallback_reason: data.fallback_reason || "",
         answer_quality: {
           passed: Boolean(quality.passed),
           issues: Array.isArray(quality.issues) ? quality.issues.slice(0, 10) : [],
+          citation_validity: Boolean(quality.citation_validity),
+          evidence_relevance: quality.evidence_relevance || "not_evaluated",
+          claim_support: quality.claim_support || "not_evaluated",
+          data_freshness: quality.data_freshness || "unknown",
         },
         citations: (data.citations || []).slice(0, 5).map(item => ({
           index: item.index || "",

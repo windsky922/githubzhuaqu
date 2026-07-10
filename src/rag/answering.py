@@ -206,6 +206,8 @@ def _response(
         "answer_mode": answer_mode,
         "fallback_reason": fallback_reason,
         "confidence": confidence,
+        "evidence_coverage": confidence,
+        "match_confidence": "unknown",
         "count": len(contexts),
         "retrieval": retrieval.get("retrieval") or {},
         "citations": citations,

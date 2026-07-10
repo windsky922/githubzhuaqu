@@ -45,7 +45,9 @@ GitHub Actions 默认执行事件检测与候选构建，但 `send_event_notific
 
 `/v1/rag/ask` 不是普通聊天接口。它必须先有 RAG 证据，再尝试真实模型回答；没有证据时直接拒答。模型失败不会阻断接口，响应会保留 `citations`、`evidence`、`answer_mode`、`fallback_reason` 和 `model_status`，管理页据此展示模型状态和降级原因。提示词保存在 `prompts/rag_ask.md`，业务代码只负责装配结构化证据。
 
-管理页 RAG 对话工作台是该接口的 GPT 式前端封装，不新增后端会话状态。对话历史只保存在浏览器 localStorage，最多 20 轮；每轮问题独立检索，历史回答只用于页面回看，不进入 `prompt_context`，也不作为事实证据。
+Ask 响应把证据覆盖与匹配把握分开表达：旧 `confidence` 仅作为兼容字段保留，`evidence_coverage` 复用其按证据数量计算的 `low/medium/high`，`match_confidence` 在未校准阶段固定为 `unknown`。`answer_quality` 保留原有通过状态和问题列表，并显式标记引用有效性、证据相关性、主张支持度和数据新鲜度；P0-2 只有引用有效性经过实际校验，不能把证据数量或格式校验解释为推荐正确率。
+
+管理页 RAG 对话工作台是该接口的 GPT 式前端封装，不新增后端会话状态。对话历史只保存在浏览器 localStorage，最多 20 轮；每轮问题独立检索，历史回答只用于页面回看，不进入 `prompt_context`，也不作为事实证据。管理页和 React 工作台显示“证据覆盖”与“匹配把握尚未校准”，不再把 `confidence` 渲染为匹配置信度。
 
 `frontend/` 是 React + TypeScript 用户前端，构建产物写入 `docs/app/`，通过 Hash Router 提供项目匹配、筛选、推荐、详情和对比页面；旧 `agent.html`、`explorer.html`、`recommendations.html`、`project.html`、`compare.html` 仅保留 query 参数并跳转到对应路由。`app/#/agent?api=1` 是面向普通用户的项目匹配前端：用户只输入一句需求，前端默认调用 `/v1/rag/ask/stream?mode=hybrid&limit=3&auto_build=true`。流中的 `delta` 只作为“待质量校验草稿”展示，只有 `final` 中通过质量闸门的结果可作为回答；失败时以规则降级回答替换草稿。它不新增数据库表、不保存聊天历史到后端，也不把前端历史或模型回答当作事实来源；真实依据仍只来自本轮 `citations`、`evidence`、`contexts` 和 `prompt_context`。
 

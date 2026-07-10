@@ -1475,6 +1475,11 @@ class ApiRepository:
             answer = f"{answer}\n\n通知记忆：{notification_memory.get('summary') or ''}".strip()
             evidence = [*evidence, *notification_evidence]
             citations = [*citations, *notification_citations]
+        evidence_coverage = (
+            "medium"
+            if notification_memory.get("event_count") and not contexts
+            else answer_result.get("evidence_coverage") or answer_result.get("confidence") or explanation.get("confidence") or "low"
+        )
         return {
             "schema_version": 1,
             "query": explained.get("query") or query,
@@ -1482,7 +1487,9 @@ class ApiRepository:
             "answer_model": answer_result.get("answer_model") or "rule:rag-ask-v1",
             "answer_mode": answer_result.get("answer_mode") or "fallback_rule",
             "fallback_reason": answer_result.get("fallback_reason") or "",
-            "confidence": "medium" if notification_memory.get("event_count") and not contexts else answer_result.get("confidence") or explanation.get("confidence") or "low",
+            "confidence": evidence_coverage,
+            "evidence_coverage": evidence_coverage,
+            "match_confidence": "unknown",
             "count": len(contexts) + len(notification_evidence),
             "retrieval": answer_result.get("retrieval") or explained.get("retrieval") or {},
             "citations": citations,
