@@ -758,6 +758,7 @@ python scripts/backfill_rag_explanations.py --limit 10
 5. `quality`：解释历史数量、平均质量分和质量分布。
 6. `coverage`：项目覆盖率、缺口数量和缺口样本。
 7. `next_actions`：建议的下一步维护动作。
+8. `corpus_versions`：期望和已观察到的语料/清洗器版本；`needs_corpus_rebuild=true` 时维护计划优先创建受控语料重建任务。
 
 示例：
 

@@ -54,6 +54,11 @@ CREATE TABLE IF NOT EXISTS project_corpus (
   category TEXT NOT NULL DEFAULT '',
   sources_json TEXT NOT NULL DEFAULT '[]',
   search_text TEXT NOT NULL DEFAULT '',
+  corpus_version TEXT NOT NULL DEFAULT 'legacy-v0',
+  cleaner_version TEXT NOT NULL DEFAULT 'legacy-v0',
+  content_hash TEXT NOT NULL DEFAULT '',
+  noise_json TEXT NOT NULL DEFAULT '{}',
+  source_manifest_json TEXT NOT NULL DEFAULT '[]',
   payload_json TEXT NOT NULL DEFAULT '{}'
 );
 
@@ -82,6 +87,10 @@ CREATE TABLE IF NOT EXISTS rag_chunks (
   sources_json TEXT NOT NULL DEFAULT '[]',
   chunk_text TEXT NOT NULL DEFAULT '',
   token_estimate INTEGER NOT NULL DEFAULT 0,
+  corpus_version TEXT NOT NULL DEFAULT 'legacy-v0',
+  cleaner_version TEXT NOT NULL DEFAULT 'legacy-v0',
+  content_hash TEXT NOT NULL DEFAULT '',
+  is_untrusted INTEGER NOT NULL DEFAULT 0,
   payload_json TEXT NOT NULL DEFAULT '{}'
 );
 

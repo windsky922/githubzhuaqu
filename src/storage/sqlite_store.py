@@ -7,6 +7,8 @@ from hashlib import sha1
 from pathlib import Path
 from typing import Any
 
+from src.rag.corpus_cleaner import CLEANER_VERSION, CORPUS_VERSION, clean_external_text, clean_internal_text, content_hash
+
 
 SCHEMA_PATH = Path(__file__).with_name("schema.sql")
 
@@ -21,6 +23,7 @@ def connect(db_path: Path) -> sqlite3.Connection:
 def initialize(connection: sqlite3.Connection) -> None:
     connection.executescript(SCHEMA_PATH.read_text(encoding="utf-8"))
     _ensure_rag_explanation_columns(connection)
+    _ensure_corpus_version_columns(connection)
     connection.commit()
 
 
@@ -33,6 +36,29 @@ def _ensure_rag_explanation_columns(connection: sqlite3.Connection) -> None:
     }.items():
         if name not in columns:
             connection.execute(f"ALTER TABLE rag_explanations ADD COLUMN {name} {definition}")
+
+
+def _ensure_corpus_version_columns(connection: sqlite3.Connection) -> None:
+    definitions = {
+        "project_corpus": {
+            "corpus_version": "TEXT NOT NULL DEFAULT 'legacy-v0'",
+            "cleaner_version": "TEXT NOT NULL DEFAULT 'legacy-v0'",
+            "content_hash": "TEXT NOT NULL DEFAULT ''",
+            "noise_json": "TEXT NOT NULL DEFAULT '{}'",
+            "source_manifest_json": "TEXT NOT NULL DEFAULT '[]'",
+        },
+        "rag_chunks": {
+            "corpus_version": "TEXT NOT NULL DEFAULT 'legacy-v0'",
+            "cleaner_version": "TEXT NOT NULL DEFAULT 'legacy-v0'",
+            "content_hash": "TEXT NOT NULL DEFAULT ''",
+            "is_untrusted": "INTEGER NOT NULL DEFAULT 0",
+        },
+    }
+    for table, columns in definitions.items():
+        existing = {row["name"] for row in connection.execute(f"PRAGMA table_info({table})").fetchall()}
+        for name, definition in columns.items():
+            if name not in existing:
+                connection.execute(f"ALTER TABLE {table} ADD COLUMN {name} {definition}")
 
 
 def import_json_archive(root: Path, db_path: Path) -> dict[str, int]:
@@ -413,12 +439,16 @@ def upsert_project_corpus(connection: sqlite3.Connection, row: sqlite3.Row) -> N
             (full_name,),
         ).fetchall()
     ]
+    external_sources = [
+        ("repository_description", str(row["description"] or "")),
+        ("selection_description", str(selection_payload.get("description") or "")),
+        ("readme", str(selection_payload.get("readme_summary") or selection_payload.get("readme_excerpt") or "")),
+    ]
+    cleaned_external = [(name, clean_external_text(text)) for name, text in external_sources if text]
     text_parts = [
         full_name,
         title,
-        str(row["description"] or ""),
-        str(selection_payload.get("description") or ""),
-        str(selection_payload.get("readme_summary") or selection_payload.get("readme_excerpt") or ""),
+        *(item.text for _, item in cleaned_external),
         category,
         language,
         " ".join(str(item) for item in sources if item),
@@ -428,6 +458,22 @@ def upsert_project_corpus(connection: sqlite3.Connection, row: sqlite3.Row) -> N
         _project_profile_text(project_profile),
         _project_agent_task_memory_text(agent_tasks),
         _project_agent_run_memory_text(agent_task_runs),
+    ]
+    noise = {
+        key: sum(item.noise.get(key, 0) for _, item in cleaned_external)
+        for key in (
+            "raw_chars", "html_tags", "html_attributes", "markdown_images", "badge_lines",
+            "duplicate_lines", "prompt_injection_lines", "cleaned_chars",
+        )
+    }
+    source_manifest = [
+        {
+            "source_type": name,
+            "content_hash": item.content_hash,
+            "cleaned_chars": len(item.text),
+            "is_untrusted": item.is_untrusted,
+        }
+        for name, item in cleaned_external
     ]
     payload = {
         "run_date": run_date,
@@ -443,16 +489,21 @@ def upsert_project_corpus(connection: sqlite3.Connection, row: sqlite3.Row) -> N
         "project_profile": project_profile,
         "agent_tasks": agent_tasks,
         "agent_task_runs": agent_task_runs,
+        "corpus_version": CORPUS_VERSION,
+        "cleaner_version": CLEANER_VERSION,
     }
     corpus_id = sha1(f"{run_date}:{full_name}".encode("utf-8")).hexdigest()
-    search_text = _clean_text(" ".join(text_parts))
+    search_text = _clean_text(" ".join(clean_internal_text(part) for part in text_parts if part))
+    search_hash = content_hash(search_text)
+    is_untrusted = any(item.is_untrusted for _, item in cleaned_external)
     connection.execute(
         """
         INSERT INTO project_corpus(
           corpus_id, run_date, full_name, html_url, title, language, category,
-          sources_json, search_text, payload_json
+          sources_json, search_text, corpus_version, cleaner_version, content_hash,
+          noise_json, source_manifest_json, payload_json
         )
-        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(corpus_id) DO UPDATE SET
           run_date = excluded.run_date,
           full_name = excluded.full_name,
@@ -462,6 +513,11 @@ def upsert_project_corpus(connection: sqlite3.Connection, row: sqlite3.Row) -> N
           category = excluded.category,
           sources_json = excluded.sources_json,
           search_text = excluded.search_text,
+          corpus_version = excluded.corpus_version,
+          cleaner_version = excluded.cleaner_version,
+          content_hash = excluded.content_hash,
+          noise_json = excluded.noise_json,
+          source_manifest_json = excluded.source_manifest_json,
           payload_json = excluded.payload_json
         """,
         (
@@ -474,6 +530,11 @@ def upsert_project_corpus(connection: sqlite3.Connection, row: sqlite3.Row) -> N
             category,
             _json_text(sources),
             search_text,
+            CORPUS_VERSION,
+            CLEANER_VERSION,
+            search_hash,
+            _json_text(noise),
+            _json_text(source_manifest),
             _json_text(payload),
         ),
     )
@@ -503,6 +564,7 @@ def upsert_project_corpus(connection: sqlite3.Connection, row: sqlite3.Row) -> N
         sources=sources,
         search_text=search_text,
         payload=payload,
+        is_untrusted=is_untrusted,
     )
 
 
@@ -518,6 +580,7 @@ def upsert_rag_chunks(
     sources: list[Any],
     search_text: str,
     payload: dict[str, Any],
+    is_untrusted: bool = False,
 ) -> None:
     connection.execute(
         "DELETE FROM rag_chunks_fts WHERE chunk_id IN (SELECT chunk_id FROM rag_chunks WHERE corpus_id = ?)",
@@ -536,9 +599,10 @@ def upsert_rag_chunks(
             """
             INSERT INTO rag_chunks(
               chunk_id, corpus_id, chunk_index, run_date, full_name, html_url,
-              language, category, sources_json, chunk_text, token_estimate, payload_json
+              language, category, sources_json, chunk_text, token_estimate,
+              corpus_version, cleaner_version, content_hash, is_untrusted, payload_json
             )
-            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(chunk_id) DO UPDATE SET
               corpus_id = excluded.corpus_id,
               chunk_index = excluded.chunk_index,
@@ -550,6 +614,10 @@ def upsert_rag_chunks(
               sources_json = excluded.sources_json,
               chunk_text = excluded.chunk_text,
               token_estimate = excluded.token_estimate,
+              corpus_version = excluded.corpus_version,
+              cleaner_version = excluded.cleaner_version,
+              content_hash = excluded.content_hash,
+              is_untrusted = excluded.is_untrusted,
               payload_json = excluded.payload_json
             """,
             (
@@ -564,6 +632,10 @@ def upsert_rag_chunks(
                 _json_text(sources),
                 chunk_text,
                 _token_estimate(chunk_text),
+                CORPUS_VERSION,
+                CLEANER_VERSION,
+                content_hash(chunk_text),
+                int(is_untrusted),
                 _json_text(chunk_payload),
             ),
         )

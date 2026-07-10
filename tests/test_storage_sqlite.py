@@ -7,6 +7,7 @@ from pathlib import Path
 
 from scripts.verify_migration import _json_counts
 from src.rag.embeddings import build_rag_embeddings
+from src.rag.corpus_cleaner import CLEANER_VERSION, CORPUS_VERSION
 from src.storage.sqlite_store import connect, import_json_archive, table_count
 
 
@@ -59,24 +60,32 @@ class SqliteStorageTest(unittest.TestCase):
                 job = connection.execute("SELECT job_id, status FROM jobs WHERE job_id = ?", ("run:2026-05-03",)).fetchone()
                 self.assertEqual(job["status"], "succeeded")
                 corpus = connection.execute(
-                    "SELECT full_name, search_text, payload_json FROM project_corpus WHERE full_name = ?",
+                    "SELECT full_name, search_text, corpus_version, cleaner_version, content_hash, noise_json, source_manifest_json, payload_json FROM project_corpus WHERE full_name = ?",
                     ("owner/project",),
                 ).fetchone()
                 self.assertIn("owner/project", corpus["search_text"])
                 self.assertIn("AI Agent", corpus["search_text"])
                 self.assertIn("项目定位", corpus["search_text"])
                 self.assertIn("Agent 任务记忆", corpus["search_text"])
+                self.assertEqual(corpus["corpus_version"], CORPUS_VERSION)
+                self.assertEqual(corpus["cleaner_version"], CLEANER_VERSION)
+                self.assertEqual(len(corpus["content_hash"]), 64)
+                self.assertIsInstance(json.loads(corpus["noise_json"]), dict)
+                self.assertTrue(json.loads(corpus["source_manifest_json"]))
                 corpus_payload = json.loads(corpus["payload_json"])
                 self.assertIn("project_profile", corpus_payload)
                 self.assertIn("agent_judgement", corpus_payload["project_profile"])
                 self.assertTrue(corpus_payload["agent_tasks"])
                 chunk = connection.execute(
-                    "SELECT full_name, chunk_text, payload_json FROM rag_chunks WHERE full_name = ?",
+                    "SELECT full_name, chunk_text, corpus_version, cleaner_version, content_hash, is_untrusted, payload_json FROM rag_chunks WHERE full_name = ?",
                     ("owner/project",),
                 ).fetchone()
                 self.assertIn("owner/project", chunk["chunk_text"])
                 self.assertIn("AI Agent", chunk["chunk_text"])
                 self.assertIn("项目定位", chunk["chunk_text"])
+                self.assertEqual(chunk["corpus_version"], CORPUS_VERSION)
+                self.assertEqual(chunk["cleaner_version"], CLEANER_VERSION)
+                self.assertEqual(len(chunk["content_hash"]), 64)
                 chunk_payload = json.loads(chunk["payload_json"])
                 self.assertIn("project_profile", chunk_payload)
             finally:

@@ -644,6 +644,8 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertIn(rag_diagnostics["level"], {"low", "medium", "high"})
             self.assertIn("ready_for_answering", rag_diagnostics["signals"])
             self.assertGreaterEqual(rag_diagnostics["table_counts"]["rag_chunks"], 1)
+            self.assertTrue(rag_diagnostics["signals"]["corpus_version_current"])
+            self.assertFalse(rag_diagnostics["corpus_versions"]["needs_corpus_rebuild"])
             self.assertTrue(rag_diagnostics["next_actions"])
             self.assertEqual(rag_backfill_preview["schema_version"], 1)
             self.assertTrue(rag_backfill_preview["accepted"])

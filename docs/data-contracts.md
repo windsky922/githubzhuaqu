@@ -284,9 +284,9 @@ migration_meta
 1. `runs` 保存运行摘要索引。
 2. `repositories` 保存仓库基础信息。
 3. `selections` 保存每次运行入选项目及排序信息。
-4. `project_corpus` 保存从入选项目派生的公开文本语料、`payload_json.project_profile`、`payload_json.agent_tasks` 和 `payload_json.agent_task_runs`，用于本地搜索、后续向量检索和 RAG。
+4. `project_corpus` 保存从入选项目派生的公开文本语料、`payload_json.project_profile`、`payload_json.agent_tasks` 和 `payload_json.agent_task_runs`，用于本地搜索、后续向量检索和 RAG。`corpus_version`、`cleaner_version`、`content_hash` 标识可重复构建版本；`noise_json` 记录清洗计数；`source_manifest_json` 记录各原始归档来源的清洗后哈希和可信标记。原始 README 仍只保留在 selections/repository payload，不复制到语料表。
 5. `project_corpus_fts` 保存 `project_corpus` 的 SQLite FTS5 搜索索引，可由派生语料重建。
-6. `rag_chunks` 保存从 `project_corpus` 拆分出的短文本证据块，`payload_json.project_profile` 和 `payload_json.agent_tasks` 会随证据块保留，用于 RAG 检索、引用和后续 embedding。
+6. `rag_chunks` 保存从 `project_corpus` 拆分出的短文本证据块，`payload_json.project_profile` 和 `payload_json.agent_tasks` 会随证据块保留，用于 RAG 检索、引用和后续 embedding。每个 chunk 保存语料/清洗器版本、内容哈希和 `is_untrusted`；版本变化后的受控语料重建会清空旧 embedding，避免向量与文本不一致。
 7. `rag_chunks_fts` 保存 `rag_chunks` 的 SQLite FTS5 搜索索引，可由派生语料重建。
 8. `rag_embeddings` 保存从 `rag_chunks` 派生的本地 embedding 向量索引；当前默认模型为 `local-hash-v1`，可重建，不保存密钥。
 9. `rag_explanations` 保存 RAG 解释结果、引用、检索参数、解释摘要和规则版质量评估，用于后续质量评估和模型替换对比；不保存密钥。

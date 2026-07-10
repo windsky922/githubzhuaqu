@@ -20,6 +20,7 @@ from src.rag.embeddings import (
     vector_from_json,
 )
 from src.rag.answering import answer_rag_question, stream_rag_answer_question
+from src.rag.corpus_cleaner import CLEANER_VERSION, CORPUS_VERSION
 from src.storage.sqlite_store import (
     connect,
     import_json_archive,
@@ -1740,6 +1741,22 @@ class ApiRepository:
         coverage = self.rag_coverage(limit=limit)
         table_counts = database.get("table_counts") if isinstance(database.get("table_counts"), dict) else {}
         readiness = database.get("rag_readiness") if isinstance(database.get("rag_readiness"), dict) else {}
+        connection = connect(self.db_path)
+        try:
+            initialize(connection)
+            version_rows = connection.execute(
+                "SELECT corpus_version, cleaner_version, COUNT(*) AS count FROM project_corpus GROUP BY corpus_version, cleaner_version"
+            ).fetchall()
+        finally:
+            connection.close()
+        observed_versions = [
+            {"corpus_version": row["corpus_version"], "cleaner_version": row["cleaner_version"], "count": row["count"]}
+            for row in version_rows
+        ]
+        versions_current = not observed_versions or all(
+            row["corpus_version"] == CORPUS_VERSION and row["cleaner_version"] == CLEANER_VERSION
+            for row in observed_versions
+        )
         signals = {
             "has_corpus": _int_value(table_counts.get("project_corpus")) > 0,
             "has_chunks": _int_value(table_counts.get("rag_chunks")) > 0,
@@ -1748,6 +1765,7 @@ class ApiRepository:
             "ready_for_text_search": bool(readiness.get("ready_for_text_search")),
             "ready_for_vector_search": _int_value(table_counts.get("rag_embeddings")) > 0,
             "ready_for_answering": _int_value(table_counts.get("rag_chunks")) > 0 and _int_value(quality.get("total_count")) > 0,
+            "corpus_version_current": versions_current,
         }
         health = _rag_diagnostics_health(
             signals=signals,
@@ -1764,6 +1782,12 @@ class ApiRepository:
                 "rag_chunks": _int_value(table_counts.get("rag_chunks")),
                 "rag_embeddings": _int_value(table_counts.get("rag_embeddings")),
                 "rag_explanations": _int_value(table_counts.get("rag_explanations")),
+            },
+            "corpus_versions": {
+                "expected_corpus_version": CORPUS_VERSION,
+                "expected_cleaner_version": CLEANER_VERSION,
+                "observed": observed_versions,
+                "needs_corpus_rebuild": not versions_current,
             },
             "quality": {
                 "total_count": _int_value(quality.get("total_count")),
@@ -2043,6 +2067,7 @@ class ApiRepository:
             diagnostics.get("status") == "needs_corpus"
             or not signals.get("has_corpus")
             or not signals.get("has_chunks")
+            or not signals.get("corpus_version_current", True)
         ):
             plan = self.plan_rag_corpus_rebuild(payload)
             return {
@@ -5720,7 +5745,7 @@ def _rag_diagnostics_health(
     coverage_rate: float,
     average_quality_score: float,
 ) -> dict[str, str]:
-    if not signals.get("has_corpus") or not signals.get("has_chunks"):
+    if not signals.get("has_corpus") or not signals.get("has_chunks") or not signals.get("corpus_version_current", True):
         return {"status": "needs_corpus", "level": "low"}
     if not signals.get("has_explanations"):
         return {"status": "needs_explanations", "level": "medium"}
@@ -5740,6 +5765,8 @@ def _rag_diagnostics_next_actions(
     actions: list[str] = []
     if not signals.get("has_corpus") or not signals.get("has_chunks"):
         actions.append("先运行 python scripts\\migrate_json_to_sqlite.py，重建 project_corpus 和 rag_chunks。")
+    elif not signals.get("corpus_version_current", True):
+        actions.append("当前语料版本已过期，请通过受控 rag_corpus_rebuild 任务重建并失效旧 embedding。")
     if not signals.get("has_embeddings"):
         actions.append("运行 python scripts\\build_rag_embeddings.py，补齐本地向量检索索引。")
     if not signals.get("has_explanations") or _int_value(coverage.get("gap_count")) > 0:

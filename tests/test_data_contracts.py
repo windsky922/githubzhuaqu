@@ -214,6 +214,11 @@ SQLITE_COLUMNS = {
         "category",
         "sources_json",
         "search_text",
+        "corpus_version",
+        "cleaner_version",
+        "content_hash",
+        "noise_json",
+        "source_manifest_json",
         "payload_json",
     },
     "project_corpus_fts": {
@@ -236,6 +241,10 @@ SQLITE_COLUMNS = {
         "sources_json",
         "chunk_text",
         "token_estimate",
+        "corpus_version",
+        "cleaner_version",
+        "content_hash",
+        "is_untrusted",
         "payload_json",
     },
     "rag_chunks_fts": {

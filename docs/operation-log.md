@@ -1,5 +1,12 @@
 # 操作日志
 
+## 2026-07-10 追加：P0-3A 确定性语料清洗与版本化
+
+1. 新增标准库 RAG 语料清洗器，移除 Markdown 图片、徽章、HTML 标签/属性、重复模板和提示注入式行，同时保留链接标题、代码内容与限制说明。
+2. `project_corpus` 和 `rag_chunks` 增加语料版本、清洗器版本、内容哈希、噪声/来源清单和不可信标记；旧数据库通过增量列迁移标记为 `legacy-v0`。
+3. RAG 诊断识别过期语料并优先计划 `rag_corpus_rebuild`；确认重建时旧 embedding 同步失效，结果明确返回失效数量和待重建状态。
+4. 新增只读语料审计脚本与清洗/迁移测试；固定 52 条评估集的 FTS5、local-hash-v1、hybrid 指标与 P0-1 基线一致，未调整检索权重。
+
 ## 2026-07-10 追加：P0-2 Ask 质量与置信度语义修正
 
 1. `/v1/rag/ask` 与 `/v1/rag/ask/stream` 的 `final` 保留旧 `confidence` 字段，并新增等值 `evidence_coverage` 与固定为 `unknown` 的 `match_confidence`，避免把证据数量解释为匹配正确率。

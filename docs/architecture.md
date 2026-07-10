@@ -34,6 +34,8 @@ GitHub Actions 默认执行事件检测与候选构建，但 `send_event_notific
 
 ## 证据约束 RAG Ask 层
 
+RAG 语料先经过确定性清洗和版本化，再进入 FTS5、local-hash 与 Ask。外部 README/描述按不可信输入处理：图片、徽章、HTML 属性、重复模板和提示注入式行不进入检索或模型上下文，原文仍可从 JSON 归档追溯。`corpus_version`、`cleaner_version` 和内容哈希用于判断派生索引是否过期；确认执行语料重建时旧 embedding 同步失效，随后由独立任务重建。
+
 ```text
 /v1/rag/ask
 -> rag_explain 生成证据、引用和解释编号

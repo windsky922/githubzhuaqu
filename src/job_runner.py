@@ -173,6 +173,7 @@ def _execute_rag_corpus_rebuild(root: Path, db_path: Path, request: dict[str, An
         }
 
     counts = import_json_archive(root, db_path)
+    after_counts = _rag_table_counts(db_path)
     return {
         "run_date": _now()[:10],
         "status": "ok",
@@ -180,7 +181,9 @@ def _execute_rag_corpus_rebuild(root: Path, db_path: Path, request: dict[str, An
         "selected_archive_count": selected_count,
         "import_counts": counts,
         "before_counts": before_counts,
-        "after_counts": _rag_table_counts(db_path),
+        "after_counts": after_counts,
+        "invalidated_embedding_count": before_counts.get("rag_embeddings", 0),
+        "embedding_rebuild_required": after_counts.get("rag_chunks", 0) > 0 and after_counts.get("rag_embeddings", 0) == 0,
         "request_context": _request_context(request),
     }
 
