@@ -1,5 +1,13 @@
 # 操作日志
 
+## 2026-07-10 追加：项目研究 Agent V2 对抗性审查报告
+
+1. 新增 `docs/project-review-agent-v2-roadmap.md`，从候选覆盖、检索、语料、回答质量、反馈闭环、数据新鲜度、隐私、CI 和工程演进九个维度复核 V2。
+2. 报告明确当前最不确定的是首选项目的真实需求匹配度；现有 `confidence` 和 `answer_quality` 主要反映证据数量与引用格式，尚不能代表相关性或正确率。
+3. 记录本地审计发现：79 个唯一项目、261 个 RAG chunks，其中存在 HTML、图片、徽章和重复文本噪声；本地数据日期与 `weekly-archive` 自动归档分支存在可见的新鲜度分裂。
+4. 路线图将人工标注评估集、置信度语义修正、语料清洗、结构化推荐、追问澄清和提交级 CI 列为 P0；查询级反馈、真实 embedding 对照、新鲜度和隐私保护列为 P1。
+5. README 增加 V2 报告入口，同时保留 V1 审查作为历史产品闭环基线。
+
 ## 2026-07-10 追加：React 项目研究工作台与流式 RAG
 
 1. 新增 `frontend/` React + TypeScript + Vite 工程，使用 Tailwind、shadcn/Radix 基础设施、Lucide、React Router 和 TanStack Query，构建产物发布到 `docs/app/`。
