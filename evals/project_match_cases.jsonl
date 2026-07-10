@@ -1,0 +1,52 @@
+{"id":"agent-01","query":"想找多智能体编排项目","relevant_repositories":["eval/agent-orchestrator"],"constraints":{},"expect_clarification":false}
+{"id":"agent-02","query":"需要自动化 agent 工作流","relevant_repositories":["eval/agent-orchestrator"],"constraints":{"language":"Python"},"expect_clarification":false}
+{"id":"agent-03","query":"Python 智能体协作框架","relevant_repositories":["eval/agent-orchestrator"],"constraints":{"category":"AI Agent"},"expect_clarification":false}
+{"id":"agent-04","query":"编排多个 AI agent 完成任务","relevant_repositories":["eval/agent-orchestrator"],"constraints":{"source":"github_trending"},"expect_clarification":false}
+{"id":"agent-05","query":"agent orchestration 自动化","relevant_repositories":["eval/agent-orchestrator"],"constraints":{},"expect_clarification":false}
+{"id":"agent-06","query":"寻找 Python 的工作流智能体","relevant_repositories":["eval/agent-orchestrator"],"constraints":{"language":"Python","category":"AI Agent"},"expect_clarification":false}
+{"id":"rag-01","query":"找本地知识库 RAG","relevant_repositories":["eval/rag-knowledge"],"constraints":{},"expect_clarification":false}
+{"id":"rag-02","query":"TypeScript 文档问答检索","relevant_repositories":["eval/rag-knowledge"],"constraints":{"language":"TypeScript"},"expect_clarification":false}
+{"id":"rag-03","query":"语义搜索开发工具","relevant_repositories":["eval/rag-knowledge"],"constraints":{"category":"Developer Tools"},"expect_clarification":false}
+{"id":"rag-04","query":"本地 RAG semantic search","relevant_repositories":["eval/rag-knowledge"],"constraints":{"source":"github_search"},"expect_clarification":false}
+{"id":"rag-05","query":"知识库检索系统","relevant_repositories":["eval/rag-knowledge"],"constraints":{},"expect_clarification":false}
+{"id":"rag-06","query":"用于文档问答的 TypeScript 项目","relevant_repositories":["eval/rag-knowledge"],"constraints":{"language":"TypeScript","category":"Developer Tools"},"expect_clarification":false}
+{"id":"data-01","query":"需要数据管道 ETL","relevant_repositories":["eval/data-pipeline"],"constraints":{},"expect_clarification":false}
+{"id":"data-02","query":"Python 数据质量调度","relevant_repositories":["eval/data-pipeline"],"constraints":{"language":"Python"},"expect_clarification":false}
+{"id":"data-03","query":"数据工程 pipeline","relevant_repositories":["eval/data-pipeline"],"constraints":{"category":"Data Engineering"},"expect_clarification":false}
+{"id":"data-04","query":"GitHub Trending 的 ETL 项目","relevant_repositories":["eval/data-pipeline"],"constraints":{"source":"github_trending"},"expect_clarification":false}
+{"id":"data-05","query":"自动化数据处理管道","relevant_repositories":["eval/data-pipeline"],"constraints":{},"expect_clarification":false}
+{"id":"data-06","query":"Python ETL 数据管道","relevant_repositories":["eval/data-pipeline"],"constraints":{"language":"Python","category":"Data Engineering"},"expect_clarification":false}
+{"id":"mobile-01","query":"找 Flutter 移动应用","relevant_repositories":["eval/flutter-mobile"],"constraints":{},"expect_clarification":false}
+{"id":"mobile-02","query":"Dart 跨平台客户端","relevant_repositories":["eval/flutter-mobile"],"constraints":{"language":"Dart"},"expect_clarification":false}
+{"id":"mobile-03","query":"移动端开发项目","relevant_repositories":["eval/flutter-mobile"],"constraints":{"category":"Mobile"},"expect_clarification":false}
+{"id":"mobile-04","query":"github search 上的 Flutter 项目","relevant_repositories":["eval/flutter-mobile"],"constraints":{"source":"github_search"},"expect_clarification":false}
+{"id":"mobile-05","query":"跨平台 mobile client","relevant_repositories":["eval/flutter-mobile"],"constraints":{},"expect_clarification":false}
+{"id":"mobile-06","query":"Dart 的移动应用","relevant_repositories":["eval/flutter-mobile"],"constraints":{"language":"Dart","category":"Mobile"},"expect_clarification":false}
+{"id":"security-01","query":"依赖漏洞扫描工具","relevant_repositories":["eval/security-scanner"],"constraints":{},"expect_clarification":false}
+{"id":"security-02","query":"Go 软件供应链安全","relevant_repositories":["eval/security-scanner"],"constraints":{"language":"Go"},"expect_clarification":false}
+{"id":"security-03","query":"安全扫描项目","relevant_repositories":["eval/security-scanner"],"constraints":{"category":"Security"},"expect_clarification":false}
+{"id":"security-04","query":"Trending 漏洞检测仓库","relevant_repositories":["eval/security-scanner"],"constraints":{"source":"github_trending"},"expect_clarification":false}
+{"id":"security-05","query":"security scanner 依赖风险","relevant_repositories":["eval/security-scanner"],"constraints":{},"expect_clarification":false}
+{"id":"security-06","query":"Go 漏洞扫描","relevant_repositories":["eval/security-scanner"],"constraints":{"language":"Go","category":"Security"},"expect_clarification":false}
+{"id":"observe-01","query":"想做可观测性平台","relevant_repositories":["eval/observability"],"constraints":{},"expect_clarification":false}
+{"id":"observe-02","query":"Rust 日志指标链路追踪","relevant_repositories":["eval/observability"],"constraints":{"language":"Rust"},"expect_clarification":false}
+{"id":"observe-03","query":"DevOps observability 工具","relevant_repositories":["eval/observability"],"constraints":{"category":"DevOps"},"expect_clarification":false}
+{"id":"observe-04","query":"github search 的链路追踪","relevant_repositories":["eval/observability"],"constraints":{"source":"github_search"},"expect_clarification":false}
+{"id":"observe-05","query":"日志和指标监控","relevant_repositories":["eval/observability"],"constraints":{},"expect_clarification":false}
+{"id":"observe-06","query":"Rust 可观测性","relevant_repositories":["eval/observability"],"constraints":{"language":"Rust","category":"DevOps"},"expect_clarification":false}
+{"id":"image-01","query":"图像生成工作流","relevant_repositories":["eval/image-workflow"],"constraints":{},"expect_clarification":false}
+{"id":"image-02","query":"Python 扩散模型项目","relevant_repositories":["eval/image-workflow"],"constraints":{"language":"Python"},"expect_clarification":false}
+{"id":"image-03","query":"AI 图像生成","relevant_repositories":["eval/image-workflow"],"constraints":{"category":"AI"},"expect_clarification":false}
+{"id":"image-04","query":"Trending 上的图像生成项目","relevant_repositories":["eval/image-workflow"],"constraints":{"source":"github_trending"},"expect_clarification":false}
+{"id":"image-05","query":"扩散模型自动化","relevant_repositories":["eval/image-workflow"],"constraints":{},"expect_clarification":false}
+{"id":"image-06","query":"Python 的图像工作流","relevant_repositories":["eval/image-workflow"],"constraints":{"language":"Python","category":"AI"},"expect_clarification":false}
+{"id":"gateway-01","query":"需要 API 网关","relevant_repositories":["eval/api-gateway"],"constraints":{},"expect_clarification":false}
+{"id":"gateway-02","query":"Go 限流鉴权服务","relevant_repositories":["eval/api-gateway"],"constraints":{"language":"Go"},"expect_clarification":false}
+{"id":"gateway-03","query":"后端网关项目","relevant_repositories":["eval/api-gateway"],"constraints":{"category":"Backend"},"expect_clarification":false}
+{"id":"gateway-04","query":"github search 上的 API 网关","relevant_repositories":["eval/api-gateway"],"constraints":{"source":"github_search"},"expect_clarification":false}
+{"id":"gateway-05","query":"rate limit 鉴权网关","relevant_repositories":["eval/api-gateway"],"constraints":{},"expect_clarification":false}
+{"id":"gateway-06","query":"Go 的 API 网关","relevant_repositories":["eval/api-gateway"],"constraints":{"language":"Go","category":"Backend"},"expect_clarification":false}
+{"id":"clarify-01","query":"我想找一个项目","relevant_repositories":["eval/agent-orchestrator"],"constraints":{"language":"Kotlin"},"expect_clarification":true}
+{"id":"clarify-02","query":"继续","relevant_repositories":["eval/rag-knowledge"],"constraints":{"category":"Database"},"expect_clarification":true}
+{"id":"clarify-03","query":"有什么适合我的","relevant_repositories":["eval/data-pipeline"],"constraints":{"language":"Scala"},"expect_clarification":true}
+{"id":"clarify-04","query":"给我推荐","relevant_repositories":["eval/flutter-mobile"],"constraints":{"category":"Desktop"},"expect_clarification":true}

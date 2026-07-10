@@ -390,6 +390,10 @@ React 开发入口为 `http://127.0.0.1:5173/#/agent?api=1`，发布构建入口
 
 当前 embedding 使用本地确定性 `local-hash-v1`，不调用外部模型、不需要密钥。它用于打通向量索引表和检索 API，后续可以替换为真实 embedding 模型。
 
+### 项目匹配检索基线
+
+`evals/project_match_cases.jsonl` 保存 52 条中文项目需求及其期望仓库、硬约束和是否应澄清。运行 `python scripts/evaluate_project_match.py` 会在固定 fixture 语料上输出 FTS5、`local-hash-v1` 和 hybrid 的 Recall@3、Recall@10、MRR@10、硬约束违反率、零命中率和澄清正确率；不调用问答接口，也不保存模型回答。传入 `--root <weekly-archive-root>` 可测量指定归档，但只有期望仓库与该归档一致时才适合作为对比基线。
+
 回填缺少解释历史的项目：
 
 ```bash
