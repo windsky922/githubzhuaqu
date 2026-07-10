@@ -59,6 +59,7 @@ CREATE TABLE IF NOT EXISTS project_corpus (
   content_hash TEXT NOT NULL DEFAULT '',
   noise_json TEXT NOT NULL DEFAULT '{}',
   source_manifest_json TEXT NOT NULL DEFAULT '[]',
+  structured_json TEXT NOT NULL DEFAULT '{}',
   payload_json TEXT NOT NULL DEFAULT '{}'
 );
 
@@ -91,6 +92,7 @@ CREATE TABLE IF NOT EXISTS rag_chunks (
   cleaner_version TEXT NOT NULL DEFAULT 'legacy-v0',
   content_hash TEXT NOT NULL DEFAULT '',
   is_untrusted INTEGER NOT NULL DEFAULT 0,
+  source_type TEXT NOT NULL DEFAULT 'legacy',
   payload_json TEXT NOT NULL DEFAULT '{}'
 );
 
@@ -98,6 +100,24 @@ CREATE INDEX IF NOT EXISTS idx_rag_chunks_corpus_id ON rag_chunks(corpus_id);
 CREATE INDEX IF NOT EXISTS idx_rag_chunks_run_date ON rag_chunks(run_date);
 CREATE INDEX IF NOT EXISTS idx_rag_chunks_full_name ON rag_chunks(full_name);
 CREATE INDEX IF NOT EXISTS idx_rag_chunks_language_category ON rag_chunks(language, category);
+CREATE TABLE IF NOT EXISTS rag_corpus_enrichments (
+  enrichment_id TEXT PRIMARY KEY,
+  corpus_id TEXT NOT NULL DEFAULT '',
+  full_name TEXT NOT NULL DEFAULT '',
+  source_hash TEXT NOT NULL DEFAULT '',
+  cleaner_version TEXT NOT NULL DEFAULT '',
+  prompt_version TEXT NOT NULL DEFAULT '',
+  model TEXT NOT NULL DEFAULT '',
+  status TEXT NOT NULL DEFAULT '',
+  structured_json TEXT NOT NULL DEFAULT '{}',
+  evidence_json TEXT NOT NULL DEFAULT '{}',
+  error_summary TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL DEFAULT '',
+  updated_at TEXT NOT NULL DEFAULT ''
+);
+
+CREATE INDEX IF NOT EXISTS idx_rag_corpus_enrichments_source ON rag_corpus_enrichments(source_hash, model, prompt_version);
+CREATE INDEX IF NOT EXISTS idx_rag_corpus_enrichments_repo ON rag_corpus_enrichments(full_name, status);
 
 CREATE VIRTUAL TABLE IF NOT EXISTS rag_chunks_fts USING fts5(
   chunk_id UNINDEXED,

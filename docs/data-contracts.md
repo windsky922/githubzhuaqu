@@ -239,7 +239,7 @@ error
 report_url
 ```
 
-`kind` 当前支持 `weekly_report`、`rag_backfill`、`rag_corpus_rebuild`、`rag_embedding_build`、`rag_search_evaluation` 和 `dev_context_index`。`weekly_report` 表示周报任务，`rag_backfill` 表示 RAG 解释回填任务，`rag_corpus_rebuild` 表示从 JSON 归档重建 SQLite RAG 语料与证据块，`rag_embedding_build` 表示从 `rag_chunks` 构建本地 embedding 索引，`rag_search_evaluation` 表示一次 RAG 检索质量评估任务，`dev_context_index` 表示一次开发上下文索引刷新任务。
+`kind` 当前支持 `weekly_report`、`rag_backfill`、`rag_corpus_rebuild`、`rag_corpus_enrichment`、`rag_embedding_build`、`rag_search_evaluation` 和 `dev_context_index`。`rag_corpus_enrichment` 表示按内容哈希缓存、显式确认执行的 Kimi 结构化语料增强；无密钥或单项失败不影响确定性语料。
 
 `request` 只公开 `profile`、`sources`、`dry_run`、`requested_dry_run`、`confirm_delivery`、`delivery_allowed`、`days_back`、`trigger_source`、`requested_by`、`safety_warnings`、`queries`、`language`、`category`、`source`、`limit`、`rag_limit`、`mode`、`model`、`auto_build`、`confirm_execution`、`maintenance_action`、`coverage_limit`、`min_gap_count`、`dimensions`、`run_checks`、`replace` 和 `max_command_chars`。这些字段用于任务审计、检索评估、开发上下文索引和受控推送/补库确认，不应包含 Token、Chat ID、Webhook 或其他密钥。
 
@@ -257,6 +257,7 @@ project_corpus
 project_corpus_fts
 rag_chunks
 rag_chunks_fts
+rag_corpus_enrichments
 rag_embeddings
 rag_explanations
 project_feedback
@@ -286,9 +287,10 @@ migration_meta
 3. `selections` 保存每次运行入选项目及排序信息。
 4. `project_corpus` 保存从入选项目派生的公开文本语料、`payload_json.project_profile`、`payload_json.agent_tasks` 和 `payload_json.agent_task_runs`，用于本地搜索、后续向量检索和 RAG。`corpus_version`、`cleaner_version`、`content_hash` 标识可重复构建版本；`noise_json` 记录清洗计数；`source_manifest_json` 记录各原始归档来源的清洗后哈希和可信标记。原始 README 仍只保留在 selections/repository payload，不复制到语料表。
 5. `project_corpus_fts` 保存 `project_corpus` 的 SQLite FTS5 搜索索引，可由派生语料重建。
-6. `rag_chunks` 保存从 `project_corpus` 拆分出的短文本证据块，`payload_json.project_profile` 和 `payload_json.agent_tasks` 会随证据块保留，用于 RAG 检索、引用和后续 embedding。每个 chunk 保存语料/清洗器版本、内容哈希和 `is_untrusted`；版本变化后的受控语料重建会清空旧 embedding，避免向量与文本不一致。
+6. `rag_chunks` 保存从 `project_corpus` 按 `source_type` 拆分出的短文本证据块，来源包括 `identity`、`description`、`readme`、`selection_reason`、`project_profile`、`risk`、`agent_memory` 和 `model_enrichment`。每个 chunk 保存语料/清洗器版本、内容哈希和 `is_untrusted`；同一 corpus 内去重，不跨运行日期删除历史证据。
 7. `rag_chunks_fts` 保存 `rag_chunks` 的 SQLite FTS5 搜索索引，可由派生语料重建。
 8. `rag_embeddings` 保存从 `rag_chunks` 派生的本地 embedding 向量索引；当前默认模型为 `local-hash-v1`，可重建，不保存密钥。
+8.1 `rag_corpus_enrichments` 按来源哈希、清洗器版本、prompt 版本和 Kimi 模型缓存结构化字段、逐字段证据与截断错误；不保存完整模型原始回答。通过证据校验的结果写入 `project_corpus.structured_json` 和 `model_enrichment` chunk，但 P0-3 不用于硬过滤或首选排名。
 9. `rag_explanations` 保存 RAG 解释结果、引用、检索参数、解释摘要和规则版质量评估，用于后续质量评估和模型替换对比；不保存密钥。
 10. `project_feedback` 保存用户对项目的显式反馈，包括仓库名、profile、评分、标签、备注和来源，用于后续个性化记忆、RAG 重排和推荐校准；不保存密钥。
 11. `project_agent_tasks` 保存项目级任务类型、优先级、状态、原因、执行结果、来源、去重键和生命周期时间。`payload_json.subscription_action` 只描述后续订阅动作，不保存推送密钥。

@@ -37,6 +37,7 @@ EXECUTABLE_JOB_KINDS = {
     "weekly_report",
     "rag_backfill",
     "rag_corpus_rebuild",
+    "rag_corpus_enrichment",
     "rag_embedding_build",
     "rag_search_evaluation",
     "dev_context_index",
@@ -111,6 +112,7 @@ class ApiRepository:
                 "rag_search_evaluation_jobs": True,
                 "rag_search_evaluation_trends": True,
                 "rag_search_evaluation_plan": True,
+                "rag_corpus_enrichment_plan": True,
                 "rag_explain": True,
                 "rag_ask": True,
                 "rag_explanations": True,
@@ -1808,7 +1810,7 @@ class ApiRepository:
 
     def rag_maintenance_report(self, *, limit: int = 20) -> dict[str, Any]:
         limit = max(1, min(_int_value(limit) or 20, 100))
-        maintenance_kinds = {"rag_backfill", "rag_corpus_rebuild", "rag_embedding_build", "rag_search_evaluation"}
+        maintenance_kinds = {"rag_backfill", "rag_corpus_rebuild", "rag_corpus_enrichment", "rag_embedding_build", "rag_search_evaluation"}
         jobs = [
             job
             for job in self.jobs(limit=max(limit * 4, 100)).get("jobs", [])
@@ -1993,6 +1995,19 @@ class ApiRepository:
             message="已创建 RAG 语料重建 planned 任务。",
         )
 
+    def plan_rag_corpus_enrichment(self, payload: dict[str, Any] | None) -> dict[str, Any]:
+        request = self._rag_maintenance_job_request(
+            payload,
+            action="enrich_corpus",
+            default_trigger_source="rag_corpus_enrichment_plan_api",
+        )
+        request["replace"] = _bool_value((payload or {}).get("replace"), False)
+        return self._plan_rag_maintenance_job(
+            kind="rag_corpus_enrichment",
+            request=request,
+            message="已创建 Kimi RAG 语料结构化增强 planned 任务。",
+        )
+
     def plan_rag_embedding_build(self, payload: dict[str, Any] | None) -> dict[str, Any]:
         request = self._rag_maintenance_job_request(
             payload,
@@ -2150,6 +2165,7 @@ class ApiRepository:
             "trigger_source": str(payload.get("trigger_source") or default_trigger_source).strip()[:80],
             "model": str(payload.get("model") or MODEL_NAME).strip(),
             "dimensions": max(8, min(_int_value(payload.get("dimensions")) or DEFAULT_DIMENSIONS, 512)),
+            "replace": _bool_value(payload.get("replace"), False),
             "safety_warnings": safety_warnings,
         }
 
@@ -3069,7 +3085,7 @@ class ApiRepository:
         warnings = []
         if kind not in EXECUTABLE_JOB_KINDS:
             blockers.append(
-                "当前执行器只支持 weekly_report、rag_backfill、rag_corpus_rebuild、rag_embedding_build 和 rag_search_evaluation 任务。"
+                "当前执行器只支持 weekly_report、rag_backfill、rag_corpus_rebuild、rag_corpus_enrichment、rag_embedding_build 和 rag_search_evaluation 任务。"
             )
         if job.get("status") != "planned":
             blockers.append(f"任务状态为 {job.get('status') or 'unknown'}，只有 planned 任务可以被执行器消费。")
@@ -3083,7 +3099,7 @@ class ApiRepository:
                 blockers.append("dry_run=false 但缺少 confirm_execution=true，不能进入真实补库执行。")
             if not _truthy(request.get("dry_run", True)):
                 warnings.append("该任务允许写入 RAG 解释历史，执行前请确认 SQLite 数据库状态正确。")
-        if kind in {"rag_corpus_rebuild", "rag_embedding_build"}:
+        if kind in {"rag_corpus_rebuild", "rag_corpus_enrichment", "rag_embedding_build"}:
             if not _truthy(request.get("dry_run", True)) and not _truthy(request.get("confirm_execution")):
                 blockers.append("dry_run=false 但缺少 confirm_execution=true，不能进入真实 RAG 维护执行。")
             if not _truthy(request.get("dry_run", True)):
@@ -3211,7 +3227,7 @@ class ApiRepository:
             blockers.append("任务不存在，不能重试。")
         if job and job.get("kind") not in EXECUTABLE_JOB_KINDS:
             blockers.append(
-                "当前只支持 weekly_report、rag_backfill、rag_corpus_rebuild、rag_embedding_build 和 rag_search_evaluation 任务重试。"
+                "当前只支持 weekly_report、rag_backfill、rag_corpus_rebuild、rag_corpus_enrichment、rag_embedding_build 和 rag_search_evaluation 任务重试。"
             )
         if job and job.get("status") != "failed":
             blockers.append(f"任务状态为 {job.get('status') or 'unknown'}，只有 failed 任务可以重试。")
@@ -4482,7 +4498,11 @@ def _rag_maintenance_plan_job_id(kind: str, submitted_at: str, request: dict[str
     compact_time = submitted_at.replace("-", "").replace(":", "").replace(".", "").replace("Z", "")
     fingerprint = json.dumps({"kind": kind, "request": request}, ensure_ascii=False, sort_keys=True)
     digest = sha1(fingerprint.encode("utf-8")).hexdigest()[:10]
-    prefix = "rag-corpus-plan" if kind == "rag_corpus_rebuild" else "rag-embedding-plan"
+    prefix = {
+        "rag_corpus_rebuild": "rag-corpus-plan",
+        "rag_corpus_enrichment": "rag-corpus-enrichment-plan",
+        "rag_embedding_build": "rag-embedding-plan",
+    }.get(kind, "rag-maintenance-plan")
     return f"{prefix}:{compact_time}:{digest}"
 
 
@@ -4839,7 +4859,7 @@ def _rag_chunk_rows_fts(
     return connection.execute(
         f"""
         SELECT c.chunk_id, c.corpus_id, c.chunk_index, c.run_date, c.full_name, c.html_url,
-               c.language, c.category, c.sources_json, c.chunk_text, c.token_estimate, c.payload_json
+               c.language, c.category, c.sources_json, c.chunk_text, c.token_estimate, c.source_type, c.payload_json
         FROM rag_chunks c
         JOIN rag_chunks_fts f ON f.chunk_id = c.chunk_id
         WHERE {" AND ".join(conditions)}
@@ -4875,7 +4895,7 @@ def _rag_chunk_rows_like(
         parameters.append(f"%{term.lower()}%")
     sql = """
         SELECT chunk_id, corpus_id, chunk_index, run_date, full_name, html_url,
-               language, category, sources_json, chunk_text, token_estimate, payload_json
+               language, category, sources_json, chunk_text, token_estimate, source_type, payload_json
         FROM rag_chunks
     """
     if conditions:
@@ -4995,6 +5015,7 @@ def _rag_context(row: Any, terms: list[str]) -> dict[str, Any]:
             "category": row["category"],
             "sources": _list_strings(_json_list(row["sources_json"])),
             "token_estimate": _int_value(row["token_estimate"]),
+            "source_type": row["source_type"] or "legacy",
             "quality_level": payload.get("quality_level") or "",
             "trending_rank": _int_value(payload.get("trending_rank")),
             "star_growth": _int_value(payload.get("star_growth")),
@@ -5082,6 +5103,7 @@ def _vector_context(row: Any, payload: dict[str, Any], score: float, terms: list
             "star_growth": _int_value(payload.get("star_growth")),
             "embedding_model": row["embedding_model"],
             "dimensions": _int_value(row["dimensions"]),
+            "source_type": payload.get("source_type") or "legacy",
         },
     }
 

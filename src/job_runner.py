@@ -100,6 +100,8 @@ def _execute_job_by_kind(root: Path, db_path: Path, kind: str, request: dict[str
         return _execute_rag_backfill(root=root, db_path=db_path, request=request)
     if kind == "rag_corpus_rebuild":
         return _execute_rag_corpus_rebuild(root=root, db_path=db_path, request=request)
+    if kind == "rag_corpus_enrichment":
+        return _execute_rag_corpus_enrichment(root=root, db_path=db_path, request=request)
     if kind == "rag_embedding_build":
         return _execute_rag_embedding_build(db_path=db_path, request=request)
     if kind == "rag_search_evaluation":
@@ -186,6 +188,24 @@ def _execute_rag_corpus_rebuild(root: Path, db_path: Path, request: dict[str, An
         "embedding_rebuild_required": after_counts.get("rag_chunks", 0) > 0 and after_counts.get("rag_embeddings", 0) == 0,
         "request_context": _request_context(request),
     }
+
+
+def _execute_rag_corpus_enrichment(root: Path, db_path: Path, request: dict[str, Any]) -> dict[str, Any]:
+    from src.rag.corpus_enrichment import enrich_rag_corpus
+
+    dry_run = _bool_value(request.get("dry_run"), True)
+    if dry_run:
+        return {
+            "run_date": _now()[:10], "status": "ok", "dry_run": True,
+            "limit": _positive_int(request.get("limit")) or 10,
+            "message": "dry_run=true，仅预览 Kimi 语料增强任务，未调用模型或写入 SQLite。",
+            "request_context": _request_context(request),
+        }
+    result = enrich_rag_corpus(
+        db_path=db_path, root=root, limit=_positive_int(request.get("limit")) or 10,
+        replace=_bool_value(request.get("replace"), False),
+    )
+    return {"run_date": _now()[:10], "status": "ok", "dry_run": False, **result, "request_context": _request_context(request)}
 
 
 def _execute_rag_embedding_build(db_path: Path, request: dict[str, Any]) -> dict[str, Any]:

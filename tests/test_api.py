@@ -8,6 +8,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from src.api.repository import ApiRepository
+from src.storage.sqlite_store import connect
 
 
 def _api_route_dependencies_installed() -> bool:
@@ -615,8 +616,11 @@ class ApiRepositoryTest(unittest.TestCase):
                 [item["explanation_id"] for item in rag_explanations["explanations"]],
             )
             self.assertIn("owner/agent", rag_explanations["explanations"][0]["answer"])
-            self.assertEqual(rag_explanations["explanations"][0]["quality_score"], rag_explain["quality"]["score"])
-            self.assertEqual(rag_explanations["explanations"][0]["quality_level"], rag_explain["quality"]["level"])
+            matching_explanation = next(
+                item for item in rag_explanations["explanations"] if item["explanation_id"] == rag_explain["explanation_id"]
+            )
+            self.assertEqual(matching_explanation["quality_score"], rag_explain["quality"]["score"])
+            self.assertEqual(matching_explanation["quality_level"], rag_explain["quality"]["level"])
             self.assertEqual(project_rag_explanations["repo"], "owner/agent")
             self.assertGreaterEqual(project_rag_explanations["count"], 1)
             self.assertIn("owner/agent", project_rag_explanations["explanations"][0]["repositories"])
@@ -851,8 +855,18 @@ class ApiRepositoryTest(unittest.TestCase):
             rag = repository.project_rag_bundle("owner/agent", limit=8)
             self.assertTrue(rag["agent_tasks"]["tasks"])
             self.assertTrue(rag["next_actions"])
-            corpus_text = " ".join(item.get("text") or item.get("chunk_text") or "" for item in rag["contexts"])
-            self.assertIn("验证任务闭环完成", corpus_text)
+            connection = connect(repository.db_path)
+            try:
+                memory_text = " ".join(
+                    row["chunk_text"]
+                    for row in connection.execute(
+                        "SELECT chunk_text FROM rag_chunks WHERE full_name = ? AND source_type = 'agent_memory'",
+                        ("owner/agent",),
+                    )
+                )
+            finally:
+                connection.close()
+            self.assertIn("验证任务闭环完成", memory_text)
         finally:
             shutil.rmtree(root, ignore_errors=True)
 

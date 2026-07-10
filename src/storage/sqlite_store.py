@@ -46,12 +46,14 @@ def _ensure_corpus_version_columns(connection: sqlite3.Connection) -> None:
             "content_hash": "TEXT NOT NULL DEFAULT ''",
             "noise_json": "TEXT NOT NULL DEFAULT '{}'",
             "source_manifest_json": "TEXT NOT NULL DEFAULT '[]'",
+            "structured_json": "TEXT NOT NULL DEFAULT '{}'",
         },
         "rag_chunks": {
             "corpus_version": "TEXT NOT NULL DEFAULT 'legacy-v0'",
             "cleaner_version": "TEXT NOT NULL DEFAULT 'legacy-v0'",
             "content_hash": "TEXT NOT NULL DEFAULT ''",
             "is_untrusted": "INTEGER NOT NULL DEFAULT 0",
+            "source_type": "TEXT NOT NULL DEFAULT 'legacy'",
         },
     }
     for table, columns in definitions.items():
@@ -59,6 +61,7 @@ def _ensure_corpus_version_columns(connection: sqlite3.Connection) -> None:
         for name, definition in columns.items():
             if name not in existing:
                 connection.execute(f"ALTER TABLE {table} ADD COLUMN {name} {definition}")
+    connection.execute("CREATE INDEX IF NOT EXISTS idx_rag_chunks_source_type ON rag_chunks(source_type)")
 
 
 def import_json_archive(root: Path, db_path: Path) -> dict[str, int]:
@@ -475,6 +478,22 @@ def upsert_project_corpus(connection: sqlite3.Connection, row: sqlite3.Row) -> N
         }
         for name, item in cleaned_external
     ]
+    structured = {
+        "deployment": "",
+        "tech_stack": _list_value(selection_payload.get("topics")) + ([language] if language else []),
+        "license": "",
+        "maintenance_status": "",
+        "limitations": [str(item) for item in [*security_flags, *quality_flags] if item],
+    }
+    chunk_sources = [
+        ("identity", clean_internal_text(" ".join([full_name, title, language, category]))),
+        ("description", "\n".join(item.text for name, item in cleaned_external if "description" in name)),
+        ("readme", "\n".join(item.text for name, item in cleaned_external if name == "readme")),
+        ("selection_reason", clean_internal_text("\n".join(str(item) for item in selection_reasons if item))),
+        ("project_profile", clean_internal_text(_project_profile_text(project_profile))),
+        ("risk", clean_internal_text("\n".join(str(item) for item in [*security_flags, *quality_flags] if item))),
+        ("agent_memory", clean_internal_text("\n".join([_project_agent_task_memory_text(agent_tasks), _project_agent_run_memory_text(agent_task_runs)]))),
+    ]
     payload = {
         "run_date": run_date,
         "full_name": full_name,
@@ -501,9 +520,9 @@ def upsert_project_corpus(connection: sqlite3.Connection, row: sqlite3.Row) -> N
         INSERT INTO project_corpus(
           corpus_id, run_date, full_name, html_url, title, language, category,
           sources_json, search_text, corpus_version, cleaner_version, content_hash,
-          noise_json, source_manifest_json, payload_json
+          noise_json, source_manifest_json, structured_json, payload_json
         )
-        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(corpus_id) DO UPDATE SET
           run_date = excluded.run_date,
           full_name = excluded.full_name,
@@ -518,6 +537,7 @@ def upsert_project_corpus(connection: sqlite3.Connection, row: sqlite3.Row) -> N
           content_hash = excluded.content_hash,
           noise_json = excluded.noise_json,
           source_manifest_json = excluded.source_manifest_json,
+          structured_json = excluded.structured_json,
           payload_json = excluded.payload_json
         """,
         (
@@ -535,6 +555,7 @@ def upsert_project_corpus(connection: sqlite3.Connection, row: sqlite3.Row) -> N
             search_hash,
             _json_text(noise),
             _json_text(source_manifest),
+            _json_text(structured),
             _json_text(payload),
         ),
     )
@@ -565,6 +586,7 @@ def upsert_project_corpus(connection: sqlite3.Connection, row: sqlite3.Row) -> N
         search_text=search_text,
         payload=payload,
         is_untrusted=is_untrusted,
+        chunk_sources=chunk_sources,
     )
 
 
@@ -581,28 +603,40 @@ def upsert_rag_chunks(
     search_text: str,
     payload: dict[str, Any],
     is_untrusted: bool = False,
+    chunk_sources: list[tuple[str, str]] | None = None,
 ) -> None:
     connection.execute(
         "DELETE FROM rag_chunks_fts WHERE chunk_id IN (SELECT chunk_id FROM rag_chunks WHERE corpus_id = ?)",
         (corpus_id,),
     )
     connection.execute("DELETE FROM rag_chunks WHERE corpus_id = ?", (corpus_id,))
-    for index, chunk_text in enumerate(_chunk_text(search_text), start=1):
-        chunk_id = sha1(f"{corpus_id}:{index}".encode("utf-8")).hexdigest()
+    source_chunks = chunk_sources or [("legacy", search_text)]
+    seen_chunks: set[str] = set()
+    chunk_index = 0
+    for source_type, source_text in source_chunks:
+      for chunk_text in _chunk_text(source_text):
+        key = chunk_text.casefold().strip()
+        if not key or key in seen_chunks:
+            continue
+        seen_chunks.add(key)
+        chunk_index += 1
+        index = chunk_index
+        chunk_id = sha1(f"{corpus_id}:{source_type}:{content_hash(chunk_text)}:{index}".encode("utf-8")).hexdigest()
         chunk_payload = {
             **payload,
             "corpus_id": corpus_id,
             "chunk_index": index,
             "token_estimate": _token_estimate(chunk_text),
+            "source_type": source_type,
         }
         connection.execute(
             """
             INSERT INTO rag_chunks(
               chunk_id, corpus_id, chunk_index, run_date, full_name, html_url,
               language, category, sources_json, chunk_text, token_estimate,
-              corpus_version, cleaner_version, content_hash, is_untrusted, payload_json
+              corpus_version, cleaner_version, content_hash, is_untrusted, source_type, payload_json
             )
-            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(chunk_id) DO UPDATE SET
               corpus_id = excluded.corpus_id,
               chunk_index = excluded.chunk_index,
@@ -618,6 +652,7 @@ def upsert_rag_chunks(
               cleaner_version = excluded.cleaner_version,
               content_hash = excluded.content_hash,
               is_untrusted = excluded.is_untrusted,
+              source_type = excluded.source_type,
               payload_json = excluded.payload_json
             """,
             (
@@ -636,6 +671,7 @@ def upsert_rag_chunks(
                 CLEANER_VERSION,
                 content_hash(chunk_text),
                 int(is_untrusted),
+                source_type,
                 _json_text(chunk_payload),
             ),
         )

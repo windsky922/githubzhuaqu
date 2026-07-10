@@ -1,5 +1,12 @@
 # 操作日志
 
+## 2026-07-10 追加：P0-3B 来源分层与 Kimi 语料增强
+
+1. RAG chunks 按 identity、description、readme、selection reason、project profile、risk 和 Agent memory 分层生成，同一 corpus 内去重并保留跨日期历史证据。
+2. 新增 `project_corpus.structured_json`、`rag_chunks.source_type` 和 `rag_corpus_enrichments` 缓存表，结构化增强按内容哈希、清洗器/prompt 版本和模型稳定去重。
+3. 新增默认 dry-run、需显式确认的 `rag_corpus_enrichment` planned job；复用 Kimi 环境变量，非法 JSON、超时、无配置和无证据字段均安全降级，不保存完整模型原始回答。
+4. 通过逐字段证据校验的增强内容只进入检索，不参与硬过滤或首选排名；固定评估集中 local-hash-v1/hybrid Recall@3 从 0.8846 提升到 0.9231，FTS5 指标持平。
+
 ## 2026-07-10 追加：P0-3A 确定性语料清洗与版本化
 
 1. 新增标准库 RAG 语料清洗器，移除 Markdown 图片、徽章、HTML 标签/属性、重复模板和提示注入式行，同时保留链接标题、代码内容与限制说明。

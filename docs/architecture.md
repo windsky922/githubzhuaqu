@@ -36,6 +36,8 @@ GitHub Actions 默认执行事件检测与候选构建，但 `send_event_notific
 
 RAG 语料先经过确定性清洗和版本化，再进入 FTS5、local-hash 与 Ask。外部 README/描述按不可信输入处理：图片、徽章、HTML 属性、重复模板和提示注入式行不进入检索或模型上下文，原文仍可从 JSON 归档追溯。`corpus_version`、`cleaner_version` 和内容哈希用于判断派生索引是否过期；确认执行语料重建时旧 embedding 同步失效，随后由独立任务重建。
 
+确定性语料按来源单独分块，避免 README、风险、项目画像和 Agent 记忆互相污染。Kimi 结构化增强是独立 planned job，不在查询或语料重建中隐式调用；其输出只有在逐字段证据能从清洗原文精确定位时才进入 `model_enrichment` chunk。增强结果不直接执行硬过滤或排名，相关决策留给 P0-4 的可审计 recommendations 层。
+
 ```text
 /v1/rag/ask
 -> rag_explain 生成证据、引用和解释编号

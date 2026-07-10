@@ -82,10 +82,20 @@ class SqliteStorageTest(unittest.TestCase):
                 ).fetchone()
                 self.assertIn("owner/project", chunk["chunk_text"])
                 self.assertIn("AI Agent", chunk["chunk_text"])
-                self.assertIn("项目定位", chunk["chunk_text"])
+                profile_chunk = connection.execute(
+                    "SELECT chunk_text FROM rag_chunks WHERE full_name = ? AND source_type = 'project_profile'",
+                    ("owner/project",),
+                ).fetchone()
+                self.assertIn("项目定位", profile_chunk["chunk_text"])
                 self.assertEqual(chunk["corpus_version"], CORPUS_VERSION)
                 self.assertEqual(chunk["cleaner_version"], CLEANER_VERSION)
                 self.assertEqual(len(chunk["content_hash"]), 64)
+                source_types = {
+                    item["source_type"]
+                    for item in connection.execute("SELECT DISTINCT source_type FROM rag_chunks WHERE full_name = ?", ("owner/project",))
+                }
+                self.assertIn("identity", source_types)
+                self.assertIn("project_profile", source_types)
                 chunk_payload = json.loads(chunk["payload_json"])
                 self.assertIn("project_profile", chunk_payload)
             finally:

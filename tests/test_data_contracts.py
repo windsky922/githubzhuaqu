@@ -219,6 +219,7 @@ SQLITE_COLUMNS = {
         "content_hash",
         "noise_json",
         "source_manifest_json",
+        "structured_json",
         "payload_json",
     },
     "project_corpus_fts": {
@@ -245,7 +246,13 @@ SQLITE_COLUMNS = {
         "cleaner_version",
         "content_hash",
         "is_untrusted",
+        "source_type",
         "payload_json",
+    },
+    "rag_corpus_enrichments": {
+        "enrichment_id", "corpus_id", "full_name", "source_hash", "cleaner_version",
+        "prompt_version", "model", "status", "structured_json", "evidence_json",
+        "error_summary", "created_at", "updated_at",
     },
     "rag_chunks_fts": {
         "chunk_id",

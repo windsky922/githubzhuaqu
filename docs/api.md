@@ -818,6 +818,10 @@ POST /v1/jobs/{job_id}/execute
 
 执行时必须传入 `confirm_execution=true`。如果计划任务自身为 `dry_run=false`，创建计划时也必须传入 `confirm_execution=true`，否则后端会自动改为 `dry_run=true`，避免误写 SQLite。
 
+### `POST /v1/rag/corpus-enrichment-plan`
+
+创建 Kimi 结构化语料增强 planned job。请求支持 `limit`、`replace`、`dry_run`、`confirm_execution`、`requested_by`；默认 `dry_run=true`，真实调用模型并写入 `rag_corpus_enrichments` 必须同时传入 `dry_run=false` 和 `confirm_execution=true`。任务按清洗内容哈希、cleaner/prompt 版本和 Kimi 模型复用缓存；无密钥或单项目失败不会改变确定性语料。通过逐字段原文证据校验的结果进入 `model_enrichment` chunk，但不执行硬约束过滤或首选排名。
+
 ### `POST /v1/rag/maintenance-plan`
 
 检查 RAG 诊断状态与覆盖缺口，并按需创建 RAG 维护 planned 任务。该接口会先调用 `/v1/rag/diagnostics`，再按优先级创建任务：
