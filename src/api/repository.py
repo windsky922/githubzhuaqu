@@ -19,7 +19,7 @@ from src.rag.embeddings import (
     hash_embedding,
     vector_from_json,
 )
-from src.rag.answering import answer_rag_question
+from src.rag.answering import answer_rag_question, stream_rag_answer_question
 from src.storage.sqlite_store import (
     connect,
     import_json_archive,
@@ -1395,6 +1395,67 @@ class ApiRepository:
                 "prompt_context": explained.get("prompt_context") or "",
             },
         )
+        return self._rag_ask_response(
+            query=query,
+            explained=explained,
+            answer_result=answer_result,
+            limit=limit,
+        )
+
+    def rag_ask_stream(
+        self,
+        *,
+        query: str,
+        language: str | None = None,
+        category: str | None = None,
+        source: str | None = None,
+        limit: int = 8,
+        mode: str = "fts5",
+        model: str = MODEL_NAME,
+        auto_build: bool = False,
+    ):
+        explained = self.rag_explain(
+            query=query,
+            language=language,
+            category=category,
+            source=source,
+            limit=limit,
+            mode=mode,
+            model=model,
+            auto_build=auto_build,
+        )
+        retrieval = {
+            "query": explained.get("query") or query,
+            "contexts": explained.get("contexts") if isinstance(explained.get("contexts"), list) else [],
+            "citations": explained.get("citations") if isinstance(explained.get("citations"), list) else [],
+            "retrieval": explained.get("retrieval") or {},
+            "prompt_context": explained.get("prompt_context") or "",
+        }
+        for event in stream_rag_answer_question(
+            root=self.root,
+            query=str(explained.get("query") or query or ""),
+            retrieval=retrieval,
+        ):
+            if event.get("event") != "final":
+                yield event
+                continue
+            answer_result = event.get("data") if isinstance(event.get("data"), dict) else {}
+            event["data"] = self._rag_ask_response(
+                query=query,
+                explained=explained,
+                answer_result=answer_result,
+                limit=limit,
+            )
+            yield event
+
+    def _rag_ask_response(
+        self,
+        *,
+        query: str,
+        explained: dict[str, Any],
+        answer_result: dict[str, Any],
+        limit: int,
+    ) -> dict[str, Any]:
         explanation = explained.get("explanation") if isinstance(explained.get("explanation"), dict) else {}
         quality = explained.get("quality") if isinstance(explained.get("quality"), dict) else answer_result.get("quality") or {}
         answer = str(answer_result.get("answer") or explanation.get("answer") or "当前没有足够 RAG 证据形成回答。")

@@ -8,7 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 INCLUDED_SUFFIXES = {".py", ".yml", ".yaml", ".md", ".json", ".example", ".txt"}
-EXCLUDED_DIRS = {".git", "__pycache__", ".pytest_cache", ".mypy_cache", "data", "reports"}
+EXCLUDED_DIRS = {".git", "__pycache__", ".pytest_cache", ".mypy_cache", "node_modules", "data", "reports"}
 EXCLUDED_PATH_PREFIXES = {("docs", "weekly")}
 
 SECRET_PATTERNS = {

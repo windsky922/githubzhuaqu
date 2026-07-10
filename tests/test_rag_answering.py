@@ -2,7 +2,7 @@ import unittest
 from pathlib import Path
 
 from src.llm.client import LlmClientError
-from src.rag.answering import answer_rag_question
+from src.rag.answering import answer_rag_question, stream_rag_answer_question
 
 
 class _FakeClient:
@@ -27,6 +27,14 @@ class _FakeClient:
         if self.error:
             raise self.error
         return self.answer
+
+    def stream_chat(self, messages):
+        self.calls += 1
+        if self.error:
+            raise self.error
+        for part in (self.answer[: len(self.answer) // 2], self.answer[len(self.answer) // 2 :]):
+            if part:
+                yield part
 
 
 def _retrieval(contexts):
@@ -150,6 +158,48 @@ class RagAnsweringTest(unittest.TestCase):
         self.assertEqual(result["answer_mode"], "fallback_rule")
         self.assertIn("rag_ask.md", result["fallback_reason"])
         self.assertIn("owner/agent", result["answer"])
+
+    def test_stream_emits_draft_then_validated_final(self):
+        events = list(
+            stream_rag_answer_question(
+                root=Path.cwd(),
+                query="agent workflow",
+                retrieval=_retrieval([_context()]),
+                client=_FakeClient(answer="优先研究 owner/agent 的 agent workflow 自动化能力。 [1]"),
+            )
+        )
+
+        self.assertEqual(events[0]["event"], "meta")
+        self.assertEqual("".join(item["data"]["text"] for item in events if item["event"] == "delta"), "优先研究 owner/agent 的 agent workflow 自动化能力。 [1]")
+        self.assertEqual(events[-1]["event"], "final")
+        self.assertEqual(events[-1]["data"]["answer_mode"], "llm")
+
+    def test_stream_quality_failure_replaces_draft_with_rule_fallback(self):
+        events = list(
+            stream_rag_answer_question(
+                root=Path.cwd(),
+                query="agent workflow",
+                retrieval=_retrieval([_context()]),
+                client=_FakeClient(answer="unknown/repo 更值得继续研究 [1]。"),
+            )
+        )
+
+        self.assertTrue(any(item["event"] == "delta" for item in events))
+        self.assertEqual(events[-1]["data"]["answer_mode"], "fallback_rule")
+        self.assertIn("unknown_repository:unknown/repo", events[-1]["data"]["fallback_reason"])
+
+    def test_stream_refusal_does_not_emit_deltas(self):
+        events = list(
+            stream_rag_answer_question(
+                root=Path.cwd(),
+                query="agent workflow",
+                retrieval=_retrieval([]),
+                client=_FakeClient(),
+            )
+        )
+
+        self.assertEqual([item["event"] for item in events], ["meta", "final"])
+        self.assertEqual(events[-1]["data"]["answer_mode"], "refusal")
 
 
 def _context():

@@ -19,6 +19,20 @@ class _Response:
         return json.dumps(self.payload).encode("utf-8")
 
 
+class _StreamResponse:
+    def __init__(self, lines: list[str]) -> None:
+        self.lines = lines
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc, tb) -> None:
+        return None
+
+    def __iter__(self):
+        return iter([line.encode("utf-8") for line in self.lines])
+
+
 class LlmClientTest(unittest.TestCase):
     def test_env_config_requires_key_and_model(self):
         config = LlmConfig.from_env({})
@@ -51,6 +65,29 @@ class LlmClientTest(unittest.TestCase):
 
         with self.assertRaises(LlmClientError):
             client.chat([{"role": "user", "content": "hi"}])
+
+    def test_stream_chat_yields_sse_deltas(self):
+        config = LlmConfig(
+            api_key="x",
+            base_url="https://api.example.com/v1",
+            model="moonshot-test",
+            timeout_seconds=3,
+            max_retries=0,
+            retry_seconds=0,
+        )
+        client = KimiChatClient(config)
+        lines = [
+            'data: {"choices":[{"delta":{"content":"证据"}}]}\n',
+            'data: {"choices":[{"delta":{"content":"回答"}}]}\n',
+            "data: [DONE]\n",
+        ]
+
+        with patch("urllib.request.urlopen", return_value=_StreamResponse(lines)) as urlopen:
+            answer = "".join(client.stream_chat([{"role": "user", "content": "hi"}]))
+
+        self.assertEqual(answer, "证据回答")
+        payload = json.loads(urlopen.call_args.args[0].data.decode("utf-8"))
+        self.assertTrue(payload["stream"])
 
 
 if __name__ == "__main__":

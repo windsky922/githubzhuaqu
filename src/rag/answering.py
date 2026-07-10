@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from collections.abc import Iterator
 from typing import Any
 
 from src.llm.client import KimiChatClient, LlmClientError
@@ -82,6 +83,104 @@ def answer_rag_question(
         evidence=evidence,
         model_status={**model_status, "attempted": model_status["configured"], "used": False},
     )
+
+
+def stream_rag_answer_question(
+    *,
+    root: Path,
+    query: str,
+    retrieval: dict[str, Any],
+    client: KimiChatClient | None = None,
+) -> Iterator[dict[str, Any]]:
+    """Yield draft deltas, then one evidence-validated final response."""
+    contexts = _list_of_dicts(retrieval.get("contexts"))
+    citations = _list_of_dicts(retrieval.get("citations"))
+    prompt_context = str(retrieval.get("prompt_context") or "")
+    evidence = _evidence_from_contexts(contexts)
+    model_client = client or KimiChatClient()
+    model_status = model_client.status()
+    yield {
+        "event": "meta",
+        "data": {
+            "query": retrieval.get("query") or query,
+            "retrieval": retrieval.get("retrieval") or {},
+            "citations": citations,
+            "evidence": evidence,
+            "model_status": model_status,
+        },
+    }
+
+    if not contexts:
+        yield {
+            "event": "final",
+            "data": _response(
+                query=query,
+                answer="当前没有召回可引用的 RAG 证据，不能生成项目研究结论。请扩大关键词、放宽筛选条件，或先重建 RAG 索引。",
+                answer_model=RULE_MODEL,
+                answer_mode="refusal",
+                fallback_reason="no_evidence",
+                confidence="low",
+                retrieval=retrieval,
+                citations=citations,
+                evidence=evidence,
+                model_status={**model_status, "attempted": False, "used": False},
+            ),
+        }
+        return
+
+    fallback_reason = "Kimi API 未配置"
+    if model_status["configured"]:
+        try:
+            messages = rag_ask_messages(
+                root=root,
+                question=query,
+                prompt_context=prompt_context,
+                citations=citations,
+                evidence=evidence,
+            )
+            chunks: list[str] = []
+            for delta in model_client.stream_chat(messages):
+                chunks.append(delta)
+                yield {"event": "delta", "data": {"text": delta}}
+            answer = _ensure_citation_marker("".join(chunks), citations)
+            answer_quality = validate_rag_answer(answer=answer, citations=citations, contexts=contexts)
+            if not answer_quality["passed"]:
+                raise LlmClientError("llm_quality_failed: " + "; ".join(answer_quality["issues"]))
+            yield {
+                "event": "final",
+                "data": _response(
+                    query=query,
+                    answer=answer,
+                    answer_model=f"kimi:{model_status['model']}",
+                    answer_mode="llm",
+                    fallback_reason="",
+                    confidence=_confidence(contexts),
+                    retrieval=retrieval,
+                    citations=citations,
+                    evidence=evidence,
+                    model_status={**model_status, "attempted": True, "used": True},
+                    answer_quality=answer_quality,
+                ),
+            }
+            return
+        except (LlmClientError, OSError) as error:
+            fallback_reason = str(error)
+
+    yield {
+        "event": "final",
+        "data": _response(
+            query=query,
+            answer=_rule_answer(query=query, contexts=contexts, retrieval=retrieval),
+            answer_model=RULE_MODEL,
+            answer_mode="fallback_rule",
+            fallback_reason=fallback_reason,
+            confidence=_confidence(contexts),
+            retrieval=retrieval,
+            citations=citations,
+            evidence=evidence,
+            model_status={**model_status, "attempted": model_status["configured"], "used": False},
+        ),
+    }
 
 
 def _response(

@@ -41,7 +41,7 @@ GitHub Actions 默认执行事件检测与候选构建，但 `send_event_notific
 
 管理页 RAG 对话工作台是该接口的 GPT 式前端封装，不新增后端会话状态。对话历史只保存在浏览器 localStorage，最多 20 轮；每轮问题独立检索，历史回答只用于页面回看，不进入 `prompt_context`，也不作为事实证据。
 
-`agent.html?api=1` 是面向普通用户的项目匹配前端：用户只输入一句需求，前端默认调用 `/v1/rag/ask?mode=hybrid&limit=3&auto_build=true`，并把答案压缩成简短回答、Top 项目卡片和折叠证据。它不新增数据库表、不保存聊天历史到后端，也不把前端历史或模型回答当作事实来源；真实依据仍只来自本轮 `citations`、`evidence`、`contexts` 和 `prompt_context`。
+`frontend/` 是 React + TypeScript 用户前端，构建产物写入 `docs/app/`，通过 Hash Router 提供项目匹配、筛选、推荐、详情和对比页面；旧 `agent.html`、`explorer.html`、`recommendations.html`、`project.html`、`compare.html` 仅保留 query 参数并跳转到对应路由。`app/#/agent?api=1` 是面向普通用户的项目匹配前端：用户只输入一句需求，前端默认调用 `/v1/rag/ask/stream?mode=hybrid&limit=3&auto_build=true`。流中的 `delta` 只作为“待质量校验草稿”展示，只有 `final` 中通过质量闸门的结果可作为回答；失败时以规则降级回答替换草稿。它不新增数据库表、不保存聊天历史到后端，也不把前端历史或模型回答当作事实来源；真实依据仍只来自本轮 `citations`、`evidence`、`contexts` 和 `prompt_context`。
 
 ## 项目级 Agent 执行层
 

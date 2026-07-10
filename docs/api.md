@@ -68,7 +68,7 @@ Authorization: Bearer <本地管理口令>
 
 管理首页的 GPT 式 RAG 对话工作台仍然逐轮调用 `/v1/rag/ask`。对话历史只保存在浏览器 `localStorage.github_weekly_rag_chat_history`，最多 20 轮；后端不保存会话，不把历史回答作为事实证据，也不写入 SQLite。
 
-项目匹配 Agent 页 `agent.html?api=1` 也复用 `/v1/rag/ask`。它面向普通用户，只保留一句话需求输入，默认 `mode=hybrid&limit=3&auto_build=true`，把返回结果渲染为简短回答、Top 项目卡片和折叠证据。该页历史只保存在 `localStorage.github_weekly_agent_match_history`，不保存 API Key、管理口令或请求头。
+React 项目匹配工作台位于 `app/#/agent?api=1`，旧 `agent.html?api=1` 自动跳转。它默认调用 `/v1/rag/ask/stream`，只保留一句话需求输入，并把回答渲染为简短结论、Top 项目卡片和折叠证据。会话只保存在浏览器 `localStorage.github_weekly_agent_match_conversations_v1`，不保存 API Key、管理口令或请求头；历史回答不进入下一轮检索，也不作为事实证据。
 
 如果本地没有 `data/github_weekly.sqlite`，查询项目接口会从 `data/` 下的 JSON 归档自动重建 SQLite 派生索引。
 
@@ -634,6 +634,10 @@ py scripts\run_rag_search_evaluation.py --queries "agent workflow;python automat
 管理页 RAG 对话工作台使用同一接口。每轮问题独立检索；前端以用户/助手气泡展示回答，只把本轮问题、回答摘要、引用、证据、质量闸门结果和 `prompt_context` 保存到浏览器 localStorage，便于刷新后继续查看。
 
 `agent.html?api=1` 的项目匹配对话同样使用该接口，不新增后端会话接口。前端默认降低 `limit` 到 3 来缩短响应等待，并只把详细引用、证据和 `prompt_context` 放入折叠区；如果回答进入 `refusal`、`fallback_rule` 或质量闸门失败，页面必须显式展示状态。
+
+### `GET /v1/rag/ask/stream`
+
+React 项目匹配工作台使用的只读 SSE 接口，查询参数与 `/v1/rag/ask` 一致。事件依次为：`meta`（召回元数据、引用和证据摘要）、零到多条 `delta`（未通过质量闸门的生成草稿）、`final`（与 `/v1/rag/ask` 相同的完整最终响应）或 `error`（脱敏后的流协议错误）。前端不得把 `delta` 当作最终事实；质量失败时 `final` 会以规则降级回答替换草稿。
 
 示例：
 

@@ -62,6 +62,19 @@ class SecurityCheckTest(unittest.TestCase):
         finally:
             shutil.rmtree(root, ignore_errors=True)
 
+    def test_ignores_untracked_node_dependencies(self):
+        root = Path.cwd() / f".tmp-security-test-{uuid.uuid4().hex}"
+        try:
+            dependencies = root / "node_modules" / "package"
+            dependencies.mkdir(parents=True)
+            (dependencies / "README.md").write_text("token: ghp_" + "E" * 36 + "\n", encoding="utf-8")
+
+            findings = scan_repository(root)
+
+            self.assertEqual(findings, [])
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
     def test_still_scans_regular_docs(self):
         root = Path.cwd() / f".tmp-security-test-{uuid.uuid4().hex}"
         try:

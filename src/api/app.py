@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 import hmac
+import json
 import os
 from pathlib import Path
 from typing import Any
 
 from fastapi import Body, Depends, FastAPI, Header, HTTPException, Query, status
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
 from src.api.repository import ROOT, ApiRepository
@@ -466,6 +467,37 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
             model=model or "local-hash-v1",
             auto_build=auto_build,
         )
+
+    @app.get("/v1/rag/ask/stream")
+    def v1_rag_ask_stream(
+        q: str = Query(..., min_length=1),
+        language: str | None = None,
+        category: str | None = None,
+        source: str | None = None,
+        limit: int = Query(default=8, ge=1, le=30),
+        mode: str = "fts5",
+        model: str | None = None,
+        auto_build: bool = False,
+    ) -> StreamingResponse:
+        def event_stream():
+            try:
+                for event in repository.rag_ask_stream(
+                    query=q,
+                    language=language,
+                    category=category,
+                    source=source,
+                    limit=limit,
+                    mode=mode,
+                    model=model or "local-hash-v1",
+                    auto_build=auto_build,
+                ):
+                    name = str(event.get("event") or "error")
+                    data = event.get("data") if isinstance(event.get("data"), dict) else {"message": "流式响应格式异常"}
+                    yield f"event: {name}\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
+            except (OSError, ValueError):
+                yield 'event: error\ndata: {"message": "流式问答连接中断，请重试。"}\n\n'
+
+        return StreamingResponse(event_stream(), media_type="text/event-stream")
 
     @app.get("/v1/rag/explanations")
     def v1_rag_explanations(

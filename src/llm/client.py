@@ -6,6 +6,7 @@ import time
 import urllib.error
 import urllib.request
 from dataclasses import dataclass
+from collections.abc import Iterator
 from typing import Any
 
 from src.security import redact_sensitive_text
@@ -69,6 +70,56 @@ class KimiChatClient:
             raise LlmClientError(f"Kimi API 返回空内容，响应结构：{_response_shape(data)}")
         return redact_sensitive_text(content).strip()
 
+    def stream_chat(self, messages: list[dict[str, str]]) -> Iterator[str]:
+        """Yield safe text deltas from the provider's OpenAI-compatible SSE stream."""
+        if not self.config.configured:
+            raise LlmClientError("Kimi API 未配置")
+        payload = {
+            "model": self.config.model,
+            "messages": messages,
+            "temperature": 1,
+            "stream": True,
+        }
+        errors: list[str] = []
+        for attempt in range(self.config.max_retries + 1):
+            emitted = False
+            try:
+                request = _request(self._chat_url(), payload, self.config.api_key)
+                with urllib.request.urlopen(request, timeout=self.config.timeout_seconds) as response:
+                    for raw_line in response:
+                        line = raw_line.decode("utf-8", errors="replace").strip()
+                        if not line.startswith("data:"):
+                            continue
+                        data_text = line[5:].strip()
+                        if data_text == "[DONE]":
+                            if not emitted:
+                                raise LlmClientError("Kimi API 流式响应没有文本内容")
+                            return
+                        try:
+                            delta = _extract_stream_delta(json.loads(data_text))
+                        except json.JSONDecodeError as error:
+                            raise LlmClientError("Kimi API 返回了无效流式数据") from error
+                        safe_delta = redact_sensitive_text(delta)
+                        if safe_delta:
+                            emitted = True
+                            yield safe_delta
+                if not emitted:
+                    raise LlmClientError("Kimi API 流式响应提前结束且没有文本内容")
+                return
+            except urllib.error.HTTPError as error:
+                body = error.read().decode("utf-8", errors="replace")
+                message = redact_sensitive_text(f"Kimi API error {error.code}: {body}")
+                if not _is_transient_error(error.code, body) or attempt >= self.config.max_retries:
+                    raise LlmClientError("; ".join(errors + [message])) from error
+                errors.append(f"{message}; retry_after={self.config.retry_seconds}s")
+            except (TimeoutError, urllib.error.URLError, LlmClientError) as error:
+                message = redact_sensitive_text(f"Kimi API transient stream error: {error}")
+                if emitted or attempt >= self.config.max_retries:
+                    raise LlmClientError("; ".join(errors + [message])) from error
+                errors.append(f"{message}; retry_after={self.config.retry_seconds}s")
+            time.sleep(self.config.retry_seconds)
+        raise LlmClientError("; ".join(errors) or "Kimi API stream request failed")
+
     def _post_with_retries(self, payload: dict[str, Any]) -> dict[str, Any]:
         errors: list[str] = []
         for attempt in range(self.config.max_retries + 1):
@@ -129,6 +180,24 @@ def _extract_content(data: dict[str, Any]) -> str:
     return ""
 
 
+def _extract_stream_delta(data: dict[str, Any]) -> str:
+    choice = (data.get("choices") or [{}])[0]
+    delta = choice.get("delta") or {}
+    content = delta.get("content")
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        return "".join(
+            str(item.get("text") or item.get("content") or "") if isinstance(item, dict) else str(item)
+            for item in content
+        )
+    for key in ("reasoning_content", "text", "output_text"):
+        value = delta.get(key) or choice.get(key)
+        if isinstance(value, str):
+            return value
+    return ""
+
+
 def _response_shape(data: dict[str, Any]) -> str:
     choice = (data.get("choices") or [{}])[0]
     message = choice.get("message") or {}
@@ -155,4 +224,3 @@ def _int_value(value: str | None, default: int, *, minimum: int) -> int:
     except ValueError:
         return default
     return max(minimum, parsed)
-

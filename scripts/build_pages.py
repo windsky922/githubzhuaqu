@@ -43,22 +43,22 @@ def build_pages(root: Path = ROOT) -> list[Path]:
     admin_page.write_text(_admin_dashboard_content(), encoding="utf-8")
     written.append(admin_page)
     agent_page = root / "docs" / "agent.html"
-    agent_page.write_text(_agent_match_content(), encoding="utf-8")
+    agent_page.write_text(_react_app_redirect_content("agent"), encoding="utf-8")
     written.append(agent_page)
     explorer = root / "docs" / "explorer.html"
-    explorer.write_text(_explorer_content(), encoding="utf-8")
+    explorer.write_text(_react_app_redirect_content("explore"), encoding="utf-8")
     written.append(explorer)
     recommendations = root / "docs" / "recommendations.html"
-    recommendations.write_text(_recommendations_content(), encoding="utf-8")
+    recommendations.write_text(_react_app_redirect_content("recommendations"), encoding="utf-8")
     written.append(recommendations)
     subscriptions = root / "docs" / "subscriptions.html"
     subscriptions.write_text(_subscriptions_content(), encoding="utf-8")
     written.append(subscriptions)
     compare = root / "docs" / "compare.html"
-    compare.write_text(_compare_content(), encoding="utf-8")
+    compare.write_text(_react_app_redirect_content("compare"), encoding="utf-8")
     written.append(compare)
     project_page = root / "docs" / "project.html"
-    project_page.write_text(_project_detail_content(), encoding="utf-8")
+    project_page.write_text(_react_app_redirect_content("project"), encoding="utf-8")
     written.append(project_page)
     runs_page = root / "docs" / "runs.html"
     runs_page.write_text(_runs_dashboard_content(), encoding="utf-8")
@@ -99,6 +99,47 @@ def _report_files(root: Path) -> list[Path]:
         key=lambda path: path.stem,
         reverse=True,
     )
+
+
+def _react_app_redirect_content(page: str) -> str:
+    routes = {
+        "agent": "/agent",
+        "explore": "/explore",
+        "recommendations": "/recommendations",
+        "compare": "/compare",
+        "project": "/agent",
+    }
+    route = routes[page]
+    return f"""<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GitHub 项目研究 Agent</title>
+</head>
+<body>
+  <p>正在打开 React 项目研究工作台。<a id="appLink" href="app/#/{route.lstrip('/')}">继续打开</a></p>
+  <script>
+    (function () {{
+      const page = {json.dumps(page, ensure_ascii=False)};
+      const params = new URLSearchParams(window.location.search);
+      let route = {json.dumps(route, ensure_ascii=False)};
+      if (page === "project") {{
+        const repo = params.get("repo") || "";
+        if (/^[^/]+\\/[^/]+$/.test(repo)) {{
+          route = "/projects/" + repo.split("/").map(encodeURIComponent).join("/");
+          params.delete("repo");
+        }}
+      }}
+      const query = params.toString();
+      const target = "app/#" + route + (query ? "?" + query : "");
+      document.getElementById("appLink").href = target;
+      window.location.replace(target);
+    }})();
+  </script>
+</body>
+</html>
+"""
 
 
 def _index_content(root: Path, reports: list[Path]) -> str:

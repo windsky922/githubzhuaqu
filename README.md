@@ -107,6 +107,7 @@ GitHub Actions
 | `src/rag/` | RAG 基础能力，当前包含本地确定性 embedding 构建逻辑和证据约束问答编排 |
 | `src/job_runner.py` | 执行 SQLite jobs 表中的计划任务 |
 | `scripts/build_pages.py` | 生成 GitHub Pages 归档页面 |
+| `frontend/` | React + TypeScript 项目研究工作台源码，构建后发布到 `docs/app/` |
 | `scripts/build_rag_embeddings.py` | 从 `rag_chunks` 构建本地 RAG embedding 索引 |
 | `scripts/backfill_rag_explanations.py` | 为缺少解释历史的项目批量生成规则版 RAG 解释 |
 | `scripts/plan_rag_maintenance.py` | 检查 RAG 诊断与覆盖缺口，并按需创建语料重建、embedding 构建或解释回填 planned 任务 |
@@ -381,7 +382,7 @@ python scripts/query_archive.py --profile agent_development --query workflow --f
 python scripts/build_rag_embeddings.py
 ```
 
-本地前端现在提供两个 RAG 入口：`admin.html?api=1` 用于管理、诊断和证据检查；`agent.html?api=1` 用于面向用户的一句话项目匹配对话。项目匹配页默认使用 `/v1/rag/ask?mode=hybrid&limit=3&auto_build=true`，前端只展示简短回答、Top 项目卡片和折叠证据，不保存密钥，不新增后端会话。
+本地前端现在提供两个 RAG 入口：`admin.html?api=1` 用于管理、诊断和证据检查；`app/#/agent?api=1` 是 React 项目匹配工作台，旧 `agent.html?api=1` 会自动跳转。工作台默认使用 `/v1/rag/ask/stream?mode=hybrid&limit=3&auto_build=true`，以 SSE 展示“待质量校验草稿”，最终只保留通过证据质量闸门的回答；无证据或质量失败会明确显示 refusal/规则降级。对话只保存在浏览器 `localStorage`，不保存密钥，不新增后端会话。
 
 当前 embedding 使用本地确定性 `local-hash-v1`，不调用外部模型、不需要密钥。它用于打通向量索引表和检索 API，后续可以替换为真实 embedding 模型。
 

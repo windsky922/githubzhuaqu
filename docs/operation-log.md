@@ -1,5 +1,13 @@
 # 操作日志
 
+## 2026-07-10 追加：React 项目研究工作台与流式 RAG
+
+1. 新增 `frontend/` React + TypeScript + Vite 工程，使用 Tailwind、shadcn/Radix 基础设施、Lucide、React Router 和 TanStack Query，构建产物发布到 `docs/app/`。
+2. 用户路径迁移为 Hash Router：项目匹配、项目筛选、推荐、详情和对比；旧 HTML 页面保留为 query 参数兼容跳转入口，管理页不迁移。
+3. 新增 `/v1/rag/ask/stream` SSE 契约与 Kimi 流式客户端。`delta` 是质量校验前草稿，服务端收齐文本后复用现有引用质量闸门，失败时由 `final` 返回规则降级答案替换草稿。
+4. 对话历史只保存在 `localStorage.github_weekly_agent_match_conversations_v1`，最多 10 个会话、每个 20 轮；首次读取旧历史时迁移，不写入 SQLite 或后端会话表。
+5. GitHub Actions 增加 Node、npm 校验和 React 构建步骤，确保 `docs/app/` 随归档发布。
+
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
 
 ## 2026-07-08 追加：轻量项目匹配 Agent 前端

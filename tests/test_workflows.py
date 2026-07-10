@@ -73,6 +73,16 @@ class WorkflowTest(unittest.TestCase):
             workflow.index("scripts/build_pages.py"),
         )
 
+    def test_weekly_workflow_checks_and_builds_react_workbench_before_publish(self) -> None:
+        workflow = (ROOT / ".github" / "workflows" / "weekly.yml").read_text(encoding="utf-8")
+
+        self.assertIn("actions/setup-node@v6", workflow)
+        self.assertIn("npm ci", workflow)
+        self.assertIn("npm run lint && npm run test", workflow)
+        self.assertIn("npm run build", workflow)
+        self.assertLess(workflow.index("python scripts/build_pages.py"), workflow.index("npm run build"))
+        self.assertLess(workflow.index("npm run build"), workflow.index("scripts/publish_archive_branch.py"))
+
     def test_weekly_workflow_builds_candidates_and_gates_real_delivery(self) -> None:
         workflow = (ROOT / ".github" / "workflows" / "weekly.yml").read_text(encoding="utf-8")
 

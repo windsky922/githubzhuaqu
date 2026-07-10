@@ -1177,6 +1177,10 @@ class ApiRepositoryTest(unittest.TestCase):
                     "auto_build": True,
                 },
             )
+            v1_rag_ask_stream = client.get(
+                "/v1/rag/ask/stream",
+                params={"q": "agent workflow", "language": "Python", "limit": 5},
+            )
             v1_rag_explanations = client.get(
                 "/v1/rag/explanations",
                 params={"q": "agent", "limit": 5},
@@ -1347,6 +1351,11 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(v1_rag_hybrid_explain.status_code, 200)
             self.assertEqual(v1_rag_ask.status_code, 200)
             self.assertEqual(v1_rag_hybrid_ask.status_code, 200)
+            self.assertEqual(v1_rag_ask_stream.status_code, 200)
+            self.assertIn("text/event-stream", v1_rag_ask_stream.headers["content-type"])
+            self.assertIn("event: meta", v1_rag_ask_stream.text)
+            self.assertIn("event: final", v1_rag_ask_stream.text)
+            self.assertIn('"answer_mode": "fallback_rule"', v1_rag_ask_stream.text)
             self.assertEqual(v1_rag_explanations.status_code, 200)
             self.assertEqual(v1_project_rag_explanations.status_code, 200)
             self.assertEqual(v1_project_rag.status_code, 200)
