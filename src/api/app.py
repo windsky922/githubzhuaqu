@@ -11,6 +11,7 @@ from fastapi.responses import RedirectResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
 from src.api.repository import ROOT, ApiRepository
+from src.rag.follow_up_router import normalize_contextual_request
 
 
 def require_admin_token(
@@ -472,6 +473,14 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
             auto_build=auto_build,
         )
 
+    @app.post("/v1/rag/ask")
+    def v1_rag_ask_contextual(payload: dict[str, Any] | None = Body(default=None)) -> dict[str, Any]:
+        try:
+            request = normalize_contextual_request(payload)
+            return repository.rag_ask_contextual(request)
+        except ValueError as error:
+            raise HTTPException(status_code=422, detail=str(error)) from error
+
     @app.get("/v1/rag/ask/stream")
     def v1_rag_ask_stream(
         q: str = Query(..., min_length=1),
@@ -495,6 +504,24 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
                     model=model or "local-hash-v1",
                     auto_build=auto_build,
                 ):
+                    name = str(event.get("event") or "error")
+                    data = event.get("data") if isinstance(event.get("data"), dict) else {"message": "流式响应格式异常"}
+                    yield f"event: {name}\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
+            except (OSError, ValueError):
+                yield 'event: error\ndata: {"message": "流式问答连接中断，请重试。"}\n\n'
+
+        return StreamingResponse(event_stream(), media_type="text/event-stream")
+
+    @app.post("/v1/rag/ask/stream")
+    def v1_rag_ask_contextual_stream(payload: dict[str, Any] | None = Body(default=None)) -> StreamingResponse:
+        try:
+            request = normalize_contextual_request(payload)
+        except ValueError as error:
+            raise HTTPException(status_code=422, detail=str(error)) from error
+
+        def event_stream():
+            try:
+                for event in repository.rag_ask_contextual_stream(request):
                     name = str(event.get("event") or "error")
                     data = event.get("data") if isinstance(event.get("data"), dict) else {"message": "流式响应格式异常"}
                     yield f"event: {name}\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"

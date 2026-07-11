@@ -21,6 +21,7 @@ from src.rag.embeddings import (
 )
 from src.rag.answering import answer_rag_question, stream_rag_answer_question
 from src.rag.corpus_cleaner import CLEANER_VERSION, CORPUS_VERSION
+from src.rag.follow_up_router import normalize_contextual_request, route_follow_up
 from src.storage.sqlite_store import (
     connect,
     import_json_archive,
@@ -1311,6 +1312,30 @@ class ApiRepository:
         model: str = MODEL_NAME,
         auto_build: bool = False,
     ) -> dict[str, Any]:
+        result = self._rag_explain_readonly(
+            query=query,
+            language=language,
+            category=category,
+            source=source,
+            limit=limit,
+            mode=mode,
+            model=model,
+            auto_build=auto_build,
+        )
+        return self._persist_rag_explanation(result)
+
+    def _rag_explain_readonly(
+        self,
+        *,
+        query: str,
+        language: str | None = None,
+        category: str | None = None,
+        source: str | None = None,
+        limit: int = 8,
+        mode: str = "fts5",
+        model: str = MODEL_NAME,
+        auto_build: bool = False,
+    ) -> dict[str, Any]:
         normalized_mode = (_blank_to_none(mode) or "fts5").lower()
         if normalized_mode in {"hybrid", "mixed"}:
             retrieval = self.rag_hybrid_search(
@@ -1369,7 +1394,99 @@ class ApiRepository:
                 prompt_context=prompt_context,
             ),
         }
-        return self._persist_rag_explanation(result)
+        return result
+
+    def rag_ask_contextual(self, payload: dict[str, Any] | None, *, router_client: Any = None) -> dict[str, Any]:
+        request = normalize_contextual_request(payload)
+        route = route_follow_up(
+            root=self.root,
+            query=request["q"],
+            context=request["context"],
+            client=router_client,
+        )
+        if route["clarification_required"]:
+            return _contextual_clarification_response(request["q"], route)
+        explained = self._contextual_explained(request, route)
+        answer_result = answer_rag_question(
+            root=self.root,
+            query=route["resolved_query"],
+            retrieval=_contextual_answer_retrieval(explained, request, route),
+        )
+        response = self._rag_ask_response(
+            query=request["q"],
+            explained=explained,
+            answer_result=answer_result,
+            limit=request["limit"],
+        )
+        return _with_contextual_route(response, request["q"], route, retrieval_performed=True)
+
+    def rag_ask_contextual_stream(self, payload: dict[str, Any] | None, *, router_client: Any = None):
+        request = normalize_contextual_request(payload)
+        route = route_follow_up(
+            root=self.root,
+            query=request["q"],
+            context=request["context"],
+            client=router_client,
+        )
+        if route["clarification_required"]:
+            yield {
+                "event": "meta",
+                "data": {
+                    "query": request["q"],
+                    "resolved_query": "",
+                    "count": 0,
+                    "retrieval": {"mode": "not_run"},
+                    "input_route": route,
+                },
+            }
+            yield {"event": "final", "data": _contextual_clarification_response(request["q"], route)}
+            return
+        explained = self._contextual_explained(request, route)
+        retrieval = _contextual_answer_retrieval(explained, request, route)
+        for event in stream_rag_answer_question(
+            root=self.root,
+            query=route["resolved_query"],
+            retrieval=retrieval,
+        ):
+            if event.get("event") == "meta":
+                data = event.get("data") if isinstance(event.get("data"), dict) else {}
+                event["data"] = {
+                    **data,
+                    "query": request["q"],
+                    "resolved_query": route["resolved_query"],
+                    "input_route": {**route, "retrieval_performed": True},
+                }
+                yield event
+                continue
+            if event.get("event") != "final":
+                yield event
+                continue
+            answer_result = event.get("data") if isinstance(event.get("data"), dict) else {}
+            response = self._rag_ask_response(
+                query=request["q"],
+                explained=explained,
+                answer_result=answer_result,
+                limit=request["limit"],
+            )
+            event["data"] = _with_contextual_route(response, request["q"], route, retrieval_performed=True)
+            yield event
+
+    def _contextual_explained(self, request: dict[str, Any], route: dict[str, Any]) -> dict[str, Any]:
+        retrieval_limit = 30 if route["candidate_scope"] != "archive" else request["limit"]
+        explained = self._rag_explain_readonly(
+            query=route["resolved_query"],
+            language=request["language"] or None,
+            category=request["category"] or None,
+            source=request["source"] or None,
+            limit=retrieval_limit,
+            mode=request["mode"],
+            model=request["model"],
+            auto_build=request["auto_build"],
+        )
+        allowed = _contextual_candidate_ids(route, request["context"])
+        if allowed:
+            explained = _filter_explained_to_repositories(explained, allowed, request["limit"])
+        return explained
 
     def rag_ask(
         self,
@@ -4988,6 +5105,128 @@ def _rag_corpus_readiness(documents: list[dict[str, Any]]) -> dict[str, Any]:
             if documents
             else ["先运行周报生成并同步 SQLite 语料。"]
         ),
+    }
+
+
+def _contextual_answer_retrieval(
+    explained: dict[str, Any], request: dict[str, Any], route: dict[str, Any]
+) -> dict[str, Any]:
+    return {
+        "query": route["resolved_query"],
+        "contexts": explained.get("contexts") if isinstance(explained.get("contexts"), list) else [],
+        "citations": explained.get("citations") if isinstance(explained.get("citations"), list) else [],
+        "retrieval": explained.get("retrieval") or {},
+        "prompt_context": explained.get("prompt_context") or "",
+        "constraints": {
+            "language": request.get("language") or "",
+            "category": request.get("category") or "",
+            "source": request.get("source") or "",
+        },
+    }
+
+
+def _contextual_candidate_ids(route: dict[str, Any], context: dict[str, Any]) -> list[str]:
+    if route.get("candidate_scope") == "primary_candidate":
+        primary = str(context.get("primary_repository_id") or "")
+        return [primary] if primary else []
+    if route.get("candidate_scope") == "previous_candidates":
+        values = context.get("candidate_repository_ids")
+        return [str(item) for item in values] if isinstance(values, list) else []
+    return []
+
+
+def _filter_explained_to_repositories(
+    explained: dict[str, Any], allowed: list[str], limit: int
+) -> dict[str, Any]:
+    allowed_set = set(allowed)
+    contexts = [
+        context
+        for context in (explained.get("contexts") if isinstance(explained.get("contexts"), list) else [])
+        if str((context.get("metadata") or {}).get("full_name") or "") in allowed_set
+    ][: max(1, min(_int_value(limit) or 8, 30))]
+    citations = _rag_citations(contexts)
+    prompt_context = _rag_prompt_context(contexts)
+    explanation = _rag_explanation(
+        query=str(explained.get("query") or ""),
+        contexts=contexts,
+        citations=citations,
+        retrieval=explained.get("retrieval") or {},
+    )
+    return {
+        **explained,
+        "count": len(contexts),
+        "contexts": contexts,
+        "citations": citations,
+        "prompt_context": prompt_context,
+        "explanation": explanation,
+        "quality": _rag_explanation_quality(
+            contexts=contexts,
+            citations=citations,
+            explanation=explanation,
+            prompt_context=prompt_context,
+        ),
+    }
+
+
+def _with_contextual_route(
+    response: dict[str, Any], raw_query: str, route: dict[str, Any], *, retrieval_performed: bool
+) -> dict[str, Any]:
+    input_route = {**route, "retrieval_performed": retrieval_performed}
+    return {
+        **response,
+        "query": raw_query,
+        "resolved_query": route.get("resolved_query") or "",
+        "clarification_required": bool(route.get("clarification_required")),
+        "clarification_question": str(route.get("clarification_question") or ""),
+        "input_route": input_route,
+        "source_explanation_id": "",
+        "cached": False,
+    }
+
+
+def _contextual_clarification_response(query: str, route: dict[str, Any]) -> dict[str, Any]:
+    question = str(route.get("clarification_question") or "请补充完整项目需求。")
+    return {
+        "schema_version": 1,
+        "query": query,
+        "resolved_query": "",
+        "answer": question,
+        "answer_model": route.get("parser") or "rule:follow-up-v1",
+        "answer_mode": "clarification",
+        "fallback_reason": "",
+        "confidence": "low",
+        "evidence_coverage": "low",
+        "match_confidence": "unknown",
+        "count": 0,
+        "retrieval": {"mode": "not_run"},
+        "citations": [],
+        "evidence": [],
+        "recommendations": [],
+        "quality": {"score": 0, "level": "low", "metrics": {"context_count": 0, "citation_count": 0, "evidence_count": 0}},
+        "prompt_context": "",
+        "source_explanation_id": "",
+        "cached": False,
+        "next_actions": [question],
+        "contexts": [],
+        "notification_memory": {},
+        "model_status": {
+            "provider": "kimi",
+            "configured": str(route.get("parser") or "").startswith("kimi:"),
+            "attempted": str(route.get("parser") or "").startswith("kimi:"),
+            "used": str(route.get("parser") or "").startswith("kimi:"),
+        },
+        "answer_quality": {
+            "applicable": False,
+            "passed": True,
+            "issues": [],
+            "citation_validity": True,
+            "evidence_relevance": "not_evaluated",
+            "claim_support": "not_evaluated",
+            "data_freshness": "unknown",
+        },
+        "clarification_required": True,
+        "clarification_question": question,
+        "input_route": {**route, "retrieval_performed": False},
     }
 
 

@@ -1,5 +1,22 @@
 # 操作日志
 
+## 2026-07-11 追加：P0-5A 无状态追问路由与澄清保护
+
+### 1. 开发目的
+
+在检索前识别“继续、展开、那个项目”等追问，避免把短命令作为独立项目 query 送入 RAG。
+
+### 2. 修改内容
+
+1. 新增同路径 POST Ask 与流式 POST；接收上一轮用户目标、候选仓库、确认首选、检索模式和 resumable，不接收历史 assistant 文本。
+2. 新增确定性追问路由器；规则无法判断时才复用 Kimi 严格 JSON 路由，任何模型异常或越权输出都转为澄清。
+3. 无上下文短追问直接返回 `answer_mode=clarification`，不调用检索或回答模型；contextual POST 使用只读解释装配，不写 `rag_explanations`。
+4. 新增 40 条中文追问评估。route、clarification、rewrite、candidate scope 和 constraint exact-match 均为 1.0，原始短追问误检索率为 0。
+
+### 3. 边界
+
+本阶段不新增 SQLite schema 或服务端会话。候选过滤的查询级下推、完整硬约束验证和 React POST 接入在 P0-5B 完成。
+
 ## 2026-07-11 追加：P0-4B React 使用后端推荐决策
 
 ### 1. 开发目的

@@ -647,6 +647,14 @@ React 项目匹配工作台使用的只读 SSE 接口，查询参数与 `/v1/rag
 
 新增的 `evidence_coverage`、`match_confidence`、`recommendations` 和质量维度只出现在完整 Ask 响应与 SSE `final` 中；不改变 `meta`、`delta`、`error` 的事件结构和顺序。
 
+### `POST /v1/rag/ask` 与 `POST /v1/rag/ask/stream`
+
+无状态追问入口。POST 与既有 GET 共用路径，但使用 JSON 请求体；GET 的查询参数和响应保持不变。请求体包含当前 `q`，以及可选的 `context.previous_user_goal`、`candidate_repository_ids`、`primary_repository_id`、`mode` 和 `resumable`。context 最多携带 10 个 `owner/repo`，不得提交历史 assistant 回答、citations、evidence 或 `prompt_context`。
+
+POST 响应在 Ask 字段之外新增 `resolved_query`、`clarification_required`、`clarification_question` 和 `input_route`。`input_route` 记录 `new_search/resume/refine/clarify`、规则或 Kimi 路由器、候选范围、结构化 requirements 以及是否实际检索。无上下文的“继续、展开、嗯”等输入返回 `answer_mode=clarification`，contexts、citations、evidence 和 recommendations 均为空；流式响应只产生 `meta` 和 `final`，不产生草稿。
+
+路由优先使用确定性规则；只有规则无法可靠判断时才调用 Kimi 严格 JSON 路由。模型不可用、超时、非法 JSON 或越权字段都会保守转为澄清。contextual POST 不写入 `rag_explanations`、任务、反馈或服务端会话。
+
 示例：
 
 ```text
