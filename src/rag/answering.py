@@ -7,6 +7,7 @@ from typing import Any
 from src.llm.client import KimiChatClient, LlmClientError
 from src.llm.prompts import rag_ask_messages
 from src.rag.answer_quality import validate_rag_answer
+from src.rag.project_recommendations import build_project_recommendations
 
 
 RULE_MODEL = "rule:rag-ask-v1"
@@ -198,6 +199,11 @@ def _response(
     answer_quality: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     contexts = _list_of_dicts(retrieval.get("contexts"))
+    recommendations = build_project_recommendations(
+        contexts=contexts,
+        citations=citations,
+        constraints=retrieval.get("constraints") if isinstance(retrieval.get("constraints"), dict) else {},
+    )
     return {
         "schema_version": 1,
         "query": retrieval.get("query") or query,
@@ -212,6 +218,7 @@ def _response(
         "retrieval": retrieval.get("retrieval") or {},
         "citations": citations,
         "evidence": evidence,
+        "recommendations": recommendations,
         "quality": _answer_quality(contexts=contexts, citations=citations, evidence=evidence),
         "prompt_context": retrieval.get("prompt_context") or "",
         "source_explanation_id": "",

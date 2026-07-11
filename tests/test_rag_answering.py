@@ -51,6 +51,7 @@ def _retrieval(contexts):
             }
         ][: len(contexts)],
         "retrieval": {"mode": "hybrid"},
+        "constraints": {"language": "Python", "category": "AI Agent", "source": "github_trending"},
         "prompt_context": "[1] owner/agent\nagent workflow automation",
     }
 
@@ -77,6 +78,7 @@ class RagAnsweringTest(unittest.TestCase):
 
         self.assertEqual(result["answer_mode"], "refusal")
         self.assertEqual(result["fallback_reason"], "no_evidence")
+        self.assertEqual(result["recommendations"], [])
         self.assertEqual(client.calls, 0)
         self.assert_quality_semantics(result, "low")
 
@@ -94,6 +96,8 @@ class RagAnsweringTest(unittest.TestCase):
         self.assertIn("owner/agent", result["answer"])
         self.assertIn("[1]", result["answer"])
         self.assertTrue(result["answer_quality"]["passed"])
+        self.assertEqual(result["recommendations"][0]["full_name"], "owner/agent")
+        self.assertEqual(result["recommendations"][0]["eligibility"], "eligible")
         self.assert_quality_semantics(result, "low")
 
     def test_evidence_coverage_preserves_legacy_thresholds(self):
@@ -195,6 +199,7 @@ class RagAnsweringTest(unittest.TestCase):
         self.assertEqual("".join(item["data"]["text"] for item in events if item["event"] == "delta"), "优先研究 owner/agent 的 agent workflow 自动化能力。 [1]")
         self.assertEqual(events[-1]["event"], "final")
         self.assertEqual(events[-1]["data"]["answer_mode"], "llm")
+        self.assertEqual(events[-1]["data"]["recommendations"][0]["full_name"], "owner/agent")
         self.assert_quality_semantics(events[-1]["data"], "low")
 
     def test_stream_quality_failure_replaces_draft_with_rule_fallback(self):
@@ -223,6 +228,7 @@ class RagAnsweringTest(unittest.TestCase):
 
         self.assertEqual([item["event"] for item in events], ["meta", "final"])
         self.assertEqual(events[-1]["data"]["answer_mode"], "refusal")
+        self.assertEqual(events[-1]["data"]["recommendations"], [])
 
 
 def _context(index=1):

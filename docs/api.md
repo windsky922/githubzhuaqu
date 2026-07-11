@@ -635,6 +635,7 @@ py scripts\run_rag_search_evaluation.py --queries "agent workflow;python automat
 13. `evidence_coverage`：与兼容字段 `confidence` 等值，明确表示已召回、可引用证据的覆盖程度。
 14. `match_confidence`：当前固定为 `unknown`；在没有标注数据校准前不输出 `medium` 或 `high`。
 15. `answer_quality`：保留 `passed`、`issues`，并新增 `citation_validity`、`evidence_relevance`、`claim_support`、`data_freshness`。当前只有引用有效性执行实际校验，后三项分别返回 `not_evaluated`、`not_evaluated`、`unknown`；质量闸门通过不代表项目相关或结论正确。
+16. `recommendations`：当前归档内的确定性结构化推荐。每项包含 `full_name`、`rank`、`match_score`、`matched_requirements`、`unmet_requirements`、`reasons`、`citation_indexes`、`evidence_chunk_ids` 和 `eligibility`。`match_score` 只是本轮、同一检索模式内的相对排序分，不是概率或置信度；`eligibility` 只验证显式 `language`、`category`、`source` 筛选，模型增强字段不能决定硬约束。
 
 管理页 RAG 对话工作台使用同一接口。每轮问题独立检索；前端以用户/助手气泡展示回答，只把本轮问题、回答摘要、引用、证据、质量闸门结果和 `prompt_context` 保存到浏览器 localStorage，便于刷新后继续查看。
 
@@ -644,7 +645,7 @@ py scripts\run_rag_search_evaluation.py --queries "agent workflow;python automat
 
 React 项目匹配工作台使用的只读 SSE 接口，查询参数与 `/v1/rag/ask` 一致。事件依次为：`meta`（召回元数据、引用和证据摘要）、零到多条 `delta`（未通过质量闸门的生成草稿）、`final`（与 `/v1/rag/ask` 相同的完整最终响应）或 `error`（脱敏后的流协议错误）。前端不得把 `delta` 当作最终事实；质量失败时 `final` 会以规则降级回答替换草稿。
 
-新增的 `evidence_coverage`、`match_confidence` 和质量维度只出现在完整 Ask 响应与 SSE `final` 中；不改变 `meta`、`delta`、`error` 的事件结构和顺序。
+新增的 `evidence_coverage`、`match_confidence`、`recommendations` 和质量维度只出现在完整 Ask 响应与 SSE `final` 中；不改变 `meta`、`delta`、`error` 的事件结构和顺序。
 
 示例：
 

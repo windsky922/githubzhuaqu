@@ -1402,6 +1402,7 @@ class ApiRepository:
                 "citations": explained.get("citations") if isinstance(explained.get("citations"), list) else [],
                 "retrieval": explained.get("retrieval") or {},
                 "prompt_context": explained.get("prompt_context") or "",
+                "constraints": {"language": language, "category": category, "source": source},
             },
         )
         return self._rag_ask_response(
@@ -1439,6 +1440,7 @@ class ApiRepository:
             "citations": explained.get("citations") if isinstance(explained.get("citations"), list) else [],
             "retrieval": explained.get("retrieval") or {},
             "prompt_context": explained.get("prompt_context") or "",
+            "constraints": {"language": language, "category": category, "source": source},
         }
         for event in stream_rag_answer_question(
             root=self.root,
@@ -1497,6 +1499,9 @@ class ApiRepository:
             "retrieval": answer_result.get("retrieval") or explained.get("retrieval") or {},
             "citations": citations,
             "evidence": evidence,
+            "recommendations": answer_result.get("recommendations")
+            if isinstance(answer_result.get("recommendations"), list)
+            else [],
             "quality": quality,
             "prompt_context": answer_result.get("prompt_context") or explained.get("prompt_context") or "",
             "source_explanation_id": explained.get("explanation_id") or "",

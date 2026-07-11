@@ -1,5 +1,22 @@
 # 操作日志
 
+## 2026-07-11 追加：P0-4A 后端结构化项目推荐
+
+### 1. 开发目的
+
+停止由回答文本或前端引用顺序猜测首选项目，为 Ask 建立可测试、可审计的后端推荐决策结果。
+
+### 2. 修改内容
+
+1. `/v1/rag/ask` 与 `/v1/rag/ask/stream` 的 `final` 新增非破坏性 `recommendations[]`，按仓库聚合本轮 contexts，并返回相对排序分、显式约束判定、理由、引用编号和证据 chunk ID。
+2. 推荐生成不读取 Kimi 回答；只验证现有 `language`、`category`、`source` 参数。模型增强可作为证据，不能决定硬约束或首选排名。
+3. 新增结构化推荐评估脚本，复用 52 条 P0-1 中文需求，分别测量 FTS5、local-hash-v1 和 hybrid 的 Top-1、Recall@3、MRR@10、硬约束违反率与无首选率。
+4. 固定评估中三种模式的显式硬约束违反率均为 0；P0-1 原检索基线保持不变。
+
+### 3. 边界
+
+本阶段不解析自然语言里的部署、许可证、成本或技术栈约束，不修改独立 `/v1/recommendations`，不新增 SQLite 字段、服务端会话或模型调用。
+
 ## 2026-07-10 追加：P0-3B 来源分层与 Kimi 语料增强
 
 1. RAG chunks 按 identity、description、readme、selection reason、project profile、risk 和 Agent memory 分层生成，同一 corpus 内去重并保留跨日期历史证据。
