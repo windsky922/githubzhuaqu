@@ -2,6 +2,10 @@
 
 本文档记录第一阶段最小可用版本的实际实现架构。
 
+## 提交级质量检查
+
+`.github/workflows/ci.yml` 独立于定时周报主流程，在 `push main` 和 pull request 上运行。它只执行确定性测试、静态检查、安全检查和前端构建一致性检查，不读取 Kimi/Telegram 等业务密钥，也不触发采集、归档或外发。当前只提供自动检查与失败报警，不配置 GitHub 分支保护，因此仍允许直接推送 `main`。
+
 ## React 项目匹配工作台
 
 `docs/app/#/agent` 是面向普通用户的 React 项目匹配入口。前端只在浏览器 `localStorage` 保存有限的会话标题、问题和最终响应；不创建后端会话表，也不把历史回答视为事实证据。它通过 POST `/v1/rag/ask/stream` 提交当前输入和最小用户意图上下文，只包含上一轮用户目标、候选 ID、确认首选、模式和 resumable。历史 assistant answer、citations、evidence、prompt_context 均不进入请求。页面只从后端 `recommendations[]` 读取候选顺序和资格状态。

@@ -1,5 +1,7 @@
 # GitHub Weekly Agent
 
+`main` 的每次 push 和所有 pull request 都会运行独立提交质量检查：Python 3.12 全量测试与安全检查、Node.js 22 前端类型检查/单元测试/生产构建，以及 `docs/app` 构建产物一致性检查。该工作流不读取业务 Secrets，不运行采集、模型或真实推送。
+
 GitHub Weekly Agent 的长期定位是 GitHub 项目研究 Agent：持续采集热门仓库，沉淀项目知识库，通过 RAG 检索、相似项目比较、反馈记忆和推荐解释，帮助开发者判断哪些项目值得关注、学习、集成或持续跟踪。
 
 当前版本仍保留每周热点周报作为稳定输出形态。系统以 [GitHub Trending](https://github.com/trending) 周榜作为第一优先级信号，结合 GitHub Search、Star 增量、主题匹配、近期活跃度、仓库质量信号和基础安全风险提示，生成中文周报，并把 GitHub Pages 阅读链接推送到 Telegram、飞书或企业微信。
