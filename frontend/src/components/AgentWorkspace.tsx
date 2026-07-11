@@ -8,6 +8,12 @@ import { EvidenceDrawer } from "./EvidenceDrawer";
 
 export type Candidate = Project & { evidenceCount: number };
 
+export function selectPrimaryRecommendation(answer: RagAnswer, candidates: Candidate[]) {
+  return answer.answer_quality?.passed === true && candidates[0]?.eligibility === "eligible"
+    ? candidates[0]
+    : undefined;
+}
+
 export function ConversationSidebar({ conversations, activeId, historyGroups, onCreate, onSelect, mobile = false }: { conversations: Conversation[]; activeId?: string; historyGroups: Record<string, Conversation[]>; onCreate: () => void; onSelect: (id: string) => void; mobile?: boolean }) {
   const [open, setOpen] = useState(false);
   const closeThen = (callback: () => void) => () => { callback(); if (mobile) setOpen(false); };
@@ -35,9 +41,10 @@ export function answerConfidenceSemantics(answer: Pick<RagAnswer, "confidence" |
 }
 
 export function AnswerSummary({ answer, candidates }: { answer: RagAnswer; candidates: Candidate[] }) {
-  const [primary, ...rest] = candidates;
+  const primary = selectPrimaryRecommendation(answer, candidates);
+  const rest = primary ? candidates.slice(1) : candidates;
   const semantics = answerConfidenceSemantics(answer);
-  return <section className="answer-summary"><div className="answer-meta"><AnswerStatus mode={answer.answer_mode} quality={answer.answer_quality?.passed} /><span className="badge">{semantics.coverageLabel}</span><span className="badge">{semantics.matchLabel}</span></div>{primary ? <><div className="recommendation-title"><CheckCircle2 size={17} /><span>最匹配项目</span></div><PrimaryProjectCard project={primary} evidenceCount={primary.evidenceCount} /></> : null}<div className="answer-text"><p>{reasonSummary(answer)}</p></div><div className="answer-notice"><strong>质量边界</strong><span>当前质量闸门只校验引用有效性，不能证明项目相关性或结论正确。</span></div><details className="expanded-analysis"><summary>展开完整分析</summary><div className="answer-text">{answer.answer.replace(/\[\d+\]/g, "").split(/\n+/).map((paragraph, index) => <p key={index}>{paragraph}</p>)}</div></details>{answer.fallback_reason ? <div className="answer-notice warn"><strong>已采用保守结论</strong><span>{friendlyFallback(answer.fallback_reason)}</span></div> : null}{answer.answer_quality?.passed === false ? <div className="answer-notice bad"><strong>质量校验未通过</strong><span>{(answer.answer_quality.issues || []).join("；") || "模型回答未通过证据质量闸门。"}</span></div> : null}{rest.length ? <div className="candidate-section"><div className="candidate-heading">其他可考虑项目</div><div className="project-grid">{rest.slice(0, 2).map((project) => <CandidateProjectCard key={project.full_name} project={project} evidenceCount={project.evidenceCount} />)}</div></div> : null}<EvidenceDrawer answer={answer} trigger={<button className="button evidence-trigger" type="button"><MessageSquareText size={15} />查看依据</button>} /></section>;
+  return <section className="answer-summary"><div className="answer-meta"><AnswerStatus mode={answer.answer_mode} quality={answer.answer_quality?.passed} /><span className="badge">{semantics.coverageLabel}</span><span className="badge">{semantics.matchLabel}</span></div>{primary ? <><div className="recommendation-title"><CheckCircle2 size={17} /><span>当前归档内最匹配候选</span></div><PrimaryProjectCard project={primary} evidenceCount={primary.evidenceCount} /></> : <div className="answer-notice warn"><strong>暂无可确认首选</strong><span>只有质量闸门通过且后端判定为符合已验证约束的第一项，才能标记为首选。</span></div>}<div className="answer-text"><p>{reasonSummary(answer)}</p></div><div className="answer-notice"><strong>质量边界</strong><span>当前质量闸门只校验引用有效性，不能证明项目相关性或结论正确。</span></div><details className="expanded-analysis"><summary>展开完整分析</summary><div className="answer-text">{answer.answer.replace(/\[\d+\]/g, "").split(/\n+/).map((paragraph, index) => <p key={index}>{paragraph}</p>)}</div></details>{answer.fallback_reason ? <div className="answer-notice warn"><strong>已采用保守结论</strong><span>{friendlyFallback(answer.fallback_reason)}</span></div> : null}{answer.answer_quality?.passed === false ? <div className="answer-notice bad"><strong>质量校验未通过</strong><span>{(answer.answer_quality.issues || []).join("；") || "模型回答未通过证据质量闸门。"}</span></div> : null}{rest.length ? <div className="candidate-section"><div className="candidate-heading">{primary ? "其他可考虑项目" : "当前候选及约束状态"}</div><div className="project-grid">{rest.slice(0, primary ? 2 : 3).map((project) => <CandidateProjectCard key={project.full_name} project={project} evidenceCount={project.evidenceCount} />)}</div></div> : null}<EvidenceDrawer answer={answer} trigger={<button className="button evidence-trigger" type="button"><MessageSquareText size={15} />查看依据</button>} /></section>;
 }
 
 export function StreamDraft({ draft, stage }: { draft: string; stage: string }) { return <section className="assistant-message stream-draft"><span className="message-label">研究 Agent</span><span className="stream-stage"><i />{stage}</span>{draft ? <div className="answer-text draft">{draft}</div> : <div className="draft">正在分析本轮证据…</div>}</section>; }

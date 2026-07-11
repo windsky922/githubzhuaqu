@@ -73,6 +73,14 @@ h1 { margin: 0; color: #152034; font-size: 26px; line-height: 1.2; letter-spacin
 .answer-summary { display: grid; gap: 14px; }
 .answer-meta, .project-meta { display: flex; flex-wrap: wrap; gap: 7px; }
 .answer-status, .badge { display: inline-flex; align-items: center; min-height: 24px; border-radius: 999px; background: #edf1f6; color: #5d6b7c; padding: 0 8px; font-size: 11px; font-weight: 760; }
+.eligibility-badge.eligible { background: #e6f6ee; color: #15734c; }
+.eligibility-badge.unknown { background: #fff3d8; color: #946005; }
+.eligibility-badge.rejected { background: #feeceb; color: #a33a34; }
+.project-card.eligibility-rejected { border-color: #efc5c1; }
+.requirement-list { display: flex; gap: 7px; align-items: flex-start; border-radius: 7px; padding: 7px 9px; font-size: 12px; line-height: 1.45; }
+.requirement-list strong { flex: 0 0 auto; }
+.requirement-list.matched { background: #edf8f2; color: #176b49; }
+.requirement-list.unmet { background: #fff0ef; color: #983c36; }
 .answer-status.ok { background: #e6f6ee; color: #15734c; }.answer-status.warn { background: #fff3d8; color: #946005; }.answer-status.bad { background: #feeceb; color: #a6322f; }
 .recommendation-title { display: inline-flex; align-items: center; gap: 7px; color: #1f4f91; font-size: 13px; font-weight: 820; }
 .answer-text { color: #394b64; line-height: 1.7; white-space: pre-wrap; }

@@ -639,7 +639,7 @@ py scripts\run_rag_search_evaluation.py --queries "agent workflow;python automat
 
 管理页 RAG 对话工作台使用同一接口。每轮问题独立检索；前端以用户/助手气泡展示回答，只把本轮问题、回答摘要、引用、证据、质量闸门结果和 `prompt_context` 保存到浏览器 localStorage，便于刷新后继续查看。
 
-`agent.html?api=1` 的项目匹配对话同样使用该接口，不新增后端会话接口。前端默认降低 `limit` 到 3 来缩短响应等待，并只把详细引用、证据和 `prompt_context` 放入折叠区；如果回答进入 `refusal`、`fallback_rule` 或质量闸门失败，页面必须显式展示状态。
+`agent.html?api=1` 的项目匹配对话同样使用该接口，不新增后端会话接口。前端默认降低 `limit` 到 3 来缩短响应等待，候选集合与顺序只读取 `recommendations`，详细引用、证据和 `prompt_context` 只进入折叠依据区。只有质量闸门通过且第一项 `eligibility=eligible` 时才能显示“当前归档内最匹配候选”；其他情况必须显示“暂无可确认首选”。
 
 ### `GET /v1/rag/ask/stream`
 

@@ -10,6 +10,18 @@ export type Evidence = {
 
 export type Citation = Pick<Evidence, "index" | "full_name" | "html_url" | "run_date" | "chunk_id">;
 
+export type RagRecommendation = {
+  full_name: string;
+  rank: number;
+  match_score: number;
+  matched_requirements: string[];
+  unmet_requirements: string[];
+  reasons: string[];
+  citation_indexes: number[];
+  evidence_chunk_ids: string[];
+  eligibility: "eligible" | "rejected" | "unknown";
+};
+
 export type Project = {
   full_name: string;
   html_url?: string;
@@ -26,6 +38,11 @@ export type Project = {
   recommendation_score?: number;
   quality?: { level?: string; score?: number };
   risk_summary?: string;
+  match_score?: number;
+  matched_requirements?: string[];
+  unmet_requirements?: string[];
+  eligibility?: RagRecommendation["eligibility"];
+  recommendation_rank?: number;
   [key: string]: unknown;
 };
 
@@ -53,6 +70,7 @@ export type RagAnswer = {
   count: number;
   citations: Citation[];
   evidence: Evidence[];
+  recommendations: RagRecommendation[];
   prompt_context: string;
   answer_quality: {
     passed?: boolean;

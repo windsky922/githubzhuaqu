@@ -1,18 +1,23 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { answerFromEvent, shouldUseApi, streamRagAsk } from "../lib/api";
 import { loadConversations, newConversation, saveConversations } from "../lib/conversations";
-import type { Conversation, Project, RagAnswer } from "../lib/types";
+import type { Conversation, RagAnswer } from "../lib/types";
 import { AgentTopbar, AnswerSummary, ChatComposer, ConversationSidebar, type Candidate, ScrollToLatestButton, StreamDraft } from "../components/AgentWorkspace";
 
 const examples = ["我需要一个适合本地部署的多 Agent 自动化项目", "团队想跟踪值得长期关注的 RAG 基础设施", "适合 Python 团队的 AI 编程工具有哪些？"];
 
 export function matchProjects(answer?: RagAnswer): Candidate[] {
-  const projects = new Map<string, Candidate>();
-  const evidenceCount = new Map<string, number>();
-  const evidenceReason = new Map<string, string>();
-  (answer?.evidence || []).forEach((item) => { if (!item.full_name) return; evidenceCount.set(item.full_name, (evidenceCount.get(item.full_name) || 0) + 1); if (!evidenceReason.has(item.full_name) && item.quote) evidenceReason.set(item.full_name, item.quote); });
-  (answer?.citations || []).forEach((citation) => { if (!citation.full_name) return; const quote = evidenceReason.get(citation.full_name); projects.set(citation.full_name, { full_name: citation.full_name, html_url: citation.html_url, run_date: citation.run_date, rag_reason: quote || "仅有引用候选，未检索到可展示的对应片段。", evidenceCount: evidenceCount.get(citation.full_name) || 0 }); });
-  return [...projects.values()].slice(0, 3);
+  return (answer?.recommendations || []).slice(0, 3).map((recommendation) => ({
+    full_name: recommendation.full_name,
+    html_url: `https://github.com/${recommendation.full_name}`,
+    rag_reason: recommendation.reasons[0] || "基于本轮可审计排序进入候选。",
+    evidenceCount: recommendation.evidence_chunk_ids.length,
+    match_score: recommendation.match_score,
+    matched_requirements: recommendation.matched_requirements,
+    unmet_requirements: recommendation.unmet_requirements,
+    eligibility: recommendation.eligibility,
+    recommendation_rank: recommendation.rank,
+  }));
 }
 
 function history(conversations: Conversation[]) { return conversations.reduce<Record<string, Conversation[]>>((groups, conversation) => { const key = new Intl.DateTimeFormat("zh-CN", { month: "short", day: "numeric" }).format(new Date(conversation.updatedAt)); (groups[key] ||= []).push(conversation); return groups; }, {}); }

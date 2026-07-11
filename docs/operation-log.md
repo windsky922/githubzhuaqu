@@ -1,5 +1,22 @@
 # 操作日志
 
+## 2026-07-11 追加：P0-4B React 使用后端推荐决策
+
+### 1. 开发目的
+
+移除项目匹配页根据 citations 顺序推断首选的前端逻辑，让“首选”严格来自后端可审计 recommendations 与质量闸门。
+
+### 2. 修改内容
+
+1. React 新增结构化 recommendation 类型，候选卡只按 `recommendations[]` 组装和排序；citations、evidence、contexts 继续只用于依据展示。
+2. 只有第一项 `eligibility=eligible` 且 `answer_quality.passed=true` 时显示“当前归档内最匹配候选”，否则显示“暂无可确认首选”。
+3. 项目卡新增相对匹配分、资格状态、满足要求和未满足要求；不把该分数称为概率或置信度。
+4. 前端测试覆盖 citations 不再决定首选、质量闸门、eligible/unknown/rejected 状态和约束原因。
+
+### 3. 边界
+
+本阶段不解析自然语言硬约束，不增加服务端会话，不改变 SSE 事件序列，也不把历史模型回答作为证据。下一阶段进入 P0-5 无状态追问与澄清。
+
 ## 2026-07-11 追加：P0-4A 后端结构化项目推荐
 
 ### 1. 开发目的
