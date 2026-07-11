@@ -1,5 +1,22 @@
 # 操作日志
 
+## 2026-07-11 追加：P0-6B Playwright 浏览器回归
+
+### 1. 开发目的
+
+把项目匹配、流式状态、筛选分页和三项目对比从组件测试提升为桌面/手机真实 Chromium 回归，并在提交 CI 中自动执行。
+
+### 2. 修改内容
+
+1. 新增 Playwright 配置与 `npm run test:e2e`，覆盖桌面 Chrome 和 Pixel 7 视口。
+2. 新增本地 mock server，确定性模拟 SSE `meta/delta/final`、clarification、no_match、refusal、规则降级、项目分页和对比，不访问真实模型、GitHub 或 SQLite。
+3. 浏览器测试验证长流式输出后输入区仍可用、澄清轮不展示项目卡/质量失败、无匹配原因可见、筛选分页和最多三个项目对比。
+4. CI 新增独立 E2E job；仅在失败时上传 `output/playwright/` 下的截图、trace 和 HTML 报告，保留 7 天。
+
+### 3. 边界
+
+不修改 API、SQLite schema、Ask 契约、检索权重或模型配置；不启用分支保护，`tmp/` 与浏览器诊断产物不提交。
+
 ## 2026-07-11 追加：P0-6A 提交级核心质量检查
 
 ### 1. 开发目的

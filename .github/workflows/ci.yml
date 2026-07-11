@@ -58,3 +58,38 @@ jobs:
 
       - name: 检查差异格式
         run: git diff --check
+
+  e2e:
+    name: Playwright 浏览器回归
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v6
+
+      - name: 配置 Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: 安装前端依赖
+        run: npm ci
+
+      - name: 重建前端发布产物
+        run: npm run build
+
+      - name: 安装 Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: 运行桌面与手机浏览器回归
+        run: npm run test:e2e
+
+      - name: 上传失败诊断产物
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-artifacts-${{ github.run_attempt }}
+          path: output/playwright/
+          if-no-files-found: ignore
+          retention-days: 7

@@ -12,6 +12,7 @@ dist/
 build/
 node_modules/
 frontend/node_modules/
+output/playwright/
 *.egg-info/
 data/*.sqlite
 data/*.sqlite-shm
