@@ -16,6 +16,7 @@ export type RagRecommendation = {
   match_score: number;
   matched_requirements: string[];
   unmet_requirements: string[];
+  unknown_requirements: string[];
   reasons: string[];
   citation_indexes: number[];
   evidence_chunk_ids: string[];
@@ -41,6 +42,7 @@ export type Project = {
   match_score?: number;
   matched_requirements?: string[];
   unmet_requirements?: string[];
+  unknown_requirements?: string[];
   eligibility?: RagRecommendation["eligibility"];
   recommendation_rank?: number;
   [key: string]: unknown;
@@ -71,11 +73,23 @@ export type RagAnswer = {
   citations: Citation[];
   evidence: Evidence[];
   recommendations: RagRecommendation[];
+  resolved_query?: string;
+  clarification_required?: boolean;
+  clarification_question?: string;
+  input_route?: {
+    route?: "new_search" | "resume" | "refine" | "clarify";
+    reason?: string;
+    parser?: string;
+    retrieval_performed?: boolean;
+    candidate_scope?: "archive" | "previous_candidates" | "primary_candidate" | "none";
+    requirements?: Array<{ field: string; operator: string; value: string; hard: boolean }>;
+  };
   prompt_context: string;
   answer_quality: {
+    applicable?: boolean;
     passed?: boolean;
     issues?: string[];
-    citation_validity?: boolean;
+    citation_validity?: boolean | string;
     evidence_relevance?: "not_evaluated" | string;
     claim_support?: "not_evaluated" | string;
     data_freshness?: "unknown" | string;
@@ -83,6 +97,14 @@ export type RagAnswer = {
   retrieval?: { mode?: string };
   model_status?: { configured?: boolean; used?: boolean };
   [key: string]: unknown;
+};
+
+export type AskIntentContext = {
+  previous_user_goal: string;
+  candidate_repository_ids: string[];
+  primary_repository_id?: string;
+  mode: "fts5" | "vector" | "hybrid";
+  resumable: boolean;
 };
 
 export type ChatTurn = {

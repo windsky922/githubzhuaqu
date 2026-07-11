@@ -51,6 +51,24 @@ class ProjectRecommendationsTest(unittest.TestCase):
     def test_empty_contexts_return_no_recommendations(self):
         self.assertEqual(build_project_recommendations(contexts=[], citations=[], constraints={"language": "Python"}), [])
 
+    def test_verified_requirements_add_unknown_state_and_evidence(self):
+        result = build_project_recommendations(
+            contexts=[_context("owner/project", "chunk:1", 1)],
+            citations=[],
+            requirements=[{"field": "deployment", "operator": "eq", "value": "local", "hard": True}],
+            requirement_verification={
+                "owner/project": {
+                    "matched_requirements": [],
+                    "unmet_requirements": [],
+                    "unknown_requirements": ["部署方式=local"],
+                    "evidence_chunk_ids": ["chunk:deployment"],
+                }
+            },
+        )
+        self.assertEqual(result[0]["eligibility"], "unknown")
+        self.assertEqual(result[0]["unknown_requirements"], ["部署方式=local"])
+        self.assertEqual(result[0]["evidence_chunk_ids"], ["chunk:1", "chunk:deployment"])
+
 
 def _context(full_name, chunk_id, score, *, language="Python", source_type="identity"):
     return {

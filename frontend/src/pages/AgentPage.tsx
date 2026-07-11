@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { answerFromEvent, shouldUseApi, streamRagAsk } from "../lib/api";
 import { loadConversations, newConversation, saveConversations } from "../lib/conversations";
-import type { Conversation, RagAnswer } from "../lib/types";
+import type { AskIntentContext, Conversation, RagAnswer } from "../lib/types";
 import { AgentTopbar, AnswerSummary, ChatComposer, ConversationSidebar, type Candidate, ScrollToLatestButton, StreamDraft } from "../components/AgentWorkspace";
 
 const examples = ["我需要一个适合本地部署的多 Agent 自动化项目", "团队想跟踪值得长期关注的 RAG 基础设施", "适合 Python 团队的 AI 编程工具有哪些？"];
@@ -15,9 +15,28 @@ export function matchProjects(answer?: RagAnswer): Candidate[] {
     match_score: recommendation.match_score,
     matched_requirements: recommendation.matched_requirements,
     unmet_requirements: recommendation.unmet_requirements,
+    unknown_requirements: recommendation.unknown_requirements,
     eligibility: recommendation.eligibility,
     recommendation_rank: recommendation.rank,
   }));
+}
+
+export function followUpContext(answer: RagAnswer | undefined, previousQuestion: string): AskIntentContext | undefined {
+  if (!answer) return undefined;
+  const candidateIds = (answer.recommendations || []).map((item) => item.full_name).filter(Boolean).slice(0, 10);
+  const first = answer.recommendations?.[0];
+  const mode = answer.retrieval?.mode;
+  const normalizedMode: AskIntentContext["mode"] = mode === "fts5" || mode === "vector" ? mode : "hybrid";
+  const resumable = Boolean(candidateIds.length && !["clarification", "no_match", "refusal"].includes(answer.answer_mode));
+  return {
+    previous_user_goal: answer.resolved_query || previousQuestion,
+    candidate_repository_ids: candidateIds,
+    ...(answer.answer_quality?.passed === true && first?.eligibility === "eligible"
+      ? { primary_repository_id: first.full_name }
+      : {}),
+    mode: normalizedMode,
+    resumable,
+  };
 }
 
 function history(conversations: Conversation[]) { return conversations.reduce<Record<string, Conversation[]>>((groups, conversation) => { const key = new Intl.DateTimeFormat("zh-CN", { month: "short", day: "numeric" }).format(new Date(conversation.updatedAt)); (groups[key] ||= []).push(conversation); return groups; }, {}); }
@@ -48,13 +67,15 @@ export function AgentPage() {
 
   async function submit(rawQuestion?: string) {
     const nextQuestion = (rawQuestion || question).trim(); if (!nextQuestion || busy || !active || !apiEnabled) return;
+    const previousTurn = [...active.turns].reverse().find((turn) => turn.response);
+    const context = previousTurn ? followUpContext(previousTurn.response, previousTurn.question) : undefined;
     const turnId = crypto.randomUUID(); const now = new Date().toISOString(); setQuestion(""); setDraft(""); setBusy(true); setStage("正在检索可引用的项目证据"); setStatus("检索中…");
     setConversations((items) => items.map((conversation) => conversation.id === active.id ? { ...conversation, title: conversation.turns.length ? conversation.title : nextQuestion.slice(0, 22), updatedAt: now, turns: [...conversation.turns, { id: turnId, question: nextQuestion, createdAt: now }] } : conversation));
     const controller = new AbortController(); controllerRef.current = controller;
-    try { await streamRagAsk(nextQuestion, controller.signal, (event) => {
+    try { await streamRagAsk(nextQuestion, context, controller.signal, (event) => {
       if (event.event === "meta") { setStage("已召回证据，正在生成草稿"); setStatus("证据已召回"); }
       if (event.event === "delta") { setDraft((value) => value + String(event.data.text || "")); setStage("草稿生成中，等待证据质量校验"); setStatus("证据校验中…"); }
-      if (event.event === "final") { const response = answerFromEvent(event.data); setConversations((items) => items.map((conversation) => conversation.id === active.id ? { ...conversation, updatedAt: new Date().toISOString(), turns: conversation.turns.map((turn) => turn.id === turnId ? { ...turn, response } : turn) } : conversation)); setDraft(""); setStage("已生成正式结论"); setStatus(response.answer_mode === "llm" && response.answer_quality?.passed !== false ? "回答已通过证据质量校验。" : "已返回证据约束结论。"); }
+      if (event.event === "final") { const response = answerFromEvent(event.data); setConversations((items) => items.map((conversation) => conversation.id === active.id ? { ...conversation, updatedAt: new Date().toISOString(), turns: conversation.turns.map((turn) => turn.id === turnId ? { ...turn, response } : turn) } : conversation)); setDraft(""); setStage("已生成正式结论"); setStatus(response.answer_mode === "clarification" ? "需要补充需求后再检索。" : response.answer_mode === "no_match" ? "当前硬约束下没有匹配项目。" : response.answer_mode === "llm" && response.answer_quality?.passed !== false ? "回答已通过证据质量校验。" : "已返回证据约束结论。"); }
       if (event.event === "error") { setStage("连接异常"); setStatus(String(event.data.message || "流式连接中断。")); }
     }); } catch (error) { if (!controller.signal.aborted) { setStage("请求失败"); setStatus(`请求失败：${error instanceof Error ? error.message : "未知错误"}`); } } finally { controllerRef.current = null; setBusy(false); }
   }

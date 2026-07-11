@@ -21,6 +21,7 @@ from src.rag.embeddings import (
 )
 from src.rag.answering import answer_rag_question, stream_rag_answer_question
 from src.rag.corpus_cleaner import CLEANER_VERSION, CORPUS_VERSION
+from src.rag.constraint_verifier import verify_project_requirements
 from src.rag.follow_up_router import normalize_contextual_request, route_follow_up
 from src.storage.sqlite_store import (
     connect,
@@ -853,6 +854,7 @@ class ApiRepository:
         category: str | None = None,
         source: str | None = None,
         limit: int = 8,
+        repository_ids: list[str] | None = None,
     ) -> dict[str, Any]:
         self.ensure_sqlite_index()
         normalized_query = (_blank_to_none(query) or "").strip()
@@ -861,6 +863,7 @@ class ApiRepository:
         normalized_language = _blank_to_none(language)
         normalized_category = _blank_to_none(category)
         normalized_source = _blank_to_none(source)
+        normalized_repository_ids = _normalized_repository_ids(repository_ids)
         if not terms:
             return {
                 "schema_version": 1,
@@ -884,6 +887,7 @@ class ApiRepository:
                     language=normalized_language,
                     category=normalized_category,
                     source=normalized_source,
+                    repository_ids=normalized_repository_ids,
                     limit=limit * 3,
                 )
             except sqlite3.Error:
@@ -893,6 +897,7 @@ class ApiRepository:
                     language=normalized_language,
                     category=normalized_category,
                     source=normalized_source,
+                    repository_ids=normalized_repository_ids,
                     limit=limit * 3,
                 )
                 retrieval_mode = "like"
@@ -930,12 +935,14 @@ class ApiRepository:
         limit: int = 8,
         model: str = MODEL_NAME,
         auto_build: bool = False,
+        repository_ids: list[str] | None = None,
     ) -> dict[str, Any]:
         self.ensure_sqlite_index()
         normalized_query = (_blank_to_none(query) or "").strip()
         terms = _search_terms(normalized_query)
         limit = max(1, min(int(limit or 8), 30))
         model = _blank_to_none(model) or MODEL_NAME
+        normalized_repository_ids = set(_normalized_repository_ids(repository_ids))
         if not terms:
             return {
                 "schema_version": 1,
@@ -955,6 +962,8 @@ class ApiRepository:
         rows = self._embedding_rows(model)
         contexts = []
         for row in rows:
+            if normalized_repository_ids and str(row["full_name"] or "") not in normalized_repository_ids:
+                continue
             payload = _json_object(row["payload_json"])
             if language and str(payload.get("language") or "") != language:
                 continue
@@ -996,6 +1005,7 @@ class ApiRepository:
         limit: int = 8,
         model: str = MODEL_NAME,
         auto_build: bool = False,
+        repository_ids: list[str] | None = None,
     ) -> dict[str, Any]:
         normalized_query = (_blank_to_none(query) or "").strip()
         terms = _search_terms(normalized_query)
@@ -1027,6 +1037,7 @@ class ApiRepository:
             category=category,
             source=source,
             limit=candidate_limit,
+            repository_ids=repository_ids,
         )
         vector_result = self.rag_vector_search(
             query=normalized_query,
@@ -1036,6 +1047,7 @@ class ApiRepository:
             limit=candidate_limit,
             model=model,
             auto_build=auto_build,
+            repository_ids=repository_ids,
         )
         contexts = _merge_hybrid_contexts(
             text_result.get("contexts") if isinstance(text_result.get("contexts"), list) else [],
@@ -1335,6 +1347,7 @@ class ApiRepository:
         mode: str = "fts5",
         model: str = MODEL_NAME,
         auto_build: bool = False,
+        repository_ids: list[str] | None = None,
     ) -> dict[str, Any]:
         normalized_mode = (_blank_to_none(mode) or "fts5").lower()
         if normalized_mode in {"hybrid", "mixed"}:
@@ -1346,6 +1359,7 @@ class ApiRepository:
                 limit=limit,
                 model=model,
                 auto_build=auto_build,
+                repository_ids=repository_ids,
             )
         elif normalized_mode in {"vector", "embedding", "semantic"}:
             retrieval = self.rag_vector_search(
@@ -1356,6 +1370,7 @@ class ApiRepository:
                 limit=limit,
                 model=model,
                 auto_build=auto_build,
+                repository_ids=repository_ids,
             )
         else:
             retrieval = self.rag_retrieve(
@@ -1364,6 +1379,7 @@ class ApiRepository:
                 category=category,
                 source=source,
                 limit=limit,
+                repository_ids=repository_ids,
             )
         contexts = retrieval.get("contexts") if isinstance(retrieval.get("contexts"), list) else []
         citations = retrieval.get("citations") if isinstance(retrieval.get("citations"), list) else []
@@ -1472,20 +1488,32 @@ class ApiRepository:
             yield event
 
     def _contextual_explained(self, request: dict[str, Any], route: dict[str, Any]) -> dict[str, Any]:
-        retrieval_limit = 30 if route["candidate_scope"] != "archive" else request["limit"]
+        allowed = _contextual_candidate_ids(route, request["context"])
+        retrieval_query = (
+            request["context"].get("previous_user_goal")
+            if route.get("route") in {"resume", "refine"}
+            else route["resolved_query"]
+        )
         explained = self._rag_explain_readonly(
-            query=route["resolved_query"],
+            query=str(retrieval_query or route["resolved_query"]),
             language=request["language"] or None,
             category=request["category"] or None,
             source=request["source"] or None,
-            limit=retrieval_limit,
+            limit=request["limit"],
             mode=request["mode"],
             model=request["model"],
             auto_build=request["auto_build"],
+            repository_ids=allowed,
         )
-        allowed = _contextual_candidate_ids(route, request["context"])
-        if allowed:
-            explained = _filter_explained_to_repositories(explained, allowed, request["limit"])
+        full_names = _unique_strings(
+            (context.get("metadata") or {}).get("full_name") or ""
+            for context in (explained.get("contexts") if isinstance(explained.get("contexts"), list) else [])
+        )
+        explained["requirement_verification"] = verify_project_requirements(
+            self.db_path,
+            full_names,
+            route.get("requirements") if isinstance(route.get("requirements"), list) else [],
+        )
         return explained
 
     def rag_ask(
@@ -1602,7 +1630,7 @@ class ApiRepository:
             if notification_memory.get("event_count") and not contexts
             else answer_result.get("evidence_coverage") or answer_result.get("confidence") or explanation.get("confidence") or "low"
         )
-        return {
+        response = {
             "schema_version": 1,
             "query": explained.get("query") or query,
             "answer": answer,
@@ -1629,6 +1657,10 @@ class ApiRepository:
             "model_status": answer_result.get("model_status") or {},
             "answer_quality": answer_result.get("answer_quality") or {},
         }
+        if "clarification_required" in answer_result:
+            response["clarification_required"] = bool(answer_result.get("clarification_required"))
+            response["clarification_question"] = str(answer_result.get("clarification_question") or "")
+        return response
 
     def rag_explanations(
         self,
@@ -4964,6 +4996,7 @@ def _rag_chunk_rows_fts(
     language: str | None,
     category: str | None,
     source: str | None,
+    repository_ids: list[str],
     limit: int,
 ) -> list[Any]:
     conditions = ["rag_chunks_fts MATCH ?"]
@@ -4977,6 +5010,9 @@ def _rag_chunk_rows_fts(
     if source:
         conditions.append("c.sources_json LIKE ?")
         parameters.append(f"%{source}%")
+    if repository_ids:
+        conditions.append(f"c.full_name IN ({','.join('?' for _ in repository_ids)})")
+        parameters.extend(repository_ids)
     parameters.append(limit)
     return connection.execute(
         f"""
@@ -4999,6 +5035,7 @@ def _rag_chunk_rows_like(
     language: str | None,
     category: str | None,
     source: str | None,
+    repository_ids: list[str],
     limit: int,
 ) -> list[Any]:
     conditions = []
@@ -5012,6 +5049,9 @@ def _rag_chunk_rows_like(
     if source:
         conditions.append("sources_json LIKE ?")
         parameters.append(f"%{source}%")
+    if repository_ids:
+        conditions.append(f"full_name IN ({','.join('?' for _ in repository_ids)})")
+        parameters.extend(repository_ids)
     for term in terms:
         conditions.append("LOWER(chunk_text) LIKE ?")
         parameters.append(f"%{term.lower()}%")
@@ -5122,6 +5162,10 @@ def _contextual_answer_retrieval(
             "category": request.get("category") or "",
             "source": request.get("source") or "",
         },
+        "requirements": route.get("requirements") if isinstance(route.get("requirements"), list) else [],
+        "requirement_verification": explained.get("requirement_verification")
+        if isinstance(explained.get("requirement_verification"), dict)
+        else {},
     }
 
 
@@ -5133,6 +5177,17 @@ def _contextual_candidate_ids(route: dict[str, Any], context: dict[str, Any]) ->
         values = context.get("candidate_repository_ids")
         return [str(item) for item in values] if isinstance(values, list) else []
     return []
+
+
+def _normalized_repository_ids(value: Any) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    result = []
+    for item in value[:10]:
+        normalized = str(item or "").strip()
+        if normalized and normalized not in result:
+            result.append(normalized)
+    return result
 
 
 def _filter_explained_to_repositories(
@@ -5172,12 +5227,16 @@ def _with_contextual_route(
     response: dict[str, Any], raw_query: str, route: dict[str, Any], *, retrieval_performed: bool
 ) -> dict[str, Any]:
     input_route = {**route, "retrieval_performed": retrieval_performed}
+    clarification_required = bool(response.get("clarification_required")) or bool(route.get("clarification_required"))
+    clarification_question = str(
+        response.get("clarification_question") or route.get("clarification_question") or ""
+    )
     return {
         **response,
         "query": raw_query,
         "resolved_query": route.get("resolved_query") or "",
-        "clarification_required": bool(route.get("clarification_required")),
-        "clarification_question": str(route.get("clarification_question") or ""),
+        "clarification_required": clarification_required,
+        "clarification_question": clarification_question,
         "input_route": input_route,
         "source_explanation_id": "",
         "cached": False,

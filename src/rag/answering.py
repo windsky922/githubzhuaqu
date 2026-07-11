@@ -26,6 +26,18 @@ def answer_rag_question(
     evidence = _evidence_from_contexts(contexts)
     model_client = client or KimiChatClient()
     model_status = model_client.status()
+    recommendations = _recommendations(retrieval, contexts, citations)
+
+    constraint_gate = _constraint_gate_response(
+        query=query,
+        retrieval=retrieval,
+        citations=citations,
+        evidence=evidence,
+        recommendations=recommendations,
+        model_status=model_status,
+    )
+    if constraint_gate:
+        return constraint_gate
 
     if not contexts:
         return _response(
@@ -39,6 +51,7 @@ def answer_rag_question(
             citations=citations,
             evidence=evidence,
             model_status={**model_status, "attempted": False, "used": False},
+            recommendations=recommendations,
         )
 
     if model_status["configured"]:
@@ -49,6 +62,7 @@ def answer_rag_question(
                 prompt_context=prompt_context,
                 citations=citations,
                 evidence=evidence,
+                recommendations=recommendations,
             )
             answer = _ensure_citation_marker(model_client.chat(messages), citations)
             answer_quality = validate_rag_answer(answer=answer, citations=citations, contexts=contexts)
@@ -66,6 +80,7 @@ def answer_rag_question(
                 evidence=evidence,
                 model_status={**model_status, "attempted": True, "used": True},
                 answer_quality=answer_quality,
+                recommendations=recommendations,
             )
         except (LlmClientError, OSError) as error:
             fallback_reason = str(error)
@@ -74,7 +89,7 @@ def answer_rag_question(
 
     return _response(
         query=query,
-        answer=_rule_answer(query=query, contexts=contexts, retrieval=retrieval),
+        answer=_rule_answer(query=query, contexts=contexts, retrieval=retrieval, recommendations=recommendations),
         answer_model=RULE_MODEL,
         answer_mode="fallback_rule",
         fallback_reason=fallback_reason,
@@ -83,6 +98,7 @@ def answer_rag_question(
         citations=citations,
         evidence=evidence,
         model_status={**model_status, "attempted": model_status["configured"], "used": False},
+        recommendations=recommendations,
     )
 
 
@@ -100,6 +116,7 @@ def stream_rag_answer_question(
     evidence = _evidence_from_contexts(contexts)
     model_client = client or KimiChatClient()
     model_status = model_client.status()
+    recommendations = _recommendations(retrieval, contexts, citations)
     yield {
         "event": "meta",
         "data": {
@@ -110,6 +127,19 @@ def stream_rag_answer_question(
             "model_status": model_status,
         },
     }
+
+    constraint_gate = _constraint_gate_response(
+        query=query,
+        retrieval=retrieval,
+        citations=citations,
+        evidence=evidence,
+        recommendations=recommendations,
+        model_status=model_status,
+    )
+    if constraint_gate:
+        yield {"event": "final", "data": constraint_gate}
+        return
+
 
     if not contexts:
         yield {
@@ -125,6 +155,7 @@ def stream_rag_answer_question(
                 citations=citations,
                 evidence=evidence,
                 model_status={**model_status, "attempted": False, "used": False},
+                recommendations=recommendations,
             ),
         }
         return
@@ -138,6 +169,7 @@ def stream_rag_answer_question(
                 prompt_context=prompt_context,
                 citations=citations,
                 evidence=evidence,
+                recommendations=recommendations,
             )
             chunks: list[str] = []
             for delta in model_client.stream_chat(messages):
@@ -161,6 +193,7 @@ def stream_rag_answer_question(
                     evidence=evidence,
                     model_status={**model_status, "attempted": True, "used": True},
                     answer_quality=answer_quality,
+                    recommendations=recommendations,
                 ),
             }
             return
@@ -171,7 +204,7 @@ def stream_rag_answer_question(
         "event": "final",
         "data": _response(
             query=query,
-            answer=_rule_answer(query=query, contexts=contexts, retrieval=retrieval),
+            answer=_rule_answer(query=query, contexts=contexts, retrieval=retrieval, recommendations=recommendations),
             answer_model=RULE_MODEL,
             answer_mode="fallback_rule",
             fallback_reason=fallback_reason,
@@ -180,8 +213,79 @@ def stream_rag_answer_question(
             citations=citations,
             evidence=evidence,
             model_status={**model_status, "attempted": model_status["configured"], "used": False},
+            recommendations=recommendations,
         ),
     }
+
+
+def _recommendations(
+    retrieval: dict[str, Any],
+    contexts: list[dict[str, Any]],
+    citations: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    return build_project_recommendations(
+        contexts=contexts,
+        citations=citations,
+        constraints=retrieval.get("constraints") if isinstance(retrieval.get("constraints"), dict) else {},
+        requirements=_list_of_dicts(retrieval.get("requirements")),
+        requirement_verification=(
+            retrieval.get("requirement_verification")
+            if isinstance(retrieval.get("requirement_verification"), dict)
+            else {}
+        ),
+    )
+
+
+def _constraint_gate_response(
+    *,
+    query: str,
+    retrieval: dict[str, Any],
+    citations: list[dict[str, Any]],
+    evidence: list[dict[str, Any]],
+    recommendations: list[dict[str, Any]],
+    model_status: dict[str, Any],
+) -> dict[str, Any] | None:
+    requirements = _list_of_dicts(retrieval.get("requirements"))
+    if not requirements:
+        return None
+    if any(item.get("eligibility") == "eligible" for item in recommendations):
+        return None
+
+    has_unknown = not recommendations or any(item.get("eligibility") == "unknown" for item in recommendations)
+    if has_unknown:
+        question = "当前候选中存在无法核实的硬约束。请补充可验证条件，或明确允许扩大到全部归档继续搜索。"
+        answer_mode = "clarification"
+        fallback_reason = "hard_constraint_unknown"
+    else:
+        question = "当前候选全部违反了明确的硬约束。请放宽条件，或要求重新搜索全部归档。"
+        answer_mode = "no_match"
+        fallback_reason = "hard_constraint_no_match"
+
+    result = _response(
+        query=query,
+        answer=question,
+        answer_model="rule:constraint-gate-v1",
+        answer_mode=answer_mode,
+        fallback_reason=fallback_reason,
+        confidence=_confidence(_list_of_dicts(retrieval.get("contexts"))),
+        retrieval=retrieval,
+        citations=citations,
+        evidence=evidence,
+        model_status={**model_status, "attempted": False, "used": False},
+        answer_quality={
+            "applicable": False,
+            "passed": True,
+            "issues": [],
+            "citation_validity": "not_applicable",
+            "evidence_relevance": "not_evaluated",
+            "claim_support": "not_evaluated",
+            "data_freshness": "unknown",
+        },
+        recommendations=recommendations,
+    )
+    result["clarification_required"] = has_unknown
+    result["clarification_question"] = question if has_unknown else ""
+    return result
 
 
 def _response(
@@ -197,13 +301,10 @@ def _response(
     evidence: list[dict[str, Any]],
     model_status: dict[str, Any],
     answer_quality: dict[str, Any] | None = None,
+    recommendations: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     contexts = _list_of_dicts(retrieval.get("contexts"))
-    recommendations = build_project_recommendations(
-        contexts=contexts,
-        citations=citations,
-        constraints=retrieval.get("constraints") if isinstance(retrieval.get("constraints"), dict) else {},
-    )
+    recommendations = recommendations if recommendations is not None else _recommendations(retrieval, contexts, citations)
     return {
         "schema_version": 1,
         "query": retrieval.get("query") or query,
@@ -231,19 +332,26 @@ def _response(
     }
 
 
-def _rule_answer(*, query: str, contexts: list[dict[str, Any]], retrieval: dict[str, Any]) -> str:
+def _rule_answer(
+    *, query: str, contexts: list[dict[str, Any]], retrieval: dict[str, Any], recommendations: list[dict[str, Any]]
+) -> str:
     repositories = _unique_strings(context.get("metadata", {}).get("full_name") or "" for context in contexts)
     sources = _unique_strings(
         source
         for context in contexts
         for source in _list_strings(context.get("metadata", {}).get("sources") or [])
     )
-    top = contexts[0].get("metadata", {}) if contexts else {}
-    top_repo = top.get("full_name") or (repositories[0] if repositories else "")
+    eligible = next((item for item in recommendations if item.get("eligibility") == "eligible"), None)
+    top_repo = str((eligible or {}).get("full_name") or "")
     mode = (retrieval.get("retrieval") or {}).get("mode") or "rag"
     citation_markers = _citation_markers(contexts)
+    lead = (
+        f"基于 {mode} 证据，问题“{query}”当前优先关注 {top_repo}{citation_markers[:3] or ''}。"
+        if top_repo
+        else f"基于 {mode} 证据，问题“{query}”当前没有通过全部硬约束的首选项目。"
+    )
     answer = [
-        f"基于 {mode} 证据，问题“{query}”当前优先关注 {top_repo}{citation_markers[:3] or ''}。",
+        lead,
         f"证据覆盖 {len(repositories)} 个项目：{'、'.join(repositories[:5]) or '未识别项目'}{citation_markers or ''}。",
         f"来源包括：{'、'.join(sources[:5]) or '未标明来源'}{citation_markers[:3] or ''}。",
         "该回答为规则降级版，只根据已召回证据给出低到中置信结论，不补充证据外信息。",

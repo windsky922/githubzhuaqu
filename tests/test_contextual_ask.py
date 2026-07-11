@@ -79,6 +79,50 @@ class ContextualAskTest(unittest.TestCase):
         self.assertEqual(events[-1]["event"], "final")
         self.assertEqual(events[-1]["data"], normal)
 
+    def test_refine_rejects_conflicting_candidate_without_calling_answer_model(self):
+        payload = {
+            "q": "更适合 Java 的",
+            "context": {
+                "previous_user_goal": "多智能体编排项目",
+                "candidate_repository_ids": ["eval/agent-orchestrator"],
+                "primary_repository_id": "eval/agent-orchestrator",
+                "mode": "hybrid",
+                "resumable": True,
+            },
+            "mode": "hybrid",
+            "auto_build": True,
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            repository = self._repository(Path(directory))
+            with patch("src.rag.answering.KimiChatClient.chat", side_effect=AssertionError("answer model must not run")):
+                result = repository.rag_ask_contextual(payload)
+        self.assertEqual(result["answer_mode"], "no_match")
+        self.assertFalse(result["clarification_required"])
+        self.assertEqual(result["recommendations"][0]["eligibility"], "rejected")
+        self.assertIn("语言=Java", result["recommendations"][0]["unmet_requirements"])
+
+    def test_unverifiable_hard_constraint_requests_clarification(self):
+        payload = {
+            "q": "必须付费",
+            "context": {
+                "previous_user_goal": "多智能体编排项目",
+                "candidate_repository_ids": ["eval/agent-orchestrator"],
+                "primary_repository_id": "eval/agent-orchestrator",
+                "mode": "hybrid",
+                "resumable": True,
+            },
+            "mode": "hybrid",
+            "auto_build": True,
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            repository = self._repository(Path(directory))
+            result = repository.rag_ask_contextual(payload)
+        self.assertEqual(result["answer_mode"], "clarification")
+        self.assertTrue(result["clarification_required"])
+        self.assertEqual(result["recommendations"][0]["eligibility"], "unknown")
+        self.assertIn("成本=paid", result["recommendations"][0]["unknown_requirements"])
+        self.assertFalse(result["answer_quality"]["applicable"])
+
     @unittest.skipUnless(importlib.util.find_spec("fastapi") and importlib.util.find_spec("httpx"), "缺少 API 测试依赖")
     def test_post_routes_are_additive_and_validate_payload(self):
         from fastapi.testclient import TestClient

@@ -1,4 +1,4 @@
-import type { Comparison, Project, ProjectPage, RagAnswer } from "./types";
+import type { AskIntentContext, Comparison, Project, ProjectPage, RagAnswer } from "./types";
 
 type JsonEnvelope<T> = { projects?: T[]; profiles?: unknown[]; recommendations?: T[]; total?: number; offset?: number; limit?: number; has_more?: boolean; count?: number };
 export type StreamEvent = { event: "meta" | "delta" | "final" | "error"; data: Record<string, unknown> };
@@ -85,9 +85,17 @@ export async function recommendations() {
   return [...(await projects())].sort((left, right) => Number(right.recommendation_score || 0) - Number(left.recommendation_score || 0)).slice(0, 30);
 }
 
-export async function streamRagAsk(question: string, signal: AbortSignal, onEvent: (event: StreamEvent) => void) {
-  const params = new URLSearchParams({ q: question, mode: "hybrid", limit: "3", auto_build: "true" });
-  const response = await fetch(`/v1/rag/ask/stream?${params}`, { signal, headers: { Accept: "text/event-stream" } });
+export function contextualAskBody(question: string, context?: AskIntentContext) {
+  return { q: question, ...(context ? { context } : {}), mode: context?.mode || "hybrid", limit: 3, auto_build: true };
+}
+
+export async function streamRagAsk(question: string, context: AskIntentContext | undefined, signal: AbortSignal, onEvent: (event: StreamEvent) => void) {
+  const response = await fetch("/v1/rag/ask/stream", {
+    method: "POST",
+    signal,
+    headers: { Accept: "text/event-stream", "Content-Type": "application/json" },
+    body: JSON.stringify(contextualAskBody(question, context)),
+  });
   if (!response.ok || !response.body) throw new Error(`HTTP ${response.status}`);
   const reader = response.body.getReader();
   const decoder = new TextDecoder();

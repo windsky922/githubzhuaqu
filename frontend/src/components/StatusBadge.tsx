@@ -1,4 +1,6 @@
 export function answerStatus(mode: string, quality?: boolean) {
+  if (mode === "clarification") return { tone: "warn", label: "需要补充需求" };
+  if (mode === "no_match") return { tone: "bad", label: "硬约束下无匹配" };
   if (mode === "refusal") return { tone: "bad", label: "当前归档没有足够证据" };
   if (quality === false) return { tone: "bad", label: "模型回答未通过质量校验" };
   if (mode === "fallback_rule") return { tone: "warn", label: "已切换为证据约束结论" };

@@ -4,7 +4,7 @@
 
 ## React 项目匹配工作台
 
-`docs/app/#/agent` 是面向普通用户的 React 项目匹配入口。前端只在浏览器 `localStorage` 保存有限的会话标题、问题和最终响应；不创建后端会话表，不向模型传递历史回答，也不把历史回答视为事实证据。它通过 `/v1/rag/ask/stream` 接收检索元数据、未校验草稿和最终响应；草稿不能作为正式结论，只有经过既有引用与质量闸门处理的 `final` 才显示为推荐。页面只从后端 `recommendations[]` 读取候选顺序和资格状态，citations、evidence、contexts 仅作为依据，不再决定首选。
+`docs/app/#/agent` 是面向普通用户的 React 项目匹配入口。前端只在浏览器 `localStorage` 保存有限的会话标题、问题和最终响应；不创建后端会话表，也不把历史回答视为事实证据。它通过 POST `/v1/rag/ask/stream` 提交当前输入和最小用户意图上下文，只包含上一轮用户目标、候选 ID、确认首选、模式和 resumable。历史 assistant answer、citations、evidence、prompt_context 均不进入请求。页面只从后端 `recommendations[]` 读取候选顺序和资格状态。
 
 Agent 路由使用独立的全高工作区，消息列表是唯一可滚动区域，输入框固定在工作区底部。项目筛选通过 `offset` 分页从 SQLite 归档读取项目；对比选择只保存在浏览器并同步到 `repos` URL 参数，对比结果复用既有只读项目对比 API，不增加用户数据或后端状态。
 
@@ -50,11 +50,13 @@ RAG 语料先经过确定性清洗和版本化，再进入 FTS5、local-hash 与
 
 `/v1/rag/ask` 不是普通聊天接口。它必须先有 RAG 证据，再尝试真实模型回答；没有证据时直接拒答。模型失败不会阻断接口，响应会保留 `citations`、`evidence`、`answer_mode`、`fallback_reason` 和 `model_status`，管理页据此展示模型状态和降级原因。提示词保存在 `prompts/rag_ask.md`，业务代码只负责装配结构化证据。
 
+POST Ask 在检索前经过 `follow_up_router`。确定性规则优先识别 resume/refine/new_search/clarify，无法判断时才调用 Kimi 严格 JSON 路由；模型只能建议路由、改写和约束，不能选择项目。候选范围直接下推到 FTS5 SQL、vector 行过滤和 hybrid 两路召回。`constraint_verifier` 从仓库/语料确定性元数据及非模型增强 chunk 验证硬约束，`project_recommendations` 统一生成 eligible/unknown/rejected；没有合格候选时由规则闸门返回 clarification 或 no_match，不调用回答模型。
+
 Ask 响应把证据覆盖与匹配把握分开表达：旧 `confidence` 仅作为兼容字段保留，`evidence_coverage` 复用其按证据数量计算的 `low/medium/high`，`match_confidence` 在未校准阶段固定为 `unknown`。`answer_quality` 保留原有通过状态和问题列表，并显式标记引用有效性、证据相关性、主张支持度和数据新鲜度；P0-2 只有引用有效性经过实际校验，不能把证据数量或格式校验解释为推荐正确率。
 
 管理页 RAG 对话工作台是该接口的 GPT 式前端封装，不新增后端会话状态。对话历史只保存在浏览器 localStorage，最多 20 轮；每轮问题独立检索，历史回答只用于页面回看，不进入 `prompt_context`，也不作为事实证据。管理页和 React 工作台显示“证据覆盖”与“匹配把握尚未校准”，不再把 `confidence` 渲染为匹配置信度。
 
-`frontend/` 是 React + TypeScript 用户前端，构建产物写入 `docs/app/`，通过 Hash Router 提供项目匹配、筛选、推荐、详情和对比页面；旧 `agent.html`、`explorer.html`、`recommendations.html`、`project.html`、`compare.html` 仅保留 query 参数并跳转到对应路由。`app/#/agent?api=1` 是面向普通用户的项目匹配前端：用户只输入一句需求，前端默认调用 `/v1/rag/ask/stream?mode=hybrid&limit=3&auto_build=true`。流中的 `delta` 只作为“待质量校验草稿”展示；`final` 中只有第一项 recommendation 为 eligible 且回答质量通过时才显示“当前归档内最匹配候选”。失败、未知或拒绝状态仍可作为候选展示，但不能伪装成首选。它不新增数据库表、不保存聊天历史到后端，也不把前端历史或模型回答当作事实来源。
+`frontend/` 是 React + TypeScript 用户前端，构建产物写入 `docs/app/`，通过 Hash Router 提供项目匹配、筛选、推荐、详情和对比页面；旧 `agent.html`、`explorer.html`、`recommendations.html`、`project.html`、`compare.html` 仅保留 query 参数并跳转到对应路由。`app/#/agent?api=1` 默认 POST `/v1/rag/ask/stream`。流中的 `delta` 只作为“待质量校验草稿”展示；`final` 中只有第一项 recommendation 为 eligible 且回答质量通过时才显示首选。clarification 不展示项目卡或质量失败，no_match 展示冲突候选与原因。它不新增数据库表或后端会话。
 
 ## 项目级 Agent 执行层
 

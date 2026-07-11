@@ -12,6 +12,7 @@ def rag_ask_messages(
     prompt_context: str,
     citations: list[dict[str, Any]],
     evidence: list[dict[str, Any]],
+    recommendations: list[dict[str, Any]] | None = None,
 ) -> list[dict[str, str]]:
     prompt = (root / "prompts" / "rag_ask.md").read_text(encoding="utf-8")
     payload = {
@@ -19,6 +20,7 @@ def rag_ask_messages(
         "prompt_context": prompt_context,
         "citations": citations,
         "evidence": evidence,
+        "recommendations": recommendations or [],
     }
     return [
         {"role": "system", "content": prompt},

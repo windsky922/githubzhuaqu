@@ -16,6 +16,8 @@ def build_project_recommendations(
     contexts: list[dict[str, Any]],
     citations: list[dict[str, Any]],
     constraints: dict[str, Any] | None = None,
+    requirements: list[dict[str, Any]] | None = None,
+    requirement_verification: dict[str, dict[str, Any]] | None = None,
 ) -> list[dict[str, Any]]:
     """Build an auditable, deterministic repository ranking from one retrieval result."""
     normalized_constraints = {
@@ -62,6 +64,15 @@ def build_project_recommendations(
     recommendations = []
     for candidate in grouped.values():
         matched, unmet, unknown = _evaluate_constraints(candidate, normalized_constraints)
+        verified = (requirement_verification or {}).get(candidate["full_name"], {})
+        matched.extend(item for item in _strings(verified.get("matched_requirements")) if item not in matched)
+        unmet.extend(item for item in _strings(verified.get("unmet_requirements")) if item not in unmet)
+        unknown.extend(item for item in _strings(verified.get("unknown_requirements")) if item not in unknown)
+        if requirements and not verified:
+            unknown.extend(
+                item for item in (_requirement_label(requirement) for requirement in requirements)
+                if item not in unknown
+            )
         eligibility = "rejected" if unmet else "unknown" if unknown else "eligible"
         if max_score > 0:
             match_score = round(candidate["best_score"] / max_score, 4)
@@ -74,7 +85,11 @@ def build_project_recommendations(
             index = citation.get("index")
             if isinstance(index, int) and index > 0 and index not in citation_indexes:
                 citation_indexes.append(index)
-        reasons = _reasons(candidate, matched, unknown)
+        evidence_chunk_ids = list(candidate["chunk_ids"])
+        for chunk_id in _strings(verified.get("evidence_chunk_ids")):
+            if chunk_id not in evidence_chunk_ids:
+                evidence_chunk_ids.append(chunk_id)
+        reasons = _reasons(candidate, matched, unmet, unknown)
         recommendations.append(
             {
                 "full_name": candidate["full_name"],
@@ -82,9 +97,10 @@ def build_project_recommendations(
                 "match_score": match_score,
                 "matched_requirements": matched,
                 "unmet_requirements": unmet,
+                "unknown_requirements": unknown,
                 "reasons": reasons,
                 "citation_indexes": citation_indexes,
-                "evidence_chunk_ids": candidate["chunk_ids"],
+                "evidence_chunk_ids": evidence_chunk_ids,
                 "eligibility": eligibility,
             }
         )
@@ -125,7 +141,7 @@ def _evaluate_constraints(
     return matched, unmet, unknown
 
 
-def _reasons(candidate: dict[str, Any], matched: list[str], unknown: list[str]) -> list[str]:
+def _reasons(candidate: dict[str, Any], matched: list[str], unmet: list[str], unknown: list[str]) -> list[str]:
     reasons = []
     if matched:
         reasons.append("满足显式筛选：" + "、".join(matched))
@@ -133,9 +149,20 @@ def _reasons(candidate: dict[str, Any], matched: list[str], unknown: list[str]) 
     source_types = [item for item in candidate["source_types"] if item]
     if source_types:
         reasons.append("证据类型：" + "、".join(source_types))
+    if unmet:
+        reasons.append("违反显式约束：" + "、".join(unmet))
     if unknown:
         reasons.append("无法验证显式筛选：" + "、".join(unknown))
     return reasons
+
+
+def _requirement_label(requirement: dict[str, Any]) -> str:
+    labels = {"license": "许可证", "deployment": "部署方式", "cost": "成本", "tech_stack": "技术栈", **CONSTRAINT_LABELS}
+    field = str(requirement.get("field") or "")
+    operator = str(requirement.get("operator") or "eq")
+    value = str(requirement.get("value") or "")
+    symbol = "≠" if operator == "not_eq" else "包含" if operator == "contains" else "="
+    return f"{labels.get(field, field)}{symbol}{value}"
 
 
 def _strings(value: Any) -> list[str]:

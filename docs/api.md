@@ -68,7 +68,7 @@ Authorization: Bearer <本地管理口令>
 
 管理首页的 GPT 式 RAG 对话工作台仍然逐轮调用 `/v1/rag/ask`。对话历史只保存在浏览器 `localStorage.github_weekly_rag_chat_history`，最多 20 轮；后端不保存会话，不把历史回答作为事实证据，也不写入 SQLite。
 
-React 项目匹配工作台位于 `app/#/agent?api=1`，旧 `agent.html?api=1` 自动跳转。它默认调用 `/v1/rag/ask/stream`，只保留一句话需求输入，并把回答渲染为“最匹配项目、候选项目、折叠证据”。SSE 草稿只标记为质量校验中，`final` 到达后才成为正式结论；失败、拒答和规则降级会显示用户可理解的状态。会话只保存在浏览器 `localStorage.github_weekly_agent_match_conversations_v1`，不保存 API Key、管理口令或请求头；历史回答不进入下一轮检索，也不作为事实证据。
+React 项目匹配工作台位于 `app/#/agent?api=1`，旧 `agent.html?api=1` 自动跳转。它默认 POST `/v1/rag/ask/stream`，并把回答渲染为“最匹配项目、候选项目、折叠证据”。SSE 草稿只标记为质量校验中，`final` 到达后才成为正式结论；clarification、no_match、拒答和规则降级均显示独立状态。会话只保存在浏览器 `localStorage.github_weekly_agent_match_conversations_v1`；下一轮只提交上一轮用户目标、候选 ID、确认首选、模式和 resumable，不提交历史回答、citations、evidence 或 prompt_context。
 
 `GET /api/projects` 与 `GET /v1/projects` 支持可选 `offset`（默认 0）和既有 `limit`（最大 200）。响应保留 `projects` 与 `count`，并新增 `total`、`offset`、`limit`、`has_more`，供 React 筛选页按每页 50 条展示完整历史归档。项目对比选择只保存在浏览器 `localStorage.github_weekly_project_compare_v1`，最多 3 个仓库；URL 中的 `repos` 参数优先于本地暂存。
 
@@ -635,7 +635,7 @@ py scripts\run_rag_search_evaluation.py --queries "agent workflow;python automat
 13. `evidence_coverage`：与兼容字段 `confidence` 等值，明确表示已召回、可引用证据的覆盖程度。
 14. `match_confidence`：当前固定为 `unknown`；在没有标注数据校准前不输出 `medium` 或 `high`。
 15. `answer_quality`：保留 `passed`、`issues`，并新增 `citation_validity`、`evidence_relevance`、`claim_support`、`data_freshness`。当前只有引用有效性执行实际校验，后三项分别返回 `not_evaluated`、`not_evaluated`、`unknown`；质量闸门通过不代表项目相关或结论正确。
-16. `recommendations`：当前归档内的确定性结构化推荐。每项包含 `full_name`、`rank`、`match_score`、`matched_requirements`、`unmet_requirements`、`reasons`、`citation_indexes`、`evidence_chunk_ids` 和 `eligibility`。`match_score` 只是本轮、同一检索模式内的相对排序分，不是概率或置信度；`eligibility` 只验证显式 `language`、`category`、`source` 筛选，模型增强字段不能决定硬约束。
+16. `recommendations`：当前归档内的确定性结构化推荐。每项包含 `full_name`、`rank`、`match_score`、`matched_requirements`、`unmet_requirements`、`unknown_requirements`、`reasons`、`citation_indexes`、`evidence_chunk_ids` 和 `eligibility`。`match_score` 只是本轮、同一检索模式内的相对排序分，不是概率或置信度。GET 继续验证显式 `language/category/source`；POST 还会验证路由器解析出的自然语言硬约束。
 
 管理页 RAG 对话工作台使用同一接口。每轮问题独立检索；前端以用户/助手气泡展示回答，只把本轮问题、回答摘要、引用、证据、质量闸门结果和 `prompt_context` 保存到浏览器 localStorage，便于刷新后继续查看。
 
@@ -652,6 +652,10 @@ React 项目匹配工作台使用的只读 SSE 接口，查询参数与 `/v1/rag
 无状态追问入口。POST 与既有 GET 共用路径，但使用 JSON 请求体；GET 的查询参数和响应保持不变。请求体包含当前 `q`，以及可选的 `context.previous_user_goal`、`candidate_repository_ids`、`primary_repository_id`、`mode` 和 `resumable`。context 最多携带 10 个 `owner/repo`，不得提交历史 assistant 回答、citations、evidence 或 `prompt_context`。
 
 POST 响应在 Ask 字段之外新增 `resolved_query`、`clarification_required`、`clarification_question` 和 `input_route`。`input_route` 记录 `new_search/resume/refine/clarify`、规则或 Kimi 路由器、候选范围、结构化 requirements 以及是否实际检索。无上下文的“继续、展开、嗯”等输入返回 `answer_mode=clarification`，contexts、citations、evidence 和 recommendations 均为空；流式响应只产生 `meta` 和 `final`，不产生草稿。
+
+resume/展开只在上一轮 candidate IDs 内检索，“那个项目”只在 primary ID 内检索，refine 只重排上一轮候选，明确“重新找/换一批”才检索全归档。候选限制在 FTS5、vector 和 hybrid 内部查询阶段执行，不使用先取固定 Top-N 再过滤。
+
+硬约束字段为 `language/category/source/license/deployment/cost/tech_stack`，operator 为 `eq/not_eq/contains`。language、license 使用 repositories 元数据，category、source 使用确定性语料字段，tech_stack 使用 language/topics；deployment、cost 只接受非 `model_enrichment` 清洗 chunk 的明确规则命中。冲突为 rejected，无法验证为 unknown，全部通过为 eligible。没有 eligible 且全部冲突时返回 `answer_mode=no_match` 且不调用回答模型；存在 unknown 时返回 clarification，请用户补充条件或允许扩大搜索。clarification 的 `answer_quality.applicable=false`，前端不得显示成质量失败。
 
 路由优先使用确定性规则；只有规则无法可靠判断时才调用 Kimi 严格 JSON 路由。模型不可用、超时、非法 JSON 或越权字段都会保守转为澄清。contextual POST 不写入 `rag_explanations`、任务、反馈或服务端会话。
 

@@ -26,6 +26,7 @@ export function ProjectCard({ project, primary = false, evidenceCount = 0 }: { p
     <p className="project-reason">{projectReason(project)}</p>
     {project.matched_requirements?.length ? <div className="requirement-list matched"><strong>满足</strong><span>{project.matched_requirements.join("、")}</span></div> : null}
     {project.unmet_requirements?.length ? <div className="requirement-list unmet"><strong>未满足</strong><span>{project.unmet_requirements.join("、")}</span></div> : null}
+    {project.unknown_requirements?.length ? <div className="requirement-list unknown"><strong>无法验证</strong><span>{project.unknown_requirements.join("、")}</span></div> : null}
     <div className="project-actions"><Link className="small-link" to={`/projects/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`}><FileText size={13} />详情</Link>{project.html_url ? <a className="small-link" href={project.html_url} target="_blank" rel="noreferrer"><ExternalLink size={13} />GitHub</a> : null}<button className="small-link compare-action" type="button" disabled={!selected && !compare.canAdd} onClick={() => selected ? compare.remove(project.full_name) : compare.add(project.full_name)}><GitCompareArrows size={13} />{selected ? "移出对比" : "加入对比"}</button></div>
   </article>;
 }

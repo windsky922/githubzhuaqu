@@ -1,5 +1,24 @@
 # 操作日志
 
+## 2026-07-11 追加：P0-5B 候选范围、硬约束验证与 React 接入
+
+### 1. 开发目的
+
+让追问真正限定在浏览器声明的上一轮候选内，并在回答模型运行前完成可审计的自然语言硬约束判定。
+
+### 2. 修改内容
+
+1. candidate IDs 下推到 FTS5、vector 和 hybrid 内部查询；resume/refine 不再采用先取 Top-N 再过滤。
+2. 新增确定性硬约束验证器。language/license/category/source/tech_stack 使用可信元数据，deployment/cost 只使用非 `model_enrichment` 清洗 chunk；recommendation 新增 `unknown_requirements[]`。
+3. 全部候选明确冲突时返回 `answer_mode=no_match`；存在无法验证条件时返回 clarification。两条路径均不调用回答模型，质量闸门标记为不适用。
+4. React 改为 POST 流式 Ask，每轮只提交上一轮用户目标、候选 ID、确认首选、模式和 resumable；澄清轮不展示项目卡或质量失败。
+5. 新增候选范围、硬约束、模型增强隔离、最小请求体和 clarification/no_match 前后端测试。
+6. 重跑 40 条追问评估与 52 条 P0-1/P0-4 基线：追问路由、澄清、改写、候选范围和约束精确匹配均为 1.0，原始追问误检索率为 0；三模式检索和推荐指标与 P0-4 保持一致，硬约束违反率均为 0。
+
+### 3. 边界
+
+本阶段不新增 SQLite schema、服务端会话、Responses API 或 Agents SDK；既有 GET 契约与 SSE 事件名、顺序保持不变，`tmp/` 不纳入提交。
+
 ## 2026-07-11 追加：P0-5A 无状态追问路由与澄清保护
 
 ### 1. 开发目的
