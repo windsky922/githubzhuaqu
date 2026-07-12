@@ -34,6 +34,12 @@ LICENSES = {
     "gplv3": "GPL-3.0", "bsd-3-clause": "BSD-3-Clause", "mpl-2.0": "MPL-2.0",
 }
 TECH_STACKS = ("Docker", "Kubernetes", "React", "Vue", "FastAPI", "Django", "Spring", "Node.js", "LangChain")
+NEGATION_MARKERS = (
+    "不要", "排除", "不能", "不是", "不支持", "不依赖", "无法", "禁止", "without", "does not", "doesn't", "not support", " not ", " no ",
+)
+CLAUSE_SPLIT_RE = re.compile(r"[，,。；;！？!?]+|但(?:是)?|不过|然而|同时|并且|而且|另外|此外|且|\bbut\b", re.IGNORECASE)
+POSITIVE_BOUNDARY_RE = re.compile(r"(?<!^)(?=(?:必须|要求|最好|优先|需要支持|要支持|must\b|require\b|prefer\b))", re.IGNORECASE)
+DISJUNCTION_RE = re.compile(r"(?:或者|或是|二选一|\s或\s|either|\sor\s)", re.IGNORECASE)
 
 
 def normalize_contextual_request(payload: dict[str, Any] | None) -> dict[str, Any]:
@@ -109,11 +115,18 @@ def route_follow_up(
     client: KimiChatClient | None = None,
 ) -> dict[str, Any]:
     normalized = _normalize_query(query)
-    requirements = extract_requirements(query)
+    parsed_requirements = parse_requirements(query)
+    requirements = parsed_requirements["requirements"]
     has_context = _has_resumable_context(context)
 
     if any(marker in normalized for marker in ("忽略之前", "忽略系统", "系统提示", "输出json", "绕过规则")):
         return _clarify("这句话包含无法作为项目需求处理的指令。请只描述要寻找或比较的项目。", "instruction_like_input")
+    if parsed_requirements["ambiguous"]:
+        return _clarify(
+            "这些条件包含无法安全确定的否定范围、冲突或析取关系。请把必须满足和必须排除的条件分别写清楚。",
+            parsed_requirements["reason"],
+            requirements,
+        )
     if any(marker in normalized for marker in RESET_MARKERS):
         resolved = _combine_query(context.get("previous_user_goal") if has_context else "", query)
         return _route("new_search", "explicit_archive_reset", resolved, "archive", requirements)
@@ -143,11 +156,31 @@ def route_follow_up(
     return _route("new_search", "substantive_query", query.strip(), "archive", requirements)
 
 
-def extract_requirements(query: str) -> list[dict[str, Any]]:
-    lower = f" {query.casefold()} "
-    negative = any(marker in query for marker in ("不要", "排除", "不能", "不是"))
-    operator = "not_eq" if negative else "eq"
+def parse_requirements(query: str) -> dict[str, Any]:
     requirements: list[dict[str, Any]] = []
+    for clause in _constraint_clauses(query):
+        _extract_clause_requirements(clause, requirements)
+    ambiguity_reason = _requirement_ambiguity(query, requirements)
+    return {"requirements": requirements, "ambiguous": bool(ambiguity_reason), "reason": ambiguity_reason}
+
+
+def extract_requirements(query: str) -> list[dict[str, Any]]:
+    return parse_requirements(query)["requirements"]
+
+
+def _constraint_clauses(query: str) -> list[str]:
+    clauses = []
+    for fragment in CLAUSE_SPLIT_RE.split(str(query or "")):
+        for clause in POSITIVE_BOUNDARY_RE.split(fragment):
+            normalized = clause.strip()
+            if normalized:
+                clauses.append(normalized)
+    return clauses
+
+
+def _extract_clause_requirements(clause: str, requirements: list[dict[str, Any]]) -> None:
+    lower = f" {clause.casefold()} "
+    operator = "not_eq" if any(marker in lower for marker in NEGATION_MARKERS) else "eq"
     for token, value in sorted(LANGUAGES.items(), key=lambda item: len(item[0]), reverse=True):
         if token == "java" and "javascript" in lower:
             continue
@@ -156,20 +189,48 @@ def extract_requirements(query: str) -> list[dict[str, Any]]:
     for token, value in LICENSES.items():
         if token in lower:
             _append_requirement(requirements, "license", operator, value)
-    deployment_values = []
-    if any(marker in lower for marker in ("本地部署", "私有化", "离线", "self-hosted", "self hosted")):
-        deployment_values.append("local")
-    if any(marker in lower for marker in ("云端", "saas", "cloud")):
-        deployment_values.append("cloud")
-    for value in deployment_values:
-        _append_requirement(requirements, "deployment", operator, value)
-    for marker, value in (("免费", "free"), ("低成本", "low_cost"), ("付费", "paid")):
-        if marker in lower:
+    offline_negative = any(
+        marker in lower
+        for marker in ("不支持离线", "不能离线", "无法离线", "does not support offline", "doesn't support offline", "no offline support")
+    )
+    offline_positive = any(
+        marker in lower
+        for marker in ("完全离线", "离线运行", "不能联网", "无需联网", "不依赖网络", "without internet", "air-gapped", "air gapped")
+    )
+    if offline_negative:
+        _append_requirement(requirements, "deployment", "not_eq", "offline")
+    elif offline_positive:
+        _append_requirement(requirements, "deployment", "eq", "offline")
+    elif "离线" in lower or "offline" in lower:
+        _append_requirement(requirements, "deployment", operator, "offline")
+    if any(marker in lower for marker in ("本地部署", "私有化部署", "self-hosted", "self hosted")):
+        _append_requirement(requirements, "deployment", operator, "local")
+    if any(marker in lower for marker in ("云端", "云 api", "云api", "saas", "cloud")):
+        _append_requirement(requirements, "deployment", operator, "cloud")
+    for markers, value in (
+        (("免费", " free ", "free to use", "no cost"), "free"),
+        (("低成本", "low cost", "low-cost"), "low_cost"),
+        (("付费", " paid ", "subscription"), "paid"),
+    ):
+        if any(marker in lower for marker in markers):
             _append_requirement(requirements, "cost", operator, value)
     for stack in TECH_STACKS:
         if stack.casefold() in lower:
             _append_requirement(requirements, "tech_stack", operator, stack)
-    return requirements
+
+
+def _requirement_ambiguity(query: str, requirements: list[dict[str, Any]]) -> str:
+    if len(requirements) > 1 and DISJUNCTION_RE.search(str(query or "")):
+        return "ambiguous_constraint_disjunction"
+    by_target: dict[tuple[str, str], set[str]] = {}
+    for requirement in requirements:
+        key = (str(requirement.get("field") or ""), str(requirement.get("value") or "").casefold())
+        by_target.setdefault(key, set()).add(str(requirement.get("operator") or ""))
+    if any({"eq", "not_eq"}.issubset(operators) for operators in by_target.values()):
+        return "conflicting_constraint_requirements"
+    if any(marker in str(query or "") for marker in ("不要求", "无所谓", "随便")) and requirements:
+        return "ambiguous_constraint_optional"
+    return ""
 
 
 def _route_with_kimi(

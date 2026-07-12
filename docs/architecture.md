@@ -54,7 +54,7 @@ RAG 语料先经过确定性清洗和版本化，再进入 FTS5、local-hash 与
 
 `/v1/rag/ask` 不是普通聊天接口。它必须先有 RAG 证据，再尝试真实模型回答；没有证据时直接拒答。模型失败不会阻断接口，响应会保留 `citations`、`evidence`、`answer_mode`、`fallback_reason` 和 `model_status`，管理页据此展示模型状态和降级原因。提示词保存在 `prompts/rag_ask.md`，业务代码只负责装配结构化证据。
 
-POST Ask 在检索前经过 `follow_up_router`。确定性规则优先识别 resume/refine/new_search/clarify，无法判断时才调用 Kimi 严格 JSON 路由；模型只能建议路由、改写和约束，不能选择项目。候选范围直接下推到 FTS5 SQL、vector 行过滤和 hybrid 两路召回。`constraint_verifier` 从仓库/语料确定性元数据及非模型增强 chunk 验证硬约束，`project_recommendations` 统一生成 eligible/unknown/rejected；没有合格候选时由规则闸门返回 clarification 或 no_match，不调用回答模型。
+POST Ask 在检索前经过 `follow_up_router`。确定性规则优先识别 resume/refine/new_search/clarify，并按分句和连接词限定否定作用域；同一目标冲突、析取或无法表达的可选条件直接澄清。部署要求区分 local、offline、cloud，避免把 self-hosted 等同于完全离线。规则无法判断时才调用 Kimi 严格 JSON 路由；模型只能建议路由、改写和约束，不能选择项目。候选范围直接下推到 FTS5 SQL、vector 行过滤和 hybrid 两路召回。`constraint_verifier` 从仓库/语料确定性元数据及非模型增强 chunk 验证硬约束，`project_recommendations` 统一生成 eligible/unknown/rejected；没有合格候选时由规则闸门返回 clarification 或 no_match，不调用回答模型。
 
 Ask 响应把证据覆盖与匹配把握分开表达：旧 `confidence` 仅作为兼容字段保留，`evidence_coverage` 复用其按证据数量计算的 `low/medium/high`，`match_confidence` 在未校准阶段固定为 `unknown`。`answer_quality` 保留原有通过状态和问题列表，并显式标记引用有效性、证据相关性、主张支持度和数据新鲜度；P0-2 只有引用有效性经过实际校验，不能把证据数量或格式校验解释为推荐正确率。
 

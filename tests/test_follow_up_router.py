@@ -3,7 +3,7 @@ import unittest
 from pathlib import Path
 
 from src.llm.client import LlmClientError
-from src.rag.follow_up_router import normalize_contextual_request, route_follow_up
+from src.rag.follow_up_router import normalize_contextual_request, parse_requirements, route_follow_up
 
 
 class _Client:
@@ -57,6 +57,48 @@ class FollowUpRouterTest(unittest.TestCase):
                 {"field": "license", "operator": "eq", "value": "MIT", "hard": True},
             ],
         )
+
+    def test_negation_scope_is_limited_to_each_clause(self):
+        self.assertEqual(
+            parse_requirements("不要云 API，但必须 Python")["requirements"],
+            [
+                {"field": "deployment", "operator": "not_eq", "value": "cloud", "hard": True},
+                {"field": "language", "operator": "eq", "value": "Python", "hard": True},
+            ],
+        )
+        self.assertEqual(
+            parse_requirements("不是 Java，最好 MIT")["requirements"],
+            [
+                {"field": "language", "operator": "not_eq", "value": "Java", "hard": True},
+                {"field": "license", "operator": "eq", "value": "MIT", "hard": True},
+            ],
+        )
+        self.assertEqual(
+            parse_requirements("不要 Java 和 Go，但必须 Docker")["requirements"],
+            [
+                {"field": "language", "operator": "not_eq", "value": "Java", "hard": True},
+                {"field": "language", "operator": "not_eq", "value": "Go", "hard": True},
+                {"field": "tech_stack", "operator": "eq", "value": "Docker", "hard": True},
+            ],
+        )
+
+    def test_offline_is_stricter_than_local_deployment(self):
+        parsed = parse_requirements("不能联网，要求 Docker")
+        self.assertEqual(
+            parsed["requirements"],
+            [
+                {"field": "deployment", "operator": "eq", "value": "offline", "hard": True},
+                {"field": "tech_stack", "operator": "eq", "value": "Docker", "hard": True},
+            ],
+        )
+        self.assertFalse(parsed["ambiguous"])
+
+    def test_conflict_disjunction_and_optional_constraint_clarify(self):
+        for query in ("必须 Python 但不要 Python", "Python 或 Java", "不要求 Python"):
+            with self.subTest(query=query):
+                result = route_follow_up(root=Path.cwd(), query=query, context=_context())
+                self.assertEqual(result["route"], "clarify")
+                self.assertTrue(result["clarification_required"])
 
     def test_explicit_reset_searches_archive(self):
         result = route_follow_up(root=Path.cwd(), query="换一批适合 Python 的项目", context=_context())
