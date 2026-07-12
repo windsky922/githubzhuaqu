@@ -5,7 +5,7 @@ from pathlib import Path
 
 from scripts.evaluate_project_match import write_fixture
 from src.api.repository import ApiRepository
-from src.rag.constraint_verifier import verify_project_requirements
+from src.rag.constraint_verifier import classify_text_evidence, verify_project_requirements
 from src.storage.sqlite_store import connect
 
 
@@ -98,6 +98,47 @@ class ConstraintVerifierTest(unittest.TestCase):
                 [_requirement("tech_stack", "Fast", operator="contains")],
             )["eval/agent-orchestrator"]
         self.assertEqual(result["matched_requirements"], ["技术栈包含Fast"])
+
+    def test_external_inference_rejects_local_and_offline_requirements(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            write_fixture(root)
+            repository = ApiRepository(root=root, db_path=root / "data" / "github_weekly.sqlite")
+            repository.ensure_sqlite_index()
+            connection = connect(repository.db_path)
+            try:
+                connection.execute(
+                    "UPDATE rag_chunks SET chunk_text=?, source_type='readme' WHERE full_name=?",
+                    ("支持 self-hosted UI，但推理依赖托管推理并且必须联网。", "eval/agent-orchestrator"),
+                )
+                connection.commit()
+            finally:
+                connection.close()
+            result = verify_project_requirements(
+                repository.db_path,
+                ["eval/agent-orchestrator"],
+                [_requirement("deployment", "local"), _requirement("deployment", "offline")],
+            )["eval/agent-orchestrator"]
+        self.assertEqual(result["matched_requirements"], [])
+        self.assertEqual(result["unmet_requirements"], ["部署方式=local", "部署方式=offline"])
+
+
+class TextEvidenceClassifierTest(unittest.TestCase):
+    def test_distinguishes_support_conflict_and_uncertainty(self):
+        cases = [
+            ("deployment", "offline", "可完全离线运行，无需联网。", "supports"),
+            ("deployment", "offline", "This project does not support offline mode.", "contradicts"),
+            ("deployment", "offline", "The UI is self-hosted but uses hosted inference.", "external_dependency"),
+            ("deployment", "offline", "Offline mode is available only if an extra package is installed.", "conditional"),
+            ("deployment", "local", "支持私有化部署。", "supports"),
+            ("cost", "free", "提供 14 天免费试用。", "trial_only"),
+            ("cost", "free", "Requires a paid plan.", "contradicts"),
+            ("cost", "free", "社区版完全免费。", "supports"),
+            ("cost", "free", "价格请咨询销售。", "unknown"),
+        ]
+        for field, value, sentence, expected in cases:
+            with self.subTest(sentence=sentence):
+                self.assertEqual(classify_text_evidence(field, value, sentence), expected)
 
 
 def _requirement(field, value, operator="eq"):

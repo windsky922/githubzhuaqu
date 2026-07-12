@@ -655,7 +655,7 @@ POST 响应在 Ask 字段之外新增 `resolved_query`、`clarification_required
 
 resume/展开只在上一轮 candidate IDs 内检索，“那个项目”只在 primary ID 内检索，refine 只重排上一轮候选，明确“重新找/换一批”才检索全归档。候选限制在 FTS5、vector 和 hybrid 内部查询阶段执行，不使用先取固定 Top-N 再过滤。
 
-硬约束字段为 `language/category/source/license/deployment/cost/tech_stack`，operator 为 `eq/not_eq/contains`。规则解析按分句和连接词限定否定作用域；同一目标冲突、析取或“不要求/无所谓”等无法安全表示的条件返回 clarification。`deployment` 的确定性值至少包含 `local`、`offline`、`cloud`，其中 `offline` 明确表示运行时不得依赖网络、云 API 或托管推理，不等同于普通 self-hosted。language、license 使用 repositories 元数据，category、source 使用确定性语料字段，tech_stack 使用 language/topics；deployment、cost 只接受非 `model_enrichment` 清洗 chunk 的明确规则命中。冲突为 rejected，无法验证为 unknown，全部通过为 eligible。没有 eligible 且全部冲突时返回 `answer_mode=no_match` 且不调用回答模型；存在 unknown 时返回 clarification，请用户补充条件或允许扩大搜索。clarification 的 `answer_quality.applicable=false`，前端不得显示成质量失败。
+硬约束字段为 `language/category/source/license/deployment/cost/tech_stack`，operator 为 `eq/not_eq/contains`。规则解析按分句和连接词限定否定作用域；同一目标冲突、析取或“不要求/无所谓”等无法安全表示的条件返回 clarification。`deployment` 的确定性值至少包含 `local`、`offline`、`cloud`，其中 `offline` 明确表示运行时不得依赖网络、云 API 或托管推理，不等同于普通 self-hosted。language、license 使用 repositories 元数据，category、source 使用确定性语料字段，tech_stack 使用 language/topics；deployment、cost 只接受非 `model_enrichment` 清洗 chunk 的句子级证据，内部区分 `supports/contradicts/conditional/trial_only/external_dependency/unknown`。免费试用不满足“免费”，self-hosted UI 加 hosted inference 不满足“完全离线”，明确否定和相反依赖均判为冲突；条件不完整或证据不足保持 unknown。冲突为 rejected，无法验证为 unknown，全部通过为 eligible。没有 eligible 且全部冲突时返回 `answer_mode=no_match` 且不调用回答模型；存在 unknown 时返回 clarification，请用户补充条件或允许扩大搜索。clarification 的 `answer_quality.applicable=false`，前端不得显示成质量失败。
 
 路由优先使用确定性规则；只有规则无法可靠判断时才调用 Kimi 严格 JSON 路由。模型不可用、超时、非法 JSON 或越权字段都会保守转为澄清。contextual POST 不写入 `rag_explanations`、任务、反馈或服务端会话。
 

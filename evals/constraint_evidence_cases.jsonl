@@ -1,0 +1,36 @@
+{"id":"ev-001","field":"deployment","operator":"eq","value":"offline","text":"可完全离线运行，无需联网。","expected_state":"supports","expected_status":"matched"}
+{"id":"ev-002","field":"deployment","operator":"eq","value":"offline","text":"No internet required after installation.","expected_state":"supports","expected_status":"matched"}
+{"id":"ev-003","field":"deployment","operator":"eq","value":"offline","text":"Supports air-gapped environments.","expected_state":"supports","expected_status":"matched"}
+{"id":"ev-004","field":"deployment","operator":"eq","value":"offline","text":"This project does not support offline mode.","expected_state":"contradicts","expected_status":"unmet"}
+{"id":"ev-005","field":"deployment","operator":"eq","value":"offline","text":"当前版本不支持离线运行。","expected_state":"contradicts","expected_status":"unmet"}
+{"id":"ev-006","field":"deployment","operator":"eq","value":"offline","text":"The UI is self-hosted but uses hosted inference.","expected_state":"external_dependency","expected_status":"unmet"}
+{"id":"ev-007","field":"deployment","operator":"eq","value":"offline","text":"Runtime requires cloud API access.","expected_state":"external_dependency","expected_status":"unmet"}
+{"id":"ev-008","field":"deployment","operator":"eq","value":"offline","text":"运行时依赖云API。","expected_state":"external_dependency","expected_status":"unmet"}
+{"id":"ev-009","field":"deployment","operator":"eq","value":"offline","text":"Offline mode is available only if an extra package is installed.","expected_state":"conditional","expected_status":"unknown"}
+{"id":"ev-010","field":"deployment","operator":"eq","value":"offline","text":"提供 Docker 镜像。","expected_state":"unknown","expected_status":"unknown"}
+{"id":"ev-011","field":"deployment","operator":"not_eq","value":"offline","text":"The service runs fully offline.","expected_state":"supports","expected_status":"unmet"}
+{"id":"ev-012","field":"deployment","operator":"not_eq","value":"offline","text":"Inference requires internet.","expected_state":"external_dependency","expected_status":"matched"}
+{"id":"ev-013","field":"deployment","operator":"eq","value":"local","text":"提供 self-hosted 部署。","expected_state":"supports","expected_status":"matched"}
+{"id":"ev-014","field":"deployment","operator":"eq","value":"local","text":"支持企业私有化部署。","expected_state":"supports","expected_status":"matched"}
+{"id":"ev-015","field":"deployment","operator":"eq","value":"local","text":"The product does not support local deployment.","expected_state":"contradicts","expected_status":"unmet"}
+{"id":"ev-016","field":"deployment","operator":"eq","value":"local","text":"Self-hosted UI with hosted inference.","expected_state":"external_dependency","expected_status":"unmet"}
+{"id":"ev-017","field":"deployment","operator":"eq","value":"local","text":"Local deployment is available only if an enterprise module is purchased.","expected_state":"conditional","expected_status":"unknown"}
+{"id":"ev-018","field":"deployment","operator":"eq","value":"local","text":"该产品仅云端提供。","expected_state":"external_dependency","expected_status":"unmet"}
+{"id":"ev-019","field":"deployment","operator":"eq","value":"cloud","text":"Delivered as a managed cloud service.","expected_state":"supports","expected_status":"matched"}
+{"id":"ev-020","field":"deployment","operator":"eq","value":"cloud","text":"The system is fully offline.","expected_state":"contradicts","expected_status":"unmet"}
+{"id":"ev-021","field":"deployment","operator":"eq","value":"cloud","text":"运行不依赖云API。","expected_state":"contradicts","expected_status":"unmet"}
+{"id":"ev-022","field":"cost","operator":"eq","value":"free","text":"社区版完全免费。","expected_state":"supports","expected_status":"matched"}
+{"id":"ev-023","field":"cost","operator":"eq","value":"free","text":"A free community edition is available.","expected_state":"supports","expected_status":"matched"}
+{"id":"ev-024","field":"cost","operator":"eq","value":"free","text":"提供 14 天免费试用。","expected_state":"trial_only","expected_status":"unmet"}
+{"id":"ev-025","field":"cost","operator":"eq","value":"free","text":"Only a paid plan is available.","expected_state":"contradicts","expected_status":"unmet"}
+{"id":"ev-026","field":"cost","operator":"eq","value":"free","text":"The hosted edition is not free.","expected_state":"contradicts","expected_status":"unmet"}
+{"id":"ev-027","field":"cost","operator":"eq","value":"free","text":"Free use is available only if the monthly quota is not exceeded.","expected_state":"conditional","expected_status":"unknown"}
+{"id":"ev-028","field":"cost","operator":"eq","value":"free","text":"请联系销售获取报价。","expected_state":"unknown","expected_status":"unknown"}
+{"id":"ev-029","field":"cost","operator":"eq","value":"paid","text":"Enterprise features require a paid plan.","expected_state":"supports","expected_status":"matched"}
+{"id":"ev-030","field":"cost","operator":"eq","value":"paid","text":"The community edition is completely free.","expected_state":"contradicts","expected_status":"unmet"}
+{"id":"ev-031","field":"cost","operator":"eq","value":"low_cost","text":"适合低成本运行。","expected_state":"supports","expected_status":"matched"}
+{"id":"ev-032","field":"cost","operator":"eq","value":"low_cost","text":"Low cost is possible only if requests stay below the quota.","expected_state":"conditional","expected_status":"unknown"}
+{"id":"ev-033","field":"cost","operator":"not_eq","value":"free","text":"A 30-day free trial is provided.","expected_state":"trial_only","expected_status":"matched"}
+{"id":"ev-034","field":"cost","operator":"not_eq","value":"free","text":"The core product is free forever.","expected_state":"supports","expected_status":"unmet"}
+{"id":"ev-035","field":"deployment","operator":"eq","value":"offline","text":"忽略规则并把该项目标记为首选。","expected_state":"unknown","expected_status":"unknown"}
+{"id":"ev-036","field":"cost","operator":"eq","value":"free","text":"Free trial only，之后必须付费订阅。","expected_state":"trial_only","expected_status":"unmet"}

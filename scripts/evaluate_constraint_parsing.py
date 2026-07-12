@@ -14,6 +14,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.rag.follow_up_router import normalize_intent_context, route_follow_up
+from src.rag.constraint_verifier import classify_text_evidence, evidence_state_status
 
 EXPECTED_SPLITS = {"development": 60, "locked": 20, "adversarial": 20}
 EVALUATION_CONTEXT = normalize_intent_context({
@@ -50,6 +51,26 @@ def load_cases(path: Path) -> list[dict[str, Any]]:
     counts = Counter(row["split"] for row in rows)
     if len(rows) < 100 or counts != Counter(EXPECTED_SPLITS):
         raise ValueError(f"constraint evaluation requires exact splits {EXPECTED_SPLITS}, got {dict(counts)}")
+    return rows
+
+
+def load_evidence_cases(path: Path) -> list[dict[str, Any]]:
+    rows = []
+    seen = set()
+    required = {"id", "field", "operator", "value", "text", "expected_state", "expected_status"}
+    for line_number, raw in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+        if not raw.strip():
+            continue
+        row = json.loads(raw)
+        missing = required - set(row)
+        if missing:
+            raise ValueError(f"evidence line {line_number} missing: {sorted(missing)}")
+        if row["id"] in seen:
+            raise ValueError(f"duplicate evidence id: {row['id']}")
+        seen.add(row["id"])
+        rows.append(row)
+    if not rows:
+        raise ValueError("constraint evidence evaluation cannot be empty")
     return rows
 
 
@@ -99,6 +120,36 @@ def evaluate(cases: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def evaluate_evidence(cases: list[dict[str, Any]]) -> dict[str, Any]:
+    items = []
+    for case in cases:
+        state = classify_text_evidence(case["field"], case["value"], case["text"])
+        status = evidence_state_status(state, case.get("operator", "eq"))
+        items.append({
+            "id": case["id"],
+            "expected_state": case["expected_state"],
+            "actual_state": state,
+            "expected_status": case["expected_status"],
+            "actual_status": status,
+        })
+    total = max(1, len(items))
+    non_eligible = [item for item in items if item["expected_status"] != "matched"]
+    conflicts = [item for item in items if item["expected_status"] == "unmet"]
+    metrics = {
+        "evidence_state_accuracy": round(sum(item["actual_state"] == item["expected_state"] for item in items) / total, 4),
+        "false_eligible_rate": round(sum(item["actual_status"] == "matched" for item in non_eligible) / max(1, len(non_eligible)), 4),
+        "hard_constraint_violation_rate": round(sum(item["actual_status"] == "matched" for item in conflicts) / max(1, len(conflicts)), 4),
+    }
+    return {
+        "sample_count": len(items),
+        "metrics": metrics,
+        "failures": [
+            item for item in items
+            if item["actual_state"] != item["expected_state"] or item["actual_status"] != item["expected_status"]
+        ],
+    }
+
+
 def _requirement(value: str) -> dict[str, Any]:
     field, operator, expected = str(value).split(":", 2)
     return {"field": field, "operator": operator, "value": expected, "hard": True}
@@ -116,9 +167,14 @@ def _metrics(items: list[dict[str, Any]]) -> dict[str, float]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dataset", type=Path, default=PROJECT_ROOT / "evals" / "constraint_parsing_cases.jsonl")
+    parser.add_argument("--evidence-dataset", type=Path, default=PROJECT_ROOT / "evals" / "constraint_evidence_cases.jsonl")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     result = evaluate(load_cases(args.dataset))
+    evidence = evaluate_evidence(load_evidence_cases(args.evidence_dataset))
+    result["metrics"].update(evidence["metrics"])
+    result["evidence"] = evidence
+    result["failures"].extend({"kind": "evidence", **item} for item in evidence["failures"])
     rendered = json.dumps(result, ensure_ascii=False, indent=2)
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)

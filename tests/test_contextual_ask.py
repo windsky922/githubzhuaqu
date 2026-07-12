@@ -101,6 +101,41 @@ class ContextualAskTest(unittest.TestCase):
         self.assertEqual(result["recommendations"][0]["eligibility"], "rejected")
         self.assertIn("语言=Java", result["recommendations"][0]["unmet_requirements"])
 
+    def test_trial_and_hosted_inference_are_rejected_in_normal_and_stream_final(self):
+        payload = {
+            "q": "必须免费，同时必须离线",
+            "context": {
+                "previous_user_goal": "多智能体编排项目",
+                "candidate_repository_ids": ["eval/agent-orchestrator"],
+                "primary_repository_id": "eval/agent-orchestrator",
+                "mode": "hybrid",
+                "resumable": True,
+            },
+            "mode": "hybrid",
+            "auto_build": True,
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            repository = self._repository(Path(directory))
+            connection = connect(repository.db_path)
+            try:
+                connection.execute(
+                    "UPDATE rag_chunks SET chunk_text=?, source_type='readme' WHERE full_name=?",
+                    ("多智能体编排项目，提供免费试用，但运行时依赖托管推理并且必须联网。", "eval/agent-orchestrator"),
+                )
+                connection.commit()
+            finally:
+                connection.close()
+            with patch("src.rag.answering.KimiChatClient.chat", side_effect=AssertionError("answer model must not run")):
+                normal = repository.rag_ask_contextual(payload)
+                events = list(repository.rag_ask_contextual_stream(payload))
+        self.assertEqual(normal["answer_mode"], "no_match")
+        self.assertEqual(events[-1], {"event": "final", "data": normal})
+        recommendation = normal["recommendations"][0]
+        self.assertEqual(recommendation["eligibility"], "rejected")
+        self.assertIn("成本=free", recommendation["unmet_requirements"])
+        self.assertIn("部署方式=offline", recommendation["unmet_requirements"])
+        self.assertTrue(any(reason.startswith("违反显式约束：") for reason in recommendation["reasons"]))
+
     def test_unverifiable_hard_constraint_requests_clarification(self):
         payload = {
             "q": "必须付费",

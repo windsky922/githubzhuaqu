@@ -18,14 +18,31 @@ FIELD_LABELS = {
 }
 
 DEPLOYMENT_MARKERS = {
-    "local": ("本地部署", "私有化部署", "离线运行", "self-hosted", "self hosted", "docker compose"),
-    "cloud": ("云端服务", "托管服务", "cloud service", "saas"),
+    "local": ("本地部署", "私有化部署", "本地运行", "self-hosted", "self hosted", "local deployment", "on-premise", "on premises"),
+    "offline": ("完全离线", "离线运行", "离线", "无需联网", "不依赖云 api", "不依赖云api", "air-gapped", "air gapped", "fully offline", "offline", "no internet required", "without internet", "does not require cloud api"),
+    "cloud": ("云端服务", "托管服务", "云 api", "云api", "cloud service", "cloud api", "hosted service", "saas"),
 }
 COST_MARKERS = {
-    "free": ("免费使用", "完全免费", "free to use", "no cost"),
-    "low_cost": ("低成本", "low cost"),
-    "paid": ("付费版本", "付费服务", "paid plan", "subscription pricing"),
+    "free": ("免费使用", "完全免费", "永久免费", "免费社区版", "免费", "free to use", "completely free", "free forever", "free community edition", "no cost", "free"),
+    "low_cost": ("低成本", "成本较低", "low cost"),
+    "paid": ("付费版本", "付费服务", "付费订阅", "paid plan", "paid service", "subscription pricing"),
 }
+SENTENCE_SPLIT_RE = re.compile(r"(?<=[。！？!?；;])|[\r\n]+")
+NEGATION_PATTERNS = (
+    "不支持", "不能", "无法", "不可", "不提供", "不依赖", "无需", "没有", "并非", "不是", "不", "非",
+    "does not support", "does not support the", "doesn't support", "not support", "cannot", "can't", "is not", "not", "no support",
+)
+CONDITIONAL_PATTERNS = (
+    "仅当", "前提是", "取决于", "视情况", "需要额外", "需另行",
+    "only if", "depends on", "subject to", "requires additional", "available when",
+)
+TRIAL_ONLY_PATTERNS = (
+    "免费试用", "试用期", "限时免费", "free trial", "trial period", "free for 7 days", "free for 14 days", "free for 30 days",
+)
+EXTERNAL_DEPENDENCY_PATTERNS = (
+    "依赖云 api", "依赖云api", "需要云 api", "需要云api", "依赖托管推理", "使用托管推理", "需要联网", "必须联网", "依赖互联网", "仅云端",
+    "requires cloud api", "depends on cloud api", "hosted inference", "requires internet", "internet connection required", "cloud only", "only available as a cloud service",
+)
 
 
 def verify_project_requirements(
@@ -128,30 +145,119 @@ def _verify_metadata_requirement(field: str, operator: str, expected: str, value
 
 
 def _verify_text_requirement(field: str, operator: str, expected: str, chunks: list[Any]) -> tuple[str, list[str]]:
-    markers = DEPLOYMENT_MARKERS if field == "deployment" else COST_MARKERS
     target = _normalize_value(field, expected)
-    target_hits = _chunk_hits(chunks, markers.get(target, ()))
-    opposite_hits = _chunk_hits(chunks, tuple(marker for key, values in markers.items() if key != target for marker in values))
+    states: dict[str, list[str]] = {
+        "supports": [],
+        "contradicts": [],
+        "conditional": [],
+        "trial_only": [],
+        "external_dependency": [],
+    }
+    for row in chunks:
+        chunk_id = str(row["chunk_id"] or "")
+        for sentence in _sentences(str(row["chunk_text"] or "")):
+            state = classify_text_evidence(field, target, sentence)
+            if state != "unknown" and chunk_id not in states[state]:
+                states[state].append(chunk_id)
+    supports = states["supports"]
+    blockers = _unique_strings([
+        *states["contradicts"],
+        *states["trial_only"],
+        *states["external_dependency"],
+    ])
+    conditional = states["conditional"]
     if operator == "not_eq":
-        if target_hits:
-            return "unmet", target_hits
-        if opposite_hits:
-            return "matched", opposite_hits
+        if supports:
+            return "unmet", _unique_strings([*supports, *blockers])
+        if blockers:
+            return "matched", blockers
+        if conditional:
+            return "unknown", conditional
         return "unknown", []
-    if target_hits:
-        return "matched", target_hits
-    if opposite_hits:
-        return "unmet", opposite_hits
+    if blockers:
+        return "unmet", _unique_strings([*blockers, *supports])
+    if supports:
+        return "matched", supports
+    if conditional:
+        return "unknown", conditional
     return "unknown", []
 
 
-def _chunk_hits(chunks: list[Any], markers: tuple[str, ...]) -> list[str]:
-    hits = []
-    for row in chunks:
-        text = str(row["chunk_text"] or "").casefold()
-        if any(_contains_marker(text, marker.casefold()) for marker in markers):
-            hits.append(str(row["chunk_id"] or ""))
-    return _unique_strings(hits)
+def classify_text_evidence(field: str, expected: str, sentence: str) -> str:
+    """Classify one deterministic sentence without using model-enriched evidence."""
+    text = " ".join(str(sentence or "").casefold().split())
+    target = _normalize_value(field, expected)
+    markers = DEPLOYMENT_MARKERS if field == "deployment" else COST_MARKERS
+    target_markers = markers.get(target, ())
+    target_present = any(_contains_marker(text, marker.casefold()) for marker in target_markers)
+
+    if field == "cost" and target == "free" and any(marker in text for marker in TRIAL_ONLY_PATTERNS):
+        return "trial_only"
+    if field == "deployment" and target in {"local", "offline"} and _has_external_dependency(text):
+        return "external_dependency"
+    if target_present and _target_is_negated(text, target_markers):
+        return "contradicts"
+    if target_present and any(marker in text for marker in CONDITIONAL_PATTERNS):
+        return "conditional"
+    if target_present:
+        return "supports"
+
+    if field == "deployment":
+        if target == "offline" and _has_markers(text, DEPLOYMENT_MARKERS["cloud"]):
+            return "external_dependency"
+        if target == "cloud" and _has_markers(text, DEPLOYMENT_MARKERS["offline"]):
+            return "contradicts"
+    if field == "cost":
+        if target == "free" and _has_markers(text, COST_MARKERS["paid"]):
+            return "contradicts"
+        if target == "paid" and _has_markers(text, COST_MARKERS["free"]):
+            return "contradicts"
+    return "unknown"
+
+
+def evidence_state_status(state: str, operator: str = "eq") -> str:
+    """Map one evidence state to the existing matched/unmet/unknown contract."""
+    if operator == "not_eq":
+        if state == "supports":
+            return "unmet"
+        if state in {"contradicts", "trial_only", "external_dependency"}:
+            return "matched"
+        return "unknown"
+    if state == "supports":
+        return "matched"
+    if state in {"contradicts", "trial_only", "external_dependency"}:
+        return "unmet"
+    return "unknown"
+
+
+def _sentences(text: str) -> list[str]:
+    return [part.strip() for part in SENTENCE_SPLIT_RE.split(text) if part.strip()]
+
+
+def _has_markers(text: str, markers: tuple[str, ...]) -> bool:
+    return any(_contains_marker(text, marker.casefold()) for marker in markers)
+
+
+def _target_is_negated(text: str, markers: tuple[str, ...]) -> bool:
+    for marker in markers:
+        position = text.find(marker.casefold())
+        if position < 0:
+            continue
+        prefix = text[max(0, position - 28):position].rstrip(" ：:-")
+        if any(prefix.endswith(negation) for negation in NEGATION_PATTERNS):
+            return True
+    return False
+
+
+def _has_external_dependency(text: str) -> bool:
+    for marker in EXTERNAL_DEPENDENCY_PATTERNS:
+        position = text.find(marker)
+        if position < 0:
+            continue
+        prefix = text[max(0, position - 12):position]
+        if not any(negation in prefix for negation in ("不", "无", "not ", "does not ", "doesn't ")):
+            return True
+    return False
 
 
 def _contains_marker(text: str, marker: str) -> bool:

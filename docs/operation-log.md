@@ -1,5 +1,22 @@
 # 操作日志
 
+## 2026-07-12 追加：P0-7B 句子级部署与成本证据语义
+
+### 1. 开发目的
+
+修复部署和成本只按关键词命中导致的错误首选，避免把否定句、免费试用和外部托管依赖当成项目能力。
+
+### 2. 修改内容
+
+1. 非 `model_enrichment` 清洗 chunk 按句子分类为 `supports`、`contradicts`、`conditional`、`trial_only`、`external_dependency` 或 `unknown`。
+2. 明确支持且无冲突才满足硬约束；明确否定、仅试用或相反外部依赖判为冲突，条件不完整或证据不足保持 unknown。
+3. “free trial”不满足免费，self-hosted UI 加 hosted inference 不满足完全离线，`does not support offline` 判为冲突；模型增强不能改变结果。
+4. 新增 36 条句子证据评估及普通 Ask/SSE final 等值回归。证据状态准确率为 1.0，错误合格率与硬约束违反率均为 0。
+
+### 3. 边界
+
+不新增 SQLite 表或响应字段，不调整 hybrid 权重，不引入真实 embedding，不保存聊天历史；管理口令与真实后端 E2E 留给后续独立阶段。
+
 ## 2026-07-12 追加：P0-7A 分句级硬约束解析
 
 ### 1. 开发目的
