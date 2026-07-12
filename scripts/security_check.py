@@ -19,6 +19,19 @@ SECRET_PATTERNS = {
     ),
 }
 
+FORBIDDEN_BROWSER_ADMIN_AUTH_PATTERNS = {
+    "admin_token_query_read": re.compile(
+        r"(?:searchParams|params)\.get\(\s*['\"]admin_token['\"]\s*\)"
+    ),
+    "admin_token_browser_storage": re.compile(
+        r"localStorage\.(?:getItem|setItem)\(\s*['\"]github_weekly_admin_token['\"]"
+    ),
+    "admin_token_query_write": re.compile(
+        r"(?:searchParams|params)\.(?:set|append)\(\s*['\"]admin_token['\"]"
+    ),
+    "admin_token_literal_url": re.compile(r"['\"`][^'\"`\r\n]*[?&]admin_token="),
+}
+
 ALLOWLIST_MARKERS = (
     "${{ secrets.",
     "os.getenv(",
@@ -41,6 +54,12 @@ def scan_repository(root: Path = ROOT) -> list[str]:
                 if pattern.search(line):
                     relative = path.relative_to(root).as_posix()
                     findings.append(f"{relative}:{line_number}: {name}")
+    for path in _iter_browser_admin_auth_files(root):
+        for line_number, line in enumerate(path.read_text(encoding="utf-8", errors="replace").splitlines(), start=1):
+            for name, pattern in FORBIDDEN_BROWSER_ADMIN_AUTH_PATTERNS.items():
+                if pattern.search(line):
+                    relative = path.relative_to(root).as_posix()
+                    findings.append(f"{relative}:{line_number}: {name}")
     return findings
 
 
@@ -53,6 +72,23 @@ def _iter_text_files(root: Path) -> list[Path]:
         if _is_excluded_path(relative_parts):
             continue
         if path.suffix in INCLUDED_SUFFIXES or path.name == ".env.example":
+            files.append(path)
+    return files
+
+
+def _iter_browser_admin_auth_files(root: Path) -> list[Path]:
+    files = []
+    for path in root.rglob("*"):
+        if not path.is_file():
+            continue
+        relative = path.relative_to(root)
+        parts = relative.parts
+        if _is_excluded_path(parts):
+            continue
+        is_page_builder = relative.as_posix() == "scripts/build_pages.py"
+        is_generated_page = len(parts) == 2 and parts[0] == "docs" and path.suffix in {".html", ".js"}
+        is_frontend_source = parts[:2] == ("frontend", "src") and path.suffix in {".js", ".ts", ".tsx"}
+        if is_page_builder or is_generated_page or is_frontend_source:
             files.append(path)
     return files
 

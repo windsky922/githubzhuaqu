@@ -42,6 +42,9 @@ def build_pages(root: Path = ROOT) -> list[Path]:
     admin_page = root / "docs" / "admin.html"
     admin_page.write_text(_admin_dashboard_content(), encoding="utf-8")
     written.append(admin_page)
+    admin_auth = root / "docs" / "admin-auth.js"
+    admin_auth.write_text(_admin_auth_script(), encoding="utf-8")
+    written.append(admin_auth)
     agent_page = root / "docs" / "agent.html"
     agent_page.write_text(_react_app_redirect_content("agent"), encoding="utf-8")
     written.append(agent_page)
@@ -1184,12 +1187,111 @@ def _agent_match_content() -> str:
 """
 
 
+def _admin_auth_script() -> str:
+    return r"""(() => {
+  const inputSelector = "[data-admin-auth-input]";
+  const statusSelector = "[data-admin-auth-status]";
+
+  function input() {
+    return document.querySelector(inputSelector);
+  }
+
+  function setStatus(message, isError = false) {
+    const target = document.querySelector(statusSelector);
+    if (!target) return;
+    target.textContent = message || "";
+    target.classList.toggle("admin-auth-error", Boolean(isError));
+  }
+
+  function clear(message = "管理口令已清除。") {
+    const target = input();
+    if (target) target.value = "";
+    setStatus(message, false);
+  }
+
+  function writeHeaders() {
+    const token = String(input()?.value || "").trim();
+    if (!token) {
+      setStatus("请先在本页输入管理口令；口令不会保存到浏览器存储。", true);
+      const error = new Error("请先在本页输入管理口令。未发送写请求。");
+      error.code = "admin_token_required";
+      throw error;
+    }
+    setStatus("管理口令仅保留在当前页面内存中。", false);
+    return { "Content-Type": "application/json", "X-Admin-Token": token };
+  }
+
+  function handleResponse(response) {
+    if (Number(response?.status) === 401) {
+      clear("管理口令无效，已从当前页面清除，请重新输入。");
+    } else if (Number(response?.status) === 403) {
+      setStatus("后端未配置 ADMIN_API_TOKEN，请配置环境变量并重启服务。", true);
+    }
+    return response;
+  }
+
+  function mount() {
+    if (!document.getElementById("admin-auth-style")) {
+      const style = document.createElement("style");
+      style.id = "admin-auth-style";
+      style.textContent = `
+        .admin-auth-panel { margin: 0 0 14px; padding: 14px; border: 1px solid #d8dee8; background: #fff; display: grid; gap: 8px; }
+        .admin-auth-row { display: grid; grid-template-columns: minmax(180px, 1fr) auto; gap: 8px; align-items: end; }
+        .admin-auth-label { display: grid; gap: 5px; color: #667085; font-size: 13px; font-weight: 700; }
+        .admin-auth-input { width: 100%; min-height: 38px; box-sizing: border-box; border: 1px solid #d0d7de; border-radius: 6px; padding: 8px 10px; font: inherit; background: #fff; color: #172033; }
+        .admin-auth-clear { min-height: 38px; border: 1px solid #2563eb; border-radius: 6px; padding: 0 12px; background: #fff; color: #2563eb; font: inherit; font-weight: 700; cursor: pointer; }
+        .admin-auth-note, .admin-auth-status { margin: 0; color: #667085; font-size: 13px; line-height: 1.5; }
+        .admin-auth-error { color: #b42318; }
+        @media (max-width: 560px) { .admin-auth-row { grid-template-columns: 1fr; } }
+      `;
+      document.head.appendChild(style);
+    }
+    document.querySelectorAll("[data-admin-auth-mount]").forEach(target => {
+      target.innerHTML = `
+        <section class="admin-auth-panel" aria-label="管理口令">
+          <div class="admin-auth-row">
+            <label class="admin-auth-label">管理口令
+              <input class="admin-auth-input" data-admin-auth-input type="password" autocomplete="off" spellcheck="false" aria-describedby="admin-auth-note">
+            </label>
+            <button class="admin-auth-clear" data-admin-auth-clear type="button">清除</button>
+          </div>
+          <p id="admin-auth-note" class="admin-auth-note">仅当前页面有效；刷新、关闭或离开页面后需要重新输入。不写入 URL、localStorage 或 sessionStorage。</p>
+          <p class="admin-auth-status" data-admin-auth-status aria-live="polite"></p>
+        </section>`;
+      target.querySelector("[data-admin-auth-clear]")?.addEventListener("click", () => clear());
+    });
+    if (window.__githubWeeklyLegacyAdminTokenIgnored) {
+      setStatus("旧链接中的管理口令已忽略并从地址栏删除，请在本页重新输入。", true);
+    }
+  }
+
+  window.GitHubWeeklyAdminAuth = Object.freeze({ clear, handleResponse, writeHeaders });
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount, { once: true });
+  else mount();
+})();
+"""
+
+
 def _admin_dashboard_content() -> str:
     return """<!doctype html>
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <script>
+    (() => {
+      const url = new URL(window.location.href);
+      if (url.searchParams.has("admin_token")) {
+        url.searchParams.delete("admin_token");
+        window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+        window.__githubWeeklyLegacyAdminTokenIgnored = true;
+      }
+      try { window.localStorage.removeItem("github_weekly_admin_token"); } catch (error) {}
+      try { window.sessionStorage.removeItem("github_weekly_admin_token"); } catch (error) {}
+    })();
+  </script>
+  <script src="admin-auth.js"></script>
   <title>GitHub 周报本地管理首页</title>
   <style>
     :root {
@@ -1684,6 +1786,7 @@ def _admin_dashboard_content() -> str:
     </div>
   </header>
   <main class="wrap">
+    <div data-admin-auth-mount></div>
     <section class="panel">
       <h2>后端连接</h2>
       <p id="apiMode">检测中</p>
@@ -3442,22 +3545,13 @@ def _admin_dashboard_content() -> str:
     }
 
     function jsonOrThrow(response) {
+      window.GitHubWeeklyAdminAuth.handleResponse(response);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       return response.json();
     }
 
     function adminWriteHeaders() {
-      const token = adminToken();
-      const headers = { "Content-Type": "application/json" };
-      if (token) headers["X-Admin-Token"] = token;
-      return headers;
-    }
-
-    function adminToken() {
-      const params = new URLSearchParams(window.location.search);
-      const token = params.get("admin_token") || window.localStorage.getItem("github_weekly_admin_token") || "";
-      if (params.get("admin_token")) window.localStorage.setItem("github_weekly_admin_token", params.get("admin_token"));
-      return token.trim();
+      return window.GitHubWeeklyAdminAuth.writeHeaders();
     }
 
     function jobDetailUrl(jobId) {
@@ -3497,6 +3591,20 @@ def _subscriptions_content() -> str:
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <script>
+    (() => {
+      const url = new URL(window.location.href);
+      if (url.searchParams.has("admin_token")) {
+        url.searchParams.delete("admin_token");
+        window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+        window.__githubWeeklyLegacyAdminTokenIgnored = true;
+      }
+      try { window.localStorage.removeItem("github_weekly_admin_token"); } catch (error) {}
+      try { window.sessionStorage.removeItem("github_weekly_admin_token"); } catch (error) {}
+    })();
+  </script>
+  <script src="admin-auth.js"></script>
   <title>GitHub 订阅配置</title>
   <style>
     :root { color-scheme: light; font-family: Inter, "Microsoft YaHei", Arial, sans-serif; background: #f6f8fa; color: #1f2328; }
@@ -3549,6 +3657,7 @@ def _subscriptions_content() -> str:
     </div>
   </header>
   <main class="wrap">
+    <div data-admin-auth-mount></div>
     <section class="panel">
       <h2>新增订阅</h2>
       <div class="grid">
@@ -3586,16 +3695,7 @@ def _subscriptions_content() -> str:
     };
 
     function adminWriteHeaders() {
-      const token = adminToken();
-      const headers = { "Content-Type": "application/json" };
-      if (token) headers["X-Admin-Token"] = token;
-      return headers;
-    }
-
-    function adminToken() {
-      const token = params.get("admin_token") || window.localStorage.getItem("github_weekly_admin_token") || "";
-      if (params.get("admin_token")) window.localStorage.setItem("github_weekly_admin_token", params.get("admin_token"));
-      return token.trim();
+      return window.GitHubWeeklyAdminAuth.writeHeaders();
     }
 
     function init() {
@@ -3611,6 +3711,7 @@ def _subscriptions_content() -> str:
     function loadProfiles() {
       fetch("profiles.json", { cache: "no-store" })
         .then(response => {
+          window.GitHubWeeklyAdminAuth.handleResponse(response);
           if (!response.ok) throw new Error(`HTTP ${response.status}`);
           return response.json();
         })
@@ -3683,7 +3784,8 @@ def _subscriptions_content() -> str:
       }
       try {
         const response = await fetch("/v1/subscriptions?limit=100", { cache: "no-store" });
-        if (!response.ok) throw new Error(`读取失败：${response.status}`);
+          window.GitHubWeeklyAdminAuth.handleResponse(response);
+          if (!response.ok) throw new Error(`读取失败：${response.status}`);
         const data = await response.json();
         renderSubscriptions(data.subscriptions || []);
       } catch (error) {
@@ -3703,7 +3805,8 @@ def _subscriptions_content() -> str:
           headers: adminWriteHeaders(),
           body: JSON.stringify(payload)
         });
-        if (!response.ok) throw new Error(`保存失败：${response.status}`);
+          window.GitHubWeeklyAdminAuth.handleResponse(response);
+          if (!response.ok) throw new Error(`保存失败：${response.status}`);
         const data = await response.json();
         setMessage(`已保存：${data.subscription.name || data.subscription.subscription_id}`, false);
         loadSubscriptions();
@@ -3769,7 +3872,8 @@ def _subscriptions_content() -> str:
           headers: adminWriteHeaders(),
           body: JSON.stringify({ dry_run: true, requested_by: "subscriptions_page" })
         });
-        if (!response.ok) throw new Error(`生成任务失败：${response.status}`);
+          window.GitHubWeeklyAdminAuth.handleResponse(response);
+          if (!response.ok) throw new Error(`生成任务失败：${response.status}`);
         const data = await response.json();
         if (!data.accepted && data.blockers && data.blockers.length) {
           setMessage(data.blockers.join("；"), true);
@@ -3793,7 +3897,8 @@ def _subscriptions_content() -> str:
           headers: adminWriteHeaders(),
           body: JSON.stringify({ status })
         });
-        if (!response.ok) throw new Error(`更新失败：${response.status}`);
+          window.GitHubWeeklyAdminAuth.handleResponse(response);
+          if (!response.ok) throw new Error(`更新失败：${response.status}`);
         loadSubscriptions();
       } catch (error) {
         setMessage(error.message || String(error), true);
@@ -3807,7 +3912,8 @@ def _subscriptions_content() -> str:
       target.innerHTML = '<p class="notice">正在读取推荐预览...</p>';
       try {
         const response = await fetch(`/v1/subscriptions/${encodeURIComponent(id)}/recommendations?limit=5`, { cache: "no-store" });
-        if (!response.ok) throw new Error(`预览失败：${response.status}`);
+          window.GitHubWeeklyAdminAuth.handleResponse(response);
+          if (!response.ok) throw new Error(`预览失败：${response.status}`);
         const data = await response.json();
         target.innerHTML = previewHtml(data);
       } catch (error) {
@@ -3895,6 +4001,20 @@ def _recommendations_content() -> str:
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <script>
+    (() => {
+      const url = new URL(window.location.href);
+      if (url.searchParams.has("admin_token")) {
+        url.searchParams.delete("admin_token");
+        window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+        window.__githubWeeklyLegacyAdminTokenIgnored = true;
+      }
+      try { window.localStorage.removeItem("github_weekly_admin_token"); } catch (error) {}
+      try { window.sessionStorage.removeItem("github_weekly_admin_token"); } catch (error) {}
+    })();
+  </script>
+  <script src="admin-auth.js"></script>
   <title>GitHub 个性化推荐</title>
   <style>
     :root { color-scheme: light; font-family: Inter, "Microsoft YaHei", Arial, sans-serif; background: #f6f8fa; color: #1f2328; }
@@ -3955,6 +4075,7 @@ def _recommendations_content() -> str:
     </div>
   </header>
   <main class="wrap">
+    <div data-admin-auth-mount></div>
     <section class="panel">
       <h2>推荐条件</h2>
       <div class="filters">
@@ -4273,10 +4394,7 @@ def _recommendations_content() -> str:
     }
 
     function adminWriteHeaders() {
-      const token = adminToken();
-      const headers = { "Content-Type": "application/json" };
-      if (token) headers["X-Admin-Token"] = token;
-      return headers;
+      return window.GitHubWeeklyAdminAuth.writeHeaders();
     }
 
     async function feedbackHttpError(response) {
@@ -4299,15 +4417,10 @@ def _recommendations_content() -> str:
         return "后端未配置 ADMIN_API_TOKEN。请在启动后端的 PowerShell 中设置 $env:ADMIN_API_TOKEN 后重启服务。";
       }
       if (status === 401) {
-        return "管理口令无效或未传入。请用 ?admin_token=你的口令 打开页面，或写入 localStorage.github_weekly_admin_token。";
+        window.GitHubWeeklyAdminAuth.clear("管理口令无效，已从当前页面清除，请重新输入。");
+        return "管理口令无效或未传入，请在本页管理口令栏重新输入。";
       }
       return (error && (error.detail || error.message)) || String(error);
-    }
-
-    function adminToken() {
-      const token = params.get("admin_token") || window.localStorage.getItem("github_weekly_admin_token") || "";
-      if (params.get("admin_token")) window.localStorage.setItem("github_weekly_admin_token", params.get("admin_token"));
-      return token.trim();
     }
 
     function renderError(error) {
@@ -4904,6 +5017,7 @@ def _explorer_content() -> str:
     }
 
     function jsonOrThrow(response) {
+      window.GitHubWeeklyAdminAuth.handleResponse(response);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       return response.json();
     }
@@ -5853,6 +5967,7 @@ def _compare_content() -> str:
     }
 
     function jsonOrThrow(response) {
+      window.GitHubWeeklyAdminAuth.handleResponse(response);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       return response.json();
     }
@@ -5881,6 +5996,20 @@ def _project_detail_content() -> str:
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <script>
+    (() => {
+      const url = new URL(window.location.href);
+      if (url.searchParams.has("admin_token")) {
+        url.searchParams.delete("admin_token");
+        window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+        window.__githubWeeklyLegacyAdminTokenIgnored = true;
+      }
+      try { window.localStorage.removeItem("github_weekly_admin_token"); } catch (error) {}
+      try { window.sessionStorage.removeItem("github_weekly_admin_token"); } catch (error) {}
+    })();
+  </script>
+  <script src="admin-auth.js"></script>
   <title>GitHub 项目详情</title>
   <style>
     :root {
@@ -6182,13 +6311,12 @@ def _project_detail_content() -> str:
     </div>
   </header>
   <main class="wrap">
+    <div data-admin-auth-mount></div>
     <section id="content" class="empty">加载中</section>
   </main>
   <script>
     const content = document.getElementById("content");
     const title = document.getElementById("title");
-
-    adminToken();
 
     Promise.resolve()
       .then(loadDetail)
@@ -6709,10 +6837,7 @@ def _project_detail_content() -> str:
     }
 
     function adminWriteHeaders() {
-      const token = adminToken();
-      const headers = { "Content-Type": "application/json" };
-      if (token) headers["X-Admin-Token"] = token;
-      return headers;
+      return window.GitHubWeeklyAdminAuth.writeHeaders();
     }
 
     async function feedbackHttpError(response) {
@@ -6735,16 +6860,10 @@ def _project_detail_content() -> str:
         return "后端未配置 ADMIN_API_TOKEN。请在启动后端的 PowerShell 中设置 $env:ADMIN_API_TOKEN 后重启服务。";
       }
       if (status === 401) {
-        return "管理口令无效或未传入。请用 ?admin_token=你的口令 打开页面，或写入 localStorage.github_weekly_admin_token。";
+        window.GitHubWeeklyAdminAuth.clear("管理口令无效，已从当前页面清除，请重新输入。");
+        return "管理口令无效或未传入，请在本页管理口令栏重新输入。";
       }
       return (error && (error.detail || error.message)) || String(error);
-    }
-
-    function adminToken() {
-      const params = new URLSearchParams(window.location.search);
-      const token = params.get("admin_token") || window.localStorage.getItem("github_weekly_admin_token") || "";
-      if (params.get("admin_token")) window.localStorage.setItem("github_weekly_admin_token", params.get("admin_token"));
-      return token.trim();
     }
 
     function ragEvidenceHtml(detail) {
@@ -6894,6 +7013,7 @@ def _project_detail_content() -> str:
     }
 
     function jsonOrThrow(response) {
+      window.GitHubWeeklyAdminAuth.handleResponse(response);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       return response.json();
     }
@@ -7396,6 +7516,20 @@ def _jobs_dashboard_content() -> str:
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <script>
+    (() => {
+      const url = new URL(window.location.href);
+      if (url.searchParams.has("admin_token")) {
+        url.searchParams.delete("admin_token");
+        window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+        window.__githubWeeklyLegacyAdminTokenIgnored = true;
+      }
+      try { window.localStorage.removeItem("github_weekly_admin_token"); } catch (error) {}
+      try { window.sessionStorage.removeItem("github_weekly_admin_token"); } catch (error) {}
+    })();
+  </script>
+  <script src="admin-auth.js"></script>
   <title>GitHub 周报任务状态</title>
   <style>
     :root {
@@ -7661,6 +7795,7 @@ def _jobs_dashboard_content() -> str:
     </div>
   </header>
   <main class="wrap">
+    <div data-admin-auth-mount></div>
     <section class="filters" aria-label="任务筛选">
       <label>状态
         <select id="status">
@@ -7988,22 +8123,13 @@ def _jobs_dashboard_content() -> str:
     }
 
     function jsonOrThrow(response) {
+      window.GitHubWeeklyAdminAuth.handleResponse(response);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       return response.json();
     }
 
     function adminWriteHeaders() {
-      const token = adminToken();
-      const headers = { "Content-Type": "application/json" };
-      if (token) headers["X-Admin-Token"] = token;
-      return headers;
-    }
-
-    function adminToken() {
-      const params = new URLSearchParams(window.location.search);
-      const token = params.get("admin_token") || window.localStorage.getItem("github_weekly_admin_token") || "";
-      if (params.get("admin_token")) window.localStorage.setItem("github_weekly_admin_token", params.get("admin_token"));
-      return token.trim();
+      return window.GitHubWeeklyAdminAuth.writeHeaders();
     }
 
     function render() {
@@ -8639,6 +8765,20 @@ def _job_detail_content() -> str:
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <script>
+    (() => {
+      const url = new URL(window.location.href);
+      if (url.searchParams.has("admin_token")) {
+        url.searchParams.delete("admin_token");
+        window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+        window.__githubWeeklyLegacyAdminTokenIgnored = true;
+      }
+      try { window.localStorage.removeItem("github_weekly_admin_token"); } catch (error) {}
+      try { window.sessionStorage.removeItem("github_weekly_admin_token"); } catch (error) {}
+    })();
+  </script>
+  <script src="admin-auth.js"></script>
   <title>GitHub 周报任务详情</title>
   <style>
     :root {
@@ -8835,6 +8975,7 @@ def _job_detail_content() -> str:
     </div>
   </header>
   <main class="wrap">
+    <div data-admin-auth-mount></div>
     <section id="content" class="panel"><div class="empty">加载中</div></section>
   </main>
   <script>
@@ -9139,21 +9280,13 @@ def _job_detail_content() -> str:
     }
 
     function jsonOrThrow(response) {
+      window.GitHubWeeklyAdminAuth.handleResponse(response);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       return response.json();
     }
 
     function adminWriteHeaders() {
-      const token = adminToken();
-      const headers = { "Content-Type": "application/json" };
-      if (token) headers["X-Admin-Token"] = token;
-      return headers;
-    }
-
-    function adminToken() {
-      const token = params.get("admin_token") || window.localStorage.getItem("github_weekly_admin_token") || "";
-      if (params.get("admin_token")) window.localStorage.setItem("github_weekly_admin_token", params.get("admin_token"));
-      return token.trim();
+      return window.GitHubWeeklyAdminAuth.writeHeaders();
     }
 
     function escapeHtml(value) {

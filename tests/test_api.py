@@ -1022,6 +1022,10 @@ class ApiRepositoryTest(unittest.TestCase):
                     headers={"X-Admin-Token": "bad"},
                     json={"full_name": "owner/agent", "rating": 1, "source": "route-test"},
                 )
+                query_only = client.post(
+                    "/v1/feedback?admin_token=test",
+                    json={"full_name": "owner/agent", "rating": 1, "source": "route-test"},
+                )
                 valid = client.post(
                     "/v1/feedback",
                     headers={"X-Admin-Token": "test"},
@@ -1052,6 +1056,9 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertEqual(missing_dev_context.status_code, 401)
             self.assertEqual(missing_dev_context_plan.status_code, 401)
             self.assertEqual(invalid.status_code, 401)
+            self.assertEqual(query_only.status_code, 401)
+            self.assertNotIn("test", query_only.text.casefold())
+            self.assertNotIn("bad", invalid.text.casefold())
             self.assertEqual(valid.status_code, 201)
             self.assertEqual(valid_dev_context.status_code, 202)
             self.assertEqual(valid_dev_context_plan.status_code, 202)

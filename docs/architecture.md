@@ -6,6 +6,10 @@
 
 `.github/workflows/ci.yml` 独立于定时周报主流程，在 `push main` 和 pull request 上运行。它执行确定性测试、静态检查、安全检查、前端构建一致性及 Chromium 桌面/手机 Playwright 回归。E2E 由本地 mock server 提供固定 SSE、分页和对比数据，不依赖 Kimi、GitHub 网络或 SQLite；失败时短期上传截图、trace 和报告。当前只提供自动检查与失败报警，不配置 GitHub 分支保护，因此仍允许直接推送 `main`。
 
+## 管理写接口凭证边界
+
+FastAPI 管理写接口继续接受 `X-Admin-Token` 或 `Authorization: Bearer`，只读接口不需要鉴权。浏览器管理页通过共享 `admin-auth.js` 从当前页面密码框生成 `X-Admin-Token`，口令不写入 URL、localStorage、sessionStorage、日志或 SQLite；刷新、关闭或跨页导航都会丢失。页面在加载最早阶段忽略并清理旧 `admin_token` 参数、删除旧浏览器存储，并使用 `Referrer-Policy: no-referrer` 阻止旧 URL 继续向资源请求传播。安全检查会阻止生产页面重新引入 URL 或浏览器持久化口令。
+
 ## React 项目匹配工作台
 
 `docs/app/#/agent` 是面向普通用户的 React 项目匹配入口。前端只在浏览器 `localStorage` 保存有限的会话标题、问题和最终响应；不创建后端会话表，也不把历史回答视为事实证据。它通过 POST `/v1/rag/ask/stream` 提交当前输入和最小用户意图上下文，只包含上一轮用户目标、候选 ID、确认首选、模式和 resumable。历史 assistant answer、citations、evidence、prompt_context 均不进入请求。页面只从后端 `recommendations[]` 读取候选顺序和资格状态。

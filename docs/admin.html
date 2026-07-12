@@ -3,6 +3,20 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <script>
+    (() => {
+      const url = new URL(window.location.href);
+      if (url.searchParams.has("admin_token")) {
+        url.searchParams.delete("admin_token");
+        window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+        window.__githubWeeklyLegacyAdminTokenIgnored = true;
+      }
+      try { window.localStorage.removeItem("github_weekly_admin_token"); } catch (error) {}
+      try { window.sessionStorage.removeItem("github_weekly_admin_token"); } catch (error) {}
+    })();
+  </script>
+  <script src="admin-auth.js"></script>
   <title>GitHub 周报本地管理首页</title>
   <style>
     :root {
@@ -497,6 +511,7 @@
     </div>
   </header>
   <main class="wrap">
+    <div data-admin-auth-mount></div>
     <section class="panel">
       <h2>后端连接</h2>
       <p id="apiMode">检测中</p>
@@ -2255,22 +2270,13 @@
     }
 
     function jsonOrThrow(response) {
+      window.GitHubWeeklyAdminAuth.handleResponse(response);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       return response.json();
     }
 
     function adminWriteHeaders() {
-      const token = adminToken();
-      const headers = { "Content-Type": "application/json" };
-      if (token) headers["X-Admin-Token"] = token;
-      return headers;
-    }
-
-    function adminToken() {
-      const params = new URLSearchParams(window.location.search);
-      const token = params.get("admin_token") || window.localStorage.getItem("github_weekly_admin_token") || "";
-      if (params.get("admin_token")) window.localStorage.setItem("github_weekly_admin_token", params.get("admin_token"));
-      return token.trim();
+      return window.GitHubWeeklyAdminAuth.writeHeaders();
     }
 
     function jobDetailUrl(jobId) {

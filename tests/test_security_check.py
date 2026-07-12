@@ -88,6 +88,47 @@ class SecurityCheckTest(unittest.TestCase):
         finally:
             shutil.rmtree(root, ignore_errors=True)
 
+    def test_rejects_browser_admin_token_url_and_storage_transport(self):
+        root = Path.cwd() / f".tmp-security-test-{uuid.uuid4().hex}"
+        cases = {
+            "query_read": 'const token = params.get("admin_token");',
+            "storage_read": 'localStorage.getItem("github_weekly_admin_token");',
+            "storage_write": 'localStorage.setItem("github_weekly_admin_token", token);',
+            "query_write": 'url.searchParams.set("admin_token", token);',
+            "literal_url": 'const href = "admin.html?admin_token=" + token;',
+        }
+        try:
+            docs = root / "docs"
+            docs.mkdir(parents=True)
+            for name, source in cases.items():
+                (docs / f"{name}.html").write_text(source, encoding="utf-8")
+
+            findings = scan_repository(root)
+
+            self.assertEqual(len(findings), len(cases))
+            for name in cases:
+                self.assertTrue(any(f"docs/{name}.html" in finding for finding in findings), findings)
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
+    def test_allows_legacy_cleanup_without_reading_value(self):
+        root = Path.cwd() / f".tmp-security-test-{uuid.uuid4().hex}"
+        try:
+            docs = root / "docs"
+            docs.mkdir(parents=True)
+            (docs / "admin.html").write_text(
+                """url.searchParams.has(\"admin_token\");
+url.searchParams.delete(\"admin_token\");
+localStorage.removeItem(\"github_weekly_admin_token\");""",
+                encoding="utf-8",
+            )
+
+            findings = scan_repository(root)
+
+            self.assertEqual(findings, [])
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
 
 if __name__ == "__main__":
     unittest.main()

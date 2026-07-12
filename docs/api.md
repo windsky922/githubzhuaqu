@@ -60,7 +60,7 @@ Authorization: Bearer <本地管理口令>
 
 如果未配置 `ADMIN_API_TOKEN`，管理写接口返回 `403`；如果配置后请求未带正确口令，返回 `401`。受保护接口包括 `/v1/runs/trigger`、`/v1/jobs/{job_id}/execute`、`/v1/jobs/{job_id}/retry`、`/v1/rag/*` 写入/计划接口、`/v1/subscriptions` 写入接口、事件检测、候选构建、候选投递、`POST /v1/feedback` 和项目 Agent 任务写接口。
 
-本地页面会从 `?admin_token=...` 或浏览器 `localStorage.github_weekly_admin_token` 读取口令，并仅在写请求中发送 `X-Admin-Token`。不要把真实口令提交到仓库、文档或 GitHub Pages。
+`admin.html`、`subscriptions.html`、`jobs.html` 和 `job.html` 只从当前页面的密码框读取口令，并仅在写请求中发送 `X-Admin-Token`。口令不进入 URL、localStorage、sessionStorage、日志或 SQLite，刷新或离开页面后需要重新输入。旧 `admin_token` URL 参数会被忽略并从地址栏删除，旧 `github_weekly_admin_token` 浏览器存储只会删除、不会迁移。若真实口令曾通过旧方式使用，应立即轮换。
 
 根路径 `http://127.0.0.1:8000/` 会跳转到管理首页。`/v1/*` 路径是 JSON API，例如 `/v1/jobs?limit=50` 返回机器可读任务数据，不是 HTML 页面。
 
@@ -1100,7 +1100,7 @@ GET /v1/feedback?profile=agent_development&limit=20
 
 当前推荐接口已经会读取这些反馈、项目档案和 Agent 任务：`GET /v1/recommendations` 会把匹配 profile 的反馈聚合为项目级 `feedback_memory`，读取 `project_profile`，并生成 `recommendation_score`、`ranking_factors`、`preference_score`、解释字段和结构化 `next_actions`。`GET /v1/projects/{owner}/{repo}/rag` 会返回该项目的 `feedback_memory`、`project_profile`、`agent_tasks` 和 `next_actions`。
 
-前端入口已经接入反馈闭环：`project.html?repo=...&api=1` 和 `recommendations.html?api=1` 会通过 `POST /v1/feedback` 写入“有用 / 不适合 / 继续跟踪”反馈；`admin.html?api=1` 会读取 `GET /v1/feedback?limit=200` 展示反馈记忆汇总，并读取 `/v1/recommendations?limit=20` 展示受反馈影响的推荐项目。所有页面写请求仍需提供管理口令，来源为 `?admin_token=...` 或 `localStorage.github_weekly_admin_token`。
+前端入口已经接入反馈闭环：`project.html?repo=...&api=1` 和 `recommendations.html?api=1` 会通过 `POST /v1/feedback` 写入“有用 / 不适合 / 继续跟踪”反馈；`admin.html?api=1` 会读取 `GET /v1/feedback?limit=200` 展示反馈记忆汇总，并读取 `/v1/recommendations?limit=20` 展示受反馈影响的推荐项目。所有页面写请求仍需提供管理口令；浏览器端只能使用当前页面的内存输入和 `X-Admin-Token` 请求头，不接受 URL 或持久化浏览器存储传递。
 
 ### `/v1/agent-tasks` 项目 Agent 任务
 

@@ -1,5 +1,22 @@
 # 操作日志
 
+## 2026-07-12 追加：P0-8 管理口令浏览器传递收口
+
+### 1. 开发目的
+
+停止通过 URL 和浏览器持久化存储传递管理口令，降低浏览器历史、复制链接、Referer、截图和本地同步造成的泄露风险。
+
+### 2. 修改内容
+
+1. `admin.html`、`subscriptions.html`、`jobs.html` 和 `job.html` 使用统一密码框；口令只保留在当前页面内存，通过 `X-Admin-Token` 发送。
+2. 旧 `admin_token` 参数只检测并从地址栏删除，不读取其值；旧 localStorage/sessionStorage 项只删除、不迁移，并设置 `Referrer-Policy: no-referrer`。
+3. 缺少口令时浏览器阻止写请求；401 会清空输入，403 提示后端配置，错误信息不回显口令。
+4. 安全检查新增浏览器管理口令回归规则，API、页面生成和桌面/手机 Playwright 覆盖 URL、存储、Header、刷新及日志边界。
+
+### 3. 边界
+
+不新增登录接口、Cookie、服务端会话或 SQLite 字段；FastAPI 的 `X-Admin-Token` 与 `Authorization: Bearer` 契约保持不变，后续进入真实 FastAPI + 临时 SQLite E2E。
+
 ## 2026-07-12 追加：P0-7B 句子级部署与成本证据语义
 
 ### 1. 开发目的
@@ -6200,4 +6217,3 @@ docs/project-architecture.md
 后续如果进入开发阶段，再按 `docs/project-architecture.md` 中的开发顺序实施。
 
 ---
-
