@@ -20,6 +20,11 @@
     "first_sent_at": "2026-05-03"
   },
   {
+    "full_name": "abseil/abseil-cpp",
+    "html_url": "https://github.com/abseil/abseil-cpp",
+    "first_sent_at": "2026-07-13"
+  },
+  {
     "full_name": "addyosmani/agent-skills",
     "html_url": "https://github.com/addyosmani/agent-skills",
     "first_sent_at": "2026-06-15"
@@ -375,6 +380,11 @@
     "first_sent_at": "2026-06-29"
   },
   {
+    "full_name": "iOfficeAI/OfficeCLI",
+    "html_url": "https://github.com/iOfficeAI/OfficeCLI",
+    "first_sent_at": "2026-07-13"
+  },
+  {
     "full_name": "iptv-org/iptv",
     "html_url": "https://github.com/iptv-org/iptv",
     "first_sent_at": "2026-06-22"
@@ -553,6 +563,11 @@
     "full_name": "open-webui/open-webui",
     "html_url": "https://github.com/open-webui/open-webui",
     "first_sent_at": "2026-04-29"
+  },
+  {
+    "full_name": "openai/codex-plugin-cc",
+    "html_url": "https://github.com/openai/codex-plugin-cc",
+    "first_sent_at": "2026-07-13"
   },
   {
     "full_name": "OpenBB-finance/OpenBB",
@@ -750,6 +765,11 @@
     "first_sent_at": "2026-04-29"
   },
   {
+    "full_name": "TencentCloud/CubeSandbox",
+    "html_url": "https://github.com/TencentCloud/CubeSandbox",
+    "first_sent_at": "2026-07-13"
+  },
+  {
     "full_name": "tensorflow/tensorflow",
     "html_url": "https://github.com/tensorflow/tensorflow",
     "first_sent_at": "2026-04-28"
@@ -808,6 +828,11 @@
     "full_name": "warpdotdev/warp",
     "html_url": "https://github.com/warpdotdev/warp",
     "first_sent_at": "2026-05-06"
+  },
+  {
+    "full_name": "wonderwhy-er/DesktopCommanderMCP",
+    "html_url": "https://github.com/wonderwhy-er/DesktopCommanderMCP",
+    "first_sent_at": "2026-07-13"
   },
   {
     "full_name": "wshobson/agents",
