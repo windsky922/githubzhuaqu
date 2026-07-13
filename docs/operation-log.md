@@ -1,5 +1,23 @@
 # 操作日志
 
+## 2026-07-13 追加：P0-10A 真实 FastAPI 与临时 SQLite 浏览器回归
+
+### 1. 开发目的
+
+在保留现有 mock Playwright 回归的基础上，建立“构建后静态应用 → Chromium → FastAPI → 临时 SQLite → 确定性本地 RAG”的真实链路，发现接口、路由和页面接入之间仅靠单元测试无法暴露的偏差。
+
+### 2. 修改内容
+
+1. 抽取固定项目匹配 fixture，原有评估默认文本保持不变；真实 E2E 可选择加入经过规则验证的能力证据。
+2. 新增临时后端启动器：复制 `docs/` 到系统临时目录，建立独立 SQLite、FTS5、语料和 `local-hash-v1` embedding，清空 Kimi、GitHub、Telegram 凭据并监听 `127.0.0.1:4183`。
+3. 新增单 worker Chromium 回归，覆盖真实健康检查、规则降级 SSE、普通 POST 与 SSE final 等值、无上下文澄清、序号候选范围、正交能力冲突和管理口令 Header 鉴权。
+4. 管理口令测试只调用 `/v1/dev-context/index-plan`，仅在临时库创建 planned 任务；`admin_token` URL 参数仍不能鉴权。
+5. 管理口令输入、清除按钮和状态区域增加稳定 `data-testid`；现有 mock E2E、Ask 契约和 SQLite schema 不变。
+
+### 3. 边界
+
+真实回归不访问外网，不读取业务 Secrets，不修改本机 SQLite，不触发索引执行、Kimi、Telegram 或其他真实外发。规则降级流沿用现有 `meta → final` 契约；`meta → delta → final` 仍由既有 mock 用例覆盖生成中展示。
+
 ## 2026-07-13 追加：P0-9C 候选序号追问与工程规则同步
 
 ### 1. 开发目的

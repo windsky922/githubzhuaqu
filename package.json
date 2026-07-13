@@ -8,6 +8,7 @@
     "lint": "tsc -p frontend/tsconfig.json",
     "test": "vitest --config frontend/vitest.config.ts run",
     "test:e2e": "playwright test",
+    "test:e2e:real": "playwright test --config playwright.real.config.ts",
     "build": "npm run lint && cd frontend && vite build && node scripts/trim-build.mjs"
   },
   "dependencies": {

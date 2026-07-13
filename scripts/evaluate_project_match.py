@@ -18,6 +18,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
+from scripts.project_match_fixture import FIXTURE_PROJECTS, write_project_match_fixture
 from src.api.repository import ApiRepository
 
 
@@ -26,20 +27,6 @@ MODES: dict[str, Callable[..., dict[str, Any]]] = {
     "local-hash-v1": ApiRepository.rag_vector_search,
     "hybrid": ApiRepository.rag_hybrid_search,
 }
-
-# The fixture is a fixed corpus, rather than the changing weekly archive.  It makes
-# the baseline repeatable while allowing --root to measure a real archive separately.
-FIXTURE_PROJECTS = [
-    ("eval/agent-orchestrator", "Python", "AI Agent", "多智能体 编排 工作流 自动化 agent orchestration", "github_trending"),
-    ("eval/rag-knowledge", "TypeScript", "Developer Tools", "本地知识库 RAG 检索 文档问答 semantic search", "github_search"),
-    ("eval/data-pipeline", "Python", "Data Engineering", "数据管道 ETL 调度 数据质量 data pipeline", "github_trending"),
-    ("eval/flutter-mobile", "Dart", "Mobile", "Flutter 跨平台 移动应用 mobile client", "github_search"),
-    ("eval/security-scanner", "Go", "Security", "依赖漏洞 扫描 软件供应链 security scanner", "github_trending"),
-    ("eval/observability", "Rust", "DevOps", "可观测性 日志 指标 链路追踪 observability", "github_search"),
-    ("eval/image-workflow", "Python", "AI", "图像生成 工作流 扩散模型 image generation", "github_trending"),
-    ("eval/api-gateway", "Go", "Backend", "API 网关 限流 鉴权 gateway rate limit", "github_search"),
-]
-
 
 def load_cases(path: Path) -> list[dict[str, Any]]:
     cases = []
@@ -66,30 +53,7 @@ def load_cases(path: Path) -> list[dict[str, Any]]:
 
 
 def write_fixture(root: Path) -> None:
-    selected = root / "data" / "selected"
-    selected.mkdir(parents=True, exist_ok=True)
-    records = [
-        {
-            "full_name": name,
-            "html_url": f"https://github.com/{name}",
-            "description": description,
-            "language": language,
-            "category": category,
-            "sources": [source],
-            "stargazers_count": 100,
-            "forks_count": 10,
-            "score": 0.9,
-            "star_growth": 20,
-            "trending_rank": index + 1,
-            "selection_reasons": [f"匹配 {category} 方向。"],
-            "security_flags": [],
-            "quality_score": 90,
-            "quality_level": "high",
-            "quality_flags": [],
-        }
-        for index, (name, language, category, description, source) in enumerate(FIXTURE_PROJECTS)
-    ]
-    (selected / "2026-01-01.json").write_text(json.dumps(records, ensure_ascii=False), encoding="utf-8")
+    write_project_match_fixture(root)
 
 
 def _repositories(result: dict[str, Any]) -> list[str]:
