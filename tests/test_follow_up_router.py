@@ -30,6 +30,8 @@ class FollowUpRouterTest(unittest.TestCase):
         self.assertEqual(result["route"], "resume")
         self.assertEqual(result["candidate_scope"], "previous_candidates")
         self.assertEqual(result["resolved_query"], "找 Python 多 Agent 项目")
+        self.assertEqual(result["selected_candidate_indexes"], [])
+        self.assertEqual(result["selected_repository_ids"], ["owner/agent", "owner/other"])
         self.assertEqual(client.calls, 0)
 
     def test_follow_up_without_context_clarifies_without_model(self):
@@ -45,6 +47,42 @@ class FollowUpRouterTest(unittest.TestCase):
         focused = route_follow_up(root=Path.cwd(), query="那个项目呢", context=_context())
         self.assertEqual(missing["route"], "clarify")
         self.assertEqual(focused["candidate_scope"], "primary_candidate")
+        self.assertEqual(focused["selected_repository_ids"], ["owner/agent"])
+
+    def test_ordinal_reference_selects_authoritative_repository(self):
+        result = route_follow_up(root=Path.cwd(), query="第二个呢", context=_context())
+        self.assertEqual(result["route"], "resume")
+        self.assertEqual(result["candidate_scope"], "selected_candidates")
+        self.assertEqual(result["selected_candidate_indexes"], [1])
+        self.assertEqual(result["selected_repository_ids"], ["owner/other"])
+        self.assertEqual(result["resolved_query"], "找 Python 多 Agent 项目")
+
+    def test_ordinal_comparison_preserves_candidate_order(self):
+        context = {
+            **_context(),
+            "candidate_repository_ids": ["owner/first", "owner/second", "owner/third"],
+            "primary_repository_id": "owner/first",
+        }
+        result = route_follow_up(root=Path.cwd(), query="比较第三个和第一个", context=context)
+        self.assertEqual(result["candidate_scope"], "selected_candidates")
+        self.assertEqual(result["selected_candidate_indexes"], [2, 0])
+        self.assertEqual(result["selected_repository_ids"], ["owner/third", "owner/first"])
+
+    def test_ordinal_without_context_or_out_of_range_clarifies(self):
+        without_context = route_follow_up(root=Path.cwd(), query="看第二个", context=_empty_context())
+        out_of_range = route_follow_up(root=Path.cwd(), query="看第三个", context=_context())
+        self.assertEqual(without_context["route"], "clarify")
+        self.assertEqual(without_context["selected_repository_ids"], [])
+        self.assertEqual(out_of_range["route"], "clarify")
+        self.assertFalse(out_of_range["retrieval_performed"])
+
+    def test_previous_candidate_requires_primary_and_uses_it_when_confirmed(self):
+        ambiguous = route_follow_up(root=Path.cwd(), query="上一个项目", context={**_context(), "primary_repository_id": ""})
+        focused = route_follow_up(root=Path.cwd(), query="上一个项目", context=_context())
+        self.assertEqual(ambiguous["route"], "clarify")
+        self.assertEqual(focused["candidate_scope"], "primary_candidate")
+        self.assertEqual(focused["selected_candidate_indexes"], [0])
+        self.assertEqual(focused["selected_repository_ids"], ["owner/agent"])
 
     def test_refinement_extracts_constraints(self):
         result = route_follow_up(root=Path.cwd(), query="更适合 TypeScript 且必须 MIT 的", context=_context())

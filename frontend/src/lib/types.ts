@@ -93,7 +93,9 @@ export type RagAnswer = {
     reason?: string;
     parser?: string;
     retrieval_performed?: boolean;
-    candidate_scope?: "archive" | "previous_candidates" | "primary_candidate" | "none";
+    candidate_scope?: "archive" | "previous_candidates" | "primary_candidate" | "selected_candidates" | "none";
+    selected_candidate_indexes?: number[];
+    selected_repository_ids?: string[];
     requirement_schema_version?: "capability-v1" | string;
     requirements?: Array<{ field: string; operator: string; value: RequirementValue; hard: boolean }>;
   };

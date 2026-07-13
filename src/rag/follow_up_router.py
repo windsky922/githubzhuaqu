@@ -14,7 +14,7 @@ REQUIREMENT_SCHEMA_VERSION = "capability-v1"
 REPOSITORY_RE = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 ALLOWED_MODES = {"fts5", "vector", "hybrid"}
 ALLOWED_ROUTES = {"new_search", "resume", "refine", "clarify"}
-ALLOWED_SCOPES = {"archive", "previous_candidates", "primary_candidate", "none"}
+ALLOWED_SCOPES = {"archive", "previous_candidates", "primary_candidate", "selected_candidates", "none"}
 CAPABILITY_FIELDS = {
     "hosting_mode",
     "offline_capable",
@@ -34,6 +34,10 @@ RESUME_WORDS = {
 PRIMARY_WORDS = {"那个呢", "那个项目呢", "这个呢", "这个项目呢", "它呢"}
 RESET_MARKERS = ("重新找", "换一批", "搜索其他", "找别的", "重新搜索")
 AMBIGUOUS_WORDS = {"哪个好", "还有吗", "怎么选", "可以吗", "怎么样", "还有呢"}
+PREVIOUS_CANDIDATE_WORDS = {"上一个", "上一个呢", "上一个项目", "上一个项目呢", "看上一个项目", "看看上一个项目"}
+ORDINAL_RE = re.compile(r"第\s*([一二三四五六七八九十]|\d{1,2})\s*个?")
+ORDINAL_VALUES = {"一": 1, "二": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9, "十": 10}
+ORDINAL_COMPARISON_MARKERS = ("比较", "对比", "和", "与", "跟", "、")
 
 LANGUAGES = {
     "python": "Python", "java": "Java", "javascript": "JavaScript", "typescript": "TypeScript",
@@ -141,14 +145,31 @@ def route_follow_up(
     if any(marker in normalized for marker in RESET_MARKERS):
         resolved = _combine_query(context.get("previous_user_goal") if has_context else "", query)
         return _route("new_search", "explicit_archive_reset", resolved, "archive", requirements)
+    ordinal_route = _ordinal_candidate_route(normalized, context, requirements, has_context=has_context)
+    if ordinal_route is not None:
+        return ordinal_route
     if normalized in PRIMARY_WORDS:
         primary = str(context.get("primary_repository_id") or "")
         if has_context and primary:
-            return _route("resume", "primary_candidate_reference", context["previous_user_goal"], "primary_candidate", requirements)
+            return _route(
+                "resume",
+                "primary_candidate_reference",
+                context["previous_user_goal"],
+                "primary_candidate",
+                requirements,
+                selected_repository_ids=[primary],
+            )
         return _clarify("你指的是哪个项目？请给出项目名称，或先选择一个已确认的首选项目。", "primary_candidate_missing")
     if normalized in RESUME_WORDS:
         if has_context:
-            return _route("resume", "exact_resume_command", context["previous_user_goal"], "previous_candidates", requirements)
+            return _route(
+                "resume",
+                "exact_resume_command",
+                context["previous_user_goal"],
+                "previous_candidates",
+                requirements,
+                selected_repository_ids=list(context.get("candidate_repository_ids") or []),
+            )
         return _clarify("你想继续刚才的项目分析，还是开始一次新的项目搜索？请补充一句完整需求。", "resume_without_context")
     if requirements and _looks_like_refinement(normalized):
         if has_context:
@@ -158,6 +179,7 @@ def route_follow_up(
                 _combine_query(context["previous_user_goal"], query),
                 "previous_candidates",
                 requirements,
+                selected_repository_ids=list(context.get("candidate_repository_ids") or []),
             )
         if _has_search_target(normalized):
             return _route("new_search", "substantive_query_with_constraints", query.strip(), "archive", requirements)
@@ -165,6 +187,64 @@ def route_follow_up(
     if normalized in AMBIGUOUS_WORDS or len(normalized) <= 3:
         return _route_with_kimi(root=root, query=query, context=context, requirements=requirements, client=client)
     return _route("new_search", "substantive_query", query.strip(), "archive", requirements)
+
+
+def _ordinal_candidate_route(
+    normalized: str,
+    context: dict[str, Any],
+    requirements: list[dict[str, Any]],
+    *,
+    has_context: bool,
+) -> dict[str, Any] | None:
+    primary = str(context.get("primary_repository_id") or "")
+    if normalized in PREVIOUS_CANDIDATE_WORDS:
+        if has_context and primary:
+            repository_ids = list(context.get("candidate_repository_ids") or [])
+            primary_index = repository_ids.index(primary) if primary in repository_ids else -1
+            return _route(
+                "resume",
+                "confirmed_primary_reference",
+                str(context.get("previous_user_goal") or ""),
+                "primary_candidate",
+                requirements,
+                selected_candidate_indexes=[primary_index] if primary_index >= 0 else [],
+                selected_repository_ids=[primary],
+            )
+        return _clarify("“上一个项目”无法唯一确定。请先确认首选项目，或直接写出仓库名称。", "previous_candidate_ambiguous", requirements)
+
+    matches = list(ORDINAL_RE.finditer(normalized))
+    if not matches:
+        return None
+    if not has_context:
+        return _clarify("当前没有可按序号选择的上一轮候选。请先搜索项目，或直接写出仓库名称。", "ordinal_without_context", requirements)
+    if len(matches) > 1 and not any(marker in normalized for marker in ORDINAL_COMPARISON_MARKERS):
+        return _clarify("检测到多个候选序号，但无法确定是否要比较它们。请明确写成“比较第一个和第二个”。", "ordinal_reference_ambiguous", requirements)
+
+    indexes: list[int] = []
+    for match in matches:
+        token = match.group(1)
+        position = ORDINAL_VALUES.get(token, int(token) if token.isdigit() else 0)
+        index = position - 1
+        if index not in indexes:
+            indexes.append(index)
+    repository_ids = list(context.get("candidate_repository_ids") or [])
+    if any(index < 0 or index >= len(repository_ids) for index in indexes):
+        return _clarify(
+            f"上一轮只有 {len(repository_ids)} 个候选，无法选择这个序号。请使用有效序号或直接写出仓库名称。",
+            "ordinal_out_of_range",
+            requirements,
+        )
+    selected = [repository_ids[index] for index in indexes]
+    reason = "ordinal_candidate_comparison" if len(selected) > 1 else "ordinal_candidate_reference"
+    return _route(
+        "resume",
+        reason,
+        str(context.get("previous_user_goal") or ""),
+        "selected_candidates",
+        requirements,
+        selected_candidate_indexes=indexes,
+        selected_repository_ids=selected,
+    )
 
 
 def parse_requirements(query: str) -> dict[str, Any]:
@@ -313,7 +393,16 @@ def _validated_model_route(value: Any, *, query: str, context: dict[str, Any], m
     if not resolved or len(resolved) > 2000:
         raise ValueError("invalid resolved query")
     scope = "archive" if route == "new_search" else "previous_candidates"
-    return _route(route, "kimi_route", resolved, scope, requirements, parser=f"kimi:{model}")
+    selected_repository_ids = [] if scope == "archive" else list(context.get("candidate_repository_ids") or [])
+    return _route(
+        route,
+        "kimi_route",
+        resolved,
+        scope,
+        requirements,
+        parser=f"kimi:{model}",
+        selected_repository_ids=selected_repository_ids,
+    )
 
 
 def _validated_requirements(value: Any) -> list[dict[str, Any]]:
@@ -342,7 +431,17 @@ def _validated_requirements(value: Any) -> list[dict[str, Any]]:
     return result
 
 
-def _route(route: str, reason: str, resolved_query: str, scope: str, requirements: list[dict[str, Any]], *, parser: str | None = None) -> dict[str, Any]:
+def _route(
+    route: str,
+    reason: str,
+    resolved_query: str,
+    scope: str,
+    requirements: list[dict[str, Any]],
+    *,
+    parser: str | None = None,
+    selected_candidate_indexes: list[int] | None = None,
+    selected_repository_ids: list[str] | None = None,
+) -> dict[str, Any]:
     return {
         "route": route,
         "reason": reason,
@@ -350,6 +449,8 @@ def _route(route: str, reason: str, resolved_query: str, scope: str, requirement
         "resolved_query": resolved_query.strip(),
         "retrieval_performed": False,
         "candidate_scope": scope,
+        "selected_candidate_indexes": list(selected_candidate_indexes or []),
+        "selected_repository_ids": list(selected_repository_ids or []),
         "requirement_schema_version": REQUIREMENT_SCHEMA_VERSION,
         "requirements": requirements,
         "clarification_required": False,

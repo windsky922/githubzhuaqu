@@ -486,6 +486,9 @@ class DataContractsTest(unittest.TestCase):
             "external_api_required",
             "api_key_required",
             "requirement_evaluations",
+            "selected_candidates",
+            "selected_candidate_indexes",
+            "selected_repository_ids",
         ):
             self.assertIn(expected, contract)
 

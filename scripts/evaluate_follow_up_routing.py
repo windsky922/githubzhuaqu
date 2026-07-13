@@ -35,8 +35,8 @@ def load_cases(path: Path) -> list[dict[str, Any]]:
             raise ValueError(f"duplicate id: {row['id']}")
         seen.add(row["id"])
         rows.append(row)
-    if len(rows) < 40:
-        raise ValueError("follow-up evaluation requires at least 40 cases")
+    if len(rows) < 60:
+        raise ValueError("follow-up evaluation requires at least 60 cases")
     return rows
 
 
@@ -61,27 +61,46 @@ def evaluate(cases: list[dict[str, Any]], *, root: Path = PROJECT_ROOT) -> dict[
             "clarification_correct": bool(result["clarification_required"]) == bool(case["expect_clarification"]),
             "rewrite_correct": bool(rewrite_correct),
             "scope_correct": result["candidate_scope"] == case["expected_scope"],
+            "selected_indexes_correct": (
+                result.get("selected_candidate_indexes", []) == case["expected_selected_indexes"]
+                if "expected_selected_indexes" in case else None
+            ),
+            "selected_repositories_correct": (
+                result.get("selected_repository_ids", []) == case["expected_selected_repository_ids"]
+                if "expected_selected_repository_ids" in case else None
+            ),
             "constraints_correct": result["requirements"] == case["expected_requirements"],
             "raw_follow_up_retrieval_violation": raw_violation,
         })
     total = max(1, len(items))
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "sample_count": len(items),
         "metrics": {
             "route_accuracy": _rate(items, "route_correct", total),
             "clarification_accuracy": _rate(items, "clarification_correct", total),
             "rewrite_accuracy": _rate(items, "rewrite_correct", total),
             "candidate_scope_accuracy": _rate(items, "scope_correct", total),
+            "selected_candidate_index_accuracy": _optional_rate(items, "selected_indexes_correct"),
+            "selected_repository_accuracy": _optional_rate(items, "selected_repositories_correct"),
             "constraint_exact_match_accuracy": _rate(items, "constraints_correct", total),
             "raw_follow_up_retrieval_violation_rate": round(sum(item["raw_follow_up_retrieval_violation"] for item in items) / total, 4),
         },
-        "failures": [item for item in items if not all(value for key, value in item.items() if key not in {"id", "raw_follow_up_retrieval_violation"}) or item["raw_follow_up_retrieval_violation"]],
+        "failures": [
+            item for item in items
+            if any(value is False for key, value in item.items() if key not in {"id", "raw_follow_up_retrieval_violation"})
+            or item["raw_follow_up_retrieval_violation"]
+        ],
     }
 
 
 def _rate(items: list[dict[str, Any]], key: str, total: int) -> float:
     return round(sum(bool(item[key]) for item in items) / total, 4)
+
+
+def _optional_rate(items: list[dict[str, Any]], key: str) -> float:
+    applicable = [item for item in items if item.get(key) is not None]
+    return round(sum(bool(item[key]) for item in applicable) / max(1, len(applicable)), 4)
 
 
 def main() -> int:

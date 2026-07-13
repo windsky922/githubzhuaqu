@@ -60,6 +60,8 @@ RAG 语料先经过确定性清洗和版本化，再进入 FTS5、local-hash 与
 
 POST Ask 在检索前经过 `follow_up_router`。确定性规则优先识别 resume/refine/new_search/clarify，并按分句、连接词和谓词限定否定作用域；同一目标冲突、析取或无法表达的可选条件直接澄清。`capability-v1` 将托管方式、离线能力、联网要求、外部 API 依赖和 API Key 依赖分别建模，旧 deployment 只在验证器入口规范化。规则无法判断时才调用 Kimi 严格 JSON 路由；模型只能建议路由、改写和约束，不能选择项目。候选范围直接下推到 FTS5 SQL、vector 行过滤和 hybrid 两路召回。`constraint_verifier` 从仓库/语料确定性元数据及非模型增强 chunk 计算能力事实，按句子区分支持、冲突、条件、仅试用、外部依赖或未知；模型增强不能覆盖硬约束结论。`project_recommendations` 统一生成 eligible/unknown/rejected，并通过 `requirement_evaluations[]` 公开逐条件状态、原因和证据；没有合格候选时由规则闸门返回 clarification 或 no_match，不调用回答模型。
 
+候选序号同样在 `follow_up_router` 中确定性解析。序号先映射到上一轮有序 `candidate_repository_ids`，再生成 `selected_candidate_indexes[]` 和权威 `selected_repository_ids[]`；repository 层只把这些 ID 下推到实际检索，不先取大 Top-K 再过滤。越界、无上下文和不确定引用在检索前短路为 clarification。浏览器只负责回传最小无状态上下文，不根据 citations、evidence 或历史 assistant 文本解释序号。
+
 Ask 响应把证据覆盖与匹配把握分开表达：旧 `confidence` 仅作为兼容字段保留，`evidence_coverage` 复用其按证据数量计算的 `low/medium/high`，`match_confidence` 在未校准阶段固定为 `unknown`。`answer_quality` 保留原有通过状态和问题列表，并显式标记引用有效性、证据相关性、主张支持度和数据新鲜度；P0-2 只有引用有效性经过实际校验，不能把证据数量或格式校验解释为推荐正确率。
 
 管理页 RAG 对话工作台是该接口的 GPT 式前端封装，不新增后端会话状态。对话历史只保存在浏览器 localStorage，最多 20 轮；每轮问题独立检索，历史回答只用于页面回看，不进入 `prompt_context`，也不作为事实证据。管理页和 React 工作台显示“证据覆盖”与“匹配把握尚未校准”，不再把 `confidence` 渲染为匹配置信度。

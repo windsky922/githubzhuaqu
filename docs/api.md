@@ -659,6 +659,8 @@ resume/展开只在上一轮 candidate IDs 内检索，“那个项目”只在 
 
 规则解析按分句、连接词和谓词限定否定作用域；同一目标冲突、析取或“不要求/无所谓”等无法安全表示的条件返回 clarification。能力事实使用 repositories 可信元数据及非 `model_enrichment` 清洗 chunk，句子证据区分 `supports/contradicts/conditional/trial_only/external_dependency/unknown`。免费试用不满足“免费”，self-hosted UI 加 hosted inference 不满足“完全离线”；模型增强只能补充理由，不能改变硬约束结论。recommendation 新增 `requirement_evaluations[]`，逐项返回条件、matched/unmet/unknown 状态、原因和证据 chunk IDs。冲突为 rejected，无法验证为 unknown，全部通过为 eligible；没有 eligible 且全部冲突时返回 `answer_mode=no_match`，存在 unknown 时返回 clarification。clarification 的 `answer_quality.applicable=false`。
 
+候选序号追问由确定性规则处理。`candidate_scope` 新增 `selected_candidates`；`input_route.selected_candidate_indexes[]` 使用零基索引，`selected_repository_ids[]` 是本轮实际检索范围的权威值。“第二个呢”只检索上一轮第二个候选，“比较第一个和第二个”只检索这两个候选。越界序号、无上下文序号或无法唯一解释且没有已确认 primary 的“上一个项目”返回 clarification，`retrieval_performed=false`。有 `primary_repository_id` 时，“上一个项目”按该已确认项目处理。普通 POST 与流式 `final` 返回相同的 requirements、recommendations 和序号范围；GET Ask 与 SSE 事件顺序不变。
+
 路由优先使用确定性规则；只有规则无法可靠判断时才调用 Kimi 严格 JSON 路由。模型不可用、超时、非法 JSON 或越权字段都会保守转为澄清。contextual POST 不写入 `rag_explanations`、任务、反馈或服务端会话。
 
 示例：

@@ -68,6 +68,52 @@ class ContextualAskTest(unittest.TestCase):
         self.assertTrue(result["recommendations"])
         self.assertEqual({item["full_name"] for item in result["recommendations"]}, {"eval/agent-orchestrator"})
 
+    def test_ordinal_follow_up_filters_to_selected_repository_and_matches_stream(self):
+        payload = {
+            "q": "第二个呢",
+            "context": {
+                "previous_user_goal": "本地知识库 RAG 检索",
+                "candidate_repository_ids": ["eval/agent-orchestrator", "eval/rag-knowledge"],
+                "primary_repository_id": "eval/agent-orchestrator",
+                "mode": "hybrid",
+                "resumable": True,
+            },
+            "mode": "hybrid",
+            "auto_build": True,
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            repository = self._repository(Path(directory))
+            with patch.dict(os.environ, {"KIMI_API_KEY": "", "KIMI_MODEL": ""}, clear=False):
+                normal = repository.rag_ask_contextual(payload)
+                events = list(repository.rag_ask_contextual_stream(payload))
+        route = normal["input_route"]
+        self.assertEqual(route["candidate_scope"], "selected_candidates")
+        self.assertEqual(route["selected_candidate_indexes"], [1])
+        self.assertEqual(route["selected_repository_ids"], ["eval/rag-knowledge"])
+        self.assertEqual({item["full_name"] for item in normal["recommendations"]}, {"eval/rag-knowledge"})
+        self.assertEqual(events[-1]["event"], "final")
+        self.assertEqual(events[-1]["data"], normal)
+
+    def test_invalid_ordinal_clarifies_without_retrieval(self):
+        payload = {
+            "q": "看第三个",
+            "context": {
+                "previous_user_goal": "多智能体编排项目",
+                "candidate_repository_ids": ["eval/agent-orchestrator"],
+                "primary_repository_id": "eval/agent-orchestrator",
+                "mode": "hybrid",
+                "resumable": True,
+            },
+            "mode": "hybrid",
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            repository = self._repository(Path(directory))
+            with patch.object(repository, "_rag_explain_readonly", side_effect=AssertionError("retrieval must not run")):
+                result = repository.rag_ask_contextual(payload)
+        self.assertEqual(result["answer_mode"], "clarification")
+        self.assertFalse(result["input_route"]["retrieval_performed"])
+        self.assertEqual(result["input_route"]["selected_repository_ids"], [])
+
     def test_stream_final_matches_normal_response(self):
         payload = {"q": "找 Python 多 Agent 项目", "mode": "hybrid", "auto_build": True, "limit": 3}
         with tempfile.TemporaryDirectory() as directory:

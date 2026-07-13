@@ -5170,6 +5170,8 @@ def _contextual_answer_retrieval(
 
 
 def _contextual_candidate_ids(route: dict[str, Any], context: dict[str, Any]) -> list[str]:
+    if route.get("candidate_scope") == "selected_candidates":
+        return _normalized_repository_ids(route.get("selected_repository_ids"))
     if route.get("candidate_scope") == "primary_candidate":
         primary = str(context.get("primary_repository_id") or "")
         return [primary] if primary else []

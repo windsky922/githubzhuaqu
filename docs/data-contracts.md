@@ -211,6 +211,16 @@ api_key_required: boolean
 
 每个 recommendation 除已有排序、满足/不满足/未知要求和证据字段外，还返回 `requirement_evaluations[]`。每项包含原条件的 `field/operator/value`、`status: matched | unmet | unknown`、可审计 `reason` 和 `evidence_chunk_ids[]`。能力事实只从可信元数据及非 `model_enrichment` 清洗 chunk 确定性计算；模型增强不能把 unknown 或 rejected 改成 eligible。本阶段不新增 SQLite 表或第二套能力缓存。
 
+候选序号追问扩展 `input_route`，不改变请求体：
+
+```text
+candidate_scope: archive | previous_candidates | primary_candidate | selected_candidates | none
+selected_candidate_indexes: number[]
+selected_repository_ids: string[]
+```
+
+`selected_candidate_indexes` 使用上一轮 `candidate_repository_ids` 的零基索引；`selected_repository_ids` 是后端实际传入 FTS5、vector 和 hybrid 候选过滤的权威范围。无上下文、序号越界或无法唯一解释时两者为空，并返回 clarification 且不检索。浏览器仍只提交上一轮用户目标、有序候选仓库 ID、确认的 primary、mode 和 resumable，不提交 assistant 文本、citations、evidence 或 prompt_context。
+
 `/api/projects` 复用历史归档查询能力，支持按语言、方向、profile、来源、风险提示、质量分、Trending 排名和关键词筛选。返回结构保持为：
 
 ```text

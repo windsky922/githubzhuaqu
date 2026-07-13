@@ -1,5 +1,23 @@
 # 操作日志
 
+## 2026-07-13 追加：P0-9C 候选序号追问与工程规则同步
+
+### 1. 开发目的
+
+避免“第二个呢”“看第三个”“比较第一个和第二个”被当成全归档新搜索，确保自然语言序号只作用于浏览器提交的上一轮有序候选，并公开本轮实际检索仓库范围。
+
+### 2. 修改内容
+
+1. `candidate_scope` 新增 `selected_candidates`；`input_route` 新增零基 `selected_candidate_indexes[]` 和权威 `selected_repository_ids[]`，repository 层将所选仓库 ID 直接下推到 FTS5、vector 和 hybrid 召回。
+2. 单个序号只检索对应仓库，多序号比较按用户出现顺序检索；序号越界、无可恢复上下文或无法唯一解释的“上一个项目”返回 clarification 且检索调用为 0。有已确认 primary 时，“上一个项目”聚焦该仓库。
+3. 普通 POST Ask 与 SSE final 返回等值序号范围；React 类型同步扩展，浏览器请求仍只包含用户目标、候选 ID、确认 primary、mode 和 resumable，不发送历史 assistant 文本、引用、证据或 prompt_context。
+4. 追问评估集从 40 条扩展到 60 条，新增 20 条序号、比较、越界和不可恢复样本；路由、范围、澄清、改写、约束及所选仓库准确率均为 1.0，原始短追问误检索率为 0。
+5. 重写项目 `AGENTS.md`，补齐当前 FastAPI/React/RAG 架构、外部 README 不可信、模型增强限制、数据契约同步、完整验证和提交边界。
+
+### 3. 边界
+
+不新增 SQLite 表或服务端会话，不提交历史模型回答，不改变 GET Ask、既有 POST 字段或 SSE 事件顺序，不调整检索权重。独立 blind 样本仍由后续审查提供；未完成 blind 验证前不宣称序号或能力模型已校准。
+
 ## 2026-07-13 追加：P0-9B 正交项目能力模型
 
 ### 1. 开发目的
