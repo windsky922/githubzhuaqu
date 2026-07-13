@@ -1,5 +1,22 @@
 # 操作日志
 
+## 2026-07-13 追加：P0-10B 真实浏览器回归接入提交级 CI
+
+### 1. 开发目的
+
+把 P0-10A 的真实 FastAPI + 临时 SQLite 浏览器回归接入 `push main` 和 pull request 自动检查，与现有 mock 界面回归分开报告失败原因。
+
+### 2. 修改内容
+
+1. `.github/workflows/ci.yml` 新增独立 `playwright-real` job，使用 Python 3.12、Node.js 22、Chromium、前端生产构建和 `npm run test:e2e:real`。
+2. 真实回归只使用固定 fixture 和系统临时 SQLite；启动器主动清空 Kimi、GitHub、Telegram 凭据，不接收业务 Secrets。
+3. mock 与 real Playwright 使用独立报告和失败产物目录，失败产物保留 7 天，成功不上传。
+4. README、架构说明和项目验证命令同步区分两套 E2E 的职责。
+
+### 3. 边界
+
+不修改 API、SQLite schema、Ask/SSE 契约、检索权重或模型配置；不启用分支保护，仍保留当前直接推送 `main` 的工作方式。
+
 ## 2026-07-13 追加：P0-10A 真实 FastAPI 与临时 SQLite 浏览器回归
 
 ### 1. 开发目的

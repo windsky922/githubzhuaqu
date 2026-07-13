@@ -4,7 +4,7 @@
 
 ## 提交级质量检查
 
-`.github/workflows/ci.yml` 独立于定时周报主流程，在 `push main` 和 pull request 上运行。它执行确定性测试、静态检查、安全检查、前端构建一致性及 Chromium 桌面/手机 Playwright 回归。E2E 由本地 mock server 提供固定 SSE、分页和对比数据，不依赖 Kimi、GitHub 网络或 SQLite；失败时短期上传截图、trace 和报告。当前只提供自动检查与失败报警，不配置 GitHub 分支保护，因此仍允许直接推送 `main`。
+`.github/workflows/ci.yml` 独立于定时周报主流程，在 `push main` 和 pull request 上运行。它执行确定性测试、静态检查、安全检查、前端构建一致性及两套 Chromium Playwright 回归。mock E2E 由本地固定 server 提供 SSE、分页、对比和桌面/手机状态，快速定位前端渲染问题；real E2E 启动真实 FastAPI，将已构建 `docs/`、固定项目归档、FTS5、语料和 `local-hash-v1` embedding 放入系统临时目录中的 SQLite，以单 worker 验证普通 POST、SSE final、无状态追问、能力约束和 `X-Admin-Token` 鉴权。真实回归显式清空 Kimi、GitHub 和 Telegram 凭据，管理写入只创建临时 planned 任务；两套回归失败时分别短期上传截图、trace 和报告。当前只提供自动检查与失败报警，不配置 GitHub 分支保护，因此仍允许直接推送 `main`。
 
 ## 管理写接口凭证边界
 

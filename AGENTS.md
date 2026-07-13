@@ -40,6 +40,7 @@ npm run lint
 npm run test
 npm run build
 npm run test:e2e
+npm run test:e2e:real
 python -m unittest discover -q
 python scripts\security_check.py
 python scripts\evaluate_project_match.py
@@ -57,4 +58,4 @@ git status --short --branch
 
 - 只暂存本阶段明确修改的文件，检查 `tmp/` 未进入暂存区。
 - 每个稳定阶段独立 `git commit`，随后 `git push origin main`。
-- CI 在 `push main` 和 PR 上运行核心检查与 Chromium E2E；当前不启用分支保护，不能把“已推送”当成“远端检查已通过”。
+- CI 在 `push main` 和 PR 上运行核心检查、mock Chromium E2E 和真实 FastAPI + 临时 SQLite E2E；当前不启用分支保护，不能把“已推送”当成“远端检查已通过”。
