@@ -10,6 +10,17 @@ export type Evidence = {
 
 export type Citation = Pick<Evidence, "index" | "full_name" | "html_url" | "run_date" | "chunk_id">;
 
+export type RequirementValue = string | boolean;
+
+export type RequirementEvaluation = {
+  field: string;
+  operator: string;
+  value: RequirementValue;
+  status: "matched" | "unmet" | "unknown";
+  reason: string;
+  evidence_chunk_ids: string[];
+};
+
 export type RagRecommendation = {
   full_name: string;
   rank: number;
@@ -20,6 +31,7 @@ export type RagRecommendation = {
   reasons: string[];
   citation_indexes: number[];
   evidence_chunk_ids: string[];
+  requirement_evaluations: RequirementEvaluation[];
   eligibility: "eligible" | "rejected" | "unknown";
 };
 
@@ -82,7 +94,8 @@ export type RagAnswer = {
     parser?: string;
     retrieval_performed?: boolean;
     candidate_scope?: "archive" | "previous_candidates" | "primary_candidate" | "none";
-    requirements?: Array<{ field: string; operator: string; value: string; hard: boolean }>;
+    requirement_schema_version?: "capability-v1" | string;
+    requirements?: Array<{ field: string; operator: string; value: RequirementValue; hard: boolean }>;
   };
   prompt_context: string;
   answer_quality: {

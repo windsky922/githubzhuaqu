@@ -31,7 +31,7 @@ class _OfflineClient:
         return {"configured": False, "model": ""}
 
 
-def load_cases(path: Path) -> list[dict[str, Any]]:
+def load_cases(path: Path, *, enforce_counts: bool = True) -> list[dict[str, Any]]:
     rows = []
     seen = set()
     for line_number, raw in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
@@ -49,8 +49,10 @@ def load_cases(path: Path) -> list[dict[str, Any]]:
         seen.add(row["id"])
         rows.append(row)
     counts = Counter(row["split"] for row in rows)
-    if len(rows) < 100 or counts != Counter(EXPECTED_SPLITS):
+    if enforce_counts and (len(rows) < 100 or counts != Counter(EXPECTED_SPLITS)):
         raise ValueError(f"constraint evaluation requires exact splits {EXPECTED_SPLITS}, got {dict(counts)}")
+    if not rows:
+        raise ValueError("constraint evaluation cannot be empty")
     return rows
 
 
@@ -84,7 +86,7 @@ def evaluate(cases: list[dict[str, Any]]) -> dict[str, Any]:
             client=_OfflineClient(),
         )
         expected = [_requirement(value) for value in case["expected"]]
-        expected_targets = {(item["field"], item["value"].casefold()): item["operator"] for item in expected}
+        expected_targets = {(item["field"], str(item["value"]).casefold()): item["operator"] for item in expected}
         actual_targets = {
             (item["field"], str(item["value"]).casefold()): item["operator"]
             for item in parsed["requirements"]
@@ -108,7 +110,8 @@ def evaluate(cases: list[dict[str, Any]]) -> dict[str, Any]:
         items.append(item)
     split_metrics = {split: _metrics([item for item in items if item["split"] == split]) for split in EXPECTED_SPLITS}
     return {
-        "schema_version": 1,
+        "schema_version": 2,
+        "requirement_schema_version": "capability-v1",
         "sample_count": len(items),
         "metrics": _metrics(items),
         "splits": split_metrics,
@@ -135,10 +138,12 @@ def evaluate_evidence(cases: list[dict[str, Any]]) -> dict[str, Any]:
     total = max(1, len(items))
     non_eligible = [item for item in items if item["expected_status"] != "matched"]
     conflicts = [item for item in items if item["expected_status"] == "unmet"]
+    supported = [item for item in items if item["expected_status"] == "matched"]
     metrics = {
         "evidence_state_accuracy": round(sum(item["actual_state"] == item["expected_state"] for item in items) / total, 4),
         "false_eligible_rate": round(sum(item["actual_status"] == "matched" for item in non_eligible) / max(1, len(non_eligible)), 4),
         "hard_constraint_violation_rate": round(sum(item["actual_status"] == "matched" for item in conflicts) / max(1, len(conflicts)), 4),
+        "false_rejection_rate": round(sum(item["actual_status"] == "unmet" for item in supported) / max(1, len(supported)), 4),
     }
     return {
         "sample_count": len(items),
@@ -152,6 +157,10 @@ def evaluate_evidence(cases: list[dict[str, Any]]) -> dict[str, Any]:
 
 def _requirement(value: str) -> dict[str, Any]:
     field, operator, expected = str(value).split(":", 2)
+    if field in {"offline_capable", "network_required", "external_api_required", "api_key_required"}:
+        if expected not in {"true", "false"}:
+            raise ValueError(f"invalid boolean capability expectation: {value}")
+        expected = expected == "true"
     return {"field": field, "operator": operator, "value": expected, "hard": True}
 
 
@@ -168,6 +177,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dataset", type=Path, default=PROJECT_ROOT / "evals" / "constraint_parsing_cases.jsonl")
     parser.add_argument("--evidence-dataset", type=Path, default=PROJECT_ROOT / "evals" / "constraint_evidence_cases.jsonl")
+    parser.add_argument("--blind-dataset", type=Path, help="独立审查提供的未见样本；不要求固定数量")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     result = evaluate(load_cases(args.dataset))
@@ -175,6 +185,10 @@ def main() -> int:
     result["metrics"].update(evidence["metrics"])
     result["evidence"] = evidence
     result["failures"].extend({"kind": "evidence", **item} for item in evidence["failures"])
+    if args.blind_dataset:
+        blind = evaluate(load_cases(args.blind_dataset, enforce_counts=False))
+        result["blind"] = blind
+        result["failures"].extend({"kind": "blind", **item} for item in blind["failures"])
     rendered = json.dumps(result, ensure_ascii=False, indent=2)
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)

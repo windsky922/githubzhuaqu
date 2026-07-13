@@ -133,7 +133,8 @@ class ContextualAskTest(unittest.TestCase):
         recommendation = normal["recommendations"][0]
         self.assertEqual(recommendation["eligibility"], "rejected")
         self.assertIn("成本=free", recommendation["unmet_requirements"])
-        self.assertIn("部署方式=offline", recommendation["unmet_requirements"])
+        self.assertIn("离线能力=true", recommendation["unmet_requirements"])
+        self.assertTrue(recommendation["requirement_evaluations"])
         self.assertTrue(any(reason.startswith("违反显式约束：") for reason in recommendation["reasons"]))
 
     def test_unverifiable_hard_constraint_requests_clarification(self):

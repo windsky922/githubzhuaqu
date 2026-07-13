@@ -1,5 +1,23 @@
 # 操作日志
 
+## 2026-07-13 追加：P0-9B 正交项目能力模型
+
+### 1. 开发目的
+
+消除旧 `deployment` 同时承载托管位置、离线能力、联网要求和外部 API 依赖造成的错误合格或错误拒绝，确保“本地部署但调用外部 API”“云端部署但不依赖外部模型 API”等组合能被独立表达和审计。
+
+### 2. 修改内容
+
+1. POST Ask 的 `input_route` 增加 `requirement_schema_version=capability-v1`，requirements 的 value 扩展为字符串或布尔值；新增 `hosting_mode`、`offline_capable`、`network_required`、`external_api_required`、`api_key_required`，旧 deployment 只在验证器入口兼容转换。
+2. 规则路由按谓词处理需要、不需要、依赖、不依赖和 without requiring 等表达；Kimi prompt 只允许新字段，旧字段输出先规范化，无法安全规范化时澄清。
+3. 非 `model_enrichment` 清洗 chunk 按独立能力验证；recommendation 新增 `requirement_evaluations[]`，逐条件公开 matched/unmet/unknown、原因和证据 chunk IDs，模型增强不能改变硬约束结论。
+4. capability-v1 评估包含 100 条解析样本和 60 条证据样本；development、locked、adversarial 的解析/operator/澄清准确率与证据状态准确率均为 1.0，错误合格率、硬约束违反率和错误拒绝率均为 0。评估器提供独立 blind 数据入口；未完成 blind 验证前不宣称模型已校准。
+5. 长流式 Playwright mock 保留足够的 delta 展示时间，避免慢设备跳过中间态而产生时序假失败；Playwright 并发策略保持原配置不变。
+
+### 3. 边界
+
+不新增 SQLite 表或第二套能力事实缓存，不调整检索权重，不改变 GET Ask、SSE 事件名或事件顺序。下一步单独实现候选序号追问；真实 FastAPI + 临时 SQLite E2E 继续留在 P0-10。
+
 ## 2026-07-13 追加：P0-9A 旧管理口令历史泄露提示补全
 
 ### 1. 开发目的

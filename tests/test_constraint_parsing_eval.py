@@ -16,11 +16,12 @@ class ConstraintParsingEvaluationTest(unittest.TestCase):
 
     def test_sentence_evidence_semantics_have_no_false_eligible_result(self):
         result = evaluate_evidence(load_evidence_cases(Path("evals/constraint_evidence_cases.jsonl")))
-        self.assertEqual(result["sample_count"], 36)
+        self.assertEqual(result["sample_count"], 60)
         self.assertEqual(result["failures"], [])
         self.assertEqual(result["metrics"]["evidence_state_accuracy"], 1)
         self.assertEqual(result["metrics"]["false_eligible_rate"], 0)
         self.assertEqual(result["metrics"]["hard_constraint_violation_rate"], 0)
+        self.assertEqual(result["metrics"]["false_rejection_rate"], 0)
 
 
 if __name__ == "__main__":

@@ -9,12 +9,23 @@ from src.llm.client import KimiChatClient, LlmClientError
 from src.llm.prompts import follow_up_route_messages
 
 
-ROUTER_VERSION = "follow-up-v1"
+ROUTER_VERSION = "follow-up-v2"
+REQUIREMENT_SCHEMA_VERSION = "capability-v1"
 REPOSITORY_RE = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 ALLOWED_MODES = {"fts5", "vector", "hybrid"}
 ALLOWED_ROUTES = {"new_search", "resume", "refine", "clarify"}
 ALLOWED_SCOPES = {"archive", "previous_candidates", "primary_candidate", "none"}
-ALLOWED_FIELDS = {"language", "category", "source", "license", "deployment", "cost", "tech_stack"}
+CAPABILITY_FIELDS = {
+    "hosting_mode",
+    "offline_capable",
+    "network_required",
+    "external_api_required",
+    "api_key_required",
+}
+BOOLEAN_CAPABILITY_FIELDS = CAPABILITY_FIELDS - {"hosting_mode"}
+ALLOWED_FIELDS = {
+    "language", "category", "source", "license", "deployment", "cost", "tech_stack", *CAPABILITY_FIELDS,
+}
 ALLOWED_OPERATORS = {"eq", "not_eq", "contains"}
 
 RESUME_WORDS = {
@@ -195,18 +206,54 @@ def _extract_clause_requirements(clause: str, requirements: list[dict[str, Any]]
     )
     offline_positive = any(
         marker in lower
-        for marker in ("完全离线", "离线运行", "不能联网", "无需联网", "不依赖网络", "without internet", "air-gapped", "air gapped")
+        for marker in ("完全离线", "离线运行", "离线可用", "fully offline", "offline capable", "air-gapped", "air gapped")
     )
     if offline_negative:
-        _append_requirement(requirements, "deployment", "not_eq", "offline")
+        _append_requirement(requirements, "offline_capable", "eq", False)
     elif offline_positive:
-        _append_requirement(requirements, "deployment", "eq", "offline")
+        _append_requirement(requirements, "offline_capable", "eq", True)
     elif "离线" in lower or "offline" in lower:
-        _append_requirement(requirements, "deployment", operator, "offline")
+        _append_requirement(requirements, "offline_capable", "eq", operator != "not_eq")
+
+    if any(marker in lower for marker in ("不能联网", "无需联网", "不需要联网", "不依赖网络", "without internet", "no internet required", "does not require internet")):
+        _append_requirement(requirements, "network_required", "eq", False)
+    elif any(marker in lower for marker in ("必须联网", "需要联网", "依赖互联网", "requires internet", "internet connection required")):
+        _append_requirement(requirements, "network_required", "eq", True)
+
+    external_api_negative = any(marker in lower for marker in (
+        "不要云 api", "不要云api", "不需要云 api", "不需要云api", "无需云 api", "无需云api",
+        "不依赖云 api", "不依赖云api", "不能依赖外部模型 api", "不依赖外部模型 api",
+        "不要 cloud api", "不需要 cloud api", "无需 cloud api", "不依赖 cloud api",
+        "does not require cloud api", "doesn't require cloud api", "no cloud api required",
+        "works without a cloud api", "without requiring cloud api", "not dependent on cloud api",
+        "without hosted inference", "不依赖托管推理",
+    ))
+    external_api_positive = any(marker in lower for marker in (
+        "必须连接 openai", "需要连接 openai", "会调用 openai", "调用 openai", "依赖 openai",
+        "依赖云 api", "依赖云api", "需要云 api", "需要云api", "依赖外部模型 api", "依赖托管推理",
+        "requires cloud api", "depends on cloud api", "requires external model api", "uses hosted inference",
+    ))
+    if external_api_negative:
+        _append_requirement(requirements, "external_api_required", "eq", False)
+    elif external_api_positive:
+        _append_requirement(requirements, "external_api_required", "eq", True)
+
+    if any(marker in lower for marker in (
+        "不要任何 api key", "不要 api key", "无需 api key", "不需要 api key",
+        "no api key required", "without an api key", "without api key",
+    )):
+        _append_requirement(requirements, "api_key_required", "eq", False)
+    elif any(marker in lower for marker in ("需要 api key", "必须 api key", "requires an api key", "api key required")):
+        _append_requirement(requirements, "api_key_required", "eq", True)
+
     if any(marker in lower for marker in ("本地部署", "私有化部署", "self-hosted", "self hosted")):
-        _append_requirement(requirements, "deployment", operator, "local")
-    if any(marker in lower for marker in ("云端", "云 api", "云api", "saas", "cloud")):
-        _append_requirement(requirements, "deployment", operator, "cloud")
+        _append_requirement(requirements, "hosting_mode", "not_eq" if operator == "not_eq" else "contains", "self_hosted")
+    cloud_hosting = any(marker in lower for marker in (
+        "云端部署", "部署在云端", "运行在云端", "云端服务", "托管服务", "saas",
+        "cloud deployment", "hosted in the cloud", "hosted in cloud", "cloud hosted", "managed cloud", "必须 cloud", "要求 cloud",
+    )) or (any(marker in lower for marker in ("不要 cloud", "no cloud ")) and "cloud api" not in lower)
+    if cloud_hosting:
+        _append_requirement(requirements, "hosting_mode", "not_eq" if operator == "not_eq" else "contains", "cloud_hosted")
     for markers, value in (
         (("免费", " free ", "free to use", "no cost"), "free"),
         (("低成本", "low cost", "low-cost"), "low_cost"),
@@ -280,10 +327,18 @@ def _validated_requirements(value: Any) -> list[dict[str, Any]]:
             raise ValueError("invalid requirement")
         field = str(item.get("field") or "")
         operator = str(item.get("operator") or "")
-        requirement_value = str(item.get("value") or "").strip()
-        if field not in ALLOWED_FIELDS or operator not in ALLOWED_OPERATORS or not requirement_value or len(requirement_value) > 100:
+        requirement_value = item.get("value")
+        if field not in ALLOWED_FIELDS or operator not in ALLOWED_OPERATORS:
             raise ValueError("invalid requirement fields")
-        _append_requirement(result, field, operator, requirement_value)
+        if field in BOOLEAN_CAPABILITY_FIELDS:
+            if not isinstance(requirement_value, bool) or operator not in {"eq", "not_eq"}:
+                raise ValueError("invalid boolean requirement")
+        else:
+            requirement_value = str(requirement_value or "").strip()
+            if not requirement_value or len(requirement_value) > 100:
+                raise ValueError("invalid requirement value")
+        for normalized in _canonical_requirements(field, operator, requirement_value):
+            _append_requirement(result, normalized["field"], normalized["operator"], normalized["value"])
     return result
 
 
@@ -295,6 +350,7 @@ def _route(route: str, reason: str, resolved_query: str, scope: str, requirement
         "resolved_query": resolved_query.strip(),
         "retrieval_performed": False,
         "candidate_scope": scope,
+        "requirement_schema_version": REQUIREMENT_SCHEMA_VERSION,
         "requirements": requirements,
         "clarification_required": False,
         "clarification_question": "",
@@ -308,10 +364,23 @@ def _clarify(question: str, reason: str, requirements: list[dict[str, Any]] | No
     return result
 
 
-def _append_requirement(items: list[dict[str, Any]], field: str, operator: str, value: str) -> None:
+def _append_requirement(items: list[dict[str, Any]], field: str, operator: str, value: Any) -> None:
     item = {"field": field, "operator": operator, "value": value, "hard": True}
     if item not in items:
         items.append(item)
+
+
+def _canonical_requirements(field: str, operator: str, value: Any) -> list[dict[str, Any]]:
+    if field != "deployment":
+        return [{"field": field, "operator": operator, "value": value}]
+    target = str(value or "").strip().casefold()
+    if target == "local":
+        return [{"field": "hosting_mode", "operator": "not_eq" if operator == "not_eq" else "contains", "value": "self_hosted"}]
+    if target == "cloud":
+        return [{"field": "hosting_mode", "operator": "not_eq" if operator == "not_eq" else "contains", "value": "cloud_hosted"}]
+    if target == "offline":
+        return [{"field": "offline_capable", "operator": "eq", "value": operator != "not_eq"}]
+    raise ValueError("unsupported legacy deployment requirement")
 
 
 def _has_resumable_context(context: dict[str, Any]) -> bool:

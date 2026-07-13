@@ -62,7 +62,7 @@ class FollowUpRouterTest(unittest.TestCase):
         self.assertEqual(
             parse_requirements("不要云 API，但必须 Python")["requirements"],
             [
-                {"field": "deployment", "operator": "not_eq", "value": "cloud", "hard": True},
+                {"field": "external_api_required", "operator": "eq", "value": False, "hard": True},
                 {"field": "language", "operator": "eq", "value": "Python", "hard": True},
             ],
         )
@@ -87,11 +87,42 @@ class FollowUpRouterTest(unittest.TestCase):
         self.assertEqual(
             parsed["requirements"],
             [
-                {"field": "deployment", "operator": "eq", "value": "offline", "hard": True},
+                {"field": "network_required", "operator": "eq", "value": False, "hard": True},
                 {"field": "tech_stack", "operator": "eq", "value": "Docker", "hard": True},
             ],
         )
         self.assertFalse(parsed["ambiguous"])
+
+    def test_capability_v1_separates_hosting_offline_and_external_dependencies(self):
+        self.assertEqual(
+            parse_requirements("可以部署在云端，但不能依赖外部模型 API")["requirements"],
+            [
+                {"field": "hosting_mode", "operator": "contains", "value": "cloud_hosted", "hard": True},
+                {"field": "external_api_required", "operator": "eq", "value": False, "hard": True},
+            ],
+        )
+        self.assertEqual(
+            parse_requirements("本地部署，但会调用 OpenAI")["requirements"],
+            [
+                {"field": "hosting_mode", "operator": "contains", "value": "self_hosted", "hard": True},
+                {"field": "external_api_required", "operator": "eq", "value": True, "hard": True},
+            ],
+        )
+        result = route_follow_up(root=Path.cwd(), query="不要云 API", context=_context())
+        self.assertEqual(result["requirement_schema_version"], "capability-v1")
+
+    def test_kimi_legacy_deployment_is_canonicalized(self):
+        client = _Client(json.dumps({
+            "route": "refine",
+            "resolved_query": "找可本地部署的项目",
+            "clarification_question": "",
+            "requirements": [{"field": "deployment", "operator": "eq", "value": "local", "hard": True}],
+        }, ensure_ascii=False))
+        result = route_follow_up(root=Path.cwd(), query="还有吗", context=_context(), client=client)
+        self.assertEqual(
+            result["requirements"],
+            [{"field": "hosting_mode", "operator": "contains", "value": "self_hosted", "hard": True}],
+        )
 
     def test_conflict_disjunction_and_optional_constraint_clarify(self):
         for query in ("必须 Python 但不要 Python", "Python 或 Java", "不要求 Python"):

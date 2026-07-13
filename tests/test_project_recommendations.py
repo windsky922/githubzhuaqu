@@ -62,12 +62,24 @@ class ProjectRecommendationsTest(unittest.TestCase):
                     "unmet_requirements": [],
                     "unknown_requirements": ["部署方式=local"],
                     "evidence_chunk_ids": ["chunk:deployment"],
+                    "requirement_evaluations": [
+                        {
+                            "field": "hosting_mode",
+                            "operator": "contains",
+                            "value": "self_hosted",
+                            "status": "unknown",
+                            "reason": "未找到可验证该要求的可信证据。",
+                            "evidence_chunk_ids": ["chunk:deployment"],
+                        }
+                    ],
                 }
             },
         )
         self.assertEqual(result[0]["eligibility"], "unknown")
         self.assertEqual(result[0]["unknown_requirements"], ["部署方式=local"])
         self.assertEqual(result[0]["evidence_chunk_ids"], ["chunk:1", "chunk:deployment"])
+        self.assertEqual(result[0]["requirement_evaluations"][0]["field"], "hosting_mode")
+        self.assertEqual(result[0]["requirement_evaluations"][0]["status"], "unknown")
 
 
 def _context(full_name, chunk_id, score, *, language="Python", source_type="identity"):

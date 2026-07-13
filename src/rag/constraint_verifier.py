@@ -15,12 +15,32 @@ FIELD_LABELS = {
     "deployment": "部署方式",
     "cost": "成本",
     "tech_stack": "技术栈",
+    "hosting_mode": "托管方式",
+    "offline_capable": "离线能力",
+    "network_required": "运行时联网",
+    "external_api_required": "外部模型 API",
+    "api_key_required": "API Key",
 }
+CAPABILITY_FIELDS = {
+    "hosting_mode", "offline_capable", "network_required", "external_api_required", "api_key_required",
+}
+BOOLEAN_CAPABILITY_FIELDS = CAPABILITY_FIELDS - {"hosting_mode"}
+TEXT_REQUIREMENT_FIELDS = {"deployment", "cost", *CAPABILITY_FIELDS}
 
 DEPLOYMENT_MARKERS = {
     "local": ("本地部署", "私有化部署", "本地运行", "self-hosted", "self hosted", "local deployment", "on-premise", "on premises"),
     "offline": ("完全离线", "离线运行", "离线", "无需联网", "不依赖云 api", "不依赖云api", "air-gapped", "air gapped", "fully offline", "offline", "no internet required", "without internet", "does not require cloud api"),
     "cloud": ("云端服务", "托管服务", "云 api", "云api", "cloud service", "cloud api", "hosted service", "saas"),
+}
+HOSTING_MODE_MARKERS = {
+    "self_hosted": (
+        "本地部署", "私有化部署", "本地运行", "self-hosted", "self hosted", "local deployment",
+        "runs locally", "on-premise", "on premises",
+    ),
+    "cloud_hosted": (
+        "云端部署", "云端服务", "托管服务", "仅云端提供", "仅支持云端", "cloud deployment", "cloud hosted", "managed cloud",
+        "hosted service", "hosted in the cloud", "hosted in cloud", "saas",
+    ),
 }
 COST_MARKERS = {
     "free": ("免费使用", "完全免费", "永久免费", "免费社区版", "免费", "free to use", "completely free", "free forever", "free community edition", "no cost", "free"),
@@ -43,6 +63,24 @@ EXTERNAL_DEPENDENCY_PATTERNS = (
     "依赖云 api", "依赖云api", "需要云 api", "需要云api", "依赖托管推理", "使用托管推理", "需要联网", "必须联网", "依赖互联网", "仅云端",
     "requires cloud api", "depends on cloud api", "hosted inference", "requires internet", "internet connection required", "cloud only", "only available as a cloud service",
 )
+BOOLEAN_FACT_PATTERNS = {
+    "offline_capable": {
+        True: ("完全离线", "离线运行", "支持离线", "无需联网", "不依赖网络", "fully offline", "offline capable", "air-gapped", "air gapped", "no internet required", "without internet"),
+        False: ("不支持离线", "不能离线", "无法离线", "需要联网", "必须联网", "依赖互联网", "does not support offline", "doesn't support offline", "no offline support", "requires internet", "internet connection required", "hosted inference"),
+    },
+    "network_required": {
+        True: ("需要联网", "必须联网", "依赖互联网", "requires internet", "internet connection required", "network connection required"),
+        False: ("不能联网", "无需联网", "不需要联网", "不依赖网络", "no internet required", "no internet is required", "without internet", "does not require internet", "works offline", "air-gapped", "air gapped"),
+    },
+    "external_api_required": {
+        True: ("依赖云 api", "依赖云api", "需要云 api", "需要云api", "依赖外部模型 api", "依赖托管推理", "使用托管推理", "调用 openai", "连接 openai", "requires cloud api", "depends on cloud api", "requires external model api", "uses hosted inference", "hosted inference"),
+        False: ("不要云 api", "不要云api", "不需要云 api", "不需要云api", "无需云 api", "无需云api", "不依赖云 api", "不依赖云api", "不依赖外部模型 api", "不依赖托管推理", "does not require cloud api", "doesn't require cloud api", "no cloud api required", "works without a cloud api", "without requiring cloud api", "not dependent on cloud api", "without hosted inference"),
+    },
+    "api_key_required": {
+        True: ("需要 api key", "必须 api key", "api key required", "api key is required", "requires an api key", "requires api key"),
+        False: ("不要任何 api key", "不要 api key", "无需 api key", "不需要 api key", "no api key required", "no api key is required", "without an api key", "without api key"),
+    },
+}
 
 
 def verify_project_requirements(
@@ -67,7 +105,7 @@ def verify_project_requirements(
 def requirement_label(requirement: dict[str, Any]) -> str:
     field = str(requirement.get("field") or "")
     operator = str(requirement.get("operator") or "eq")
-    value = str(requirement.get("value") or "")
+    value = _display_value(requirement.get("value"))
     symbol = "≠" if operator == "not_eq" else "包含" if operator == "contains" else "="
     return f"{FIELD_LABELS.get(field, field)}{symbol}{value}"
 
@@ -103,15 +141,16 @@ def _verify_one(connection: Any, full_name: str, requirements: list[dict[str, An
     unmet: list[str] = []
     unknown: list[str] = []
     evidence_chunk_ids: list[str] = []
+    requirement_evaluations: list[dict[str, Any]] = []
     for requirement in requirements:
         label = requirement_label(requirement)
         field = str(requirement.get("field") or "")
         operator = str(requirement.get("operator") or "eq")
-        expected = str(requirement.get("value") or "")
-        if field in {"deployment", "cost"}:
+        expected = requirement.get("value")
+        if field in TEXT_REQUIREMENT_FIELDS:
             status, evidence = _verify_text_requirement(field, operator, expected, chunks)
         else:
-            status, evidence = _verify_metadata_requirement(field, operator, expected, metadata.get(field, []))
+            status, evidence = _verify_metadata_requirement(field, operator, str(expected or ""), metadata.get(field, []))
         if status == "matched":
             matched.append(label)
         elif status == "unmet":
@@ -121,11 +160,20 @@ def _verify_one(connection: Any, full_name: str, requirements: list[dict[str, An
         for chunk_id in evidence:
             if chunk_id not in evidence_chunk_ids:
                 evidence_chunk_ids.append(chunk_id)
+        requirement_evaluations.append({
+            "field": field,
+            "operator": operator,
+            "value": expected,
+            "status": status,
+            "reason": _evaluation_reason(status, bool(evidence)),
+            "evidence_chunk_ids": evidence,
+        })
     return {
         "matched_requirements": matched,
         "unmet_requirements": unmet,
         "unknown_requirements": unknown,
         "evidence_chunk_ids": evidence_chunk_ids,
+        "requirement_evaluations": requirement_evaluations,
     }
 
 
@@ -144,8 +192,8 @@ def _verify_metadata_requirement(field: str, operator: str, expected: str, value
     return ("matched" if matched else "unmet"), []
 
 
-def _verify_text_requirement(field: str, operator: str, expected: str, chunks: list[Any]) -> tuple[str, list[str]]:
-    target = _normalize_value(field, expected)
+def _verify_text_requirement(field: str, operator: str, expected: Any, chunks: list[Any]) -> tuple[str, list[str]]:
+    target = expected if field in BOOLEAN_CAPABILITY_FIELDS else _normalize_value(field, expected)
     states: dict[str, list[str]] = {
         "supports": [],
         "contradicts": [],
@@ -183,18 +231,36 @@ def _verify_text_requirement(field: str, operator: str, expected: str, chunks: l
     return "unknown", []
 
 
-def classify_text_evidence(field: str, expected: str, sentence: str) -> str:
+def classify_text_evidence(field: str, expected: Any, sentence: str) -> str:
     """Classify one deterministic sentence without using model-enriched evidence."""
     text = " ".join(str(sentence or "").casefold().split())
+    if field == "deployment":
+        return _classify_legacy_deployment(expected, text)
+    if field == "hosting_mode":
+        target = _normalize_value(field, expected)
+        target_markers = HOSTING_MODE_MARKERS.get(target, ())
+        target_present = _has_markers(text, target_markers)
+        if target_present and _target_is_negated(text, target_markers):
+            return "contradicts"
+        if target_present and any(marker in text for marker in CONDITIONAL_PATTERNS):
+            return "conditional"
+        return "supports" if target_present else "unknown"
+    if field in BOOLEAN_CAPABILITY_FIELDS:
+        expected_bool = _bool_value(expected)
+        fact = _boolean_fact(field, text)
+        if fact is None:
+            return "unknown"
+        if any(marker in text for marker in CONDITIONAL_PATTERNS):
+            return "conditional"
+        return "supports" if fact == expected_bool else "contradicts"
+
     target = _normalize_value(field, expected)
-    markers = DEPLOYMENT_MARKERS if field == "deployment" else COST_MARKERS
+    markers = COST_MARKERS
     target_markers = markers.get(target, ())
     target_present = any(_contains_marker(text, marker.casefold()) for marker in target_markers)
 
     if field == "cost" and target == "free" and any(marker in text for marker in TRIAL_ONLY_PATTERNS):
         return "trial_only"
-    if field == "deployment" and target in {"local", "offline"} and _has_external_dependency(text):
-        return "external_dependency"
     if target_present and _target_is_negated(text, target_markers):
         return "contradicts"
     if target_present and any(marker in text for marker in CONDITIONAL_PATTERNS):
@@ -202,11 +268,6 @@ def classify_text_evidence(field: str, expected: str, sentence: str) -> str:
     if target_present:
         return "supports"
 
-    if field == "deployment":
-        if target == "offline" and _has_markers(text, DEPLOYMENT_MARKERS["cloud"]):
-            return "external_dependency"
-        if target == "cloud" and _has_markers(text, DEPLOYMENT_MARKERS["offline"]):
-            return "contradicts"
     if field == "cost":
         if target == "free" and _has_markers(text, COST_MARKERS["paid"]):
             return "contradicts"
@@ -267,10 +328,64 @@ def _contains_marker(text: str, marker: str) -> bool:
 
 
 def _normalize_value(field: str, value: Any) -> str:
-    text = str(value or "").strip().casefold()
+    text = ("true" if value is True else "false" if value is False else str(value or "")).strip().casefold()
     if field == "license":
         text = text.removesuffix(" license").replace("apache 2.0", "apache-2.0")
     return text
+
+
+def _classify_legacy_deployment(expected: Any, text: str) -> str:
+    target = _normalize_value("deployment", expected)
+    if target == "local":
+        if _boolean_fact("external_api_required", text) is True:
+            return "external_dependency"
+        if classify_text_evidence("hosting_mode", "cloud_hosted", text) == "supports":
+            return "external_dependency"
+        return classify_text_evidence("hosting_mode", "self_hosted", text)
+    if target == "cloud":
+        if _boolean_fact("offline_capable", text) is True:
+            return "contradicts"
+        return classify_text_evidence("hosting_mode", "cloud_hosted", text)
+    if target == "offline":
+        if any(marker in text for marker in CONDITIONAL_PATTERNS) and ("offline" in text or "离线" in text):
+            return "conditional"
+        if _boolean_fact("external_api_required", text) is True or _boolean_fact("network_required", text) is True:
+            return "external_dependency"
+        return classify_text_evidence("offline_capable", True, text)
+    return "unknown"
+
+
+def _boolean_fact(field: str, text: str) -> bool | None:
+    patterns = BOOLEAN_FACT_PATTERNS.get(field, {})
+    for value in (False, True):
+        if _has_markers(text, patterns.get(value, ())):
+            return value
+    return None
+
+
+def _bool_value(value: Any) -> bool:
+    if isinstance(value, bool):
+        return value
+    normalized = str(value or "").strip().casefold()
+    if normalized in {"true", "1", "yes"}:
+        return True
+    if normalized in {"false", "0", "no"}:
+        return False
+    raise ValueError("boolean capability value must be true or false")
+
+
+def _display_value(value: Any) -> str:
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    return str(value or "")
+
+
+def _evaluation_reason(status: str, has_evidence: bool) -> str:
+    if status == "matched":
+        return "可信证据明确支持该要求。"
+    if status == "unmet":
+        return "可信证据与该要求冲突。"
+    return "可信证据不足或条件不完整，暂无法验证。" if has_evidence else "未找到可验证该要求的可信证据。"
 
 
 def _json_object(value: Any) -> dict[str, Any]:

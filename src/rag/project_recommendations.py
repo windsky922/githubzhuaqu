@@ -65,6 +65,9 @@ def build_project_recommendations(
     for candidate in grouped.values():
         matched, unmet, unknown = _evaluate_constraints(candidate, normalized_constraints)
         verified = (requirement_verification or {}).get(candidate["full_name"], {})
+        requirement_evaluations = [
+            dict(item) for item in verified.get("requirement_evaluations", []) if isinstance(item, dict)
+        ]
         matched.extend(item for item in _strings(verified.get("matched_requirements")) if item not in matched)
         unmet.extend(item for item in _strings(verified.get("unmet_requirements")) if item not in unmet)
         unknown.extend(item for item in _strings(verified.get("unknown_requirements")) if item not in unknown)
@@ -73,6 +76,17 @@ def build_project_recommendations(
                 item for item in (_requirement_label(requirement) for requirement in requirements)
                 if item not in unknown
             )
+            requirement_evaluations = [
+                {
+                    "field": str(requirement.get("field") or ""),
+                    "operator": str(requirement.get("operator") or "eq"),
+                    "value": requirement.get("value"),
+                    "status": "unknown",
+                    "reason": "未找到可验证该要求的可信证据。",
+                    "evidence_chunk_ids": [],
+                }
+                for requirement in requirements
+            ]
         eligibility = "rejected" if unmet else "unknown" if unknown else "eligible"
         if max_score > 0:
             match_score = round(candidate["best_score"] / max_score, 4)
@@ -101,6 +115,7 @@ def build_project_recommendations(
                 "reasons": reasons,
                 "citation_indexes": citation_indexes,
                 "evidence_chunk_ids": evidence_chunk_ids,
+                "requirement_evaluations": requirement_evaluations,
                 "eligibility": eligibility,
             }
         )
@@ -157,10 +172,15 @@ def _reasons(candidate: dict[str, Any], matched: list[str], unmet: list[str], un
 
 
 def _requirement_label(requirement: dict[str, Any]) -> str:
-    labels = {"license": "许可证", "deployment": "部署方式", "cost": "成本", "tech_stack": "技术栈", **CONSTRAINT_LABELS}
+    labels = {
+        "license": "许可证", "deployment": "部署方式", "cost": "成本", "tech_stack": "技术栈",
+        "hosting_mode": "托管方式", "offline_capable": "离线能力", "network_required": "运行时联网",
+        "external_api_required": "外部模型 API", "api_key_required": "API Key", **CONSTRAINT_LABELS,
+    }
     field = str(requirement.get("field") or "")
     operator = str(requirement.get("operator") or "eq")
-    value = str(requirement.get("value") or "")
+    raw_value = requirement.get("value")
+    value = "true" if raw_value is True else "false" if raw_value is False else str(raw_value or "")
     symbol = "≠" if operator == "not_eq" else "包含" if operator == "contains" else "="
     return f"{labels.get(field, field)}{symbol}{value}"
 

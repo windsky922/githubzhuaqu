@@ -134,7 +134,7 @@ async function handleAsk(request, response) {
   }
   await delay(80);
   sseEvent(response, "delta", { text: "正在根据固定证据生成草稿。" });
-  await delay(query.includes("长流式") ? 450 : 80);
+  await delay(query.includes("长流式") ? 1_200 : 80);
   sseEvent(response, "final", final);
   response.end();
 }

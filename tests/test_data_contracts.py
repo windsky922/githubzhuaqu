@@ -473,6 +473,22 @@ SQLITE_COLUMNS = {
 
 
 class DataContractsTest(unittest.TestCase):
+    def test_contextual_ask_capability_contract_is_documented(self):
+        contract = (Path(__file__).parents[1] / "docs" / "data-contracts.md").read_text(encoding="utf-8")
+        for expected in (
+            "POST /v1/rag/ask",
+            "POST /v1/rag/ask/stream",
+            "requirement_schema_version",
+            "capability-v1",
+            "hosting_mode",
+            "offline_capable",
+            "network_required",
+            "external_api_required",
+            "api_key_required",
+            "requirement_evaluations",
+        ):
+            self.assertIn(expected, contract)
+
     def test_public_json_contracts_are_stable(self):
         root = Path.cwd() / f".tmp-contract-test-{uuid.uuid4().hex}"
         try:

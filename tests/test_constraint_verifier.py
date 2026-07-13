@@ -51,7 +51,7 @@ class ConstraintVerifierTest(unittest.TestCase):
                     _requirement("language", "Python"),
                     _requirement("license", "MIT"),
                     _requirement("tech_stack", "Docker"),
-                    _requirement("deployment", "local"),
+                    _requirement("hosting_mode", "self_hosted", operator="contains"),
                     _requirement("cost", "free"),
                 ],
             )["eval/agent-orchestrator"]
@@ -60,7 +60,7 @@ class ConstraintVerifierTest(unittest.TestCase):
         self.assertIn("语言=Python", result["matched_requirements"])
         self.assertIn("许可证=MIT", result["matched_requirements"])
         self.assertIn("技术栈=Docker", result["matched_requirements"])
-        self.assertIn("部署方式=local", result["matched_requirements"])
+        self.assertIn("托管方式包含self_hosted", result["matched_requirements"])
         self.assertIn("成本=free", result["matched_requirements"])
         self.assertNotIn("model-only", result["evidence_chunk_ids"])
 
@@ -122,6 +122,35 @@ class ConstraintVerifierTest(unittest.TestCase):
         self.assertEqual(result["matched_requirements"], [])
         self.assertEqual(result["unmet_requirements"], ["部署方式=local", "部署方式=offline"])
 
+    def test_capability_evaluations_keep_hosting_independent_from_external_api(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            write_fixture(root)
+            repository = ApiRepository(root=root, db_path=root / "data" / "github_weekly.sqlite")
+            repository.ensure_sqlite_index()
+            connection = connect(repository.db_path)
+            try:
+                connection.execute(
+                    "UPDATE rag_chunks SET chunk_text=?, source_type='readme' WHERE full_name=?",
+                    ("支持 self-hosted UI，但推理依赖托管推理并且必须联网。", "eval/agent-orchestrator"),
+                )
+                connection.commit()
+            finally:
+                connection.close()
+            result = verify_project_requirements(
+                repository.db_path,
+                ["eval/agent-orchestrator"],
+                [
+                    _requirement("hosting_mode", "self_hosted", operator="contains"),
+                    _requirement("offline_capable", True),
+                    _requirement("external_api_required", False),
+                ],
+            )["eval/agent-orchestrator"]
+        self.assertIn("托管方式包含self_hosted", result["matched_requirements"])
+        self.assertIn("离线能力=true", result["unmet_requirements"])
+        self.assertIn("外部模型 API=false", result["unmet_requirements"])
+        self.assertEqual([item["status"] for item in result["requirement_evaluations"]], ["matched", "unmet", "unmet"])
+
 
 class TextEvidenceClassifierTest(unittest.TestCase):
     def test_distinguishes_support_conflict_and_uncertainty(self):
@@ -135,6 +164,12 @@ class TextEvidenceClassifierTest(unittest.TestCase):
             ("cost", "free", "Requires a paid plan.", "contradicts"),
             ("cost", "free", "社区版完全免费。", "supports"),
             ("cost", "free", "价格请咨询销售。", "unknown"),
+            ("external_api_required", False, "does not require cloud API", "supports"),
+            ("external_api_required", False, "works without a cloud API", "supports"),
+            ("external_api_required", False, "no cloud API required", "supports"),
+            ("hosting_mode", "cloud_hosted", "does not require cloud API", "unknown"),
+            ("hosting_mode", "self_hosted", "本地部署但必须连接 OpenAI", "supports"),
+            ("external_api_required", True, "本地部署但必须连接 OpenAI", "supports"),
         ]
         for field, value, sentence, expected in cases:
             with self.subTest(sentence=sentence):

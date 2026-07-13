@@ -181,6 +181,8 @@ GET /v1/rag/retrieve
 GET /v1/rag/vector-search
 GET /v1/rag/explain
 GET /v1/rag/ask
+POST /v1/rag/ask
+POST /v1/rag/ask/stream
 GET /v1/rag/diagnostics
 GET /v1/feedback
 POST /v1/feedback
@@ -190,6 +192,24 @@ GET /v1/dev-context/search
 POST /v1/dev-context/ask
 GET /v1/dev-context/runs/{id}
 ```
+
+### 无状态项目匹配请求
+
+`POST /v1/rag/ask` 与 `POST /v1/rag/ask/stream` 接收当前用户输入、筛选参数和浏览器提供的最小上下文。服务端不保存聊天会话，也不把历史 assistant 回答、引用或证据作为请求上下文。流式接口只在既有 `final` 事件中返回完整结果，事件名和顺序保持兼容。
+
+`input_route.requirement_schema_version` 当前固定为 `capability-v1`。`requirements[]` 的稳定字段为 `field`、`operator`、`value` 和 `hard`，其中 `value` 为 `string | boolean`。项目能力使用相互独立的字段表达：
+
+```text
+hosting_mode: self_hosted | cloud_hosted
+offline_capable: boolean
+network_required: boolean
+external_api_required: boolean
+api_key_required: boolean
+```
+
+语言、分类、来源、许可证、成本和技术栈继续使用 `language/category/source/license/cost/tech_stack`。旧 `deployment` 只作为后端兼容输入，进入验证器前转换为上述能力字段；新规则路由和 Kimi 路由不得生成 `deployment`。
+
+每个 recommendation 除已有排序、满足/不满足/未知要求和证据字段外，还返回 `requirement_evaluations[]`。每项包含原条件的 `field/operator/value`、`status: matched | unmet | unknown`、可审计 `reason` 和 `evidence_chunk_ids[]`。能力事实只从可信元数据及非 `model_enrichment` 清洗 chunk 确定性计算；模型增强不能把 unknown 或 rejected 改成 eligible。本阶段不新增 SQLite 表或第二套能力缓存。
 
 `/api/projects` 复用历史归档查询能力，支持按语言、方向、profile、来源、风险提示、质量分、Trending 排名和关键词筛选。返回结构保持为：
 
