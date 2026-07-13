@@ -169,7 +169,7 @@ docs/weekly/YYYY-MM-DD.md
 
 `admin.html` 是本地管理首页。本地后端或 URL 带 `api=1` 时会展示数据库概览、语料搜索、RAG 证据检索、本地向量检索、GPT 式证据约束 RAG 对话、RAG 质量概览、RAG 检索评估趋势、RAG 解释回填、planned 任务创建和任务工作台；静态 GitHub Pages 模式下只展示可读归档入口。
 
-本地管理页涉及写入、任务创建、执行、重试、订阅修改或反馈写入时，需要后端配置 `ADMIN_API_TOKEN`。`admin.html`、`subscriptions.html`、`jobs.html` 和 `job.html` 只接受页面密码框输入，口令仅保留在当前页面内存并通过 `X-Admin-Token` 发送；刷新或离开页面后需要重新输入。`?admin_token=` 已停用，旧浏览器存储会被删除。若此前曾把真实口令放入 URL 或浏览器存储，应轮换该口令。
+本地管理页涉及写入、任务创建、执行、重试、订阅修改或反馈写入时，需要后端配置 `ADMIN_API_TOKEN`。`admin.html`、`subscriptions.html`、`jobs.html` 和 `job.html` 只接受页面密码框输入，口令仅保留在当前页面内存并通过 `X-Admin-Token` 发送；刷新或离开页面后需要重新输入。`?admin_token=` 已停用，旧浏览器存储会被删除。删除地址栏参数无法撤销已产生的浏览器历史、服务器、代理或 CDN 访问日志；若此前曾把真实口令放入 URL 或浏览器存储，应立即轮换该口令。
 
 `subscriptions.html` 是订阅配置页，支持在本地后端模式下保存、查看、启用和停用订阅偏好。页面会读取 `profiles.json` 生成 Java、Python、Agent 开发等快捷方向按钮，点击后自动填充订阅名称、profile、语言和关键词。订阅列表支持把已启用订阅生成 planned 周报任务，生成后仍需要在任务详情页确认执行。订阅只保存 profile、语言、方向、关键词、排序、数量和通道名称，不保存 Token、Chat ID 或 Webhook。
 

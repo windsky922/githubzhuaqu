@@ -60,7 +60,7 @@ Authorization: Bearer <本地管理口令>
 
 如果未配置 `ADMIN_API_TOKEN`，管理写接口返回 `403`；如果配置后请求未带正确口令，返回 `401`。受保护接口包括 `/v1/runs/trigger`、`/v1/jobs/{job_id}/execute`、`/v1/jobs/{job_id}/retry`、`/v1/rag/*` 写入/计划接口、`/v1/subscriptions` 写入接口、事件检测、候选构建、候选投递、`POST /v1/feedback` 和项目 Agent 任务写接口。
 
-`admin.html`、`subscriptions.html`、`jobs.html` 和 `job.html` 只从当前页面的密码框读取口令，并仅在写请求中发送 `X-Admin-Token`。口令不进入 URL、localStorage、sessionStorage、日志或 SQLite，刷新或离开页面后需要重新输入。旧 `admin_token` URL 参数会被忽略并从地址栏删除，旧 `github_weekly_admin_token` 浏览器存储只会删除、不会迁移。若真实口令曾通过旧方式使用，应立即轮换。
+`admin.html`、`subscriptions.html`、`jobs.html` 和 `job.html` 只从当前页面的密码框读取口令，并仅在写请求中发送 `X-Admin-Token`。新请求中的口令不进入 URL、localStorage、sessionStorage、应用日志或 SQLite，刷新或离开页面后需要重新输入。旧 `admin_token` URL 参数会被忽略并从地址栏删除，旧 `github_weekly_admin_token` 浏览器存储只会删除、不会迁移；这不能撤销旧 URL 已产生的浏览器历史、服务器、代理或 CDN 访问日志。若真实口令曾通过旧方式使用，应立即轮换。
 
 根路径 `http://127.0.0.1:8000/` 会跳转到管理首页。`/v1/*` 路径是 JSON API，例如 `/v1/jobs?limit=50` 返回机器可读任务数据，不是 HTML 页面。
 

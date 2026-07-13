@@ -128,6 +128,8 @@ class BuildPagesTest(unittest.TestCase):
             self.assertIn('localStorage 或 sessionStorage', admin_auth)
             self.assertNotIn('localStorage.getItem("github_weekly_admin_token")', admin_auth)
             self.assertNotIn('localStorage.setItem("github_weekly_admin_token")', admin_auth)
+            self.assertIn("可能已进入访问日志", admin_auth)
+            self.assertIn("立即轮换 ADMIN_API_TOKEN", admin_auth)
             self.assertIn('const page = "project"', project_html)
             self.assertIn('route = "/projects/"', project_html)
             weekly_html = (root / "docs" / "weekly" / "2026-04-28.html").read_text(encoding="utf-8")

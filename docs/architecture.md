@@ -8,7 +8,7 @@
 
 ## 管理写接口凭证边界
 
-FastAPI 管理写接口继续接受 `X-Admin-Token` 或 `Authorization: Bearer`，只读接口不需要鉴权。浏览器管理页通过共享 `admin-auth.js` 从当前页面密码框生成 `X-Admin-Token`，口令不写入 URL、localStorage、sessionStorage、日志或 SQLite；刷新、关闭或跨页导航都会丢失。页面在加载最早阶段忽略并清理旧 `admin_token` 参数、删除旧浏览器存储，并使用 `Referrer-Policy: no-referrer` 阻止旧 URL 继续向资源请求传播。安全检查会阻止生产页面重新引入 URL 或浏览器持久化口令。
+FastAPI 管理写接口继续接受 `X-Admin-Token` 或 `Authorization: Bearer`，只读接口不需要鉴权。浏览器管理页通过共享 `admin-auth.js` 从当前页面密码框生成 `X-Admin-Token`，新请求中的口令不写入 URL、localStorage、sessionStorage、应用日志或 SQLite；刷新、关闭或跨页导航都会丢失。页面在加载最早阶段忽略并清理旧 `admin_token` 参数、删除旧浏览器存储，并使用 `Referrer-Policy: no-referrer` 阻止旧 URL 继续向资源请求传播。清理只能阻止未来传播，不能撤销旧 URL 已进入的浏览器历史或服务器、代理、CDN 日志；页面会明确要求轮换旧口令。安全检查会阻止生产页面重新引入 URL 或浏览器持久化口令。
 
 ## React 项目匹配工作台
 

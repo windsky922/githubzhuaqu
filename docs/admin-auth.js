@@ -71,7 +71,7 @@
       target.querySelector("[data-admin-auth-clear]")?.addEventListener("click", () => clear());
     });
     if (window.__githubWeeklyLegacyAdminTokenIgnored) {
-      setStatus("旧链接中的管理口令已忽略并从地址栏删除，请在本页重新输入。", true);
+      setStatus("旧链接中的管理口令已忽略并从地址栏删除；该口令可能已进入访问日志，请立即轮换 ADMIN_API_TOKEN 后重新输入。", true);
     }
   }
 

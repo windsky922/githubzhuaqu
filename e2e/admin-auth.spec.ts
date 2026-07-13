@@ -22,6 +22,8 @@ test("管理口令只保留在当前页面内存并通过请求头发送", async
   await expect(input).toHaveAttribute("type", "password");
   await expect(input).toHaveValue("");
   await expect(page.locator("[data-admin-auth-status]")).toContainText("旧链接中的管理口令已忽略");
+  await expect(page.locator("[data-admin-auth-status]")).toContainText("可能已进入访问日志");
+  await expect(page.locator("[data-admin-auth-status]")).toContainText("立即轮换 ADMIN_API_TOKEN");
   await expect.poll(() => page.evaluate(key => ({
     local: window.localStorage.getItem(key),
     session: window.sessionStorage.getItem(key),
