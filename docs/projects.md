@@ -4,6 +4,16 @@
 
 | 日期 | 项目 | 来源 | Trending 排名 | 方向 | 语言 | Star | 新增 Star | 风险提示 | 链接 |
 |---|---|---|---:|---|---|---:|---:|---:|---|
+| 2026-07-13 | wonderwhy-er/DesktopCommanderMCP | GitHub Trending | 2 | AI Agent | TypeScript | 8010 | 0 | 0 | [https://github.com/wonderwhy-er/DesktopCommanderMCP](https://github.com/wonderwhy-er/DesktopCommanderMCP) |
+| 2026-07-13 | openai/codex-plugin-cc | GitHub Trending | 3 | LLM Tooling | JavaScript | 28086 | 2530 | 0 | [https://github.com/openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc) |
+| 2026-07-13 | TencentCloud/CubeSandbox | GitHub Trending | 4 | AI Agent | Rust | 9817 | 0 | 0 | [https://github.com/TencentCloud/CubeSandbox](https://github.com/TencentCloud/CubeSandbox) |
+| 2026-07-13 | abseil/abseil-cpp | GitHub Trending | 5 | Other | C++ | 17946 | 0 | 0 | [https://github.com/abseil/abseil-cpp](https://github.com/abseil/abseil-cpp) |
+| 2026-07-13 | ogulcancelik/herdr | GitHub Trending | 6 | AI Agent | Rust | 15812 | 3674 | 0 | [https://github.com/ogulcancelik/herdr](https://github.com/ogulcancelik/herdr) |
+| 2026-07-13 | asgeirtj/system_prompts_leaks | GitHub Search + GitHub Trending | 7 | AI Agent | JavaScript | 56763 | 12223 | 0 | [https://github.com/asgeirtj/system_prompts_leaks](https://github.com/asgeirtj/system_prompts_leaks) |
+| 2026-07-13 | diegosouzapw/OmniRoute | GitHub Trending | 8 | AI Agent | TypeScript | 16253 | 4323 | 0 | [https://github.com/diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute) |
+| 2026-07-13 | stablyai/orca | GitHub Trending | 9 | AI Agent | TypeScript | 17084 | 4663 | 0 | [https://github.com/stablyai/orca](https://github.com/stablyai/orca) |
+| 2026-07-13 | iOfficeAI/OfficeCLI | GitHub Trending | 12 | AI Agent | C# | 15470 | 0 | 0 | [https://github.com/iOfficeAI/OfficeCLI](https://github.com/iOfficeAI/OfficeCLI) |
+| 2026-07-13 | usestrix/strix | GitHub Trending | 13 | AI Agent | Python | 40877 | 3660 | 0 | [https://github.com/usestrix/strix](https://github.com/usestrix/strix) |
 | 2026-07-06 | usestrix/strix | GitHub Trending | 1 | AI Agent | Python | 37217 | 0 | 0 | [https://github.com/usestrix/strix](https://github.com/usestrix/strix) |
 | 2026-07-06 | xbtlin/ai-berkshire | GitHub Trending | 2 | AI Agent | Python | 10372 | 0 | 0 | [https://github.com/xbtlin/ai-berkshire](https://github.com/xbtlin/ai-berkshire) |
 | 2026-07-06 | diegosouzapw/OmniRoute | GitHub Trending | 3 | AI Agent | TypeScript | 11930 | 0 | 0 | [https://github.com/diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute) |

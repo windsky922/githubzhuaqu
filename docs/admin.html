@@ -3,6 +3,20 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <script>
+    (() => {
+      const url = new URL(window.location.href);
+      if (url.searchParams.has("admin_token")) {
+        url.searchParams.delete("admin_token");
+        window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+        window.__githubWeeklyLegacyAdminTokenIgnored = true;
+      }
+      try { window.localStorage.removeItem("github_weekly_admin_token"); } catch (error) {}
+      try { window.sessionStorage.removeItem("github_weekly_admin_token"); } catch (error) {}
+    })();
+  </script>
+  <script src="admin-auth.js"></script>
   <title>GitHub 周报本地管理首页</title>
   <style>
     :root {
@@ -152,6 +166,109 @@
       gap: 8px;
       margin-top: 12px;
       align-items: end;
+    }
+    .rag-chat-shell {
+      margin-top: 12px;
+      border: 1px solid var(--line);
+      background: #f8fafc;
+      display: grid;
+      grid-template-rows: minmax(280px, 520px) auto;
+      min-height: 480px;
+    }
+    .rag-chat-messages {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: 16px;
+      overflow-y: auto;
+    }
+    .rag-chat-empty {
+      margin: auto;
+      max-width: 520px;
+      text-align: center;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+    .rag-chat-turn {
+      display: grid;
+      gap: 10px;
+    }
+    .rag-chat-bubble {
+      max-width: min(760px, 92%);
+      border: 1px solid var(--line);
+      background: var(--panel);
+      padding: 12px;
+      line-height: 1.55;
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
+    }
+    .rag-chat-bubble.user {
+      justify-self: end;
+      background: #eff6ff;
+      border-color: #bfdbfe;
+    }
+    .rag-chat-bubble.assistant {
+      justify-self: start;
+    }
+    .rag-chat-bubble.error {
+      border-color: #fecaca;
+      background: #fff1f2;
+    }
+    .rag-chat-meta,
+    .rag-chat-chip-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .rag-chat-chip {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 2px 8px;
+      background: #fff;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .rag-chat-evidence {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .rag-chat-evidence details {
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 8px;
+    }
+    .rag-chat-evidence summary {
+      cursor: pointer;
+      font-weight: 700;
+    }
+    .rag-chat-composer {
+      border-top: 1px solid var(--line);
+      background: var(--panel);
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+    }
+    .rag-chat-composer textarea {
+      min-height: 78px;
+    }
+    .rag-chat-controls {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+      align-items: end;
+    }
+    .rag-chat-actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
     }
     .workflow-grid {
       display: grid;
@@ -394,6 +511,7 @@
     </div>
   </header>
   <main class="wrap">
+    <div data-admin-auth-mount></div>
     <section class="panel">
       <h2>后端连接</h2>
       <p id="apiMode">检测中</p>
@@ -449,6 +567,43 @@
         <button id="runRagSearch" type="button">检索</button>
       </div>
       <div id="ragSearchResults" class="search-results"></div>
+      <h3>RAG 对话</h3>
+      <div class="rag-chat-shell">
+        <div id="ragChatMessages" class="rag-chat-messages"></div>
+        <div class="rag-chat-composer">
+          <label>问题
+            <textarea id="ragChatQuery" placeholder="哪些 Agent workflow 项目值得继续跟踪？"></textarea>
+          </label>
+          <div class="rag-chat-controls">
+            <label>检索方式
+              <select id="ragChatMode">
+                <option value="hybrid">hybrid</option>
+                <option value="fts5">fts5</option>
+                <option value="vector">vector</option>
+              </select>
+            </label>
+            <label>数量
+              <input id="ragChatLimit" type="number" min="1" max="30" value="5">
+            </label>
+            <label>语言
+              <input id="ragChatLanguage" type="text" placeholder="Python">
+            </label>
+            <label>方向
+              <input id="ragChatCategory" type="text" placeholder="AI Agent">
+            </label>
+            <label>来源
+              <input id="ragChatSource" type="text" placeholder="github_trending">
+            </label>
+          </div>
+          <div class="rag-chat-actions">
+            <p id="ragChatStatus" class="task-status"></p>
+            <div class="links">
+              <button id="clearRagChat" class="secondary-button" type="button">清空对话</button>
+              <button id="sendRagChat" type="button">发送</button>
+            </div>
+          </div>
+        </div>
+      </div>
       <h3>开发上下文 RAG</h3>
       <div class="search-form">
         <label>开发上下文问题
@@ -603,6 +758,8 @@
     const databaseTrends = document.getElementById("databaseTrends");
     const corpusSearchResults = document.getElementById("corpusSearchResults");
     const ragSearchResults = document.getElementById("ragSearchResults");
+    const ragChatMessages = document.getElementById("ragChatMessages");
+    const ragChatStatus = document.getElementById("ragChatStatus");
     const devContextResults = document.getElementById("devContextResults");
     const devContextJobs = document.getElementById("devContextJobs");
     const ragQualitySummary = document.getElementById("ragQualitySummary");
@@ -631,6 +788,17 @@
       language: document.getElementById("ragLanguage"),
       button: document.getElementById("runRagSearch"),
     };
+    const ragChatControls = {
+      query: document.getElementById("ragChatQuery"),
+      mode: document.getElementById("ragChatMode"),
+      limit: document.getElementById("ragChatLimit"),
+      language: document.getElementById("ragChatLanguage"),
+      category: document.getElementById("ragChatCategory"),
+      source: document.getElementById("ragChatSource"),
+      sendButton: document.getElementById("sendRagChat"),
+      clearButton: document.getElementById("clearRagChat"),
+    };
+    const ragChatState = { messages: loadRagChatHistory() };
     const devContextControls = {
       query: document.getElementById("devContextQuery"),
       source: document.getElementById("devContextSource"),
@@ -658,6 +826,7 @@
     setupCreateTask();
       setupCorpusSearch();
       setupRagSearch();
+      setupRagChat();
       setupDevContext();
       setupRagBackfill();
     setupRagMaintenance();
@@ -707,6 +876,24 @@
       ragControls.button.addEventListener("click", runRagSearch);
       ragControls.query.addEventListener("keydown", event => {
         if (event.key === "Enter") runRagSearch();
+      });
+    }
+
+    function setupRagChat() {
+      renderRagChat();
+      if (!shouldUseApi()) {
+        ragChatControls.sendButton.disabled = true;
+        ragChatStatus.textContent = "RAG 对话需要本地后端或 api=1 模式。";
+        return;
+      }
+      ragChatStatus.textContent = "每轮独立调用 /v1/rag/ask；历史只保存在当前浏览器。";
+      ragChatControls.sendButton.addEventListener("click", sendRagChatMessage);
+      ragChatControls.clearButton.addEventListener("click", clearRagChatHistory);
+      ragChatControls.query.addEventListener("keydown", event => {
+        if (event.key === "Enter" && !event.shiftKey) {
+          event.preventDefault();
+          sendRagChatMessage();
+        }
       });
     }
 
@@ -799,6 +986,65 @@
         })
         .finally(() => {
           ragControls.button.disabled = false;
+        });
+    }
+
+    function sendRagChatMessage() {
+      const question = ragChatControls.query.value.trim();
+      if (!question) {
+        ragChatStatus.textContent = "请输入 RAG 对话问题。";
+        return;
+      }
+      const params = new URLSearchParams();
+      const mode = ragChatControls.mode.value || "hybrid";
+      const limit = Math.max(1, Math.min(Number(ragChatControls.limit.value || 5), 30));
+      params.set("q", question);
+      params.set("mode", mode);
+      params.set("limit", String(limit));
+      if (mode === "vector" || mode === "hybrid") params.set("auto_build", "true");
+      if (ragChatControls.language.value.trim()) params.set("language", ragChatControls.language.value.trim());
+      if (ragChatControls.category.value.trim()) params.set("category", ragChatControls.category.value.trim());
+      if (ragChatControls.source.value.trim()) params.set("source", ragChatControls.source.value.trim());
+      ragChatControls.sendButton.disabled = true;
+      ragChatStatus.textContent = "正在生成证据约束回答...";
+      fetch(`/v1/rag/ask?${params.toString()}`, { cache: "no-store" })
+        .then(jsonOrThrow)
+        .then(data => {
+          const message = {
+            id: `rag-chat-${Date.now()}`,
+            asked_at: new Date().toISOString(),
+            question,
+            mode,
+            limit,
+            language: ragChatControls.language.value.trim(),
+            category: ragChatControls.category.value.trim(),
+            source: ragChatControls.source.value.trim(),
+            response: ragChatResponseSnapshot(data),
+          };
+          ragChatState.messages.push(message);
+          ragChatState.messages = ragChatState.messages.slice(-20);
+          saveRagChatHistory(ragChatState.messages);
+          renderRagChat();
+          ragChatControls.query.value = "";
+          ragChatStatus.textContent = "已生成回答。";
+        })
+        .catch(error => {
+          const message = {
+            id: `rag-chat-${Date.now()}`,
+            asked_at: new Date().toISOString(),
+            question,
+            mode,
+            limit,
+            error: String(error.message || error),
+          };
+          ragChatState.messages.push(message);
+          ragChatState.messages = ragChatState.messages.slice(-20);
+          saveRagChatHistory(ragChatState.messages);
+          renderRagChat();
+          ragChatStatus.textContent = "RAG 对话失败。";
+        })
+        .finally(() => {
+          ragChatControls.sendButton.disabled = false;
         });
     }
 
@@ -1657,10 +1903,25 @@
       const citations = data.citations || [];
       const promptContext = data.prompt_context || "";
       const retrieval = data.retrieval || {};
+      const modelStatus = data.model_status || {};
+      const modelText = [
+        data.answer_model || "-",
+        data.answer_mode || "-",
+        `证据覆盖 ${data.evidence_coverage || data.confidence || "-"}`,
+        "匹配把握 尚未校准",
+        modelStatus.configured ? "模型已配置" : "模型未配置",
+        modelStatus.used ? "已使用模型" : "未使用模型"
+      ].join(" · ");
+      const fallbackText = data.fallback_reason ? `<p>降级原因：${escapeHtml(data.fallback_reason)}</p>` : "";
+      const answerQuality = data.answer_quality || {};
+      const qualityIssues = (answerQuality.issues || []).join("；");
+      const qualityText = `${qualityIssues ? `<p>质量闸门：${escapeHtml(qualityIssues)}</p>` : ""}<p>质量边界：当前只校验引用有效性，不能证明项目相关性或结论正确。</p>`;
       const answerHtml = data.answer ? `<article class="search-row">
         <strong>RAG 回答</strong>
         <p>${escapeHtml(data.answer)}</p>
-        <span>${escapeHtml(data.answer_model || "-")} · ${escapeHtml(data.confidence || "-")} · ${escapeHtml(data.source_explanation_id || "-")}</span>
+        ${fallbackText}
+        ${qualityText}
+        <span>${escapeHtml(modelText)} · ${escapeHtml(data.source_explanation_id || "-")}</span>
       </article>` : "";
       const nextActions = (data.next_actions || []).map(item => `<li>${escapeHtml(item)}</li>`).join("");
       const nextActionsHtml = nextActions ? `<article class="search-row"><strong>下一步动作</strong><ul>${nextActions}</ul></article>` : "";
@@ -1676,6 +1937,140 @@
         </article>`;
       }).join("");
       return `${answerHtml}${summary}${nextActionsHtml}${contextHtml}<label>Prompt Context<textarea readonly>${escapeHtml(promptContext)}</textarea></label>`;
+    }
+
+    function renderRagChat() {
+      if (!ragChatState.messages.length) {
+        ragChatMessages.innerHTML = '<div class="rag-chat-empty"><strong>证据约束 RAG 对话</strong><p>每轮都会独立检索证据，不把历史回答当事实来源。输入问题后可查看模型回答、引用证据、降级原因和质量闸门结果。</p></div>';
+        return;
+      }
+      ragChatMessages.innerHTML = ragChatState.messages.map(ragChatMessageHtml).join("");
+      ragChatMessages.scrollTop = ragChatMessages.scrollHeight;
+    }
+
+    function ragChatMessageHtml(message) {
+      const response = message.response || {};
+      const quality = response.answer_quality || {};
+      const qualityIssues = (quality.issues || []).join("；") || "无";
+      const filters = [
+        message.mode ? `mode=${message.mode}` : "",
+        message.limit ? `limit=${message.limit}` : "",
+        message.language ? `language=${message.language}` : "",
+        message.category ? `category=${message.category}` : "",
+        message.source ? `source=${message.source}` : "",
+      ].filter(Boolean).join(" · ");
+      if (message.error) {
+        return `<article class="rag-chat-turn">
+          <div class="rag-chat-bubble user">${escapeHtml(message.question || "")}</div>
+          <div class="rag-chat-bubble assistant error">
+            <div class="rag-chat-meta"><span>${escapeHtml(message.asked_at || "")}</span><span>${escapeHtml(filters || "-")}</span></div>
+            <p>请求失败：${escapeHtml(message.error)}</p>
+          </div>
+        </article>`;
+      }
+      const fallback = response.fallback_reason ? `<p>降级原因：${escapeHtml(response.fallback_reason)}</p>` : "";
+      const promptContext = response.prompt_context
+        ? `<details><summary>查看 prompt_context</summary><textarea readonly>${escapeHtml(response.prompt_context)}</textarea></details>`
+        : "";
+      return `<article class="rag-chat-turn">
+        <div class="rag-chat-bubble user">${escapeHtml(message.question || "")}</div>
+        <div class="rag-chat-bubble assistant">
+          <div class="rag-chat-meta"><span>${escapeHtml(message.asked_at || "")}</span><span>${escapeHtml(filters || "-")}</span></div>
+          <div class="rag-chat-chip-row">
+            <span class="rag-chat-chip">${escapeHtml(response.answer_model || "-")}</span>
+            <span class="rag-chat-chip">${escapeHtml(response.answer_mode || "-")}</span>
+            <span class="rag-chat-chip">证据覆盖 ${escapeHtml(response.evidence_coverage || response.confidence || "-")}</span>
+            <span class="rag-chat-chip">匹配把握 尚未校准</span>
+            <span class="rag-chat-chip">quality ${escapeHtml(String(Boolean(quality.passed)))}</span>
+          </div>
+          <p>${escapeHtml(response.answer || "")}</p>
+          ${fallback}
+          <p>质量闸门：${escapeHtml(qualityIssues)}</p>
+          <p>质量边界：当前只校验引用有效性，不能证明项目相关性或结论正确。</p>
+          <div class="rag-chat-evidence">
+            ${ragChatCitationsHtml(response.citations || [])}
+            ${ragChatEvidenceHtml(response.evidence || [])}
+            ${promptContext}
+          </div>
+        </div>
+      </article>`;
+    }
+
+    function ragChatCitationsHtml(citations) {
+      const items = (citations || []).slice(0, 5);
+      if (!items.length) return "<p>暂无引用。</p>";
+      return `<details open><summary>引用证据</summary><ul>${items.map(item => {
+        const label = `[${item.index || "-"}] ${item.full_name || "-"} / ${item.run_date || "-"} / ${item.chunk_id || "-"}`;
+        const link = item.html_url ? ` · <a href="${escapeAttribute(item.html_url)}" target="_blank" rel="noreferrer">GitHub</a>` : "";
+        return `<li>${escapeHtml(label)}${link}</li>`;
+      }).join("")}</ul></details>`;
+    }
+
+    function ragChatEvidenceHtml(evidence) {
+      const items = (evidence || []).slice(0, 5);
+      if (!items.length) return "<p>暂无证据摘要。</p>";
+      return `<details><summary>证据摘要</summary><ul>${items.map(item => {
+        const matched = (item.matched_evidence || []).join("；");
+        return `<li><span>${escapeHtml(item.full_name || "-")} / ${escapeHtml(item.chunk_id || "-")}</span><p>${escapeHtml(item.quote || "")}</p>${matched ? `<span>${escapeHtml(matched)}</span>` : ""}</li>`;
+      }).join("")}</ul></details>`;
+    }
+
+    function ragChatResponseSnapshot(data) {
+      const quality = data.answer_quality || {};
+      return {
+        answer: data.answer || "",
+        answer_model: data.answer_model || "",
+        answer_mode: data.answer_mode || "",
+        confidence: data.confidence || "",
+        evidence_coverage: data.evidence_coverage || data.confidence || "",
+        match_confidence: data.match_confidence || "unknown",
+        fallback_reason: data.fallback_reason || "",
+        answer_quality: {
+          passed: Boolean(quality.passed),
+          issues: Array.isArray(quality.issues) ? quality.issues.slice(0, 10) : [],
+          citation_validity: Boolean(quality.citation_validity),
+          evidence_relevance: quality.evidence_relevance || "not_evaluated",
+          claim_support: quality.claim_support || "not_evaluated",
+          data_freshness: quality.data_freshness || "unknown",
+        },
+        citations: (data.citations || []).slice(0, 5).map(item => ({
+          index: item.index || "",
+          full_name: item.full_name || "",
+          html_url: item.html_url || "",
+          run_date: item.run_date || "",
+          chunk_id: item.chunk_id || "",
+        })),
+        evidence: (data.evidence || []).slice(0, 5).map(item => ({
+          full_name: item.full_name || "",
+          run_date: item.run_date || "",
+          chunk_id: item.chunk_id || "",
+          quote: item.quote || "",
+          matched_evidence: Array.isArray(item.matched_evidence) ? item.matched_evidence.slice(0, 5) : [],
+        })),
+        prompt_context: data.prompt_context || "",
+        source_explanation_id: data.source_explanation_id || "",
+      };
+    }
+
+    function loadRagChatHistory() {
+      try {
+        const raw = window.localStorage.getItem("github_weekly_rag_chat_history");
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed.slice(0, 20) : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function saveRagChatHistory(messages) {
+      window.localStorage.setItem("github_weekly_rag_chat_history", JSON.stringify((messages || []).slice(0, 20)));
+    }
+
+    function clearRagChatHistory() {
+      ragChatState.messages = [];
+      window.localStorage.removeItem("github_weekly_rag_chat_history");
+      renderRagChat();
+      ragChatStatus.textContent = "已清空本地 RAG 对话历史。";
     }
 
     function devContextIndexHtml(data) {
@@ -1875,22 +2270,13 @@
     }
 
     function jsonOrThrow(response) {
+      window.GitHubWeeklyAdminAuth.handleResponse(response);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       return response.json();
     }
 
     function adminWriteHeaders() {
-      const token = adminToken();
-      const headers = { "Content-Type": "application/json" };
-      if (token) headers["X-Admin-Token"] = token;
-      return headers;
-    }
-
-    function adminToken() {
-      const params = new URLSearchParams(window.location.search);
-      const token = params.get("admin_token") || window.localStorage.getItem("github_weekly_admin_token") || "";
-      if (params.get("admin_token")) window.localStorage.setItem("github_weekly_admin_token", params.get("admin_token"));
-      return token.trim();
+      return window.GitHubWeeklyAdminAuth.writeHeaders();
     }
 
     function jobDetailUrl(jobId) {

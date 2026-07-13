@@ -1,7 +1,312 @@
 {
   "schema_version": 1,
-  "count": 170,
+  "count": 180,
   "projects": [
+    {
+      "run_date": "2026-07-13",
+      "full_name": "wonderwhy-er/DesktopCommanderMCP",
+      "html_url": "https://github.com/wonderwhy-er/DesktopCommanderMCP",
+      "description": "This is MCP server for Claude that gives it terminal control, file system search and diff file editing capabilities",
+      "readme_summary": "Work with code and text, run processes, and automate tasks, going far beyond other AI editors - while using host client subscriptions instead of API token costs.",
+      "category": "AI Agent",
+      "language": "TypeScript",
+      "stargazers_count": 8010,
+      "forks_count": 985,
+      "star_growth": 0,
+      "score": 0.634,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 2,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 2 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 8010，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-07-13.html"
+    },
+    {
+      "run_date": "2026-07-13",
+      "full_name": "openai/codex-plugin-cc",
+      "html_url": "https://github.com/openai/codex-plugin-cc",
+      "description": "Use Codex from Claude Code to review code or delegate tasks.",
+      "readme_summary": "Use Codex from inside Claude Code for code reviews or to delegate tasks to Codex. This plugin is for Claude Code users who want an easy way to start using Codex from the workflow they already have.",
+      "category": "LLM Tooling",
+      "language": "JavaScript",
+      "stargazers_count": 28086,
+      "forks_count": 1838,
+      "star_growth": 2530,
+      "score": 0.4161,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 3,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 3 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 2530，近期热度上升。",
+        "当前累计 Star 28086，具备一定社区关注度。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+      ],
+      "quality_score": 92,
+      "quality_level": "high",
+      "report_url": "weekly/2026-07-13.html"
+    },
+    {
+      "run_date": "2026-07-13",
+      "full_name": "TencentCloud/CubeSandbox",
+      "html_url": "https://github.com/TencentCloud/CubeSandbox",
+      "description": "Instant, Concurrent, Secure & Lightweight Sandbox for AI Agents.",
+      "readme_summary": "CubeSandbox Instant, Concurrent, Secure & Lightweight Sandbox Service for AI Agents Cube Sandbox is a high-performance, out-of-the-box secure sandbox service built on RustVMM and KVM. It supports both single-node deployment and easy scaling to multi-node clusters.",
+      "category": "AI Agent",
+      "language": "Rust",
+      "stargazers_count": 9817,
+      "forks_count": 964,
+      "star_growth": 0,
+      "score": 0.5271,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 4,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 4 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 9817，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-07-13.html"
+    },
+    {
+      "run_date": "2026-07-13",
+      "full_name": "abseil/abseil-cpp",
+      "html_url": "https://github.com/abseil/abseil-cpp",
+      "description": "Abseil Common Libraries (C++)",
+      "readme_summary": "The repository contains the Abseil C++ library code. Abseil is an open-source collection of C++ code (compliant to C++17) designed to augment the C++ standard library.",
+      "category": "Other",
+      "language": "C++",
+      "stargazers_count": 17946,
+      "forks_count": 3217,
+      "star_growth": 0,
+      "score": 0.4222,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 5,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 5 位，是本期最重要的热度信号。",
+        "当前累计 Star 17946，具备一定社区关注度。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库简介较短，项目定位信息有限。",
+        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+      ],
+      "quality_score": 84,
+      "quality_level": "high",
+      "report_url": "weekly/2026-07-13.html"
+    },
+    {
+      "run_date": "2026-07-13",
+      "full_name": "ogulcancelik/herdr",
+      "html_url": "https://github.com/ogulcancelik/herdr",
+      "description": "agent multiplexer that lives in your terminal.",
+      "readme_summary": "real terminal views, not a wrapped interpretation. detach, agents keep running** — reattach from any terminal, or over ssh. sessions survive restarts.",
+      "category": "AI Agent",
+      "language": "Rust",
+      "stargazers_count": 15812,
+      "forks_count": 1062,
+      "star_growth": 3674,
+      "score": 0.6394,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 6,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 6 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 3674，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-07-13.html"
+    },
+    {
+      "run_date": "2026-07-13",
+      "full_name": "asgeirtj/system_prompts_leaks",
+      "html_url": "https://github.com/asgeirtj/system_prompts_leaks",
+      "description": "Extracted system prompts from Anthropic - Claude Fable 5, Opus 4.8, Claude Code, Claude Design. OpenAI - ChatGPT GPT-5.6, Codex GPT-5.6, GPT-5.5. Google - Gemini 3.5 Flash, 3.1 Pro, Antigravity. xAI - Grok, Cursor, Copilot, VS Code, Perplexity, and more. Updated regularly.",
+      "readme_summary": "As seen in The Washington Post:** See the hidden rules behind AI. Then use them to rewrite this article. (May 11, 2026) The purpose of this repo is to document the System Prompt instructions for all the AI chatbots out there - Claude, ChatGPT, Gemini etc.",
+      "category": "AI Agent",
+      "language": "JavaScript",
+      "stargazers_count": 56763,
+      "forks_count": 9385,
+      "star_growth": 12223,
+      "score": 0.6512,
+      "sources": [
+        "github_search",
+        "github_trending"
+      ],
+      "trending_rank": 7,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 7 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 12223，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-07-13.html"
+    },
+    {
+      "run_date": "2026-07-13",
+      "full_name": "diegosouzapw/OmniRoute",
+      "html_url": "https://github.com/diegosouzapw/OmniRoute",
+      "description": "Never stop coding. Free AI gateway: one endpoint, 231+ providers (50+ free), connect Claude Code, Codex, Cursor, Cline & Copilot to FREE Claude/GPT/Gemini. RTK+Caveman stacked compression saves 15-95% tokens, smart auto-fallback, MCP/A2A, multimodal APIs, Desktop/PWA.",
+      "readme_summary": "Plug Claude Code, Codex, Cursor, Cline, Copilot & Antigravity into FREE Claude / GPT / Gemini. Auto-fallback.** RTK + Caveman compression saves 15–95% tokens.",
+      "category": "AI Agent",
+      "language": "TypeScript",
+      "stargazers_count": 16253,
+      "forks_count": 2478,
+      "star_growth": 4323,
+      "score": 0.4657,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 8,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 8 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 4323，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-07-13.html"
+    },
+    {
+      "run_date": "2026-07-13",
+      "full_name": "stablyai/orca",
+      "html_url": "https://github.com/stablyai/orca",
+      "description": "Orca is the ADE for working with a fleet of parallel agents. Run any coding agent with your own subscription. Available on desktop and mobile.",
+      "readme_summary": "Español · Português · 中文 · 日本語 · 한국어 The AI Orchestrator for 100x builders. Run Codex, ClaudeCode, OpenCode or Pi side-by-side — each in its own worktree, tracked in one place.",
+      "category": "AI Agent",
+      "language": "TypeScript",
+      "stargazers_count": 17084,
+      "forks_count": 1339,
+      "star_growth": 4663,
+      "score": 0.5859,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 9,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 9 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 4663，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-07-13.html"
+    },
+    {
+      "run_date": "2026-07-13",
+      "full_name": "iOfficeAI/OfficeCLI",
+      "html_url": "https://github.com/iOfficeAI/OfficeCLI",
+      "description": "OfficeCLI is the first and best Office suite  purpose-built for AI agents to read, edit, and automate Word, Excel, and PowerPoint files. Free, open-source, single binary, no Office installation required.",
+      "readme_summary": "OfficeCLI is the world's first and the best Office suite designed for AI agents.** Give any AI agent full control over Word, Excel, and PowerPoint — in one line of code.** Open-source. No Office installation.",
+      "category": "AI Agent",
+      "language": "C#",
+      "stargazers_count": 15470,
+      "forks_count": 1056,
+      "star_growth": 0,
+      "score": 0.5014,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 12,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 12 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 15470，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-07-13.html"
+    },
+    {
+      "run_date": "2026-07-13",
+      "full_name": "usestrix/strix",
+      "html_url": "https://github.com/usestrix/strix",
+      "description": "Open-source AI penetration testing tool to find and fix your app’s vulnerabilities.",
+      "readme_summary": "[!TIP] New!** Strix integrates seamlessly with GitHub Actions and CI/CD pipelines. Automatically scan for vulnerabilities on every pull request and block insecure code before it reaches production - Get started with no setup required.",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 40877,
+      "forks_count": 4314,
+      "star_growth": 3660,
+      "score": 0.3603,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 13,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 13 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 3660，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-07-13.html"
+    },
     {
       "run_date": "2026-07-06",
       "full_name": "usestrix/strix",

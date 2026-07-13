@@ -60,11 +60,17 @@ Authorization: Bearer <本地管理口令>
 
 如果未配置 `ADMIN_API_TOKEN`，管理写接口返回 `403`；如果配置后请求未带正确口令，返回 `401`。受保护接口包括 `/v1/runs/trigger`、`/v1/jobs/{job_id}/execute`、`/v1/jobs/{job_id}/retry`、`/v1/rag/*` 写入/计划接口、`/v1/subscriptions` 写入接口、事件检测、候选构建、候选投递、`POST /v1/feedback` 和项目 Agent 任务写接口。
 
-本地页面会从 `?admin_token=...` 或浏览器 `localStorage.github_weekly_admin_token` 读取口令，并仅在写请求中发送 `X-Admin-Token`。不要把真实口令提交到仓库、文档或 GitHub Pages。
+`admin.html`、`subscriptions.html`、`jobs.html` 和 `job.html` 只从当前页面的密码框读取口令，并仅在写请求中发送 `X-Admin-Token`。口令不进入 URL、localStorage、sessionStorage、日志或 SQLite，刷新或离开页面后需要重新输入。旧 `admin_token` URL 参数会被忽略并从地址栏删除，旧 `github_weekly_admin_token` 浏览器存储只会删除、不会迁移。若真实口令曾通过旧方式使用，应立即轮换。
 
 根路径 `http://127.0.0.1:8000/` 会跳转到管理首页。`/v1/*` 路径是 JSON API，例如 `/v1/jobs?limit=50` 返回机器可读任务数据，不是 HTML 页面。
 
-管理首页中的 RAG 区域会调用 `/v1/rag/ask`、`/v1/rag/retrieve`、`/v1/rag/vector-search` 和 `/v1/rag/hybrid-search`，用于查看问答结果、证据块、引用和 `prompt_context`；开发上下文区域会调用 `/v1/dev-context/index`、`/v1/dev-context/search` 和 `/v1/dev-context/ask`，用于索引开发材料、检索证据和生成规则版审查/诊断回答，并会展示最近 `dev_context_index` 任务状态。后端还提供 `/v1/rag/search-compare`、`/v1/rag/search-evaluation` 和 `/v1/rag/search-evaluation-trends`，用于比较、批量评估和长期观察三种检索模式的召回差异。管理首页会展示检索评估趋势，包括最近评估任务、平均样本数、零命中样本和推荐模式分布。RAG 诊断会调用 `/v1/rag/diagnostics`，用于判断语料、证据块、embedding、解释历史和问答能力是否可用；RAG 质量概览会调用 `/v1/rag/quality-summary`，用于查看解释数量、质量分布、改进建议和低质量样本；RAG 维护计划按钮会调用 `/v1/rag/maintenance-plan`，按诊断结果创建语料重建、embedding 构建或解释回填 planned 任务；维护历史可以通过 `/v1/rag/maintenance-report` 查看最近 RAG 维护任务状态、计数变化和下一步建议；RAG 回填区会调用 `/v1/rag/backfill-explanations`，先预览缺口项目，确认后再写入 SQLite。向量检索会在 `auto_build=true` 时自动构建本地 `local-hash-v1` 索引，也可以先手动运行 `py scripts\build_rag_embeddings.py`。
+管理首页中的 RAG 区域会调用 `/v1/rag/ask`、`/v1/rag/retrieve`、`/v1/rag/vector-search` 和 `/v1/rag/hybrid-search`，用于查看问答结果、模型状态、降级原因、证据块、引用和 `prompt_context`；开发上下文区域会调用 `/v1/dev-context/index`、`/v1/dev-context/search` 和 `/v1/dev-context/ask`，用于索引开发材料、检索证据和生成规则版审查/诊断回答，并会展示最近 `dev_context_index` 任务状态。后端还提供 `/v1/rag/search-compare`、`/v1/rag/search-evaluation` 和 `/v1/rag/search-evaluation-trends`，用于比较、批量评估和长期观察三种检索模式的召回差异。管理首页会展示检索评估趋势，包括最近评估任务、平均样本数、零命中样本和推荐模式分布。RAG 诊断会调用 `/v1/rag/diagnostics`，用于判断语料、证据块、embedding、解释历史和问答能力是否可用；RAG 质量概览会调用 `/v1/rag/quality-summary`，用于查看解释数量、质量分布、改进建议和低质量样本；RAG 维护计划按钮会调用 `/v1/rag/maintenance-plan`，按诊断结果创建语料重建、embedding 构建或解释回填 planned 任务；维护历史可以通过 `/v1/rag/maintenance-report` 查看最近 RAG 维护任务状态、计数变化和下一步建议；RAG 回填区会调用 `/v1/rag/backfill-explanations`，先预览缺口项目，确认后再写入 SQLite。向量检索会在 `auto_build=true` 时自动构建本地 `local-hash-v1` 索引，也可以先手动运行 `py scripts\build_rag_embeddings.py`。
+
+管理首页的 GPT 式 RAG 对话工作台仍然逐轮调用 `/v1/rag/ask`。对话历史只保存在浏览器 `localStorage.github_weekly_rag_chat_history`，最多 20 轮；后端不保存会话，不把历史回答作为事实证据，也不写入 SQLite。
+
+React 项目匹配工作台位于 `app/#/agent?api=1`，旧 `agent.html?api=1` 自动跳转。它默认 POST `/v1/rag/ask/stream`，并把回答渲染为“最匹配项目、候选项目、折叠证据”。SSE 草稿只标记为质量校验中，`final` 到达后才成为正式结论；clarification、no_match、拒答和规则降级均显示独立状态。会话只保存在浏览器 `localStorage.github_weekly_agent_match_conversations_v1`；下一轮只提交上一轮用户目标、候选 ID、确认首选、模式和 resumable，不提交历史回答、citations、evidence 或 prompt_context。
+
+`GET /api/projects` 与 `GET /v1/projects` 支持可选 `offset`（默认 0）和既有 `limit`（最大 200）。响应保留 `projects` 与 `count`，并新增 `total`、`offset`、`limit`、`has_more`，供 React 筛选页按每页 50 条展示完整历史归档。项目对比选择只保存在浏览器 `localStorage.github_weekly_project_compare_v1`，最多 3 个仓库；URL 中的 `repos` 参数优先于本地暂存。
 
 如果本地没有 `data/github_weekly.sqlite`，查询项目接口会从 `data/` 下的 JSON 归档自动重建 SQLite 派生索引。
 
@@ -591,13 +597,13 @@ py scripts\run_rag_search_evaluation.py --queries "agent workflow;python automat
 /v1/rag/explain?q=agent%20workflow&mode=hybrid&auto_build=true
 ```
 
-这是当前 RAG 从“召回证据”升级到“解释输出”的第一层接口。后续如果接入真实 LLM，应优先复用 `citations` 和 `prompt_context`，并要求模型按引用编号回答。
+这是当前 RAG 从“召回证据”升级到“解释输出”的第一层接口。`/v1/rag/ask` 会继续复用 `citations` 和 `prompt_context`，并要求模型按引用编号回答。
 
 ### `GET /v1/rag/ask`
 
-面向前端和后续 Agent 编排的 RAG 问答入口。它复用 `/v1/rag/explain` 的检索、解释和 SQLite 解释历史写入能力，但返回结构更接近“可直接展示或交给下一步工具”的问答结果。
+面向前端和后续 Agent 编排的 RAG 问答入口。它复用 `/v1/rag/explain` 的检索、解释和 SQLite 解释历史写入能力，再把证据交给统一 LLM 客户端生成回答；未配置、超时、限流或响应异常时自动回退规则版。
 
-当前版本仍是本地规则版，不调用外部模型、不读取密钥。后续接入 Kimi、LangChain 或其他问答链时，应优先保持该接口的 `answer + citations + prompt_context + next_actions` 数据边界稳定。
+真实模型只在 `KIMI_API_KEY` 和 `KIMI_MODEL` 同时配置时启用。没有证据时接口返回 `answer_mode=refusal`，不调用模型，也不编造项目结论。
 
 支持参数与 `/v1/rag/explain` 一致：
 
@@ -614,14 +620,44 @@ py scripts\run_rag_search_evaluation.py --queries "agent workflow;python automat
 
 返回字段包含：
 
-1. `answer`：当前规则版回答。
-2. `answer_model`：回答生成策略，当前为 `rule:rag-ask-v1`。
-3. `citations`：回答引用的项目、日期和 chunk ID。
-4. `evidence`：裁剪后的证据摘要。
-5. `quality`：解释质量分与质量等级。
-6. `prompt_context`：后续接入模型时可直接使用的上下文。
-7. `next_actions`：建议的下一步核验或补库动作。
-8. `source_explanation_id`：本次问答复用或写入的 RAG 解释编号。
+1. `answer`：模型或规则版回答。
+2. `answer_model`：回答生成策略，例如 `kimi:moonshot-v1-8k` 或 `rule:rag-ask-v1`。
+3. `answer_mode`：`llm`、`fallback_rule` 或 `refusal`。
+4. `fallback_reason`：未使用真实模型时的原因，正常模型回答为空字符串。
+5. `citations`：回答引用的项目、日期和 chunk ID。
+6. `evidence`：裁剪后的证据摘要。
+7. `quality`：解释质量分与质量等级。
+8. `prompt_context`：后续模型回答使用的上下文。
+9. `next_actions`：建议的下一步核验或补库动作。
+10. `source_explanation_id`：本次问答复用或写入的 RAG 解释编号。
+11. `model_status`：模型是否配置、是否尝试、是否实际使用、模型名和超时配置。
+12. `confidence`：旧兼容字段，值为 `low`、`medium` 或 `high`；当前仅表示证据覆盖量，不代表项目匹配置信度。
+13. `evidence_coverage`：与兼容字段 `confidence` 等值，明确表示已召回、可引用证据的覆盖程度。
+14. `match_confidence`：当前固定为 `unknown`；在没有标注数据校准前不输出 `medium` 或 `high`。
+15. `answer_quality`：保留 `passed`、`issues`，并新增 `citation_validity`、`evidence_relevance`、`claim_support`、`data_freshness`。当前只有引用有效性执行实际校验，后三项分别返回 `not_evaluated`、`not_evaluated`、`unknown`；质量闸门通过不代表项目相关或结论正确。
+16. `recommendations`：当前归档内的确定性结构化推荐。每项包含 `full_name`、`rank`、`match_score`、`matched_requirements`、`unmet_requirements`、`unknown_requirements`、`reasons`、`citation_indexes`、`evidence_chunk_ids` 和 `eligibility`。`match_score` 只是本轮、同一检索模式内的相对排序分，不是概率或置信度。GET 继续验证显式 `language/category/source`；POST 还会验证路由器解析出的自然语言硬约束。
+
+管理页 RAG 对话工作台使用同一接口。每轮问题独立检索；前端以用户/助手气泡展示回答，只把本轮问题、回答摘要、引用、证据、质量闸门结果和 `prompt_context` 保存到浏览器 localStorage，便于刷新后继续查看。
+
+`agent.html?api=1` 的项目匹配对话同样使用该接口，不新增后端会话接口。前端默认降低 `limit` 到 3 来缩短响应等待，候选集合与顺序只读取 `recommendations`，详细引用、证据和 `prompt_context` 只进入折叠依据区。只有质量闸门通过且第一项 `eligibility=eligible` 时才能显示“当前归档内最匹配候选”；其他情况必须显示“暂无可确认首选”。
+
+### `GET /v1/rag/ask/stream`
+
+React 项目匹配工作台使用的只读 SSE 接口，查询参数与 `/v1/rag/ask` 一致。事件依次为：`meta`（召回元数据、引用和证据摘要）、零到多条 `delta`（未通过质量闸门的生成草稿）、`final`（与 `/v1/rag/ask` 相同的完整最终响应）或 `error`（脱敏后的流协议错误）。前端不得把 `delta` 当作最终事实；质量失败时 `final` 会以规则降级回答替换草稿。
+
+新增的 `evidence_coverage`、`match_confidence`、`recommendations` 和质量维度只出现在完整 Ask 响应与 SSE `final` 中；不改变 `meta`、`delta`、`error` 的事件结构和顺序。
+
+### `POST /v1/rag/ask` 与 `POST /v1/rag/ask/stream`
+
+无状态追问入口。POST 与既有 GET 共用路径，但使用 JSON 请求体；GET 的查询参数和响应保持不变。请求体包含当前 `q`，以及可选的 `context.previous_user_goal`、`candidate_repository_ids`、`primary_repository_id`、`mode` 和 `resumable`。context 最多携带 10 个 `owner/repo`，不得提交历史 assistant 回答、citations、evidence 或 `prompt_context`。
+
+POST 响应在 Ask 字段之外新增 `resolved_query`、`clarification_required`、`clarification_question` 和 `input_route`。`input_route` 记录 `new_search/resume/refine/clarify`、规则或 Kimi 路由器、候选范围、结构化 requirements 以及是否实际检索。无上下文的“继续、展开、嗯”等输入返回 `answer_mode=clarification`，contexts、citations、evidence 和 recommendations 均为空；流式响应只产生 `meta` 和 `final`，不产生草稿。
+
+resume/展开只在上一轮 candidate IDs 内检索，“那个项目”只在 primary ID 内检索，refine 只重排上一轮候选，明确“重新找/换一批”才检索全归档。候选限制在 FTS5、vector 和 hybrid 内部查询阶段执行，不使用先取固定 Top-N 再过滤。
+
+硬约束字段为 `language/category/source/license/deployment/cost/tech_stack`，operator 为 `eq/not_eq/contains`。规则解析按分句和连接词限定否定作用域；同一目标冲突、析取或“不要求/无所谓”等无法安全表示的条件返回 clarification。`deployment` 的确定性值至少包含 `local`、`offline`、`cloud`，其中 `offline` 明确表示运行时不得依赖网络、云 API 或托管推理，不等同于普通 self-hosted。language、license 使用 repositories 元数据，category、source 使用确定性语料字段，tech_stack 使用 language/topics；deployment、cost 只接受非 `model_enrichment` 清洗 chunk 的句子级证据，内部区分 `supports/contradicts/conditional/trial_only/external_dependency/unknown`。免费试用不满足“免费”，self-hosted UI 加 hosted inference 不满足“完全离线”，明确否定和相反依赖均判为冲突；条件不完整或证据不足保持 unknown。冲突为 rejected，无法验证为 unknown，全部通过为 eligible。没有 eligible 且全部冲突时返回 `answer_mode=no_match` 且不调用回答模型；存在 unknown 时返回 clarification，请用户补充条件或允许扩大搜索。clarification 的 `answer_quality.applicable=false`，前端不得显示成质量失败。
+
+路由优先使用确定性规则；只有规则无法可靠判断时才调用 Kimi 严格 JSON 路由。模型不可用、超时、非法 JSON 或越权字段都会保守转为澄清。contextual POST 不写入 `rag_explanations`、任务、反馈或服务端会话。
 
 示例：
 
@@ -735,6 +771,7 @@ python scripts/backfill_rag_explanations.py --limit 10
 5. `quality`：解释历史数量、平均质量分和质量分布。
 6. `coverage`：项目覆盖率、缺口数量和缺口样本。
 7. `next_actions`：建议的下一步维护动作。
+8. `corpus_versions`：期望和已观察到的语料/清洗器版本；`needs_corpus_rebuild=true` 时维护计划优先创建受控语料重建任务。
 
 示例：
 
@@ -793,6 +830,10 @@ POST /v1/jobs/{job_id}/execute
 ```
 
 执行时必须传入 `confirm_execution=true`。如果计划任务自身为 `dry_run=false`，创建计划时也必须传入 `confirm_execution=true`，否则后端会自动改为 `dry_run=true`，避免误写 SQLite。
+
+### `POST /v1/rag/corpus-enrichment-plan`
+
+创建 Kimi 结构化语料增强 planned job。请求支持 `limit`、`replace`、`dry_run`、`confirm_execution`、`requested_by`；默认 `dry_run=true`，真实调用模型并写入 `rag_corpus_enrichments` 必须同时传入 `dry_run=false` 和 `confirm_execution=true`。任务按清洗内容哈希、cleaner/prompt 版本和 Kimi 模型复用缓存；无密钥或单项目失败不会改变确定性语料。通过逐字段原文证据校验的结果进入 `model_enrichment` chunk，但不执行硬约束过滤或首选排名。
 
 ### `POST /v1/rag/maintenance-plan`
 
@@ -1059,7 +1100,7 @@ GET /v1/feedback?profile=agent_development&limit=20
 
 当前推荐接口已经会读取这些反馈、项目档案和 Agent 任务：`GET /v1/recommendations` 会把匹配 profile 的反馈聚合为项目级 `feedback_memory`，读取 `project_profile`，并生成 `recommendation_score`、`ranking_factors`、`preference_score`、解释字段和结构化 `next_actions`。`GET /v1/projects/{owner}/{repo}/rag` 会返回该项目的 `feedback_memory`、`project_profile`、`agent_tasks` 和 `next_actions`。
 
-前端入口已经接入反馈闭环：`project.html?repo=...&api=1` 和 `recommendations.html?api=1` 会通过 `POST /v1/feedback` 写入“有用 / 不适合 / 继续跟踪”反馈；`admin.html?api=1` 会读取 `GET /v1/feedback?limit=200` 展示反馈记忆汇总，并读取 `/v1/recommendations?limit=20` 展示受反馈影响的推荐项目。所有页面写请求仍需提供管理口令，来源为 `?admin_token=...` 或 `localStorage.github_weekly_admin_token`。
+前端入口已经接入反馈闭环：`project.html?repo=...&api=1` 和 `recommendations.html?api=1` 会通过 `POST /v1/feedback` 写入“有用 / 不适合 / 继续跟踪”反馈；`admin.html?api=1` 会读取 `GET /v1/feedback?limit=200` 展示反馈记忆汇总，并读取 `/v1/recommendations?limit=20` 展示受反馈影响的推荐项目。所有页面写请求仍需提供管理口令；浏览器端只能使用当前页面的内存输入和 `X-Admin-Token` 请求头，不接受 URL 或持久化浏览器存储传递。
 
 ### `/v1/agent-tasks` 项目 Agent 任务
 

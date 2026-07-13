@@ -1,0 +1,139 @@
+{
+  "schema_version": 1,
+  "total_projects": 10,
+  "trending_project_count": 10,
+  "trending_top10_selected_count": 8,
+  "trending_selected_rate": 1.0,
+  "total_star_growth": 31073,
+  "top_languages": [
+    {
+      "name": "TypeScript",
+      "count": 3
+    },
+    {
+      "name": "JavaScript",
+      "count": 2
+    },
+    {
+      "name": "Rust",
+      "count": 2
+    },
+    {
+      "name": "C++",
+      "count": 1
+    },
+    {
+      "name": "C#",
+      "count": 1
+    },
+    {
+      "name": "Python",
+      "count": 1
+    }
+  ],
+  "top_categories": [
+    {
+      "name": "AI Agent",
+      "count": 8
+    },
+    {
+      "name": "LLM Tooling",
+      "count": 1
+    },
+    {
+      "name": "Other",
+      "count": 1
+    }
+  ],
+  "top_trending": [
+    {
+      "full_name": "wonderwhy-er/DesktopCommanderMCP",
+      "html_url": "https://github.com/wonderwhy-er/DesktopCommanderMCP",
+      "trending_rank": 2,
+      "stargazers_count": 8010,
+      "language": "TypeScript",
+      "category": "AI Agent"
+    },
+    {
+      "full_name": "openai/codex-plugin-cc",
+      "html_url": "https://github.com/openai/codex-plugin-cc",
+      "trending_rank": 3,
+      "stargazers_count": 28086,
+      "language": "JavaScript",
+      "category": "LLM Tooling"
+    },
+    {
+      "full_name": "TencentCloud/CubeSandbox",
+      "html_url": "https://github.com/TencentCloud/CubeSandbox",
+      "trending_rank": 4,
+      "stargazers_count": 9817,
+      "language": "Rust",
+      "category": "AI Agent"
+    },
+    {
+      "full_name": "abseil/abseil-cpp",
+      "html_url": "https://github.com/abseil/abseil-cpp",
+      "trending_rank": 5,
+      "stargazers_count": 17946,
+      "language": "C++",
+      "category": "Other"
+    },
+    {
+      "full_name": "ogulcancelik/herdr",
+      "html_url": "https://github.com/ogulcancelik/herdr",
+      "trending_rank": 6,
+      "stargazers_count": 15812,
+      "language": "Rust",
+      "category": "AI Agent"
+    }
+  ],
+  "top_star_growth": [
+    {
+      "full_name": "asgeirtj/system_prompts_leaks",
+      "html_url": "https://github.com/asgeirtj/system_prompts_leaks",
+      "star_growth": 12223,
+      "stargazers_count": 56763,
+      "language": "JavaScript",
+      "category": "AI Agent"
+    },
+    {
+      "full_name": "stablyai/orca",
+      "html_url": "https://github.com/stablyai/orca",
+      "star_growth": 4663,
+      "stargazers_count": 17084,
+      "language": "TypeScript",
+      "category": "AI Agent"
+    },
+    {
+      "full_name": "diegosouzapw/OmniRoute",
+      "html_url": "https://github.com/diegosouzapw/OmniRoute",
+      "star_growth": 4323,
+      "stargazers_count": 16253,
+      "language": "TypeScript",
+      "category": "AI Agent"
+    },
+    {
+      "full_name": "ogulcancelik/herdr",
+      "html_url": "https://github.com/ogulcancelik/herdr",
+      "star_growth": 3674,
+      "stargazers_count": 15812,
+      "language": "Rust",
+      "category": "AI Agent"
+    },
+    {
+      "full_name": "usestrix/strix",
+      "html_url": "https://github.com/usestrix/strix",
+      "star_growth": 3660,
+      "stargazers_count": 40877,
+      "language": "Python",
+      "category": "AI Agent"
+    }
+  ],
+  "summary_points": [
+    "AI Agent 是本期最集中的方向，共 8 个项目。",
+    "TypeScript 是本期出现最多的主要语言，共 3 个项目。",
+    "本期入选项目累计新增 Star 31073。",
+    "wonderwhy-er/DesktopCommanderMCP 是本期 GitHub Trending 排名最高的项目，周榜排名 2。",
+    "asgeirtj/system_prompts_leaks 是本期新增 Star 最高的项目，新增 12223。"
+  ]
+}

@@ -2,6 +2,20 @@
 
 本文档记录第一阶段最小可用版本的实际实现架构。
 
+## 提交级质量检查
+
+`.github/workflows/ci.yml` 独立于定时周报主流程，在 `push main` 和 pull request 上运行。它执行确定性测试、静态检查、安全检查、前端构建一致性及 Chromium 桌面/手机 Playwright 回归。E2E 由本地 mock server 提供固定 SSE、分页和对比数据，不依赖 Kimi、GitHub 网络或 SQLite；失败时短期上传截图、trace 和报告。当前只提供自动检查与失败报警，不配置 GitHub 分支保护，因此仍允许直接推送 `main`。
+
+## 管理写接口凭证边界
+
+FastAPI 管理写接口继续接受 `X-Admin-Token` 或 `Authorization: Bearer`，只读接口不需要鉴权。浏览器管理页通过共享 `admin-auth.js` 从当前页面密码框生成 `X-Admin-Token`，口令不写入 URL、localStorage、sessionStorage、日志或 SQLite；刷新、关闭或跨页导航都会丢失。页面在加载最早阶段忽略并清理旧 `admin_token` 参数、删除旧浏览器存储，并使用 `Referrer-Policy: no-referrer` 阻止旧 URL 继续向资源请求传播。安全检查会阻止生产页面重新引入 URL 或浏览器持久化口令。
+
+## React 项目匹配工作台
+
+`docs/app/#/agent` 是面向普通用户的 React 项目匹配入口。前端只在浏览器 `localStorage` 保存有限的会话标题、问题和最终响应；不创建后端会话表，也不把历史回答视为事实证据。它通过 POST `/v1/rag/ask/stream` 提交当前输入和最小用户意图上下文，只包含上一轮用户目标、候选 ID、确认首选、模式和 resumable。历史 assistant answer、citations、evidence、prompt_context 均不进入请求。页面只从后端 `recommendations[]` 读取候选顺序和资格状态。
+
+Agent 路由使用独立的全高工作区，消息列表是唯一可滚动区域，输入框固定在工作区底部。项目筛选通过 `offset` 分页从 SQLite 归档读取项目；对比选择只保存在浏览器并同步到 `repos` URL 参数，对比结果复用既有只读项目对比 API，不增加用户数据或后端状态。
+
 ## 事件订阅与候选层
 
 ```text
@@ -25,6 +39,32 @@
 通知记忆通过三个出口进入 Agent：推荐接口返回项目级 `event_memory` 和排序解释，RAG 问答在通知相关问题中召回 `notification_memory`，单项目 RAG 聚合返回事件、候选和投递审计摘要。项目详情页负责创建项目订阅，管理页负责检测、构建、预览、确认和失败重试；`scripts/manage_notifications.py` 为本地和自动化提供同一服务入口。
 
 GitHub Actions 默认执行事件检测与候选构建，但 `send_event_notifications` 默认为 `false`。只有显式开启该输入时，工作流才会同时传入 `--no-dry-run` 和 `--confirm-delivery`；通知步骤设置为非阻塞，不影响 Pages 生成和现有每周链接推送。
+
+## 证据约束 RAG Ask 层
+
+RAG 语料先经过确定性清洗和版本化，再进入 FTS5、local-hash 与 Ask。外部 README/描述按不可信输入处理：图片、徽章、HTML 属性、重复模板和提示注入式行不进入检索或模型上下文，原文仍可从 JSON 归档追溯。`corpus_version`、`cleaner_version` 和内容哈希用于判断派生索引是否过期；确认执行语料重建时旧 embedding 同步失效，随后由独立任务重建。
+
+确定性语料按来源单独分块，避免 README、风险、项目画像和 Agent 记忆互相污染。Kimi 结构化增强是独立 planned job，不在查询或语料重建中隐式调用；其输出只有在逐字段证据能从清洗原文精确定位时才进入 `model_enrichment` chunk。增强结果可参与召回和推荐理由，但不能决定硬约束；P0-4 的 recommendations 层只以确定性仓库元数据验证显式筛选。
+
+```text
+/v1/rag/ask
+-> rag_explain 生成证据、引用和解释编号
+-> project_recommendations 按仓库聚合、验证显式约束并生成可审计排序
+-> src/rag/answering.py 检查证据充足性
+-> src/llm/client.py 调用 Kimi 兼容聊天接口
+-> prompts/rag_ask.md 约束模型只能基于证据回答并标注引用
+-> 未配置、超时、限流、错误或无证据时规则降级/拒答
+```
+
+`/v1/rag/ask` 不是普通聊天接口。它必须先有 RAG 证据，再尝试真实模型回答；没有证据时直接拒答。模型失败不会阻断接口，响应会保留 `citations`、`evidence`、`answer_mode`、`fallback_reason` 和 `model_status`，管理页据此展示模型状态和降级原因。提示词保存在 `prompts/rag_ask.md`，业务代码只负责装配结构化证据。
+
+POST Ask 在检索前经过 `follow_up_router`。确定性规则优先识别 resume/refine/new_search/clarify，并按分句和连接词限定否定作用域；同一目标冲突、析取或无法表达的可选条件直接澄清。部署要求区分 local、offline、cloud，避免把 self-hosted 等同于完全离线。规则无法判断时才调用 Kimi 严格 JSON 路由；模型只能建议路由、改写和约束，不能选择项目。候选范围直接下推到 FTS5 SQL、vector 行过滤和 hybrid 两路召回。`constraint_verifier` 从仓库/语料确定性元数据及非模型增强 chunk 验证硬约束；部署和成本按句子分类为支持、冲突、条件、仅试用、外部依赖或未知，模型增强不能覆盖这些结论。`project_recommendations` 统一生成 eligible/unknown/rejected；没有合格候选时由规则闸门返回 clarification 或 no_match，不调用回答模型。
+
+Ask 响应把证据覆盖与匹配把握分开表达：旧 `confidence` 仅作为兼容字段保留，`evidence_coverage` 复用其按证据数量计算的 `low/medium/high`，`match_confidence` 在未校准阶段固定为 `unknown`。`answer_quality` 保留原有通过状态和问题列表，并显式标记引用有效性、证据相关性、主张支持度和数据新鲜度；P0-2 只有引用有效性经过实际校验，不能把证据数量或格式校验解释为推荐正确率。
+
+管理页 RAG 对话工作台是该接口的 GPT 式前端封装，不新增后端会话状态。对话历史只保存在浏览器 localStorage，最多 20 轮；每轮问题独立检索，历史回答只用于页面回看，不进入 `prompt_context`，也不作为事实证据。管理页和 React 工作台显示“证据覆盖”与“匹配把握尚未校准”，不再把 `confidence` 渲染为匹配置信度。
+
+`frontend/` 是 React + TypeScript 用户前端，构建产物写入 `docs/app/`，通过 Hash Router 提供项目匹配、筛选、推荐、详情和对比页面；旧 `agent.html`、`explorer.html`、`recommendations.html`、`project.html`、`compare.html` 仅保留 query 参数并跳转到对应路由。`app/#/agent?api=1` 默认 POST `/v1/rag/ask/stream`。流中的 `delta` 只作为“待质量校验草稿”展示；`final` 中只有第一项 recommendation 为 eligible 且回答质量通过时才显示首选。clarification 不展示项目卡或质量失败，no_match 展示冲突候选与原因。它不新增数据库表或后端会话。
 
 ## 项目级 Agent 执行层
 

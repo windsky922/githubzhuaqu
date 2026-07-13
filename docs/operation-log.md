@@ -1,6 +1,249 @@
 # 操作日志
 
+## 2026-07-12 追加：P0-8 管理口令浏览器传递收口
+
+### 1. 开发目的
+
+停止通过 URL 和浏览器持久化存储传递管理口令，降低浏览器历史、复制链接、Referer、截图和本地同步造成的泄露风险。
+
+### 2. 修改内容
+
+1. `admin.html`、`subscriptions.html`、`jobs.html` 和 `job.html` 使用统一密码框；口令只保留在当前页面内存，通过 `X-Admin-Token` 发送。
+2. 旧 `admin_token` 参数只检测并从地址栏删除，不读取其值；旧 localStorage/sessionStorage 项只删除、不迁移，并设置 `Referrer-Policy: no-referrer`。
+3. 缺少口令时浏览器阻止写请求；401 会清空输入，403 提示后端配置，错误信息不回显口令。
+4. 安全检查新增浏览器管理口令回归规则，API、页面生成和桌面/手机 Playwright 覆盖 URL、存储、Header、刷新及日志边界。
+
+### 3. 边界
+
+不新增登录接口、Cookie、服务端会话或 SQLite 字段；FastAPI 的 `X-Admin-Token` 与 `Authorization: Bearer` 契约保持不变，后续进入真实 FastAPI + 临时 SQLite E2E。
+
+## 2026-07-12 追加：P0-7B 句子级部署与成本证据语义
+
+### 1. 开发目的
+
+修复部署和成本只按关键词命中导致的错误首选，避免把否定句、免费试用和外部托管依赖当成项目能力。
+
+### 2. 修改内容
+
+1. 非 `model_enrichment` 清洗 chunk 按句子分类为 `supports`、`contradicts`、`conditional`、`trial_only`、`external_dependency` 或 `unknown`。
+2. 明确支持且无冲突才满足硬约束；明确否定、仅试用或相反外部依赖判为冲突，条件不完整或证据不足保持 unknown。
+3. “free trial”不满足免费，self-hosted UI 加 hosted inference 不满足完全离线，`does not support offline` 判为冲突；模型增强不能改变结果。
+4. 新增 36 条句子证据评估及普通 Ask/SSE final 等值回归。证据状态准确率为 1.0，错误合格率与硬约束违反率均为 0。
+
+### 3. 边界
+
+不新增 SQLite 表或响应字段，不调整 hybrid 权重，不引入真实 embedding，不保存聊天历史；管理口令与真实后端 E2E 留给后续独立阶段。
+
+## 2026-07-12 追加：P0-7A 分句级硬约束解析
+
+### 1. 开发目的
+
+修复整句出现否定词后把所有要求错误改为 `not_eq` 的问题，并把完全离线与普通本地部署分开表达。
+
+### 2. 修改内容
+
+1. 约束解析按标点及“但、不过、同时、并且、且、must、require”等连接关系分句，每个分句独立确定 operator。
+2. `deployment` 新增 `offline` 值；“不能联网/无需联网/air-gapped”解析为 offline，“不支持离线”解析为 `not_eq offline`。
+3. 同一目标同时要求和排除、析取条件及“不要求/无所谓”等不可安全表达的输入直接返回 clarification。
+4. 新增 100 条约束解析评估，按 60/20/20 划分 development、locked regression 和 adversarial；三组的约束精确匹配、operator 和澄清准确率均为 1.0。
+
+### 3. 边界
+
+本阶段不修改 Ask 字段或 SSE 顺序，不新增 SQLite 表，不调整检索权重；句子级部署和成本证据语义留在 P0-7B。
+
+## 2026-07-11 追加：P0-6B Playwright 浏览器回归
+
+### 1. 开发目的
+
+把项目匹配、流式状态、筛选分页和三项目对比从组件测试提升为桌面/手机真实 Chromium 回归，并在提交 CI 中自动执行。
+
+### 2. 修改内容
+
+1. 新增 Playwright 配置与 `npm run test:e2e`，覆盖桌面 Chrome 和 Pixel 7 视口。
+2. 新增本地 mock server，确定性模拟 SSE `meta/delta/final`、clarification、no_match、refusal、规则降级、项目分页和对比，不访问真实模型、GitHub 或 SQLite。
+3. 浏览器测试验证长流式输出后输入区仍可用、澄清轮不展示项目卡/质量失败、无匹配原因可见、筛选分页和最多三个项目对比。
+4. CI 新增独立 E2E job；仅在失败时上传 `output/playwright/` 下的截图、trace 和 HTML 报告，保留 7 天。
+
+### 3. 边界
+
+不修改 API、SQLite schema、Ask 契约、检索权重或模型配置；不启用分支保护，`tmp/` 与浏览器诊断产物不提交。
+
+## 2026-07-11 追加：P0-6A 提交级核心质量检查
+
+### 1. 开发目的
+
+让每次 `push main` 和 pull request 自动验证前后端回归、安全边界与发布构建一致性，不再只依赖定时周报工作流或本地手工检查。
+
+### 2. 修改内容
+
+1. 新增独立 `.github/workflows/ci.yml`，使用 Python 3.12、Node.js 22 和只读仓库权限。
+2. 自动执行前端类型检查、Vitest、生产构建、Python 全量测试、安全检查和 `git diff --check`。
+3. 重建 `docs/app` 后检查工作树差异，阻止前端源码与已提交发布产物不一致。
+4. 同一分支的新提交会取消旧的未完成检查，减少重复资源消耗。
+
+### 3. 边界
+
+该工作流不读取业务 Secrets，不运行采集、Kimi、Telegram、归档或真实外发；本阶段不启用 GitHub 分支保护，仍允许直接推送 `main`。
+
+## 2026-07-11 追加：P0-5B 候选范围、硬约束验证与 React 接入
+
+### 1. 开发目的
+
+让追问真正限定在浏览器声明的上一轮候选内，并在回答模型运行前完成可审计的自然语言硬约束判定。
+
+### 2. 修改内容
+
+1. candidate IDs 下推到 FTS5、vector 和 hybrid 内部查询；resume/refine 不再采用先取 Top-N 再过滤。
+2. 新增确定性硬约束验证器。language/license/category/source/tech_stack 使用可信元数据，deployment/cost 只使用非 `model_enrichment` 清洗 chunk；recommendation 新增 `unknown_requirements[]`。
+3. 全部候选明确冲突时返回 `answer_mode=no_match`；存在无法验证条件时返回 clarification。两条路径均不调用回答模型，质量闸门标记为不适用。
+4. React 改为 POST 流式 Ask，每轮只提交上一轮用户目标、候选 ID、确认首选、模式和 resumable；澄清轮不展示项目卡或质量失败。
+5. 新增候选范围、硬约束、模型增强隔离、最小请求体和 clarification/no_match 前后端测试。
+6. 重跑 40 条追问评估与 52 条 P0-1/P0-4 基线：追问路由、澄清、改写、候选范围和约束精确匹配均为 1.0，原始追问误检索率为 0；三模式检索和推荐指标与 P0-4 保持一致，硬约束违反率均为 0。
+
+### 3. 边界
+
+本阶段不新增 SQLite schema、服务端会话、Responses API 或 Agents SDK；既有 GET 契约与 SSE 事件名、顺序保持不变，`tmp/` 不纳入提交。
+
+## 2026-07-11 追加：P0-5A 无状态追问路由与澄清保护
+
+### 1. 开发目的
+
+在检索前识别“继续、展开、那个项目”等追问，避免把短命令作为独立项目 query 送入 RAG。
+
+### 2. 修改内容
+
+1. 新增同路径 POST Ask 与流式 POST；接收上一轮用户目标、候选仓库、确认首选、检索模式和 resumable，不接收历史 assistant 文本。
+2. 新增确定性追问路由器；规则无法判断时才复用 Kimi 严格 JSON 路由，任何模型异常或越权输出都转为澄清。
+3. 无上下文短追问直接返回 `answer_mode=clarification`，不调用检索或回答模型；contextual POST 使用只读解释装配，不写 `rag_explanations`。
+4. 新增 40 条中文追问评估。route、clarification、rewrite、candidate scope 和 constraint exact-match 均为 1.0，原始短追问误检索率为 0。
+
+### 3. 边界
+
+本阶段不新增 SQLite schema 或服务端会话。候选过滤的查询级下推、完整硬约束验证和 React POST 接入在 P0-5B 完成。
+
+## 2026-07-11 追加：P0-4B React 使用后端推荐决策
+
+### 1. 开发目的
+
+移除项目匹配页根据 citations 顺序推断首选的前端逻辑，让“首选”严格来自后端可审计 recommendations 与质量闸门。
+
+### 2. 修改内容
+
+1. React 新增结构化 recommendation 类型，候选卡只按 `recommendations[]` 组装和排序；citations、evidence、contexts 继续只用于依据展示。
+2. 只有第一项 `eligibility=eligible` 且 `answer_quality.passed=true` 时显示“当前归档内最匹配候选”，否则显示“暂无可确认首选”。
+3. 项目卡新增相对匹配分、资格状态、满足要求和未满足要求；不把该分数称为概率或置信度。
+4. 前端测试覆盖 citations 不再决定首选、质量闸门、eligible/unknown/rejected 状态和约束原因。
+
+### 3. 边界
+
+本阶段不解析自然语言硬约束，不增加服务端会话，不改变 SSE 事件序列，也不把历史模型回答作为证据。下一阶段进入 P0-5 无状态追问与澄清。
+
+## 2026-07-11 追加：P0-4A 后端结构化项目推荐
+
+### 1. 开发目的
+
+停止由回答文本或前端引用顺序猜测首选项目，为 Ask 建立可测试、可审计的后端推荐决策结果。
+
+### 2. 修改内容
+
+1. `/v1/rag/ask` 与 `/v1/rag/ask/stream` 的 `final` 新增非破坏性 `recommendations[]`，按仓库聚合本轮 contexts，并返回相对排序分、显式约束判定、理由、引用编号和证据 chunk ID。
+2. 推荐生成不读取 Kimi 回答；只验证现有 `language`、`category`、`source` 参数。模型增强可作为证据，不能决定硬约束或首选排名。
+3. 新增结构化推荐评估脚本，复用 52 条 P0-1 中文需求，分别测量 FTS5、local-hash-v1 和 hybrid 的 Top-1、Recall@3、MRR@10、硬约束违反率与无首选率。
+4. 固定评估中三种模式的显式硬约束违反率均为 0；P0-1 原检索基线保持不变。
+
+### 3. 边界
+
+本阶段不解析自然语言里的部署、许可证、成本或技术栈约束，不修改独立 `/v1/recommendations`，不新增 SQLite 字段、服务端会话或模型调用。
+
+## 2026-07-10 追加：P0-3B 来源分层与 Kimi 语料增强
+
+1. RAG chunks 按 identity、description、readme、selection reason、project profile、risk 和 Agent memory 分层生成，同一 corpus 内去重并保留跨日期历史证据。
+2. 新增 `project_corpus.structured_json`、`rag_chunks.source_type` 和 `rag_corpus_enrichments` 缓存表，结构化增强按内容哈希、清洗器/prompt 版本和模型稳定去重。
+3. 新增默认 dry-run、需显式确认的 `rag_corpus_enrichment` planned job；复用 Kimi 环境变量，非法 JSON、超时、无配置和无证据字段均安全降级，不保存完整模型原始回答。
+4. 通过逐字段证据校验的增强内容只进入检索，不参与硬过滤或首选排名；固定评估集中 local-hash-v1/hybrid Recall@3 从 0.8846 提升到 0.9231，FTS5 指标持平。
+
+## 2026-07-10 追加：P0-3A 确定性语料清洗与版本化
+
+1. 新增标准库 RAG 语料清洗器，移除 Markdown 图片、徽章、HTML 标签/属性、重复模板和提示注入式行，同时保留链接标题、代码内容与限制说明。
+2. `project_corpus` 和 `rag_chunks` 增加语料版本、清洗器版本、内容哈希、噪声/来源清单和不可信标记；旧数据库通过增量列迁移标记为 `legacy-v0`。
+3. RAG 诊断识别过期语料并优先计划 `rag_corpus_rebuild`；确认重建时旧 embedding 同步失效，结果明确返回失效数量和待重建状态。
+4. 新增只读语料审计脚本与清洗/迁移测试；固定 52 条评估集的 FTS5、local-hash-v1、hybrid 指标与 P0-1 基线一致，未调整检索权重。
+
+## 2026-07-10 追加：P0-2 Ask 质量与置信度语义修正
+
+1. `/v1/rag/ask` 与 `/v1/rag/ask/stream` 的 `final` 保留旧 `confidence` 字段，并新增等值 `evidence_coverage` 与固定为 `unknown` 的 `match_confidence`，避免把证据数量解释为匹配正确率。
+2. `answer_quality` 保留 `passed`、`issues`，新增引用有效性、证据相关性、主张支持度和数据新鲜度；当前只实际校验引用，其他维度明确标记为未评估或未知。
+3. React 项目匹配工作台和管理页改为展示“证据覆盖”“匹配把握尚未校准”及质量边界说明；SSE 事件名、顺序和既有字段保持不变。
+4. 未修改检索权重、SQLite schema、历史解释或服务端会话；同步补充后端、API/SSE、前端和页面生成测试。
+
+## 2026-07-10 追加：P0-1 项目匹配评估集与固定基线
+
+1. 新增 `evals/project_match_cases.jsonl`，包含 52 条中文需求、期望仓库、语言/方向/来源硬约束及澄清预期。
+2. 新增 `scripts/evaluate_project_match.py` 与定向测试，在固定 fixture 语料上直接调用 FTS5、`local-hash-v1` 和 hybrid 检索，不调用 `/v1/rag/ask` 或保存模型回答。
+3. 基线统一输出 Recall@3、Recall@10、MRR@10、硬约束违反率、零命中率和澄清正确率；固定语料中 FTS5 的 Recall@3 为 0.0962、零命中率为 0.9038，确认中文自然需求检索是后续 P0 优先改进点。
+4. 未修改 RAG Ask/Stream 响应契约、未新增后端会话或 SQLite 表；已通过前端 lint/test/build、Python 全量测试、安全检查和 diff 检查。
+
+## 2026-07-10 追加：项目研究 Agent V2 对抗性审查报告
+
+1. 新增 `docs/project-review-agent-v2-roadmap.md`，从候选覆盖、检索、语料、回答质量、反馈闭环、数据新鲜度、隐私、CI 和工程演进九个维度复核 V2。
+2. 报告明确当前最不确定的是首选项目的真实需求匹配度；现有 `confidence` 和 `answer_quality` 主要反映证据数量与引用格式，尚不能代表相关性或正确率。
+3. 记录本地审计发现：79 个唯一项目、261 个 RAG chunks，其中存在 HTML、图片、徽章和重复文本噪声；本地数据日期与 `weekly-archive` 自动归档分支存在可见的新鲜度分裂。
+4. 路线图将人工标注评估集、置信度语义修正、语料清洗、结构化推荐、追问澄清和提交级 CI 列为 P0；查询级反馈、真实 embedding 对照、新鲜度和隐私保护列为 P1。
+5. README 增加 V2 报告入口，同时保留 V1 审查作为历史产品闭环基线。
+
+## 2026-07-10 追加：React 项目研究工作台与流式 RAG
+
+1. 新增 `frontend/` React + TypeScript + Vite 工程，使用 Tailwind、shadcn/Radix 基础设施、Lucide、React Router 和 TanStack Query，构建产物发布到 `docs/app/`。
+2. 用户路径迁移为 Hash Router：项目匹配、项目筛选、推荐、详情和对比；旧 HTML 页面保留为 query 参数兼容跳转入口，管理页不迁移。
+3. 新增 `/v1/rag/ask/stream` SSE 契约与 Kimi 流式客户端。`delta` 是质量校验前草稿，服务端收齐文本后复用现有引用质量闸门，失败时由 `final` 返回规则降级答案替换草稿。
+4. 对话历史只保存在 `localStorage.github_weekly_agent_match_conversations_v1`，最多 10 个会话、每个 20 轮；首次读取旧历史时迁移，不写入 SQLite 或后端会话表。
+5. GitHub Actions 增加 Node、npm 校验和 React 构建步骤，确保 `docs/app/` 随归档发布。
+
 本文件记录 Codex 对本仓库执行的文档审查和项目规划操作。
+
+## 2026-07-10 追加：前端工作台可用性修复
+
+1. 项目列表 API 新增非破坏性分页元数据，React 筛选页改为每页 50 条的服务端筛选。
+2. Agent 页面改为全高消息滚动区，输入框固定在底部；顶部显示开发 5173 或发布 8000 环境。
+3. 项目对比新增最多 3 项的浏览器本地暂存、URL 同步、技术参数矩阵和明确空态。
+
+## 2026-07-10 追加：React 项目匹配页体验重构
+
+1. `#/agent` 改为顶部全局导航和专用会话历史栏，移动端提供导航抽屉与会话抽屉。
+2. 回答改为首选项目优先，候选项目、状态、降级说明和五段证据抽屉分层显示。
+3. 保持 `/v1/rag/ask/stream`、本地会话存储和证据质量边界不变；不新增后端状态或账号能力。
+
+## 2026-07-08 追加：轻量项目匹配 Agent 前端
+
+1. 新增 `agent.html?api=1` 作为普通用户入口，用户只输入一句需求即可调用 `/v1/rag/ask` 进行证据约束项目匹配。
+2. 页面默认使用 `mode=hybrid`、`limit=3` 和 `auto_build=true`，减少等待时间；高级参数折叠，不干扰主流程。
+3. 回答默认展示简短摘要、Top 项目卡片和详情/对比/GitHub 操作入口；引用、证据、质量闸门、降级原因和 `prompt_context` 保持折叠查看。
+4. 本地历史只保存到 `localStorage.github_weekly_agent_match_history`，不保存密钥、管理口令或请求头，不新增后端会话表。
+
+## 2026-07-08 追加：管理页证据约束 RAG 对话工作台
+
+1. 管理页新增 RAG 对话区域，复用 `/v1/rag/ask`，支持连续提问、模式选择、limit 和语言/方向/来源过滤。
+2. 对话历史只保存在浏览器 `localStorage.github_weekly_rag_chat_history`，最多 20 轮；后端不新增会话表，不保存 API Key 或管理口令。
+3. 每轮回答展示 `answer_model`、`answer_mode`、`confidence`、`fallback_reason`、`answer_quality`、前 5 条 citations/evidence 和可折叠 `prompt_context`。
+4. 对话工作台每轮独立检索，不把历史回答当事实证据；无证据、fallback 和质量闸门问题在页面显式展示。
+5. 对话区升级为 GPT 式聊天布局：滚动消息区、用户/助手气泡、底部输入栏、Enter 发送和 Shift+Enter 换行，证据与 prompt_context 保持折叠查看。
+6. 修复 RAG Ask API 未向前端透传 `answer_quality` 的问题；规则降级回答补充引用编号，避免页面出现 `quality false` 但“质量闸门：无”的矛盾状态。
+
+## 2026-07-07 追加：证据约束 RAG Ask 接入 Kimi
+
+1. 新增统一 LLM 客户端 `src/llm/client.py`，复用 `KIMI_API_KEY`、`KIMI_BASE_URL`、`KIMI_MODEL`、超时和重试环境变量，不在代码中保存密钥。
+2. 新增 `src/rag/answering.py` 和 `prompts/rag_ask.md`，让 `/v1/rag/ask` 先基于 RAG 证据回答；无证据拒答，模型未配置或失败时自动回退规则版。
+3. `/v1/rag/ask` 新增 `answer_mode`、`fallback_reason` 和 `model_status`，并继续保留 `answer_model`、`citations`、`evidence`、`source_explanation_id` 与通知记忆。
+4. 管理页 RAG 回答卡片显示模型配置状态、是否使用模型和降级原因，便于区分真实模型回答与规则版 fallback。
+5. 真实 Kimi 验证发现 PowerShell `Invoke-RestMethod` 会把无 charset 的中文 JSON 按错误编码显示；后端 JSON 响应统一补充 `charset=utf-8`，`curl + Python` 验证原始响应本身为正确 UTF-8。
+6. 新增 `src/rag/answer_quality.py` 作为 LLM 回答质量闸门；空回答、无有效引用、引用不存在编号或提到证据外仓库时自动回退规则版，并把原因写入 `fallback_reason` 和 `answer_quality`。
+
+## 2026-07-07 追加：项目研究 Agent v1 审查报告
+
+1. 新增 `docs/project-review-agent-v1-roadmap.md`，沉淀本轮从第一性原理和对抗性审查得到的项目定位、主要风险、遗漏点、下一阶段目标和长期路线。
+2. 报告明确当前阶段先完成“采集 -> 入库 -> 检索 -> 对话 -> 反馈 -> 订阅 -> 推送 -> 自动运行”的 v1 产品闭环，项目研究深度、复杂 UI、多用户权限和大规模向量库后置。
+3. 报告审查并修正下一阶段目标：从“真实 LLM RAG 对话闭环”收敛为“证据约束 RAG Ask 接入真实 LLM”，强调 citations、fallback、回答模式、失败原因和无证据拒答。
+4. README 增加审查报告入口，便于后续追求目标模式直接从 v1 路线继续开发。
 
 ## 2026-06-21 追加：通知记忆、管理工作台与自动化入口
 
@@ -5974,4 +6217,3 @@ docs/project-architecture.md
 后续如果进入开发阶段，再按 `docs/project-architecture.md` 中的开发顺序实施。
 
 ---
-

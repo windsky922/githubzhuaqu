@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GitHub 周报 2026-07-13</title>
+  <style>
+    body { margin: 0; background: #f6f7f9; color: #1f2933; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height: 1.7; }
+    main { max-width: 960px; margin: 0 auto; padding: 32px 20px 56px; }
+    article { background: #fff; border: 1px solid #d8dee8; padding: 28px; }
+    h1, h2, h3, h4 { line-height: 1.3; }
+    a { color: #0969da; }
+    code { background: #eef2f7; padding: 2px 5px; }
+    table { width: 100%; border-collapse: collapse; margin: 18px 0; display: block; overflow-x: auto; }
+    th, td { border: 1px solid #d8dee8; padding: 8px 10px; text-align: left; vertical-align: top; }
+    th { background: #f1f4f8; }
+    hr { border: 0; border-top: 1px solid #d8dee8; margin: 24px 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <article>
+      <p><strong>GitHub 每周热点项目周报</strong></p>
+      <p>*统计周期：2026-07-06 至 2026-07-13*</p>
+      <hr>
+      <h3>1. 本周总体趋势</h3>
+      <p>本期 GitHub Trending 周榜呈现<strong>AI Agent 工具爆发</strong>态势。全部 10 个入选项目均来自 GitHub Trending 周榜（排名 2-13 位），累计新增 Star 达 <strong>31,073</strong>，显示出极高的社区关注度。</p>
+      <p><strong>技术栈分布</strong>：TypeScript（3 个）与 Rust（2 个）成为 Agent 开发首选语言，Python、JavaScript、C++、C# 各有 1 个代表性项目。<strong>领域聚焦</strong>：8 个项目集中在 AI Agent 开发与编排，涵盖终端控制、沙箱安全、Agent 多路复用、Prompt 工程及自动化办公等细分场景。</p>
+      <p>值得关注的是，本期项目<strong>质量评分均达到 high 级别</strong>，且多数项目（6/10）在一周内获得显著 Star 增长（1,000-12,000+），表明这些工具已进入实际应用阶段，而非早期概念验证。</p>
+      <hr>
+      <h3>2. 热点项目总览</h3>
+      <table>
+        <thead><tr><th>排名</th><th>项目</th><th>语言</th><th>Star 总数</th><th>本周新增</th><th>链接</th></tr></thead>
+        <tbody>
+        <tr><td>2</td><td>DesktopCommanderMCP</td><td>TypeScript</td><td>8,010</td><td>-</td><td><a href="https://github.com/wonderwhy-er/DesktopCommanderMCP">https://github.com/wonderwhy-er/DesktopCommanderMCP</a></td></tr>
+        <tr><td>3</td><td>codex-plugin-cc</td><td>JavaScript</td><td>28,086</td><td>+2,530</td><td><a href="https://github.com/openai/codex-plugin-cc">https://github.com/openai/codex-plugin-cc</a></td></tr>
+        <tr><td>4</td><td>CubeSandbox</td><td>Rust</td><td>9,817</td><td>-</td><td><a href="https://github.com/TencentCloud/CubeSandbox">https://github.com/TencentCloud/CubeSandbox</a></td></tr>
+        <tr><td>5</td><td>abseil-cpp</td><td>C++</td><td>17,946</td><td>-</td><td><a href="https://github.com/abseil/abseil-cpp">https://github.com/abseil/abseil-cpp</a></td></tr>
+        <tr><td>6</td><td>herdr</td><td>Rust</td><td>15,812</td><td>+3,674</td><td><a href="https://github.com/ogulcancelik/herdr">https://github.com/ogulcancelik/herdr</a></td></tr>
+        <tr><td>7</td><td>system_prompts_leaks</td><td>JavaScript</td><td>56,763</td><td>+12,223</td><td><a href="https://github.com/asgeirtj/system_prompts_leaks">https://github.com/asgeirtj/system_prompts_leaks</a></td></tr>
+        <tr><td>8</td><td>OmniRoute</td><td>TypeScript</td><td>16,253</td><td>+4,323</td><td><a href="https://github.com/diegosouzapw/OmniRoute">https://github.com/diegosouzapw/OmniRoute</a></td></tr>
+        <tr><td>9</td><td>orca</td><td>TypeScript</td><td>17,084</td><td>+4,663</td><td><a href="https://github.com/stablyai/orca">https://github.com/stablyai/orca</a></td></tr>
+        <tr><td>12</td><td>OfficeCLI</td><td>C#</td><td>15,470</td><td>-</td><td><a href="https://github.com/iOfficeAI/OfficeCLI">https://github.com/iOfficeAI/OfficeCLI</a></td></tr>
+        <tr><td>13</td><td>strix</td><td>Python</td><td>40,877</td><td>+3,660</td><td><a href="https://github.com/usestrix/strix">https://github.com/usestrix/strix</a></td></tr>
+        </tbody>
+      </table>
+      <hr>
+      <h3>3. 重点项目分析</h3>
+      <p><strong>DesktopCommanderMCP（Trending #2）</strong></p>
+      <p>基于 TypeScript 的 MCP 服务器，为 Claude 提供终端控制、文件系统搜索和 diff 编辑能力。该项目质量评分 100（high 级别），支持使用宿主客户端订阅替代 API Token 成本，适合需要深度集成 IDE 与终端的开发者。目前 8,010 Star，176 个开放 Issue 显示社区活跃度较高。</p>
+      <p><strong>openai/codex-plugin-cc（Trending #3）</strong></p>
+      <p>OpenAI 官方推出的 Claude Code 插件，允许在 Claude Code 中直接调用 Codex 进行代码审查或任务委托。本周新增 2,530 Star，累计 28,086 Star，采用 Apache-2.0 协议。该项目体现了主流 AI 工具间的互操作性趋势，适合已有 Claude Code 工作流的用户增量使用。</p>
+      <p><strong>TencentCloud/CubeSandbox（Trending #4）</strong></p>
+      <p>腾讯云开源的 AI Agent 沙箱服务，基于 RustVMM 和 KVM 构建，支持单节点到多节点集群扩展。作为 Rust 项目，其安全评分 100（low 风险），提供即时、并发、轻量级的安全隔离环境，解决 Agent 执行不可信代码时的安全痛点。</p>
+      <p><strong>asgeirtj/system_prompts_leaks（Trending #7）</strong></p>
+      <p>本期新增 Star 最高（+12,223），累计 56,763 Star。该项目收集并记录了 Claude、ChatGPT、Gemini 等主流 AI 的系统提示词（System Prompt），被《华盛顿邮报》引用报道。采用 CC0-1.0 协议，适合研究大模型行为边界与 Prompt 工程的学习者。</p>
+      <p><strong>stablyai/orca（Trending #9）</strong></p>
+      <p>定位&quot;AI 编排开发环境（ADE）&quot;，支持并行运行 Codex、Claude Code、OpenCode 或 Pi 等多个 Agent，每个在独立 worktree 中执行。本周新增 4,663 Star，YC 背书项目，支持桌面与移动端，适合需要同时调度多 Agent 协作的复杂开发场景。</p>
+      <hr>
+      <h3>4. 最适合用户学习的项目</h3>
+      <p>根据您关注的<strong>Java 后端、Python 工具、Agent 开发与 CLI 自动化</strong>方向，推荐以下学习路径：</p>
+      <p><strong>入门首选：strix（Python）</strong></p>
+      <p>唯一入选的 Python 项目（Trending #13，40,877 Star），专注 AI 渗透测试与漏洞扫描。提供 GitHub Actions 集成能力，适合学习如何将 AI Agent 集成到 CI/CD 流程。代码质量高（quality_score: 100），且有实际的自动化安全测试应用场景。</p>
+      <p><strong>架构进阶：CubeSandbox（Rust）</strong></p>
+      <p>若关注 Agent 安全隔离与云原生架构，可研究腾讯云的沙箱实现。虽然使用 Rust，但其基于 KVM 的轻量级虚拟化设计思路对 Java/Python 后端开发者理解容器安全边界具有参考价值。</p>
+      <p><strong>工具集成：DesktopCommanderMCP（TypeScript）</strong></p>
+      <p>适合学习 MCP（Model Context Protocol）协议实践，了解如何为 Claude 等 AI 客户端扩展终端与文件系统能力。项目结构清晰，MIT 协议允许二次开发。</p>
+      <p><strong>Prompt 工程研究：system_prompts_leaks</strong></p>
+      <p>虽非代码项目，但系统提示词库对理解大模型指令遵循机制极具价值，有助于优化您现有 Java/Python 项目中的 AI 集成提示词设计。</p>
+      <hr>
+      <h3>5. 本周结论</h3>
+      <p>1. <strong>AI Agent 基础设施进入实用化阶段</strong>：本期 80% 项目聚焦 Agent 开发工具链（编排、沙箱、终端集成），表明社区正从&quot;构建 Agent&quot;转向&quot;构建 Agent 的生态系统&quot;。</p>
+      <p>2. <strong>TypeScript/Rust 成为 Agent 开发双雄</strong>：TypeScript 主导上层应用与协议实现（MCP、网关、IDE），Rust 主导底层安全与性能关键组件（沙箱、终端复用器）。</p>
+      <p>3. <strong>多 Agent 协作成为新热点</strong>：herdr、orca 等项目解决&quot;如何同时管理多个 Agent&quot;的问题，预示下一代开发环境将向并行 Agent 编排演进。</p>
+      <p>4. <strong>安全与成本优化受关注</strong>：CubeSandbox 解决安全隔离，OmniRoute 通过 Token 压缩与免费 API 路由降低使用成本，反映企业级落地的实际需求。</p>
+      <p><strong>建议关注</strong>：MCP 协议生态的扩展（DesktopCommanderMCP）、多 Agent 编排模式（orca/herdr）以及 AI 安全测试自动化（strix）的持续演进。</p>
+      <h2>附录：项目链接与来源补全</h2>
+      <p>• asgeirtj/system_prompts_leaks；<a href="https://github.com/asgeirtj/system_prompts_leaks">https://github.com/asgeirtj/system_prompts_leaks</a>；来源：GitHub Search + GitHub Trending；Trending 排名：7</p>
+    </article>
+  </main>
+</body>
+</html>

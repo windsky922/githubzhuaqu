@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GitHub 项目研究 Agent</title>
+</head>
+<body>
+  <p>正在打开 React 项目研究工作台。<a id="appLink" href="app/#/agent">继续打开</a></p>
+  <script>
+    (function () {
+      const page = "agent";
+      const params = new URLSearchParams(window.location.search);
+      let route = "/agent";
+      if (page === "project") {
+        const repo = params.get("repo") || "";
+        if (/^[^/]+\/[^/]+$/.test(repo)) {
+          route = "/projects/" + repo.split("/").map(encodeURIComponent).join("/");
+          params.delete("repo");
+        }
+      }
+      const query = params.toString();
+      const target = "app/#" + route + (query ? "?" + query : "");
+      document.getElementById("appLink").href = target;
+      window.location.replace(target);
+    })();
+  </script>
+</body>
+</html>
