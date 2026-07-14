@@ -154,6 +154,8 @@ config/interests.example.json
 
 ## 数据归档
 
+`weekly-archive` 是公开静态归档，不是运行态备份：发布器仅从 allowlist 复制 Pages 静态资产、周报及 `raw/runs/selected/trends` 公共 JSON，并在每次发布前清理归档 worktree 的 `docs`、`reports`、`data` 后暂存删除。SQLite、WAL/SHM、`data/state`、用户订阅/反馈/任务、未知文件和符号链接均不进入公开分支。工作流恢复历史时只取公开 JSON 和报告；SQLite 由这些 JSON 重建。未来跨 Actions 的真实用户状态必须使用私有持久化位置。
+
 归档目录职责：
 
 1. `data/raw/YYYY-MM-DD.json`：保存 GitHub API 本次采集到的原始候选仓库。

@@ -1,5 +1,18 @@
 # 操作日志
 
+## 2026-07-14 追加：P0-11A 公开归档白名单与运行态边界
+
+### 1. 修改内容
+
+1. `scripts/publish_archive_branch.py` 改为显式 allowlist，发布前清理 archive worktree 的 `docs`、`reports`、`data` 并使用 `git add -A` 暂存删除；拒绝 SQLite、WAL/SHM、未知文件、符号链接、路径穿越和敏感 canary。
+2. 周报工作流恢复历史时只检出公开报告及 `raw/runs/selected/trends` JSON，不再从公开分支恢复完整 `data/` 或 SQLite。
+3. SQLite 保持由公共 JSON 重建的本地派生索引；订阅、反馈和任务运行态不进入公开归档。当前本地订阅、反馈、通知和项目任务均为空，已有周报 job 均已结束。
+
+### 2. 验证与边界
+
+1. 新增临时 worktree 测试，证明旧 SQLite 被清理、公共文件可复制、未知文件和敏感 canary 被拒绝。
+2. 远端 `weekly-archive` 只读 fetch 仍被已知损坏 loose object `0d5add93193596c7597490811fc0cd23952335aa` 阻断；未删除对象、未改写远端历史。本阶段只处理未来发布与最新 tree 删除。
+
 ## 2026-07-13 追加：GitHub 项目研究 Agent V3 新窗口开发交接
 
 ### 1. 目的

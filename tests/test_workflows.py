@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+import shutil
+import subprocess
+import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from scripts import publish_archive_branch
 
@@ -24,7 +28,8 @@ class WorkflowTest(unittest.TestCase):
         self.assertIn("send_event_notifications:", workflow)
         self.assertIn("ARCHIVE_BRANCH: weekly-archive", workflow)
         self.assertIn("scripts/publish_archive_branch.py", workflow)
-        self.assertIn("git checkout \"origin/$ARCHIVE_BRANCH\" -- data reports || true", workflow)
+        self.assertIn("git checkout \"origin/$ARCHIVE_BRANCH\" -- reports data/raw data/runs data/selected data/trends || true", workflow)
+        self.assertNotIn('git checkout "origin/$ARCHIVE_BRANCH" -- data reports || true', workflow)
         self.assertNotIn("git push\n", workflow)
         self.assertNotIn("git commit -m", workflow)
 
@@ -98,9 +103,79 @@ class WorkflowTest(unittest.TestCase):
         script = (ROOT / "scripts" / "publish_archive_branch.py").read_text(encoding="utf-8")
 
         self.assertEqual(publish_archive_branch.ARCHIVE_PATHS, ("docs", "reports", "data"))
-        self.assertIn("git\", \"add\", *ARCHIVE_PATHS", script)
+        self.assertEqual(publish_archive_branch.PUBLIC_DATA_DIRECTORIES, ("raw", "runs", "selected", "trends"))
+        self.assertIn('"git", "add", "-A"', script)
         self.assertNotIn("README.md", publish_archive_branch.ARCHIVE_PATHS)
         self.assertNotIn(".github", publish_archive_branch.ARCHIVE_PATHS)
+
+    def test_public_archive_copy_removes_old_sqlite_and_keeps_allowlisted_files(self) -> None:
+        root = Path(tempfile.mkdtemp(prefix="archive-publisher-test-"))
+        worktree = root / "worktree"
+        try:
+            (root / "docs" / "weekly").mkdir(parents=True)
+            (root / "docs" / "weekly" / "2026-07-14.html").write_text("public", encoding="utf-8")
+            (root / "reports").mkdir()
+            (root / "reports" / "2026-07-14.md").write_text("report", encoding="utf-8")
+            (root / "data" / "runs").mkdir(parents=True)
+            (root / "data" / "runs" / "2026-07-14.json").write_text("{}", encoding="utf-8")
+            local_sqlite = root / "data" / "github_weekly.sqlite"
+            local_sqlite.write_bytes(b"local sqlite")
+            local_sqlite_before = local_sqlite.read_bytes()
+            (root / "data" / "state").mkdir()
+            (root / "data" / "state" / "private.json").write_text("{}", encoding="utf-8")
+            (worktree / "data").mkdir(parents=True)
+            (worktree / "data" / "github_weekly.sqlite").write_bytes(b"old sqlite")
+            subprocess.run(["git", "init"], cwd=worktree, check=True, capture_output=True)
+            subprocess.run(["git", "add", "data/github_weekly.sqlite"], cwd=worktree, check=True, capture_output=True)
+            subprocess.run(["git", "-c", "user.name=test", "-c", "user.email=test@example.invalid", "commit", "-m", "seed"], cwd=worktree, check=True, capture_output=True)
+
+            sources = publish_archive_branch._public_sources(root)
+            publish_archive_branch._synchronize_archive_tree(worktree, sources, source_root=root)
+            publish_archive_branch._stage_and_validate(worktree)
+
+            self.assertTrue((worktree / "docs" / "weekly" / "2026-07-14.html").exists())
+            self.assertTrue((worktree / "reports" / "2026-07-14.md").exists())
+            self.assertTrue((worktree / "data" / "runs" / "2026-07-14.json").exists())
+            self.assertFalse((worktree / "data" / "github_weekly.sqlite").exists())
+            self.assertFalse((worktree / "data" / "state").exists())
+            self.assertEqual(local_sqlite.read_bytes(), local_sqlite_before)
+            staged = subprocess.run(["git", "diff", "--cached", "--name-status"], cwd=worktree, check=True, text=True, capture_output=True).stdout
+            self.assertIn("D\tdata/github_weekly.sqlite", staged)
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
+    def test_public_archive_rejects_symbolic_link_candidate(self) -> None:
+        root = Path(tempfile.mkdtemp(prefix="archive-publisher-test-"))
+        try:
+            candidate = root / "data" / "runs" / "2026-07-14.json"
+            candidate.parent.mkdir(parents=True)
+            candidate.write_text("{}", encoding="utf-8")
+            with patch.object(Path, "is_symlink", return_value=True):
+                with self.assertRaisesRegex(ValueError, "符号链接"):
+                    publish_archive_branch._public_sources(root)
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
+    def test_public_archive_rejects_unknown_file_and_sensitive_canary(self) -> None:
+        root = Path(tempfile.mkdtemp(prefix="archive-publisher-test-"))
+        try:
+            (root / "data" / "runs").mkdir(parents=True)
+            unknown = root / "data" / "runs" / "unknown.txt"
+            unknown.write_text("private", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "未知文件"):
+                publish_archive_branch._public_sources(root)
+            unknown.unlink()
+            canary = root / "data" / "runs" / "2026-07-14.json"
+            canary.write_text('{"value":"archive-query-canary"}', encoding="utf-8")
+            worktree = root / "worktree"
+            worktree.mkdir()
+            subprocess.run(["git", "init"], cwd=worktree, check=True, capture_output=True)
+            sources = publish_archive_branch._public_sources(root)
+            publish_archive_branch._synchronize_archive_tree(worktree, sources, source_root=root)
+            with self.assertRaisesRegex(ValueError, "敏感内容标记"):
+                publish_archive_branch._stage_and_validate(worktree)
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
 
 
 if __name__ == "__main__":

@@ -9,6 +9,8 @@
 3. SQLite 是可重建派生索引，不提交数据库文件。
 4. 公共数据不能包含密钥、用户隐私、未脱敏配置或原始错误堆栈。
 5. 修改字段时必须同步更新测试、文档和下游消费逻辑。
+6. `weekly-archive` 只可包含 allowlist 中的 Pages 静态文件、周报及 `data/raw`、`data/runs`、`data/selected`、`data/trends` JSON；SQLite、WAL/SHM、`data/state`、用户状态、未知文件和符号链接均为私有或拒绝项。
+7. 每次运行可由上述公开 JSON 重建 SQLite 派生索引；未来需要跨 Actions 保留的订阅、反馈或任务状态必须进入独立私有存储，不能依赖公开归档。
 
 ## 二、`docs/projects.json`
 

@@ -95,7 +95,7 @@ jobs:
         run: |
           if git ls-remote --exit-code --heads origin "$ARCHIVE_BRANCH" >/dev/null 2>&1; then
             git fetch origin "$ARCHIVE_BRANCH"
-            git checkout "origin/$ARCHIVE_BRANCH" -- data reports || true
+            git checkout "origin/$ARCHIVE_BRANCH" -- reports data/raw data/runs data/selected data/trends || true
           else
             echo "归档分支 $ARCHIVE_BRANCH 不存在，本次运行后会自动创建。"
           fi
