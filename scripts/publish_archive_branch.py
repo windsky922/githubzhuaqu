@@ -1,12 +1,18 @@
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import shutil
 import subprocess
+import sys
 from pathlib import Path, PurePosixPath
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from src.public_archive import project_archive_json
 ARCHIVE_PATHS = ("docs", "reports", "data")
 PUBLIC_DATA_DIRECTORIES = ("raw", "runs", "selected", "trends")
 PUBLIC_DOC_FILES = (
@@ -48,6 +54,7 @@ def main() -> int:
 
     public_sources = _public_sources(ROOT)
     if args.dry_run:
+        _validate_public_json_projections(public_sources, ROOT)
         print(f"dry-run: {len(public_sources)} 个公共文件将发布。")
         return 0
 
@@ -146,7 +153,40 @@ def _synchronize_archive_tree(worktree: Path, public_sources: list[Path], *, sou
         _validate_relative_path(relative)
         target = worktree / relative
         target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(source, target)
+        if _is_public_data_json(relative):
+            _write_public_json_projection(source, relative, target)
+        else:
+            shutil.copy2(source, target)
+
+
+def _write_public_json_projection(source: Path, relative: Path, target: Path) -> None:
+    projected = _public_json_projection(source, relative)
+    target.write_text(json.dumps(projected, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def _validate_public_json_projections(public_sources: list[Path], source_root: Path) -> None:
+    source_root = source_root.resolve()
+    for source in public_sources:
+        relative = source.relative_to(source_root)
+        if _is_public_data_json(relative):
+            _public_json_projection(source, relative)
+
+
+def _public_json_projection(source: Path, relative: Path) -> object:
+    try:
+        payload = json.loads(source.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as error:
+        raise ValueError(f"public archive rejects invalid JSON: {relative.as_posix()}") from error
+    return project_archive_json(PurePosixPath(relative.as_posix()), payload)
+
+
+def _is_public_data_json(relative: Path) -> bool:
+    return len(relative.parts) >= 3 and relative.parts[:2] in {
+        ("data", "raw"),
+        ("data", "runs"),
+        ("data", "selected"),
+        ("data", "trends"),
+    }
 
 
 def _stage_and_validate(worktree: Path) -> None:

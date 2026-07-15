@@ -156,7 +156,7 @@ config/interests.example.json
 
 ## 数据归档
 
-`weekly-archive` 是公开静态归档，不是运行态备份：发布器仅从 allowlist 复制 Pages 静态资产、周报及 `raw/runs/selected/trends` 公共 JSON，并在每次发布前清理归档 worktree 的 `docs`、`reports`、`data` 后暂存删除。SQLite、WAL/SHM、`data/state`、用户订阅/反馈/任务、未知文件和符号链接均不进入公开分支。工作流恢复历史时只取公开 JSON 和报告；SQLite 由这些 JSON 重建。未来跨 Actions 的真实用户状态必须使用私有持久化位置。
+`weekly-archive` 是公开静态归档，不是运行态备份：发布器仅从 allowlist 复制 Pages 静态资产、周报及 `raw/runs/selected/trends` 的字段级公共 JSON 投影，并在每次发布前清理归档 worktree 的 `docs`、`reports`、`data` 后暂存删除。本地 JSON 事实来源不被改写；投影只保留 SQLite 重建和 Pages 所需的明确字段，未知字段、查询、原始错误详情、运行/状态路径及投递结果在写入公开 worktree 前移除。SQLite、WAL/SHM、`data/state`、用户订阅/反馈/任务、未知文件和符号链接均不进入公开分支。工作流恢复历史时只取公开 JSON 和报告；SQLite 由这些 JSON 重建。未来跨 Actions 的真实用户状态必须使用私有持久化位置。
 
 发布完成后，`audit_public_archive.py` 使用 GitHub tree API 对远端最新 commit 做只读 attestation：只枚举路径和 SHA，拒绝数据库、密钥和日志类文件；失败则 weekly workflow 失败。历史审计通过显式 `--history-limit` 单独运行，不读取 blob 内容，也不触发历史改写。
 

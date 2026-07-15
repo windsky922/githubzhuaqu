@@ -168,7 +168,7 @@ class WorkflowTest(unittest.TestCase):
                 publish_archive_branch._public_sources(root)
             unknown.unlink()
             canary = root / "data" / "runs" / "2026-07-14.json"
-            canary.write_text('{"value":"archive-query-canary"}', encoding="utf-8")
+            canary.write_text('{"status":"archive-query-canary"}', encoding="utf-8")
             worktree = root / "worktree"
             worktree.mkdir()
             subprocess.run(["git", "init"], cwd=worktree, check=True, capture_output=True)
@@ -176,6 +176,51 @@ class WorkflowTest(unittest.TestCase):
             publish_archive_branch._synchronize_archive_tree(worktree, sources, source_root=root)
             with self.assertRaisesRegex(ValueError, "敏感内容标记"):
                 publish_archive_branch._stage_and_validate(worktree)
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
+    def test_public_archive_projects_private_json_fields_before_staging(self) -> None:
+        root = Path(tempfile.mkdtemp(prefix="archive-publisher-test-"))
+        worktree = root / "worktree"
+        try:
+            (root / "data" / "selected").mkdir(parents=True)
+            (root / "data" / "runs").mkdir(parents=True)
+            (root / "data" / "trends").mkdir(parents=True)
+            (root / "data" / "selected" / "2026-07-14.json").write_text(
+                '[{"full_name":"owner/public","description":"public description","readme_summary":"public summary",'
+                '"query":"archive-query-canary","note":"archive-note-canary","payload":{"token":"archive-secret-canary"}}]',
+                encoding="utf-8",
+            )
+            (root / "data" / "runs" / "2026-07-14.json").write_text(
+                '{"run_date":"2026-07-14","status":"success","selected_count":1,'
+                '"queries":["archive-query-canary"],"collector_errors":["archive-note-canary"],'
+                '"delivery_results":[{"token":"archive-secret-canary"}],"state_path":"private"}',
+                encoding="utf-8",
+            )
+            (root / "data" / "trends" / "2026-07-14.json").write_text(
+                '{"total_projects":1,"top_languages":[{"name":"Python","count":1,"note":"archive-note-canary"}]}',
+                encoding="utf-8",
+            )
+            worktree.mkdir()
+            subprocess.run(["git", "init"], cwd=worktree, check=True, capture_output=True)
+
+            sources = publish_archive_branch._public_sources(root)
+            publish_archive_branch._synchronize_archive_tree(worktree, sources, source_root=root)
+            publish_archive_branch._stage_and_validate(worktree)
+
+            selected = (worktree / "data" / "selected" / "2026-07-14.json").read_text(encoding="utf-8")
+            run = (worktree / "data" / "runs" / "2026-07-14.json").read_text(encoding="utf-8")
+            trend = (worktree / "data" / "trends" / "2026-07-14.json").read_text(encoding="utf-8")
+            staged = "\n".join((selected, run, trend))
+            self.assertIn("public description", selected)
+            self.assertIn('\"selected_count\": 1', run)
+            self.assertIn('\"name\": \"Python\"', trend)
+            self.assertNotIn("archive-query-canary", staged)
+            self.assertNotIn("archive-note-canary", staged)
+            self.assertNotIn("archive-secret-canary", staged)
+            self.assertNotIn('\"query\"', staged)
+            self.assertNotIn('\"queries\"', staged)
+            self.assertNotIn('\"delivery_results\"', staged)
         finally:
             shutil.rmtree(root, ignore_errors=True)
 

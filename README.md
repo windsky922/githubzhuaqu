@@ -361,7 +361,7 @@ python main.py
 
 ## SQLite 派生索引
 
-`weekly-archive` 只发布显式允许的 GitHub Pages 静态文件、周报和 `data/raw`、`data/runs`、`data/selected`、`data/trends` 中的 JSON。SQLite、WAL/SHM、`data/state`、用户反馈、订阅、任务运行态、未知文件和符号链接不发布。SQLite 是本地可重建派生索引，每次运行从公共 JSON 重建；真实用户状态如未来需要跨 Actions 保留，必须放入独立私有存储，不能回流公开归档。
+`weekly-archive` 只发布显式允许的 GitHub Pages 静态文件、周报和 `data/raw`、`data/runs`、`data/selected`、`data/trends` 的字段级公开 JSON 投影。发布器不会原样复制这些本地事实文件：未知字段、查询、原始错误详情、运行路径、状态路径和投递结果会在写入公开 worktree 前丢弃。SQLite、WAL/SHM、`data/state`、用户反馈、订阅、任务运行态、未知文件和符号链接不发布。SQLite 是本地可重建派生索引，每次运行从公共 JSON 投影重建；真实用户状态如未来需要跨 Actions 保留，必须放入独立私有存储，不能回流公开归档。
 
 每次周报发布完成后，工作流会通过 GitHub tree API 只读验证 `weekly-archive` 最新 tree 不含数据库、密钥和日志类文件；验证器只输出路径、提交 SHA 和计数，不下载或记录归档内容。
 
