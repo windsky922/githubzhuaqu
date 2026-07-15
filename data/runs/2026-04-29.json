@@ -1,91 +1,13 @@
 {
-  "run_date": "2026-04-29",
-  "status": "success",
-  "queries": [
-    "GitHub Trending weekly",
-    "pushed:>=2026-04-22 stars:>20",
-    "topic:ai pushed:>=2026-04-22 stars:>10",
-    "topic:agent pushed:>=2026-04-22 stars:>10",
-    "topic:llm pushed:>=2026-04-22 stars:>10",
-    "topic:automation pushed:>=2026-04-22 stars:>10",
-    "language:Python pushed:>=2026-04-22 stars:>20",
-    "language:TypeScript pushed:>=2026-04-22 stars:>20"
-  ],
   "collected_count": 223,
+  "fallback_used": true,
+  "kimi_used": false,
+  "readme_fetched_count": 10,
+  "report_path": "reports/2026-04-29.md",
+  "run_date": "2026-04-29",
   "selected_count": 10,
   "skipped_sent_count": 80,
-  "collector_errors": [],
-  "collector_stats": [
-    {
-      "source": "github_trending",
-      "query": "GitHub Trending weekly",
-      "status": "success",
-      "count": 13,
-      "error": ""
-    },
-    {
-      "source": "github_search",
-      "query": "pushed:>=2026-04-22 stars:>20",
-      "status": "success",
-      "count": 30,
-      "error": ""
-    },
-    {
-      "source": "github_search",
-      "query": "topic:ai pushed:>=2026-04-22 stars:>10",
-      "status": "success",
-      "count": 30,
-      "error": ""
-    },
-    {
-      "source": "github_search",
-      "query": "topic:agent pushed:>=2026-04-22 stars:>10",
-      "status": "success",
-      "count": 30,
-      "error": ""
-    },
-    {
-      "source": "github_search",
-      "query": "topic:llm pushed:>=2026-04-22 stars:>10",
-      "status": "success",
-      "count": 30,
-      "error": ""
-    },
-    {
-      "source": "github_search",
-      "query": "topic:automation pushed:>=2026-04-22 stars:>10",
-      "status": "success",
-      "count": 30,
-      "error": ""
-    },
-    {
-      "source": "github_search",
-      "query": "language:Python pushed:>=2026-04-22 stars:>20",
-      "status": "success",
-      "count": 30,
-      "error": ""
-    },
-    {
-      "source": "github_search",
-      "query": "language:TypeScript pushed:>=2026-04-22 stars:>20",
-      "status": "success",
-      "count": 30,
-      "error": ""
-    }
-  ],
-  "readme_fetched_count": 10,
   "star_history_updated_count": 163,
-  "report_path": "reports/2026-04-29.md",
-  "run_summary_path": "data/runs/2026-04-29.json",
-  "raw_repositories_path": "data/raw/2026-04-29.json",
-  "selected_repositories_path": "data/selected/2026-04-29.json",
-  "state_path": "data/state/sent_repos.json",
-  "star_history_path": "data/state/star_history.json",
-  "trend_summary_path": "data/trends/2026-04-29.json",
-  "kimi_used": false,
-  "fallback_used": true,
-  "report_error": "Kimi 周报质量检查失败：报告缺少完整 Markdown 链接：https://github.com/Alishahryar1/free-claude-code；报告缺少完整 Markdown 链接：https://github.com/huggingface/ml-intern；报告缺少完整 Markdown 链接：https://github.com/mattpocock/skills；报告缺少完整 Markdown 链接：https://github.com/zilliztech/claude-context；报告缺少完整 Markdown 链接：https://github.com/Fincept-Corporation/FinceptTerminal",
-  "telegram_sent": true,
-  "telegram_error": "",
-  "error": ""
+  "status": "success",
+  "telegram_sent": true
 }

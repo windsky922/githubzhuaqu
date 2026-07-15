@@ -61,17 +61,17 @@
         <section class="admin-auth-panel" aria-label="管理口令">
           <div class="admin-auth-row">
             <label class="admin-auth-label">管理口令
-              <input class="admin-auth-input" data-admin-auth-input type="password" autocomplete="off" spellcheck="false" aria-describedby="admin-auth-note">
+              <input class="admin-auth-input" data-admin-auth-input data-testid="admin-token-input" type="password" autocomplete="off" spellcheck="false" aria-describedby="admin-auth-note">
             </label>
-            <button class="admin-auth-clear" data-admin-auth-clear type="button">清除</button>
+            <button class="admin-auth-clear" data-admin-auth-clear data-testid="admin-token-clear" type="button">清除</button>
           </div>
           <p id="admin-auth-note" class="admin-auth-note">仅当前页面有效；刷新、关闭或离开页面后需要重新输入。不写入 URL、localStorage 或 sessionStorage。</p>
-          <p class="admin-auth-status" data-admin-auth-status aria-live="polite"></p>
+          <p class="admin-auth-status" data-admin-auth-status data-testid="admin-token-status" aria-live="polite"></p>
         </section>`;
       target.querySelector("[data-admin-auth-clear]")?.addEventListener("click", () => clear());
     });
     if (window.__githubWeeklyLegacyAdminTokenIgnored) {
-      setStatus("旧链接中的管理口令已忽略并从地址栏删除，请在本页重新输入。", true);
+      setStatus("旧链接中的管理口令已忽略并从地址栏删除；该口令可能已进入访问日志，请立即轮换 ADMIN_API_TOKEN 后重新输入。", true);
     }
   }
 

@@ -1,135 +1,130 @@
 {
   "schema_version": 1,
-  "total_projects": 10,
-  "trending_project_count": 10,
-  "trending_top10_selected_count": 8,
-  "trending_selected_rate": 1.0,
-  "total_star_growth": 74445,
-  "top_languages": [
-    {
-      "name": "Python",
-      "count": 6
-    },
-    {
-      "name": "Shell",
-      "count": 2
-    },
-    {
-      "name": "Swift",
-      "count": 1
-    },
-    {
-      "name": "TypeScript",
-      "count": 1
-    }
-  ],
-  "top_categories": [
-    {
-      "name": "AI Agent",
-      "count": 6
-    },
-    {
-      "name": "Other",
-      "count": 2
-    },
-    {
-      "name": "LLM Tooling",
-      "count": 1
-    },
-    {
-      "name": "Machine Learning",
-      "count": 1
-    }
-  ],
-  "top_trending": [
-    {
-      "full_name": "mvanhorn/last30days-skill",
-      "html_url": "https://github.com/mvanhorn/last30days-skill",
-      "trending_rank": 1,
-      "stargazers_count": 42139,
-      "language": "Python",
-      "category": "AI Agent"
-    },
-    {
-      "full_name": "apple/container",
-      "html_url": "https://github.com/apple/container",
-      "trending_rank": 2,
-      "stargazers_count": 37059,
-      "language": "Swift",
-      "category": "Other"
-    },
-    {
-      "full_name": "chopratejas/headroom",
-      "html_url": "https://github.com/chopratejas/headroom",
-      "trending_rank": 4,
-      "stargazers_count": 27748,
-      "language": "Python",
-      "category": "AI Agent"
-    },
-    {
-      "full_name": "NVIDIA/SkillSpector",
-      "html_url": "https://github.com/NVIDIA/SkillSpector",
-      "trending_rank": 5,
-      "stargazers_count": 5474,
-      "language": "Python",
-      "category": "AI Agent"
-    },
-    {
-      "full_name": "addyosmani/agent-skills",
-      "html_url": "https://github.com/addyosmani/agent-skills",
-      "trending_rank": 6,
-      "stargazers_count": 59625,
-      "language": "Shell",
-      "category": "AI Agent"
-    }
-  ],
-  "top_star_growth": [
-    {
-      "full_name": "addyosmani/agent-skills",
-      "html_url": "https://github.com/addyosmani/agent-skills",
-      "star_growth": 33995,
-      "stargazers_count": 59625,
-      "language": "Shell",
-      "category": "AI Agent"
-    },
-    {
-      "full_name": "mvanhorn/last30days-skill",
-      "html_url": "https://github.com/mvanhorn/last30days-skill",
-      "star_growth": 10692,
-      "stargazers_count": 42139,
-      "language": "Python",
-      "category": "AI Agent"
-    },
-    {
-      "full_name": "chopratejas/headroom",
-      "html_url": "https://github.com/chopratejas/headroom",
-      "star_growth": 10650,
-      "stargazers_count": 27748,
-      "language": "Python",
-      "category": "AI Agent"
-    },
-    {
-      "full_name": "Leonxlnx/taste-skill",
-      "html_url": "https://github.com/Leonxlnx/taste-skill",
-      "star_growth": 6866,
-      "stargazers_count": 43814,
-      "language": "Shell",
-      "category": "AI Agent"
-    },
-    {
-      "full_name": "refactoringhq/tolaria",
-      "html_url": "https://github.com/refactoringhq/tolaria",
-      "star_growth": 6594,
-      "stargazers_count": 16250,
-      "language": "TypeScript",
-      "category": "Other"
-    }
-  ],
   "summary_points": [
     "AI Agent 是本期最集中的方向，共 6 个项目。",
     "Python 是本期出现最多的主要语言，共 6 个项目。",
     "本期入选项目累计新增 Star 74445。",
     "mvanhorn/last30days-skill 是本期 GitHub Trending 排名最高的项目，周榜排名 1。",
     "addyosmani/agent-skills 是本期新增 Star 最高的项目，新增 33995。"
-  ]
+  ],
+  "top_categories": [
+    {
+      "count": 6,
+      "name": "AI Agent"
+    },
+    {
+      "count": 2,
+      "name": "Other"
+    },
+    {
+      "count": 1,
+      "name": "LLM Tooling"
+    },
+    {
+      "count": 1,
+      "name": "Machine Learning"
+    }
+  ],
+  "top_languages": [
+    {
+      "count": 6,
+      "name": "Python"
+    },
+    {
+      "count": 2,
+      "name": "Shell"
+    },
+    {
+      "count": 1,
+      "name": "Swift"
+    },
+    {
+      "count": 1,
+      "name": "TypeScript"
+    }
+  ],
+  "top_star_growth": [
+    {
+      "category": "AI Agent",
+      "full_name": "addyosmani/agent-skills",
+      "html_url": "https://github.com/addyosmani/agent-skills",
+      "language": "Shell",
+      "star_growth": 33995,
+      "stargazers_count": 59625
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "mvanhorn/last30days-skill",
+      "html_url": "https://github.com/mvanhorn/last30days-skill",
+      "language": "Python",
+      "star_growth": 10692,
+      "stargazers_count": 42139
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "chopratejas/headroom",
+      "html_url": "https://github.com/chopratejas/headroom",
+      "language": "Python",
+      "star_growth": 10650,
+      "stargazers_count": 27748
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "Leonxlnx/taste-skill",
+      "html_url": "https://github.com/Leonxlnx/taste-skill",
+      "language": "Shell",
+      "star_growth": 6866,
+      "stargazers_count": 43814
+    },
+    {
+      "category": "Other",
+      "full_name": "refactoringhq/tolaria",
+      "html_url": "https://github.com/refactoringhq/tolaria",
+      "language": "TypeScript",
+      "star_growth": 6594,
+      "stargazers_count": 16250
+    }
+  ],
+  "top_trending": [
+    {
+      "category": "AI Agent",
+      "full_name": "mvanhorn/last30days-skill",
+      "html_url": "https://github.com/mvanhorn/last30days-skill",
+      "language": "Python",
+      "stargazers_count": 42139
+    },
+    {
+      "category": "Other",
+      "full_name": "apple/container",
+      "html_url": "https://github.com/apple/container",
+      "language": "Swift",
+      "stargazers_count": 37059
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "chopratejas/headroom",
+      "html_url": "https://github.com/chopratejas/headroom",
+      "language": "Python",
+      "stargazers_count": 27748
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "NVIDIA/SkillSpector",
+      "html_url": "https://github.com/NVIDIA/SkillSpector",
+      "language": "Python",
+      "stargazers_count": 5474
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "addyosmani/agent-skills",
+      "html_url": "https://github.com/addyosmani/agent-skills",
+      "language": "Shell",
+      "stargazers_count": 59625
+    }
+  ],
+  "total_projects": 10,
+  "total_star_growth": 74445,
+  "trending_project_count": 10,
+  "trending_selected_rate": 1.0,
+  "trending_top10_selected_count": 8
 }

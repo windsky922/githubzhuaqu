@@ -1,139 +1,134 @@
 {
   "schema_version": 1,
-  "total_projects": 10,
-  "trending_project_count": 10,
-  "trending_top10_selected_count": 8,
-  "trending_selected_rate": 1.0,
-  "total_star_growth": 39911,
-  "top_languages": [
-    {
-      "name": "Python",
-      "count": 5
-    },
-    {
-      "name": "C",
-      "count": 1
-    },
-    {
-      "name": "TypeScript",
-      "count": 1
-    },
-    {
-      "name": "Rust",
-      "count": 1
-    },
-    {
-      "name": "JavaScript",
-      "count": 1
-    },
-    {
-      "name": "Shell",
-      "count": 1
-    }
-  ],
-  "top_categories": [
-    {
-      "name": "AI Agent",
-      "count": 5
-    },
-    {
-      "name": "Other",
-      "count": 3
-    },
-    {
-      "name": "LLM Tooling",
-      "count": 2
-    }
-  ],
-  "top_trending": [
-    {
-      "full_name": "DeusData/codebase-memory-mcp",
-      "html_url": "https://github.com/DeusData/codebase-memory-mcp",
-      "trending_rank": 1,
-      "stargazers_count": 10499,
-      "language": "C",
-      "category": "LLM Tooling"
-    },
-    {
-      "full_name": "chopratejas/headroom",
-      "html_url": "https://github.com/chopratejas/headroom",
-      "trending_rank": 2,
-      "stargazers_count": 44832,
-      "language": "Python",
-      "category": "AI Agent"
-    },
-    {
-      "full_name": "Panniantong/Agent-Reach",
-      "html_url": "https://github.com/Panniantong/Agent-Reach",
-      "trending_rank": 3,
-      "stargazers_count": 37022,
-      "language": "Python",
-      "category": "AI Agent"
-    },
-    {
-      "full_name": "iptv-org/iptv",
-      "html_url": "https://github.com/iptv-org/iptv",
-      "trending_rank": 4,
-      "stargazers_count": 127185,
-      "language": "TypeScript",
-      "category": "Other"
-    },
-    {
-      "full_name": "n0-computer/iroh",
-      "html_url": "https://github.com/n0-computer/iroh",
-      "trending_rank": 5,
-      "stargazers_count": 10460,
-      "language": "Rust",
-      "category": "Other"
-    }
-  ],
-  "top_star_growth": [
-    {
-      "full_name": "chopratejas/headroom",
-      "html_url": "https://github.com/chopratejas/headroom",
-      "star_growth": 17084,
-      "stargazers_count": 44832,
-      "language": "Python",
-      "category": "AI Agent"
-    },
-    {
-      "full_name": "Panniantong/Agent-Reach",
-      "html_url": "https://github.com/Panniantong/Agent-Reach",
-      "star_growth": 8124,
-      "stargazers_count": 37022,
-      "language": "Python",
-      "category": "AI Agent"
-    },
-    {
-      "full_name": "iptv-org/iptv",
-      "html_url": "https://github.com/iptv-org/iptv",
-      "star_growth": 5856,
-      "stargazers_count": 127185,
-      "language": "TypeScript",
-      "category": "Other"
-    },
-    {
-      "full_name": "addyosmani/agent-skills",
-      "html_url": "https://github.com/addyosmani/agent-skills",
-      "star_growth": 5234,
-      "stargazers_count": 64859,
-      "language": "Shell",
-      "category": "AI Agent"
-    },
-    {
-      "full_name": "NVIDIA/SkillSpector",
-      "html_url": "https://github.com/NVIDIA/SkillSpector",
-      "star_growth": 3613,
-      "stargazers_count": 9087,
-      "language": "Python",
-      "category": "AI Agent"
-    }
-  ],
   "summary_points": [
     "AI Agent 是本期最集中的方向，共 5 个项目。",
     "Python 是本期出现最多的主要语言，共 5 个项目。",
     "本期入选项目累计新增 Star 39911。",
     "DeusData/codebase-memory-mcp 是本期 GitHub Trending 排名最高的项目，周榜排名 1。",
     "chopratejas/headroom 是本期新增 Star 最高的项目，新增 17084。"
-  ]
+  ],
+  "top_categories": [
+    {
+      "count": 5,
+      "name": "AI Agent"
+    },
+    {
+      "count": 3,
+      "name": "Other"
+    },
+    {
+      "count": 2,
+      "name": "LLM Tooling"
+    }
+  ],
+  "top_languages": [
+    {
+      "count": 5,
+      "name": "Python"
+    },
+    {
+      "count": 1,
+      "name": "C"
+    },
+    {
+      "count": 1,
+      "name": "TypeScript"
+    },
+    {
+      "count": 1,
+      "name": "Rust"
+    },
+    {
+      "count": 1,
+      "name": "JavaScript"
+    },
+    {
+      "count": 1,
+      "name": "Shell"
+    }
+  ],
+  "top_star_growth": [
+    {
+      "category": "AI Agent",
+      "full_name": "chopratejas/headroom",
+      "html_url": "https://github.com/chopratejas/headroom",
+      "language": "Python",
+      "star_growth": 17084,
+      "stargazers_count": 44832
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "Panniantong/Agent-Reach",
+      "html_url": "https://github.com/Panniantong/Agent-Reach",
+      "language": "Python",
+      "star_growth": 8124,
+      "stargazers_count": 37022
+    },
+    {
+      "category": "Other",
+      "full_name": "iptv-org/iptv",
+      "html_url": "https://github.com/iptv-org/iptv",
+      "language": "TypeScript",
+      "star_growth": 5856,
+      "stargazers_count": 127185
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "addyosmani/agent-skills",
+      "html_url": "https://github.com/addyosmani/agent-skills",
+      "language": "Shell",
+      "star_growth": 5234,
+      "stargazers_count": 64859
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "NVIDIA/SkillSpector",
+      "html_url": "https://github.com/NVIDIA/SkillSpector",
+      "language": "Python",
+      "star_growth": 3613,
+      "stargazers_count": 9087
+    }
+  ],
+  "top_trending": [
+    {
+      "category": "LLM Tooling",
+      "full_name": "DeusData/codebase-memory-mcp",
+      "html_url": "https://github.com/DeusData/codebase-memory-mcp",
+      "language": "C",
+      "stargazers_count": 10499
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "chopratejas/headroom",
+      "html_url": "https://github.com/chopratejas/headroom",
+      "language": "Python",
+      "stargazers_count": 44832
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "Panniantong/Agent-Reach",
+      "html_url": "https://github.com/Panniantong/Agent-Reach",
+      "language": "Python",
+      "stargazers_count": 37022
+    },
+    {
+      "category": "Other",
+      "full_name": "iptv-org/iptv",
+      "html_url": "https://github.com/iptv-org/iptv",
+      "language": "TypeScript",
+      "stargazers_count": 127185
+    },
+    {
+      "category": "Other",
+      "full_name": "n0-computer/iroh",
+      "html_url": "https://github.com/n0-computer/iroh",
+      "language": "Rust",
+      "stargazers_count": 10460
+    }
+  ],
+  "total_projects": 10,
+  "total_star_growth": 39911,
+  "trending_project_count": 10,
+  "trending_selected_rate": 1.0,
+  "trending_top10_selected_count": 8
 }
