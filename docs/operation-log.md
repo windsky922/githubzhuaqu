@@ -1,5 +1,29 @@
 # 操作日志
 
+## 2026-07-15 追加：V4 下一阶段开发交接
+
+### 1. 交接目的
+
+1. 新增 `docs/project-review-agent-v4-handoff.md`，把当前功能基线、必读顺序、第一任务、实现边界、测试矩阵、完整验证和可复制启动提示固化为下一窗口的唯一执行入口。
+2. README 增加 V4 交接入口，并保留 V4 路线图与 V3/V2/V1 历史文档；路线图负责说明风险和优先级，交接文档负责说明新窗口如何工作。
+
+### 2. 当前基线与下一任务
+
+1. 文档编写前本地 `main` 与 `origin/main` 均为 `63712587bc1f9a2348653218c7c477702488b1f1`；该提交的 GitHub Actions run `29412784296` 三项 job 全部成功。工作区仅有未跟踪 `output/`、`tmp/`，本阶段不读取、不修改、不暂存。
+2. 下一阶段第一任务为 V4 路线图的 P0-14：建立 schema-versioned 公共归档 manifest，并在 push 前证明完整 staged tree 与本轮公共投影精确一致；选择器、staged tree 校验、测试和远端 `audit_public_archive.py` 必须复用同一规则，未知路径默认拒绝。
+3. 该任务只修复未来发布边界，不重新扫描历史数据库、不改写 `weekly-archive` 历史、不处理已知损坏 loose object，也不迁移 Agent 框架、修改 Ask/SSE 契约、服务端会话或 hybrid 权重。
+
+### 3. 交接边界
+
+1. 功能基线 `6371258` 与交接文档提交后的实际 HEAD 分开记录；新窗口必须用 `git rev-parse` 和远端 CI 重新核验，不把本文 SHA 当作永久状态。
+2. P0-14 完成前不进入 P0-15 评估阈值门禁；完整前端、双 Playwright、Python、安全、四套评估、差异和 `docs/app` 一致性通过，且远端三个 CI job 成功后才关闭阶段。
+
+### 4. 本轮验证
+
+1. 前端类型检查、11 项 Vitest、生产构建、12 项 mock Playwright 和 6 项真实 FastAPI Playwright 全部通过；`docs/app` 与源码构建一致。
+2. Python 全量 258 项测试和安全检查通过；项目匹配、项目推荐、60 条追问路由、100 条约束解析及 60 条证据固定集保持 V4 基线，false eligibility 与硬约束违反率为 0。
+3. `git diff --check` 通过；仅交接文档、README 入口和本条操作日志属于本阶段，`output/`、`tmp/` 保持未跟踪且未触碰。
+
 ## 2026-07-15 追加：GitHub 项目研究 Agent V4 第一性原理对抗性审查
 
 ### 1. 审查基线与范围
