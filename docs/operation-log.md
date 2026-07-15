@@ -1,5 +1,17 @@
 # 操作日志
 
+## 2026-07-15 追加：P0-13 仅公开归档修复发布通道
+
+### 1. 修改内容
+
+1. 新增手动 workflow `archive-remediation.yml`：只有在 `confirm_public_archive_release=true` 时运行，恢复既有公开报告和 JSON、执行字段投影 dry-run、重建 Pages 与前端产物，再发布到 `weekly-archive` 并执行远端 tree attestation。
+2. 该 workflow 不含 schedule、采集命令、Kimi 配置、Telegram/飞书/微信/企微 Secret 或任何通知发送步骤；其唯一写入目标是公开归档分支。
+
+### 2. 边界
+
+1. 本阶段只新增受控发布通道，不自动触发它；实际将 SQLite 从远端最新 tree 移除仍需用户在 GitHub Actions 中显式确认运行。
+2. 流程只替换最新公开 tree，不改写 `weekly-archive` 历史；历史 SQLite 的暴露范围和后续处置仍为独立事项。
+
 ## 2026-07-15 追加：P0-11C 公开 JSON 字段级投影
 
 ### 1. 修改内容

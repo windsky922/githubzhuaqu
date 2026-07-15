@@ -14,6 +14,26 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class WorkflowTest(unittest.TestCase):
+    def test_archive_remediation_workflow_is_manual_confirmed_and_has_no_external_delivery(self) -> None:
+        workflow = (ROOT / ".github" / "workflows" / "archive-remediation.yml").read_text(encoding="utf-8")
+
+        self.assertIn("workflow_dispatch:", workflow)
+        self.assertIn("confirm_public_archive_release:", workflow)
+        self.assertIn("inputs.confirm_public_archive_release == true", workflow)
+        self.assertIn("contents: write", workflow)
+        self.assertIn("ARCHIVE_BRANCH: weekly-archive", workflow)
+        self.assertIn('git checkout "origin/$ARCHIVE_BRANCH" -- reports data/raw data/runs data/selected data/trends || true', workflow)
+        self.assertIn("scripts/publish_archive_branch.py --message \"validation\" --dry-run", workflow)
+        self.assertIn("python scripts/build_pages.py", workflow)
+        self.assertIn("npm run build", workflow)
+        self.assertIn("scripts/audit_public_archive.py", workflow)
+        self.assertNotIn("schedule:", workflow)
+        self.assertNotIn("KIMI_", workflow)
+        self.assertNotIn("TELEGRAM_", workflow)
+        self.assertNotIn("WEBHOOK", workflow)
+        self.assertNotIn("send_report_link.py", workflow)
+        self.assertNotIn("manage_notifications.py", workflow)
+
     def test_weekly_workflow_publishes_archive_to_separate_branch(self) -> None:
         workflow = (ROOT / ".github" / "workflows" / "weekly.yml").read_text(encoding="utf-8")
 

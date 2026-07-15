@@ -365,6 +365,8 @@ python main.py
 
 每次周报发布完成后，工作流会通过 GitHub tree API 只读验证 `weekly-archive` 最新 tree 不含数据库、密钥和日志类文件；验证器只输出路径、提交 SHA 和计数，不下载或记录归档内容。
 
+如需在不采集项目、不调用 Kimi、也不发送任何通知的前提下把当前安全投影应用到公开分支，可在 GitHub Actions 手动运行“公开归档修复发布”，并显式勾选 `confirm_public_archive_release`。该流程只恢复既有公开归档数据、重建 Pages、发布字段投影并验证远端 tree；不会改写归档历史。
+
 当前事实来源仍然是 `data/` 下的 JSON 归档。SQLite 只作为后续前端筛选、历史查询、趋势分析、任务状态和本地订阅配置的派生索引。
 
 每次运行主流程后，程序会自动把 JSON 归档同步到 SQLite；如果同步失败，不会阻断周报生成和 Telegram 推送，错误会记录在运行摘要的 `sqlite_error` 字段中。
