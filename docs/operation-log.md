@@ -1,5 +1,33 @@
 # 操作日志
 
+## 2026-07-15 追加：GitHub 项目研究 Agent V4 第一性原理对抗性审查
+
+### 1. 审查基线与范围
+
+- 基线为 `47bded04d344ed3a0dbe9070e045b437d2246c64`，审查时本地 `main` 与 `origin/main` 一致；提交质量检查运行 `29410935146` 的核心质量、mock Playwright 和真实 FastAPI Playwright 全部成功。
+- 采用 code-explorer、reviewer、test-analyst 三角色只读审查，主 Agent 按当前代码、测试、配置、文档和远端只读元数据裁决；未读取 `tmp/`、`output/`、运行态 SQLite 或原始业务数据，未调用真实模型、采集或外发。
+- 用户确认历史归档数据库不存在真实用户信息、真实 token 或真实通知地址；该结论记录为用户提供的业务事实，不扩写为独立内容取证证明，也不触发历史重写、缓存清理、凭据轮换或通知。
+
+### 2. 结论变化
+
+1. V3 的“未校验流式草稿先展示”已由 P0-11B 修复，当前后端完整缓冲并通过基础质量闸门后才发送 delta；V4 不再把它列为未解决风险。
+2. 当前最没有把握的是 `answer_quality.passed=true` 在未见真实需求下是否代表主张受证据支持；现有 relevance、claim support 和 freshness 仍未评估。
+3. 当前最大的系统遗漏是发布器只对白名单源做选择，没有证明最终 staged Git tree 完全等于 allowlist；归档根目录或其他旧目录的未知文件可能在 push 前未被阻止。
+4. 当前最大的质量门禁缺口是项目匹配和推荐 evaluator 没有冻结阈值，Recall/MRR/Top-1 退化仍可能保持绿色 CI。
+
+### 3. 产出与下一阶段
+
+- 新增 `docs/project-review-agent-v4-roadmap.md`，README 顶部入口升级为 V4，并保留 V3/V2/V1 历史入口。
+- 下一阶段首先执行 P0-14：建立单一公共归档 manifest，对最终 staged tree 做 push 前完整 allowlist 校验；随后把四套评估接入明确阈值门禁，再处理 claim support、数据新鲜度和项目级能力作用域。
+- 本阶段只修改审查文档、README 入口和操作日志；不修改 API、schema、前端、归档发布器、检索权重或模型配置，不触碰 `tmp/`、`output/`。
+
+### 4. 本轮验证
+
+- 前端 lint、11 项 Vitest、生产构建、Python 全量单元测试、安全检查、12 项 mock Playwright 和 6 项真实 FastAPI Playwright 全部通过；`docs/app` 与源码构建一致。
+- 项目匹配固定评估：local-hash-v1/hybrid Recall@3/10 `0.9231`、MRR@10 `0.8878`、硬约束违反率 `0`；FTS5 Recall@3/10 与 MRR@10 为 `0.0962`。
+- 项目推荐固定评估：local-hash-v1/hybrid Top-1 `0.8654`、Recall@3 `0.9231`、MRR@10 `0.8878`、硬约束违反率 `0`；FTS5 Top-1/Recall@3/MRR@10 为 `0.0962`。
+- 60 条追问路由、100 条约束解析和 60 条句子证据固定集均无失败；固定集 false eligibility 和硬约束违反率为 `0`。这些是公开 fixture 回归结果，不是独立 blind 或真实模型正确率。
+
 ## 2026-07-15 追加：多 Agent 只读审查工作方式
 
 ### 1. 固化内容
