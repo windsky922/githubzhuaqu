@@ -57,6 +57,11 @@ class ArchiveContentAuditTest(unittest.TestCase):
         with patch.object(api, "get", return_value={"encoding": "base64", "content": "U1FMaXRlIGZvcm1hdCAzAA=="}):
             self.assertEqual(api.get_bytes("repos/owner/repo/git/blobs/blob-a"), b"SQLite format 3\x00")
 
+    def test_github_blob_payload_accepts_base64_line_wrapping(self) -> None:
+        api = GitHubArchiveApi("test")
+        with patch.object(api, "get", return_value={"encoding": "base64", "content": "U1FMaXRl\nIGZvcm1hdCAzAA==\n"}):
+            self.assertEqual(api.get_bytes("repos/owner/repo/git/blobs/blob-a"), b"SQLite format 3\x00")
+
     def test_inventory_deduplicates_blob_and_tracks_commit_bounds(self) -> None:
         inventory = enumerate_history(FakeArchiveApi({"blob-a": b""}), "owner/repo", "weekly-archive")
 

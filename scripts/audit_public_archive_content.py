@@ -56,7 +56,7 @@ class GitHubArchiveApi:
         if not isinstance(data, dict) or data.get("encoding") != "base64" or not isinstance(data.get("content"), str):
             raise RuntimeError("无法读取 GitHub 公开归档数据库。")
         try:
-            return base64.b64decode(data["content"], validate=True)
+            return base64.b64decode("".join(data["content"].split()), validate=True)
         except (ValueError, binascii.Error) as error:
             raise RuntimeError("无法读取 GitHub 公开归档数据库。") from error
 
