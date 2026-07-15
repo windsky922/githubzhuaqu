@@ -4,7 +4,7 @@
 
 - 当前唯一活动任务：为历史 `weekly-archive` 数据库建立可复现、无原文输出的结构取证工具。
 - 目标与完成定义：工具经本地与 CI 验证后，才可在用户单独授权下扫描历史数据库结构并生成私有脱敏统计。
-- 当前步骤：实现完成，未执行 `--confirm-structure-scan`。
+- 当前步骤：实现与 CI 验证完成，未执行 `--confirm-structure-scan`。
 
 ## 已确认事实
 
@@ -17,6 +17,7 @@
 - 新增历史内容审计器、假 GitHub API/临时 SQLite 回归和敏感 canary 输出保护。
 - 新增 `docs/archive-history-audit-protocol.md`，限定报告只能写入 `tmp/archive-audit/<run-id>/summary.json`。
 - 完整前端、双 Playwright、Python、安全和四套评估验证均通过。
+- CI `29408568021` 三项 job 全部成功；此前 CI `29408400738` 的 `tmp/` 根目录测试假设已修复并单独提交为 `fe68a02`。
 
 ## 未完成与阻塞
 
