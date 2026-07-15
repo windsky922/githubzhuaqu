@@ -64,7 +64,7 @@ def answer_rag_question(
                 evidence=evidence,
                 recommendations=recommendations,
             )
-            answer = _ensure_citation_marker(model_client.chat(messages), citations)
+            answer = model_client.chat(messages).strip()
             answer_quality = validate_rag_answer(answer=answer, citations=citations, contexts=contexts)
             if not answer_quality["passed"]:
                 raise LlmClientError("llm_quality_failed: " + "; ".join(answer_quality["issues"]))
@@ -109,7 +109,7 @@ def stream_rag_answer_question(
     retrieval: dict[str, Any],
     client: KimiChatClient | None = None,
 ) -> Iterator[dict[str, Any]]:
-    """Yield draft deltas, then one evidence-validated final response."""
+    """Buffer provider output, then emit only evidence-validated deltas and final."""
     contexts = _list_of_dicts(retrieval.get("contexts"))
     citations = _list_of_dicts(retrieval.get("citations"))
     prompt_context = str(retrieval.get("prompt_context") or "")
@@ -174,11 +174,12 @@ def stream_rag_answer_question(
             chunks: list[str] = []
             for delta in model_client.stream_chat(messages):
                 chunks.append(delta)
-                yield {"event": "delta", "data": {"text": delta}}
-            answer = _ensure_citation_marker("".join(chunks), citations)
+            answer = "".join(chunks).strip()
             answer_quality = validate_rag_answer(answer=answer, citations=citations, contexts=contexts)
             if not answer_quality["passed"]:
                 raise LlmClientError("llm_quality_failed: " + "; ".join(answer_quality["issues"]))
+            for delta in chunks:
+                yield {"event": "delta", "data": {"text": delta}}
             yield {
                 "event": "final",
                 "data": _response(

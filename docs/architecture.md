@@ -42,6 +42,8 @@ GitHub Actions 默认执行事件检测与候选构建，但 `send_event_notific
 
 ## 证据约束 RAG Ask 层
 
+流式 Ask 不转发未经验证的 provider delta：后端先完整缓冲输出，执行硬约束、引用、未知仓库和危险指令检查；仅通过后才以既有 `meta → delta* → final` 顺序发送。校验失败时只发送规则降级 `final`，前端不会渲染 provider 草稿；普通 POST 与 SSE final 保持等值。
+
 RAG 语料先经过确定性清洗和版本化，再进入 FTS5、local-hash 与 Ask。外部 README/描述按不可信输入处理：图片、徽章、HTML 属性、重复模板和提示注入式行不进入检索或模型上下文，原文仍可从 JSON 归档追溯。`corpus_version`、`cleaner_version` 和内容哈希用于判断派生索引是否过期；确认执行语料重建时旧 embedding 同步失效，随后由独立任务重建。
 
 确定性语料按来源单独分块，避免 README、风险、项目画像和 Agent 记忆互相污染。Kimi 结构化增强是独立 planned job，不在查询或语料重建中隐式调用；其输出只有在逐字段证据能从清洗原文精确定位时才进入 `model_enrichment` chunk。增强结果可参与召回和推荐理由，但不能决定硬约束；P0-4 的 recommendations 层只以确定性仓库元数据验证显式筛选。

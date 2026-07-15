@@ -7,6 +7,10 @@ from typing import Any
 _CITATION_RE = re.compile(r"\[(\d+)\]")
 _REPO_RE = re.compile(r"\b([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)\b")
 _URL_RE = re.compile(r"https?://\S+")
+_UNSAFE_INSTRUCTION_RE = re.compile(
+    r"ignore\s+(?:all\s+)?(?:previous|prior)\s+instructions|system\s+(?:prompt|message)|忽略(?:之前|先前|以上)(?:的)?指令|系统(?:提示|消息)",
+    re.IGNORECASE,
+)
 
 
 def validate_rag_answer(
@@ -35,6 +39,8 @@ def validate_rag_answer(
         issues.append("unknown_repository:" + ",".join(unknown_repositories[:5]))
     if len(contexts) < 1:
         issues.append("no_evidence")
+    if _UNSAFE_INSTRUCTION_RE.search(text):
+        issues.append("unsafe_instruction")
 
     return {
         "passed": not issues,
