@@ -105,7 +105,9 @@ class ArchiveContentAuditTest(unittest.TestCase):
                 os.environ["GITHUB_TOKEN"] = previous
 
     def test_report_is_written_only_under_tmp(self) -> None:
-        test_root = Path(tempfile.mkdtemp(prefix="archive-audit-test-", dir=Path.cwd() / "tmp"))
+        private_root = Path.cwd() / "tmp"
+        private_root.mkdir(exist_ok=True)
+        test_root = Path(tempfile.mkdtemp(prefix="archive-audit-test-", dir=private_root))
         report = _write_report({"database_blob_count": 0}, test_root)
         try:
             self.assertTrue(report.is_file())
