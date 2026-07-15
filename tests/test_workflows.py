@@ -28,8 +28,10 @@ class WorkflowTest(unittest.TestCase):
         self.assertIn("send_event_notifications:", workflow)
         self.assertIn("ARCHIVE_BRANCH: weekly-archive", workflow)
         self.assertIn("scripts/publish_archive_branch.py", workflow)
+        self.assertIn("scripts/audit_public_archive.py", workflow)
         self.assertIn("git checkout \"origin/$ARCHIVE_BRANCH\" -- reports data/raw data/runs data/selected data/trends || true", workflow)
         self.assertNotIn('git checkout "origin/$ARCHIVE_BRANCH" -- data reports || true', workflow)
+        self.assertLess(workflow.rindex("scripts/publish_archive_branch.py"), workflow.index("scripts/audit_public_archive.py"))
         self.assertNotIn("git push\n", workflow)
         self.assertNotIn("git commit -m", workflow)
 

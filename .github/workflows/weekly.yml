@@ -265,3 +265,11 @@ jobs:
           python scripts/publish_archive_branch.py
           --branch "$ARCHIVE_BRANCH"
           --message "chore: record delivery status [skip ci]"
+
+      - name: 验证远端公开归档 tree
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: >
+          python scripts/audit_public_archive.py
+          --branch "$ARCHIVE_BRANCH"
+          --verify-latest
