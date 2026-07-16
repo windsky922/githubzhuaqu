@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "root_files": [
+    "docs/index.md",
+    "docs/projects.md",
+    "docs/admin.html",
+    "docs/admin-auth.js",
+    "docs/agent.html",
+    "docs/explorer.html",
+    "docs/recommendations.html",
+    "docs/subscriptions.html",
+    "docs/compare.html",
+    "docs/project.html",
+    "docs/runs.html",
+    "docs/jobs.html",
+    "docs/job.html",
+    "docs/projects.json",
+    "docs/runs.json",
+    "docs/jobs.json",
+    "docs/profiles.json",
+    "docs/profiles.html",
+    "docs/feed.xml"
+  ],
+  "recursive_paths": {
+    "docs/app": [".css", ".gif", ".html", ".ico", ".jpg", ".jpeg", ".js", ".json", ".map", ".png", ".svg", ".webp", ".woff", ".woff2"],
+    "docs/weekly": [".html", ".md"],
+    "reports": [".md"],
+    "data/raw": [".json"],
+    "data/runs": [".json"],
+    "data/selected": [".json"],
+    "data/trends": [".json"]
+  },
+  "forbidden_suffixes": [".sqlite", ".sqlite3", ".db", ".db3", "-wal", "-shm", ".env", ".pem", ".key", ".log"]
+}

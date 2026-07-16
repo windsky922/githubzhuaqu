@@ -12,6 +12,7 @@
 6. `weekly-archive` 只可包含 allowlist 中的 Pages 静态文件、周报及 `data/raw`、`data/runs`、`data/selected`、`data/trends` JSON 的字段级公开投影；SQLite、WAL/SHM、`data/state`、用户状态、未知文件和符号链接均为私有或拒绝项。
 7. 项目数组只保留公开仓库元数据、分类/评分/趋势、README 摘要、来源与质量信号；运行摘要只保留公开计数、状态、报告链接和汇总指标；趋势嵌套条目只保留名称/计数或公开项目摘要。未知键、查询、note/payload、原始错误详情、运行或状态路径、投递结果均不得出现在公开投影。
 8. 每次运行可由上述公开 JSON 投影重建 SQLite 派生索引；未来需要跨 Actions 保留的订阅、反馈或任务状态必须进入独立私有存储，不能依赖公开归档。
+9. `config/public-archive-manifest.json` 是 `weekly-archive` 路径政策的唯一来源：发布来源选择、push 前完整 staged tree 校验和远端 latest tree attestation 必须复用它。暂存路径集合必须等于本轮 manifest 投影；未知路径、禁止后缀、符号链接与路径穿越均失败关闭。
 
 ## 二、`docs/projects.json`
 

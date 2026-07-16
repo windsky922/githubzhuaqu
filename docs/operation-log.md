@@ -1,5 +1,18 @@
 # 操作日志
 
+## 2026-07-16 追加：P0-14 公共归档 manifest 与 staged tree 门禁
+
+### 1. 修改内容
+
+1. 新增 `config/public-archive-manifest.json` 与 `src/public_archive_manifest.py`，以版本化、默认拒绝的单一规则定义公开根文件、递归目录、允许后缀与禁止后缀。
+2. 发布器按 manifest 选择来源；同步归档 worktree 时清除除 `.git` 外的全部旧内容；`git add -A` 后校验 staged 路径集合与本轮预期公共投影精确相等，并拒绝未知路径和 Git symlink mode。
+3. 远端 `audit_public_archive.py` 复用同一 manifest，因此未知普通路径和 symlink 与数据库、密钥、日志类路径同样使 latest tree attestation 失败。
+
+### 2. 验证与边界
+
+1. 定向执行 `python -m unittest tests.test_public_archive_manifest tests.test_workflows tests.test_audit_public_archive -q`；覆盖未知根路径、旧文件清理、staged 精确集合和远端规则一致性。
+2. Python 全量、security、四套固定评估、前端 lint/test/build、mock Playwright、真实 FastAPI Playwright、`git diff --check` 和 `docs/app` 一致性均在本地通过。本阶段未读取或修改 `output/`、`tmp/`、运行态 SQLite 或历史 blob；未改写 `weekly-archive` 历史、未执行真实发布或外发；远端 CI 与 latest tree attestation 尚未执行。
+
 ## 2026-07-15 追加：V4 下一阶段开发交接
 
 ### 1. 交接目的

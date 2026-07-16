@@ -19,7 +19,7 @@ class FakeGitHubApi:
                 {"sha": "old", "commit": {"tree": {"sha": "tree-old"}}},
             ]
         trees = {
-            "head": [{"path": "docs/index.html", "type": "blob"}, {"path": "data/github_weekly.sqlite", "type": "blob"}],
+            "head": [{"path": "docs/index.md", "type": "blob"}, {"path": "data/github_weekly.sqlite", "type": "blob"}],
             "tree-new": [{"path": "data/github_weekly.sqlite", "type": "blob"}],
             "tree-old": [{"path": "data/github_weekly.sqlite", "type": "blob"}, {"path": "data/legacy.db3", "type": "blob"}],
         }

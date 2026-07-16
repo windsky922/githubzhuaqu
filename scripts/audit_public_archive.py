@@ -6,15 +6,19 @@ import os
 import subprocess
 import sys
 from collections import defaultdict
+from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from src.public_archive_manifest import is_allowed_path
+
 API_BASE = "https://api.github.com"
-FORBIDDEN_SUFFIXES = (".sqlite", ".sqlite3", ".db", ".db3", "-wal", "-shm", ".env", ".pem", ".key", ".log")
-
-
 class GitHubApi:
     def __init__(self, token: str | None = None) -> None:
         self.token = token or os.getenv("GITHUB_TOKEN") or os.getenv("GH_TOKEN")
@@ -55,7 +59,8 @@ def _forbidden_paths(tree: list[dict[str, Any]]) -> list[str]:
     return sorted(
         entry["path"]
         for entry in tree
-        if entry.get("type") == "blob" and entry.get("path", "").lower().endswith(FORBIDDEN_SUFFIXES)
+        if entry.get("type") == "blob"
+        and (entry.get("mode") == "120000" or not is_allowed_path(entry.get("path", "")))
     )
 
 
