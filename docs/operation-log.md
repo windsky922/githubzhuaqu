@@ -1,5 +1,18 @@
 # 操作日志
 
+## 2026-07-16 追加：P0-15 固定评估阈值 CI 门禁
+
+### 1. 修改内容
+
+1. 新增版本化 `config/evaluation-thresholds.json`：固定四组公开 fixture 的 SHA-256 与回归下限；这些数值只表示当前固定集的回归门槛，不表示真实用户泛化准确率或 blind 成绩。
+2. 新增 `scripts/check_evaluation_thresholds.py`：对 fixture hash、评估 JSON 指标路径及 min/max 阈值失败关闭，并输出 commit、fixture hash 与违规摘要。
+3. CI 显式运行项目匹配、推荐、追问路由、约束解析四个 evaluator；检查器失败会阻断质量 job，四份结果与 threshold summary 作为短期 artifact 上传。
+
+### 2. 本轮验证与边界
+
+1. 当前 52 条匹配/推荐、60 条追问、100 条约束与 60 条证据固定集均符合门槛；FTS5 仅保留观测，不作为核心质量阈值。
+2. 本阶段不调整 hybrid 权重、fixture 内容、真实模型或外部网络调用，不新增 branch protection；直接 push `main` 的治理门禁仍需仓库管理员单独授权。
+
 ## 2026-07-16 追加：P0-14 公共归档 manifest 与 staged tree 门禁
 
 ### 1. 修改内容

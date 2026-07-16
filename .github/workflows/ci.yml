@@ -56,6 +56,29 @@ jobs:
       - name: 安全检查
         run: python scripts/security_check.py
 
+      - name: 运行固定评估阈值门禁
+        run: |
+          mkdir -p evaluation-results
+          python scripts/evaluate_project_match.py --output evaluation-results/project-match.json
+          python scripts/evaluate_project_recommendations.py --output evaluation-results/project-recommendations.json
+          python scripts/evaluate_follow_up_routing.py --output evaluation-results/follow-up-routing.json
+          python scripts/evaluate_constraint_parsing.py --output evaluation-results/constraint-parsing.json
+          python scripts/check_evaluation_thresholds.py \
+            --output evaluation-results/threshold-check.json \
+            --result project_match=evaluation-results/project-match.json \
+            --result project_recommendations=evaluation-results/project-recommendations.json \
+            --result follow_up_routing=evaluation-results/follow-up-routing.json \
+            --result constraint_parsing=evaluation-results/constraint-parsing.json
+
+      - name: 上传固定评估结果
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fixed-evaluation-results-${{ github.sha }}
+          path: evaluation-results/
+          if-no-files-found: warn
+          retention-days: 14
+
       - name: 检查差异格式
         run: git diff --check
 

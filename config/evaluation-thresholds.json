@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "purpose": "当前固定 fixture 的回归门禁，不代表真实用户泛化准确率。",
+  "fixtures": {
+    "project_match_cases": {"path": "evals/project_match_cases.jsonl", "sha256": "f9a2c4346379f00fbfa75019cff82b30828d3f08781f8adf0ba9cc4d4fb44553"},
+    "follow_up_cases": {"path": "evals/follow_up_cases.jsonl", "sha256": "1941bb3e2c7a353d6b1f348d0597d95a743d388d7843abb22b66de10238f5791"},
+    "constraint_parsing_cases": {"path": "evals/constraint_parsing_cases.jsonl", "sha256": "277c5e6a6945043c16d0a49aabb15d2998398eec38136d3c704140d7053aa0cb"},
+    "constraint_evidence_cases": {"path": "evals/constraint_evidence_cases.jsonl", "sha256": "ee01fef818e4638e3ae05d9b18b2573bd9eb17be0bdbd8d6369a4fc78d7a1618"}
+  },
+  "evaluations": {
+    "project_match": {
+      "minimum": {"modes.local-hash-v1.recall_at_3": 0.92, "modes.local-hash-v1.recall_at_10": 0.92, "modes.local-hash-v1.mrr_at_10": 0.88, "modes.local-hash-v1.clarification_accuracy": 1.0, "modes.hybrid.recall_at_3": 0.92, "modes.hybrid.recall_at_10": 0.92, "modes.hybrid.mrr_at_10": 0.88, "modes.hybrid.clarification_accuracy": 1.0},
+      "maximum": {"modes.local-hash-v1.hard_constraint_violation_rate": 0.0, "modes.local-hash-v1.zero_hit_rate": 0.08, "modes.hybrid.hard_constraint_violation_rate": 0.0, "modes.hybrid.zero_hit_rate": 0.08}
+    },
+    "project_recommendations": {
+      "minimum": {"modes.local-hash-v1.top_1_accuracy": 0.86, "modes.local-hash-v1.recall_at_3": 0.92, "modes.local-hash-v1.mrr_at_10": 0.88, "modes.hybrid.top_1_accuracy": 0.86, "modes.hybrid.recall_at_3": 0.92, "modes.hybrid.mrr_at_10": 0.88},
+      "maximum": {"modes.local-hash-v1.hard_constraint_violation_rate": 0.0, "modes.local-hash-v1.no_primary_rate": 0.08, "modes.hybrid.hard_constraint_violation_rate": 0.0, "modes.hybrid.no_primary_rate": 0.08}
+    },
+    "follow_up_routing": {
+      "minimum": {"metrics.route_accuracy": 1.0, "metrics.clarification_accuracy": 1.0, "metrics.rewrite_accuracy": 1.0, "metrics.candidate_scope_accuracy": 1.0, "metrics.constraint_exact_match_accuracy": 1.0},
+      "maximum": {"metrics.raw_follow_up_retrieval_violation_rate": 0.0}
+    },
+    "constraint_parsing": {
+      "minimum": {"metrics.constraint_exact_match_accuracy": 1.0, "metrics.operator_accuracy": 1.0, "metrics.clarification_accuracy": 1.0, "metrics.evidence_state_accuracy": 1.0},
+      "maximum": {"metrics.false_eligible_rate": 0.0, "metrics.hard_constraint_violation_rate": 0.0}
+    }
+  }
+}
