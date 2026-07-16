@@ -11,7 +11,7 @@
 ### 2. 验证与边界
 
 1. 定向执行 `python -m unittest tests.test_public_archive_manifest tests.test_workflows tests.test_audit_public_archive -q`；覆盖未知根路径、旧文件清理、staged 精确集合和远端规则一致性。
-2. Python 全量、security、四套固定评估、前端 lint/test/build、mock Playwright、真实 FastAPI Playwright、`git diff --check` 和 `docs/app` 一致性均在本地通过。本阶段未读取或修改 `output/`、`tmp/`、运行态 SQLite 或历史 blob；未改写 `weekly-archive` 历史、未执行真实发布或外发；远端 CI 与 latest tree attestation 尚未执行。
+2. Python 全量、security、四套固定评估、前端 lint/test/build、mock Playwright、真实 FastAPI Playwright、`git diff --check` 和 `docs/app` 一致性均在本地通过。提交 `f0e9558` 的远端三个 CI job 全部成功；只读 latest tree attestation 返回 154 个文件、禁止或未知路径为 0。本阶段未读取或修改 `output/`、`tmp/`、运行态 SQLite 或历史 blob；未改写 `weekly-archive` 历史、未执行真实发布或外发。
 
 ## 2026-07-15 追加：V4 下一阶段开发交接
 
