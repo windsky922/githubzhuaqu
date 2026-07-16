@@ -1,5 +1,18 @@
 # 操作日志
 
+## 2026-07-16 追加：P0-16 真实主张支持闸门
+
+### 1. 修改内容
+
+1. Ask 质量链路新增确定性、版本化的不可展示主张台账：项目事实与比较/排序结论逐项绑定 citation、同项目证据块和原文摘录，并在 `answer_quality.claim_checks[]` 返回类型、引用、证据仓库、`supported/contradicted/insufficient` 与原因。
+2. 无支持、矛盾、跨项目错配、无效摘录或比较对象覆盖不足均使质量闸门 fail closed；普通 POST 和 SSE 复用既有规则降级，SSE 不发送 provider delta，确认首选保持关闭。
+3. 保持既有 Ask 字段、`meta → delta* → final` 顺序和无状态追问；前端仅把 delta 标记为已通过当前基础闸门的分段输出。
+
+### 2. 验证与边界
+
+1. 新增确定性 fixture 覆盖同项目支持、无关合法引用、反驳证据、跨项目证据和无来源比较；不调用真实模型或外部网络。
+2. 本阶段不调整 hybrid 权重、不改 SQLite schema、不读取运行态数据库、不改变公共归档。`data_freshness=unknown` 保持不变：基础主张闸门通过不等于资料新鲜；P0-17 继续处理 freshness。
+
 ## 2026-07-16 追加：P0-15 固定评估阈值 CI 门禁
 
 ### 1. 修改内容

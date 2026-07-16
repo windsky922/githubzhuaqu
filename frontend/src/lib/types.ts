@@ -105,8 +105,16 @@ export type RagAnswer = {
     passed?: boolean;
     issues?: string[];
     citation_validity?: boolean | string;
-    evidence_relevance?: "not_evaluated" | string;
-    claim_support?: "not_evaluated" | string;
+    evidence_relevance?: "passed" | "failed" | "not_applicable" | string;
+    claim_support?: "supported" | "failed" | "not_applicable" | string;
+    claim_checks?: Array<{
+      id: string;
+      kind: "project_fact" | "comparison" | "ranking" | string;
+      citation_indexes: number[];
+      evidence_repositories: string[];
+      status: "supported" | "contradicted" | "insufficient" | string;
+      reason: string;
+    }>;
     data_freshness?: "unknown" | string;
   };
   retrieval?: { mode?: string };

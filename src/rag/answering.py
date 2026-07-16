@@ -54,6 +54,7 @@ def answer_rag_question(
             recommendations=recommendations,
         )
 
+    failed_quality: dict[str, Any] | None = None
     if model_status["configured"]:
         try:
             messages = rag_ask_messages(
@@ -66,8 +67,11 @@ def answer_rag_question(
             )
             answer = model_client.chat(messages).strip()
             answer_quality = validate_rag_answer(answer=answer, citations=citations, contexts=contexts)
+            validated_answer = str(answer_quality.pop("validated_answer", answer))
             if not answer_quality["passed"]:
+                failed_quality = answer_quality
                 raise LlmClientError("llm_quality_failed: " + "; ".join(answer_quality["issues"]))
+            answer = validated_answer
             return _response(
                 query=query,
                 answer=answer,
@@ -98,6 +102,7 @@ def answer_rag_question(
         citations=citations,
         evidence=evidence,
         model_status={**model_status, "attempted": model_status["configured"], "used": False},
+        answer_quality=failed_quality,
         recommendations=recommendations,
     )
 
@@ -161,6 +166,7 @@ def stream_rag_answer_question(
         return
 
     fallback_reason = "Kimi API 未配置"
+    failed_quality: dict[str, Any] | None = None
     if model_status["configured"]:
         try:
             messages = rag_ask_messages(
@@ -176,10 +182,12 @@ def stream_rag_answer_question(
                 chunks.append(delta)
             answer = "".join(chunks).strip()
             answer_quality = validate_rag_answer(answer=answer, citations=citations, contexts=contexts)
+            validated_answer = str(answer_quality.pop("validated_answer", answer))
             if not answer_quality["passed"]:
+                failed_quality = answer_quality
                 raise LlmClientError("llm_quality_failed: " + "; ".join(answer_quality["issues"]))
-            for delta in chunks:
-                yield {"event": "delta", "data": {"text": delta}}
+            answer = validated_answer
+            yield {"event": "delta", "data": {"text": answer}}
             yield {
                 "event": "final",
                 "data": _response(
@@ -214,6 +222,7 @@ def stream_rag_answer_question(
             citations=citations,
             evidence=evidence,
             model_status={**model_status, "attempted": model_status["configured"], "used": False},
+            answer_quality=failed_quality,
             recommendations=recommendations,
         ),
     }
@@ -278,8 +287,8 @@ def _constraint_gate_response(
             "passed": True,
             "issues": [],
             "citation_validity": "not_applicable",
-            "evidence_relevance": "not_evaluated",
-            "claim_support": "not_evaluated",
+            "evidence_relevance": "not_applicable",
+            "claim_support": "not_applicable",
             "data_freshness": "unknown",
         },
         recommendations=recommendations,
@@ -306,6 +315,8 @@ def _response(
 ) -> dict[str, Any]:
     contexts = _list_of_dicts(retrieval.get("contexts"))
     recommendations = recommendations if recommendations is not None else _recommendations(retrieval, contexts, citations)
+    quality_result = answer_quality or validate_rag_answer(answer=answer, citations=citations, contexts=contexts)
+    quality_result.pop("validated_answer", None)
     return {
         "schema_version": 1,
         "query": retrieval.get("query") or query,
@@ -328,8 +339,7 @@ def _response(
         "next_actions": _next_actions(contexts=contexts, citations=citations, answer_mode=answer_mode),
         "contexts": contexts,
         "model_status": model_status,
-        "answer_quality": answer_quality
-        or validate_rag_answer(answer=answer, citations=citations, contexts=contexts),
+        "answer_quality": quality_result,
     }
 
 

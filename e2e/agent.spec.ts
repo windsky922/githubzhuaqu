@@ -12,7 +12,7 @@ async function submit(page: Page, question: string) {
 
 test("长流式输出完成后输入区仍固定可用", async ({ page }) => {
   await submit(page, "长流式回答");
-  await expect(page.getByText("草稿生成中，等待证据质量校验")).toBeVisible();
+  await expect(page.getByText("已通过当前基础闸门，正在分段展示")).toBeVisible();
   await expect(page.getByText("当前归档内最匹配候选")).toBeVisible();
   await expect(page.getByText("fixture/agent-platform", { exact: true })).toBeVisible();
   const composer = page.locator(".composer-wrap");

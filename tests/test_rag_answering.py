@@ -3,6 +3,7 @@ from pathlib import Path
 
 from src.llm.client import LlmClientError
 from src.rag.answering import answer_rag_question, stream_rag_answer_question
+from src.rag.answer_quality import validate_rag_answer
 
 
 class _FakeClient:
@@ -62,8 +63,8 @@ class RagAnsweringTest(unittest.TestCase):
         self.assertEqual(result["evidence_coverage"], expected_coverage)
         self.assertEqual(result["match_confidence"], "unknown")
         self.assertIn("citation_validity", result["answer_quality"])
-        self.assertEqual(result["answer_quality"]["evidence_relevance"], "not_evaluated")
-        self.assertEqual(result["answer_quality"]["claim_support"], "not_evaluated")
+        self.assertEqual(result["answer_quality"]["evidence_relevance"], "not_applicable")
+        self.assertEqual(result["answer_quality"]["claim_support"], "not_applicable")
         self.assertEqual(result["answer_quality"]["data_freshness"], "unknown")
 
     def test_refuses_without_evidence(self):
@@ -215,6 +216,76 @@ class RagAnsweringTest(unittest.TestCase):
         self.assertEqual(events[-1]["data"]["answer_mode"], "fallback_rule")
         self.assertIn("unknown_repository:unknown/repo", events[-1]["data"]["fallback_reason"])
 
+    def test_claim_ledger_accepts_same_repository_source_quote(self):
+        answer = (
+            "owner/agent 是 agent workflow automation 项目。 [1]\n"
+            '<claim_ledger>{"schema_version":1,"claims":[{"id":"claim-1","kind":"project_fact","text":"owner/agent 是 agent workflow automation 项目。","subjects":["owner/agent"],"citation_indexes":[1],"evidence_refs":[{"citation_index":1,"chunk_id":"chunk:1","repository":"owner/agent","quote":"owner/agent 是 agent workflow automation 项目。"}]}]}</claim_ledger>'
+        )
+        quality = validate_rag_answer(answer=answer, citations=_retrieval([_context(1)])["citations"], contexts=[_context(1)])
+        self.assertTrue(quality["passed"])
+        self.assertEqual(quality["claim_support"], "supported")
+        self.assertEqual(quality["validated_answer"], "owner/agent 是 agent workflow automation 项目。 [1]")
+
+    def test_claim_ledger_rejects_irrelevant_contradicted_cross_project_and_incomplete_comparison(self):
+        context = _context(1)
+        citation = _retrieval([context])["citations"]
+        base = {
+            "schema_version": 1,
+            "claims": [{
+                "id": "claim-1", "kind": "project_fact", "text": "owner/agent 支持本地 UI。",
+                "subjects": ["owner/agent"], "citation_indexes": [1],
+                "evidence_refs": [{"citation_index": 1, "chunk_id": "chunk:1", "repository": "owner/agent", "quote": "无关的其他描述文本。"}],
+            }],
+        }
+        import json
+
+        irrelevant = validate_rag_answer(answer=f'owner/agent 支持本地 UI。 [1]\n<claim_ledger>{json.dumps(base, ensure_ascii=False)}</claim_ledger>', citations=citation, contexts=[context])
+        self.assertFalse(irrelevant["passed"])
+        self.assertEqual(irrelevant["claim_checks"][0]["status"], "insufficient")
+
+        contradicted_context = {**context, "text": "owner/agent 不支持本地 UI，必须使用远端服务。"}
+        base["claims"][0]["evidence_refs"][0]["quote"] = "owner/agent 不支持本地 UI，必须使用远端服务。"
+        contradicted = validate_rag_answer(answer=f'owner/agent 支持本地 UI。 [1]\n<claim_ledger>{json.dumps(base, ensure_ascii=False)}</claim_ledger>', citations=citation, contexts=[contradicted_context])
+        self.assertEqual(contradicted["claim_checks"][0]["status"], "contradicted")
+
+        cross_context = {
+            "chunk_id": "chunk:other",
+            "text": "owner/other is an agent workflow automation project.",
+            "metadata": {"full_name": "owner/other"},
+        }
+        cross_ledger = json.loads(json.dumps(base))
+        cross_ledger["claims"][0]["evidence_refs"][0].update(
+            {"citation_index": 1, "chunk_id": "chunk:other", "repository": "owner/other", "quote": cross_context["text"]}
+        )
+        cross_project = validate_rag_answer(
+            answer=f'{cross_ledger["claims"][0]["text"]} [1]\n<claim_ledger>{json.dumps(cross_ledger, ensure_ascii=False)}</claim_ledger>',
+            citations=[{"index": 1, "full_name": "owner/other", "chunk_id": "chunk:other"}],
+            contexts=[cross_context],
+        )
+        self.assertFalse(cross_project["passed"])
+        self.assertEqual(cross_project["claim_checks"][0]["reason"], "cross_project_evidence")
+
+        base["claims"][0]["evidence_refs"][0]["quote"] = context["text"]
+        base["claims"][0].update({"kind": "comparison", "text": "owner/agent 优于 owner/other。", "subjects": ["owner/agent", "owner/other"]})
+        comparison = validate_rag_answer(answer=f'owner/agent 优于 owner/other。 [1]\n<claim_ledger>{json.dumps(base, ensure_ascii=False)}</claim_ledger>', citations=citation, contexts=[context])
+        self.assertFalse(comparison["passed"])
+        self.assertEqual(comparison["claim_checks"][0]["reason"], "comparison_without_basis")
+
+    def test_missing_ledger_claim_falls_back_without_stream_delta_or_primary(self):
+        events = list(
+            stream_rag_answer_question(
+                root=Path.cwd(),
+                query="agent workflow",
+                retrieval=_retrieval([_context()]),
+                client=_FakeClient(answer="owner/agent 支持本地 UI。 [1]"),
+            )
+        )
+        final = events[-1]["data"]
+        self.assertEqual([item["event"] for item in events], ["meta", "final"])
+        self.assertEqual(final["answer_mode"], "fallback_rule")
+        self.assertFalse(final["answer_quality"]["passed"])
+        self.assertEqual(final["answer_quality"]["claim_support"], "failed")
+
     def test_stream_unsafe_instruction_across_deltas_never_emits_provider_text(self):
         events = list(
             stream_rag_answer_question(
@@ -245,12 +316,13 @@ class RagAnsweringTest(unittest.TestCase):
 
 
 def _context(index=1):
+    repository = "owner/agent" if index == 1 else f"owner/agent-{index}"
     return {
         "chunk_id": f"chunk:{index}",
-        "text": f"owner/agent-{index} 是 agent workflow automation 项目。",
+        "text": f"{repository} 是 agent workflow automation 项目。",
         "evidence": ["agent workflow automation"],
         "metadata": {
-            "full_name": f"owner/agent-{index}" if index != 1 else "owner/agent",
+            "full_name": repository,
             "html_url": f"https://github.com/owner/agent-{index}",
             "run_date": "2026-05-09",
             "language": "Python",

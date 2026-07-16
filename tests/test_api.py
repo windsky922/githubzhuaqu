@@ -1420,7 +1420,7 @@ class ApiRepositoryTest(unittest.TestCase):
             self.assertIn('"answer_mode": "fallback_rule"', v1_rag_ask_stream.text)
             self.assertIn('"evidence_coverage":', v1_rag_ask_stream.text)
             self.assertIn('"match_confidence": "unknown"', v1_rag_ask_stream.text)
-            self.assertIn('"evidence_relevance": "not_evaluated"', v1_rag_ask_stream.text)
+            self.assertIn('"evidence_relevance": "not_applicable"', v1_rag_ask_stream.text)
             self.assertIn('"recommendations":', v1_rag_ask_stream.text)
             self.assertEqual(v1_rag_explanations.status_code, 200)
             self.assertEqual(v1_project_rag_explanations.status_code, 200)

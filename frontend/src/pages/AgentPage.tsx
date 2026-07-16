@@ -74,7 +74,7 @@ export function AgentPage() {
     const controller = new AbortController(); controllerRef.current = controller;
     try { await streamRagAsk(nextQuestion, context, controller.signal, (event) => {
       if (event.event === "meta") { setStage("已召回证据，正在生成草稿"); setStatus("证据已召回"); }
-      if (event.event === "delta") { setDraft((value) => value + String(event.data.text || "")); setStage("草稿生成中，等待证据质量校验"); setStatus("证据校验中…"); }
+      if (event.event === "delta") { setDraft((value) => value + String(event.data.text || "")); setStage("已通过当前基础闸门，正在分段展示"); setStatus("主张与证据校验已通过。"); }
       if (event.event === "final") { const response = answerFromEvent(event.data); setConversations((items) => items.map((conversation) => conversation.id === active.id ? { ...conversation, updatedAt: new Date().toISOString(), turns: conversation.turns.map((turn) => turn.id === turnId ? { ...turn, response } : turn) } : conversation)); setDraft(""); setStage("已生成正式结论"); setStatus(response.answer_mode === "clarification" ? "需要补充需求后再检索。" : response.answer_mode === "no_match" ? "当前硬约束下没有匹配项目。" : response.answer_mode === "llm" && response.answer_quality?.passed !== false ? "回答已通过证据质量校验。" : "已返回证据约束结论。"); }
       if (event.event === "error") { setStage("连接异常"); setStatus(String(event.data.message || "流式连接中断。")); }
     }); } catch (error) { if (!controller.signal.aborted) { setStage("请求失败"); setStatus(`请求失败：${error instanceof Error ? error.message : "未知错误"}`); } } finally { controllerRef.current = null; setBusy(false); }
