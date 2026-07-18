@@ -1,5 +1,18 @@
 # 操作日志
 
+## 2026-07-18 追加：P0-16B 结构化语义主张支持闸门
+
+### 1. 修改内容
+
+1. 主张台账升级为 schema-v2。每个主张及其证据引用使用固定事实字段：主体、组件、阶段、谓词、值、模态、版本范围、条件、时间和数量；证据事实必须由 quote 逐字段锚定。
+2. `claim_checks[]` 拆分 `binding_status`、`polarity_status`、`scope_status`、`semantic_support_status`。只有四层都通过才为 `supported`；字段不一致、未锚定、跨项目或可见事实漏登记均 fail closed，普通 POST 与 SSE 均不发送 provider 内容。
+3. 新增离线 `claim_support_cases` evaluator，并把 fixture hash、准确率和 false-support 率接入固定评估阈值门禁与 CI。
+
+### 2. 边界
+
+1. 结构化字段检查只接受可由当前引用 quote 明确表达的事实；不能安全解析的自然语言主张降级，不猜测语义。
+2. 不改 SQLite schema、hybrid 权重、运行态数据库、公共归档、Ask/SSE 事件顺序、无状态追问、硬约束或外发确认。`data_freshness=unknown` 保持不变，仍由 P0-17 处理。
+
 ## 2026-07-16 追加：P0-16 真实主张支持闸门
 
 ### 1. 修改内容

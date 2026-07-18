@@ -987,7 +987,7 @@ def _agent_match_content() -> str:
           ${fallback}
           ${refusal}
           <p class="quality ${qualityClass}">${escapeHtml(qualityText)}</p>
-          <p>质量边界：当前只校验引用有效性，不能证明项目相关性或结论正确。</p>
+          <p>质量边界：当前校验引用绑定、极性、结构化作用域和语义字段一致性；不代表资料新鲜、blind 泛化或真实需求匹配正确率。</p>
           <details>
             <summary>证据与详情</summary>
             <p>本轮检索问题：${escapeHtml(message.retrieval_question || message.question || "")}</p>
@@ -1093,8 +1093,8 @@ def _agent_match_content() -> str:
           passed: Boolean(quality.passed),
           issues: Array.isArray(quality.issues) ? quality.issues.slice(0, 10) : [],
           citation_validity: Boolean(quality.citation_validity),
-          evidence_relevance: quality.evidence_relevance || "not_evaluated",
-          claim_support: quality.claim_support || "not_evaluated",
+          evidence_relevance: quality.evidence_relevance || "not_applicable",
+          claim_support: quality.claim_support || "not_applicable",
           data_freshness: quality.data_freshness || "unknown",
         },
         citations: (data.citations || []).slice(0, 5).map(item => ({
@@ -3190,7 +3190,7 @@ def _admin_dashboard_content() -> str:
       const fallbackText = data.fallback_reason ? `<p>降级原因：${escapeHtml(data.fallback_reason)}</p>` : "";
       const answerQuality = data.answer_quality || {};
       const qualityIssues = (answerQuality.issues || []).join("；");
-      const qualityText = `${qualityIssues ? `<p>质量闸门：${escapeHtml(qualityIssues)}</p>` : ""}<p>质量边界：当前只校验引用有效性，不能证明项目相关性或结论正确。</p>`;
+      const qualityText = `${qualityIssues ? `<p>质量闸门：${escapeHtml(qualityIssues)}</p>` : ""}<p>质量边界：当前校验引用绑定、极性、结构化作用域和语义字段一致性；不代表资料新鲜、blind 泛化或真实需求匹配正确率。</p>`;
       const answerHtml = data.answer ? `<article class="search-row">
         <strong>RAG 回答</strong>
         <p>${escapeHtml(data.answer)}</p>
@@ -3261,7 +3261,7 @@ def _admin_dashboard_content() -> str:
           <p>${escapeHtml(response.answer || "")}</p>
           ${fallback}
           <p>质量闸门：${escapeHtml(qualityIssues)}</p>
-          <p>质量边界：当前只校验引用有效性，不能证明项目相关性或结论正确。</p>
+          <p>质量边界：当前校验引用绑定、极性、结构化作用域和语义字段一致性；不代表资料新鲜、blind 泛化或真实需求匹配正确率。</p>
           <div class="rag-chat-evidence">
             ${ragChatCitationsHtml(response.citations || [])}
             ${ragChatEvidenceHtml(response.evidence || [])}
@@ -3304,8 +3304,8 @@ def _admin_dashboard_content() -> str:
           passed: Boolean(quality.passed),
           issues: Array.isArray(quality.issues) ? quality.issues.slice(0, 10) : [],
           citation_validity: Boolean(quality.citation_validity),
-          evidence_relevance: quality.evidence_relevance || "not_evaluated",
-          claim_support: quality.claim_support || "not_evaluated",
+          evidence_relevance: quality.evidence_relevance || "not_applicable",
+          claim_support: quality.claim_support || "not_applicable",
           data_freshness: quality.data_freshness || "unknown",
         },
         citations: (data.citations || []).slice(0, 5).map(item => ({

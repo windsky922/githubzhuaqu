@@ -3,6 +3,8 @@ from __future__ import annotations
 import re
 from typing import Any
 
+from src.rag.claim_support import compare_facts, normalize_fact
+
 
 _CITATION_RE = re.compile(r"\[(\d+)\]")
 _REPO_RE = re.compile(r"\b([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)\b")
@@ -91,7 +93,7 @@ def _extract_claim_ledger(answer: str) -> tuple[str, dict[str, Any] | None, str]
         ledger = json.loads(match.group(1))
     except (json.JSONDecodeError, TypeError):
         return visible, None, "invalid_ledger"
-    if not isinstance(ledger, dict) or ledger.get("schema_version") != 1 or not isinstance(ledger.get("claims"), list):
+    if not isinstance(ledger, dict) or ledger.get("schema_version") != 2 or not isinstance(ledger.get("claims"), list):
         return visible, None, "invalid_ledger"
     return visible, ledger, ""
 
@@ -105,18 +107,33 @@ def _validate_claims(
     contexts: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
     if ledger_error:
-        return [{"id": "ledger", "kind": "ledger", "status": "insufficient", "reason": ledger_error, "evidence_refs": []}]
+        return [_ledger_failure("ledger", ledger_error)]
     requires_ledger = bool(_mentioned_repositories(answer) and _FACT_MARKER_RE.search(answer))
     if ledger is None:
-        return ([{"id": "ledger", "kind": "ledger", "status": "insufficient", "reason": "missing_ledger", "evidence_refs": []}] if requires_ledger else [])
+        return ([_ledger_failure("ledger", "missing_ledger")] if requires_ledger else [])
     claims = ledger["claims"]
     if not claims:
-        return ([{"id": "ledger", "kind": "ledger", "status": "insufficient", "reason": "missing_claim", "evidence_refs": []}] if requires_ledger else [])
+        return ([_ledger_failure("ledger", "missing_claim")] if requires_ledger else [])
     citation_map = {_int_value(item.get("index")) or index: item for index, item in enumerate(citations, start=1)}
     context_map = {str(item.get("chunk_id") or ""): item for item in contexts}
     checks: list[dict[str, Any]] = []
     for fallback_id, claim in enumerate(claims, start=1):
         checks.append(_validate_claim(claim, fallback_id, answer, citation_map, context_map))
+    unregistered = _unregistered_factual_sentences(answer, claims)
+    checks.extend(
+        {
+            "id": f"ledger:unregistered:{index}",
+            "kind": "ledger",
+            "status": "insufficient",
+            "reason": "unregistered_factual_sentence",
+            "evidence_refs": [],
+            "binding_status": "not_applicable",
+            "polarity_status": "not_applicable",
+            "scope_status": "not_applicable",
+            "semantic_support_status": "insufficient",
+        }
+        for index, _ in enumerate(unregistered, start=1)
+    )
     return checks
 
 
@@ -135,8 +152,19 @@ def _validate_claim(
     subjects = [str(item).strip().lower() for item in claim.get("subjects", []) if str(item).strip()]
     indexes = {_int_value(item) for item in claim.get("citation_indexes", []) if _int_value(item) > 0}
     refs = claim.get("evidence_refs") if isinstance(claim.get("evidence_refs"), list) else []
-    result = {"id": claim_id, "kind": kind or "unknown", "status": "insufficient", "reason": "", "evidence_refs": refs}
-    if kind not in {"project_fact", "comparison", "ranking"} or not text or not subjects or not indexes or not refs:
+    raw_facts = claim.get("facts") if isinstance(claim.get("facts"), list) else []
+    result = {
+        "id": claim_id,
+        "kind": kind or "unknown",
+        "status": "insufficient",
+        "reason": "",
+        "evidence_refs": refs,
+        "binding_status": "invalid",
+        "polarity_status": "insufficient",
+        "scope_status": "insufficient",
+        "semantic_support_status": "insufficient",
+    }
+    if kind not in {"project_fact", "comparison", "ranking"} or not text or not subjects or not indexes or not refs or not raw_facts:
         result["reason"] = "invalid_claim"
         return result
     if text not in answer or not _claim_has_citations(answer, text, indexes):
@@ -148,8 +176,23 @@ def _validate_claim(
     if kind in {"comparison", "ranking"} and len(set(subjects)) < 2:
         result["reason"] = "comparison_without_subjects"
         return result
+    facts_by_subject: dict[str, dict[str, Any]] = {}
+    for raw_fact in raw_facts:
+        fact, fact_error = normalize_fact(raw_fact)
+        if fact is None:
+            result["reason"] = fact_error
+            return result
+        subject = str(fact["subject"])
+        if subject not in subjects or subject in facts_by_subject:
+            result["reason"] = "invalid_claim_facts"
+            return result
+        facts_by_subject[subject] = fact
+    if set(facts_by_subject) != set(subjects):
+        result["reason"] = "incomplete_claim_facts"
+        return result
+
     covered: set[str] = set()
-    contradiction = False
+    comparisons: list[dict[str, str]] = []
     for ref in refs:
         if not isinstance(ref, dict):
             result["reason"] = "invalid_evidence_ref"
@@ -172,18 +215,66 @@ def _validate_claim(
         if kind == "project_fact" and repository != subjects[0]:
             result["reason"] = "cross_project_evidence"
             return result
+        result["binding_status"] = "valid"
+        comparison = compare_facts(
+            claim=facts_by_subject.get(repository, {}),
+            evidence=ref.get("fact"),
+            quote=quote,
+        )
+        comparisons.append(comparison)
+        if comparison["polarity_status"] == "contradicted":
+            result.update(comparison)
+            result["status"] = "contradicted"
+            return result
+        if comparison["scope_status"] != "matched" or comparison["semantic_support_status"] != "supported":
+            result.update(comparison)
+            return result
         covered.add(repository)
-        contradiction = contradiction or (_has_negation(text) != _has_negation(quote))
     if kind in {"comparison", "ranking"} and not set(subjects).issubset(covered):
         result["reason"] = "comparison_without_basis"
         return result
-    if contradiction:
-        result["status"] = "contradicted"
-        result["reason"] = "polarity_conflicts_with_evidence"
+    if kind == "project_fact" and subjects[0] not in covered:
+        result["reason"] = "missing_fact_evidence"
         return result
+    result["binding_status"] = "valid"
+    result["polarity_status"] = "matched"
+    result["scope_status"] = "matched"
+    result["semantic_support_status"] = "supported"
     result["status"] = "supported"
     result["reason"] = ""
     return result
+
+
+def _unregistered_factual_sentences(answer: str, claims: list[Any]) -> list[str]:
+    registered = {
+        _normalize(str(item.get("text") or ""))
+        for item in claims
+        if isinstance(item, dict) and str(item.get("text") or "").strip()
+    }
+    sentences = re.split(r"(?<=[.!?。！？])\s*|\n+", answer)
+    unregistered: list[str] = []
+    for sentence in sentences:
+        raw = _CITATION_RE.sub("", sentence).strip()
+        cleaned = _normalize(raw)
+        if not cleaned or not _mentioned_repositories(raw) or not _FACT_MARKER_RE.search(raw):
+            continue
+        if not any(cleaned in claim or claim in cleaned for claim in registered):
+            unregistered.append(cleaned)
+    return unregistered
+
+
+def _ledger_failure(claim_id: str, reason: str) -> dict[str, Any]:
+    return {
+        "id": claim_id,
+        "kind": "ledger",
+        "status": "insufficient",
+        "reason": reason,
+        "evidence_refs": [],
+        "binding_status": "not_applicable",
+        "polarity_status": "not_applicable",
+        "scope_status": "not_applicable",
+        "semantic_support_status": "insufficient",
+    }
 
 
 def _claim_has_citations(answer: str, text: str, indexes: set[int]) -> bool:

@@ -114,6 +114,10 @@ export type RagAnswer = {
       evidence_repositories: string[];
       status: "supported" | "contradicted" | "insufficient" | string;
       reason: string;
+      binding_status?: "valid" | "invalid" | "not_applicable" | string;
+      polarity_status?: "matched" | "contradicted" | "insufficient" | "not_applicable" | string;
+      scope_status?: "matched" | "mismatched" | "insufficient" | "not_applicable" | string;
+      semantic_support_status?: "supported" | "mismatched" | "insufficient" | string;
     }>;
     data_freshness?: "unknown" | string;
   };

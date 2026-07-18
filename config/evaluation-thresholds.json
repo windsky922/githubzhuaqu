@@ -5,7 +5,8 @@
     "project_match_cases": {"path": "evals/project_match_cases.jsonl", "sha256": "f9a2c4346379f00fbfa75019cff82b30828d3f08781f8adf0ba9cc4d4fb44553"},
     "follow_up_cases": {"path": "evals/follow_up_cases.jsonl", "sha256": "1941bb3e2c7a353d6b1f348d0597d95a743d388d7843abb22b66de10238f5791"},
     "constraint_parsing_cases": {"path": "evals/constraint_parsing_cases.jsonl", "sha256": "277c5e6a6945043c16d0a49aabb15d2998398eec38136d3c704140d7053aa0cb"},
-    "constraint_evidence_cases": {"path": "evals/constraint_evidence_cases.jsonl", "sha256": "ee01fef818e4638e3ae05d9b18b2573bd9eb17be0bdbd8d6369a4fc78d7a1618"}
+    "constraint_evidence_cases": {"path": "evals/constraint_evidence_cases.jsonl", "sha256": "ee01fef818e4638e3ae05d9b18b2573bd9eb17be0bdbd8d6369a4fc78d7a1618"},
+    "claim_support_cases": {"path": "evals/claim_support_cases.jsonl", "sha256": "591a55d9f025d222ba9159322b3eed265b8e731ae0299ba620e9e5a91fd0f1a5"}
   },
   "evaluations": {
     "project_match": {
@@ -23,6 +24,10 @@
     "constraint_parsing": {
       "minimum": {"metrics.constraint_exact_match_accuracy": 1.0, "metrics.operator_accuracy": 1.0, "metrics.clarification_accuracy": 1.0, "metrics.evidence_state_accuracy": 1.0},
       "maximum": {"metrics.false_eligible_rate": 0.0, "metrics.hard_constraint_violation_rate": 0.0}
+    },
+    "claim_support": {
+      "minimum": {"metrics.exact_accuracy": 1.0, "metrics.rejected_case_accuracy": 1.0},
+      "maximum": {"metrics.false_support_rate": 0.0}
     }
   }
 }

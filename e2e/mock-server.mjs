@@ -91,8 +91,8 @@ function answerPayload(mode) {
       passed: true,
       issues: [],
       citation_validity: recommendations.length ? true : "not_applicable",
-      evidence_relevance: "not_evaluated",
-      claim_support: "not_evaluated",
+      evidence_relevance: "not_applicable",
+      claim_support: "not_applicable",
       data_freshness: "unknown",
     },
   };

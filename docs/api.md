@@ -634,7 +634,7 @@ py scripts\run_rag_search_evaluation.py --queries "agent workflow;python automat
 12. `confidence`：旧兼容字段，值为 `low`、`medium` 或 `high`；当前仅表示证据覆盖量，不代表项目匹配置信度。
 13. `evidence_coverage`：与兼容字段 `confidence` 等值，明确表示已召回、可引用证据的覆盖程度。
 14. `match_confidence`：当前固定为 `unknown`；在没有标注数据校准前不输出 `medium` 或 `high`。
-15. `answer_quality`：保留 `passed`、`issues`，并提供 `citation_validity`、`evidence_relevance`、`claim_support`、`claim_checks`、`data_freshness`。项目事实与比较/排序结论必须在不可展示的版本化主张台账中逐项关联 citation、同项目证据块和原文摘录；每项 `claim_checks` 返回类型、citation、证据仓库、`supported/contradicted/insufficient` 与原因。任一受管主张未被支持、被反驳或跨项目错配时，质量闸门失败并走规则降级。`data_freshness` 仍为 `unknown`：基础闸门通过不代表资料新鲜。
+15. `answer_quality`：保留 `passed`、`issues`，并提供 `citation_validity`、`evidence_relevance`、`claim_support`、`claim_checks`、`data_freshness`。项目事实与比较/排序结论必须在不可展示的 schema-v2 台账中逐项关联 citation、同项目证据块、原文摘录和结构化事实。每项 `claim_checks` 返回 `binding_status`、`polarity_status`、`scope_status`、`semantic_support_status`：只有引用绑定有效、极性一致、主体/组件/阶段/版本范围/条件/时间一致，且谓词/值/模态/数量一致并能由 quote 锚定时才为 `supported`。任一字段不匹配、未锚定或漏登记事实均失败闭合并走规则降级。`data_freshness` 仍为 `unknown`：该闸门不声明资料新鲜。
 16. `recommendations`：当前归档内的确定性结构化推荐。每项包含 `full_name`、`rank`、`match_score`、`matched_requirements`、`unmet_requirements`、`unknown_requirements`、`reasons`、`citation_indexes`、`evidence_chunk_ids` 和 `eligibility`。`match_score` 只是本轮、同一检索模式内的相对排序分，不是概率或置信度。GET 继续验证显式 `language/category/source`；POST 还会验证路由器解析出的自然语言硬约束。
 
 管理页 RAG 对话工作台使用同一接口。每轮问题独立检索；前端以用户/助手气泡展示回答，只把本轮问题、回答摘要、引用、证据、质量闸门结果和 `prompt_context` 保存到浏览器 localStorage，便于刷新后继续查看。

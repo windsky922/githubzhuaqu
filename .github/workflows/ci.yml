@@ -63,12 +63,14 @@ jobs:
           python scripts/evaluate_project_recommendations.py --output evaluation-results/project-recommendations.json
           python scripts/evaluate_follow_up_routing.py --output evaluation-results/follow-up-routing.json
           python scripts/evaluate_constraint_parsing.py --output evaluation-results/constraint-parsing.json
+          python scripts/evaluate_claim_support.py --output evaluation-results/claim-support.json
           python scripts/check_evaluation_thresholds.py \
             --output evaluation-results/threshold-check.json \
             --result project_match=evaluation-results/project-match.json \
             --result project_recommendations=evaluation-results/project-recommendations.json \
             --result follow_up_routing=evaluation-results/follow-up-routing.json \
-            --result constraint_parsing=evaluation-results/constraint-parsing.json
+            --result constraint_parsing=evaluation-results/constraint-parsing.json \
+            --result claim_support=evaluation-results/claim-support.json
 
       - name: 上传固定评估结果
         if: always()

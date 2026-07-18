@@ -277,7 +277,7 @@ class BuildPagesTest(unittest.TestCase):
             self.assertIn("match_confidence", admin_page)
             self.assertIn("证据覆盖", admin_page)
             self.assertIn("匹配把握 尚未校准", admin_page)
-            self.assertIn("不能证明项目相关性或结论正确", admin_page)
+            self.assertIn("当前校验引用绑定、极性、结构化作用域和语义字段一致性", admin_page)
             self.assertIn("fallback_reason", admin_page)
             self.assertIn("prompt_context", admin_page)
             self.assertIn('id="devContextQuery"', admin_page)

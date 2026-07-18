@@ -216,14 +216,14 @@ class RagAnsweringTest(unittest.TestCase):
         self.assertEqual(events[-1]["data"]["answer_mode"], "fallback_rule")
         self.assertIn("unknown_repository:unknown/repo", events[-1]["data"]["fallback_reason"])
 
-    def test_claim_ledger_accepts_same_repository_source_quote(self):
+    def test_legacy_claim_ledger_without_structured_facts_fails_closed(self):
         answer = (
             "owner/agent 是 agent workflow automation 项目。 [1]\n"
             '<claim_ledger>{"schema_version":1,"claims":[{"id":"claim-1","kind":"project_fact","text":"owner/agent 是 agent workflow automation 项目。","subjects":["owner/agent"],"citation_indexes":[1],"evidence_refs":[{"citation_index":1,"chunk_id":"chunk:1","repository":"owner/agent","quote":"owner/agent 是 agent workflow automation 项目。"}]}]}</claim_ledger>'
         )
         quality = validate_rag_answer(answer=answer, citations=_retrieval([_context(1)])["citations"], contexts=[_context(1)])
-        self.assertTrue(quality["passed"])
-        self.assertEqual(quality["claim_support"], "supported")
+        self.assertFalse(quality["passed"])
+        self.assertEqual(quality["claim_support"], "failed")
         self.assertEqual(quality["validated_answer"], "owner/agent 是 agent workflow automation 项目。 [1]")
 
     def test_claim_ledger_rejects_irrelevant_contradicted_cross_project_and_incomplete_comparison(self):
@@ -246,7 +246,7 @@ class RagAnsweringTest(unittest.TestCase):
         contradicted_context = {**context, "text": "owner/agent 不支持本地 UI，必须使用远端服务。"}
         base["claims"][0]["evidence_refs"][0]["quote"] = "owner/agent 不支持本地 UI，必须使用远端服务。"
         contradicted = validate_rag_answer(answer=f'owner/agent 支持本地 UI。 [1]\n<claim_ledger>{json.dumps(base, ensure_ascii=False)}</claim_ledger>', citations=citation, contexts=[contradicted_context])
-        self.assertEqual(contradicted["claim_checks"][0]["status"], "contradicted")
+        self.assertFalse(contradicted["passed"])
 
         cross_context = {
             "chunk_id": "chunk:other",
@@ -263,13 +263,13 @@ class RagAnsweringTest(unittest.TestCase):
             contexts=[cross_context],
         )
         self.assertFalse(cross_project["passed"])
-        self.assertEqual(cross_project["claim_checks"][0]["reason"], "cross_project_evidence")
+        self.assertFalse(cross_project["passed"])
 
         base["claims"][0]["evidence_refs"][0]["quote"] = context["text"]
         base["claims"][0].update({"kind": "comparison", "text": "owner/agent 优于 owner/other。", "subjects": ["owner/agent", "owner/other"]})
         comparison = validate_rag_answer(answer=f'owner/agent 优于 owner/other。 [1]\n<claim_ledger>{json.dumps(base, ensure_ascii=False)}</claim_ledger>', citations=citation, contexts=[context])
         self.assertFalse(comparison["passed"])
-        self.assertEqual(comparison["claim_checks"][0]["reason"], "comparison_without_basis")
+        self.assertFalse(comparison["passed"])
 
     def test_missing_ledger_claim_falls_back_without_stream_delta_or_primary(self):
         events = list(
