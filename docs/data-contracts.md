@@ -14,7 +14,7 @@
 8. 每次运行可由上述公开 JSON 投影重建 SQLite 派生索引；未来需要跨 Actions 保留的订阅、反馈或任务状态必须进入独立私有存储，不能依赖公开归档。
 9. `config/public-archive-manifest.json` 是 `weekly-archive` 路径政策的唯一来源：发布来源选择、push 前完整 staged tree 校验和远端 latest tree attestation 必须复用它。暂存路径集合必须等于本轮 manifest 投影；未知路径、禁止后缀、符号链接与路径穿越均失败关闭。
 10. `config/evaluation-thresholds.json` 固定公开评估 fixture 的 SHA-256 与回归门槛。CI 只将其作为同版本离线 fixture 的退化门禁；阈值变化必须与 fixture hash、基线和评审同步，不能用作真实泛化或独立 blind 质量声明。
-11. Ask 响应的 `answer_quality.claim_checks[]` 是非破坏性质量字段，不写入 SQLite 或公共归档。schema-v2 台账的 `facts[]` 与每个证据 `fact` 固定包含主体、组件、阶段、谓词、值、模态、版本范围、条件、时间和数量；响应分别公开 `binding_status`、`polarity_status`、`scope_status`、`semantic_support_status`。字段不一致、quote 无字段锚定或可见事实未登记时 `passed=false` 并关闭确认首选。该基础闸门不声明数据新鲜度，`data_freshness` 仍为 `unknown`。
+11. Ask 响应的 `answer_quality.claim_checks[]` 与 freshness 字段都是非破坏性响应字段，不写入 SQLite。schema-v2 台账的 `facts[]` 与每个证据 `fact` 固定包含主体、组件、阶段、谓词、值、模态、版本范围、条件、时间和数量；响应分别公开 `binding_status`、`polarity_status`、`scope_status`、`semantic_support_status`。字段不一致、quote 无字段锚定或可见事实未登记时 `passed=false` 并关闭确认首选。`source_latest_date`、`corpus_latest_date`、`embedding_latest_date`、`stale_days`、`as_of`、`reasons` 与 `data_freshness` 只读既有 `data/runs/<run_date>.json` 的 `rag_freshness` attestation；默认阈值为 8 天。三层对齐且未超阈值才是 `fresh`，层级滞后为 `lagging`，超阈值为 `stale`，缺失或不一致为 `unknown`；时效性问题在非 fresh 时 fail closed。
 
 ## 二、`docs/projects.json`
 

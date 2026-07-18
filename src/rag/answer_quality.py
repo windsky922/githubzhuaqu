@@ -4,6 +4,7 @@ import re
 from typing import Any
 
 from src.rag.claim_support import compare_facts, normalize_fact
+from src.rag.freshness import normalize_freshness
 
 
 _CITATION_RE = re.compile(r"\[(\d+)\]")
@@ -27,6 +28,8 @@ def validate_rag_answer(
     citations: list[dict[str, Any]],
     contexts: list[dict[str, Any]],
     min_chars: int = 24,
+    freshness: dict[str, Any] | None = None,
+    require_freshness: bool = False,
 ) -> dict[str, Any]:
     text, ledger, ledger_error = _extract_claim_ledger(answer)
     issues: list[str] = []
@@ -62,6 +65,9 @@ def validate_rag_answer(
     applicable_claims = [check for check in claim_checks if check["status"] != "not_applicable"]
     claim_support = "supported" if applicable_claims and not claim_failures else "failed" if claim_failures else "not_applicable"
     evidence_relevance = "passed" if applicable_claims and not claim_failures else "failed" if claim_failures else "not_applicable"
+    freshness_result = normalize_freshness(freshness)
+    if require_freshness and freshness_result["data_freshness"] != "fresh":
+        issues.append("data_freshness:" + freshness_result["data_freshness"])
 
     return {
         "passed": not issues,
@@ -71,7 +77,7 @@ def validate_rag_answer(
         ),
         "evidence_relevance": evidence_relevance,
         "claim_support": claim_support,
-        "data_freshness": "unknown",
+        **freshness_result,
         "claim_checks": claim_checks,
         "validated_answer": text,
         "used_citation_indexes": sorted(used_indexes),

@@ -119,7 +119,22 @@ export type RagAnswer = {
       scope_status?: "matched" | "mismatched" | "insufficient" | "not_applicable" | string;
       semantic_support_status?: "supported" | "mismatched" | "insufficient" | string;
     }>;
-    data_freshness?: "unknown" | string;
+    data_freshness?: "fresh" | "lagging" | "stale" | "unknown" | string;
+    source_latest_date?: string;
+    corpus_latest_date?: string;
+    embedding_latest_date?: string;
+    stale_days?: number | null;
+    as_of?: string;
+    reasons?: string[];
+  };
+  freshness?: {
+    data_freshness?: "fresh" | "lagging" | "stale" | "unknown" | string;
+    source_latest_date?: string;
+    corpus_latest_date?: string;
+    embedding_latest_date?: string;
+    stale_days?: number | null;
+    as_of?: string;
+    reasons?: string[];
   };
   retrieval?: { mode?: string };
   model_status?: { configured?: boolean; used?: boolean };

@@ -66,11 +66,11 @@ POST Ask 在检索前经过 `follow_up_router`。确定性规则优先识别 res
 
 候选序号同样在 `follow_up_router` 中确定性解析。序号先映射到上一轮有序 `candidate_repository_ids`，再生成 `selected_candidate_indexes[]` 和权威 `selected_repository_ids[]`；repository 层只把这些 ID 下推到实际检索，不先取大 Top-K 再过滤。越界、无上下文和不确定引用在检索前短路为 clarification。浏览器只负责回传最小无状态上下文，不根据 citations、evidence 或历史 assistant 文本解释序号。
 
-Ask 响应把证据覆盖与匹配把握分开表达：旧 `confidence` 仅作为兼容字段保留，`evidence_coverage` 复用其按证据数量计算的 `low/medium/high`，`match_confidence` 在未校准阶段固定为 `unknown`。`answer_quality` 保留原有通过状态和问题列表，并显式标记引用有效性、证据相关性、主张支持度、逐项 `claim_checks` 的 binding/polarity/scope/semantic 状态和数据新鲜度；P0-16B 以固定结构化 fixture 门禁回归上述字段，但不能把基础闸门、证据数量或格式校验解释为资料新鲜、blind 泛化或推荐正确率。
+Ask 响应把证据覆盖与匹配把握分开表达：旧 `confidence` 仅作为兼容字段保留，`evidence_coverage` 复用其按证据数量计算的 `low/medium/high`，`match_confidence` 在未校准阶段固定为 `unknown`。`answer_quality` 保留原有通过状态和问题列表，并显式标记引用有效性、证据相关性、主张支持度、逐项 `claim_checks` 的 binding/polarity/scope/semantic 状态和数据新鲜度。freshness 只读取受控运行 JSON：`source_latest_date` 是最新来源运行日，`corpus_latest_date` 与 `embedding_latest_date` 必须来自版本化 `rag_freshness` attestation；默认超过 8 天为 stale，层级落后为 lagging，缺失或不一致为 unknown。时效性请求在非 fresh 状态下于 provider 调用前规则降级，SSE 只保留 `meta → final`，首选也必须要求 fresh。该水位不代表 blind 泛化或推荐正确率。
 
 管理页 RAG 对话工作台是该接口的 GPT 式前端封装，不新增后端会话状态。对话历史只保存在浏览器 localStorage，最多 20 轮；每轮问题独立检索，历史回答只用于页面回看，不进入 `prompt_context`，也不作为事实证据。管理页和 React 工作台显示“证据覆盖”与“匹配把握尚未校准”，不再把 `confidence` 渲染为匹配置信度。
 
-`frontend/` 是 React + TypeScript 用户前端，构建产物写入 `docs/app/`，通过 Hash Router 提供项目匹配、筛选、推荐、详情和对比页面；旧 `agent.html`、`explorer.html`、`recommendations.html`、`project.html`、`compare.html` 仅保留 query 参数并跳转到对应路由。`app/#/agent?api=1` 默认 POST `/v1/rag/ask/stream`。流中的 `delta` 只展示已通过当前主张—证据基础闸门的内容；质量失败不产生 provider delta。`final` 中只有第一项 recommendation 为 eligible 且回答质量通过时才显示首选。clarification 不展示项目卡或质量失败，no_match 展示冲突候选与原因。它不新增数据库表或后端会话。
+`frontend/` 是 React + TypeScript 用户前端，构建产物写入 `docs/app/`，通过 Hash Router 提供项目匹配、筛选、推荐、详情和对比页面；旧 `agent.html`、`explorer.html`、`recommendations.html`、`project.html`、`compare.html` 仅保留 query 参数并跳转到对应路由。`app/#/agent?api=1` 默认 POST `/v1/rag/ask/stream`。流中的 `delta` 只展示已通过当前主张—证据与时效闸门的内容；质量或时效失败不产生 provider delta。`final` 中只有第一项 recommendation 为 eligible、回答质量通过且 `data_freshness=fresh` 时才显示首选。clarification 不展示项目卡或质量失败，no_match 展示冲突候选与原因。它不新增数据库表或后端会话。
 
 ## 项目级 Agent 执行层
 

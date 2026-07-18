@@ -23,6 +23,7 @@ from src.rag.answering import answer_rag_question, stream_rag_answer_question
 from src.rag.corpus_cleaner import CLEANER_VERSION, CORPUS_VERSION
 from src.rag.constraint_verifier import verify_project_requirements
 from src.rag.follow_up_router import normalize_contextual_request, route_follow_up
+from src.rag.freshness import archive_freshness
 from src.storage.sqlite_store import (
     connect,
     import_json_archive,
@@ -1423,10 +1424,12 @@ class ApiRepository:
         if route["clarification_required"]:
             return _contextual_clarification_response(request["q"], route)
         explained = self._contextual_explained(request, route)
+        retrieval = _contextual_answer_retrieval(explained, request, route)
+        retrieval["freshness"] = archive_freshness(self.root)
         answer_result = answer_rag_question(
             root=self.root,
             query=route["resolved_query"],
-            retrieval=_contextual_answer_retrieval(explained, request, route),
+            retrieval=retrieval,
         )
         response = self._rag_ask_response(
             query=request["q"],
@@ -1459,6 +1462,7 @@ class ApiRepository:
             return
         explained = self._contextual_explained(request, route)
         retrieval = _contextual_answer_retrieval(explained, request, route)
+        retrieval["freshness"] = archive_freshness(self.root)
         for event in stream_rag_answer_question(
             root=self.root,
             query=route["resolved_query"],
@@ -1548,6 +1552,7 @@ class ApiRepository:
                 "retrieval": explained.get("retrieval") or {},
                 "prompt_context": explained.get("prompt_context") or "",
                 "constraints": {"language": language, "category": category, "source": source},
+                "freshness": archive_freshness(self.root),
             },
         )
         return self._rag_ask_response(
@@ -1586,6 +1591,7 @@ class ApiRepository:
             "retrieval": explained.get("retrieval") or {},
             "prompt_context": explained.get("prompt_context") or "",
             "constraints": {"language": language, "category": category, "source": source},
+            "freshness": archive_freshness(self.root),
         }
         for event in stream_rag_answer_question(
             root=self.root,
@@ -1656,6 +1662,7 @@ class ApiRepository:
             "notification_memory": notification_memory,
             "model_status": answer_result.get("model_status") or {},
             "answer_quality": answer_result.get("answer_quality") or {},
+            "freshness": answer_result.get("freshness") or {},
         }
         if "clarification_required" in answer_result:
             response["clarification_required"] = bool(answer_result.get("clarification_required"))

@@ -28,11 +28,12 @@ describe("项目匹配回答状态", () => {
     ]);
   });
 
-  it("只有质量通过且第一项 eligible 时确认首选", () => {
+  it("只有质量与新鲜度通过且第一项 eligible 时确认首选", () => {
     const eligible = { full_name: "org/eligible", evidenceCount: 1, eligibility: "eligible" } as never;
     const unknown = { full_name: "org/unknown", evidenceCount: 1, eligibility: "unknown" } as never;
-    expect(selectPrimaryRecommendation({ answer_quality: { passed: true } } as never, [eligible])).toBe(eligible);
+    expect(selectPrimaryRecommendation({ answer_quality: { passed: true, data_freshness: "fresh" } } as never, [eligible])).toBe(eligible);
     expect(selectPrimaryRecommendation({ answer_quality: { passed: false } } as never, [eligible])).toBeUndefined();
+    expect(selectPrimaryRecommendation({ answer_quality: { passed: true, data_freshness: "stale" } } as never, [eligible])).toBeUndefined();
     expect(selectPrimaryRecommendation({ answer_quality: { passed: true } } as never, [unknown, eligible])).toBeUndefined();
   });
 

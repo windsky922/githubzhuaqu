@@ -1,5 +1,18 @@
 # 操作日志
 
+## 2026-07-18 追加：P0-17 数据新鲜度闸门
+
+### 1. 修改内容
+
+1. Ask 只读受控 `data/runs/<run_date>.json` 计算来源、语料与 embedding 三层水位；不读取运行态 SQLite，也不把 embedding 的源 `run_date` 或 SQLite `updated_at` 误作构建时间。
+2. 新增 `source_latest_date`、`corpus_latest_date`、`embedding_latest_date`、`stale_days`、`as_of`、`reasons` 与 `data_freshness=fresh/lagging/stale/unknown`。缺失或不一致 attestation 失败关闭为 `unknown`；来源新而语料旧、语料新而 embedding 旧分别诊断为 `lagging`。
+3. 查询含“最新、当前、近期、最近、现状、本周、本月、今天”或对应英文词且水位非 `fresh` 时，Ask 在调用 provider 前走规则降级；SSE 仅 `meta → final`，不发送 provider delta，前端不显示确认首选。
+
+### 2. 边界
+
+1. `rag_freshness` 是写入既有运行 JSON 的版本化证明预留字段；本阶段不改 SQLite schema、不读取本机运行态数据库、不改 hybrid 权重或公共归档路径政策。
+2. 非时效查询仍可给出受证据约束的保守回答，但前端要求 `answer_quality.data_freshness=fresh` 才显示首选。基础闸门、freshness 水位和 blind 泛化正确率是不同声明。
+
 ## 2026-07-18 追加：P0-16B 结构化语义主张支持闸门
 
 ### 1. 修改内容

@@ -7,6 +7,7 @@ from typing import Any
 from src.llm.client import KimiChatClient, LlmClientError
 from src.llm.prompts import rag_ask_messages
 from src.rag.answer_quality import validate_rag_answer
+from src.rag.freshness import is_time_sensitive_query, normalize_freshness
 from src.rag.project_recommendations import build_project_recommendations
 
 
@@ -24,6 +25,8 @@ def answer_rag_question(
     citations = _list_of_dicts(retrieval.get("citations"))
     prompt_context = str(retrieval.get("prompt_context") or "")
     evidence = _evidence_from_contexts(contexts)
+    freshness = normalize_freshness(retrieval.get("freshness"))
+    time_sensitive = is_time_sensitive_query(query)
     model_client = client or KimiChatClient()
     model_status = model_client.status()
     recommendations = _recommendations(retrieval, contexts, citations)
@@ -38,6 +41,19 @@ def answer_rag_question(
     )
     if constraint_gate:
         return constraint_gate
+
+    freshness_gate = _freshness_gate_response(
+        query=query,
+        retrieval=retrieval,
+        citations=citations,
+        evidence=evidence,
+        recommendations=recommendations,
+        model_status=model_status,
+        freshness=freshness,
+        time_sensitive=time_sensitive,
+    )
+    if freshness_gate:
+        return freshness_gate
 
     if not contexts:
         return _response(
@@ -66,7 +82,13 @@ def answer_rag_question(
                 recommendations=recommendations,
             )
             answer = model_client.chat(messages).strip()
-            answer_quality = validate_rag_answer(answer=answer, citations=citations, contexts=contexts)
+            answer_quality = validate_rag_answer(
+                answer=answer,
+                citations=citations,
+                contexts=contexts,
+                freshness=freshness,
+                require_freshness=time_sensitive,
+            )
             validated_answer = str(answer_quality.pop("validated_answer", answer))
             if not answer_quality["passed"]:
                 failed_quality = answer_quality
@@ -119,6 +141,8 @@ def stream_rag_answer_question(
     citations = _list_of_dicts(retrieval.get("citations"))
     prompt_context = str(retrieval.get("prompt_context") or "")
     evidence = _evidence_from_contexts(contexts)
+    freshness = normalize_freshness(retrieval.get("freshness"))
+    time_sensitive = is_time_sensitive_query(query)
     model_client = client or KimiChatClient()
     model_status = model_client.status()
     recommendations = _recommendations(retrieval, contexts, citations)
@@ -130,6 +154,7 @@ def stream_rag_answer_question(
             "citations": citations,
             "evidence": evidence,
             "model_status": model_status,
+            "freshness": freshness,
         },
     }
 
@@ -143,6 +168,20 @@ def stream_rag_answer_question(
     )
     if constraint_gate:
         yield {"event": "final", "data": constraint_gate}
+        return
+
+    freshness_gate = _freshness_gate_response(
+        query=query,
+        retrieval=retrieval,
+        citations=citations,
+        evidence=evidence,
+        recommendations=recommendations,
+        model_status=model_status,
+        freshness=freshness,
+        time_sensitive=time_sensitive,
+    )
+    if freshness_gate:
+        yield {"event": "final", "data": freshness_gate}
         return
 
 
@@ -181,7 +220,13 @@ def stream_rag_answer_question(
             for delta in model_client.stream_chat(messages):
                 chunks.append(delta)
             answer = "".join(chunks).strip()
-            answer_quality = validate_rag_answer(answer=answer, citations=citations, contexts=contexts)
+            answer_quality = validate_rag_answer(
+                answer=answer,
+                citations=citations,
+                contexts=contexts,
+                freshness=freshness,
+                require_freshness=time_sensitive,
+            )
             validated_answer = str(answer_quality.pop("validated_answer", answer))
             if not answer_quality["passed"]:
                 failed_quality = answer_quality
@@ -243,6 +288,45 @@ def _recommendations(
             if isinstance(retrieval.get("requirement_verification"), dict)
             else {}
         ),
+    )
+
+
+def _freshness_gate_response(
+    *,
+    query: str,
+    retrieval: dict[str, Any],
+    citations: list[dict[str, Any]],
+    evidence: list[dict[str, Any]],
+    recommendations: list[dict[str, Any]],
+    model_status: dict[str, Any],
+    freshness: dict[str, Any],
+    time_sensitive: bool,
+) -> dict[str, Any] | None:
+    if not time_sensitive or freshness["data_freshness"] == "fresh":
+        return None
+    cutoff = freshness["embedding_latest_date"] or freshness["corpus_latest_date"] or freshness["source_latest_date"] or "未知"
+    reason_suffix = ",".join(freshness["reasons"]) or freshness["data_freshness"]
+    answer = f"当前受控归档的数据截止水位为 {cutoff}（核验日 {freshness['as_of'] or '未知'}），无法据此确认“最新”结论。请先更新来源、语料和 embedding，或改问该截止日期前的情况。"
+    quality = validate_rag_answer(
+        answer=answer,
+        citations=citations,
+        contexts=_list_of_dicts(retrieval.get("contexts")),
+        freshness=freshness,
+        require_freshness=True,
+    )
+    return _response(
+        query=query,
+        answer=answer,
+        answer_model=RULE_MODEL,
+        answer_mode="fallback_rule",
+        fallback_reason=f"data_freshness:{freshness['data_freshness']}:{reason_suffix}",
+        confidence=_confidence(_list_of_dicts(retrieval.get("contexts"))),
+        retrieval=retrieval,
+        citations=citations,
+        evidence=evidence,
+        model_status={**model_status, "attempted": False, "used": False},
+        answer_quality=quality,
+        recommendations=recommendations,
     )
 
 
@@ -315,7 +399,14 @@ def _response(
 ) -> dict[str, Any]:
     contexts = _list_of_dicts(retrieval.get("contexts"))
     recommendations = recommendations if recommendations is not None else _recommendations(retrieval, contexts, citations)
-    quality_result = answer_quality or validate_rag_answer(answer=answer, citations=citations, contexts=contexts)
+    freshness = normalize_freshness(retrieval.get("freshness"))
+    quality_result = answer_quality or validate_rag_answer(
+        answer=answer,
+        citations=citations,
+        contexts=contexts,
+        freshness=freshness,
+        require_freshness=is_time_sensitive_query(query),
+    )
     quality_result.pop("validated_answer", None)
     return {
         "schema_version": 1,
@@ -340,6 +431,7 @@ def _response(
         "contexts": contexts,
         "model_status": model_status,
         "answer_quality": quality_result,
+        "freshness": freshness,
     }
 
 

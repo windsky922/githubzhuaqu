@@ -1543,6 +1543,8 @@ class ApiRepositoryTest(unittest.TestCase):
                 )
             )
             self.assertEqual(stream_final["recommendations"], v1_rag_ask.json()["recommendations"])
+            self.assertEqual(stream_final["freshness"], v1_rag_ask.json()["freshness"])
+            self.assertEqual(stream_final["answer_quality"], v1_rag_ask.json()["answer_quality"])
             self.assertEqual(v1_rag_hybrid_ask.json()["retrieval"]["mode"], "hybrid")
             self.assertIn("owner/agent", v1_rag_hybrid_ask.json()["answer"])
             self.assertIn("ready_for_answering", v1_rag_diagnostics.json()["signals"])

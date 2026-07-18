@@ -634,16 +634,16 @@ py scripts\run_rag_search_evaluation.py --queries "agent workflow;python automat
 12. `confidence`：旧兼容字段，值为 `low`、`medium` 或 `high`；当前仅表示证据覆盖量，不代表项目匹配置信度。
 13. `evidence_coverage`：与兼容字段 `confidence` 等值，明确表示已召回、可引用证据的覆盖程度。
 14. `match_confidence`：当前固定为 `unknown`；在没有标注数据校准前不输出 `medium` 或 `high`。
-15. `answer_quality`：保留 `passed`、`issues`，并提供 `citation_validity`、`evidence_relevance`、`claim_support`、`claim_checks`、`data_freshness`。项目事实与比较/排序结论必须在不可展示的 schema-v2 台账中逐项关联 citation、同项目证据块、原文摘录和结构化事实。每项 `claim_checks` 返回 `binding_status`、`polarity_status`、`scope_status`、`semantic_support_status`：只有引用绑定有效、极性一致、主体/组件/阶段/版本范围/条件/时间一致，且谓词/值/模态/数量一致并能由 quote 锚定时才为 `supported`。任一字段不匹配、未锚定或漏登记事实均失败闭合并走规则降级。`data_freshness` 仍为 `unknown`：该闸门不声明资料新鲜。
+15. `answer_quality`：保留 `passed`、`issues`，并提供 `citation_validity`、`evidence_relevance`、`claim_support`、`claim_checks`、`source_latest_date`、`corpus_latest_date`、`embedding_latest_date`、`stale_days`、`as_of`、`reasons` 与 `data_freshness`。三层水位只读受控 `data/runs/<run_date>.json` 的版本化 `rag_freshness` attestation；默认超过 8 天为 `stale`，来源新而语料旧或语料新而 embedding 旧为 `lagging`，缺失或不一致为 `unknown`。项目事实与比较/排序结论必须在不可展示的 schema-v2 台账中逐项关联 citation、同项目证据块、原文摘录和结构化事实。每项 `claim_checks` 返回 `binding_status`、`polarity_status`、`scope_status`、`semantic_support_status`：只有引用绑定有效、极性一致、主体/组件/阶段/版本范围/条件/时间一致，且谓词/值/模态/数量一致并能由 quote 锚定时才为 `supported`。任一字段不匹配、未锚定或漏登记事实均失败闭合并走规则降级。
 16. `recommendations`：当前归档内的确定性结构化推荐。每项包含 `full_name`、`rank`、`match_score`、`matched_requirements`、`unmet_requirements`、`unknown_requirements`、`reasons`、`citation_indexes`、`evidence_chunk_ids` 和 `eligibility`。`match_score` 只是本轮、同一检索模式内的相对排序分，不是概率或置信度。GET 继续验证显式 `language/category/source`；POST 还会验证路由器解析出的自然语言硬约束。
 
 管理页 RAG 对话工作台使用同一接口。每轮问题独立检索；前端以用户/助手气泡展示回答，只把本轮问题、回答摘要、引用、证据、质量闸门结果和 `prompt_context` 保存到浏览器 localStorage，便于刷新后继续查看。
 
-`agent.html?api=1` 的项目匹配对话同样使用该接口，不新增后端会话接口。前端默认降低 `limit` 到 3 来缩短响应等待，候选集合与顺序只读取 `recommendations`，详细引用、证据和 `prompt_context` 只进入折叠依据区。只有质量闸门通过且第一项 `eligibility=eligible` 时才能显示“当前归档内最匹配候选”；其他情况必须显示“暂无可确认首选”。
+`agent.html?api=1` 的项目匹配对话同样使用该接口，不新增后端会话接口。前端默认降低 `limit` 到 3 来缩短响应等待，候选集合与顺序只读取 `recommendations`，详细引用、证据和 `prompt_context` 只进入折叠依据区。只有质量闸门通过、`data_freshness=fresh` 且第一项 `eligibility=eligible` 时才能显示“当前归档内最匹配候选”；其他情况必须显示“暂无可确认首选”。
 
 ### `GET /v1/rag/ask/stream`
 
-React 项目匹配工作台使用的只读 SSE 接口，查询参数与 `/v1/rag/ask` 一致。事件依次为：`meta`（召回元数据、引用和证据摘要）、零到多条 `delta`（已通过当前引用、主张—证据基础闸门的回答分段）、`final`（与 `/v1/rag/ask` 相同的完整最终响应）或 `error`（脱敏后的流协议错误）。后端完整缓冲 provider 输出；质量失败时不发送 provider delta，只返回规则降级 `final`。
+React 项目匹配工作台使用的只读 SSE 接口，查询参数与 `/v1/rag/ask` 一致。事件依次为：`meta`（召回元数据、引用、证据摘要和 freshness 快照）、零到多条 `delta`（已通过当前引用、主张—证据与时效闸门的回答分段）、`final`（与 `/v1/rag/ask` 相同的完整最终响应）或 `error`（脱敏后的流协议错误）。后端完整缓冲 provider 输出；时效请求的水位非 `fresh` 或质量失败时不发送 provider delta，只返回规则降级 `final`。
 
 新增的 `evidence_coverage`、`match_confidence`、`recommendations` 和质量维度只出现在完整 Ask 响应与 SSE `final` 中；不改变 `meta`、`delta`、`error` 的事件结构和顺序。
 

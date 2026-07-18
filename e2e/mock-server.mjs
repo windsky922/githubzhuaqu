@@ -93,7 +93,13 @@ function answerPayload(mode) {
       citation_validity: recommendations.length ? true : "not_applicable",
       evidence_relevance: "not_applicable",
       claim_support: "not_applicable",
-      data_freshness: "unknown",
+      data_freshness: "fresh",
+      source_latest_date: "2026-07-17",
+      corpus_latest_date: "2026-07-17",
+      embedding_latest_date: "2026-07-17",
+      stale_days: 1,
+      as_of: "2026-07-18",
+      reasons: [],
     },
   };
 }
@@ -126,7 +132,7 @@ async function handleAsk(request, response) {
     "Content-Type": "text/event-stream; charset=utf-8",
     Connection: "keep-alive",
   });
-  sseEvent(response, "meta", { query, retrieval: { mode: "hybrid" }, citations: final.citations, evidence: final.evidence });
+  sseEvent(response, "meta", { query, retrieval: { mode: "hybrid" }, citations: final.citations, evidence: final.evidence, freshness: final.answer_quality });
   if (mode === "clarification") {
     sseEvent(response, "final", final);
     response.end();

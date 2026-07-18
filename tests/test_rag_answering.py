@@ -53,6 +53,15 @@ def _retrieval(contexts):
         ][: len(contexts)],
         "retrieval": {"mode": "hybrid"},
         "constraints": {"language": "Python", "category": "AI Agent", "source": "github_trending"},
+        "freshness": {
+            "source_latest_date": "2026-07-17",
+            "corpus_latest_date": "2026-07-17",
+            "embedding_latest_date": "2026-07-17",
+            "stale_days": 1,
+            "data_freshness": "fresh",
+            "as_of": "2026-07-18",
+            "reasons": [],
+        },
         "prompt_context": "[1] owner/agent\nagent workflow automation",
     }
 
@@ -65,7 +74,7 @@ class RagAnsweringTest(unittest.TestCase):
         self.assertIn("citation_validity", result["answer_quality"])
         self.assertEqual(result["answer_quality"]["evidence_relevance"], "not_applicable")
         self.assertEqual(result["answer_quality"]["claim_support"], "not_applicable")
-        self.assertEqual(result["answer_quality"]["data_freshness"], "unknown")
+        self.assertEqual(result["answer_quality"]["data_freshness"], "fresh")
 
     def test_refuses_without_evidence(self):
         client = _FakeClient()
