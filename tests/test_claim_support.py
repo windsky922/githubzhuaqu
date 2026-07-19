@@ -57,6 +57,35 @@ class ClaimSupportTest(unittest.TestCase):
         self.assertEqual(unanchored["semantic_support_status"], "insufficient")
         self.assertEqual(unanchored["reason"], "unanchored_component")
 
+    def test_quote_value_and_boolean_semantics_cannot_be_model_supplied(self):
+        cloud_quote = "The inference runtime requires cloud hosting for all editions."
+        self_hosted = _fact(predicate="hosting_mode", value="self_hosted", modality="supported")
+        cloud = _fact(predicate="hosting_mode", value="cloud", modality="required")
+        wrong_value = compare_facts(claim=self_hosted, evidence=self_hosted, quote=cloud_quote)
+        self.assertEqual(wrong_value["semantic_support_status"], "insufficient")
+        self.assertEqual(wrong_value["reason"], "quote_value_mismatch")
+        self.assertEqual(compare_facts(claim=cloud, evidence=cloud, quote=cloud_quote)["semantic_support_status"], "supported")
+
+        no_network_quote = "The inference runtime does not require network access for all editions."
+        wrong_boolean = compare_facts(claim=_fact(), evidence=_fact(), quote=no_network_quote)
+        self.assertEqual(wrong_boolean["semantic_support_status"], "insufficient")
+        self.assertEqual(wrong_boolean["reason"], "quote_value_mismatch")
+        offline_fact = _fact(value=False)
+        self.assertEqual(compare_facts(claim=offline_fact, evidence=offline_fact, quote=no_network_quote)["semantic_support_status"], "supported")
+
+    def test_negated_or_optional_string_values_are_not_independent_support(self):
+        self_hosted = _fact(predicate="hosting_mode", value="self_hosted", modality="supported")
+        free = _fact(predicate="cost", value="free", modality="supported")
+        for quote, fact in (
+            ("The inference runtime self-hosted mode is not supported for all editions.", self_hosted),
+            ("The inference runtime is not free for all editions.", free),
+            ("The inference runtime may use cloud hosting for all editions.", _fact(predicate="hosting_mode", value="cloud", modality="required")),
+        ):
+            with self.subTest(quote=quote):
+                result = compare_facts(claim=fact, evidence=fact, quote=quote)
+                self.assertEqual(result["semantic_support_status"], "insufficient")
+                self.assertEqual(result["reason"], "unextractable_predicate_value")
+
     def test_answer_quality_requires_registered_and_semantically_supported_facts(self):
         context = {
             "chunk_id": "chunk:1",

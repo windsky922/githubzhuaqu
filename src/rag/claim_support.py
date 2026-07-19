@@ -11,6 +11,7 @@ from __future__ import annotations
 import re
 from typing import Any
 
+from src.rag.evidence_fact_extractor import extract_quote_semantics
 
 FACT_FIELDS = (
     "subject",
@@ -25,23 +26,6 @@ FACT_FIELDS = (
     "quantity",
 )
 _REQUIRED = ("subject", "component", "phase", "predicate", "value", "modality", "edition")
-_PREDICATE_ANCHORS = {
-    "network_required": ("network", "internet", "online", "联网", "网络"),
-    "offline_capable": ("offline", "离线"),
-    "api_key_required": ("api key", "apikey", "token", "密钥", "令牌"),
-    "external_api_required": ("external api", "cloud api", "外部 api", "云 api"),
-    "hosting_mode": ("self-hosted", "self hosted", "cloud", "部署", "托管"),
-    "cost": ("free", "paid", "price", "免费", "付费", "价格"),
-}
-_MODALITY_ANCHORS = {
-    "required": ("require", "must", "mandatory", "需要", "必须"),
-    "optional": ("optional", "may", "可选", "可以"),
-    "supported": ("support", "available", "支持", "可用"),
-    "prohibited": ("not allowed", "forbidden", "禁止", "不允许"),
-}
-_NEGATION_RE = re.compile(r"(?:\b(?:not|no|without|cannot|never)\b|不|无|未|没有|无法|不能)", re.IGNORECASE)
-
-
 def normalize_fact(value: Any) -> tuple[dict[str, Any] | None, str]:
     """Return a closed-world fact; missing or unknown fields are insufficient."""
     if not isinstance(value, dict):
@@ -112,25 +96,20 @@ def compare_facts(*, claim: dict[str, Any], evidence: dict[str, Any], quote: str
 
 
 def evidence_fact_anchor_error(fact: dict[str, Any], quote: str) -> str:
-    """Require source wording for every non-repository evidence fact field."""
+    """Require independently extractable quote semantics and source wording."""
     text = _normalize_string(quote)
     if not text:
         return "empty_evidence_quote"
+    extracted = extract_quote_semantics(quote)
+    if extracted is None:
+        return "unextractable_predicate_value"
+    for field in ("predicate", "value", "modality"):
+        if fact.get(field) != extracted[field]:
+            return f"quote_{field}_mismatch"
     for field in ("component", "phase", "edition", "condition", "temporal", "quantity"):
         value = fact.get(field)
         if value is not None and _normalize_string(value) not in text:
             return f"unanchored_{field}"
-    predicate = str(fact["predicate"])
-    anchors = _PREDICATE_ANCHORS.get(predicate, (predicate,))
-    if not any(_normalize_string(anchor) in text for anchor in anchors):
-        return "unanchored_predicate"
-    modality = str(fact["modality"])
-    modality_anchors = _MODALITY_ANCHORS.get(modality, (modality,))
-    if not any(_normalize_string(anchor) in text for anchor in modality_anchors):
-        return "unanchored_modality"
-    expected_negative = _polarity(fact) == "negative"
-    if bool(_NEGATION_RE.search(text)) != expected_negative:
-        return "unanchored_value"
     return ""
 
 

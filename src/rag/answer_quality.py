@@ -61,7 +61,10 @@ def validate_rag_answer(
     )
     claim_failures = [check for check in claim_checks if check["status"] != "supported"]
     if claim_failures:
-        issues.extend(f"claim_support:{check['id']}:{check['status']}" for check in claim_failures)
+        issues.extend(
+            f"claim_support:{check['id']}:{check['status']}:{check['reason']}"
+            for check in claim_failures
+        )
     applicable_claims = [check for check in claim_checks if check["status"] != "not_applicable"]
     claim_support = "supported" if applicable_claims and not claim_failures else "failed" if claim_failures else "not_applicable"
     evidence_relevance = "passed" if applicable_claims and not claim_failures else "failed" if claim_failures else "not_applicable"

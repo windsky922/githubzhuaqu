@@ -1,3 +1,4 @@
+import json
 import unittest
 from pathlib import Path
 
@@ -294,6 +295,69 @@ class RagAnsweringTest(unittest.TestCase):
         self.assertEqual(final["answer_mode"], "fallback_rule")
         self.assertFalse(final["answer_quality"]["passed"])
         self.assertEqual(final["answer_quality"]["claim_support"], "failed")
+
+    def test_stream_quote_value_mismatch_never_emits_provider_delta_or_primary(self):
+        context = {
+            "chunk_id": "chunk:cloud",
+            "text": "The inference runtime requires cloud hosting for all editions.",
+            "metadata": {"full_name": "owner/agent"},
+        }
+        retrieval = _retrieval([context])
+        retrieval["citations"][0]["chunk_id"] = "chunk:cloud"
+        fact = {
+            "subject": "owner/agent",
+            "component": "inference",
+            "phase": "runtime",
+            "predicate": "hosting_mode",
+            "value": "self_hosted",
+            "modality": "supported",
+            "edition": "all editions",
+            "condition": None,
+            "temporal": None,
+            "quantity": None,
+        }
+        ledger = {
+            "schema_version": 2,
+            "claims": [
+                {
+                    "id": "claim-1",
+                    "kind": "project_fact",
+                    "text": "owner/agent supports self-hosted hosting for all editions.",
+                    "subjects": ["owner/agent"],
+                    "facts": [fact],
+                    "citation_indexes": [1],
+                    "evidence_refs": [
+                        {
+                            "citation_index": 1,
+                            "chunk_id": "chunk:cloud",
+                            "repository": "owner/agent",
+                            "quote": "The inference runtime requires cloud hosting for all editions.",
+                            "fact": fact,
+                        }
+                    ],
+                }
+            ],
+        }
+        answer = (
+            "owner/agent supports self-hosted hosting for all editions. [1]\n"
+            f"<claim_ledger>{json.dumps(ledger)}</claim_ledger>"
+        )
+        events = list(
+            stream_rag_answer_question(
+                root=Path.cwd(),
+                query="agent workflow",
+                retrieval=retrieval,
+                client=_FakeClient(answer=answer),
+            )
+        )
+
+        final = events[-1]["data"]
+        self.assertEqual([item["event"] for item in events], ["meta", "final"])
+        self.assertEqual(final["answer_mode"], "fallback_rule")
+        self.assertFalse(final["answer_quality"]["passed"])
+        self.assertEqual(final["answer_quality"]["claim_support"], "failed")
+        self.assertIn("quote_value_mismatch", final["fallback_reason"])
+        self.assertFalse(final["answer_quality"]["claim_checks"][0]["status"] == "supported")
 
     def test_stream_unsafe_instruction_across_deltas_never_emits_provider_text(self):
         events = list(

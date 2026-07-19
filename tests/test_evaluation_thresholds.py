@@ -17,7 +17,7 @@ class EvaluationThresholdTest(unittest.TestCase):
             "project_recommendations": {"modes": {"local-hash-v1": {"top_1_accuracy": 0.8654, "recall_at_3": 0.9231, "mrr_at_10": 0.8878, "hard_constraint_violation_rate": 0.0, "no_primary_rate": 0.0769}, "hybrid": {"top_1_accuracy": 0.8654, "recall_at_3": 0.9231, "mrr_at_10": 0.8878, "hard_constraint_violation_rate": 0.0, "no_primary_rate": 0.0769}}},
             "follow_up_routing": {"metrics": {"route_accuracy": 1.0, "clarification_accuracy": 1.0, "rewrite_accuracy": 1.0, "candidate_scope_accuracy": 1.0, "constraint_exact_match_accuracy": 1.0, "raw_follow_up_retrieval_violation_rate": 0.0}},
             "constraint_parsing": {"metrics": {"constraint_exact_match_accuracy": 1.0, "operator_accuracy": 1.0, "clarification_accuracy": 1.0, "evidence_state_accuracy": 1.0, "false_eligible_rate": 0.0, "hard_constraint_violation_rate": 0.0, "false_rejection_rate": 0.0}},
-            "claim_support": {"metrics": {"exact_accuracy": 1.0, "rejected_case_accuracy": 1.0, "false_support_rate": 0.0}},
+            "claim_support": {"metrics": {"exact_accuracy": 1.0, "rejected_case_accuracy": 1.0, "false_support_rate": 0.0, "false_fact_anchor_rate": 0.0}},
         }
         self.assertEqual(check_results(self.config, results), [])
 

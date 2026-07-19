@@ -635,6 +635,8 @@ py scripts\run_rag_search_evaluation.py --queries "agent workflow;python automat
 13. `evidence_coverage`：与兼容字段 `confidence` 等值，明确表示已召回、可引用证据的覆盖程度。
 14. `match_confidence`：当前固定为 `unknown`；在没有标注数据校准前不输出 `medium` 或 `high`。
 15. `answer_quality`：保留 `passed`、`issues`，并提供 `citation_validity`、`evidence_relevance`、`claim_support`、`claim_checks`、`source_latest_date`、`corpus_latest_date`、`embedding_latest_date`、`stale_days`、`as_of`、`reasons` 与 `data_freshness`。三层水位只读受控 `data/runs/<run_date>.json` 的版本化 `rag_freshness` attestation；默认超过 8 天为 `stale`，来源新而语料旧或语料新而 embedding 旧为 `lagging`，缺失或不一致为 `unknown`。项目事实与比较/排序结论必须在不可展示的 schema-v2 台账中逐项关联 citation、同项目证据块、原文摘录和结构化事实。每项 `claim_checks` 返回 `binding_status`、`polarity_status`、`scope_status`、`semantic_support_status`：只有引用绑定有效、极性一致、主体/组件/阶段/版本范围/条件/时间一致，且谓词/值/模态/数量一致并能由 quote 锚定时才为 `supported`。任一字段不匹配、未锚定或漏登记事实均失败闭合并走规则降级。
+
+其中仓库主体由 citation/context metadata 绑定；`predicate/value/modality` 必须由后端从 quote 唯一、确定性地抽取后再与 evidence fact 比较，不能接受模型自报值。其余 scope 字段必须逐字出现在 quote。无法抽取、语义歧义或闭集外 predicate 均为 `insufficient`。
 16. `recommendations`：当前归档内的确定性结构化推荐。每项包含 `full_name`、`rank`、`match_score`、`matched_requirements`、`unmet_requirements`、`unknown_requirements`、`reasons`、`citation_indexes`、`evidence_chunk_ids` 和 `eligibility`。`match_score` 只是本轮、同一检索模式内的相对排序分，不是概率或置信度。GET 继续验证显式 `language/category/source`；POST 还会验证路由器解析出的自然语言硬约束。
 
 管理页 RAG 对话工作台使用同一接口。每轮问题独立检索；前端以用户/助手气泡展示回答，只把本轮问题、回答摘要、引用、证据、质量闸门结果和 `prompt_context` 保存到浏览器 localStorage，便于刷新后继续查看。

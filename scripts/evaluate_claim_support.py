@@ -28,10 +28,15 @@ def evaluate(cases: list[dict[str, Any]]) -> dict[str, Any]:
     supported_correct = 0
     rejected_correct = 0
     false_supports = 0
+    false_fact_anchor_cases = 0
+    false_fact_anchors = 0
     for case in cases:
         result = compare_facts(claim=case.get("claim"), evidence=case.get("evidence"), quote=str(case.get("quote") or ""))
         actual = result["semantic_support_status"] == "supported"
         expected = bool(case.get("expected_supported"))
+        false_fact_anchor = case.get("category") == "false_fact_anchor"
+        false_fact_anchor_cases += int(false_fact_anchor)
+        false_fact_anchors += int(false_fact_anchor and actual)
         if actual == expected:
             supported_correct += int(expected)
             rejected_correct += int(not expected)
@@ -40,11 +45,12 @@ def evaluate(cases: list[dict[str, Any]]) -> dict[str, Any]:
             failures.append({"id": case.get("id"), "expected_supported": expected, "actual": result})
     count = len(cases)
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "sample_count": count,
         "metrics": {
             "exact_accuracy": supported_correct / count + rejected_correct / count,
             "false_support_rate": false_supports / count,
+            "false_fact_anchor_rate": false_fact_anchors / max(1, false_fact_anchor_cases),
             "supported_case_accuracy": supported_correct,
             "rejected_case_accuracy": rejected_correct / max(1, sum(not bool(case.get("expected_supported")) for case in cases)),
         },

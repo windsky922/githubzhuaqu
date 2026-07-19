@@ -68,6 +68,8 @@ POST Ask 在检索前经过 `follow_up_router`。确定性规则优先识别 res
 
 Ask 响应把证据覆盖与匹配把握分开表达：旧 `confidence` 仅作为兼容字段保留，`evidence_coverage` 复用其按证据数量计算的 `low/medium/high`，`match_confidence` 在未校准阶段固定为 `unknown`。`answer_quality` 保留原有通过状态和问题列表，并显式标记引用有效性、证据相关性、主张支持度、逐项 `claim_checks` 的 binding/polarity/scope/semantic 状态和数据新鲜度。freshness 只读取受控运行 JSON：`source_latest_date` 是最新来源运行日，`corpus_latest_date` 与 `embedding_latest_date` 必须来自版本化 `rag_freshness` attestation；默认超过 8 天为 stale，层级落后为 lagging，缺失或不一致为 unknown。时效性请求在非 fresh 状态下于 provider 调用前规则降级，SSE 只保留 `meta → final`，首选也必须要求 fresh。该水位不代表 blind 泛化或推荐正确率。
 
+P0-16C 将主张证据再分为 metadata-bound subject、quote-extracted `predicate/value/modality` 与 quote-bound scope。后端只能接受从 quote 唯一确定性抽取出的语义组合；模型自报 evidence fact 不构成证明。抽取不到或有歧义时，质量闸门失败关闭，provider 内容不进入 delta，首选关闭。
+
 管理页 RAG 对话工作台是该接口的 GPT 式前端封装，不新增后端会话状态。对话历史只保存在浏览器 localStorage，最多 20 轮；每轮问题独立检索，历史回答只用于页面回看，不进入 `prompt_context`，也不作为事实证据。管理页和 React 工作台显示“证据覆盖”与“匹配把握尚未校准”，不再把 `confidence` 渲染为匹配置信度。
 
 `frontend/` 是 React + TypeScript 用户前端，构建产物写入 `docs/app/`，通过 Hash Router 提供项目匹配、筛选、推荐、详情和对比页面；旧 `agent.html`、`explorer.html`、`recommendations.html`、`project.html`、`compare.html` 仅保留 query 参数并跳转到对应路由。`app/#/agent?api=1` 默认 POST `/v1/rag/ask/stream`。流中的 `delta` 只展示已通过当前主张—证据与时效闸门的内容；质量或时效失败不产生 provider delta。`final` 中只有第一项 recommendation 为 eligible、回答质量通过且 `data_freshness=fresh` 时才显示首选。clarification 不展示项目卡或质量失败，no_match 展示冲突候选与原因。它不新增数据库表或后端会话。

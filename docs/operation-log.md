@@ -1,5 +1,23 @@
 # 操作日志
 
+## 2026-07-19 追加：P0-16C 独立 quote 语义锚定
+
+### 1. 修改内容
+
+1. 新增确定性 `evidence_fact_extractor`：从 quote 独立抽取闭集的 `predicate/value/modality` 组合；模型提交的 evidence fact 只有与该结果完全相等才可能支持主张。
+2. 对 `network_required`、`offline_capable`、API Key、外部 API、托管方式和成本采用唯一短语匹配；零个或多个语义结果均为 `insufficient`，不猜测 value。
+3. `claim_support_cases` 新增 value、布尔语义错配，以及 self-hosted/免费被否定时的伪锚定；评估增加 `false_fact_anchor_rate`，阈值必须为零。
+
+### 3. 实际验证
+
+1. 定向单测与固定 claim-support 评估通过：14 条样本，`false_support_rate=0`、`false_fact_anchor_rate=0`。
+2. Python 全量单测（279 项）、安全检查、四套固定评估、前端 lint/test/build、mock Playwright（12 项）和真实 FastAPI Playwright（6 项）均通过；`git diff --check` 与 `docs/app` 一致性检查通过。
+
+### 2. 边界
+
+1. 仓库 subject 仍由 citation/context metadata 绑定；component、phase、edition、condition、temporal、quantity 仍必须在 quote 中逐字出现。未知或不在闭集内的 predicate 失败关闭。
+2. 不改 SQLite schema、hybrid 权重、运行态数据库、公共归档、Ask/SSE 顺序、无状态追问、硬约束或外发确认。
+
 ## 2026-07-18 追加：P0-17 数据新鲜度闸门
 
 ### 1. 修改内容
