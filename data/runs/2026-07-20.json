@@ -19,7 +19,7 @@
   "telegram_explorer_url": "https://windsky922.github.io/githubzhuaqu/explorer.html?date=2026-07-20",
   "telegram_report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-07-20.html",
   "telegram_runs_url": "https://windsky922.github.io/githubzhuaqu/runs.html",
-  "telegram_sent": false,
+  "telegram_sent": true,
   "trending_top10_available_count": 10,
   "trending_top10_fulfillment_rate": 1.0,
   "trending_top10_selected_count": 7
