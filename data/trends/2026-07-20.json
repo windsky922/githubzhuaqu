@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "summary_points": [
+    "AI Agent 是本期最集中的方向，共 9 个项目。",
+    "Python 是本期出现最多的主要语言，共 6 个项目。",
+    "本期入选项目累计新增 Star 207665。",
+    "OpenCut-app/OpenCut 是本期 GitHub Trending 排名最高的项目，周榜排名 2。",
+    "mattpocock/skills 是本期新增 Star 最高的项目，新增 84798。"
+  ],
+  "top_categories": [
+    {
+      "count": 9,
+      "name": "AI Agent"
+    },
+    {
+      "count": 1,
+      "name": "Other"
+    }
+  ],
+  "top_languages": [
+    {
+      "count": 6,
+      "name": "Python"
+    },
+    {
+      "count": 1,
+      "name": "TypeScript"
+    },
+    {
+      "count": 1,
+      "name": "Shell"
+    },
+    {
+      "count": 1,
+      "name": "C#"
+    },
+    {
+      "count": 1,
+      "name": "JavaScript"
+    }
+  ],
+  "top_star_growth": [
+    {
+      "category": "AI Agent",
+      "full_name": "mattpocock/skills",
+      "html_url": "https://github.com/mattpocock/skills",
+      "language": "Shell",
+      "star_growth": 84798,
+      "stargazers_count": 177710
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "NousResearch/hermes-agent",
+      "html_url": "https://github.com/NousResearch/hermes-agent",
+      "language": "Python",
+      "star_growth": 39181,
+      "stargazers_count": 217314
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "Panniantong/Agent-Reach",
+      "html_url": "https://github.com/Panniantong/Agent-Reach",
+      "language": "Python",
+      "star_growth": 38424,
+      "stargazers_count": 58294
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "Leonxlnx/taste-skill",
+      "html_url": "https://github.com/Leonxlnx/taste-skill",
+      "language": "JavaScript",
+      "star_growth": 33343,
+      "stargazers_count": 65293
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "Shubhamsaboo/awesome-llm-apps",
+      "html_url": "https://github.com/Shubhamsaboo/awesome-llm-apps",
+      "language": "Python",
+      "star_growth": 11919,
+      "stargazers_count": 124626
+    }
+  ],
+  "top_trending": [
+    {
+      "category": "Other",
+      "full_name": "OpenCut-app/OpenCut",
+      "html_url": "https://github.com/OpenCut-app/OpenCut",
+      "language": "TypeScript",
+      "stargazers_count": 75957
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "Shubhamsaboo/awesome-llm-apps",
+      "html_url": "https://github.com/Shubhamsaboo/awesome-llm-apps",
+      "language": "Python",
+      "stargazers_count": 124626
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "HKUDS/Vibe-Trading",
+      "html_url": "https://github.com/HKUDS/Vibe-Trading",
+      "language": "Python",
+      "stargazers_count": 25353
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "HKUDS/DeepTutor",
+      "html_url": "https://github.com/HKUDS/DeepTutor",
+      "language": "Python",
+      "stargazers_count": 28007
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "mattpocock/skills",
+      "html_url": "https://github.com/mattpocock/skills",
+      "language": "Shell",
+      "stargazers_count": 177710
+    }
+  ],
+  "total_projects": 10,
+  "total_star_growth": 207665,
+  "trending_project_count": 7,
+  "trending_selected_rate": 0.7,
+  "trending_top10_selected_count": 7
+}

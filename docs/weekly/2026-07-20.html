@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GitHub 周报 2026-07-20</title>
+  <style>
+    body { margin: 0; background: #f6f7f9; color: #1f2933; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height: 1.7; }
+    main { max-width: 960px; margin: 0 auto; padding: 32px 20px 56px; }
+    article { background: #fff; border: 1px solid #d8dee8; padding: 28px; }
+    h1, h2, h3, h4 { line-height: 1.3; }
+    a { color: #0969da; }
+    code { background: #eef2f7; padding: 2px 5px; }
+    table { width: 100%; border-collapse: collapse; margin: 18px 0; display: block; overflow-x: auto; }
+    th, td { border: 1px solid #d8dee8; padding: 8px 10px; text-align: left; vertical-align: top; }
+    th { background: #f1f4f8; }
+    hr { border: 0; border-top: 1px solid #d8dee8; margin: 24px 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <article>
+      <h2>GitHub 每周热点项目周报（2026.07.13 - 2026.07.20）</h2>
+      <h3>1. 本周总体趋势</h3>
+      <p>本周开源社区呈现<strong>AI Agent 基础设施爆发式增长</strong>态势。在入选的 10 个热点项目中，<strong>9 个项目聚焦于 AI Agent 方向</strong>，涵盖 Skill 框架、自动化工具、垂直领域应用（交易、教育、办公）等细分赛道。Python 以 6 个项目继续主导 Agent 生态，TypeScript、C#、JavaScript 和 Shell 也在特定场景展现优势。</p>
+      <p>本周累计新增 Star 达 <strong>207,665</strong>，热度极高。GitHub Trending 周榜前 8 位中，本期项目占据 7 席，其中 <code>mattpocock/skills</code> 单周新增 84,798 Star，创下近期增长记录。值得关注的是，<strong>&quot;Skill&quot; 成为本期核心概念</strong>——从知识蒸馏到前端审美，开发者正通过模块化 Skill 体系提升 Agent 的工程化水平。</p>
+      <hr>
+      <h3>2. 热点项目总览</h3>
+      <table>
+        <thead><tr><th>项目</th><th>语言</th><th>周榜排名</th><th>本周新增 Star</th><th>简介</th></tr></thead>
+        <tbody>
+        <tr><td><a href="https://github.com/OpenCut-app/OpenCut">OpenCut-app/OpenCut</a></td><td>TypeScript</td><td><strong>第 2 位</strong></td><td>-</td><td>开源 CapCut 替代品，支持 Web、桌面和移动端视频编辑</td></tr>
+        <tr><td><a href="https://github.com/Shubhamsaboo/awesome-llm-apps">Shubhamsaboo/awesome-llm-apps</a></td><td>Python</td><td><strong>第 3 位</strong></td><td>+11,919</td><td>100+ 可实际运行的 AI Agent &amp; RAG 应用集合</td></tr>
+        <tr><td><a href="https://github.com/HKUDS/Vibe-Trading">HKUDS/Vibe-Trading</a></td><td>Python</td><td><strong>第 4 位</strong></td><td>-</td><td>个人交易 Agent，支持量化金融与算法交易</td></tr>
+        <tr><td><a href="https://github.com/HKUDS/DeepTutor">HKUDS/DeepTutor</a></td><td>Python</td><td><strong>第 5 位</strong></td><td>-</td><td>终身个性化 AI 家教系统</td></tr>
+        <tr><td><a href="https://github.com/mattpocock/skills">mattpocock/skills</a></td><td>Shell</td><td><strong>第 6 位</strong></td><td><strong>+84,798</strong></td><td>面向真实工程场景的 Agent Skills 集合（非 Vibe Coding）</td></tr>
+        <tr><td><a href="https://github.com/kangarooking/cangjie-skill">kangarooking/cangjie-skill</a></td><td>Python</td><td><strong>第 7 位</strong></td><td>-</td><td>将书籍、长视频等高价值内容蒸馏为可执行 Agent Skill</td></tr>
+        <tr><td><a href="https://github.com/iOfficeAI/OfficeCLI">iOfficeAI/OfficeCLI</a></td><td>C#</td><td><strong>第 8 位</strong></td><td>-</td><td>专为 AI Agent 设计的 Office 套件，支持 Word/Excel/PPT 自动化</td></tr>
+        <tr><td><a href="https://github.com/Panniantong/Agent-Reach">Panniantong/Agent-Reach</a></td><td>Python</td><td>-</td><td>+38,424</td><td>为 Agent 提供互联网接入能力（Twitter、Reddit、YouTube、B站等）</td></tr>
+        <tr><td><a href="https://github.com/NousResearch/hermes-agent">NousResearch/hermes-agent</a></td><td>Python</td><td>-</td><td>+39,181</td><td>具备内置学习循环的自改进 AI Agent</td></tr>
+        <tr><td><a href="https://github.com/Leonxlnx/taste-skill">Leonxlnx/taste-skill</a></td><td>JavaScript</td><td>-</td><td>+33,343</td><td>提升 AI 生成前端代码的审美品质，避免&quot;通用模板&quot;式输出</td></tr>
+        </tbody>
+      </table>
+      <p>*数据来源：GitHub Trending 周榜、GitHub Search 多维度检索*</p>
+      <hr>
+      <h3>3. 重点项目分析</h3>
+      <p><strong>mattpocock/skills</strong></p>
+      <p>该项目进入 GitHub Trending 周榜第 6 位，且以 84,798 的新增 Star 成为本周增长冠军。作为 Shell 脚本集合，它区别于常见的&quot;Vibe Coding&quot;工具，专注于<strong>生产级工程实践</strong>。项目质量评分为 92 分（高质量），尽管主题标签较少，但其 README 明确强调&quot;Real Engineering&quot;定位，提供 GSD、BMAD 等工程方法论的标准化 Skill。对于追求 Agent 工程化落地的开发者，这是目前最具参考价值的 Skill 体系实践。</p>
+      <p><strong>Shubhamsaboo/awesome-llm-apps</strong></p>
+      <p>位居周榜第 3 位，本周新增 11,919 Star。这是一个 Apache-2.0 协议的 Python 项目，收录 100+ 经过端到端测试的 AI Agent 与 RAG 应用。项目质量评分 100 分（信息完整度高），支持 Claude、Gemini、GPT、DeepSeek、Llama、Qwen 等主流模型。其核心价值在于<strong>&quot;可立即运行&quot;</strong>——每个应用都提供完整的代码实现，适合作为学习 Agent 开发的实践教材。</p>
+      <p><strong>OpenCut-app/OpenCut</strong></p>
+      <p>作为本期唯一非 Agent 类别的项目，进入周榜第 2 位。基于 TypeScript 开发，定位为 CapCut 的开源替代品，支持跨平台视频编辑。项目质量评分 100 分，采用 MIT 协议，累计 75,957 Star。在 AI Agent 主导本周榜单的背景下，该项目的入选表明<strong>创意工具类开源软件</strong>仍保持强劲需求，尤其适合有视频处理需求的开发者关注。</p>
+      <p><strong>NousResearch/hermes-agent</strong></p>
+      <p>由知名研究机构 Nous Research 开发，本周新增 39,181 Star，累计达 217,314 Star。作为 Python 项目，其最大特色是<strong>内置学习循环</strong>——能从经验中创建 Skill、在使用中持续改进、自动持久化知识，并建立用户画像模型。项目质量评分 92 分，主题覆盖 claude-code、codex、moltbot 等主流 Agent 协议。需要注意的是，该项目 open_issues_count 高达 23,972，社区活跃度极高但也意味着潜在的功能迭代风险。</p>
+      <p><strong>Panniantong/Agent-Reach</strong></p>
+      <p>本周新增 38,424 Star，解决 Agent 无法直接访问互联网内容的痛点。基于 Python 开发，支持 Twitter、Reddit、YouTube、Bilibili、小红书等平台的数据抓取，且无需 API 费用。项目质量评分 100 分，标签涵盖 mcp、web-scraper、ai-search 等基础设施方向。对于需要构建<strong>具备实时信息获取能力</strong>的 Agent 开发者，该项目提供了开箱即用的解决方案，但需注意各平台的数据使用合规性。</p>
+      <hr>
+      <h3>4. 最适合用户学习的项目</h3>
+      <p>根据您的学习画像（Java 后端、Python 工具开发、Agent 开发、关注 CLI 与自动化），本期推荐以下学习路径：</p>
+      <p><strong>入门首选：<a href="https://github.com/Shubhamsaboo/awesome-llm-apps">Shubhamsaboo/awesome-llm-apps</a></strong></p>
+      <p>如果您希望快速上手 Agent 开发，该项目提供 100+ 可实际运行的示例，涵盖 RAG、Agent Workflow 等核心模式。所有代码均基于 Python，与您的技术栈匹配，且 Apache-2.0 协议允许自由修改商用。</p>
+      <p><strong>进阶实践：<a href="https://github.com/mattpocock/skills">mattpocock/skills</a></strong></p>
+      <p>当您已掌握基础 Agent 开发，希望提升工程化水平时，该项目展示了如何将工程方法论（如 GSD、BMAD）转化为可复用的 Skill 模块。尽管使用 Shell 语言，但其设计思想适用于任何技术栈，特别适合关注&quot;开发者工具&quot;方向的工程师。</p>
+      <p><strong>基础设施：<a href="https://github.com/iOfficeAI/OfficeCLI">iOfficeAI/OfficeCLI</a></strong></p>
+      <p>对于关注自动化与办公场景的后端开发者，这个 C# 项目展示了如何为 Agent 构建专用工具链。单二进制文件、无需 Office 安装的设计思路，值得在构建企业级自动化工具时参考。</p>
+      <hr>
+      <h3>5. 本周结论</h3>
+      <p>本周开源生态明确显示 <strong>AI Agent 正从&quot;概念验证&quot;向&quot;工程化落地&quot;转型</strong>。以 Skill 为核心的模块化架构成为主流趋势——无论是知识蒸馏（cangjie-skill）、审美提升（taste-skill）还是工程方法论（mattpocock/skills），开发者正在构建更专业、可复用的 Agent 能力组件。</p>
+      <p>Python 继续在 Agent 生态中占据统治地位（6/10 项目），但 TypeScript（OpenCut）、C#（OfficeCLI）和 Shell（skills）在特定垂直领域展现价值。本周所有入选项目的安全评分均为 100 分（低风险），质量评分均达 92 分以上，表明这些项目具备较高的代码成熟度和信息完整度。</p>
+      <p><strong>建议关注方向</strong>：Agent 与外部系统的集成能力（如 Agent-Reach 的互联网接入）、垂直领域专业化（如 Vibe-Trading 的金融场景）、以及 Skill 的标准化与复用机制。对于后端开发者而言，现在正是深入理解 Agent 基础设施架构的关键窗口期。</p>
+      <h2>附录：项目链接与来源补全</h2>
+      <p>• OpenCut-app/OpenCut；<a href="https://github.com/OpenCut-app/OpenCut">https://github.com/OpenCut-app/OpenCut</a>；来源：GitHub Trending；Trending 排名：2</p>
+      <p>• Shubhamsaboo/awesome-llm-apps；<a href="https://github.com/Shubhamsaboo/awesome-llm-apps">https://github.com/Shubhamsaboo/awesome-llm-apps</a>；来源：GitHub Search + GitHub Trending；Trending 排名：3</p>
+      <p>• HKUDS/Vibe-Trading；<a href="https://github.com/HKUDS/Vibe-Trading">https://github.com/HKUDS/Vibe-Trading</a>；来源：GitHub Trending；Trending 排名：4</p>
+      <p>• HKUDS/DeepTutor；<a href="https://github.com/HKUDS/DeepTutor">https://github.com/HKUDS/DeepTutor</a>；来源：GitHub Trending；Trending 排名：5</p>
+      <p>• mattpocock/skills；<a href="https://github.com/mattpocock/skills">https://github.com/mattpocock/skills</a>；来源：GitHub Search + GitHub Trending；Trending 排名：6</p>
+      <p>• kangarooking/cangjie-skill；<a href="https://github.com/kangarooking/cangjie-skill">https://github.com/kangarooking/cangjie-skill</a>；来源：GitHub Trending；Trending 排名：7</p>
+      <p>• iOfficeAI/OfficeCLI；<a href="https://github.com/iOfficeAI/OfficeCLI">https://github.com/iOfficeAI/OfficeCLI</a>；来源：GitHub Trending；Trending 排名：8</p>
+      <p>• Panniantong/Agent-Reach；<a href="https://github.com/Panniantong/Agent-Reach">https://github.com/Panniantong/Agent-Reach</a>；来源：GitHub Search</p>
+      <p>• NousResearch/hermes-agent；<a href="https://github.com/NousResearch/hermes-agent">https://github.com/NousResearch/hermes-agent</a>；来源：GitHub Search</p>
+      <p>• Leonxlnx/taste-skill；<a href="https://github.com/Leonxlnx/taste-skill">https://github.com/Leonxlnx/taste-skill</a>；来源：GitHub Search</p>
+    </article>
+  </main>
+</body>
+</html>

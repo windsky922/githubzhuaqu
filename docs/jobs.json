@@ -1,7 +1,197 @@
 {
   "schema_version": 1,
-  "count": 19,
+  "count": 24,
   "jobs": [
+    {
+      "job_id": "dev-context-index-plan:20260720T033502096803:cd21131336",
+      "kind": "dev_context_index",
+      "status": "succeeded",
+      "run_date": "2026-07-20",
+      "submitted_at": "2026-07-20T03:35:02.096803Z",
+      "started_at": "2026-07-20T03:35:02.232193Z",
+      "finished_at": "2026-07-20T03:35:02.238032Z",
+      "request": {
+        "profile": "",
+        "sources": [],
+        "dry_run": false,
+        "requested_dry_run": false,
+        "confirm_delivery": false,
+        "delivery_allowed": false,
+        "days_back": 0,
+        "trigger_source": "github_actions",
+        "requested_by": "github_actions",
+        "safety_warnings": []
+      },
+      "result": {
+        "run_date": "2026-07-20",
+        "status": "succeeded",
+        "selected_count": 0,
+        "collected_count": 0,
+        "kimi_used": false,
+        "fallback_used": false,
+        "telegram_sent": false,
+        "telegram_error": "",
+        "report_path": "",
+        "report_url": "",
+        "sqlite_index_path": "",
+        "sqlite_error": "",
+        "error": ""
+      },
+      "error": "",
+      "report_url": ""
+    },
+    {
+      "job_id": "rag-search-eval-plan:2026-07-20:f94ddf64ad84",
+      "kind": "rag_search_evaluation",
+      "status": "succeeded",
+      "run_date": "2026-07-20",
+      "submitted_at": "2026-07-20T03:35:00.824330Z",
+      "started_at": "2026-07-20T03:35:00.863331Z",
+      "finished_at": "2026-07-20T03:35:00.868511Z",
+      "request": {
+        "profile": "",
+        "sources": [],
+        "dry_run": false,
+        "requested_dry_run": false,
+        "confirm_delivery": false,
+        "delivery_allowed": false,
+        "days_back": 0,
+        "trigger_source": "rag_search_evaluation_script",
+        "requested_by": "github_actions",
+        "safety_warnings": []
+      },
+      "result": {
+        "run_date": "2026-07-20",
+        "status": "ok",
+        "selected_count": 0,
+        "collected_count": 0,
+        "kimi_used": false,
+        "fallback_used": false,
+        "telegram_sent": false,
+        "telegram_error": "",
+        "report_path": "",
+        "report_url": "",
+        "sqlite_index_path": "",
+        "sqlite_error": "",
+        "error": ""
+      },
+      "error": "",
+      "report_url": ""
+    },
+    {
+      "job_id": "rag-embedding-plan:20260720T033500620535:f6b9927a46",
+      "kind": "rag_embedding_build",
+      "status": "planned",
+      "run_date": "",
+      "submitted_at": "2026-07-20T03:35:00.620535Z",
+      "started_at": "",
+      "finished_at": "",
+      "request": {
+        "profile": "",
+        "sources": [],
+        "dry_run": true,
+        "requested_dry_run": true,
+        "confirm_delivery": false,
+        "delivery_allowed": false,
+        "days_back": 0,
+        "trigger_source": "rag_maintenance_script",
+        "requested_by": "github_actions",
+        "safety_warnings": []
+      },
+      "result": {
+        "run_date": "",
+        "status": "",
+        "selected_count": 0,
+        "collected_count": 0,
+        "kimi_used": false,
+        "fallback_used": false,
+        "telegram_sent": false,
+        "telegram_error": "",
+        "report_path": "",
+        "report_url": "",
+        "sqlite_index_path": "",
+        "sqlite_error": "",
+        "error": ""
+      },
+      "error": "",
+      "report_url": ""
+    },
+    {
+      "job_id": "preview:97b68fedff3e",
+      "kind": "weekly_report",
+      "status": "succeeded",
+      "run_date": "2026-07-20",
+      "submitted_at": "2026-07-20T03:33:24.665713Z",
+      "started_at": "2026-07-20T03:33:25.861796Z",
+      "finished_at": "2026-07-20T03:33:25.867259Z",
+      "request": {
+        "profile": "java,python,agent_development,developer_tools",
+        "sources": [],
+        "dry_run": true,
+        "requested_dry_run": true,
+        "confirm_delivery": false,
+        "delivery_allowed": false,
+        "days_back": 7,
+        "trigger_source": "github_actions",
+        "requested_by": "windsky922",
+        "safety_warnings": []
+      },
+      "result": {
+        "run_date": "2026-07-20",
+        "status": "success",
+        "selected_count": 10,
+        "collected_count": 314,
+        "kimi_used": true,
+        "fallback_used": false,
+        "telegram_sent": false,
+        "telegram_error": "Telegram send skipped",
+        "report_path": "reports/2026-07-20.md",
+        "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-07-20.html",
+        "sqlite_index_path": "data/github_weekly.sqlite",
+        "sqlite_error": "",
+        "error": ""
+      },
+      "error": "",
+      "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-07-20.html"
+    },
+    {
+      "job_id": "run:2026-07-20",
+      "kind": "weekly_report",
+      "status": "succeeded",
+      "run_date": "2026-07-20",
+      "submitted_at": "2026-07-20",
+      "started_at": "",
+      "finished_at": "2026-07-20",
+      "request": {
+        "profile": "",
+        "sources": [],
+        "dry_run": false,
+        "requested_dry_run": false,
+        "confirm_delivery": false,
+        "delivery_allowed": false,
+        "days_back": 0,
+        "trigger_source": "",
+        "requested_by": "",
+        "safety_warnings": []
+      },
+      "result": {
+        "run_date": "",
+        "status": "",
+        "selected_count": 10,
+        "collected_count": 314,
+        "kimi_used": true,
+        "fallback_used": false,
+        "telegram_sent": false,
+        "telegram_error": "",
+        "report_path": "reports/2026-07-20.md",
+        "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-07-20.html",
+        "sqlite_index_path": "",
+        "sqlite_error": "",
+        "error": ""
+      },
+      "error": "",
+      "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-07-20.html"
+    },
     {
       "job_id": "run:2026-07-13",
       "kind": "weekly_report",
@@ -23,22 +213,22 @@
         "safety_warnings": []
       },
       "result": {
-        "run_date": "2026-07-13",
-        "status": "success",
+        "run_date": "",
+        "status": "",
         "selected_count": 10,
         "collected_count": 321,
         "kimi_used": true,
         "fallback_used": false,
         "telegram_sent": true,
         "telegram_error": "",
-        "report_path": "",
-        "report_url": "weekly/2026-07-13.html",
+        "report_path": "reports/2026-07-13.md",
+        "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-07-13.html",
         "sqlite_index_path": "",
         "sqlite_error": "",
         "error": ""
       },
       "error": "",
-      "report_url": "weekly/2026-07-13.html"
+      "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-07-13.html"
     },
     {
       "job_id": "run:2026-07-06",
@@ -61,22 +251,22 @@
         "safety_warnings": []
       },
       "result": {
-        "run_date": "2026-07-06",
-        "status": "success",
+        "run_date": "",
+        "status": "",
         "selected_count": 10,
         "collected_count": 321,
         "kimi_used": true,
         "fallback_used": false,
         "telegram_sent": true,
         "telegram_error": "",
-        "report_path": "",
-        "report_url": "weekly/2026-07-06.html",
+        "report_path": "reports/2026-07-06.md",
+        "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-07-06.html",
         "sqlite_index_path": "",
         "sqlite_error": "",
         "error": ""
       },
       "error": "",
-      "report_url": "weekly/2026-07-06.html"
+      "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-07-06.html"
     },
     {
       "job_id": "run:2026-06-29",
@@ -99,22 +289,22 @@
         "safety_warnings": []
       },
       "result": {
-        "run_date": "2026-06-29",
-        "status": "success",
+        "run_date": "",
+        "status": "",
         "selected_count": 10,
         "collected_count": 322,
         "kimi_used": true,
         "fallback_used": false,
         "telegram_sent": true,
         "telegram_error": "",
-        "report_path": "",
-        "report_url": "weekly/2026-06-29.html",
+        "report_path": "reports/2026-06-29.md",
+        "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-06-29.html",
         "sqlite_index_path": "",
         "sqlite_error": "",
         "error": ""
       },
       "error": "",
-      "report_url": "weekly/2026-06-29.html"
+      "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-06-29.html"
     },
     {
       "job_id": "run:2026-06-22",
@@ -137,22 +327,22 @@
         "safety_warnings": []
       },
       "result": {
-        "run_date": "2026-06-22",
-        "status": "success",
+        "run_date": "",
+        "status": "",
         "selected_count": 10,
         "collected_count": 319,
         "kimi_used": true,
         "fallback_used": false,
         "telegram_sent": true,
         "telegram_error": "",
-        "report_path": "",
-        "report_url": "weekly/2026-06-22.html",
+        "report_path": "reports/2026-06-22.md",
+        "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-06-22.html",
         "sqlite_index_path": "",
         "sqlite_error": "",
         "error": ""
       },
       "error": "",
-      "report_url": "weekly/2026-06-22.html"
+      "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-06-22.html"
     },
     {
       "job_id": "run:2026-06-15",
@@ -175,22 +365,22 @@
         "safety_warnings": []
       },
       "result": {
-        "run_date": "2026-06-15",
-        "status": "success",
+        "run_date": "",
+        "status": "",
         "selected_count": 10,
         "collected_count": 320,
         "kimi_used": true,
         "fallback_used": false,
         "telegram_sent": true,
         "telegram_error": "",
-        "report_path": "",
-        "report_url": "weekly/2026-06-15.html",
+        "report_path": "reports/2026-06-15.md",
+        "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-06-15.html",
         "sqlite_index_path": "",
         "sqlite_error": "",
         "error": ""
       },
       "error": "",
-      "report_url": "weekly/2026-06-15.html"
+      "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-06-15.html"
     },
     {
       "job_id": "run:2026-06-08",
@@ -213,22 +403,22 @@
         "safety_warnings": []
       },
       "result": {
-        "run_date": "2026-06-08",
-        "status": "success",
+        "run_date": "",
+        "status": "",
         "selected_count": 10,
         "collected_count": 319,
         "kimi_used": true,
         "fallback_used": false,
         "telegram_sent": true,
         "telegram_error": "",
-        "report_path": "",
-        "report_url": "weekly/2026-06-08.html",
+        "report_path": "reports/2026-06-08.md",
+        "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-06-08.html",
         "sqlite_index_path": "",
         "sqlite_error": "",
         "error": ""
       },
       "error": "",
-      "report_url": "weekly/2026-06-08.html"
+      "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-06-08.html"
     },
     {
       "job_id": "run:2026-06-03",
@@ -251,22 +441,22 @@
         "safety_warnings": []
       },
       "result": {
-        "run_date": "2026-06-03",
-        "status": "success",
+        "run_date": "",
+        "status": "",
         "selected_count": 10,
         "collected_count": 210,
         "kimi_used": true,
         "fallback_used": false,
         "telegram_sent": true,
         "telegram_error": "",
-        "report_path": "",
-        "report_url": "weekly/2026-06-03.html",
+        "report_path": "reports/2026-06-03.md",
+        "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-06-03.html",
         "sqlite_index_path": "",
         "sqlite_error": "",
         "error": ""
       },
       "error": "",
-      "report_url": "weekly/2026-06-03.html"
+      "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-06-03.html"
     },
     {
       "job_id": "run:2026-06-02",
@@ -289,22 +479,22 @@
         "safety_warnings": []
       },
       "result": {
-        "run_date": "2026-06-02",
-        "status": "success",
+        "run_date": "",
+        "status": "",
         "selected_count": 10,
         "collected_count": 230,
         "kimi_used": false,
-        "fallback_used": true,
+        "fallback_used": false,
         "telegram_sent": true,
         "telegram_error": "",
-        "report_path": "",
-        "report_url": "weekly/2026-06-02.html",
+        "report_path": "reports/2026-06-02.md",
+        "report_url": "https://windsky922.github.io/githubzhuaqu/2026-06-02.html",
         "sqlite_index_path": "",
         "sqlite_error": "",
         "error": ""
       },
       "error": "",
-      "report_url": "weekly/2026-06-02.html"
+      "report_url": "https://windsky922.github.io/githubzhuaqu/2026-06-02.html"
     },
     {
       "job_id": "run:2026-05-19",
@@ -327,22 +517,22 @@
         "safety_warnings": []
       },
       "result": {
-        "run_date": "2026-05-19",
-        "status": "success",
+        "run_date": "",
+        "status": "",
         "selected_count": 10,
         "collected_count": 103,
         "kimi_used": false,
-        "fallback_used": true,
+        "fallback_used": false,
         "telegram_sent": false,
         "telegram_error": "",
-        "report_path": "",
-        "report_url": "weekly/2026-05-19.html",
+        "report_path": "reports/2026-05-19.md",
+        "report_url": "",
         "sqlite_index_path": "",
         "sqlite_error": "",
         "error": ""
       },
       "error": "",
-      "report_url": "weekly/2026-05-19.html"
+      "report_url": ""
     },
     {
       "job_id": "run:2026-05-18",
@@ -365,22 +555,22 @@
         "safety_warnings": []
       },
       "result": {
-        "run_date": "2026-05-18",
-        "status": "success",
+        "run_date": "",
+        "status": "",
         "selected_count": 10,
         "collected_count": 226,
         "kimi_used": false,
-        "fallback_used": true,
+        "fallback_used": false,
         "telegram_sent": false,
         "telegram_error": "",
-        "report_path": "",
-        "report_url": "weekly/2026-05-18.html",
+        "report_path": "reports/2026-05-18.md",
+        "report_url": "",
         "sqlite_index_path": "",
         "sqlite_error": "",
         "error": ""
       },
       "error": "",
-      "report_url": "weekly/2026-05-18.html"
+      "report_url": ""
     },
     {
       "job_id": "run:2026-05-09",
@@ -403,22 +593,22 @@
         "safety_warnings": []
       },
       "result": {
-        "run_date": "2026-05-09",
-        "status": "success",
+        "run_date": "",
+        "status": "",
         "selected_count": 10,
         "collected_count": 316,
         "kimi_used": true,
         "fallback_used": false,
         "telegram_sent": true,
         "telegram_error": "",
-        "report_path": "",
-        "report_url": "weekly/2026-05-09.html",
+        "report_path": "reports/2026-05-09.md",
+        "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-09.html",
         "sqlite_index_path": "",
         "sqlite_error": "",
         "error": ""
       },
       "error": "",
-      "report_url": "weekly/2026-05-09.html"
+      "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-09.html"
     },
     {
       "job_id": "run:2026-05-07",
@@ -441,22 +631,22 @@
         "safety_warnings": []
       },
       "result": {
-        "run_date": "2026-05-07",
-        "status": "success",
+        "run_date": "",
+        "status": "",
         "selected_count": 10,
         "collected_count": 315,
         "kimi_used": true,
         "fallback_used": false,
         "telegram_sent": true,
         "telegram_error": "",
-        "report_path": "",
-        "report_url": "weekly/2026-05-07.html",
+        "report_path": "reports/2026-05-07.md",
+        "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-07.html",
         "sqlite_index_path": "",
         "sqlite_error": "",
         "error": ""
       },
       "error": "",
-      "report_url": "weekly/2026-05-07.html"
+      "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-07.html"
     },
     {
       "job_id": "run:2026-05-06",
@@ -479,22 +669,22 @@
         "safety_warnings": []
       },
       "result": {
-        "run_date": "2026-05-06",
-        "status": "success",
+        "run_date": "",
+        "status": "",
         "selected_count": 10,
         "collected_count": 315,
         "kimi_used": true,
         "fallback_used": false,
         "telegram_sent": true,
         "telegram_error": "",
-        "report_path": "",
-        "report_url": "weekly/2026-05-06.html",
+        "report_path": "reports/2026-05-06.md",
+        "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-06.html",
         "sqlite_index_path": "",
         "sqlite_error": "",
         "error": ""
       },
       "error": "",
-      "report_url": "weekly/2026-05-06.html"
+      "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-06.html"
     },
     {
       "job_id": "run:2026-05-05",
@@ -517,22 +707,22 @@
         "safety_warnings": []
       },
       "result": {
-        "run_date": "2026-05-05",
-        "status": "success",
+        "run_date": "",
+        "status": "",
         "selected_count": 10,
         "collected_count": 311,
         "kimi_used": true,
         "fallback_used": false,
         "telegram_sent": true,
         "telegram_error": "",
-        "report_path": "",
-        "report_url": "weekly/2026-05-05.html",
+        "report_path": "reports/2026-05-05.md",
+        "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-05.html",
         "sqlite_index_path": "",
         "sqlite_error": "",
         "error": ""
       },
       "error": "",
-      "report_url": "weekly/2026-05-05.html"
+      "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-05.html"
     },
     {
       "job_id": "run:2026-05-04",
@@ -555,22 +745,22 @@
         "safety_warnings": []
       },
       "result": {
-        "run_date": "2026-05-04",
-        "status": "success",
+        "run_date": "",
+        "status": "",
         "selected_count": 10,
         "collected_count": 312,
         "kimi_used": true,
         "fallback_used": false,
         "telegram_sent": true,
         "telegram_error": "",
-        "report_path": "",
-        "report_url": "weekly/2026-05-04.html",
+        "report_path": "reports/2026-05-04.md",
+        "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-04.html",
         "sqlite_index_path": "",
         "sqlite_error": "",
         "error": ""
       },
       "error": "",
-      "report_url": "weekly/2026-05-04.html"
+      "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-04.html"
     },
     {
       "job_id": "run:2026-05-03",
@@ -593,22 +783,22 @@
         "safety_warnings": []
       },
       "result": {
-        "run_date": "2026-05-03",
-        "status": "success",
+        "run_date": "",
+        "status": "",
         "selected_count": 10,
         "collected_count": 311,
         "kimi_used": true,
         "fallback_used": false,
         "telegram_sent": true,
         "telegram_error": "",
-        "report_path": "",
-        "report_url": "weekly/2026-05-03.html",
+        "report_path": "reports/2026-05-03.md",
+        "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-03.html",
         "sqlite_index_path": "",
         "sqlite_error": "",
         "error": ""
       },
       "error": "",
-      "report_url": "weekly/2026-05-03.html"
+      "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-03.html"
     },
     {
       "job_id": "run:2026-04-30",
@@ -631,22 +821,22 @@
         "safety_warnings": []
       },
       "result": {
-        "run_date": "2026-04-30",
-        "status": "success",
+        "run_date": "",
+        "status": "",
         "selected_count": 10,
         "collected_count": 312,
         "kimi_used": true,
         "fallback_used": false,
         "telegram_sent": true,
         "telegram_error": "",
-        "report_path": "",
-        "report_url": "weekly/2026-04-30.html",
+        "report_path": "reports/2026-04-30.md",
+        "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-04-30.html",
         "sqlite_index_path": "",
         "sqlite_error": "",
         "error": ""
       },
       "error": "",
-      "report_url": "weekly/2026-04-30.html"
+      "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-04-30.html"
     },
     {
       "job_id": "run:2026-04-29",
@@ -669,22 +859,22 @@
         "safety_warnings": []
       },
       "result": {
-        "run_date": "2026-04-29",
-        "status": "success",
+        "run_date": "",
+        "status": "",
         "selected_count": 10,
         "collected_count": 223,
         "kimi_used": false,
-        "fallback_used": true,
+        "fallback_used": false,
         "telegram_sent": true,
         "telegram_error": "",
-        "report_path": "",
-        "report_url": "weekly/2026-04-29.html",
+        "report_path": "reports/2026-04-29.md",
+        "report_url": "",
         "sqlite_index_path": "",
         "sqlite_error": "",
         "error": ""
       },
       "error": "",
-      "report_url": "weekly/2026-04-29.html"
+      "report_url": ""
     },
     {
       "job_id": "run:2026-04-28",
@@ -707,22 +897,22 @@
         "safety_warnings": []
       },
       "result": {
-        "run_date": "2026-04-28",
-        "status": "success",
+        "run_date": "",
+        "status": "",
         "selected_count": 10,
         "collected_count": 240,
         "kimi_used": false,
-        "fallback_used": true,
+        "fallback_used": false,
         "telegram_sent": false,
         "telegram_error": "",
-        "report_path": "",
-        "report_url": "weekly/2026-04-28.html",
+        "report_path": "reports/2026-04-28.md",
+        "report_url": "",
         "sqlite_index_path": "",
         "sqlite_error": "",
         "error": ""
       },
       "error": "",
-      "report_url": "weekly/2026-04-28.html"
+      "report_url": ""
     }
   ]
 }

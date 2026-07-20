@@ -1,7 +1,86 @@
 {
   "schema_version": 1,
-  "count": 19,
+  "count": 20,
   "runs": [
+    {
+      "run_date": "2026-07-20",
+      "status": "success",
+      "run_schema_version": 1,
+      "report_url": "weekly/2026-07-20.html",
+      "selected_count": 10,
+      "collected_count": 314,
+      "previously_sent_selected_count": 3,
+      "previously_sent_selected_rate": 0.3,
+      "readme_fetched_count": 10,
+      "readme_fetch_rate": 1.0,
+      "star_history_updated_count": 221,
+      "kimi_used": true,
+      "fallback_used": false,
+      "telegram_sent": false,
+      "telegram_report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-07-20.html",
+      "telegram_explorer_url": "https://windsky922.github.io/githubzhuaqu/explorer.html?date=2026-07-20",
+      "telegram_runs_url": "https://windsky922.github.io/githubzhuaqu/runs.html",
+      "delivery_results": [
+        {
+          "channel": "telegram",
+          "sent": false,
+          "error": "Telegram send skipped",
+          "skipped": true
+        }
+      ],
+      "collector_error_count": 0,
+      "collector_failed_count": 0,
+      "collector_error_kinds": [],
+      "collector_error_summary": [],
+      "collector_query_count": 11,
+      "collector_success_count": 11,
+      "collector_success_rate": 1.0,
+      "top_languages": [
+        {
+          "name": "Python",
+          "count": 6
+        },
+        {
+          "name": "TypeScript",
+          "count": 1
+        },
+        {
+          "name": "Shell",
+          "count": 1
+        },
+        {
+          "name": "C#",
+          "count": 1
+        },
+        {
+          "name": "JavaScript",
+          "count": 1
+        }
+      ],
+      "top_categories": [
+        {
+          "name": "AI Agent",
+          "count": 9
+        },
+        {
+          "name": "Other",
+          "count": 1
+        }
+      ],
+      "total_star_growth": 207665,
+      "trending_project_count": 7,
+      "trending_top10_available_count": 10,
+      "trending_top10_selected_count": 7,
+      "trending_top10_fulfillment_rate": 1.0,
+      "trending_selected_rate": 0.7,
+      "summary_points": [
+        "AI Agent 是本期最集中的方向，共 9 个项目。",
+        "Python 是本期出现最多的主要语言，共 6 个项目。",
+        "本期入选项目累计新增 Star 207665。",
+        "OpenCut-app/OpenCut 是本期 GitHub Trending 排名最高的项目，周榜排名 2。",
+        "mattpocock/skills 是本期新增 Star 最高的项目，新增 84798。"
+      ]
+    },
     {
       "run_date": "2026-07-13",
       "status": "success",
@@ -20,14 +99,7 @@
       "telegram_report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-07-13.html",
       "telegram_explorer_url": "https://windsky922.github.io/githubzhuaqu/explorer.html?date=2026-07-13",
       "telegram_runs_url": "https://windsky922.github.io/githubzhuaqu/runs.html",
-      "delivery_results": [
-        {
-          "channel": "telegram",
-          "sent": true,
-          "error": "",
-          "skipped": false
-        }
-      ],
+      "delivery_results": [],
       "collector_error_count": 0,
       "collector_failed_count": 0,
       "collector_error_kinds": [],
@@ -37,42 +109,42 @@
       "collector_success_rate": 1.0,
       "top_languages": [
         {
-          "name": "TypeScript",
-          "count": 3
+          "count": 3,
+          "name": "TypeScript"
         },
         {
-          "name": "JavaScript",
-          "count": 2
+          "count": 2,
+          "name": "JavaScript"
         },
         {
-          "name": "Rust",
-          "count": 2
+          "count": 2,
+          "name": "Rust"
         },
         {
-          "name": "C++",
-          "count": 1
+          "count": 1,
+          "name": "C++"
         },
         {
-          "name": "C#",
-          "count": 1
+          "count": 1,
+          "name": "C#"
         },
         {
-          "name": "Python",
-          "count": 1
+          "count": 1,
+          "name": "Python"
         }
       ],
       "top_categories": [
         {
-          "name": "AI Agent",
-          "count": 8
+          "count": 8,
+          "name": "AI Agent"
         },
         {
-          "name": "LLM Tooling",
-          "count": 1
+          "count": 1,
+          "name": "LLM Tooling"
         },
         {
-          "name": "Other",
-          "count": 1
+          "count": 1,
+          "name": "Other"
         }
       ],
       "total_star_growth": 31073,
@@ -107,14 +179,7 @@
       "telegram_report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-07-06.html",
       "telegram_explorer_url": "https://windsky922.github.io/githubzhuaqu/explorer.html?date=2026-07-06",
       "telegram_runs_url": "https://windsky922.github.io/githubzhuaqu/runs.html",
-      "delivery_results": [
-        {
-          "channel": "telegram",
-          "sent": true,
-          "error": "",
-          "skipped": false
-        }
-      ],
+      "delivery_results": [],
       "collector_error_count": 0,
       "collector_failed_count": 0,
       "collector_error_kinds": [],
@@ -124,46 +189,46 @@
       "collector_success_rate": 1.0,
       "top_languages": [
         {
-          "name": "Python",
-          "count": 4
+          "count": 4,
+          "name": "Python"
         },
         {
-          "name": "TypeScript",
-          "count": 3
+          "count": 3,
+          "name": "TypeScript"
         },
         {
-          "name": "Haskell",
-          "count": 1
+          "count": 1,
+          "name": "Haskell"
         },
         {
-          "name": "Rust",
-          "count": 1
+          "count": 1,
+          "name": "Rust"
         },
         {
-          "name": "C",
-          "count": 1
+          "count": 1,
+          "name": "C"
         }
       ],
       "top_categories": [
         {
-          "name": "AI Agent",
-          "count": 6
+          "count": 6,
+          "name": "AI Agent"
         },
         {
-          "name": "Other",
-          "count": 1
+          "count": 1,
+          "name": "Other"
         },
         {
-          "name": "Automation",
-          "count": 1
+          "count": 1,
+          "name": "Automation"
         },
         {
-          "name": "Machine Learning",
-          "count": 1
+          "count": 1,
+          "name": "Machine Learning"
         },
         {
-          "name": "LLM Tooling",
-          "count": 1
+          "count": 1,
+          "name": "LLM Tooling"
         }
       ],
       "total_star_growth": 27872,
@@ -198,14 +263,7 @@
       "telegram_report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-06-29.html",
       "telegram_explorer_url": "https://windsky922.github.io/githubzhuaqu/explorer.html?date=2026-06-29",
       "telegram_runs_url": "https://windsky922.github.io/githubzhuaqu/runs.html",
-      "delivery_results": [
-        {
-          "channel": "telegram",
-          "sent": true,
-          "error": "",
-          "skipped": false
-        }
-      ],
+      "delivery_results": [],
       "collector_error_count": 0,
       "collector_failed_count": 0,
       "collector_error_kinds": [],
@@ -215,42 +273,42 @@
       "collector_success_rate": 1.0,
       "top_languages": [
         {
-          "name": "Python",
-          "count": 5
+          "count": 5,
+          "name": "Python"
         },
         {
-          "name": "C",
-          "count": 1
+          "count": 1,
+          "name": "C"
         },
         {
-          "name": "Go",
-          "count": 1
+          "count": 1,
+          "name": "Go"
         },
         {
-          "name": "Swift",
-          "count": 1
+          "count": 1,
+          "name": "Swift"
         },
         {
-          "name": "Haskell",
-          "count": 1
+          "count": 1,
+          "name": "Haskell"
         },
         {
-          "name": "TypeScript",
-          "count": 1
+          "count": 1,
+          "name": "TypeScript"
         }
       ],
       "top_categories": [
         {
-          "name": "AI Agent",
-          "count": 6
+          "count": 6,
+          "name": "AI Agent"
         },
         {
-          "name": "LLM Tooling",
-          "count": 2
+          "count": 2,
+          "name": "LLM Tooling"
         },
         {
-          "name": "Other",
-          "count": 2
+          "count": 2,
+          "name": "Other"
         }
       ],
       "total_star_growth": 60432,
@@ -285,14 +343,7 @@
       "telegram_report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-06-22.html",
       "telegram_explorer_url": "https://windsky922.github.io/githubzhuaqu/explorer.html?date=2026-06-22",
       "telegram_runs_url": "https://windsky922.github.io/githubzhuaqu/runs.html",
-      "delivery_results": [
-        {
-          "channel": "telegram",
-          "sent": true,
-          "error": "",
-          "skipped": false
-        }
-      ],
+      "delivery_results": [],
       "collector_error_count": 0,
       "collector_failed_count": 0,
       "collector_error_kinds": [],
@@ -302,42 +353,42 @@
       "collector_success_rate": 1.0,
       "top_languages": [
         {
-          "name": "Python",
-          "count": 5
+          "count": 5,
+          "name": "Python"
         },
         {
-          "name": "C",
-          "count": 1
+          "count": 1,
+          "name": "C"
         },
         {
-          "name": "TypeScript",
-          "count": 1
+          "count": 1,
+          "name": "TypeScript"
         },
         {
-          "name": "Rust",
-          "count": 1
+          "count": 1,
+          "name": "Rust"
         },
         {
-          "name": "JavaScript",
-          "count": 1
+          "count": 1,
+          "name": "JavaScript"
         },
         {
-          "name": "Shell",
-          "count": 1
+          "count": 1,
+          "name": "Shell"
         }
       ],
       "top_categories": [
         {
-          "name": "AI Agent",
-          "count": 5
+          "count": 5,
+          "name": "AI Agent"
         },
         {
-          "name": "Other",
-          "count": 3
+          "count": 3,
+          "name": "Other"
         },
         {
-          "name": "LLM Tooling",
-          "count": 2
+          "count": 2,
+          "name": "LLM Tooling"
         }
       ],
       "total_star_growth": 39911,
@@ -372,14 +423,7 @@
       "telegram_report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-06-15.html",
       "telegram_explorer_url": "https://windsky922.github.io/githubzhuaqu/explorer.html?date=2026-06-15",
       "telegram_runs_url": "https://windsky922.github.io/githubzhuaqu/runs.html",
-      "delivery_results": [
-        {
-          "channel": "telegram",
-          "sent": true,
-          "error": "",
-          "skipped": false
-        }
-      ],
+      "delivery_results": [],
       "collector_error_count": 0,
       "collector_failed_count": 0,
       "collector_error_kinds": [],
@@ -389,38 +433,38 @@
       "collector_success_rate": 1.0,
       "top_languages": [
         {
-          "name": "Python",
-          "count": 6
+          "count": 6,
+          "name": "Python"
         },
         {
-          "name": "Shell",
-          "count": 2
+          "count": 2,
+          "name": "Shell"
         },
         {
-          "name": "Swift",
-          "count": 1
+          "count": 1,
+          "name": "Swift"
         },
         {
-          "name": "TypeScript",
-          "count": 1
+          "count": 1,
+          "name": "TypeScript"
         }
       ],
       "top_categories": [
         {
-          "name": "AI Agent",
-          "count": 6
+          "count": 6,
+          "name": "AI Agent"
         },
         {
-          "name": "Other",
-          "count": 2
+          "count": 2,
+          "name": "Other"
         },
         {
-          "name": "LLM Tooling",
-          "count": 1
+          "count": 1,
+          "name": "LLM Tooling"
         },
         {
-          "name": "Machine Learning",
-          "count": 1
+          "count": 1,
+          "name": "Machine Learning"
         }
       ],
       "total_star_growth": 74445,
@@ -455,14 +499,7 @@
       "telegram_report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-06-08.html",
       "telegram_explorer_url": "https://windsky922.github.io/githubzhuaqu/explorer.html?date=2026-06-08",
       "telegram_runs_url": "https://windsky922.github.io/githubzhuaqu/runs.html",
-      "delivery_results": [
-        {
-          "channel": "telegram",
-          "sent": true,
-          "error": "",
-          "skipped": false
-        }
-      ],
+      "delivery_results": [],
       "collector_error_count": 0,
       "collector_failed_count": 0,
       "collector_error_kinds": [],
@@ -472,38 +509,38 @@
       "collector_success_rate": 1.0,
       "top_languages": [
         {
-          "name": "Python",
-          "count": 5
+          "count": 5,
+          "name": "Python"
         },
         {
-          "name": "TypeScript",
-          "count": 3
+          "count": 3,
+          "name": "TypeScript"
         },
         {
-          "name": "JavaScript",
-          "count": 1
+          "count": 1,
+          "name": "JavaScript"
         },
         {
-          "name": "Java",
-          "count": 1
+          "count": 1,
+          "name": "Java"
         }
       ],
       "top_categories": [
         {
-          "name": "AI Agent",
-          "count": 6
+          "count": 6,
+          "name": "AI Agent"
         },
         {
-          "name": "LLM Tooling",
-          "count": 2
+          "count": 2,
+          "name": "LLM Tooling"
         },
         {
-          "name": "Developer Tools",
-          "count": 1
+          "count": 1,
+          "name": "Developer Tools"
         },
         {
-          "name": "Machine Learning",
-          "count": 1
+          "count": 1,
+          "name": "Machine Learning"
         }
       ],
       "total_star_growth": 35635,
@@ -538,69 +575,48 @@
       "telegram_report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-06-03.html",
       "telegram_explorer_url": "https://windsky922.github.io/githubzhuaqu/explorer.html?date=2026-06-03",
       "telegram_runs_url": "https://windsky922.github.io/githubzhuaqu/runs.html",
-      "delivery_results": [
-        {
-          "channel": "telegram",
-          "sent": true,
-          "error": "",
-          "skipped": false
-        }
-      ],
-      "collector_error_count": 21,
-      "collector_failed_count": 1,
-      "collector_error_kinds": [
-        "rate_limited"
-      ],
-      "collector_error_summary": [
-        {
-          "source": "github_trending",
-          "stage": "repository_detail",
-          "status": "partial",
-          "error_kind": "rate_limited",
-          "status_code": 403,
-          "retry_after": "",
-          "rate_limit_remaining": "0",
-          "rate_limit_reset": "1780482433",
-          "message": "harry0703/MoneyPrinterTurbo: GitHub API error 403 | rate_limited | rate_limit_remaining=0: API rate limit exceeded for 85.211.182.118. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation fo"
-        }
-      ],
+      "delivery_results": [],
+      "collector_error_count": 0,
+      "collector_failed_count": 0,
+      "collector_error_kinds": [],
+      "collector_error_summary": [],
       "collector_query_count": 8,
       "collector_success_count": 7,
       "collector_success_rate": 0.875,
       "top_languages": [
         {
-          "name": "Python",
-          "count": 6
+          "count": 6,
+          "name": "Python"
         },
         {
-          "name": "JavaScript",
-          "count": 1
+          "count": 1,
+          "name": "JavaScript"
         },
         {
-          "name": "Shell",
-          "count": 1
+          "count": 1,
+          "name": "Shell"
         },
         {
-          "name": "TypeScript",
-          "count": 1
+          "count": 1,
+          "name": "TypeScript"
         },
         {
-          "name": "Go",
-          "count": 1
+          "count": 1,
+          "name": "Go"
         }
       ],
       "top_categories": [
         {
-          "name": "AI Agent",
-          "count": 8
+          "count": 8,
+          "name": "AI Agent"
         },
         {
-          "name": "LLM Tooling",
-          "count": 1
+          "count": 1,
+          "name": "LLM Tooling"
         },
         {
-          "name": "Developer Tools",
-          "count": 1
+          "count": 1,
+          "name": "Developer Tools"
         }
       ],
       "total_star_growth": 894,
@@ -634,14 +650,7 @@
       "telegram_report_url": "https://windsky922.github.io/githubzhuaqu/2026-06-02.html",
       "telegram_explorer_url": "https://windsky922.github.io/githubzhuaqu/explorer.html?date=2026-06-02",
       "telegram_runs_url": "https://windsky922.github.io/githubzhuaqu/runs.html",
-      "delivery_results": [
-        {
-          "channel": "telegram",
-          "sent": true,
-          "error": "",
-          "skipped": false
-        }
-      ],
+      "delivery_results": [],
       "collector_error_count": 0,
       "collector_failed_count": 0,
       "collector_error_kinds": [],
@@ -651,30 +660,30 @@
       "collector_success_rate": 1.0,
       "top_languages": [
         {
-          "name": "Python",
-          "count": 6
+          "count": 6,
+          "name": "Python"
         },
         {
-          "name": "TypeScript",
-          "count": 2
+          "count": 2,
+          "name": "TypeScript"
         },
         {
-          "name": "Shell",
-          "count": 1
+          "count": 1,
+          "name": "Shell"
         },
         {
-          "name": "JavaScript",
-          "count": 1
+          "count": 1,
+          "name": "JavaScript"
         }
       ],
       "top_categories": [
         {
-          "name": "AI Agent",
-          "count": 6
+          "count": 6,
+          "name": "AI Agent"
         },
         {
-          "name": "LLM Tooling",
-          "count": 4
+          "count": 4,
+          "name": "LLM Tooling"
         }
       ],
       "total_star_growth": 31744,
@@ -709,98 +718,44 @@
       "telegram_report_url": "",
       "telegram_explorer_url": "",
       "telegram_runs_url": "https://windsky922.github.io/githubzhuaqu/runs.html",
-      "delivery_results": [
-        {
-          "channel": "telegram",
-          "sent": false,
-          "error": "Telegram is not configured",
-          "skipped": true
-        }
-      ],
-      "collector_error_count": 4,
-      "collector_failed_count": 4,
-      "collector_error_kinds": [
-        "rate_limited"
-      ],
-      "collector_error_summary": [
-        {
-          "source": "github_search",
-          "stage": "github_search",
-          "status": "failed",
-          "error_kind": "rate_limited",
-          "status_code": 403,
-          "retry_after": "",
-          "rate_limit_remaining": "0",
-          "rate_limit_reset": "1779180546",
-          "message": "GitHub API error 403 | rate_limited | rate_limit_remaining=0: API rate limit exceeded for 31.59.132.213. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)"
-        },
-        {
-          "source": "github_search",
-          "stage": "github_search",
-          "status": "failed",
-          "error_kind": "rate_limited",
-          "status_code": 403,
-          "retry_after": "",
-          "rate_limit_remaining": "0",
-          "rate_limit_reset": "1779180546",
-          "message": "GitHub API error 403 | rate_limited | rate_limit_remaining=0: API rate limit exceeded for 31.59.132.213. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)"
-        },
-        {
-          "source": "github_search",
-          "stage": "github_search",
-          "status": "failed",
-          "error_kind": "rate_limited",
-          "status_code": 403,
-          "retry_after": "",
-          "rate_limit_remaining": "0",
-          "rate_limit_reset": "1779180546",
-          "message": "GitHub API error 403 | rate_limited | rate_limit_remaining=0: API rate limit exceeded for 31.59.132.213. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)"
-        },
-        {
-          "source": "github_search",
-          "stage": "github_search",
-          "status": "failed",
-          "error_kind": "rate_limited",
-          "status_code": 403,
-          "retry_after": "",
-          "rate_limit_remaining": "0",
-          "rate_limit_reset": "1779180546",
-          "message": "GitHub API error 403 | rate_limited | rate_limit_remaining=0: API rate limit exceeded for 31.59.132.213. (But here's the good news: Authenticated requests get a higher rate limit. Check out the documentation for more details.)"
-        }
-      ],
+      "delivery_results": [],
+      "collector_error_count": 0,
+      "collector_failed_count": 0,
+      "collector_error_kinds": [],
+      "collector_error_summary": [],
       "collector_query_count": 8,
       "collector_success_count": 4,
       "collector_success_rate": 0.5,
       "top_languages": [
         {
-          "name": "TypeScript",
-          "count": 4
+          "count": 4,
+          "name": "TypeScript"
         },
         {
-          "name": "Rust",
-          "count": 3
+          "count": 3,
+          "name": "Rust"
         },
         {
-          "name": "Python",
-          "count": 2
+          "count": 2,
+          "name": "Python"
         },
         {
-          "name": "Shell",
-          "count": 1
+          "count": 1,
+          "name": "Shell"
         }
       ],
       "top_categories": [
         {
-          "name": "AI Agent",
-          "count": 4
+          "count": 4,
+          "name": "AI Agent"
         },
         {
-          "name": "Other",
-          "count": 3
+          "count": 3,
+          "name": "Other"
         },
         {
-          "name": "LLM Tooling",
-          "count": 3
+          "count": 3,
+          "name": "LLM Tooling"
         }
       ],
       "total_star_growth": 8,
@@ -835,14 +790,7 @@
       "telegram_report_url": "",
       "telegram_explorer_url": "",
       "telegram_runs_url": "https://windsky922.github.io/githubzhuaqu/runs.html",
-      "delivery_results": [
-        {
-          "channel": "telegram",
-          "sent": false,
-          "error": "Telegram send skipped",
-          "skipped": true
-        }
-      ],
+      "delivery_results": [],
       "collector_error_count": 0,
       "collector_failed_count": 0,
       "collector_error_kinds": [],
@@ -852,38 +800,38 @@
       "collector_success_rate": 1.0,
       "top_languages": [
         {
-          "name": "Python",
-          "count": 3
+          "count": 3,
+          "name": "Python"
         },
         {
-          "name": "TypeScript",
-          "count": 3
+          "count": 3,
+          "name": "TypeScript"
         },
         {
-          "name": "Rust",
-          "count": 2
+          "count": 2,
+          "name": "Rust"
         },
         {
-          "name": "Shell",
-          "count": 1
+          "count": 1,
+          "name": "Shell"
         },
         {
-          "name": "JavaScript",
-          "count": 1
+          "count": 1,
+          "name": "JavaScript"
         }
       ],
       "top_categories": [
         {
-          "name": "AI Agent",
-          "count": 6
+          "count": 6,
+          "name": "AI Agent"
         },
         {
-          "name": "Other",
-          "count": 2
+          "count": 2,
+          "name": "Other"
         },
         {
-          "name": "LLM Tooling",
-          "count": 2
+          "count": 2,
+          "name": "LLM Tooling"
         }
       ],
       "total_star_growth": 46469,
@@ -918,14 +866,7 @@
       "telegram_report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-09.html",
       "telegram_explorer_url": "https://windsky922.github.io/githubzhuaqu/explorer.html?date=2026-05-09",
       "telegram_runs_url": "https://windsky922.github.io/githubzhuaqu/runs.html",
-      "delivery_results": [
-        {
-          "channel": "telegram",
-          "sent": true,
-          "error": "",
-          "skipped": false
-        }
-      ],
+      "delivery_results": [],
       "collector_error_count": 0,
       "collector_failed_count": 0,
       "collector_error_kinds": [],
@@ -935,42 +876,42 @@
       "collector_success_rate": 1.0,
       "top_languages": [
         {
-          "name": "Python",
-          "count": 5
+          "count": 5,
+          "name": "Python"
         },
         {
-          "name": "TypeScript",
-          "count": 2
+          "count": 2,
+          "name": "TypeScript"
         },
         {
-          "name": "Ruby",
-          "count": 1
+          "count": 1,
+          "name": "Ruby"
         },
         {
-          "name": "Rust",
-          "count": 1
+          "count": 1,
+          "name": "Rust"
         },
         {
-          "name": "Shell",
-          "count": 1
+          "count": 1,
+          "name": "Shell"
         }
       ],
       "top_categories": [
         {
-          "name": "AI Agent",
-          "count": 6
+          "count": 6,
+          "name": "AI Agent"
         },
         {
-          "name": "Other",
-          "count": 2
+          "count": 2,
+          "name": "Other"
         },
         {
-          "name": "Developer Tools",
-          "count": 1
+          "count": 1,
+          "name": "Developer Tools"
         },
         {
-          "name": "LLM Tooling",
-          "count": 1
+          "count": 1,
+          "name": "LLM Tooling"
         }
       ],
       "total_star_growth": 166,
@@ -1005,14 +946,7 @@
       "telegram_report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-07.html",
       "telegram_explorer_url": "https://windsky922.github.io/githubzhuaqu/explorer.html?date=2026-05-07",
       "telegram_runs_url": "https://windsky922.github.io/githubzhuaqu/runs.html",
-      "delivery_results": [
-        {
-          "channel": "telegram",
-          "sent": true,
-          "error": "",
-          "skipped": false
-        }
-      ],
+      "delivery_results": [],
       "collector_error_count": 0,
       "collector_failed_count": 0,
       "collector_error_kinds": [],
@@ -1022,38 +956,38 @@
       "collector_success_rate": 1.0,
       "top_languages": [
         {
-          "name": "Python",
-          "count": 5
+          "count": 5,
+          "name": "Python"
         },
         {
-          "name": "TypeScript",
-          "count": 2
+          "count": 2,
+          "name": "TypeScript"
         },
         {
-          "name": "Rust",
-          "count": 2
+          "count": 2,
+          "name": "Rust"
         },
         {
-          "name": "Shell",
-          "count": 1
+          "count": 1,
+          "name": "Shell"
         }
       ],
       "top_categories": [
         {
-          "name": "AI Agent",
-          "count": 6
+          "count": 6,
+          "name": "AI Agent"
         },
         {
-          "name": "Developer Tools",
-          "count": 2
+          "count": 2,
+          "name": "Developer Tools"
         },
         {
-          "name": "LLM Tooling",
-          "count": 1
+          "count": 1,
+          "name": "LLM Tooling"
         },
         {
-          "name": "Other",
-          "count": 1
+          "count": 1,
+          "name": "Other"
         }
       ],
       "total_star_growth": 5012,
@@ -1088,55 +1022,48 @@
       "telegram_report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-05-06.html",
       "telegram_explorer_url": "",
       "telegram_runs_url": "https://windsky922.github.io/githubzhuaqu/runs.html",
-      "delivery_results": [
-        {
-          "channel": "telegram",
-          "sent": true,
-          "error": "",
-          "skipped": false
-        }
-      ],
+      "delivery_results": [],
       "collector_error_count": 0,
       "collector_failed_count": 0,
       "collector_error_kinds": [],
       "collector_error_summary": [],
-      "collector_query_count": 11,
-      "collector_success_count": 11,
-      "collector_success_rate": 1.0,
+      "collector_query_count": 0,
+      "collector_success_count": 0,
+      "collector_success_rate": 0.0,
       "top_languages": [
         {
-          "name": "Python",
-          "count": 6
+          "count": 6,
+          "name": "Python"
         },
         {
-          "name": "Rust",
-          "count": 2
+          "count": 2,
+          "name": "Rust"
         },
         {
-          "name": "Shell",
-          "count": 1
+          "count": 1,
+          "name": "Shell"
         },
         {
-          "name": "TypeScript",
-          "count": 1
+          "count": 1,
+          "name": "TypeScript"
         }
       ],
       "top_categories": [
         {
-          "name": "AI Agent",
-          "count": 6
+          "count": 6,
+          "name": "AI Agent"
         },
         {
-          "name": "Developer Tools",
-          "count": 2
+          "count": 2,
+          "name": "Developer Tools"
         },
         {
-          "name": "LLM Tooling",
-          "count": 1
+          "count": 1,
+          "name": "LLM Tooling"
         },
         {
-          "name": "Other",
-          "count": 1
+          "count": 1,
+          "name": "Other"
         }
       ],
       "total_star_growth": 47,
@@ -1176,47 +1103,47 @@
       "collector_failed_count": 0,
       "collector_error_kinds": [],
       "collector_error_summary": [],
-      "collector_query_count": 11,
-      "collector_success_count": 11,
-      "collector_success_rate": 1.0,
+      "collector_query_count": 0,
+      "collector_success_count": 0,
+      "collector_success_rate": 0.0,
       "top_languages": [
         {
-          "name": "Python",
-          "count": 6
+          "count": 6,
+          "name": "Python"
         },
         {
-          "name": "Shell",
-          "count": 1
+          "count": 1,
+          "name": "Shell"
         },
         {
-          "name": "TypeScript",
-          "count": 1
+          "count": 1,
+          "name": "TypeScript"
         },
         {
-          "name": "Go",
-          "count": 1
+          "count": 1,
+          "name": "Go"
         },
         {
-          "name": "Java",
-          "count": 1
+          "count": 1,
+          "name": "Java"
         }
       ],
       "top_categories": [
         {
-          "name": "AI Agent",
-          "count": 5
+          "count": 5,
+          "name": "AI Agent"
         },
         {
-          "name": "LLM Tooling",
-          "count": 3
+          "count": 3,
+          "name": "LLM Tooling"
         },
         {
-          "name": "Developer Tools",
-          "count": 1
+          "count": 1,
+          "name": "Developer Tools"
         },
         {
-          "name": "Other",
-          "count": 1
+          "count": 1,
+          "name": "Other"
         }
       ],
       "total_star_growth": 12968,
@@ -1256,43 +1183,43 @@
       "collector_failed_count": 0,
       "collector_error_kinds": [],
       "collector_error_summary": [],
-      "collector_query_count": 11,
-      "collector_success_count": 11,
-      "collector_success_rate": 1.0,
+      "collector_query_count": 0,
+      "collector_success_count": 0,
+      "collector_success_rate": 0.0,
       "top_languages": [
         {
-          "name": "Python",
-          "count": 6
+          "count": 6,
+          "name": "Python"
         },
         {
-          "name": "TypeScript",
-          "count": 2
+          "count": 2,
+          "name": "TypeScript"
         },
         {
-          "name": "Shell",
-          "count": 1
+          "count": 1,
+          "name": "Shell"
         },
         {
-          "name": "Go",
-          "count": 1
+          "count": 1,
+          "name": "Go"
         }
       ],
       "top_categories": [
         {
-          "name": "AI Agent",
-          "count": 4
+          "count": 4,
+          "name": "AI Agent"
         },
         {
-          "name": "LLM Tooling",
-          "count": 3
+          "count": 3,
+          "name": "LLM Tooling"
         },
         {
-          "name": "Developer Tools",
-          "count": 2
+          "count": 2,
+          "name": "Developer Tools"
         },
         {
-          "name": "Other",
-          "count": 1
+          "count": 1,
+          "name": "Other"
         }
       ],
       "total_star_growth": 7483,
@@ -1332,39 +1259,39 @@
       "collector_failed_count": 0,
       "collector_error_kinds": [],
       "collector_error_summary": [],
-      "collector_query_count": 11,
-      "collector_success_count": 11,
-      "collector_success_rate": 1.0,
+      "collector_query_count": 0,
+      "collector_success_count": 0,
+      "collector_success_rate": 0.0,
       "top_languages": [
         {
-          "name": "Python",
-          "count": 7
+          "count": 7,
+          "name": "Python"
         },
         {
-          "name": "Shell",
-          "count": 1
+          "count": 1,
+          "name": "Shell"
         },
         {
-          "name": "Go",
-          "count": 1
+          "count": 1,
+          "name": "Go"
         },
         {
-          "name": "TypeScript",
-          "count": 1
+          "count": 1,
+          "name": "TypeScript"
         }
       ],
       "top_categories": [
         {
-          "name": "LLM Tooling",
-          "count": 4
+          "count": 4,
+          "name": "LLM Tooling"
         },
         {
-          "name": "AI Agent",
-          "count": 4
+          "count": 4,
+          "name": "AI Agent"
         },
         {
-          "name": "Developer Tools",
-          "count": 2
+          "count": 2,
+          "name": "Developer Tools"
         }
       ],
       "total_star_growth": 657,
@@ -1404,51 +1331,51 @@
       "collector_failed_count": 0,
       "collector_error_kinds": [],
       "collector_error_summary": [],
-      "collector_query_count": 11,
-      "collector_success_count": 11,
-      "collector_success_rate": 1.0,
+      "collector_query_count": 0,
+      "collector_success_count": 0,
+      "collector_success_rate": 0.0,
       "top_languages": [
         {
-          "name": "Python",
-          "count": 5
+          "count": 5,
+          "name": "Python"
         },
         {
-          "name": "Shell",
-          "count": 1
+          "count": 1,
+          "name": "Shell"
         },
         {
-          "name": "Go",
-          "count": 1
+          "count": 1,
+          "name": "Go"
         },
         {
-          "name": "HTML",
-          "count": 1
+          "count": 1,
+          "name": "HTML"
         },
         {
-          "name": "JavaScript",
-          "count": 1
+          "count": 1,
+          "name": "JavaScript"
         },
         {
-          "name": "TypeScript",
-          "count": 1
+          "count": 1,
+          "name": "TypeScript"
         }
       ],
       "top_categories": [
         {
-          "name": "AI Agent",
-          "count": 5
+          "count": 5,
+          "name": "AI Agent"
         },
         {
-          "name": "LLM Tooling",
-          "count": 3
+          "count": 3,
+          "name": "LLM Tooling"
         },
         {
-          "name": "Machine Learning",
-          "count": 1
+          "count": 1,
+          "name": "Machine Learning"
         },
         {
-          "name": "Other",
-          "count": 1
+          "count": 1,
+          "name": "Other"
         }
       ],
       "total_star_growth": 89,
@@ -1488,51 +1415,51 @@
       "collector_failed_count": 0,
       "collector_error_kinds": [],
       "collector_error_summary": [],
-      "collector_query_count": 8,
-      "collector_success_count": 8,
-      "collector_success_rate": 1.0,
+      "collector_query_count": 0,
+      "collector_success_count": 0,
+      "collector_success_rate": 0.0,
       "top_languages": [
         {
-          "name": "Python",
-          "count": 4
+          "count": 4,
+          "name": "Python"
         },
         {
-          "name": "TypeScript",
-          "count": 2
+          "count": 2,
+          "name": "TypeScript"
         },
         {
-          "name": "Shell",
-          "count": 1
+          "count": 1,
+          "name": "Shell"
         },
         {
-          "name": "Go",
-          "count": 1
+          "count": 1,
+          "name": "Go"
         },
         {
-          "name": "JavaScript",
-          "count": 1
+          "count": 1,
+          "name": "JavaScript"
         },
         {
-          "name": "HTML",
-          "count": 1
+          "count": 1,
+          "name": "HTML"
         }
       ],
       "top_categories": [
         {
-          "name": "AI Agent",
-          "count": 4
+          "count": 4,
+          "name": "AI Agent"
         },
         {
-          "name": "LLM Tooling",
-          "count": 3
+          "count": 3,
+          "name": "LLM Tooling"
         },
         {
-          "name": "Machine Learning",
-          "count": 2
+          "count": 2,
+          "name": "Machine Learning"
         },
         {
-          "name": "Other",
-          "count": 1
+          "count": 1,
+          "name": "Other"
         }
       ],
       "total_star_growth": 107,
@@ -1577,34 +1504,34 @@
       "collector_success_rate": 0.0,
       "top_languages": [
         {
-          "name": "Python",
-          "count": 6
+          "count": 6,
+          "name": "Python"
         },
         {
-          "name": "TypeScript",
-          "count": 2
+          "count": 2,
+          "name": "TypeScript"
         },
         {
-          "name": "Shell",
-          "count": 1
+          "count": 1,
+          "name": "Shell"
         },
         {
-          "name": "JavaScript",
-          "count": 1
+          "count": 1,
+          "name": "JavaScript"
         }
       ],
       "top_categories": [
         {
-          "name": "AI Agent",
-          "count": 8
+          "count": 8,
+          "name": "AI Agent"
         },
         {
-          "name": "LLM Tooling",
-          "count": 1
+          "count": 1,
+          "name": "LLM Tooling"
         },
         {
-          "name": "Other",
-          "count": 1
+          "count": 1,
+          "name": "Other"
         }
       ],
       "total_star_growth": 32,

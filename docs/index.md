@@ -4,26 +4,27 @@
 
 ## 最新周报
 
-- [2026-07-13](weekly/2026-07-13.html)
+- [2026-07-20](weekly/2026-07-20.html)
 
 ## 最新运行摘要
 
 - 入选项目：10 个
-- 采集候选：321 个
+- 采集候选：314 个
 - 生成方式：Kimi
-- Telegram：已推送
+- Telegram：未推送
 - 采集错误：0 条
 
 ## 最新趋势要点
 
-- AI Agent 是本期最集中的方向，共 8 个项目。
-- TypeScript 是本期出现最多的主要语言，共 3 个项目。
-- 本期入选项目累计新增 Star 31073。
-- wonderwhy-er/DesktopCommanderMCP 是本期 GitHub Trending 排名最高的项目，周榜排名 2。
-- asgeirtj/system_prompts_leaks 是本期新增 Star 最高的项目，新增 12223。
+- AI Agent 是本期最集中的方向，共 9 个项目。
+- Python 是本期出现最多的主要语言，共 6 个项目。
+- 本期入选项目累计新增 Star 207665。
+- OpenCut-app/OpenCut 是本期 GitHub Trending 排名最高的项目，周榜排名 2。
+- mattpocock/skills 是本期新增 Star 最高的项目，新增 84798。
 
 ## 全部周报
 
+- [2026-07-20](weekly/2026-07-20.html)：10 个项目，Kimi，Telegram 未推送，主语言 Python，主方向 AI Agent，新增 Star 207665，Trending 项目 7
 - [2026-07-13](weekly/2026-07-13.html)：10 个项目，Kimi，Telegram 已推送，主语言 TypeScript，主方向 AI Agent，新增 Star 31073，Trending 项目 10
 - [2026-07-06](weekly/2026-07-06.html)：10 个项目，Kimi，Telegram 已推送，主语言 Python，主方向 AI Agent，新增 Star 27872，Trending 项目 10
 - [2026-06-29](weekly/2026-06-29.html)：10 个项目，Kimi，Telegram 已推送，主语言 Python，主方向 AI Agent，新增 Star 60432，Trending 项目 10

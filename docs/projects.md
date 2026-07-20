@@ -4,6 +4,16 @@
 
 | 日期 | 项目 | 来源 | Trending 排名 | 方向 | 语言 | Star | 新增 Star | 风险提示 | 链接 |
 |---|---|---|---:|---|---|---:|---:|---:|---|
+| 2026-07-20 | OpenCut-app/OpenCut | GitHub Trending | 2 | Other | TypeScript | 75957 | 0 | 0 | [https://github.com/OpenCut-app/OpenCut](https://github.com/OpenCut-app/OpenCut) |
+| 2026-07-20 | Shubhamsaboo/awesome-llm-apps | GitHub Search + GitHub Trending | 3 | AI Agent | Python | 124626 | 11919 | 0 | [https://github.com/Shubhamsaboo/awesome-llm-apps](https://github.com/Shubhamsaboo/awesome-llm-apps) |
+| 2026-07-20 | HKUDS/Vibe-Trading | GitHub Trending | 4 | AI Agent | Python | 25353 | 0 | 0 | [https://github.com/HKUDS/Vibe-Trading](https://github.com/HKUDS/Vibe-Trading) |
+| 2026-07-20 | HKUDS/DeepTutor | GitHub Trending | 5 | AI Agent | Python | 28007 | 0 | 0 | [https://github.com/HKUDS/DeepTutor](https://github.com/HKUDS/DeepTutor) |
+| 2026-07-20 | mattpocock/skills | GitHub Search + GitHub Trending | 6 | AI Agent | Shell | 177710 | 84798 | 0 | [https://github.com/mattpocock/skills](https://github.com/mattpocock/skills) |
+| 2026-07-20 | kangarooking/cangjie-skill | GitHub Trending | 7 | AI Agent | Python | 3874 | 0 | 0 | [https://github.com/kangarooking/cangjie-skill](https://github.com/kangarooking/cangjie-skill) |
+| 2026-07-20 | iOfficeAI/OfficeCLI | GitHub Trending | 8 | AI Agent | C# | 19731 | 0 | 0 | [https://github.com/iOfficeAI/OfficeCLI](https://github.com/iOfficeAI/OfficeCLI) |
+| 2026-07-20 | Panniantong/Agent-Reach | GitHub Search | - | AI Agent | Python | 58294 | 38424 | 0 | [https://github.com/Panniantong/Agent-Reach](https://github.com/Panniantong/Agent-Reach) |
+| 2026-07-20 | NousResearch/hermes-agent | GitHub Search | - | AI Agent | Python | 217314 | 39181 | 0 | [https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) |
+| 2026-07-20 | Leonxlnx/taste-skill | GitHub Search | - | AI Agent | JavaScript | 65293 | 33343 | 0 | [https://github.com/Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) |
 | 2026-07-13 | wonderwhy-er/DesktopCommanderMCP | GitHub Trending | 2 | AI Agent | TypeScript | 8010 | 0 | 0 | [https://github.com/wonderwhy-er/DesktopCommanderMCP](https://github.com/wonderwhy-er/DesktopCommanderMCP) |
 | 2026-07-13 | openai/codex-plugin-cc | GitHub Trending | 3 | LLM Tooling | JavaScript | 28086 | 2530 | 0 | [https://github.com/openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc) |
 | 2026-07-13 | TencentCloud/CubeSandbox | GitHub Trending | 4 | AI Agent | Rust | 9817 | 0 | 0 | [https://github.com/TencentCloud/CubeSandbox](https://github.com/TencentCloud/CubeSandbox) |

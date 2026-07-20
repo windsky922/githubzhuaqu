@@ -1,7 +1,313 @@
 {
   "schema_version": 1,
-  "count": 180,
+  "count": 190,
   "projects": [
+    {
+      "run_date": "2026-07-20",
+      "full_name": "OpenCut-app/OpenCut",
+      "html_url": "https://github.com/OpenCut-app/OpenCut",
+      "description": "The open-source CapCut alternative",
+      "readme_summary": "OpenCut A free and open source video editor for web, desktop, and mobile.",
+      "category": "Other",
+      "language": "TypeScript",
+      "stargazers_count": 75957,
+      "forks_count": 7631,
+      "star_growth": 0,
+      "score": 0.462,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 2,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 2 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Agent 开发、开发者工具。",
+        "当前累计 Star 75957，具备一定社区关注度。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-07-20.html"
+    },
+    {
+      "run_date": "2026-07-20",
+      "full_name": "Shubhamsaboo/awesome-llm-apps",
+      "html_url": "https://github.com/Shubhamsaboo/awesome-llm-apps",
+      "description": "100+ AI Agent & RAG apps you can actually run — clone, customize, ship.",
+      "readme_summary": "+ open-source AI agents, agent skills, and RAG apps. Hand-built, tested end-to-end, Apache-2.0.** Clone it, ship it, sell it - 100% free and open-source Works with Claude, Gemini, GPT, DeepSeek, Llama, Qwen and other open-source models.",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 124626,
+      "forks_count": 18405,
+      "star_growth": 11919,
+      "score": 0.6339,
+      "sources": [
+        "github_search",
+        "github_trending"
+      ],
+      "trending_rank": 3,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 3 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 11919，近期热度上升。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 124626，具备一定社区关注度。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-07-20.html"
+    },
+    {
+      "run_date": "2026-07-20",
+      "full_name": "HKUDS/Vibe-Trading",
+      "html_url": "https://github.com/HKUDS/Vibe-Trading",
+      "description": "\"Vibe-Trading: Your Personal Trading Agent\"",
+      "readme_summary": "English | 中文 | 日本語 | 한국어 | العربية Vibe-Trading: Your Personal Trading Agent One Command to Empower Your Agent with Comprehensive Trading Capabilities ⚠️ **Security warning:** The X account VibeTrading_HKU, Virtuals project 101845, and token contract 0x640BDBF77b6447E8b7DB7894cED84BD1c40571f4 are not official Vibe-Trading assets.",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 25353,
+      "forks_count": 4175,
+      "star_growth": 0,
+      "score": 0.5631,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 4,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 4 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 25353，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-07-20.html"
+    },
+    {
+      "run_date": "2026-07-20",
+      "full_name": "HKUDS/DeepTutor",
+      "html_url": "https://github.com/HKUDS/DeepTutor",
+      "description": "DeepTutor: Lifelong Personalized Tutoring. https://deeptutor.info/.",
+      "readme_summary": "Features · Get Started · Explore · CLI · Ecosystem · Community 🤝 **We welcome any kinds of contributing!** Vote on roadmap items or propose new ones at Roadmap, and see our Contributing Guide for branching strategy, coding standards, and how to get started.",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 28007,
+      "forks_count": 3709,
+      "star_growth": 0,
+      "score": 0.4634,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 5,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 5 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 28007，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-07-20.html"
+    },
+    {
+      "run_date": "2026-07-20",
+      "full_name": "mattpocock/skills",
+      "html_url": "https://github.com/mattpocock/skills",
+      "description": "Skills for Real Engineers. Straight from my .agents directory.",
+      "readme_summary": "My agent skills that I use every day to do real engineering - not vibe coding. Developing real applications is hard. Approaches like GSD, BMAD, and Spec-Kit try to help by owning the process.",
+      "category": "AI Agent",
+      "language": "Shell",
+      "stargazers_count": 177710,
+      "forks_count": 15229,
+      "star_growth": 84798,
+      "score": 0.6401,
+      "sources": [
+        "github_search",
+        "github_trending"
+      ],
+      "trending_rank": 6,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 6 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 84798，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Agent 开发。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+      ],
+      "quality_score": 92,
+      "quality_level": "high",
+      "report_url": "weekly/2026-07-20.html"
+    },
+    {
+      "run_date": "2026-07-20",
+      "full_name": "kangarooking/cangjie-skill",
+      "html_url": "https://github.com/kangarooking/cangjie-skill",
+      "description": "把书、长视频、播客等高价值内容蒸馏成可执行的 Agent Skills",
+      "readme_summary": "读完、看完、听完之后，带走一套能调用的方法论。** 最近有一个很火的 idea：把同事蒸馏成 skill。即便一个人离职了，他的经验、语气、工作方式都会被 AI 一定程度替代。nuwa-skill 就是做这件事的——创造\"人类 skill\"，比如马斯克 skill、巴菲特 skill。配套的 darwin-skill 负责让这些 skill 自动进化。",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 3874,
+      "forks_count": 541,
+      "star_growth": 0,
+      "score": 0.4157,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 7,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 7 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 3874，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-07-20.html"
+    },
+    {
+      "run_date": "2026-07-20",
+      "full_name": "iOfficeAI/OfficeCLI",
+      "html_url": "https://github.com/iOfficeAI/OfficeCLI",
+      "description": "OfficeCLI is the first and best Office suite  purpose-built for AI agents to read, edit, and automate Word, Excel, and PowerPoint files. Free, open-source, single binary, no Office installation required.",
+      "readme_summary": "OfficeCLI is the world's first and the best Office suite designed for AI agents.** Give any AI agent full control over Word, Excel, and PowerPoint — in one line of code.** Open-source. No Office installation.",
+      "category": "AI Agent",
+      "language": "C#",
+      "stargazers_count": 19731,
+      "forks_count": 1326,
+      "star_growth": 0,
+      "score": 0.5092,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 8,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 8 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 19731，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-07-20.html"
+    },
+    {
+      "run_date": "2026-07-20",
+      "full_name": "Panniantong/Agent-Reach",
+      "html_url": "https://github.com/Panniantong/Agent-Reach",
+      "description": "Give your AI agent eyes to see the entire internet. Read & search Twitter, Reddit, YouTube, GitHub, Bilibili, XiaoHongShu — one CLI, zero API fees.",
+      "readme_summary": "👁️ Agent Reach 给你的 AI Agent 一键装上互联网能力 当下最稳的接入方式，替你选好、装好、体检好——接入方式会换代，你不用操心 AI Agent 已经能帮你写代码、改文档、管项目——但你让它去网上找点东西，它就抓瞎了： 📺 \"帮我看看这个 YouTube 教程讲了什么\" → **看不了**，拿不到字幕 🐦 \"帮我搜一下推特上大家怎么评价这个产品\" → **搜不了**，Twitter API 要付费 📖 \"去 Reddit 上看看有没有人遇到过同样的 bug\" → **403 被封**，服务器 IP 被拒 📕 \"帮我看看小红书上这个品的口碑\" → **打不开**，必须登录才能看 📺 \"B站上有个技术视频，帮我总结一下\" → **拿不到**，通用下载工具被 B站风控全面拦截 🔍 \"帮我在网上搜一下最新的 LLM 框架对比\" → **没有好用的搜索**，要么付费要么质量差 🌐 \"帮我看看这个网页写了啥\" → **抓回来一堆 HTML 标签**，根本没法读 📦 \"这个 GitHub 仓库是干嘛的？Issue 里说了什么？\" → 能用，但认证配置很麻烦 📡 \"帮我订阅这几个 RSS 源，有更新告诉我\" → 要自己装库写代码 这些不难实现，但是需要自己折腾配置** 每个平台都有自己的门槛——要付费的 API、要绕过的封锁、要登录的账号、要清洗的数据。你要一个一个去踩坑、装工具、调配置，光是让 Agent 能读个推特就得折腾半天。",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 58294,
+      "forks_count": 4678,
+      "star_growth": 38424,
+      "score": 0.4047,
+      "sources": [
+        "github_search"
+      ],
+      "trending_rank": 0,
+      "selection_reasons": [
+        "较上次记录新增 Star 38424，近期热度上升。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 58294，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-07-20.html"
+    },
+    {
+      "run_date": "2026-07-20",
+      "full_name": "NousResearch/hermes-agent",
+      "html_url": "https://github.com/NousResearch/hermes-agent",
+      "description": "The agent that grows with you",
+      "readme_summary": "The self-improving AI agent built by Nous Research.** It's the only agent with a built-in learning loop — it creates skills from experience, improves them during use, nudges itself to persist knowledge, searches its own past conversations, and builds a deepening model of who you are across sessions.",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 217314,
+      "forks_count": 40927,
+      "star_growth": 39181,
+      "score": 0.3691,
+      "sources": [
+        "github_search"
+      ],
+      "trending_rank": 0,
+      "selection_reasons": [
+        "较上次记录新增 Star 39181，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 217314，具备一定社区关注度。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库简介较短，项目定位信息有限。"
+      ],
+      "quality_score": 92,
+      "quality_level": "high",
+      "report_url": "weekly/2026-07-20.html"
+    },
+    {
+      "run_date": "2026-07-20",
+      "full_name": "Leonxlnx/taste-skill",
+      "html_url": "https://github.com/Leonxlnx/taste-skill",
+      "description": "Taste-Skill - gives your AI good taste. stops the AI from generating boring, generic slop ",
+      "readme_summary": "The Anti-Slop Frontend Framework for AI Agents Sponsors IMG.LY · CreativeEditor SDK Emil Kowalski · animations.dev Sent.dm · messaging APIs for SMS, WhatsApp, and RCS Portable **Agent Skills** that upgrade AI-built interfaces: stronger layout, typography, motion, and spacing instead of boilerplate-looking UIs.",
+      "category": "AI Agent",
+      "language": "JavaScript",
+      "stargazers_count": 65293,
+      "forks_count": 4512,
+      "star_growth": 33343,
+      "score": 0.3384,
+      "sources": [
+        "github_search"
+      ],
+      "trending_rank": 0,
+      "selection_reasons": [
+        "较上次记录新增 Star 33343，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发。",
+        "当前累计 Star 65293，具备一定社区关注度。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-07-20.html"
+    },
     {
       "run_date": "2026-07-13",
       "full_name": "wonderwhy-er/DesktopCommanderMCP",
@@ -5339,7 +5645,7 @@
       "full_name": "Alishahryar1/free-claude-code",
       "html_url": "https://github.com/Alishahryar1/free-claude-code",
       "description": "Use claude-code for free in the terminal, VSCode extension or discord like openclaw",
-      "readme_summary": "<div align=\"center\"> # 🤖 Free Claude Code Use Claude Code CLI, VS Code, JetBrains ACP, or chat bots through your own Anthropic-compatible proxy. [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT) [![Python 3.14](https://img.shields.io/badge/python-3.14-3776ab.svg?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/downloads/) [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json&style=for-the-badge)](https://github.com/astral-sh/uv) [![Tested with Pytest](https://img.shields.io/badge/testing-Pytest-00c0ff.svg?style=for-the-badge)](https://github.com/Alishahryar1/free-claude-code/actions/workflows/tests.yml) [![Type checking: Ty](https://img.shields.io/badge/type%20checking-ty-ffcc00.svg?style=for-the-badge)](https://pypi.org/project/ty/) [![Code style: Ruff](https://img.shields.io/badge/code%20formatting-ruff-f5a623.svg?style=for-the-badge)](https://github.com/astral-sh/ruff) [![Logging: Loguru](https://img.shields.io/badge/logging-loguru-4ecdc4.svg?style=for-the-badge)](https://github.com/Delgan/loguru) Free Claude Code routes Anthropic Messages API traffic from Claude Code to NVIDIA NIM, OpenRouter, DeepSeek, LM Studio, llama.cpp, or Ollama. It keeps Claude Code's client-side protocol stable while letting you choose free, paid, or local models. [Quick Start](#quick-start) · [Providers](#choose-a-provider) · [Clients](#connect-claude-code) · [Troubleshooting](#troubleshooting) · [Development](#development) </div> <div align=\"center\"> <img src=\"pic.png\" alt=\"Free Claude Code in action\" width=\"700\"> </div> ## What You Get - Drop-in proxy for Claude Code's Anthropic API calls. - Six provider backends: NVIDIA NIM, OpenRouter, DeepSeek, LM Studio, llama.cpp, and Ollama. - Per-model routing: send Opus, Sonnet, Haiku, and fallback traffic to different providers. - Streaming, tool use, reasoning/thinking block handl",
+      "readme_summary": "",
       "category": "LLM Tooling",
       "language": "Python",
       "stargazers_count": 18296,
@@ -5360,11 +5666,12 @@
       "security_score": 100,
       "security_level": "low",
       "quality_flags": [
+        "README 摘要不足，后续理解项目价值时需要打开仓库人工确认。",
         "仓库主题标签较少，垂直方向判断可能不够稳定。",
         "最近维护时间超过 30 天，建议关注维护连续性。"
       ],
-      "quality_score": 74,
-      "quality_level": "medium",
+      "quality_score": 56,
+      "quality_level": "low",
       "report_url": "weekly/2026-04-29.html"
     },
     {
@@ -5372,7 +5679,7 @@
       "full_name": "huggingface/ml-intern",
       "html_url": "https://github.com/huggingface/ml-intern",
       "description": "🤗 ml-intern: an open-source ML engineer that reads papers, trains models, and ships ML models",
-      "readme_summary": "<p align=\"center\"> <img src=\"frontend/public/smolagents.webp\" alt=\"smolagents logo\" width=\"160\" /> </p> # ML Intern An ML intern that autonomously researches, writes, and ships good quality ML related code using the Hugging Face ecosystem — with deep access to docs, papers, datasets, and cloud compute. ## Quick Start ### Installation ```bash git clone git@github.com:huggingface/ml-intern.git cd ml-intern uv sync uv tool install -e . ``` #### That's it. Now `ml-intern` works from any directory: ```bash ml-intern ``` Create a `.env` file in the project root (or export these in your shell): ```bash ANTHROPIC_API_KEY=<your-anthropic-api-key> # if using anthropic models OPENAI_API_KEY=<your-openai-api-key> # if using openai models HF_TOKEN=<your-hugging-face-token> GITHUB_TOKEN=<github-personal-access-token> ``` If no `HF_TOKEN` is set, the CLI will prompt you to paste one on first launch. To get a GITHUB_TOKEN follow the tutorial [here](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-fine-grained-personal-access-token). ### Usage **Interactive mode** (start a chat session): ```bash ml-intern ``` **Headless mode** (single prompt, auto-approve): ```bash ml-intern \"fine-tune llama on my dataset\" ``` **Options:** ```bash ml-intern --model anthropic/claude-opus-4-6 \"your prompt\" ml-intern --model openai/gpt-5.5 \"your prompt\" ml-intern --max-iterations 100 \"your prompt\" ml-intern --no-stream \"your prompt\" ``` ## Supported Gateways ML Intern currently supports one-way notification gateways from CLI sessions. These gateways send out-of-band status updates; they do not accept inbound chat messages. ### Slack Slack notifications use the Slack Web API to post messages when the agent needs approval, hits an error, or completes a turn. Create a Slack app with a bot token that has `chat:write`, invite the bot to the target channel, then set: ```bash SLACK_BOT_TOKEN=xoxb-... SLACK_CHANNEL_ID=C... ``` The CL",
+      "readme_summary": "",
       "category": "Machine Learning",
       "language": "Python",
       "stargazers_count": 7377,
@@ -5395,12 +5702,13 @@
       "security_score": 100,
       "security_level": "low",
       "quality_flags": [
+        "README 摘要不足，后续理解项目价值时需要打开仓库人工确认。",
         "许可证元数据缺失，复用代码前需要确认授权。",
         "仓库主题标签较少，垂直方向判断可能不够稳定。",
         "最近维护时间超过 30 天，建议关注维护连续性。"
       ],
-      "quality_score": 62,
-      "quality_level": "medium",
+      "quality_score": 44,
+      "quality_level": "low",
       "report_url": "weekly/2026-04-29.html"
     },
     {
@@ -5408,7 +5716,7 @@
       "full_name": "mattpocock/skills",
       "html_url": "https://github.com/mattpocock/skills",
       "description": "Skills for Real Engineers. Straight from my .claude directory.",
-      "readme_summary": "<p> <a href=\"https://www.aihero.dev/s/skills-newsletter\"> <picture> <source media=\"(prefers-color-scheme: dark)\" srcset=\"https://res.cloudinary.com/total-typescript/image/upload/v1777382277/skills-repo-dark_2x.png\"> <source media=\"(prefers-color-scheme: light)\" srcset=\"https://res.cloudinary.com/total-typescript/image/upload/v1777382277/skill-repo-light_2x.png\"> <img alt=\"Skills\" src=\"https://res.cloudinary.com/total-typescript/image/upload/v1777382277/skill-repo-light_2x.png\" width=\"369\"> </picture> </a> </p> # Skills For Real Engineers My agent skills that I use every day to do real engineering - not vibe coding. Developing real applications is hard. Approaches like GSD, BMAD, and Spec-Kit try to help by owning the process. But while doing so, they take away your control and make bugs in the process hard to resolve. These skills are designed to be small, easy to adapt, and composable. They work with any model. They're based on decades of engineering experience. Hack around with them. Make them your own. Enjoy. If you want to keep up with changes to these skills, and any new ones I create, you can join ~60,000 other devs on my newsletter: [Sign Up To The Newsletter](https://www.aihero.dev/s/skills-newsletter) ## Quickstart (30-second setup) 1. Run the skills.sh installer: ```bash npx skills@latest add mattpocock/skills ``` 2. Pick the skills you want, and which coding agents you want to install them on. **Make sure you select `/setup-matt-pocock-skills`**. 3. Run `/setup-matt-pocock-skills` in your agent. It will: - Ask you which issue tracker you want to use (GitHub, Linear, or local files) - Ask you what labels you apply to ticks when you triage them (`/triage` uses labels) - Ask you where you want to save any docs we create 4. Bam - you're ready to go. ## Why These Skills Exist I built these skills as a way to fix common failure modes I see with Claude Code, Codex, and other coding agents. ### #1: The Agent Didn't Do What I Want > \"No-one knows exactly what they",
+      "readme_summary": "",
       "category": "LLM Tooling",
       "language": "Shell",
       "stargazers_count": 42389,
@@ -5429,11 +5737,12 @@
       "security_score": 100,
       "security_level": "low",
       "quality_flags": [
+        "README 摘要不足，后续理解项目价值时需要打开仓库人工确认。",
         "仓库主题标签较少，垂直方向判断可能不够稳定。",
         "最近维护时间超过 30 天，建议关注维护连续性。"
       ],
-      "quality_score": 74,
-      "quality_level": "medium",
+      "quality_score": 56,
+      "quality_level": "low",
       "report_url": "weekly/2026-04-29.html"
     },
     {
@@ -5441,7 +5750,7 @@
       "full_name": "zilliztech/claude-context",
       "html_url": "https://github.com/zilliztech/claude-context",
       "description": "Code search MCP for Claude Code. Make entire codebase the context for any coding agent.",
-      "readme_summary": "![](assets/claude-context.png) > 🆕 **Looking for persistent memory for Claude Code?** Check out [memsearch Claude Code plugin](https://github.com/zilliztech/memsearch#for-claude-code-users) — a markdown-first memory system that gives your AI agent long-term memory across sessions. ### Your entire codebase as Claude's context [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT) [![Node.js](https://img.shields.io/badge/Node.js-20%2B-green.svg)](https://nodejs.org/) [![Documentation](https://img.shields.io/badge/Documentation-📚-orange.svg)](docs/) [![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/zilliz.semanticcodesearch?label=VS%20Code%20Extension&logo=visual-studio-code)](https://marketplace.visualstudio.com/items?itemName=zilliz.semanticcodesearch) [![npm - core](https://img.shields.io/npm/v/@zilliz/claude-context-core?label=%40zilliz%2Fclaude-context-core&logo=npm)](https://www.npmjs.com/package/@zilliz/claude-context-core) [![npm - mcp](https://img.shields.io/npm/v/@zilliz/claude-context-mcp?label=%40zilliz%2Fclaude-context-mcp&logo=npm)](https://www.npmjs.com/package/@zilliz/claude-context-mcp) [![Twitter](https://img.shields.io/twitter/url/https/twitter.com/zilliz_universe.svg?style=social&label=Follow%20%40Zilliz)](https://twitter.com/zilliz_universe) [![DeepWiki](https://img.shields.io/badge/DeepWiki-AI%20Docs-purple.svg?logo=gitbook&logoColor=white)](https://deepwiki.com/zilliztech/claude-context) <a href=\"https://discord.gg/mKc3R95yE5\"><img height=\"20\" src=\"https://img.shields.io/badge/Discord-%235865F2.svg?style=for-the-badge&logo=discord&logoColor=white\" alt=\"discord\" /></a> <a href=\"https://trendshift.io/repositories/15064\"><img src=\"https://trendshift.io/api/badge/repositories/15064\" alt=\"zilliztech/claude-context | Trendshift\" width=\"250\" height=\"55\" /></a> </div> **Claude Context** is an MCP plugin that adds semantic code search to Claude Code and other AI coding agents, giving t",
+      "readme_summary": "",
       "category": "AI Agent",
       "language": "TypeScript",
       "stargazers_count": 10227,
@@ -5462,10 +5771,11 @@
       "security_score": 100,
       "security_level": "low",
       "quality_flags": [
+        "README 摘要不足，后续理解项目价值时需要打开仓库人工确认。",
         "最近维护时间超过 30 天，建议关注维护连续性。"
       ],
-      "quality_score": 82,
-      "quality_level": "high",
+      "quality_score": 64,
+      "quality_level": "medium",
       "report_url": "weekly/2026-04-29.html"
     },
     {
@@ -5473,7 +5783,7 @@
       "full_name": "Fincept-Corporation/FinceptTerminal",
       "html_url": "https://github.com/Fincept-Corporation/FinceptTerminal",
       "description": "FinceptTerminal is a modern finance application offering advanced market analytics, investment research, and economic data tools, designed for interactive exploration and data-driven decision-making in a user-friendly environment.",
-      "readme_summary": "# Fincept Terminal <div align=\"center\"> [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-C06524)](https://github.com/Fincept-Corporation/FinceptTerminal/blob/main/LICENSE) [![C++20](https://img.shields.io/badge/C%2B%2B-20-00599C?logo=cplusplus)](https://isocpp.org/) [![Qt6](https://img.shields.io/badge/Qt-6-41CD52?logo=qt&logoColor=white)](https://www.qt.io/) [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)](https://www.python.org/) [![Hits](https://hits.sh/github.com/Fincept-Corporation/FinceptTerminal.svg?label=Visits)](https://hits.sh/github.com/Fincept-Corporation/FinceptTerminal/) <a href=\"https://trendshift.io/repositories/17028\" target=\"_blank\"><img src=\"https://trendshift.io/api/badge/repositories/17028\" alt=\"Fincept-Corporation%2FFinceptTerminal | Trendshift\" style=\"width: 250px; height: 55px;\" width=\"250\" height=\"55\"/></a> [![GitHub Stars](https://img.shields.io/github/stars/Fincept-Corporation/FinceptTerminal?style=social)](https://github.com/Fincept-Corporation/FinceptTerminal/stargazers) [![GitHub Forks](https://img.shields.io/github/forks/Fincept-Corporation/FinceptTerminal?style=social)](https://github.com/Fincept-Corporation/FinceptTerminal/network/members) [![GitHub Watchers](https://img.shields.io/github/watchers/Fincept-Corporation/FinceptTerminal?style=social)](https://github.com/Fincept-Corporation/FinceptTerminal/watchers) [![GitHub Release](https://img.shields.io/github/v/release/Fincept-Corporation/FinceptTerminal?color=brightgreen&logo=github)](https://github.com/Fincept-Corporation/FinceptTerminal/releases) [![GitHub Issues](https://img.shields.io/github/issues/Fincept-Corporation/FinceptTerminal)](https://github.com/Fincept-Corporation/FinceptTerminal/issues) [![Twitter](https://img.shields.io/badge/-Twitter-1DA1F2?style=flat-square&logo=twitter&logoColor=white)](https://twitter.com/intent/tweet?text=Check%20out%20FinceptTerminal&url=https%3A//github.com/Fincept-Corporation/Fincep",
+      "readme_summary": "",
       "category": "AI Agent",
       "language": "Python",
       "stargazers_count": 17672,
@@ -5494,10 +5804,11 @@
       "security_score": 100,
       "security_level": "low",
       "quality_flags": [
+        "README 摘要不足，后续理解项目价值时需要打开仓库人工确认。",
         "最近维护时间超过 30 天，建议关注维护连续性。"
       ],
-      "quality_score": 82,
-      "quality_level": "high",
+      "quality_score": 64,
+      "quality_level": "medium",
       "report_url": "weekly/2026-04-29.html"
     },
     {
@@ -5505,7 +5816,7 @@
       "full_name": "CJackHwang/ds2api",
       "html_url": "https://github.com/CJackHwang/ds2api",
       "description": "Deepseek to API: A lightweight, high-performance full-stack middleware converting client protocols to universal APIs. Supports multi-account rotation, compiled binaries, Vercel Serverless, and Docker. Compatible with Google, Claude, and OpenAI API formats.",
-      "readme_summary": "<p align=\"center\"> <img src=\"webui/public/ds2api-favicon.svg\" width=\"128\" height=\"128\" alt=\"DS2API icon\" /> </p> # DS2API <a href=\"https://trendshift.io/repositories/24508\" target=\"_blank\"><img src=\"https://trendshift.io/api/badge/repositories/24508\" alt=\"CJackHwang%2Fds2api | Trendshift\" style=\"width: 250px; height: 55px;\" width=\"250\" height=\"55\"/></a> [![License](https://img.shields.io/github/license/CJackHwang/ds2api.svg)](LICENSE) ![Stars](https://img.shields.io/github/stars/CJackHwang/ds2api.svg) ![Forks](https://img.shields.io/github/forks/CJackHwang/ds2api.svg) [![Release](https://img.shields.io/github/v/release/CJackHwang/ds2api?display_name=tag)](https://github.com/CJackHwang/ds2api/releases) [![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](docs/DEPLOY.md) [![Deploy on Zeabur](https://zeabur.com/button.svg)](https://zeabur.com/templates/L4CFHP) [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/CJackHwang/ds2api) 语言 / Language: [中文](README.MD) | [English](README.en.md) 将 DeepSeek Web 对话能力转换为 OpenAI、Claude 与 Gemini 兼容 API。后端为 **Go 全量实现**，前端为 React WebUI 管理台（源码在 `webui/`，部署时自动构建到 `static/admin`）。 文档入口：[文档导航](docs/README.md) / [架构说明](docs/ARCHITECTURE.md) / [接口文档](API.md) 【感谢Linux.do社区及GitHub社区各位开发者对项目的支持与贡献】 > **重要免责声明** > > 本仓库仅供学习、研究、个人实验和内部验证使用，不提供任何形式的商业授权、适用性保证或结果保证。 > > 作者及仓库维护者不对因使用、修改、分发、部署或依赖本项目而产生的任何直接或间接损失、账号封禁、数据丢失、法律风险或第三方索赔负责。 > > 请勿将本项目用于违反服务条款、协议、法律法规或平台规则的场景。商业使用前请自行确认 `LICENSE`、相关协议以及你是否获得了作者的书面许可。 ## 目录 - [架构概览（摘要）](#架构概览摘要) - [核心能力](#核心能力) - [平台兼容矩阵](#平台兼容矩阵) - [模型支持](#模型支持) - [OpenAI 接口](#openai-接口get-v1models) - [Claude 接口](#claude-接口get-anthropicv1models) - [Gemini 接口](#gemini-接口) - [快速开始](#快速开始) - [方式一：下载 Release 构建包](#方式一下载-release-构建包) - [方式二：Docker 运行](#方式二docker-运行) - [方式三：Vercel 部署](#方式三vercel-部署) - [方式四：本地源码运行](#方式四本地源码运行) - [配置说明](#配置说明) - [鉴权模式](#鉴权模式) - [并发模型](#并发模型) - [Tool Call 适配](#tool-call-适配) - [本地开发抓包工具](#本地开发抓包工具) - [文档索引](#文档索引) - [测试](#测试) ",
+      "readme_summary": "",
       "category": "LLM Tooling",
       "language": "Go",
       "stargazers_count": 2625,
@@ -5526,10 +5837,11 @@
       "security_score": 100,
       "security_level": "low",
       "quality_flags": [
+        "README 摘要不足，后续理解项目价值时需要打开仓库人工确认。",
         "最近维护时间超过 30 天，建议关注维护连续性。"
       ],
-      "quality_score": 82,
-      "quality_level": "high",
+      "quality_score": 64,
+      "quality_level": "medium",
       "report_url": "weekly/2026-04-29.html"
     },
     {
@@ -5537,7 +5849,7 @@
       "full_name": "Anil-matcha/Open-Generative-AI",
       "html_url": "https://github.com/Anil-matcha/Open-Generative-AI",
       "description": "Uncensored, open-source alternative to Higgsfield AI, Freepik AI, Krea AI, Openart AI — Free, unrestricted AI image & video generation studio with 200+ models (Flux, Midjourney, Kling, Sora, Veo). No content filters. Self-hosted, MIT licensed.",
-      "readme_summary": "# Open Generative AI — Uncensored Open-Source Alternative to Higgsfield AI, Freepik AI, Krea AI, Openart AI > **The free, open-source, unrestricted alternative to Higgsfield AI, Freepik, Krea, Openart AI.** Generate AI images and videos using 200+ state-of-the-art models — no content filters, no closed ecosystem, no subscription fees. > 🐎 **Early access to Happy Horse 1.0** — Alibaba's #1 ranked AI video model. Check out [Awesome HappyHorse 1.0 API & Prompts](https://github.com/Anil-matcha/Awesome-HappyHorse-1.0-API-and-Prompt) — a Python wrapper plus a curated library of high-performing community prompts for native 1080p text-to-video and image-to-video generation with jointly generated audio. > 🤖 **Automate Higgsfield, Freepik, Krea, Openart & more with AI coding agents:** [Generative-Media-Skills](https://github.com/SamurAIGPT/Generative-Media-Skills) — a library of skills that let agents like **Claude Code**, **Codex**, and other coding assistants drive 200+ image/video models end-to-end (prompt → generate → edit → stitch) directly from your terminal. Perfect for building automated media pipelines without touching a UI. ### Related projects > **Open-source Weavy, Flora Fauna Freepik Spaces, Krea nodes alternative** -> https://github.com/SamurAIGPT/Vibe-Workflow > **Open-source multi-modal chatbot and Poe alternative** -> https://github.com/Anil-matcha/Open-Poe-AI > **Open-source Opus Clip alternative — turn any long-form YouTube video into viral-ready vertical shorts** -> https://github.com/SamurAIGPT/AI-Youtube-Shorts-Generator ## 🌐 Try it Online — No Install Required **Hosted version:** [https://dev.muapi.ai/open-generative-ai](https://dev.muapi.ai/open-generative-ai) Use all four studios (Image, Video, Lip Sync, Cinema) directly in your browser — no Node.js, no setup. Sign up for a free account to start generating. The hosted version is always up to date with the latest models. **Community:** Join [Discord](https://discord.gg/sqFYv8ugND) for discussions and s",
+      "readme_summary": "",
       "category": "Other",
       "language": "JavaScript",
       "stargazers_count": 10026,
@@ -5560,11 +5872,12 @@
       "security_score": 100,
       "security_level": "low",
       "quality_flags": [
+        "README 摘要不足，后续理解项目价值时需要打开仓库人工确认。",
         "许可证元数据缺失，复用代码前需要确认授权。",
         "最近维护时间超过 30 天，建议关注维护连续性。"
       ],
-      "quality_score": 70,
-      "quality_level": "medium",
+      "quality_score": 52,
+      "quality_level": "low",
       "report_url": "weekly/2026-04-29.html"
     },
     {
@@ -5572,7 +5885,7 @@
       "full_name": "trycua/cua",
       "html_url": "https://github.com/trycua/cua",
       "description": "Open-source infrastructure for Computer-Use Agents. Sandboxes, SDKs, and benchmarks to train and evaluate AI agents that can control full desktops (macOS, Linux, Windows).",
-      "readme_summary": "<div align=\"center\"> <a href=\"https://cua.ai\" target=\"_blank\" rel=\"noopener noreferrer\"> <picture> <source media=\"(prefers-color-scheme: dark)\" alt=\"Cua logo\" width=\"150\" srcset=\"img/logo_white.svg\"> <source media=\"(prefers-color-scheme: light)\" alt=\"Cua logo\" width=\"150\" srcset=\"img/logo_black.svg\"> <img alt=\"Cua logo\" width=\"150\" src=\"img/logo_black.svg\"> </picture> </a> <p align=\"center\">Build, benchmark, and deploy agents that use computers</p> <p align=\"center\"> <a href=\"https://cua.ai\" target=\"_blank\" rel=\"noopener noreferrer\"><img src=\"https://img.shields.io/badge/cua.ai-0ea5e9\" alt=\"cua.ai\"></a> <a href=\"https://discord.gg/mVnXXpdE85\" target=\"_blank\" rel=\"noopener noreferrer\"><img src=\"https://img.shields.io/badge/Discord-Join%20Server-10b981?logo=discord&logoColor=white\" alt=\"Discord\"></a> <a href=\"https://x.com/trycua\" target=\"_blank\" rel=\"noopener noreferrer\"><img src=\"https://img.shields.io/twitter/follow/trycua?style=social\" alt=\"Twitter\"></a> <a href=\"https://cua.ai/docs\" target=\"_blank\" rel=\"noopener noreferrer\"><img src=\"https://img.shields.io/badge/Docs-0ea5e9.svg\" alt=\"Documentation\"></a> <br> <a href=\"https://trendshift.io/repositories/13685\" target=\"_blank\"><img src=\"https://trendshift.io/api/badge/repositories/13685\" alt=\"trycua%2Fcua | Trendshift\" style=\"width: 250px; height: 55px;\" width=\"250\" height=\"55\"/></a> </p> </div> ## Choose Your Path <div align=\"center\"> <table> <tr> <td colspan=\"3\" align=\"center\"> <a href=\"#cua-driver---background-computer-use-on-macos\"> <img src=\"img/card-cua-driver.png\" alt=\"Cua Driver — The background computer-use agent\" width=\"888\"> </a> </td> </tr> <tr> <td align=\"center\"> <a href=\"#cua---agentic-ui-automation--code-execution\"> <img src=\"img/card-cua-sandbox.png\" alt=\"Cua &amp; Cua Sandbox\" width=\"280\"> </a> </td> <td align=\"center\"> <a href=\"#cua-bench---benchmarks--rl-environments\"> <img src=\"img/card-cua-bench.png\" alt=\"Cua Bench\" width=\"280\"> </a> </td> <td align=\"center\"> <a href=\"#lume---macos-virtualizati",
+      "readme_summary": "",
       "category": "AI Agent",
       "language": "HTML",
       "stargazers_count": 15164,
@@ -5593,10 +5906,11 @@
       "security_score": 100,
       "security_level": "low",
       "quality_flags": [
+        "README 摘要不足，后续理解项目价值时需要打开仓库人工确认。",
         "最近维护时间超过 30 天，建议关注维护连续性。"
       ],
-      "quality_score": 82,
-      "quality_level": "high",
+      "quality_score": 64,
+      "quality_level": "medium",
       "report_url": "weekly/2026-04-29.html"
     },
     {
@@ -5604,7 +5918,7 @@
       "full_name": "mksglu/context-mode",
       "html_url": "https://github.com/mksglu/context-mode",
       "description": "Context window optimization for AI coding agents. Sandboxes tool output, 98% reduction. 14 platforms",
-      "readme_summary": "# Context Mode **The other half of the context problem.** [![users](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fcdn.jsdelivr.net%2Fgh%2Fmksglu%2Fcontext-mode%40main%2Fstats.json&query=%24.message&label=users&color=brightgreen)](https://www.npmjs.com/package/context-mode) [![npm](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fcdn.jsdelivr.net%2Fgh%2Fmksglu%2Fcontext-mode%40main%2Fstats.json&query=%24.npm&label=npm&color=blue)](https://www.npmjs.com/package/context-mode) [![marketplace](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fcdn.jsdelivr.net%2Fgh%2Fmksglu%2Fcontext-mode%40main%2Fstats.json&query=%24.marketplace&label=marketplace&color=blue)](https://github.com/mksglu/context-mode) [![GitHub stars](https://img.shields.io/github/stars/mksglu/context-mode?style=flat&color=yellow)](https://github.com/mksglu/context-mode/stargazers) [![GitHub forks](https://img.shields.io/github/forks/mksglu/context-mode?style=flat&color=blue)](https://github.com/mksglu/context-mode/network/members) [![Last commit](https://img.shields.io/github/last-commit/mksglu/context-mode?color=green)](https://github.com/mksglu/context-mode/commits) [![License: ELv2](https://img.shields.io/badge/License-ELv2-blue.svg)](LICENSE) [![Discord](https://img.shields.io/discord/1478479412700909750?label=Discord&logo=discord&color=5865f2)](https://discord.gg/DCN9jUgN5v) [![Hacker News #1](https://img.shields.io/badge/Hacker%20News-%231%20%E2%80%A2%20570%2B%20points-ff6600?logo=ycombinator&logoColor=white)](https://news.ycombinator.com/item?id=47193064) <p align=\"center\"> <sub>Used across teams at</sub> <br><br> <a href=\"#\"><img src=\"https://img.shields.io/badge/Microsoft-141414?style=flat\" alt=\"Microsoft\" /></a> <a href=\"#\"><img src=\"https://img.shields.io/badge/Google-141414?style=flat&logo=google&logoColor=white\" alt=\"Google\" /></a> <a href=\"#\"><img src=\"https://img.shields.io/badge/Meta-141414?style=flat&logo=meta&logoColor=white\" alt=\"Meta\" /></a> <a href=\"#",
+      "readme_summary": "",
       "category": "AI Agent",
       "language": "TypeScript",
       "stargazers_count": 11087,
@@ -5625,10 +5939,11 @@
       "security_score": 100,
       "security_level": "low",
       "quality_flags": [
+        "README 摘要不足，后续理解项目价值时需要打开仓库人工确认。",
         "最近维护时间超过 30 天，建议关注维护连续性。"
       ],
-      "quality_score": 82,
-      "quality_level": "high",
+      "quality_score": 64,
+      "quality_level": "medium",
       "report_url": "weekly/2026-04-29.html"
     },
     {
@@ -5636,7 +5951,7 @@
       "full_name": "pytorch/pytorch",
       "html_url": "https://github.com/pytorch/pytorch",
       "description": "Tensors and Dynamic neural networks in Python with strong GPU acceleration",
-      "readme_summary": "![PyTorch Logo](https://github.com/pytorch/pytorch/raw/main/docs/source/_static/img/pytorch-logo-dark.png) -------------------------------------------------------------------------------- PyTorch is a Python package that provides two high-level features: - Tensor computation (like NumPy) with strong GPU acceleration - Deep neural networks built on a tape-based autograd system You can reuse your favorite Python packages such as NumPy, SciPy, and Cython to extend PyTorch when needed. Our trunk health (Continuous Integration signals) can be found at [hud.pytorch.org](https://hud.pytorch.org/ci/pytorch/pytorch/main). <!-- toc --> - [More About PyTorch](#more-about-pytorch) - [A GPU-Ready Tensor Library](#a-gpu-ready-tensor-library) - [Dynamic Neural Networks: Tape-Based Autograd](#dynamic-neural-networks-tape-based-autograd) - [Python First](#python-first) - [Imperative Experiences](#imperative-experiences) - [Fast and Lean](#fast-and-lean) - [Extensions Without Pain](#extensions-without-pain) - [Installation](#installation) - [Binaries](#binaries) - [NVIDIA Jetson Platforms](#nvidia-jetson-platforms) - [From Source](#from-source) - [Prerequisites](#prerequisites) - [NVIDIA CUDA Support](#nvidia-cuda-support) - [AMD ROCm Support](#amd-rocm-support) - [Intel GPU Support](#intel-gpu-support) - [Get the PyTorch Source](#get-the-pytorch-source) - [Install Dependencies](#install-dependencies) - [Install PyTorch](#install-pytorch) - [Adjust Build Options (Optional)](#adjust-build-options-optional) - [Docker Image](#docker-image) - [Using pre-built images](#using-pre-built-images) - [Building the image yourself](#building-the-image-yourself) - [Building the Documentation](#building-the-documentation) - [Troubleshooting CI Errors](#troubleshooting-ci-errors) - [Building a PDF](#building-a-pdf) - [Previous Versions](#previous-versions) - [Getting Started](#getting-started) - [Resources](#resources) - [Communication](#communication) - [Releases and Contributing](#releases-and-con",
+      "readme_summary": "",
       "category": "Machine Learning",
       "language": "Python",
       "stargazers_count": 99527,
@@ -5656,10 +5971,11 @@
       "security_score": 100,
       "security_level": "low",
       "quality_flags": [
+        "README 摘要不足，后续理解项目价值时需要打开仓库人工确认。",
         "最近维护时间超过 30 天，建议关注维护连续性。"
       ],
-      "quality_score": 82,
-      "quality_level": "high",
+      "quality_score": 64,
+      "quality_level": "medium",
       "report_url": "weekly/2026-04-29.html"
     }
   ]
