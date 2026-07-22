@@ -12,7 +12,8 @@
 ### 2. 当前边界
 
 1. 本次未创建或读取真实 blind pack；首次报告须由独立持有者冻结标注后在私有路径运行。
-2. 分支保护和 GitHub Issue 属远端治理，待本地完整验证、推送成功并确认管理员权限后执行。
+2. 本地 Python 全量、安全检查、六套固定评估、前端 lint/test/build、mock Playwright 与真实 FastAPI Playwright 均通过；远端 run `29898224909` 的核心质量、mock Playwright、真实 FastAPI Playwright 三项均成功。
+3. 分支保护和 GitHub Issue 属远端治理：当前 CLI REST 请求返回 401、GitHub 连接器返回 403，未取得可修改仓库设置或创建 Issue 的权限；已提供 `docs/branch-protection-runbook.md`，待仓库管理员按手册执行。
 
 ## 2026-07-22 追加：P0-18 项目级能力作用域
 
