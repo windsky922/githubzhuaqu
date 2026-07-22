@@ -4,6 +4,7 @@ import json
 import re
 from typing import Any
 
+from src.rag.evidence_fact_extractor import ScopedFact, extract_quote_facts
 from src.storage.sqlite_store import connect, initialize
 
 
@@ -205,6 +206,7 @@ def _verify_text_requirement(field: str, operator: str, expected: Any, chunks: l
         chunk_id = str(row["chunk_id"] or "")
         for sentence in _sentences(str(row["chunk_text"] or "")):
             state = classify_text_evidence(field, target, sentence)
+            state = _scope_safe_state(field, target, sentence, state)
             if state != "unknown" and chunk_id not in states[state]:
                 states[state].append(chunk_id)
     supports = states["supports"]
@@ -274,6 +276,67 @@ def classify_text_evidence(field: str, expected: Any, sentence: str) -> str:
         if target == "paid" and _has_markers(text, COST_MARKERS["free"]):
             return "contradicts"
     return "unknown"
+
+
+def _scope_safe_state(field: str, expected: Any, sentence: str, state: str) -> str:
+    """Prevent a local setup/UI/optional fact from proving project eligibility.
+
+    The legacy classifier remains public for sentence-level compatibility.  The
+    project-level verifier is stricter because its result controls eligibility.
+    """
+    if field not in {"deployment", *BOOLEAN_CAPABILITY_FIELDS}:
+        return state
+    facts = extract_quote_facts(sentence)
+    if not facts:
+        return "unknown"
+    relevant = [fact for fact in facts if _fact_relevant_to_requirement(field, expected, fact)]
+    if not relevant:
+        return "unknown"
+    scoped = [fact for fact in relevant if _project_scope(fact)]
+    if not scoped:
+        return "unknown"
+    if field in BOOLEAN_CAPABILITY_FIELDS:
+        target = _bool_value(expected)
+        direct = [fact for fact in scoped if fact.predicate == field]
+        blockers = [fact for fact in scoped if fact.predicate == field and fact.value != target]
+        if field == "offline_capable" and target is True:
+            blockers.extend(fact for fact in scoped if fact.predicate in {"network_required", "external_api_required"} and fact.value is True)
+        if field == "external_api_required" and target is False:
+            blockers.extend(fact for fact in scoped if fact.predicate == "external_api_required" and fact.value is True)
+        if blockers:
+            return "contradicts"
+        if any(fact.value == target for fact in direct):
+            return "supports"
+        return "unknown"
+    return state if state != "unknown" else "unknown"
+
+
+def _project_scope(fact: ScopedFact) -> bool:
+    """A scope is project-applicable only when global or runtime/inference/required.
+
+    Setup, UI and optional statements deliberately remain insufficient.  An
+    entirely unqualified deterministic statement is treated as project-wide;
+    its clause still cannot be merged with a scoped statement elsewhere.
+    """
+    if fact.phase == "setup" or fact.surface == "ui" or fact.necessity == "optional":
+        return False
+    return fact.phase == "runtime" or fact.surface == "inference" or (
+        fact.phase is None and fact.surface is None and fact.necessity is None
+    ) or fact.necessity == "required"
+
+
+def _fact_relevant_to_requirement(field: str, expected: Any, fact: ScopedFact) -> bool:
+    if field == "deployment":
+        target = _normalize_value(field, expected)
+        if target == "local":
+            return fact.predicate in {"hosting_mode", "external_api_required", "network_required"}
+        if target == "offline":
+            return fact.predicate in {"offline_capable", "external_api_required", "network_required"}
+        return fact.predicate == "hosting_mode"
+    return fact.predicate == field or (
+        field in {"offline_capable", "external_api_required"}
+        and fact.predicate in {"network_required", "external_api_required"}
+    )
 
 
 def evidence_state_status(state: str, operator: str = "eq") -> str:

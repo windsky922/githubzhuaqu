@@ -86,6 +86,22 @@ class ClaimSupportTest(unittest.TestCase):
                 self.assertEqual(result["semantic_support_status"], "insufficient")
                 self.assertEqual(result["reason"], "unextractable_predicate_value")
 
+    def test_clause_scopes_cannot_borrow_setup_or_ui_support(self):
+        quote = (
+            "No internet is required for setup, but the inference runtime requires internet for all editions. "
+            "The UI runtime works offline for all editions, but inference requires an external cloud API for all editions."
+        )
+        setup = _fact(component="setup", phase="setup", value=False)
+        runtime_false = _fact(value=False)
+        runtime_true = _fact()
+        ui = _fact(component="ui", phase="runtime", predicate="offline_capable", value=True, modality="supported")
+        inference_api = _fact(predicate="external_api_required", value=True)
+        self.assertEqual(compare_facts(claim=setup, evidence=setup, quote=quote)["semantic_support_status"], "insufficient")
+        self.assertEqual(compare_facts(claim=runtime_false, evidence=runtime_false, quote=quote)["semantic_support_status"], "insufficient")
+        self.assertEqual(compare_facts(claim=runtime_true, evidence=runtime_true, quote=quote)["semantic_support_status"], "supported")
+        self.assertEqual(compare_facts(claim=ui, evidence=ui, quote=quote)["semantic_support_status"], "supported")
+        self.assertEqual(compare_facts(claim=inference_api, evidence=inference_api, quote=quote)["semantic_support_status"], "supported")
+
     def test_answer_quality_requires_registered_and_semantically_supported_facts(self):
         context = {
             "chunk_id": "chunk:1",

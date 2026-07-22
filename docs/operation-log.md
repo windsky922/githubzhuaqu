@@ -1,5 +1,18 @@
 # 操作日志
 
+## 2026-07-22 追加：P0-18 项目级能力作用域
+
+### 1. 修改内容
+
+1. 证据 quote 改为按分句提取闭世界 `ScopedFact`；每个事实保留 component、phase、surface、necessity 与原始分句，setup/UI/optional 不再与 runtime/inference/required 混合。
+2. 主张支持锚定必须命中同一作用域分句；多句冲突、跨 component/phase 借词和歧义事实均 fail closed。
+3. 项目级硬约束验证复用该作用域模型；runtime/inference/required 的联网或外部 API blocker 优先，不能被 setup、UI 或 optional 的正面描述抵消。
+4. 新增独立固定 adversarial fixture 与 CI 阈值：覆盖 setup/runtime、UI/inference、optional/required、initial-download/steady-state 和 community/enterprise；`false_scope_support_rate=0`。
+
+### 2. 边界
+
+不改 SQLite schema、hybrid 权重、公开归档、weekly 发布、Ask/SSE 字段与事件顺序、无状态追问或模型 enrichment 的权限边界。
+
 ## 2026-07-22 追加：P0-17A freshness attestation 生产闭环
 
 ### 1. 修改内容

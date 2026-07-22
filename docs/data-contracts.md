@@ -1,5 +1,9 @@
 # 数据契约说明
 
+## P0-18 capability scope gate
+
+`CapabilityFact` is an in-memory deterministic evidence record with `capability`, `phase`, `surface`, `necessity`, `state`, and `evidence_id` (the source chunk/clause reference). It adds no SQLite table or API field. A project-level match only uses compatible facts; setup, UI, optional, initial-download, control-plane, and other non-runtime scopes cannot prove a general runtime constraint. Contradictory or unknown scope remains `unknown`/`unmet`.
+
 本文档记录当前公开 JSON 和 SQLite 派生索引的稳定字段。后续前端、微信、飞书、RSS 或外部脚本应优先依赖这些字段。
 
 ## 一、设计原则

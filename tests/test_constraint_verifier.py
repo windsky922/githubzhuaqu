@@ -151,6 +151,38 @@ class ConstraintVerifierTest(unittest.TestCase):
         self.assertIn("外部模型 API=false", result["unmet_requirements"])
         self.assertEqual([item["status"] for item in result["requirement_evaluations"]], ["matched", "unmet", "unmet"])
 
+    def test_scope_conflicts_fail_closed_without_false_eligibility(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            write_fixture(root)
+            repository = ApiRepository(root=root, db_path=root / "data" / "github_weekly.sqlite")
+            repository.ensure_sqlite_index()
+            connection = connect(repository.db_path)
+            try:
+                connection.execute(
+                    "UPDATE rag_chunks SET chunk_text=?, source_type='readme' WHERE full_name=?",
+                    (
+                        "No internet is required for setup. The UI works offline. "
+                        "An optional integration needs no cloud API. "
+                        "The inference runtime requires internet and an external cloud API.",
+                        "eval/agent-orchestrator",
+                    ),
+                )
+                connection.commit()
+            finally:
+                connection.close()
+            result = verify_project_requirements(
+                repository.db_path,
+                ["eval/agent-orchestrator"],
+                [
+                    _requirement("offline_capable", True),
+                    _requirement("network_required", False),
+                    _requirement("external_api_required", False),
+                ],
+            )["eval/agent-orchestrator"]
+        self.assertEqual(result["matched_requirements"], [])
+        self.assertEqual(result["unmet_requirements"], ["离线能力=true", "运行时联网=false", "外部模型 API=false"])
+
 
 class TextEvidenceClassifierTest(unittest.TestCase):
     def test_distinguishes_support_conflict_and_uncertainty(self):

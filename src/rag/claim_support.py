@@ -11,7 +11,7 @@ from __future__ import annotations
 import re
 from typing import Any
 
-from src.rag.evidence_fact_extractor import extract_quote_semantics
+from src.rag.evidence_fact_extractor import ScopedFact, extract_quote_facts
 
 FACT_FIELDS = (
     "subject",
@@ -96,21 +96,52 @@ def compare_facts(*, claim: dict[str, Any], evidence: dict[str, Any], quote: str
 
 
 def evidence_fact_anchor_error(fact: dict[str, Any], quote: str) -> str:
-    """Require independently extractable quote semantics and source wording."""
+    """Require one source clause that supports both fact and its scope."""
     text = _normalize_string(quote)
     if not text:
         return "empty_evidence_quote"
-    extracted = extract_quote_semantics(quote)
-    if extracted is None:
+    candidates = [
+        item for item in extract_quote_facts(quote)
+        if item.predicate == fact.get("predicate")
+        and item.value == fact.get("value")
+        and item.modality == fact.get("modality")
+    ]
+    if not candidates:
+        same_predicate = [item for item in extract_quote_facts(quote) if item.predicate == fact.get("predicate")]
+        if same_predicate:
+            if all(item.value != fact.get("value") for item in same_predicate):
+                return "quote_value_mismatch"
+            if all(item.modality != fact.get("modality") for item in same_predicate):
+                return "quote_modality_mismatch"
         return "unextractable_predicate_value"
-    for field in ("predicate", "value", "modality"):
-        if fact.get(field) != extracted[field]:
-            return f"quote_{field}_mismatch"
-    for field in ("component", "phase", "edition", "condition", "temporal", "quantity"):
+    compatible = [item for item in candidates if _scope_anchors_fact(item, fact)]
+    if not compatible:
+        for field, extracted_value in (("component", candidates[0].component), ("phase", candidates[0].phase)):
+            if fact.get(field) is not None and _normalize_string(fact[field]) != _normalize_string(extracted_value):
+                return f"unanchored_{field}"
+        return "unanchored_scope"
+    if len(compatible) != 1:
+        return "ambiguous_scoped_fact"
+    span = _normalize_string(compatible[0].source_span)
+    for field in ("edition", "condition", "temporal", "quantity"):
         value = fact.get(field)
-        if value is not None and _normalize_string(value) not in text:
+        if value is not None and _normalize_string(value) not in span:
             return f"unanchored_{field}"
     return ""
+
+
+def _scope_anchors_fact(extracted: ScopedFact, fact: dict[str, Any]) -> bool:
+    """Do not accept a scope word that occurs only in a neighbouring clause."""
+    for field, extracted_value in (("component", extracted.component), ("phase", extracted.phase)):
+        value = fact.get(field)
+        if value is not None and _normalize_string(value) != _normalize_string(extracted_value):
+            return False
+    # Existing fact schema has modality but no separate necessity field.  A
+    # required/optional phrase therefore must agree when it is explicit.
+    if extracted.necessity and fact.get("modality") in {"required", "optional"}:
+        if fact["modality"] != extracted.necessity:
+            return False
+    return True
 
 
 def _polarity(fact: dict[str, Any]) -> str:

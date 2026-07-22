@@ -1,5 +1,9 @@
 # 后端 API 说明
 
+## P0-18 capability scope gate
+
+Recommendation eligibility keeps its existing response fields. Deterministic evidence is evaluated clause by clause as `CapabilityFact(capability, phase, surface, necessity, state, evidence_id)`. Only compatible scopes may aggregate; setup/UI/optional evidence is insufficient for a project-wide requirement, while runtime/inference/required blockers take precedence. This does not change `/v1/rag/ask`, `/v1/rag/ask/stream`, or `meta → delta* → final`.
+
 本文档记录当前后端 API 的最小可用设计。`/api/*` 继续作为兼容只读接口，`/v1/*` 用于任务调度、受控执行和后续管理端能力。
 
 ## 一、定位

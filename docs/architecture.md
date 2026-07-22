@@ -1,5 +1,9 @@
 # GitHub Weekly Agent 架构说明
 
+## P0-18 capability scope gate
+
+The deterministic constraint verifier and claim anchor share clause-scoped capability facts. Facts never merge across incompatible phase, surface, or necessity scopes. Runtime, inference, and required blockers are fail-closed for recommendation eligibility; model enrichment cannot promote unknown or rejected candidates.
+
 本文档记录第一阶段最小可用版本的实际实现架构。
 
 ## 提交级质量检查

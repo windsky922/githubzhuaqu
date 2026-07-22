@@ -6,7 +6,8 @@
     "follow_up_cases": {"path": "evals/follow_up_cases.jsonl", "sha256": "1941bb3e2c7a353d6b1f348d0597d95a743d388d7843abb22b66de10238f5791"},
     "constraint_parsing_cases": {"path": "evals/constraint_parsing_cases.jsonl", "sha256": "277c5e6a6945043c16d0a49aabb15d2998398eec38136d3c704140d7053aa0cb"},
     "constraint_evidence_cases": {"path": "evals/constraint_evidence_cases.jsonl", "sha256": "ee01fef818e4638e3ae05d9b18b2573bd9eb17be0bdbd8d6369a4fc78d7a1618"},
-    "claim_support_cases": {"path": "evals/claim_support_cases.jsonl", "sha256": "faac4d9a63a6291e338d61e928ca0253e8910b9e93d8a9224dbc962598a496e5"}
+    "claim_support_cases": {"path": "evals/claim_support_cases.jsonl", "sha256": "faac4d9a63a6291e338d61e928ca0253e8910b9e93d8a9224dbc962598a496e5"},
+    "capability_scope_cases": {"path": "evals/capability_scope_cases.jsonl", "sha256": "46421c2e6a98349f5e0beabe2c3b34597b44a1ed30b318a5358c9881ce161209"}
   },
   "evaluations": {
     "project_match": {
@@ -28,6 +29,10 @@
     "claim_support": {
       "minimum": {"metrics.exact_accuracy": 1.0, "metrics.rejected_case_accuracy": 1.0},
       "maximum": {"metrics.false_support_rate": 0.0, "metrics.false_fact_anchor_rate": 0.0}
+    },
+    "capability_scope": {
+      "minimum": {"metrics.exact_accuracy": 1.0},
+      "maximum": {"metrics.false_scope_support_rate": 0.0}
     }
   }
 }
