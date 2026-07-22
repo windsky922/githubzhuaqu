@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Ask 请求与安全降级时序",
+    "subtitle": "先完成检索和质量校验，再决定是否发送 provider delta",
+    "output": "docs/diagrams/ask-sequence.html",
+    "viewBox": [760, 760]
+  },
+  "participants": [
+    { "id": "browser", "type": "frontend", "label": "React", "sublabel": "浏览器" },
+    { "id": "api", "type": "backend", "label": "FastAPI", "sublabel": "Ask / SSE" },
+    { "id": "rag", "type": "database", "label": "RAG", "sublabel": "索引与约束" },
+    { "id": "provider", "type": "cloud", "label": "Kimi", "sublabel": "可选补充" },
+    { "id": "gate", "type": "security", "label": "质量闸门", "sublabel": "fail closed" }
+  ],
+  "segments": [
+    { "from": 150, "to": 295, "label": "检索" },
+    { "from": 315, "to": 455, "label": "生成与校验" },
+    { "from": 475, "to": 575, "label": "通过：安全流式输出" },
+    { "from": 595, "to": 675, "label": "失败：规则降级" }
+  ],
+  "messages": [
+    { "from": "browser", "to": "api", "y": 185, "label": "POST Ask", "variant": "emphasis" },
+    { "from": "api", "to": "rag", "y": 228, "label": "检索 + 硬约束", "variant": "emphasis" },
+    { "from": "rag", "to": "api", "y": 270, "label": "证据与候选", "variant": "return" },
+    { "from": "api", "to": "provider", "y": 340, "label": "可选生成", "variant": "dashed" },
+    { "from": "provider", "to": "api", "y": 382, "label": "草稿", "variant": "return" },
+    { "from": "api", "to": "gate", "y": 425, "label": "citation / claim / freshness / scope", "variant": "security" },
+    { "from": "gate", "to": "api", "y": 468, "label": "通过", "variant": "return" },
+    { "from": "api", "to": "browser", "y": 510, "label": "meta", "variant": "emphasis" },
+    { "from": "api", "to": "browser", "y": 548, "label": "delta* → final", "variant": "return" },
+    { "from": "gate", "to": "api", "y": 615, "label": "拒绝 / unknown", "variant": "security" },
+    { "from": "api", "to": "browser", "y": 655, "label": "规则降级 final", "variant": "return", "note": "不发送 provider delta；不显示确认首选" }
+  ],
+  "activations": [
+    { "participant": "browser", "from": 178, "to": 665, "type": "frontend" },
+    { "participant": "api", "from": 185, "to": 662, "type": "backend" },
+    { "participant": "rag", "from": 223, "to": 278, "type": "database" },
+    { "participant": "provider", "from": 335, "to": 390, "type": "cloud" },
+    { "participant": "gate", "from": 420, "to": 625, "type": "security" }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "兼容契约",
+      "items": [
+        "SSE 顺序保持 meta → delta* → final",
+        "Ask 追问保持无状态",
+        "provider 不可决定硬约束"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "fail-closed",
+      "items": [
+        "未支持或矛盾主张直接降级",
+        "freshness 不足不称为最新",
+        "降级路径不发送 provider delta"
+      ]
+    }
+  ]
+}

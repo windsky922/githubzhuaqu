@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "GitHub Weekly Agent 核心流程",
+    "subtitle": "数据生产、RAG 问答与 fail-closed 质量闸门",
+    "output": "docs/diagrams/core-workflow.html",
+    "viewBox": [720, 690]
+  },
+  "lanes": [
+    { "id": "production", "label": "数据生产" },
+    { "id": "ask", "label": "用户请求与回答" },
+    { "id": "quality", "label": "质量与公开边界" },
+    { "id": "fallback", "label": "拒绝与规则降级", "variant": "exception" }
+  ],
+  "phases": [
+    { "id": "source", "label": "采集与归档", "fromCol": 0, "toCol": 3 },
+    { "id": "answer", "label": "检索与回答", "fromCol": 3, "toCol": 5, "variant": "emphasis" }
+  ],
+  "groups": [
+    { "id": "p0_gates", "label": "P0 质量闸门", "lane": "quality", "fromCol": 4, "toCol": 5, "variant": "security" }
+  ],
+  "mainPath": ["browser", "api", "retrieve", "quality_gate", "response"],
+  "nodes": [
+    { "id": "github", "lane": "production", "col": 0, "type": "external", "label": "GitHub", "sublabel": "仓库与 README" },
+    { "id": "clean", "lane": "production", "col": 1, "type": "backend", "label": "筛选与清洗", "sublabel": "不可信输入隔离", "width": 100 },
+    { "id": "archive", "lane": "production", "col": 3, "type": "database", "label": "运行归档 JSON", "sublabel": "事实来源", "width": 104 },
+    { "id": "rag_index", "lane": "production", "col": 5, "type": "database", "label": "SQLite 与 RAG", "sublabel": "可重建索引", "width": 110 },
+
+    { "id": "browser", "lane": "ask", "col": 0, "type": "frontend", "label": "React 浏览器", "sublabel": "项目浏览 / Ask", "width": 96 },
+    { "id": "api", "lane": "ask", "col": 1, "type": "backend", "label": "FastAPI", "sublabel": "/v1/rag/ask", "width": 96 },
+    { "id": "retrieve", "lane": "ask", "col": 3, "type": "backend", "label": "检索与约束", "sublabel": "RAG / 推荐资格", "width": 110 },
+    { "id": "response", "lane": "ask", "col": 5, "type": "frontend", "label": "安全回答", "sublabel": "meta → delta* → final", "width": 110 },
+
+    { "id": "quality_gate", "lane": "quality", "col": 5, "type": "security", "label": "回答质量闸门", "sublabel": "证据 / 新鲜度 / 作用域", "tag": "fail closed", "width": 110 },
+    { "id": "fallback_answer", "lane": "fallback", "col": 5, "type": "security", "label": "规则降级", "sublabel": "不发送 provider delta", "tag": "证据不足 / 过期 / 冲突", "width": 110 }
+  ],
+  "edges": [
+    { "from": "github", "to": "clean", "variant": "default" },
+    { "from": "clean", "to": "archive", "variant": "default" },
+    { "from": "archive", "to": "rag_index", "variant": "emphasis" },
+    { "from": "rag_index", "to": "retrieve", "label": "派生检索", "variant": "dashed", "role": "async", "fromSide": "bottom", "toSide": "top", "route": "drop", "labelSegment": 1 },
+
+    { "from": "browser", "to": "api", "variant": "emphasis" },
+    { "from": "api", "to": "retrieve", "variant": "emphasis" },
+    { "from": "retrieve", "to": "quality_gate", "variant": "emphasis", "fromSide": "bottom", "toSide": "top", "route": "drop", "labelSegment": 1 },
+    { "from": "quality_gate", "to": "response", "label": "通过", "variant": "emphasis", "fromSide": "top", "toSide": "bottom", "route": "drop", "labelSegment": 1 },
+    { "from": "quality_gate", "to": "fallback_answer", "label": "失败", "variant": "security", "role": "error", "fromSide": "bottom", "toSide": "top", "route": "drop", "labelSegment": 1, "labelDy": 16 }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "数据边界",
+      "items": [
+        "事实来源：运行归档 JSON",
+        "SQLite：可重建索引",
+        "公开投影：manifest allowlist"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "P0 防线",
+      "items": [
+        "同项目、同作用域",
+        "缺 freshness → unknown",
+        "运行时 blocker 优先",
+        "Kimi 不决定资格"
+      ]
+    }
+  ]
+}

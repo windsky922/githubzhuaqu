@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "GitHub Weekly Agent 系统架构",
+    "subtitle": "公开归档、派生索引与受控 RAG 问答边界",
+    "output": "docs/diagrams/system-architecture.html",
+    "viewBox": [980, 690]
+  },
+  "components": [
+    { "id": "github", "type": "external", "label": "GitHub", "sublabel": "仓库、README、元数据", "pos": [40, 120], "size": [140, 64] },
+    { "id": "browser", "type": "external", "label": "用户浏览器", "sublabel": "公开浏览与 Ask", "pos": [40, 330], "size": [140, 64] },
+    { "id": "worker", "type": "backend", "label": "采集与周报任务", "sublabel": "筛选、清洗、归档", "pos": [250, 120], "size": [150, 64] },
+    { "id": "react", "type": "frontend", "label": "React 前端", "sublabel": "docs/app 静态应用", "pos": [250, 330], "size": [150, 64] },
+    { "id": "api", "type": "backend", "label": "FastAPI", "sublabel": "公开 API 与 Ask/SSE", "pos": [465, 330], "size": [150, 64], "tag": "无状态追问" },
+    { "id": "archive", "type": "database", "label": "运行归档 JSON", "sublabel": "事实来源 / freshness", "pos": [680, 120], "size": [160, 64], "tag": "公开投影" },
+    { "id": "sqlite", "type": "database", "label": "SQLite 与 RAG", "sublabel": "可重建派生索引", "pos": [680, 300], "size": [160, 64] },
+    { "id": "kimi", "type": "cloud", "label": "Kimi Provider", "sublabel": "可选补充，不决定资格", "pos": [680, 480], "size": [160, 64] },
+    { "id": "pages", "type": "cloud", "label": "GitHub Pages", "sublabel": "公开周报与前端", "pos": [465, 535], "size": [150, 64] },
+    { "id": "ci", "type": "security", "label": "GitHub Actions CI", "sublabel": "测试、评估、发布门禁", "pos": [250, 535], "size": [150, 64], "tag": "required checks" }
+  ],
+  "boundaries": [
+    { "kind": "security-group", "label": "受控应用边界", "wraps": ["worker", "react", "api", "archive", "sqlite"], "pad": 26 },
+    { "kind": "region", "label": "公开投影", "wraps": ["pages"], "pad": 22 }
+  ],
+  "connections": [
+    { "from": "github", "to": "worker", "label": "API / README", "variant": "emphasis" },
+    { "from": "worker", "to": "archive", "label": "归档 JSON", "variant": "emphasis" },
+    { "from": "worker", "to": "sqlite", "label": "构建索引", "variant": "dashed", "fromSide": "right", "toSide": "left", "labelDy": 72 },
+    { "from": "browser", "to": "react", "label": "HTTPS", "variant": "emphasis" },
+    { "from": "react", "to": "api", "label": "REST / SSE", "variant": "emphasis" },
+    { "from": "api", "to": "sqlite", "label": "检索", "fromSide": "right", "toSide": "left", "labelDy": -58 },
+    { "from": "api", "to": "archive", "label": "freshness", "variant": "dashed", "fromSide": "right", "toSide": "left", "labelDy": -148 },
+    { "from": "api", "to": "kimi", "label": "可选调用", "variant": "dashed", "fromSide": "right", "toSide": "left", "labelDy": 76 },
+    { "from": "ci", "to": "pages", "label": "验证后发布", "variant": "security" },
+    { "from": "worker", "to": "pages", "label": "周报", "variant": "dashed", "fromSide": "bottom", "toSide": "top", "labelAt": [385, 408] }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "数据事实",
+      "items": [
+        "运行归档 JSON 是事实来源",
+        "SQLite/RAG 是可重建派生索引",
+        "公开发布仅使用 manifest allowlist"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "回答安全",
+      "items": [
+        "质量失败则规则降级",
+        "Kimi 不能决定硬约束或首选",
+        "Ask 保持无状态"
+      ]
+    }
+  ]
+}
