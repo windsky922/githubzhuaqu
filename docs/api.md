@@ -645,7 +645,7 @@ py scripts\run_rag_search_evaluation.py --queries "agent workflow;python automat
 
 管理页 RAG 对话工作台使用同一接口。每轮问题独立检索；前端以用户/助手气泡展示回答，只把本轮问题、回答摘要、引用、证据、质量闸门结果和 `prompt_context` 保存到浏览器 localStorage，便于刷新后继续查看。
 
-`agent.html?api=1` 的项目匹配对话同样使用该接口，不新增后端会话接口。前端默认降低 `limit` 到 3 来缩短响应等待，候选集合与顺序只读取 `recommendations`，详细引用、证据和 `prompt_context` 只进入折叠依据区。只有质量闸门通过、`data_freshness=fresh` 且第一项 `eligibility=eligible` 时才能显示“当前归档内最匹配候选”；其他情况必须显示“暂无可确认首选”。
+`agent.html?api=1` 的项目匹配对话同样使用该接口，不新增后端会话接口。前端默认降低 `limit` 到 3 来缩短响应等待，候选集合与顺序只读取 `recommendations`，详细引用、证据和 `prompt_context` 只进入折叠依据区。`freshness_required=true` 时，只有质量闸门通过、`data_freshness=fresh` 且第一项 `eligibility=eligible` 才能显示“当前归档内最匹配候选”；非时效问题仍展示数据时间与受证据支持候选，不误报 freshness 失败。响应另有 `data_source`（已验证快照身份、运行日与 attestation 摘要）。
 
 ### `GET /v1/rag/ask/stream`
 
@@ -1070,6 +1070,10 @@ POST /v1/subscriptions/sub:xxxx/trigger
 
 1. `POST /v1/feedback`：写入一条项目反馈。
 2. `GET /v1/feedback`：按仓库名或 profile 查询反馈记录。
+3. `POST /v1/query-feedback`：按 Ask 返回的 `decision_id` 写入一次私有查询级反馈；必须管理员鉴权。
+4. `GET /v1/query-feedback` 与 `GET /v1/query-feedback/export`：只允许管理员读取或导出私有查询级反馈。
+
+查询级反馈不接受客户端候选快照，只接受服务端生成的 32 位十六进制 `decision_id`。请求体可含 `rating`（`-1`、`0`、`1`）、最多 10 个 `labels` 和清洗后最多 500 字的 `note`；回答、prompt context、provider 原始输出、请求头和密钥均不保存。
 
 `POST /v1/feedback` 请求体支持：
 

@@ -77,6 +77,7 @@ export type RagAnswer = {
   answer: string;
   answer_model: string;
   answer_mode: "llm" | "fallback_rule" | "refusal" | string;
+  freshness_required?: boolean;
   fallback_reason: string;
   confidence: string;
   evidence_coverage: string;

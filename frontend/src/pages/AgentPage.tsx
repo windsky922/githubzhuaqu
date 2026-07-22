@@ -31,7 +31,9 @@ export function followUpContext(answer: RagAnswer | undefined, previousQuestion:
   return {
     previous_user_goal: answer.resolved_query || previousQuestion,
     candidate_repository_ids: candidateIds,
-    ...(answer.answer_quality?.passed === true && first?.eligibility === "eligible"
+    ...(answer.answer_quality?.passed === true
+      && first?.eligibility === "eligible"
+      && (!answer.freshness_required || answer.freshness?.data_freshness === "fresh")
       ? { primary_repository_id: first.full_name }
       : {}),
     mode: normalizedMode,

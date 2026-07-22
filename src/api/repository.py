@@ -4,6 +4,8 @@ import json
 import re
 import sqlite3
 import subprocess
+import tempfile
+import uuid
 from datetime import UTC, datetime
 from hashlib import sha1
 from pathlib import Path
@@ -23,7 +25,8 @@ from src.rag.answering import answer_rag_question, stream_rag_answer_question
 from src.rag.corpus_cleaner import CLEANER_VERSION, CORPUS_VERSION
 from src.rag.constraint_verifier import verify_project_requirements
 from src.rag.follow_up_router import normalize_contextual_request, route_follow_up
-from src.rag.freshness import archive_freshness
+from src.rag.freshness import archive_freshness, is_time_sensitive_query, normalize_freshness
+from src.rag.data_source import resolve_verified_weekly_source
 from src.storage.sqlite_store import (
     connect,
     import_json_archive,
@@ -36,6 +39,59 @@ from src.storage.sqlite_store import (
 )
 
 ROOT = Path(__file__).resolve().parents[2]
+
+
+def _data_source_public(source: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "kind": str(source.get("kind") or "unknown"),
+        "source_id": str(source.get("source_id") or "unknown"),
+        "run_date": str(source.get("run_date") or ""),
+        "available": bool(source.get("available")),
+        "reason": str(source.get("reason") or ""),
+        "attestation": normalize_freshness(source.get("attestation")),
+    }
+
+
+def _normalize_query(value: str) -> str:
+    return re.sub(r"\s+", " ", value.strip())[:500]
+
+
+def _requirement_schema_version(response: dict[str, Any]) -> str:
+    route = response.get("input_route") if isinstance(response.get("input_route"), dict) else {}
+    return str(route.get("requirement_schema_version") or "")[:80]
+
+
+def _unavailable_data_source_response(query: str, source: dict[str, Any]) -> dict[str, Any]:
+    freshness = normalize_freshness(source.get("attestation"))
+    required = is_time_sensitive_query(query)
+    reason = str(source.get("reason") or "missing_verified_weekly_snapshot")
+    return {
+        "schema_version": 1,
+        "query": query,
+        "answer": "当前没有可验证的 weekly 快照，不能基于旧数据给出项目结论。请配置已验证快照后重试。",
+        "answer_model": "rule:rag-ask-v1",
+        "answer_mode": "refusal",
+        "fallback_reason": reason,
+        "confidence": "low",
+        "evidence_coverage": "low",
+        "match_confidence": "unknown",
+        "count": 0,
+        "retrieval": {"mode": "not_run", "reason": reason},
+        "citations": [],
+        "evidence": [],
+        "recommendations": [],
+        "quality": {},
+        "prompt_context": "",
+        "source_explanation_id": "",
+        "cached": False,
+        "next_actions": [],
+        "contexts": [],
+        "model_status": {"attempted": False, "used": False},
+        "answer_quality": {"applicable": True, "passed": False, "issues": [reason], "data_freshness": freshness["data_freshness"]},
+        "freshness": freshness,
+        "freshness_required": required,
+        "data_source": _data_source_public(source),
+    }
 EXECUTABLE_JOB_KINDS = {
     "weekly_report",
     "rag_backfill",
@@ -67,8 +123,17 @@ class ApiRepository:
     """面向后端 API 的归档访问层。"""
 
     def __init__(self, root: Path = ROOT, db_path: Path | None = None) -> None:
-        self.root = root
-        self.db_path = db_path or root / "data" / "github_weekly.sqlite"
+        self.app_root = root
+        explicit_local = root.resolve() != ROOT.resolve()
+        self.data_source = resolve_verified_weekly_source(
+            app_root=ROOT,
+            explicit_root=root if explicit_local else None,
+        )
+        self.root = self.data_source["root"] if self.data_source["available"] else (root if explicit_local else root / ".unavailable-weekly-snapshot")
+        self.db_path = db_path or (
+            self.root / "data" / "github_weekly.sqlite" if explicit_local or self.data_source["available"]
+            else Path(tempfile.gettempdir()) / "github-weekly-agent" / "unavailable.sqlite"
+        )
 
     def health(self) -> dict[str, Any]:
         return {
@@ -77,6 +142,7 @@ class ApiRepository:
             "sqlite_exists": self.db_path.exists(),
             "reports_exists": (self.root / "reports").exists(),
             "docs_exists": (self.root / "docs").exists(),
+            "data_source": _data_source_public(self.data_source),
         }
 
     def v1_health(self) -> dict[str, Any]:
@@ -1423,9 +1489,14 @@ class ApiRepository:
         )
         if route["clarification_required"]:
             return _contextual_clarification_response(request["q"], route)
+        if not self.data_source["available"] and not self.data_source.get("explicit_local"):
+            return _with_contextual_route(
+                _unavailable_data_source_response(request["q"], self.data_source), request["q"], route, retrieval_performed=False
+            )
         explained = self._contextual_explained(request, route)
         retrieval = _contextual_answer_retrieval(explained, request, route)
         retrieval["freshness"] = archive_freshness(self.root)
+        retrieval["freshness_required"] = is_time_sensitive_query(request["q"])
         answer_result = answer_rag_question(
             root=self.root,
             query=route["resolved_query"],
@@ -1460,9 +1531,17 @@ class ApiRepository:
             }
             yield {"event": "final", "data": _contextual_clarification_response(request["q"], route)}
             return
+        if not self.data_source["available"] and not self.data_source.get("explicit_local"):
+            response = _with_contextual_route(
+                _unavailable_data_source_response(request["q"], self.data_source), request["q"], route, retrieval_performed=False
+            )
+            yield {"event": "meta", "data": {"query": request["q"], "retrieval": {"mode": "not_run"}, "freshness": response["freshness"], "freshness_required": response["freshness_required"]}}
+            yield {"event": "final", "data": response}
+            return
         explained = self._contextual_explained(request, route)
         retrieval = _contextual_answer_retrieval(explained, request, route)
         retrieval["freshness"] = archive_freshness(self.root)
+        retrieval["freshness_required"] = is_time_sensitive_query(request["q"])
         for event in stream_rag_answer_question(
             root=self.root,
             query=route["resolved_query"],
@@ -1663,11 +1742,102 @@ class ApiRepository:
             "model_status": answer_result.get("model_status") or {},
             "answer_quality": answer_result.get("answer_quality") or {},
             "freshness": answer_result.get("freshness") or {},
+            "freshness_required": is_time_sensitive_query(query),
+            "data_source": _data_source_public(self.data_source),
         }
         if "clarification_required" in answer_result:
             response["clarification_required"] = bool(answer_result.get("clarification_required"))
             response["clarification_question"] = str(answer_result.get("clarification_question") or "")
+        response["decision_id"] = self._record_query_decision(response)
         return response
+
+    def _record_query_decision(self, response: dict[str, Any]) -> str:
+        """Persist the smallest private, server-derived decision snapshot."""
+        decision_id = uuid.uuid4().hex
+        freshness = normalize_freshness(response.get("freshness"))
+        source = _data_source_public(self.data_source)
+        quality = response.get("answer_quality") if isinstance(response.get("answer_quality"), dict) else {}
+        candidates = response.get("recommendations") if isinstance(response.get("recommendations"), list) else []
+        created_at = datetime.now(UTC).isoformat().replace("+00:00", "Z")
+        connection = connect(self.db_path)
+        try:
+            initialize(connection)
+            connection.execute(
+                """INSERT INTO query_runs (
+                    decision_id, normalized_query, data_source_id, data_run_date, attestation_json,
+                    constraint_version, freshness_status, freshness_required, created_at, payload_json
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (
+                    decision_id, _normalize_query(str(response.get("query") or "")), source["source_id"], source["run_date"],
+                    json.dumps(source["attestation"], ensure_ascii=False, sort_keys=True),
+                    _requirement_schema_version(response), freshness["data_freshness"], int(bool(response.get("freshness_required"))),
+                    created_at, json.dumps({"answer_mode": str(response.get("answer_mode") or ""), "quality_passed": bool(quality.get("passed"))}, sort_keys=True),
+                ),
+            )
+            for index, item in enumerate(candidates, start=1):
+                if not isinstance(item, dict):
+                    continue
+                eligibility = str(item.get("eligibility") or "unknown")
+                connection.execute(
+                    """INSERT INTO query_candidates (
+                        decision_id, rank, full_name, eligibility, eligibility_reason,
+                        is_confirmed_primary, citation_indexes_json
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                    (
+                        decision_id, _int_value(item.get("rank")) or index, str(item.get("full_name") or ""), eligibility,
+                        "; ".join(str(value) for value in item.get("unmet_requirements", [])[:5]),
+                        int(bool(quality.get("passed")) and eligibility == "eligible" and (not response.get("freshness_required") or freshness["data_freshness"] == "fresh")),
+                        json.dumps([value for value in item.get("citation_indexes", []) if isinstance(value, int)], ensure_ascii=False),
+                    ),
+                )
+            connection.commit()
+        finally:
+            connection.close()
+        return decision_id
+
+    def create_query_feedback(self, payload: dict[str, Any] | None = None) -> dict[str, Any]:
+        data = payload if isinstance(payload, dict) else {}
+        decision_id = str(data.get("decision_id") or "").strip()
+        if not re.fullmatch(r"[0-9a-f]{32}", decision_id):
+            return {"schema_version": 1, "accepted": False, "error": "decision_id 无效。", "feedback": {}}
+        rating = _int_value(data.get("rating"))
+        if rating is None or rating < -1 or rating > 1:
+            return {"schema_version": 1, "accepted": False, "error": "rating 必须是 -1、0 或 1。", "feedback": {}}
+        labels = [str(value).strip()[:40] for value in data.get("labels", []) if str(value).strip()][:10] if isinstance(data.get("labels"), list) else []
+        note = _redact_sensitive_text(str(data.get("note") or "")).strip()[:500]
+        now = datetime.now(UTC).isoformat().replace("+00:00", "Z")
+        feedback = {"feedback_id": uuid.uuid4().hex, "decision_id": decision_id, "rating": rating, "labels": labels, "note": note, "source": str(data.get("source") or "admin")[:40], "created_at": now}
+        connection = connect(self.db_path)
+        try:
+            initialize(connection)
+            if not connection.execute("SELECT 1 FROM query_runs WHERE decision_id = ?", (decision_id,)).fetchone():
+                return {"schema_version": 1, "accepted": False, "error": "decision_id 不存在。", "feedback": {}}
+            connection.execute(
+                "INSERT INTO query_feedback (feedback_id, decision_id, rating, labels_json, note, source, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (feedback["feedback_id"], decision_id, rating, json.dumps(labels, ensure_ascii=False), note, feedback["source"], now),
+            )
+            connection.commit()
+        finally:
+            connection.close()
+        return {"schema_version": 1, "accepted": True, "feedback": feedback}
+
+    def query_feedback(self, *, decision_id: str | None = None, limit: int = 100) -> dict[str, Any]:
+        limit = max(1, min(_int_value(limit) or 100, 500))
+        connection = connect(self.db_path)
+        try:
+            initialize(connection)
+            where, params = ("WHERE f.decision_id = ?", [decision_id]) if decision_id else ("", [])
+            rows = connection.execute(
+                f"""SELECT f.feedback_id, f.decision_id, f.rating, f.labels_json, f.note, f.source, f.created_at,
+                           r.normalized_query, r.data_source_id, r.data_run_date, r.freshness_status, r.freshness_required
+                    FROM query_feedback f JOIN query_runs r ON r.decision_id = f.decision_id
+                    {where} ORDER BY f.created_at DESC, f.feedback_id DESC LIMIT ?""",
+                (*params, limit),
+            ).fetchall()
+        finally:
+            connection.close()
+        items = [{"feedback_id": row["feedback_id"], "decision_id": row["decision_id"], "rating": row["rating"], "labels": _json_list(row["labels_json"]), "note": row["note"], "source": row["source"], "created_at": row["created_at"], "query": row["normalized_query"], "data_source_id": row["data_source_id"], "data_run_date": row["data_run_date"], "freshness_status": row["freshness_status"], "freshness_required": bool(row["freshness_required"])} for row in rows]
+        return {"schema_version": 1, "count": len(items), "feedback": items}
 
     def rag_explanations(
         self,

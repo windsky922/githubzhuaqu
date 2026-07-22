@@ -33,7 +33,8 @@ describe("项目匹配回答状态", () => {
     const unknown = { full_name: "org/unknown", evidenceCount: 1, eligibility: "unknown" } as never;
     expect(selectPrimaryRecommendation({ answer_quality: { passed: true, data_freshness: "fresh" } } as never, [eligible])).toBe(eligible);
     expect(selectPrimaryRecommendation({ answer_quality: { passed: false } } as never, [eligible])).toBeUndefined();
-    expect(selectPrimaryRecommendation({ answer_quality: { passed: true, data_freshness: "stale" } } as never, [eligible])).toBeUndefined();
+    expect(selectPrimaryRecommendation({ freshness_required: true, answer_quality: { passed: true, data_freshness: "stale" } } as never, [eligible])).toBeUndefined();
+    expect(selectPrimaryRecommendation({ freshness_required: false, answer_quality: { passed: true, data_freshness: "stale" } } as never, [eligible])).toBe(eligible);
     expect(selectPrimaryRecommendation({ answer_quality: { passed: true } } as never, [unknown, eligible])).toBeUndefined();
   });
 

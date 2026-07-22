@@ -9,7 +9,10 @@ import { EvidenceDrawer } from "./EvidenceDrawer";
 export type Candidate = Project & { evidenceCount: number };
 
 export function selectPrimaryRecommendation(answer: RagAnswer, candidates: Candidate[]) {
-  return !["clarification", "no_match"].includes(answer.answer_mode) && answer.answer_quality?.passed === true && answer.answer_quality?.data_freshness === "fresh" && candidates[0]?.eligibility === "eligible"
+  return !["clarification", "no_match"].includes(answer.answer_mode)
+    && answer.answer_quality?.passed === true
+    && (!answer.freshness_required || answer.answer_quality?.data_freshness === "fresh")
+    && candidates[0]?.eligibility === "eligible"
     ? candidates[0]
     : undefined;
 }

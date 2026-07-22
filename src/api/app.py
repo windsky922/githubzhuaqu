@@ -680,6 +680,24 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
     def v1_create_project_feedback(payload: dict[str, Any] | None = Body(default=None)) -> dict[str, Any]:
         return repository.create_project_feedback(payload)
 
+    @app.get("/v1/query-feedback", dependencies=admin_write_dependencies)
+    def v1_query_feedback(
+        decision_id: str | None = None,
+        limit: int = Query(default=100, ge=1, le=500),
+    ) -> dict[str, Any]:
+        return repository.query_feedback(decision_id=decision_id, limit=limit)
+
+    @app.get("/v1/query-feedback/export", dependencies=admin_write_dependencies)
+    def v1_query_feedback_export(limit: int = Query(default=500, ge=1, le=500)) -> dict[str, Any]:
+        return {**repository.query_feedback(limit=limit), "export": "private_admin_only"}
+
+    @app.post("/v1/query-feedback", status_code=201, dependencies=admin_write_dependencies)
+    def v1_create_query_feedback(payload: dict[str, Any] | None = Body(default=None)) -> dict[str, Any]:
+        result = repository.create_query_feedback(payload)
+        if not result.get("accepted"):
+            raise HTTPException(status_code=422, detail=result.get("error") or "反馈无效")
+        return result
+
     @app.get("/v1/agent-tasks")
     def v1_project_agent_task_list(
         full_name: str | None = None,

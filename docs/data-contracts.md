@@ -19,6 +19,7 @@
 9. `config/public-archive-manifest.json` 是 `weekly-archive` 路径政策的唯一来源：发布来源选择、push 前完整 staged tree 校验和远端 latest tree attestation 必须复用它。暂存路径集合必须等于本轮 manifest 投影；未知路径、禁止后缀、符号链接与路径穿越均失败关闭。
 10. `config/evaluation-thresholds.json` 固定公开评估 fixture 的 SHA-256 与回归门槛。CI 只将其作为同版本离线 fixture 的退化门禁；阈值变化必须与 fixture hash、基线和评审同步，不能用作真实泛化或独立 blind 质量声明。
 11. Ask 响应的 `answer_quality.claim_checks[]` 与 freshness 字段都是非破坏性响应字段，不写入 SQLite。schema-v2 台账的 `facts[]` 与每个证据 `fact` 固定包含主体、组件、阶段、谓词、值、模态、版本范围、条件、时间和数量；响应分别公开 `binding_status`、`polarity_status`、`scope_status`、`semantic_support_status`。字段不一致、quote 无字段锚定或可见事实未登记时 `passed=false` 并关闭确认首选。`source_latest_date`、`corpus_latest_date`、`embedding_latest_date`、`stale_days`、`as_of`、`reasons` 与 `data_freshness` 只读既有 `data/runs/<run_date>.json` 的 `rag_freshness` attestation。生产 attestation 固定 schema-v1，只有 source/corpus/embedding 对同一运行日成功且哈希、corpus version、embedding model/计数完整时才以原子替换写入；默认阈值为 8 天。三层对齐且未超阈值才是 `fresh`，层级滞后为 `lagging`，超阈值为 `stale`，缺失、schema 无效或不一致为 `unknown`；时效性问题在非 fresh 时 fail closed。
+12. `freshness_required` 是 Ask/SSE 的兼容布尔字段；生产默认数据源仅为带有效 attestation 的 `GITHUB_WEEKLY_SNAPSHOT_ROOT` weekly 快照，缺失或无效时数据源身份为 `unknown`，不回退 checkout 数据。私有 SQLite 的 `query_runs`、`query_candidates`、`query_feedback` 使用服务端 decision ID 关联一次决策及管理员反馈；它们不得进入公开 JSON、Pages、`weekly-archive`、数据库公开统计或派生实时排序，且不保存回答、prompt、provider 原始输出、请求头或密钥。
 
 12. evidence fact 的 subject 是 metadata-bound；`predicate/value/modality` 是 quote-extracted，后端仅接受唯一确定性抽取值；component、phase、edition、condition、temporal、quantity 是 quote-bound。三类任一缺失、冲突或歧义均使 `semantic_support_status=insufficient`。
 
@@ -303,6 +304,9 @@ rag_corpus_enrichments
 rag_embeddings
 rag_explanations
 project_feedback
+query_runs
+query_candidates
+query_feedback
 project_agent_tasks
 project_agent_task_runs
 subscription_events
@@ -335,11 +339,12 @@ migration_meta
 8.1 `rag_corpus_enrichments` 按来源哈希、清洗器版本、prompt 版本和 Kimi 模型缓存结构化字段、逐字段证据与截断错误；不保存完整模型原始回答。通过证据校验的结果写入 `project_corpus.structured_json` 和 `model_enrichment` chunk，但 P0-3 不用于硬过滤或首选排名。
 9. `rag_explanations` 保存 RAG 解释结果、引用、检索参数、解释摘要和规则版质量评估，用于后续质量评估和模型替换对比；不保存密钥。
 10. `project_feedback` 保存用户对项目的显式反馈，包括仓库名、profile、评分、标签、备注和来源，用于后续个性化记忆、RAG 重排和推荐校准；不保存密钥。
-11. `project_agent_tasks` 保存项目级任务类型、优先级、状态、原因、执行结果、来源、去重键和生命周期时间。`payload_json.subscription_action` 只描述后续订阅动作，不保存推送密钥。
-12. `project_agent_task_runs` 保存每次任务执行的输入、证据、引用、结构化结果、错误和生命周期。运行状态为 `running`、`succeeded` 或 `failed`；失败记录保留已采集证据。
-13. `subscription_events` 保存项目变化事件、严重度、来源运行、证据、引用和稳定去重键。
-14. `notification_candidates` 保存订阅规则匹配后生成的待确认推送内容和目标渠道，不代表已经发送。
-15. `notification_deliveries` 保存逐渠道投递状态、尝试次数、错误和响应摘要；`dedupe_key` 约束同一订阅、事件、渠道的重复发送。
+11. `query_runs`、`query_candidates` 和 `query_feedback` 是管理员专用的私有决策审计链：分别保存服务端 decision ID 的最小查询/快照/约束/freshness 元数据、当时冻结的候选排序和用户反馈。它们不保存 assistant answer、prompt context、provider 原始输出、请求头或密钥，不进入公开归档，也不改变实时排序。
+12. `project_agent_tasks` 保存项目级任务类型、优先级、状态、原因、执行结果、来源、去重键和生命周期时间。`payload_json.subscription_action` 只描述后续订阅动作，不保存推送密钥。
+13. `project_agent_task_runs` 保存每次任务执行的输入、证据、引用、结构化结果、错误和生命周期。运行状态为 `running`、`succeeded` 或 `failed`；失败记录保留已采集证据。
+14. `subscription_events` 保存项目变化事件、严重度、来源运行、证据、引用和稳定去重键。
+15. `notification_candidates` 保存订阅规则匹配后生成的待确认推送内容和目标渠道，不代表已经发送。
+16. `notification_deliveries` 保存逐渠道投递状态、尝试次数、错误和响应摘要；`dedupe_key` 约束同一订阅、事件、渠道的重复发送。
 16. `dev_runs` 保存每次开发上下文索引任务的状态、来源数量、分块数量、embedding 数量和错误摘要。
 13. `dev_corpus` 保存开发上下文原始材料，包括文档、Git diff、测试输出和安全检查输出；写入前应脱敏。
 14. `dev_chunks` 保存从开发上下文材料拆分出的短文本片段。

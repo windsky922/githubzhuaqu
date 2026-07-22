@@ -190,6 +190,49 @@ CREATE INDEX IF NOT EXISTS idx_project_feedback_full_name_updated_at ON project_
 CREATE INDEX IF NOT EXISTS idx_project_feedback_profile_updated_at ON project_feedback(profile, updated_at);
 CREATE INDEX IF NOT EXISTS idx_project_feedback_rating_updated_at ON project_feedback(rating, updated_at);
 
+-- Private decision audit. These tables are never projected to Pages or weekly-archive.
+CREATE TABLE IF NOT EXISTS query_runs (
+  decision_id TEXT PRIMARY KEY,
+  normalized_query TEXT NOT NULL DEFAULT '',
+  data_source_id TEXT NOT NULL DEFAULT '',
+  data_run_date TEXT NOT NULL DEFAULT '',
+  attestation_json TEXT NOT NULL DEFAULT '{}',
+  constraint_version TEXT NOT NULL DEFAULT '',
+  freshness_status TEXT NOT NULL DEFAULT 'unknown',
+  freshness_required INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT '',
+  payload_json TEXT NOT NULL DEFAULT '{}'
+);
+
+CREATE INDEX IF NOT EXISTS idx_query_runs_created_at ON query_runs(created_at);
+
+CREATE TABLE IF NOT EXISTS query_candidates (
+  decision_id TEXT NOT NULL,
+  rank INTEGER NOT NULL,
+  full_name TEXT NOT NULL DEFAULT '',
+  eligibility TEXT NOT NULL DEFAULT 'unknown',
+  eligibility_reason TEXT NOT NULL DEFAULT '',
+  is_confirmed_primary INTEGER NOT NULL DEFAULT 0,
+  citation_indexes_json TEXT NOT NULL DEFAULT '[]',
+  PRIMARY KEY(decision_id, rank),
+  FOREIGN KEY(decision_id) REFERENCES query_runs(decision_id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_query_candidates_full_name_decision ON query_candidates(full_name, decision_id);
+
+CREATE TABLE IF NOT EXISTS query_feedback (
+  feedback_id TEXT PRIMARY KEY,
+  decision_id TEXT NOT NULL,
+  rating INTEGER NOT NULL DEFAULT 0,
+  labels_json TEXT NOT NULL DEFAULT '[]',
+  note TEXT NOT NULL DEFAULT '',
+  source TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL DEFAULT '',
+  FOREIGN KEY(decision_id) REFERENCES query_runs(decision_id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_query_feedback_decision_created_at ON query_feedback(decision_id, created_at);
+
 CREATE TABLE IF NOT EXISTS project_agent_tasks (
   task_id TEXT PRIMARY KEY,
   full_name TEXT NOT NULL DEFAULT '',

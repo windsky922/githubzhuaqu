@@ -1,5 +1,19 @@
 # 操作日志
 
+## 2026-07-22 追加：P1 数据可信度、验证与反馈闭环（本地实现）
+
+### 1. 修改内容
+
+1. Ask 默认不再静默采用 checkout 的 `main/data`：生产需通过 `GITHUB_WEEKLY_SNAPSHOT_ROOT` 提供带有效 freshness attestation 的 weekly 快照；缺失或无效时返回 `unknown` 并规则拒答。显式传入的本地根目录只用于开发/测试。
+2. Ask 与 SSE `meta/final` 新增兼容字段 `freshness_required`；只有时效性问题且 freshness 非 `fresh` 时才关闭确认首选，普通介绍/解释问题仍可展示受证据支持的候选。
+3. 新增私有 SQLite `query_runs`、`query_candidates`、`query_feedback` 及管理员专用 `/v1/query-feedback` 读写/导出接口。服务端生成不透明 decision ID；只保存规范化查询、来源、快照、约束版本、候选与反馈，不保存回答、prompt、provider 原始输出、请求头或密钥。
+4. 新增 `scripts/evaluate_blind_rag.py`：blind pack 必须从仓库外显式传入，输出只包含 hash、聚合类别和基线指标，未进入 CI 阈值或公开 fixture。
+
+### 2. 当前边界
+
+1. 本次未创建或读取真实 blind pack；首次报告须由独立持有者冻结标注后在私有路径运行。
+2. 分支保护和 GitHub Issue 属远端治理，待本地完整验证、推送成功并确认管理员权限后执行。
+
 ## 2026-07-22 追加：P0-18 项目级能力作用域
 
 ### 1. 修改内容

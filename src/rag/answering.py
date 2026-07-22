@@ -26,7 +26,7 @@ def answer_rag_question(
     prompt_context = str(retrieval.get("prompt_context") or "")
     evidence = _evidence_from_contexts(contexts)
     freshness = normalize_freshness(retrieval.get("freshness"))
-    time_sensitive = is_time_sensitive_query(query)
+    freshness_required = bool(retrieval.get("freshness_required")) if isinstance(retrieval.get("freshness_required"), bool) else is_time_sensitive_query(query)
     model_client = client or KimiChatClient()
     model_status = model_client.status()
     recommendations = _recommendations(retrieval, contexts, citations)
@@ -50,7 +50,7 @@ def answer_rag_question(
         recommendations=recommendations,
         model_status=model_status,
         freshness=freshness,
-        time_sensitive=time_sensitive,
+        time_sensitive=freshness_required,
     )
     if freshness_gate:
         return freshness_gate
@@ -87,7 +87,7 @@ def answer_rag_question(
                 citations=citations,
                 contexts=contexts,
                 freshness=freshness,
-                require_freshness=time_sensitive,
+                require_freshness=freshness_required,
             )
             validated_answer = str(answer_quality.pop("validated_answer", answer))
             if not answer_quality["passed"]:
@@ -142,7 +142,7 @@ def stream_rag_answer_question(
     prompt_context = str(retrieval.get("prompt_context") or "")
     evidence = _evidence_from_contexts(contexts)
     freshness = normalize_freshness(retrieval.get("freshness"))
-    time_sensitive = is_time_sensitive_query(query)
+    freshness_required = bool(retrieval.get("freshness_required")) if isinstance(retrieval.get("freshness_required"), bool) else is_time_sensitive_query(query)
     model_client = client or KimiChatClient()
     model_status = model_client.status()
     recommendations = _recommendations(retrieval, contexts, citations)
@@ -155,6 +155,7 @@ def stream_rag_answer_question(
             "evidence": evidence,
             "model_status": model_status,
             "freshness": freshness,
+            "freshness_required": freshness_required,
         },
     }
 
@@ -178,7 +179,7 @@ def stream_rag_answer_question(
         recommendations=recommendations,
         model_status=model_status,
         freshness=freshness,
-        time_sensitive=time_sensitive,
+        time_sensitive=freshness_required,
     )
     if freshness_gate:
         yield {"event": "final", "data": freshness_gate}
@@ -432,6 +433,7 @@ def _response(
         "model_status": model_status,
         "answer_quality": quality_result,
         "freshness": freshness,
+        "freshness_required": bool(retrieval.get("freshness_required")) if isinstance(retrieval.get("freshness_required"), bool) else is_time_sensitive_query(query),
     }
 
 
