@@ -66,7 +66,7 @@ POST Ask 在检索前经过 `follow_up_router`。确定性规则优先识别 res
 
 候选序号同样在 `follow_up_router` 中确定性解析。序号先映射到上一轮有序 `candidate_repository_ids`，再生成 `selected_candidate_indexes[]` 和权威 `selected_repository_ids[]`；repository 层只把这些 ID 下推到实际检索，不先取大 Top-K 再过滤。越界、无上下文和不确定引用在检索前短路为 clarification。浏览器只负责回传最小无状态上下文，不根据 citations、evidence 或历史 assistant 文本解释序号。
 
-Ask 响应把证据覆盖与匹配把握分开表达：旧 `confidence` 仅作为兼容字段保留，`evidence_coverage` 复用其按证据数量计算的 `low/medium/high`，`match_confidence` 在未校准阶段固定为 `unknown`。`answer_quality` 保留原有通过状态和问题列表，并显式标记引用有效性、证据相关性、主张支持度、逐项 `claim_checks` 的 binding/polarity/scope/semantic 状态和数据新鲜度。freshness 只读取受控运行 JSON：`source_latest_date` 是最新来源运行日，`corpus_latest_date` 与 `embedding_latest_date` 必须来自版本化 `rag_freshness` attestation；默认超过 8 天为 stale，层级落后为 lagging，缺失或不一致为 unknown。时效性请求在非 fresh 状态下于 provider 调用前规则降级，SSE 只保留 `meta → final`，首选也必须要求 fresh。该水位不代表 blind 泛化或推荐正确率。
+Ask 响应把证据覆盖与匹配把握分开表达：旧 `confidence` 仅作为兼容字段保留，`evidence_coverage` 复用其按证据数量计算的 `low/medium/high`，`match_confidence` 在未校准阶段固定为 `unknown`。`answer_quality` 保留原有通过状态和问题列表，并显式标记引用有效性、证据相关性、主张支持度、逐项 `claim_checks` 的 binding/polarity/scope/semantic 状态和数据新鲜度。freshness 只读取受控运行 JSON；weekly 在来源 JSON 成功后重建可丢弃的 SQLite corpus 和 embedding，并仅在三层同一 `run_date` 成功时原子写入 schema-v1 `rag_freshness`。attestation 含日期、哈希、corpus version、模型和计数，公开投影只保留 allowlist 字段；schema、哈希或日期缺失为 unknown。默认超过 8 天为 stale，层级落后为 lagging。时效性请求在非 fresh 状态下于 provider 调用前规则降级，SSE 只保留 `meta → final`，首选也必须要求 fresh。该水位不代表 blind 泛化或推荐正确率。
 
 P0-16C 将主张证据再分为 metadata-bound subject、quote-extracted `predicate/value/modality` 与 quote-bound scope。后端只能接受从 quote 唯一确定性抽取出的语义组合；模型自报 evidence fact 不构成证明。抽取不到或有歧义时，质量闸门失败关闭，provider 内容不进入 delta，首选关闭。
 

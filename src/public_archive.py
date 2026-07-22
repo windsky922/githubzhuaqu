@@ -57,6 +57,7 @@ RUN_FIELDS = frozenset(
         "previously_sent_selected_rate",
         "readme_fetch_rate",
         "readme_fetched_count",
+        "rag_freshness",
         "report_path",
         "run_date",
         "schema_version",
@@ -71,6 +72,22 @@ RUN_FIELDS = frozenset(
         "trending_top10_available_count",
         "trending_top10_fulfillment_rate",
         "trending_top10_selected_count",
+    }
+)
+RAG_FRESHNESS_FIELDS = frozenset(
+    {
+        "schema_version",
+        "source_latest_date",
+        "corpus_latest_date",
+        "embedding_latest_date",
+        "source_hash",
+        "corpus_version",
+        "corpus_hash",
+        "chunk_count",
+        "embedding_model",
+        "embedding_hash",
+        "embedding_count",
+        "dimensions",
     }
 )
 TREND_FIELDS = frozenset(
@@ -105,7 +122,10 @@ def project_archive_json(relative: PurePosixPath, payload: Any) -> Any:
     if directory == "runs":
         if not isinstance(payload, Mapping):
             raise ValueError("public run archive JSON must be an object")
-        return _project_record(payload, RUN_FIELDS)
+        projected = _project_record(payload, RUN_FIELDS)
+        if isinstance(projected.get("rag_freshness"), Mapping):
+            projected["rag_freshness"] = _project_record(projected["rag_freshness"], RAG_FRESHNESS_FIELDS)
+        return projected
     if directory == "trends":
         if not isinstance(payload, Mapping):
             raise ValueError("public trend archive JSON must be an object")

@@ -8,6 +8,8 @@ from typing import Any
 
 DEFAULT_STALE_AFTER_DAYS = 8
 _DATE_FIELDS = ("source_latest_date", "corpus_latest_date", "embedding_latest_date")
+ATTESTATION_SCHEMA_VERSION = 1
+_ATTESTATION_HASH_FIELDS = ("source_hash", "corpus_version", "corpus_hash", "embedding_model", "embedding_hash")
 
 
 def archive_freshness(
@@ -37,6 +39,9 @@ def archive_freshness(
             source_dates.append(payload_date)
             attestation = payload.get("rag_freshness")
             if not isinstance(attestation, dict):
+                continue
+            if not _valid_attestation(attestation, payload_date):
+                reasons.append("invalid_freshness_attestation")
                 continue
             source_attested = _parse_date(attestation.get("source_latest_date"))
             corpus_attested = _parse_date(attestation.get("corpus_latest_date"))
@@ -132,3 +137,16 @@ def _parse_date(value: Any) -> date | None:
 
 def _latest_iso(values: list[date]) -> str:
     return max(values).isoformat() if values else ""
+
+
+def _valid_attestation(attestation: dict[str, Any], run_date: date) -> bool:
+    if attestation.get("schema_version") != ATTESTATION_SCHEMA_VERSION:
+        return False
+    if any(not str(attestation.get(field) or "") for field in _ATTESTATION_HASH_FIELDS):
+        return False
+    if any(int(attestation.get(field) or 0) < 1 for field in ("chunk_count", "embedding_count", "dimensions")):
+        return False
+    source = _parse_date(attestation.get("source_latest_date"))
+    corpus = _parse_date(attestation.get("corpus_latest_date"))
+    embedding = _parse_date(attestation.get("embedding_latest_date"))
+    return bool(source and corpus and embedding and source == run_date)

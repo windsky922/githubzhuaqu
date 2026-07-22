@@ -68,6 +68,15 @@ class WorkflowTest(unittest.TestCase):
         self.assertIn("scripts/create_planned_job.py", workflow)
         self.assertIn("--output .weekly-job.json", workflow)
         self.assertIn("scripts/run_planned_job.py --job-file .weekly-job.json", workflow)
+
+    def test_weekly_workflow_writes_freshness_attestation_before_pages_and_publish(self) -> None:
+        workflow = (ROOT / ".github" / "workflows" / "weekly.yml").read_text(encoding="utf-8")
+
+        self.assertIn("scripts/refresh_rag_freshness.py", workflow)
+        self.assertIn('--run-date "$(date -u +%F)"', workflow)
+        self.assertLess(workflow.index("scripts/run_planned_job.py --job-file .weekly-job.json"), workflow.index("scripts/refresh_rag_freshness.py"))
+        self.assertLess(workflow.index("scripts/refresh_rag_freshness.py"), workflow.index("python scripts/build_pages.py"))
+        self.assertLess(workflow.index("scripts/refresh_rag_freshness.py"), workflow.index("scripts/publish_archive_branch.py"))
         self.assertIn("inputs.send_link == 'true'", workflow)
 
     def test_weekly_workflow_creates_rag_maintenance_plan_before_pages(self) -> None:

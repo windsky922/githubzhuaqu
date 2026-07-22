@@ -130,6 +130,11 @@ jobs:
           DELIVERY_CHANNELS: ${{ vars.DELIVERY_CHANNELS }}
         run: python scripts/run_planned_job.py --job-file .weekly-job.json
 
+      - name: 原子写入 RAG freshness 证明
+        run: >
+          python scripts/refresh_rag_freshness.py
+          --run-date "$(date -u +%F)"
+
       - name: 创建 RAG 维护计划
         env:
           WORKFLOW_PLAN_RAG_MAINTENANCE: ${{ inputs.plan_rag_maintenance || 'true' }}

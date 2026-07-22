@@ -32,7 +32,18 @@ class RagFreshnessTest(unittest.TestCase):
         directory.mkdir(parents=True, exist_ok=True)
         payload = {"run_date": run_date}
         if freshness is not None:
-            payload["rag_freshness"] = freshness
+            payload["rag_freshness"] = {
+                "schema_version": 1,
+                "source_hash": "source",
+                "corpus_version": "corpus-v1",
+                "corpus_hash": "corpus",
+                "chunk_count": 1,
+                "embedding_model": "local-hash-v1",
+                "embedding_hash": "embedding",
+                "embedding_count": 1,
+                "dimensions": 64,
+                **freshness,
+            }
         (directory / f"{run_date}.json").write_text(json.dumps(payload), encoding="utf-8")
 
     def test_distinguishes_lagging_and_stale_layers(self):
@@ -61,6 +72,24 @@ class RagFreshnessTest(unittest.TestCase):
             inconsistent = archive_freshness(root, as_of="2026-07-18")
             self.assertEqual(inconsistent["data_freshness"], "unknown")
             self.assertIn("invalid_source_run", inconsistent["reasons"])
+
+    def test_schema_less_or_partial_attestation_fails_closed(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.write_run(
+                root,
+                "2026-07-17",
+                {
+                    "schema_version": 0,
+                    "source_hash": "",
+                    "source_latest_date": "2026-07-17",
+                    "corpus_latest_date": "2026-07-17",
+                    "embedding_latest_date": "2026-07-17",
+                },
+            )
+            result = archive_freshness(root, as_of="2026-07-18")
+            self.assertEqual(result["data_freshness"], "unknown")
+            self.assertIn("invalid_freshness_attestation", result["reasons"])
 
     def test_marks_aligned_old_data_stale_and_complete_data_fresh(self):
         with tempfile.TemporaryDirectory() as temp:

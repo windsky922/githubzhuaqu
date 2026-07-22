@@ -410,7 +410,7 @@ React 开发入口为 `http://127.0.0.1:5173/#/agent?api=1`，发布构建入口
 
 当前 embedding 使用本地确定性 `local-hash-v1`，不调用外部模型、不需要密钥。它用于打通向量索引表和检索 API，后续可以替换为真实 embedding 模型。
 
-RAG Ask 的旧 `confidence` 字段继续保留以兼容现有客户端，但它只表示证据覆盖量，不代表项目匹配正确率。新客户端应读取同值的 `evidence_coverage`，并把 `match_confidence=unknown` 展示为“匹配把握尚未校准”。`answer_quality` 会对项目事实与比较/排序结论执行结构化主张—引用—同项目证据检查：引用绑定、极性、作用域和语义支持必须全部通过；谓词、组件、阶段、模态、版本范围、条件或数量不一致，以及原文无字段锚定或漏登记事实时均规则降级。Ask 同时公开来源、语料、embedding 三层日期、`stale_days`、`as_of`、原因和 `data_freshness`；只读受控运行 JSON 的版本化 attestation，不读取运行态 SQLite。时效性问题在 `lagging`、`stale` 或 `unknown` 时不调用 provider、不发送 SSE delta，也不能确认首选；仅 `data_freshness=fresh` 可显示首选。该水位不代表 blind 泛化或项目匹配正确率。
+RAG Ask 的旧 `confidence` 字段继续保留以兼容现有客户端，但它只表示证据覆盖量，不代表项目匹配正确率。新客户端应读取同值的 `evidence_coverage`，并把 `match_confidence=unknown` 展示为“匹配把握尚未校准”。`answer_quality` 会对项目事实与比较/排序结论执行结构化主张—引用—同项目证据检查：引用绑定、极性、作用域和语义支持必须全部通过；谓词、组件、阶段、模态、版本范围、条件或数量不一致，以及原文无字段锚定或漏登记事实时均规则降级。Ask 同时公开来源、语料、embedding 三层日期、`stale_days`、`as_of`、原因和 `data_freshness`；只读受控运行 JSON 的 schema-v1 attestation，不读取运行态 SQLite。weekly 流程只在来源、corpus 与 embedding 同一运行日全部成功后原子写入该证明；schema、哈希或日期缺失均为 `unknown`。时效性问题在 `lagging`、`stale` 或 `unknown` 时不调用 provider、不发送 SSE delta，也不能确认首选；仅 `data_freshness=fresh` 可显示首选。该水位不代表 blind 泛化或项目匹配正确率。
 
 主张支持不会信任模型自报的 evidence value：后端必须从 quote 唯一确定性地抽取 `predicate/value/modality` 并与台账匹配；无法抽取、歧义或不一致均规则降级。仓库主体由 citation/context metadata 绑定，其他作用域字段必须由 quote 明确表达。
 

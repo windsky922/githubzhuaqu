@@ -1,5 +1,23 @@
 # 操作日志
 
+## 2026-07-22 追加：P0-17A freshness attestation 生产闭环
+
+### 1. 修改内容
+
+1. 新增 `src/rag/freshness_attestation.py` 与 `scripts/refresh_rag_freshness.py`：验证成功 weekly run 的 raw/selected 来源，重建派生 corpus、构建 embedding，并仅在三层同一 `run_date` 成功后以原子替换写入 `rag_freshness`。
+2. attestation 固定为 schema-v1，包含三层日期、来源/corpus/embedding 哈希、corpus version、模型、维度和计数；读取器拒绝无 schema、缺哈希或日期不一致的记录，继续 fail closed 为 `unknown`。
+3. weekly workflow 在周报任务成功后、Pages 和公开归档发布前执行写入器；公开 run JSON 只投影 allowlist 内的 freshness 字段，未知嵌套键不发布。
+
+### 2. 边界
+
+1. 该写入器只操作 CI 中可重建的 SQLite 派生索引；Ask 仍只读取公开 `data/runs` attestation，不读取本机运行态 SQLite。
+2. source、corpus 或 embedding 任一失败不会写入半成品证明，不会把运行声明为 `fresh`；不改变 Ask/SSE 字段与顺序、检索权重、会话状态或外发确认。
+
+### 3. 实际验证
+
+1. 原子写入、部分失败不落 attestation、schema/哈希缺失拒绝、公开嵌套字段投影和 weekly 顺序测试通过。
+2. Python 全量单测、前端 lint/test/build、mock Playwright、真实 FastAPI Playwright、安全检查、五项固定评估、`git diff --check` 与 `docs/app` 一致性检查通过。
+
 ## 2026-07-19 追加：P0-16C 独立 quote 语义锚定
 
 ### 1. 修改内容
