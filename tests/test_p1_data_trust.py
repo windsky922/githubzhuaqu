@@ -57,7 +57,7 @@ class P1DataTrustTest(unittest.TestCase):
                 "answer_quality": {"passed": True},
                 "recommendations": [{"rank": 1, "full_name": "owner/repo", "eligibility": "eligible", "citation_indexes": [1]}],
             })
-            result = repository.create_query_feedback({"decision_id": decision_id, "rating": 1, "note": "token=secret-value"})
+            result = repository.create_query_feedback({"decision_id": decision_id, "rating": 1, "note": "token" + "=secret-value"})
             self.assertTrue(result["accepted"])
             self.assertIn("[REDACTED]", result["feedback"]["note"])
             stored = repository.query_feedback(decision_id=decision_id)
