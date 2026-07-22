@@ -226,7 +226,7 @@ def stream_rag_answer_question(
                 citations=citations,
                 contexts=contexts,
                 freshness=freshness,
-                require_freshness=time_sensitive,
+                require_freshness=freshness_required,
             )
             validated_answer = str(answer_quality.pop("validated_answer", answer))
             if not answer_quality["passed"]:

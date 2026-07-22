@@ -7,7 +7,7 @@ import subprocess
 import tempfile
 import uuid
 from datetime import UTC, datetime
-from hashlib import sha1
+from hashlib import sha1, sha256
 from pathlib import Path
 from typing import Any
 
@@ -59,6 +59,24 @@ def _normalize_query(value: str) -> str:
 def _requirement_schema_version(response: dict[str, Any]) -> str:
     route = response.get("input_route") if isinstance(response.get("input_route"), dict) else {}
     return str(route.get("requirement_schema_version") or "")[:80]
+
+
+def _query_decision_id(response: dict[str, Any], source: dict[str, Any]) -> str:
+    """Opaque, reproducible ID for the same immutable query/source snapshot."""
+    candidates = response.get("recommendations") if isinstance(response.get("recommendations"), list) else []
+    payload = {
+        "query": _normalize_query(str(response.get("query") or "")),
+        "source_id": source.get("source_id") or "unknown",
+        "run_date": source.get("run_date") or "",
+        "freshness_required": bool(response.get("freshness_required")),
+        "constraint_version": _requirement_schema_version(response),
+        "candidates": [
+            {"rank": _int_value(item.get("rank")) or index, "full_name": str(item.get("full_name") or ""), "eligibility": str(item.get("eligibility") or "unknown")}
+            for index, item in enumerate(candidates, start=1)
+            if isinstance(item, dict)
+        ],
+    }
+    return sha256(json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()[:32]
 
 
 def _unavailable_data_source_response(query: str, source: dict[str, Any]) -> dict[str, Any]:
@@ -1753,9 +1771,9 @@ class ApiRepository:
 
     def _record_query_decision(self, response: dict[str, Any]) -> str:
         """Persist the smallest private, server-derived decision snapshot."""
-        decision_id = uuid.uuid4().hex
         freshness = normalize_freshness(response.get("freshness"))
         source = _data_source_public(self.data_source)
+        decision_id = _query_decision_id(response, source)
         quality = response.get("answer_quality") if isinstance(response.get("answer_quality"), dict) else {}
         candidates = response.get("recommendations") if isinstance(response.get("recommendations"), list) else []
         created_at = datetime.now(UTC).isoformat().replace("+00:00", "Z")
@@ -1763,7 +1781,7 @@ class ApiRepository:
         try:
             initialize(connection)
             connection.execute(
-                """INSERT INTO query_runs (
+                """INSERT OR IGNORE INTO query_runs (
                     decision_id, normalized_query, data_source_id, data_run_date, attestation_json,
                     constraint_version, freshness_status, freshness_required, created_at, payload_json
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
@@ -1779,7 +1797,7 @@ class ApiRepository:
                     continue
                 eligibility = str(item.get("eligibility") or "unknown")
                 connection.execute(
-                    """INSERT INTO query_candidates (
+                    """INSERT OR IGNORE INTO query_candidates (
                         decision_id, rank, full_name, eligibility, eligibility_reason,
                         is_confirmed_primary, citation_indexes_json
                     ) VALUES (?, ?, ?, ?, ?, ?, ?)""",
