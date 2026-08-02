@@ -1,5 +1,13 @@
 # 操作日志
 
+## 2026-08-02 追加：P0-2 离线约束评估语义同步
+
+1. 固定约束/追问评估改为比较字段、运算符和值；hard 语义由路由单测覆盖，避免旧 fixture 将普通偏好错误视为硬约束。
+2. 修正追问路由断言和 `search-01` fixture：普通 Python、多 Agent 条件均为偏好，且 fixture 补齐实际提取的 multi_agent 条件。
+3. 更新 `config/evaluation-thresholds.json` 中 follow-up fixture 的 SHA-256，保持固定样本完整性校验。
+
+验证：`python scripts/evaluate_constraint_parsing.py`、`python scripts/evaluate_follow_up_routing.py` 与 `python -m unittest tests.test_constraint_parsing_eval tests.test_follow_up_eval tests.test_follow_up_router -q` 通过；两个评估均为 100%/无 failures；`git diff --check` 通过。未触碰 `output/`、`tmp/`。
+
 ## 2026-08-02 追加：P0-1 历史只读条件核验
 
 1. `verify_project_requirements` 新增只读连接路径；本机历史 SQLite 在 `query_only` 下执行确定性核验，不初始化 schema、不写入索引。

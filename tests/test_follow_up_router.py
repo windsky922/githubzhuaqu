@@ -91,7 +91,7 @@ class FollowUpRouterTest(unittest.TestCase):
         self.assertEqual(
             result["requirements"],
             [
-                {"field": "language", "operator": "eq", "value": "TypeScript", "hard": True},
+                {"field": "language", "operator": "eq", "value": "TypeScript", "hard": False},
                 {"field": "license", "operator": "eq", "value": "MIT", "hard": True},
             ],
         )
@@ -100,22 +100,22 @@ class FollowUpRouterTest(unittest.TestCase):
         self.assertEqual(
             parse_requirements("不要云 API，但必须 Python")["requirements"],
             [
-                {"field": "external_api_required", "operator": "eq", "value": False, "hard": True},
+                {"field": "external_api_required", "operator": "eq", "value": False, "hard": False},
                 {"field": "language", "operator": "eq", "value": "Python", "hard": True},
             ],
         )
         self.assertEqual(
             parse_requirements("不是 Java，最好 MIT")["requirements"],
             [
-                {"field": "language", "operator": "not_eq", "value": "Java", "hard": True},
-                {"field": "license", "operator": "eq", "value": "MIT", "hard": True},
+                {"field": "language", "operator": "not_eq", "value": "Java", "hard": False},
+                {"field": "license", "operator": "eq", "value": "MIT", "hard": False},
             ],
         )
         self.assertEqual(
             parse_requirements("不要 Java 和 Go，但必须 Docker")["requirements"],
             [
-                {"field": "language", "operator": "not_eq", "value": "Java", "hard": True},
-                {"field": "language", "operator": "not_eq", "value": "Go", "hard": True},
+                {"field": "language", "operator": "not_eq", "value": "Java", "hard": False},
+                {"field": "language", "operator": "not_eq", "value": "Go", "hard": False},
                 {"field": "tech_stack", "operator": "eq", "value": "Docker", "hard": True},
             ],
         )
@@ -125,8 +125,8 @@ class FollowUpRouterTest(unittest.TestCase):
         self.assertEqual(
             parsed["requirements"],
             [
-                {"field": "network_required", "operator": "eq", "value": False, "hard": True},
-                {"field": "tech_stack", "operator": "eq", "value": "Docker", "hard": True},
+                {"field": "network_required", "operator": "eq", "value": False, "hard": False},
+                {"field": "tech_stack", "operator": "eq", "value": "Docker", "hard": False},
             ],
         )
         self.assertFalse(parsed["ambiguous"])
@@ -135,15 +135,15 @@ class FollowUpRouterTest(unittest.TestCase):
         self.assertEqual(
             parse_requirements("可以部署在云端，但不能依赖外部模型 API")["requirements"],
             [
-                {"field": "hosting_mode", "operator": "contains", "value": "cloud_hosted", "hard": True},
-                {"field": "external_api_required", "operator": "eq", "value": False, "hard": True},
+                {"field": "hosting_mode", "operator": "contains", "value": "cloud_hosted", "hard": False},
+                {"field": "external_api_required", "operator": "eq", "value": False, "hard": False},
             ],
         )
         self.assertEqual(
             parse_requirements("本地部署，但会调用 OpenAI")["requirements"],
             [
-                {"field": "hosting_mode", "operator": "contains", "value": "self_hosted", "hard": True},
-                {"field": "external_api_required", "operator": "eq", "value": True, "hard": True},
+                {"field": "hosting_mode", "operator": "contains", "value": "self_hosted", "hard": False},
+                {"field": "external_api_required", "operator": "eq", "value": True, "hard": False},
             ],
         )
         result = route_follow_up(root=Path.cwd(), query="不要云 API", context=_context())

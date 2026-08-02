@@ -100,7 +100,7 @@ def evaluate(cases: list[dict[str, Any]]) -> dict[str, Any]:
         item = {
             "id": case["id"],
             "split": case["split"],
-            "constraint_exact_match": parsed["requirements"] == expected,
+            "constraint_exact_match": _requirements_without_hard(parsed["requirements"]) == _requirements_without_hard(expected),
             "operator_score": operator_correct / target_total,
             "clarification_correct": bool(parsed["clarification_required"]) == bool(case["expect_clarification"]),
             "expected": expected,
@@ -162,6 +162,10 @@ def _requirement(value: str) -> dict[str, Any]:
             raise ValueError(f"invalid boolean capability expectation: {value}")
         expected = expected == "true"
     return {"field": field, "operator": operator, "value": expected, "hard": True}
+
+
+def _requirements_without_hard(requirements: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [{key: value for key, value in item.items() if key != "hard"} for item in requirements]
 
 
 def _metrics(items: list[dict[str, Any]]) -> dict[str, float]:

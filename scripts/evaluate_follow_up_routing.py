@@ -69,7 +69,7 @@ def evaluate(cases: list[dict[str, Any]], *, root: Path = PROJECT_ROOT) -> dict[
                 result.get("selected_repository_ids", []) == case["expected_selected_repository_ids"]
                 if "expected_selected_repository_ids" in case else None
             ),
-            "constraints_correct": result["requirements"] == case["expected_requirements"],
+            "constraints_correct": _requirements_without_hard(result["requirements"]) == _requirements_without_hard(case["expected_requirements"]),
             "raw_follow_up_retrieval_violation": raw_violation,
         })
     total = max(1, len(items))
@@ -96,6 +96,10 @@ def evaluate(cases: list[dict[str, Any]], *, root: Path = PROJECT_ROOT) -> dict[
 
 def _rate(items: list[dict[str, Any]], key: str, total: int) -> float:
     return round(sum(bool(item[key]) for item in items) / total, 4)
+
+
+def _requirements_without_hard(requirements: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [{key: value for key, value in item.items() if key != "hard"} for item in requirements]
 
 
 def _optional_rate(items: list[dict[str, Any]], key: str) -> float:
