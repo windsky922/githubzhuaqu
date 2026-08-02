@@ -114,7 +114,7 @@ jobs:
 
       - name: 执行周报任务
         env:
-          GH_SEARCH_TOKEN: ${{ secrets.GH_SEARCH_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
           KIMI_API_KEY: ${{ secrets.KIMI_API_KEY }}
           KIMI_BASE_URL: ${{ secrets.KIMI_BASE_URL }}
           KIMI_MODEL: ${{ secrets.KIMI_MODEL }}
