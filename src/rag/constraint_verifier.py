@@ -89,13 +89,16 @@ def verify_project_requirements(
     db_path: Any,
     full_names: list[str],
     requirements: list[dict[str, Any]],
+    *,
+    read_only: bool = False,
 ) -> dict[str, dict[str, Any]]:
     names = _unique_strings(full_names)
     if not names or not requirements:
         return {}
-    connection = connect(db_path)
+    connection = connect(db_path, read_only=read_only)
     try:
-        initialize(connection)
+        if not read_only:
+            initialize(connection)
         return {
             full_name: _verify_one(connection, full_name, requirements)
             for full_name in names
@@ -104,12 +107,59 @@ def verify_project_requirements(
         connection.close()
 
 
+def verify_context_requirements(
+    contexts: list[dict[str, Any]], requirements: list[dict[str, Any]]
+) -> dict[str, dict[str, Any]]:
+    """Verify already-retrieved historical JSON evidence without an index or writes."""
+    if not contexts or not requirements:
+        return {}
+    projects: dict[str, dict[str, Any]] = {}
+    for context in contexts:
+        metadata = context.get("metadata") if isinstance(context.get("metadata"), dict) else {}
+        full_name = str(metadata.get("full_name") or "")
+        if not full_name:
+            continue
+        project = projects.setdefault(full_name, {"metadata": {}, "chunks": []})
+        project["metadata"] = {**project["metadata"], **metadata}
+        project["chunks"].append({
+            "chunk_id": str(context.get("chunk_id") or ""),
+            "chunk_text": str(context.get("text") or ""),
+        })
+    return {
+        full_name: _verify_evidence(_context_metadata(project["metadata"], project["chunks"]), project["chunks"], requirements)
+        for full_name, project in projects.items()
+    }
+
+
 def requirement_label(requirement: dict[str, Any]) -> str:
     field = str(requirement.get("field") or "")
     operator = str(requirement.get("operator") or "eq")
     value = _display_value(requirement.get("value"))
     symbol = "≠" if operator == "not_eq" else "包含" if operator == "contains" else "="
     return f"{FIELD_LABELS.get(field, field)}{symbol}{value}"
+
+
+def _context_metadata(metadata: dict[str, Any], chunks: list[Any]) -> dict[str, list[str]]:
+    payload: dict[str, Any] = {}
+    for chunk in chunks:
+        candidate = _json_object(chunk.get("chunk_text") if isinstance(chunk, dict) else "")
+        if candidate:
+            payload = candidate
+            break
+    profile = payload.get("project_profile") if isinstance(payload.get("project_profile"), dict) else {}
+    context_profile = metadata.get("project_profile") if isinstance(metadata.get("project_profile"), dict) else {}
+    topics = _unique_strings([
+        *_list_strings(payload.get("topics")),
+        *_list_strings(profile.get("topics")),
+        *_list_strings(context_profile.get("topics")),
+    ])
+    return {
+        "language": _unique_strings([str(metadata.get("language") or ""), str(payload.get("language") or "")]),
+        "category": _unique_strings([str(metadata.get("category") or ""), str(payload.get("category") or "")]),
+        "source": _unique_strings([*_list_strings(metadata.get("sources")), *_list_strings(payload.get("sources") or payload.get("source"))]),
+        "license": _unique_strings([str(payload.get("license_name") or payload.get("license") or "")]),
+        "tech_stack": _unique_strings([str(metadata.get("language") or ""), str(payload.get("language") or ""), *topics]),
+    }
 
 
 def _verify_one(connection: Any, full_name: str, requirements: list[dict[str, Any]]) -> dict[str, Any]:
@@ -139,6 +189,10 @@ def _verify_one(connection: Any, full_name: str, requirements: list[dict[str, An
         "license": _unique_strings([repository["license_name"] if repository else ""]),
         "tech_stack": _unique_strings([repository["language"] if repository else "", *topics]),
     }
+    return _verify_evidence(metadata, chunks, requirements)
+
+
+def _verify_evidence(metadata: dict[str, Any], chunks: list[Any], requirements: list[dict[str, Any]]) -> dict[str, Any]:
     matched: list[str] = []
     unmet: list[str] = []
     unknown: list[str] = []

@@ -1,5 +1,13 @@
 # 操作日志
 
+## 2026-08-02 追加：P0-1 历史只读条件核验
+
+1. `verify_project_requirements` 新增只读连接路径；本机历史 SQLite 在 `query_only` 下执行确定性核验，不初始化 schema、不写入索引。
+2. 新增 JSON 检索上下文适配层，只从已检索的历史项目元数据和文本构造内存证据，支持 matched、unmet、unknown。
+3. `ApiRepository` 在 local SQLite/JSON 历史模式均保留 `requirement_verification`；历史来源的 `history_only` 与 `current_eligible=false` 既有边界不变。
+
+验证：`python -m unittest tests.test_constraint_verifier tests.test_contextual_ask tests.test_p1_data_trust -q` 通过（26 tests）；新增测试确认 SQLite 文件字节未变化，JSON 上下文可区分满足、硬冲突和 unknown；`git diff --check` 通过。未读取或修改 `output/`、`tmp/`、运行态 SQLite 或历史归档。
+
 ## 2026-08-02 追加：V6 下一阶段开发交接
 
 1. 新增 `docs/project-review-agent-v6-handoff.md`，以当前 `d638dae` 功能基线和未提交 V6 审查文档为起点，固定 P0-1 历史只读核验、P0-2 CI/分支治理的执行顺序。

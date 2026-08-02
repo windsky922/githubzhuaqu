@@ -24,7 +24,7 @@ from src.rag.embeddings import (
 )
 from src.rag.answering import answer_rag_question, stream_rag_answer_question
 from src.rag.corpus_cleaner import CLEANER_VERSION, CORPUS_VERSION
-from src.rag.constraint_verifier import verify_project_requirements
+from src.rag.constraint_verifier import verify_context_requirements, verify_project_requirements
 from src.rag.follow_up_router import normalize_contextual_request, route_follow_up
 from src.rag.freshness import archive_freshness, is_time_sensitive_query, normalize_freshness
 from src.rag.data_source import resolve_local_archive_source, resolve_verified_weekly_source
@@ -1778,11 +1778,15 @@ class ApiRepository:
             (context.get("metadata") or {}).get("full_name") or ""
             for context in (explained.get("contexts") if isinstance(explained.get("contexts"), list) else [])
         )
+        requirements = route.get("requirements") if isinstance(route.get("requirements"), list) else []
         explained["requirement_verification"] = (
-            {} if self.local_read_only else verify_project_requirements(
+            verify_context_requirements(explained.get("contexts") or [], requirements)
+            if self.local_json_archive
+            else verify_project_requirements(
                 self.db_path,
                 full_names,
-                route.get("requirements") if isinstance(route.get("requirements"), list) else [],
+                requirements,
+                read_only=self.local_read_only,
             )
         )
         return explained

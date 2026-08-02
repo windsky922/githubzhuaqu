@@ -5,11 +5,48 @@ from pathlib import Path
 
 from scripts.evaluate_project_match import write_fixture
 from src.api.repository import ApiRepository
-from src.rag.constraint_verifier import classify_text_evidence, verify_project_requirements
+from src.rag.constraint_verifier import classify_text_evidence, verify_context_requirements, verify_project_requirements
 from src.storage.sqlite_store import connect
 
 
 class ConstraintVerifierTest(unittest.TestCase):
+    def test_read_only_sqlite_verification_keeps_database_unchanged(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            write_fixture(root)
+            repository = ApiRepository(root=root, db_path=root / "data" / "github_weekly.sqlite")
+            repository.ensure_sqlite_index()
+            before = repository.db_path.read_bytes()
+            result = verify_project_requirements(
+                repository.db_path,
+                ["eval/agent-orchestrator"],
+                [_requirement("language", "Python")],
+                read_only=True,
+            )["eval/agent-orchestrator"]
+            self.assertEqual(result["requirement_evaluations"][0]["status"], "matched")
+            self.assertEqual(repository.db_path.read_bytes(), before)
+
+    def test_json_context_verification_reports_matched_unmet_and_unknown(self):
+        contexts = [{
+            "chunk_id": "local-json:2026-06-03:0",
+            "text": '{"topics":["agents"],"evidence":"requires cloud api"}',
+            "metadata": {
+                "full_name": "owner/historical-agent",
+                "language": "Python",
+                "category": "agent",
+                "sources": ["trending"],
+            },
+        }]
+        result = verify_context_requirements(contexts, [
+            _requirement("language", "Python"),
+            _requirement("external_api_required", False),
+            _requirement("cost", "free"),
+        ])["owner/historical-agent"]
+        self.assertEqual(
+            [item["status"] for item in result["requirement_evaluations"]],
+            ["matched", "unmet", "unknown"],
+        )
+
     def test_uses_canonical_metadata_and_non_model_clean_chunks(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
