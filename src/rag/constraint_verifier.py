@@ -21,9 +21,10 @@ FIELD_LABELS = {
     "network_required": "运行时联网",
     "external_api_required": "外部模型 API",
     "api_key_required": "API Key",
+    "multi_agent": "多 Agent",
 }
 CAPABILITY_FIELDS = {
-    "hosting_mode", "offline_capable", "network_required", "external_api_required", "api_key_required",
+    "hosting_mode", "offline_capable", "network_required", "external_api_required", "api_key_required", "multi_agent",
 }
 BOOLEAN_CAPABILITY_FIELDS = CAPABILITY_FIELDS - {"hosting_mode"}
 TEXT_REQUIREMENT_FIELDS = {"deployment", "cost", *CAPABILITY_FIELDS}
@@ -168,6 +169,7 @@ def _verify_one(connection: Any, full_name: str, requirements: list[dict[str, An
             "status": status,
             "reason": _evaluation_reason(status, bool(evidence)),
             "evidence_chunk_ids": evidence,
+            "hard": bool(requirement.get("hard")),
         })
     return {
         "matched_requirements": matched,
@@ -247,6 +249,9 @@ def classify_text_evidence(field: str, expected: Any, sentence: str) -> str:
         if target_present and any(marker in text for marker in CONDITIONAL_PATTERNS):
             return "conditional"
         return "supports" if target_present else "unknown"
+    if field == "multi_agent":
+        markers = ("多 agent", "多agent", "多智能体", "multi-agent", "multi agent", "multiagent")
+        return "supports" if any(marker in text for marker in markers) else "unknown"
     if field in BOOLEAN_CAPABILITY_FIELDS:
         expected_bool = _bool_value(expected)
         fact = _boolean_fact(field, text)
@@ -284,6 +289,8 @@ def _scope_safe_state(field: str, expected: Any, sentence: str, state: str) -> s
     The legacy classifier remains public for sentence-level compatibility.  The
     project-level verifier is stricter because its result controls eligibility.
     """
+    if field == "multi_agent":
+        return state
     if field not in {"deployment", *BOOLEAN_CAPABILITY_FIELDS}:
         return state
     facts = extract_quote_facts(sentence)

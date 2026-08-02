@@ -8,6 +8,7 @@ from unittest.mock import patch
 
 from scripts.evaluate_project_match import write_fixture
 from src.api.repository import ApiRepository
+from src.rag.follow_up_router import parse_requirements
 from src.storage.sqlite_store import connect
 
 
@@ -28,6 +29,14 @@ class ContextualAskTest(unittest.TestCase):
         self.assertFalse(result["input_route"]["retrieval_performed"])
         self.assertEqual(result["recommendations"], [])
         self.assertFalse(result["answer_quality"]["applicable"])
+
+    def test_history_style_request_parses_python_local_and_multi_agent_as_preferences(self):
+        parsed = parse_requirements("在全部本机历史归档中寻找适合 Python 团队、可本地部署的多 Agent 项目；允许部分能力待核实")
+        self.assertFalse(parsed["ambiguous"])
+        self.assertEqual(
+            [(item["field"], item["value"], item["hard"]) for item in parsed["requirements"]],
+            [("language", "Python", False), ("hosting_mode", "self_hosted", False), ("multi_agent", True, False)],
+        )
 
     def test_contextual_search_does_not_persist_explanation(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -127,7 +136,7 @@ class ContextualAskTest(unittest.TestCase):
 
     def test_refine_rejects_conflicting_candidate_without_calling_answer_model(self):
         payload = {
-            "q": "更适合 Java 的",
+            "q": "必须使用 Java",
             "context": {
                 "previous_user_goal": "多智能体编排项目",
                 "candidate_repository_ids": ["eval/agent-orchestrator"],
@@ -183,7 +192,7 @@ class ContextualAskTest(unittest.TestCase):
         self.assertTrue(recommendation["requirement_evaluations"])
         self.assertTrue(any(reason.startswith("违反显式约束：") for reason in recommendation["reasons"]))
 
-    def test_unverifiable_hard_constraint_requests_clarification(self):
+    def test_unverifiable_hard_constraint_keeps_candidate_as_unknown(self):
         payload = {
             "q": "必须付费",
             "context": {
@@ -199,11 +208,22 @@ class ContextualAskTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             repository = self._repository(Path(directory))
             result = repository.rag_ask_contextual(payload)
-        self.assertEqual(result["answer_mode"], "clarification")
-        self.assertTrue(result["clarification_required"])
+        self.assertEqual(result["answer_mode"], "fallback_rule")
+        self.assertFalse(result.get("clarification_required", False))
         self.assertEqual(result["recommendations"][0]["eligibility"], "unknown")
         self.assertIn("成本=paid", result["recommendations"][0]["unknown_requirements"])
-        self.assertFalse(result["answer_quality"]["applicable"])
+        self.assertIn("当前没有通过全部硬约束的首选项目", result["answer"])
+
+    def test_default_preferences_do_not_block_historical_style_search(self):
+        payload = {"q": "找 Python 多 Agent 项目，可本地部署，允许部分能力待核实", "mode": "hybrid", "auto_build": True}
+        with tempfile.TemporaryDirectory() as directory:
+            repository = self._repository(Path(directory))
+            result = repository.rag_ask_contextual(payload)
+        self.assertEqual(result["answer_mode"], "fallback_rule")
+        self.assertFalse(result.get("clarification_required", False))
+        recommendation = result["recommendations"][0]
+        self.assertEqual(recommendation["eligibility"], "eligible")
+        self.assertEqual({item["field"] for item in recommendation["preferences"]}, {"language", "hosting_mode", "multi_agent"})
 
     @unittest.skipUnless(importlib.util.find_spec("fastapi") and importlib.util.find_spec("httpx"), "缺少 API 测试依赖")
     def test_post_routes_are_additive_and_validate_payload(self):

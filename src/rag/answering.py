@@ -305,6 +305,8 @@ def _freshness_gate_response(
 ) -> dict[str, Any] | None:
     if not time_sensitive or freshness["data_freshness"] == "fresh":
         return None
+    if retrieval.get("history_only"):
+        return None
     cutoff = freshness["embedding_latest_date"] or freshness["corpus_latest_date"] or freshness["source_latest_date"] or "未知"
     reason_suffix = ",".join(freshness["reasons"]) or freshness["data_freshness"]
     answer = f"当前受控归档的数据截止水位为 {cutoff}（核验日 {freshness['as_of'] or '未知'}），无法据此确认“最新”结论。请先更新来源、语料和 embedding，或改问该截止日期前的情况。"
@@ -343,18 +345,11 @@ def _constraint_gate_response(
     requirements = _list_of_dicts(retrieval.get("requirements"))
     if not requirements:
         return None
-    if any(item.get("eligibility") == "eligible" for item in recommendations):
+    if not recommendations or any(item.get("eligibility") != "rejected" for item in recommendations):
         return None
-
-    has_unknown = not recommendations or any(item.get("eligibility") == "unknown" for item in recommendations)
-    if has_unknown:
-        question = "当前候选中存在无法核实的硬约束。请补充可验证条件，或明确允许扩大到全部归档继续搜索。"
-        answer_mode = "clarification"
-        fallback_reason = "hard_constraint_unknown"
-    else:
-        question = "当前候选全部违反了明确的硬约束。请放宽条件，或要求重新搜索全部归档。"
-        answer_mode = "no_match"
-        fallback_reason = "hard_constraint_no_match"
+    question = "当前候选全部违反了明确的硬约束。请放宽条件，或改用偏好描述后重新搜索。"
+    answer_mode = "no_match"
+    fallback_reason = "hard_constraint_no_match"
 
     result = _response(
         query=query,
@@ -378,8 +373,8 @@ def _constraint_gate_response(
         },
         recommendations=recommendations,
     )
-    result["clarification_required"] = has_unknown
-    result["clarification_question"] = question if has_unknown else ""
+    result["clarification_required"] = False
+    result["clarification_question"] = ""
     return result
 
 
@@ -400,13 +395,15 @@ def _response(
 ) -> dict[str, Any]:
     contexts = _list_of_dicts(retrieval.get("contexts"))
     recommendations = recommendations if recommendations is not None else _recommendations(retrieval, contexts, citations)
+    if any(item.get("eligibility") != "rejected" for item in recommendations):
+        recommendations = [item for item in recommendations if item.get("eligibility") != "rejected"]
     freshness = normalize_freshness(retrieval.get("freshness"))
     quality_result = answer_quality or validate_rag_answer(
         answer=answer,
         citations=citations,
         contexts=contexts,
         freshness=freshness,
-        require_freshness=is_time_sensitive_query(query),
+        require_freshness=is_time_sensitive_query(query) and not bool(retrieval.get("history_only")),
     )
     quality_result.pop("validated_answer", None)
     return {
@@ -455,12 +452,18 @@ def _rule_answer(
         if top_repo
         else f"基于 {mode} 证据，问题“{query}”当前没有通过全部硬约束的首选项目。"
     )
+    historical_notice = (
+        "注意：以下来自本机历史归档，只能作为历史候选，无法确认当前状态。"
+        if retrieval.get("history_only") else ""
+    )
     answer = [
         lead,
         f"证据覆盖 {len(repositories)} 个项目：{'、'.join(repositories[:5]) or '未识别项目'}{citation_markers or ''}。",
         f"来源包括：{'、'.join(sources[:5]) or '未标明来源'}{citation_markers[:3] or ''}。",
         "该回答为规则降级版，只根据已召回证据给出低到中置信结论，不补充证据外信息。",
     ]
+    if historical_notice:
+        answer.insert(0, historical_notice)
     return "\n".join(answer)
 
 

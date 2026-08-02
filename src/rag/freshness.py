@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any
 
 
-DEFAULT_STALE_AFTER_DAYS = 8
+DEFAULT_STALE_AFTER_DAYS = 30
 _DATE_FIELDS = ("source_latest_date", "corpus_latest_date", "embedding_latest_date")
 ATTESTATION_SCHEMA_VERSION = 1
 _ATTESTATION_HASH_FIELDS = ("source_hash", "corpus_version", "corpus_hash", "embedding_model", "embedding_hash")

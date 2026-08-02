@@ -13,7 +13,12 @@ from src.rag.corpus_cleaner import CLEANER_VERSION, CORPUS_VERSION, clean_extern
 SCHEMA_PATH = Path(__file__).with_name("schema.sql")
 
 
-def connect(db_path: Path) -> sqlite3.Connection:
+def connect(db_path: Path, *, read_only: bool = False) -> sqlite3.Connection:
+    if read_only:
+        connection = sqlite3.connect(f"file:{db_path.resolve().as_posix()}?mode=ro", uri=True)
+        connection.row_factory = sqlite3.Row
+        connection.execute("PRAGMA query_only = ON")
+        return connection
     db_path.parent.mkdir(parents=True, exist_ok=True)
     connection = sqlite3.connect(db_path)
     connection.row_factory = sqlite3.Row

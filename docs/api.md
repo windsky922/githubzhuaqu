@@ -1,5 +1,13 @@
 # 后端 API 说明
 
+## 偏好优先约束（2026-08-02）
+
+Ask/SSE 保持现有字段和事件顺序。自然语言识别的条件默认作为偏好；只有“必须、仅、不得、排除、不能接受、只要、必须满足”等明确表达会成为硬约束。`recommendations[].preferences` 为兼容新增字段，展示偏好状态和证据。待核实偏好或待核实硬约束不会触发 clarification；只有所有候选明确冲突时才 no_match。
+
+## 双源 Ask 数据选择（2026-08-02）
+
+`POST /v1/rag/ask` 与 `POST /v1/rag/ask/stream` 保持既有字段和 `meta → delta* → final` 顺序。verified weekly snapshot 的 `fresh` 窗口为 30 天。生产环境仍仅接受 `GITHUB_WEEKLY_SNAPSHOT_ROOT`；没有有效来源时拒答。显式 `GITHUB_WEEKLY_DATA_MODE=local` 可在没有 fresh snapshot 时只读使用本机历史 SQLite，SQLite 不可读或缺失时只读 JSON 归档。响应新增兼容字段 `data_source.history_only/read_only`，推荐项新增 `source_kind`（`verified_snapshot`、`local_archive_sqlite`、`local_archive_json`）、`source_date`、`current_eligible` 与 `source_notice`。历史结果必须提示无法确认当前状态，且 `current_eligible=false`。
+
 ## P0-18 capability scope gate
 
 Recommendation eligibility keeps its existing response fields. Deterministic evidence is evaluated clause by clause as `CapabilityFact(capability, phase, surface, necessity, state, evidence_id)`. Only compatible scopes may aggregate; setup/UI/optional evidence is insufficient for a project-wide requirement, while runtime/inference/required blockers take precedence. This does not change `/v1/rag/ask`, `/v1/rag/ask/stream`, or `meta → delta* → final`.

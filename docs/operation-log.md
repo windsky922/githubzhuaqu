@@ -1,5 +1,40 @@
 # 操作日志
 
+## 2026-08-02 追加：偏好优先的 Agent 约束
+
+1. 自然语言条件默认记为偏好；只有“必须、仅、不得、排除、不能接受、只要、必须满足”等同一短语内的明确措辞才生成硬约束。
+2. 新增 `multi_agent` 偏好，识别多 Agent/多智能体/multi-agent；候选以 `preferences[]` 公开已满足、待核实或未满足及证据块，不影响硬约束资格。
+3. Ask 不再因 unknown 硬约束进入 clarification；未知候选保留展示，只有全部候选明确违反硬约束才返回 no_match。混合结果会隐藏 rejected 候选。
+4. 前端项目卡新增偏好匹配区；历史候选继续保持来源与“无法确认当前状态”说明。
+
+验证：Python API、数据契约、freshness 与 contextual Ask 定向回归通过；`npm.cmd run lint`、`npm.cmd run test`、`npm.cmd run build` 和 `git diff --check` 通过。完整 E2E、真实 API E2E、安全检查与离线评估未在本轮运行。
+
+## 2026-08-02 追加：本地历史数据与最新快照双源 Ask
+
+### 1. 修改内容
+
+1. 将 freshness 窗口统一为 30 天；生产环境仍只接受 `GITHUB_WEEKLY_SNAPSHOT_ROOT` 的有效 weekly attestation，缺失时继续拒答。
+2. 新增显式本机模式 `GITHUB_WEEKLY_DATA_MODE=local`：没有 fresh verified snapshot 时，只读使用本机 `data/github_weekly.sqlite`；该库不可用时直接读取 `data/selected/*.json`，不建表、不迁移、不回填、不写解释或查询审计记录。
+3. Ask/SSE final 保持字段与事件顺序，新增非破坏性来源标识：`source_kind`、`source_date`、`current_eligible`、`source_notice`；历史候选可显示但不能标为当前首选。
+4. React Agent 顶部和项目卡片展示来源、日期与限制说明；历史 SQLite/JSON 都明确“仅作历史候选，无法确认当前状态”。
+
+### 2. 已完成验证
+
+1. `python -m unittest tests.test_p1_data_trust tests.test_rag_freshness -q` 通过（覆盖 30/31 天边界与本机 JSON 历史回退）。
+2. `npm.cmd run lint`、`npm.cmd run test` 通过（3 个测试文件、12 项测试）。
+3. 已通过 API、数据契约、freshness、前端类型/单元测试及生产构建；完整 E2E、真实 API E2E、全量安全与离线评估未在本轮运行。未读取或修改 `output/`、`tmp/`。
+
+## 2026-08-02 追加：前端浅色研究工作台视觉微调
+
+### 1. 修改内容
+
+1. 统一应用壳、顶栏、导航、页面标题、卡片、筛选控件和对话工作台的浅色商务视觉：提高层级、留白、边界与悬停反馈的一致性。
+2. 保留现有路由、API、数据契约和交互语义；仅修改 `frontend/src/index.css`，构建产物待验证后同步到 `docs/app/`。
+
+### 2. 验证范围
+
+1. 已通过根目录 `npm.cmd run lint`、`npm.cmd run test`（3 个测试文件、11 项测试）和 `npm.cmd run build`；`git diff --check` 通过，构建产物已同步到 `docs/app/`。未读取或修改 `output/`、`tmp/`。
+
 ## 2026-07-22 追加：V5 对抗性审查与下一阶段交接
 
 ### 1. 修改内容

@@ -1,5 +1,9 @@
 # GitHub Weekly Agent
 
+> Agent 条件默认是偏好而不是拦截器：如需严格筛选，请使用“必须、仅、不得、排除、不能接受”等明确措辞。多 Agent、本地部署、成本和离线等偏好会显示匹配或待核实状态；只有明确硬冲突才淘汰候选。
+
+> 本机历史 Ask：只有显式设置 `GITHUB_WEEKLY_DATA_MODE=local` 时，服务才会在没有 30 天内 verified weekly snapshot 时只读使用本机历史数据。它优先读取 `data/github_weekly.sqlite`，不可读或缺失时只读 `data/selected/*.json`；历史候选会显示来源和日期，且永不标记为当前首选。生产环境仍必须配置 `GITHUB_WEEKLY_SNAPSHOT_ROOT`，不会回退 checkout 数据。
+
 `main` 的每次 push 和所有 pull request 都会运行独立提交质量检查：Python 3.12 全量测试与安全检查、Node.js 22 前端类型检查/单元测试/生产构建、`docs/app` 构建产物一致性，以及两套 Chromium Playwright 回归。`npm run test:e2e` 使用本地固定 mock 覆盖桌面/手机界面状态；`npm run test:e2e:real` 使用真实 FastAPI、系统临时目录中的 SQLite 和确定性本地 RAG 覆盖同源静态应用、SSE、无状态追问、硬约束及管理鉴权。两套测试都不读取业务 Secrets，不运行采集、Kimi 或真实推送。
 
 GitHub Weekly Agent 的长期定位是 GitHub 项目研究 Agent：持续采集热门仓库，沉淀项目知识库，通过 RAG 检索、相似项目比较、反馈记忆和推荐解释，帮助开发者判断哪些项目值得关注、学习、集成或持续跟踪。

@@ -19,6 +19,7 @@ export type RequirementEvaluation = {
   status: "matched" | "unmet" | "unknown";
   reason: string;
   evidence_chunk_ids: string[];
+  hard?: boolean;
 };
 
 export type RagRecommendation = {
@@ -32,7 +33,12 @@ export type RagRecommendation = {
   citation_indexes: number[];
   evidence_chunk_ids: string[];
   requirement_evaluations: RequirementEvaluation[];
+  preferences?: RequirementEvaluation[];
   eligibility: "eligible" | "rejected" | "unknown";
+  source_kind?: "verified_snapshot" | "local_archive_sqlite" | "local_archive_json" | string;
+  source_date?: string;
+  current_eligible?: boolean;
+  source_notice?: string;
 };
 
 export type Project = {
@@ -55,8 +61,13 @@ export type Project = {
   matched_requirements?: string[];
   unmet_requirements?: string[];
   unknown_requirements?: string[];
+  preferences?: RequirementEvaluation[];
   eligibility?: RagRecommendation["eligibility"];
   recommendation_rank?: number;
+  source_kind?: RagRecommendation["source_kind"];
+  source_date?: string;
+  current_eligible?: boolean;
+  source_notice?: string;
   [key: string]: unknown;
 };
 
@@ -86,6 +97,13 @@ export type RagAnswer = {
   citations: Citation[];
   evidence: Evidence[];
   recommendations: RagRecommendation[];
+  source_notice?: string;
+  data_source?: {
+    kind?: RagRecommendation["source_kind"];
+    run_date?: string;
+    history_only?: boolean;
+    attestation?: { data_freshness?: string };
+  };
   resolved_query?: string;
   clarification_required?: boolean;
   clarification_question?: string;

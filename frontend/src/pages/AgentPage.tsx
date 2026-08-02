@@ -16,8 +16,13 @@ export function matchProjects(answer?: RagAnswer): Candidate[] {
     matched_requirements: recommendation.matched_requirements,
     unmet_requirements: recommendation.unmet_requirements,
     unknown_requirements: recommendation.unknown_requirements,
+    preferences: recommendation.preferences,
     eligibility: recommendation.eligibility,
     recommendation_rank: recommendation.rank,
+    source_kind: recommendation.source_kind,
+    source_date: recommendation.source_date,
+    current_eligible: recommendation.current_eligible,
+    source_notice: recommendation.source_notice,
   }));
 }
 
@@ -33,6 +38,7 @@ export function followUpContext(answer: RagAnswer | undefined, previousQuestion:
     candidate_repository_ids: candidateIds,
     ...(answer.answer_quality?.passed === true
       && first?.eligibility === "eligible"
+      && first?.current_eligible === true
       && (!answer.freshness_required || answer.freshness?.data_freshness === "fresh")
       ? { primary_repository_id: first.full_name }
       : {}),

@@ -29,13 +29,18 @@ describe("项目匹配回答状态", () => {
   });
 
   it("只有质量与新鲜度通过且第一项 eligible 时确认首选", () => {
-    const eligible = { full_name: "org/eligible", evidenceCount: 1, eligibility: "eligible" } as never;
+    const eligible = { full_name: "org/eligible", evidenceCount: 1, eligibility: "eligible", current_eligible: true } as never;
     const unknown = { full_name: "org/unknown", evidenceCount: 1, eligibility: "unknown" } as never;
     expect(selectPrimaryRecommendation({ answer_quality: { passed: true, data_freshness: "fresh" } } as never, [eligible])).toBe(eligible);
     expect(selectPrimaryRecommendation({ answer_quality: { passed: false } } as never, [eligible])).toBeUndefined();
     expect(selectPrimaryRecommendation({ freshness_required: true, answer_quality: { passed: true, data_freshness: "stale" } } as never, [eligible])).toBeUndefined();
     expect(selectPrimaryRecommendation({ freshness_required: false, answer_quality: { passed: true, data_freshness: "stale" } } as never, [eligible])).toBe(eligible);
     expect(selectPrimaryRecommendation({ answer_quality: { passed: true } } as never, [unknown, eligible])).toBeUndefined();
+  });
+
+  it("历史候选可展示但绝不成为当前首选", () => {
+    const historical = { full_name: "org/history", evidenceCount: 1, eligibility: "eligible", current_eligible: false, source_kind: "local_archive_sqlite" } as never;
+    expect(selectPrimaryRecommendation({ answer_quality: { passed: true, data_freshness: "stale" } } as never, [historical])).toBeUndefined();
   });
 
   it("区分无法验证与明确违反约束", () => {
@@ -54,7 +59,7 @@ describe("项目匹配回答状态", () => {
       evidence: [{ quote: "secret-evidence" }],
       prompt_context: "secret-prompt-context",
       recommendations: [
-        { full_name: "org/repo", eligibility: "eligible" },
+        { full_name: "org/repo", eligibility: "eligible", current_eligible: true },
         { full_name: "org/other", eligibility: "unknown" },
       ],
     } as never;

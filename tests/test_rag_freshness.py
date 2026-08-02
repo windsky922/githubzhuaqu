@@ -94,10 +94,14 @@ class RagFreshnessTest(unittest.TestCase):
     def test_marks_aligned_old_data_stale_and_complete_data_fresh(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
-            self.write_run(root, "2026-07-01", {"source_latest_date": "2026-07-01", "corpus_latest_date": "2026-07-01", "embedding_latest_date": "2026-07-01"})
+            self.write_run(root, "2026-06-17", {"source_latest_date": "2026-06-17", "corpus_latest_date": "2026-06-17", "embedding_latest_date": "2026-06-17"})
             stale = archive_freshness(root, as_of="2026-07-18")
             self.assertEqual(stale["data_freshness"], "stale")
-            self.assertEqual(stale["stale_days"], 17)
+            self.assertEqual(stale["stale_days"], 31)
+
+            within_window = Path(temp) / "within-window"
+            self.write_run(within_window, "2026-06-18", {"source_latest_date": "2026-06-18", "corpus_latest_date": "2026-06-18", "embedding_latest_date": "2026-06-18"})
+            self.assertEqual(archive_freshness(within_window, as_of="2026-07-18")["data_freshness"], "fresh")
 
             fresh_root = Path(temp) / "fresh"
             self.write_run(fresh_root, "2026-07-17", {"source_latest_date": "2026-07-17", "corpus_latest_date": "2026-07-17", "embedding_latest_date": "2026-07-17"})

@@ -4,6 +4,7 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from src.api.repository import ApiRepository
 from src.rag.data_source import resolve_verified_weekly_source
@@ -64,3 +65,21 @@ class P1DataTrustTest(unittest.TestCase):
             self.assertEqual(stored["count"], 1)
             self.assertEqual(stored["feedback"][0]["query"], "find a project")
             self.assertFalse(repository.create_query_feedback({"decision_id": "0" * 32, "rating": 1})["accepted"])
+
+    def test_explicit_local_mode_uses_history_without_reclassifying_it_as_weekly_snapshot(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            selected = root / "data" / "selected"
+            selected.mkdir(parents=True)
+            (selected / "2026-06-03.json").write_text(json.dumps([{
+                "full_name": "owner/local-agent", "description": "local agent workflow", "language": "Python",
+            }]), encoding="utf-8")
+            with patch("src.api.repository.ROOT", root), patch.dict("os.environ", {"GITHUB_WEEKLY_DATA_MODE": "local"}, clear=False):
+                repository = ApiRepository(root=root)
+                answer = repository.rag_ask(query="当前 local agent 项目", mode="fts5")
+            self.assertEqual(repository.data_source["kind"], "local_archive_json")
+            self.assertTrue(repository.local_read_only)
+            self.assertTrue(answer["data_source"]["history_only"])
+            self.assertIn("无法确认当前状态", answer["answer"])
+            self.assertEqual(answer["recommendations"][0]["source_kind"], "local_archive_json")
+            self.assertFalse(answer["recommendations"][0]["current_eligible"])

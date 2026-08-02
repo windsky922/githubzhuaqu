@@ -84,10 +84,16 @@ def build_project_recommendations(
                     "status": "unknown",
                     "reason": "未找到可验证该要求的可信证据。",
                     "evidence_chunk_ids": [],
+                    "hard": bool(requirement.get("hard")),
                 }
                 for requirement in requirements
             ]
-        eligibility = "rejected" if unmet else "unknown" if unknown else "eligible"
+        hard_evaluations = [item for item in requirement_evaluations if bool(item.get("hard"))]
+        preferences = [item for item in requirement_evaluations if not bool(item.get("hard"))]
+        hard_matched = [item for item in matched if item not in _evaluation_labels(preferences, "matched")]
+        hard_unmet = [item for item in unmet if item not in _evaluation_labels(preferences, "unmet")]
+        hard_unknown = [item for item in unknown if item not in _evaluation_labels(preferences, "unknown")]
+        eligibility = "rejected" if hard_unmet else "unknown" if hard_unknown else "eligible"
         if max_score > 0:
             match_score = round(candidate["best_score"] / max_score, 4)
         else:
@@ -103,15 +109,16 @@ def build_project_recommendations(
         for chunk_id in _strings(verified.get("evidence_chunk_ids")):
             if chunk_id not in evidence_chunk_ids:
                 evidence_chunk_ids.append(chunk_id)
-        reasons = _reasons(candidate, matched, unmet, unknown)
+        reasons = _reasons(candidate, hard_matched, hard_unmet, hard_unknown)
         recommendations.append(
             {
                 "full_name": candidate["full_name"],
                 "rank": 0,
                 "match_score": match_score,
-                "matched_requirements": matched,
-                "unmet_requirements": unmet,
-                "unknown_requirements": unknown,
+                "matched_requirements": hard_matched,
+                "unmet_requirements": hard_unmet,
+                "unknown_requirements": hard_unknown,
+                "preferences": preferences,
                 "reasons": reasons,
                 "citation_indexes": citation_indexes,
                 "evidence_chunk_ids": evidence_chunk_ids,
@@ -123,6 +130,8 @@ def build_project_recommendations(
     recommendations.sort(
         key=lambda item: (
             ELIGIBILITY_ORDER[item["eligibility"]],
+            -sum(1 for preference in item.get("preferences", []) if preference.get("status") == "matched"),
+            sum(1 for preference in item.get("preferences", []) if preference.get("status") == "unmet"),
             -item["match_score"],
             grouped[item["full_name"]]["first_position"],
             item["full_name"],
@@ -175,7 +184,7 @@ def _requirement_label(requirement: dict[str, Any]) -> str:
     labels = {
         "license": "许可证", "deployment": "部署方式", "cost": "成本", "tech_stack": "技术栈",
         "hosting_mode": "托管方式", "offline_capable": "离线能力", "network_required": "运行时联网",
-        "external_api_required": "外部模型 API", "api_key_required": "API Key", **CONSTRAINT_LABELS,
+        "external_api_required": "外部模型 API", "api_key_required": "API Key", "multi_agent": "多 Agent", **CONSTRAINT_LABELS,
     }
     field = str(requirement.get("field") or "")
     operator = str(requirement.get("operator") or "eq")
@@ -183,6 +192,14 @@ def _requirement_label(requirement: dict[str, Any]) -> str:
     value = "true" if raw_value is True else "false" if raw_value is False else str(raw_value or "")
     symbol = "≠" if operator == "not_eq" else "包含" if operator == "contains" else "="
     return f"{labels.get(field, field)}{symbol}{value}"
+
+
+def _evaluation_labels(evaluations: list[dict[str, Any]], status: str) -> list[str]:
+    return [
+        _requirement_label(item)
+        for item in evaluations
+        if str(item.get("status") or "") == status
+    ]
 
 
 def _strings(value: Any) -> list[str]:

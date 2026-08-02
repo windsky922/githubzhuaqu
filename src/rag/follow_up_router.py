@@ -21,6 +21,7 @@ CAPABILITY_FIELDS = {
     "network_required",
     "external_api_required",
     "api_key_required",
+    "multi_agent",
 }
 BOOLEAN_CAPABILITY_FIELDS = CAPABILITY_FIELDS - {"hosting_mode"}
 ALLOWED_FIELDS = {
@@ -272,14 +273,15 @@ def _constraint_clauses(query: str) -> list[str]:
 def _extract_clause_requirements(clause: str, requirements: list[dict[str, Any]]) -> None:
     lower = f" {clause.casefold()} "
     operator = "not_eq" if any(marker in lower for marker in NEGATION_MARKERS) else "eq"
+    hard = _clause_is_hard(lower)
     for token, value in sorted(LANGUAGES.items(), key=lambda item: len(item[0]), reverse=True):
         if token == "java" and "javascript" in lower:
             continue
         if token in lower:
-            _append_requirement(requirements, "language", operator, value)
+            _append_requirement(requirements, "language", operator, value, hard=hard)
     for token, value in LICENSES.items():
         if token in lower:
-            _append_requirement(requirements, "license", operator, value)
+            _append_requirement(requirements, "license", operator, value, hard=hard)
     offline_negative = any(
         marker in lower
         for marker in ("不支持离线", "不能离线", "无法离线", "does not support offline", "doesn't support offline", "no offline support")
@@ -289,16 +291,16 @@ def _extract_clause_requirements(clause: str, requirements: list[dict[str, Any]]
         for marker in ("完全离线", "离线运行", "离线可用", "fully offline", "offline capable", "air-gapped", "air gapped")
     )
     if offline_negative:
-        _append_requirement(requirements, "offline_capable", "eq", False)
+        _append_requirement(requirements, "offline_capable", "eq", False, hard=hard)
     elif offline_positive:
-        _append_requirement(requirements, "offline_capable", "eq", True)
+        _append_requirement(requirements, "offline_capable", "eq", True, hard=hard)
     elif "离线" in lower or "offline" in lower:
-        _append_requirement(requirements, "offline_capable", "eq", operator != "not_eq")
+        _append_requirement(requirements, "offline_capable", "eq", operator != "not_eq", hard=hard)
 
     if any(marker in lower for marker in ("不能联网", "无需联网", "不需要联网", "不依赖网络", "without internet", "no internet required", "does not require internet")):
-        _append_requirement(requirements, "network_required", "eq", False)
+        _append_requirement(requirements, "network_required", "eq", False, hard=hard)
     elif any(marker in lower for marker in ("必须联网", "需要联网", "依赖互联网", "requires internet", "internet connection required")):
-        _append_requirement(requirements, "network_required", "eq", True)
+        _append_requirement(requirements, "network_required", "eq", True, hard=hard)
 
     external_api_negative = any(marker in lower for marker in (
         "不要云 api", "不要云api", "不需要云 api", "不需要云api", "无需云 api", "无需云api",
@@ -314,36 +316,38 @@ def _extract_clause_requirements(clause: str, requirements: list[dict[str, Any]]
         "requires cloud api", "depends on cloud api", "requires external model api", "uses hosted inference",
     ))
     if external_api_negative:
-        _append_requirement(requirements, "external_api_required", "eq", False)
+        _append_requirement(requirements, "external_api_required", "eq", False, hard=hard)
     elif external_api_positive:
-        _append_requirement(requirements, "external_api_required", "eq", True)
+        _append_requirement(requirements, "external_api_required", "eq", True, hard=hard)
 
     if any(marker in lower for marker in (
         "不要任何 api key", "不要 api key", "无需 api key", "不需要 api key",
         "no api key required", "without an api key", "without api key",
     )):
-        _append_requirement(requirements, "api_key_required", "eq", False)
+        _append_requirement(requirements, "api_key_required", "eq", False, hard=hard)
     elif any(marker in lower for marker in ("需要 api key", "必须 api key", "requires an api key", "api key required")):
-        _append_requirement(requirements, "api_key_required", "eq", True)
+        _append_requirement(requirements, "api_key_required", "eq", True, hard=hard)
 
     if any(marker in lower for marker in ("本地部署", "私有化部署", "self-hosted", "self hosted")):
-        _append_requirement(requirements, "hosting_mode", "not_eq" if operator == "not_eq" else "contains", "self_hosted")
+        _append_requirement(requirements, "hosting_mode", "not_eq" if operator == "not_eq" else "contains", "self_hosted", hard=hard)
     cloud_hosting = any(marker in lower for marker in (
         "云端部署", "部署在云端", "运行在云端", "云端服务", "托管服务", "saas",
         "cloud deployment", "hosted in the cloud", "hosted in cloud", "cloud hosted", "managed cloud", "必须 cloud", "要求 cloud",
     )) or (any(marker in lower for marker in ("不要 cloud", "no cloud ")) and "cloud api" not in lower)
     if cloud_hosting:
-        _append_requirement(requirements, "hosting_mode", "not_eq" if operator == "not_eq" else "contains", "cloud_hosted")
+        _append_requirement(requirements, "hosting_mode", "not_eq" if operator == "not_eq" else "contains", "cloud_hosted", hard=hard)
     for markers, value in (
         (("免费", " free ", "free to use", "no cost"), "free"),
         (("低成本", "low cost", "low-cost"), "low_cost"),
         (("付费", " paid ", "subscription"), "paid"),
     ):
         if any(marker in lower for marker in markers):
-            _append_requirement(requirements, "cost", operator, value)
+            _append_requirement(requirements, "cost", operator, value, hard=hard)
     for stack in TECH_STACKS:
         if stack.casefold() in lower:
-            _append_requirement(requirements, "tech_stack", operator, stack)
+            _append_requirement(requirements, "tech_stack", operator, stack, hard=hard)
+    if any(marker in lower for marker in ("多 agent", "多agent", "多智能体", "multi-agent", "multi agent")):
+        _append_requirement(requirements, "multi_agent", "eq", True, hard=hard)
 
 
 def _requirement_ambiguity(query: str, requirements: list[dict[str, Any]]) -> str:
@@ -427,7 +431,7 @@ def _validated_requirements(value: Any) -> list[dict[str, Any]]:
             if not requirement_value or len(requirement_value) > 100:
                 raise ValueError("invalid requirement value")
         for normalized in _canonical_requirements(field, operator, requirement_value):
-            _append_requirement(result, normalized["field"], normalized["operator"], normalized["value"])
+            _append_requirement(result, normalized["field"], normalized["operator"], normalized["value"], hard=bool(item.get("hard")))
     return result
 
 
@@ -465,8 +469,12 @@ def _clarify(question: str, reason: str, requirements: list[dict[str, Any]] | No
     return result
 
 
-def _append_requirement(items: list[dict[str, Any]], field: str, operator: str, value: Any) -> None:
-    item = {"field": field, "operator": operator, "value": value, "hard": True}
+def _clause_is_hard(clause: str) -> bool:
+    return any(marker in clause for marker in ("必须", "必须满足", "仅", "不得", "排除", "不能接受", "只要"))
+
+
+def _append_requirement(items: list[dict[str, Any]], field: str, operator: str, value: Any, *, hard: bool = False) -> None:
+    item = {"field": field, "operator": operator, "value": value, "hard": hard}
     if item not in items:
         items.append(item)
 

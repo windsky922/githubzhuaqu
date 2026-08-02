@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import sqlite3
 import subprocess
@@ -26,7 +27,7 @@ from src.rag.corpus_cleaner import CLEANER_VERSION, CORPUS_VERSION
 from src.rag.constraint_verifier import verify_project_requirements
 from src.rag.follow_up_router import normalize_contextual_request, route_follow_up
 from src.rag.freshness import archive_freshness, is_time_sensitive_query, normalize_freshness
-from src.rag.data_source import resolve_verified_weekly_source
+from src.rag.data_source import resolve_local_archive_source, resolve_verified_weekly_source
 from src.storage.sqlite_store import (
     connect,
     import_json_archive,
@@ -49,6 +50,8 @@ def _data_source_public(source: dict[str, Any]) -> dict[str, Any]:
         "available": bool(source.get("available")),
         "reason": str(source.get("reason") or ""),
         "attestation": normalize_freshness(source.get("attestation")),
+        "history_only": bool(source.get("history_only")),
+        "read_only": bool(source.get("read_only")),
     }
 
 
@@ -143,11 +146,23 @@ class ApiRepository:
     def __init__(self, root: Path = ROOT, db_path: Path | None = None) -> None:
         self.app_root = root
         explicit_local = root.resolve() != ROOT.resolve()
-        self.data_source = resolve_verified_weekly_source(
+        local_mode = os.getenv("GITHUB_WEEKLY_DATA_MODE", "").strip().lower() == "local"
+        self.local_mode = local_mode
+        verified_source = resolve_verified_weekly_source(
             app_root=ROOT,
             explicit_root=root if explicit_local else None,
         )
+        if explicit_local:
+            self.data_source = verified_source
+        elif local_mode and verified_source.get("attestation", {}).get("data_freshness") != "fresh":
+            self.data_source = resolve_local_archive_source(app_root=root)
+        else:
+            self.data_source = verified_source
         self.root = self.data_source["root"] if self.data_source["available"] else (root if explicit_local else root / ".unavailable-weekly-snapshot")
+        self.local_read_only = bool(self.data_source.get("read_only"))
+        self.local_json_archive = self.local_read_only and self.data_source.get("kind") == "local_archive_json"
+        self.history_root = root.resolve() if local_mode and self.data_source.get("kind") == "weekly_snapshot" else None
+        self.history_db_path = self.history_root / "data" / "github_weekly.sqlite" if self.history_root else None
         self.db_path = db_path or (
             self.root / "data" / "github_weekly.sqlite" if explicit_local or self.data_source["available"]
             else Path(tempfile.gettempdir()) / "github-weekly-agent" / "unavailable.sqlite"
@@ -941,7 +956,6 @@ class ApiRepository:
         limit: int = 8,
         repository_ids: list[str] | None = None,
     ) -> dict[str, Any]:
-        self.ensure_sqlite_index()
         normalized_query = (_blank_to_none(query) or "").strip()
         terms = _search_terms(normalized_query)
         limit = max(1, min(int(limit or 8), 30))
@@ -961,10 +975,23 @@ class ApiRepository:
                 "summary": ["请输入用于 RAG 检索的问题或关键词。"],
             }
 
-        connection = connect(self.db_path)
+        if self.local_json_archive:
+            return self._local_json_rag_retrieve(
+                query=normalized_query,
+                terms=terms,
+                language=normalized_language,
+                category=normalized_category,
+                source=normalized_source,
+                limit=limit,
+                repository_ids=normalized_repository_ids,
+            )
+        self.ensure_sqlite_index()
+
+        connection = connect(self.db_path, read_only=self.local_read_only)
         retrieval_mode = "fts5"
         try:
-            initialize(connection)
+            if not self.local_read_only:
+                initialize(connection)
             try:
                 rows = _rag_chunk_rows_fts(
                     connection,
@@ -976,6 +1003,12 @@ class ApiRepository:
                     limit=limit * 3,
                 )
             except sqlite3.Error:
+                if self.local_read_only:
+                    return self._local_json_rag_retrieve(
+                        query=normalized_query, terms=terms, language=normalized_language,
+                        category=normalized_category, source=normalized_source, limit=limit,
+                        repository_ids=normalized_repository_ids,
+                    )
                 rows = _rag_chunk_rows_like(
                     connection,
                     terms=terms,
@@ -996,6 +1029,12 @@ class ApiRepository:
                 reverse=True,
             )
         )[:limit]
+        contexts = self._tag_contexts(contexts, self.data_source)
+        if self.history_root and self.history_db_path and self.history_root != self.root:
+            contexts = self._merge_history_contexts(
+                contexts, terms=terms, language=normalized_language, category=normalized_category,
+                source=normalized_source, repository_ids=normalized_repository_ids, limit=limit,
+            )
         return {
             "schema_version": 1,
             "query": normalized_query,
@@ -1006,6 +1045,122 @@ class ApiRepository:
             "contexts": contexts,
             "citations": _rag_citations(contexts),
             "retrieval": {"mode": retrieval_mode, "terms": terms, "limit": limit},
+            "prompt_context": _rag_prompt_context(contexts),
+            "summary": _rag_retrieve_summary(contexts, terms),
+        }
+
+    def _tag_contexts(self, contexts: list[dict[str, Any]], source: dict[str, Any]) -> list[dict[str, Any]]:
+        for context in contexts:
+            metadata = context.get("metadata") if isinstance(context.get("metadata"), dict) else {}
+            metadata["source_kind"] = str(source.get("kind") or "unknown")
+            metadata["source_date"] = str(source.get("run_date") or metadata.get("run_date") or "")
+            metadata["current_eligible"] = bool(source.get("kind") == "weekly_snapshot" and normalize_freshness(source.get("attestation"))["data_freshness"] == "fresh")
+            context["metadata"] = metadata
+        return contexts
+
+    def _merge_history_contexts(self, primary: list[dict[str, Any]], *, terms: list[str], language: str | None, category: str | None, source: str | None, repository_ids: list[str], limit: int) -> list[dict[str, Any]]:
+        history = resolve_local_archive_source(app_root=self.history_root or self.app_root)
+        contexts: list[dict[str, Any]] = []
+        if self.history_db_path and self.history_db_path.is_file():
+            try:
+                connection = connect(self.history_db_path, read_only=True)
+                try:
+                    rows = _rag_chunk_rows_like(connection, terms=terms, language=language, category=category, source=source, repository_ids=repository_ids, limit=limit * 3)
+                finally:
+                    connection.close()
+                contexts = [_rag_context(row, terms) for row in rows]
+                history["kind"] = "local_archive_sqlite"
+            except sqlite3.Error:
+                contexts = []
+        if not contexts:
+            original_root = self.root
+            try:
+                self.root = self.history_root or original_root
+                result = self._local_json_rag_retrieve(query=" ".join(terms), terms=terms, language=language, category=category, source=source, limit=limit * 3, repository_ids=repository_ids)
+                contexts = result["contexts"]
+                history["kind"] = "local_archive_json"
+            finally:
+                self.root = original_root
+        history["history_only"] = True
+        history["read_only"] = True
+        contexts = self._tag_contexts(contexts, history)
+        return _dedupe_rag_contexts(sorted([*primary, *contexts], key=lambda item: (item["score"], item["metadata"].get("run_date", "")), reverse=True))[:limit]
+
+    def _local_json_rag_retrieve(
+        self,
+        *,
+        query: str,
+        terms: list[str],
+        language: str | None,
+        category: str | None,
+        source: str | None,
+        limit: int,
+        repository_ids: list[str],
+    ) -> dict[str, Any]:
+        """Read selected JSON files directly without creating a derived index."""
+        contexts: list[dict[str, Any]] = []
+        selected_dir = self.root / "data" / "selected"
+        for path in sorted(selected_dir.glob("*.json"), reverse=True):
+            try:
+                items = json.loads(path.read_text(encoding="utf-8"))
+            except (OSError, ValueError, UnicodeError):
+                continue
+            if not isinstance(items, list):
+                continue
+            for index, item in enumerate(items):
+                if not isinstance(item, dict):
+                    continue
+                full_name = str(item.get("full_name") or "").strip()
+                if not full_name or (repository_ids and full_name not in repository_ids):
+                    continue
+                item_language = str(item.get("language") or "")
+                item_category = str(item.get("category") or "")
+                item_sources = _list_strings(item.get("sources") or item.get("source") or [])
+                if language and item_language != language:
+                    continue
+                if category and item_category != category:
+                    continue
+                if source and source not in item_sources:
+                    continue
+                text = json.dumps(item, ensure_ascii=False, sort_keys=True)
+                lowered = f"{full_name} {text}".lower()
+                score = sum(lowered.count(term.lower()) * 10 for term in terms)
+                if not score:
+                    continue
+                contexts.append({
+                    "chunk_id": f"local-json:{path.stem}:{index}",
+                    "corpus_id": f"local-json:{path.stem}:{full_name}",
+                    "text": text[:4000],
+                    "score": score,
+                    "evidence": _rag_evidence(text, terms),
+                    "metadata": {
+                        "chunk_index": index,
+                        "run_date": path.stem,
+                        "full_name": full_name,
+                        "html_url": str(item.get("html_url") or ""),
+                        "language": item_language,
+                        "category": item_category,
+                        "sources": item_sources,
+                        "token_estimate": max(1, len(text) // 4),
+                        "source_type": "local_archive_json",
+                        "project_profile": item.get("project_profile") if isinstance(item.get("project_profile"), dict) else {},
+                    },
+                })
+        contexts = _dedupe_rag_contexts(sorted(
+            contexts,
+            key=lambda item: (item["score"], item["metadata"]["run_date"], item["metadata"]["full_name"]),
+            reverse=True,
+        ))[:limit]
+        return {
+            "schema_version": 1,
+            "query": query,
+            "language": language or "",
+            "category": category or "",
+            "source": source or "",
+            "count": len(contexts),
+            "contexts": contexts,
+            "citations": _rag_citations(contexts),
+            "retrieval": {"mode": "local_archive_json", "terms": terms, "limit": limit},
             "prompt_context": _rag_prompt_context(contexts),
             "summary": _rag_retrieve_summary(contexts, terms),
         }
@@ -1022,6 +1177,13 @@ class ApiRepository:
         auto_build: bool = False,
         repository_ids: list[str] | None = None,
     ) -> dict[str, Any]:
+        if self.local_read_only:
+            result = self.rag_retrieve(
+                query=query, language=language, category=category, source=source,
+                limit=limit, repository_ids=repository_ids,
+            )
+            result["retrieval"] = {**result.get("retrieval", {}), "mode": "local_archive_readonly"}
+            return result
         self.ensure_sqlite_index()
         normalized_query = (_blank_to_none(query) or "").strip()
         terms = _search_terms(normalized_query)
@@ -1514,6 +1676,9 @@ class ApiRepository:
         explained = self._contextual_explained(request, route)
         retrieval = _contextual_answer_retrieval(explained, request, route)
         retrieval["freshness"] = archive_freshness(self.root)
+        if self.data_source.get("history_only"):
+            retrieval["freshness"] = self.data_source.get("attestation") or retrieval["freshness"]
+            retrieval["history_only"] = True
         retrieval["freshness_required"] = is_time_sensitive_query(request["q"])
         answer_result = answer_rag_question(
             root=self.root,
@@ -1559,6 +1724,9 @@ class ApiRepository:
         explained = self._contextual_explained(request, route)
         retrieval = _contextual_answer_retrieval(explained, request, route)
         retrieval["freshness"] = archive_freshness(self.root)
+        if self.data_source.get("history_only"):
+            retrieval["freshness"] = self.data_source.get("attestation") or retrieval["freshness"]
+            retrieval["history_only"] = True
         retrieval["freshness_required"] = is_time_sensitive_query(request["q"])
         for event in stream_rag_answer_question(
             root=self.root,
@@ -1610,10 +1778,12 @@ class ApiRepository:
             (context.get("metadata") or {}).get("full_name") or ""
             for context in (explained.get("contexts") if isinstance(explained.get("contexts"), list) else [])
         )
-        explained["requirement_verification"] = verify_project_requirements(
-            self.db_path,
-            full_names,
-            route.get("requirements") if isinstance(route.get("requirements"), list) else [],
+        explained["requirement_verification"] = (
+            {} if self.local_read_only else verify_project_requirements(
+                self.db_path,
+                full_names,
+                route.get("requirements") if isinstance(route.get("requirements"), list) else [],
+            )
         )
         return explained
 
@@ -1649,7 +1819,8 @@ class ApiRepository:
                 "retrieval": explained.get("retrieval") or {},
                 "prompt_context": explained.get("prompt_context") or "",
                 "constraints": {"language": language, "category": category, "source": source},
-                "freshness": archive_freshness(self.root),
+                "freshness": self.data_source.get("attestation") if self.data_source.get("history_only") else archive_freshness(self.root),
+                "history_only": bool(self.data_source.get("history_only")),
             },
         )
         return self._rag_ask_response(
@@ -1688,7 +1859,8 @@ class ApiRepository:
             "retrieval": explained.get("retrieval") or {},
             "prompt_context": explained.get("prompt_context") or "",
             "constraints": {"language": language, "category": category, "source": source},
-            "freshness": archive_freshness(self.root),
+            "freshness": self.data_source.get("attestation") if self.data_source.get("history_only") else archive_freshness(self.root),
+            "history_only": bool(self.data_source.get("history_only")),
         }
         for event in stream_rag_answer_question(
             root=self.root,
@@ -1763,6 +1935,42 @@ class ApiRepository:
             "freshness_required": is_time_sensitive_query(query),
             "data_source": _data_source_public(self.data_source),
         }
+        source_kind = str(self.data_source.get("kind") or "unknown")
+        source_date = str(self.data_source.get("run_date") or "")
+        current_eligible = source_kind == "weekly_snapshot" and response["freshness"].get("data_freshness") == "fresh"
+        context_sources = {
+            str((context.get("metadata") or {}).get("full_name") or ""): context.get("metadata") or {}
+            for context in contexts if isinstance(context, dict)
+        }
+        for item in response["recommendations"]:
+            if isinstance(item, dict):
+                metadata = context_sources.get(str(item.get("full_name") or ""), {})
+                item_source_kind = str(metadata.get("source_kind") or source_kind)
+                item_source_date = str(metadata.get("source_date") or source_date)
+                item_current = bool(metadata.get("current_eligible")) and item.get("eligibility") == "eligible"
+                item["source_kind"] = item_source_kind
+                item["source_date"] = item_source_date
+                item["current_eligible"] = item_current
+                item["source_notice"] = (
+                    "最新已验证快照，可用于当前结论。" if item_current
+                    else "本机历史归档，仅作历史候选，无法确认当前状态。" if item_source_kind.startswith("local_archive_")
+                    else "快照尚未满足当前结论条件，需要核实。"
+                )
+        if self.local_mode and self.history_root:
+            response["recommendations"].sort(key=lambda item: (
+                2 if item.get("eligibility") == "rejected" else 0 if item.get("eligibility") == "eligible" else 1,
+                0 if item.get("source_kind", "").startswith("local_archive_") and item.get("eligibility") == "eligible" else 1,
+                -float(item.get("match_score") or 0),
+                str(item.get("source_date") or ""),
+            ))
+            for rank, item in enumerate(response["recommendations"], start=1):
+                if isinstance(item, dict):
+                    item["rank"] = rank
+        response["source_notice"] = (
+            "最新已验证快照，可用于当前结论。" if current_eligible
+            else "本机历史归档，仅作历史候选，无法确认当前状态。" if self.data_source.get("history_only")
+            else "快照尚未满足当前结论条件，需要核实。"
+        )
         if "clarification_required" in answer_result:
             response["clarification_required"] = bool(answer_result.get("clarification_required"))
             response["clarification_question"] = str(answer_result.get("clarification_question") or "")
@@ -1774,6 +1982,8 @@ class ApiRepository:
         freshness = normalize_freshness(response.get("freshness"))
         source = _data_source_public(self.data_source)
         decision_id = _query_decision_id(response, source)
+        if self.local_read_only:
+            return decision_id
         quality = response.get("answer_quality") if isinstance(response.get("answer_quality"), dict) else {}
         candidates = response.get("recommendations") if isinstance(response.get("recommendations"), list) else []
         created_at = datetime.now(UTC).isoformat().replace("+00:00", "Z")
@@ -2862,6 +3072,8 @@ class ApiRepository:
             "created_at": created_at,
             "cached": True,
         }
+        if self.local_read_only:
+            return enriched
         connection = connect(self.db_path)
         try:
             initialize(connection)
@@ -4322,6 +4534,8 @@ class ApiRepository:
         }
 
     def ensure_sqlite_index(self) -> None:
+        if self.local_read_only:
+            return
         if not self.db_path.exists() or not self._sqlite_table_exists("jobs"):
             import_json_archive(self.root, self.db_path)
         if (
@@ -4366,9 +4580,10 @@ class ApiRepository:
                 connection.close()
 
     def _embedding_count(self, model: str) -> int:
-        connection = connect(self.db_path)
+        connection = connect(self.db_path, read_only=self.local_read_only)
         try:
-            initialize(connection)
+            if not self.local_read_only:
+                initialize(connection)
             row = connection.execute(
                 "SELECT COUNT(*) AS count FROM rag_embeddings WHERE embedding_model = ?",
                 (model,),
@@ -4378,9 +4593,10 @@ class ApiRepository:
             connection.close()
 
     def _embedding_rows(self, model: str) -> list[Any]:
-        connection = connect(self.db_path)
+        connection = connect(self.db_path, read_only=self.local_read_only)
         try:
-            initialize(connection)
+            if not self.local_read_only:
+                initialize(connection)
             return connection.execute(
                 """
                 SELECT e.chunk_id, e.corpus_id, e.run_date, e.full_name, e.html_url,

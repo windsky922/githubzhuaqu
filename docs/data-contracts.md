@@ -1,5 +1,13 @@
 # 数据契约说明
 
+## 偏好优先约束（2026-08-02）
+
+`requirements[].hard` 保持兼容：自然语言默认 `false`，仅明确强制措辞为 `true`。`input_route` 与每项 `recommendations[]` 可追加 `preferences[]`；每项包含 `field`、`operator`、`value`、`status`（`matched`、`unknown`、`unmet`）、`reason`、`evidence_chunk_ids` 与 `hard=false`。偏好不影响 `eligibility`；`eligibility` 仅由硬约束的明确冲突或待核实状态决定。
+
+## 双源 Ask 来源字段（2026-08-02）
+
+Ask/SSE 的既有契约不变。`data_source` 可追加 `history_only`、`read_only`；`recommendations[]` 可追加 `source_kind`、`source_date`、`current_eligible`、`source_notice`。`source_kind` 的稳定值为 `verified_snapshot`、`local_archive_sqlite`、`local_archive_json`。freshness 阈值为 30 天。历史来源只能提供历史参考，`current_eligible` 必须为 `false`。
+
 ## P0-18 capability scope gate
 
 `CapabilityFact` is an in-memory deterministic evidence record with `capability`, `phase`, `surface`, `necessity`, `state`, and `evidence_id` (the source chunk/clause reference). It adds no SQLite table or API field. A project-level match only uses compatible facts; setup, UI, optional, initial-download, control-plane, and other non-runtime scopes cannot prove a general runtime constraint. Contradictory or unknown scope remains `unknown`/`unmet`.

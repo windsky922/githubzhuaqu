@@ -1,5 +1,13 @@
 # GitHub Weekly Agent 架构说明
 
+## 偏好优先约束（2026-08-02）
+
+约束解析将自然语言条件分成偏好和明确硬约束。核验器继续只接收可引用的项目级证据；偏好证据不足时保留候选并标为待核实，硬约束明确冲突时才淘汰。`multi_agent` 是可检索、可核验但默认不阻断的偏好。
+
+## 双源 Ask（2026-08-02）
+
+生产路径保持 fail-closed：`GITHUB_WEEKLY_SNAPSHOT_ROOT` 缺失或无有效 attestation 不得使用 checkout 数据。显式 `GITHUB_WEEKLY_DATA_MODE=local` 才启用只读历史路径；先用 30 天内 verified snapshot，没有 fresh snapshot 时读取本机 SQLite，SQLite 不可读或缺失时读取 JSON。历史路径不调用迁移、回填、解释写入或查询审计写入，并将候选标为历史来源，禁止确认当前首选。
+
 ## P0-18 capability scope gate
 
 The deterministic constraint verifier and claim anchor share clause-scoped capability facts. Facts never merge across incompatible phase, surface, or necessity scopes. Runtime, inference, and required blockers are fail-closed for recommendation eligibility; model enrichment cannot promote unknown or rejected candidates.
