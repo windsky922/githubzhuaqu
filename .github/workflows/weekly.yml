@@ -59,6 +59,9 @@ env:
 jobs:
   weekly:
     runs-on: ubuntu-latest
+    env:
+      GITHUB_WEEKLY_SNAPSHOT_ROOT: ${{ github.workspace }}
+
     steps:
       - name: 检出代码
         uses: actions/checkout@v6

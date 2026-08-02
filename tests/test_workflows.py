@@ -73,6 +73,7 @@ class WorkflowTest(unittest.TestCase):
     def test_weekly_workflow_writes_freshness_attestation_before_pages_and_publish(self) -> None:
         workflow = (ROOT / ".github" / "workflows" / "weekly.yml").read_text(encoding="utf-8")
 
+        self.assertIn("GITHUB_WEEKLY_SNAPSHOT_ROOT: ${{ github.workspace }}", workflow)
         self.assertIn("scripts/refresh_rag_freshness.py", workflow)
         self.assertIn('--run-date "$(date -u +%F)"', workflow)
         self.assertLess(workflow.index("run: python main.py"), workflow.index("scripts/refresh_rag_freshness.py"))
