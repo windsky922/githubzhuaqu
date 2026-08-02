@@ -1,5 +1,9 @@
 # 数据契约说明
 
+## Freshness 权威阈值（2026-08-02）
+
+`DEFAULT_STALE_AFTER_DAYS` 是唯一默认值，当前为 30 天。本文任何历史的 8 天描述均已废弃，不得作为 API、attestation 或测试阈值。
+
 ## 偏好优先约束（2026-08-02）
 
 `requirements[].hard` 保持兼容：自然语言默认 `false`，仅明确强制措辞为 `true`。`input_route` 与每项 `recommendations[]` 可追加 `preferences[]`；每项包含 `field`、`operator`、`value`、`status`（`matched`、`unknown`、`unmet`）、`reason`、`evidence_chunk_ids` 与 `hard=false`。偏好不影响 `eligibility`；`eligibility` 仅由硬约束的明确冲突或待核实状态决定。

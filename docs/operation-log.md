@@ -1,5 +1,12 @@
 # 操作日志
 
+## 2026-08-02 追加：P1-1 freshness 契约统一
+
+1. 核对运行时默认值 `DEFAULT_STALE_AFTER_DAYS=30`、本机历史来源 attestation 与 API 归一化逻辑均为 30 天。
+2. 在数据契约顶部声明 30 天为唯一权威阈值，历史的 8 天描述废弃；fresh、lagging、stale、unknown 的 fail-closed 行为不变。
+
+验证：`tests.test_rag_freshness`、`tests.test_rag_freshness_attestation`、`tests.test_p1_data_trust` 将作为本轮回归；未修改数据源、SQLite、归档、`output/` 或 `tmp/`。
+
 ## 2026-08-02 追加：全量 Python 测试超时排查
 
 1. `python -m unittest discover -q` 在本地 124 秒执行上限内无输出后超时；未发现失败栈或死锁证据。
