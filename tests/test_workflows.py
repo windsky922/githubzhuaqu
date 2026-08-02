@@ -62,19 +62,20 @@ class WorkflowTest(unittest.TestCase):
             if line.lstrip().startswith("run:") and "--message" in line:
                 self.assertNotIn(": ", line.split("--message", 1)[1])
 
-    def test_weekly_workflow_uses_job_runner_for_manual_runs(self) -> None:
+    def test_weekly_workflow_runs_report_directly_with_workflow_inputs(self) -> None:
         workflow = (ROOT / ".github" / "workflows" / "weekly.yml").read_text(encoding="utf-8")
 
-        self.assertIn("scripts/create_planned_job.py", workflow)
-        self.assertIn("--output .weekly-job.json", workflow)
-        self.assertIn("scripts/run_planned_job.py --job-file .weekly-job.json", workflow)
+        self.assertIn("run: python main.py", workflow)
+        self.assertIn("INTEREST_PROFILE: ${{ inputs.profile || vars.INTEREST_PROFILE }}", workflow)
+        self.assertIn("DAYS_BACK: ${{ inputs.days_back || '7' }}", workflow)
+        self.assertIn("SKIP_TELEGRAM_SEND: ${{ inputs.skip_main_delivery || 'true' }}", workflow)
 
     def test_weekly_workflow_writes_freshness_attestation_before_pages_and_publish(self) -> None:
         workflow = (ROOT / ".github" / "workflows" / "weekly.yml").read_text(encoding="utf-8")
 
         self.assertIn("scripts/refresh_rag_freshness.py", workflow)
         self.assertIn('--run-date "$(date -u +%F)"', workflow)
-        self.assertLess(workflow.index("scripts/run_planned_job.py --job-file .weekly-job.json"), workflow.index("scripts/refresh_rag_freshness.py"))
+        self.assertLess(workflow.index("run: python main.py"), workflow.index("scripts/refresh_rag_freshness.py"))
         self.assertLess(workflow.index("scripts/refresh_rag_freshness.py"), workflow.index("python scripts/build_pages.py"))
         self.assertLess(workflow.index("scripts/refresh_rag_freshness.py"), workflow.index("scripts/publish_archive_branch.py"))
         self.assertIn("inputs.send_link == 'true'", workflow)
