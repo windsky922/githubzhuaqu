@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GitHub 周报 2026-08-02</title>
+  <style>
+    body { margin: 0; background: #f6f7f9; color: #1f2933; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height: 1.7; }
+    main { max-width: 960px; margin: 0 auto; padding: 32px 20px 56px; }
+    article { background: #fff; border: 1px solid #d8dee8; padding: 28px; }
+    h1, h2, h3, h4 { line-height: 1.3; }
+    a { color: #0969da; }
+    code { background: #eef2f7; padding: 2px 5px; }
+    table { width: 100%; border-collapse: collapse; margin: 18px 0; display: block; overflow-x: auto; }
+    th, td { border: 1px solid #d8dee8; padding: 8px 10px; text-align: left; vertical-align: top; }
+    th { background: #f1f4f8; }
+    hr { border: 0; border-top: 1px solid #d8dee8; margin: 24px 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <article>
+      <p><strong>GitHub 每周热点项目周报</strong></p>
+      <p>*统计周期：2026-07-26 至 2026-08-02*</p>
+      <hr>
+      <h3>1. 本周总体趋势</h3>
+      <p>本周开源社区呈现 <strong>AI Agent 工具链大爆发</strong> 态势。在入选的 10 个活跃项目中，<strong>AI Agent 类别占据 5 席</strong>，显示出从通用大模型向专业化 Agent 开发工具的明确转向。</p>
+      <p><strong>语言分布</strong>方面，Python（3 个）、Rust（2 个）、TypeScript（2 个）三足鼎立，Go、Swift、JavaScript 各有代表。<strong>GitHub Trending 周榜覆盖率高达 90%</strong>（9/10 项目），其中 <code>permissionlesstech/bitchat</code> 登顶周榜第 1 位。</p>
+      <p><strong>增长数据</strong>显示头部项目吸星能力强劲：NousResearch/hermes-agent 单周新增 Star 45,782，1jehuang/jcode 新增 9,734，累计新增 Star 达 55,516。质量评估方面，多数项目 quality_score 达到 100 分（high 级别），代码成熟度与信息完整度俱佳。</p>
+      <hr>
+      <h3>2. 热点项目总览</h3>
+      <table>
+        <thead><tr><th>项目名称</th><th>语言</th><th>Star 数</th><th>本周排名/增长</th><th>核心定位</th></tr></thead>
+        <tbody>
+        <tr><td><a href="https://github.com/permissionlesstech/bitchat">permissionlesstech/bitchat</a></td><td>Swift</td><td>33,998</td><td>Trending #1</td><td>去中心化蓝牙网状聊天</td></tr>
+        <tr><td><a href="https://github.com/block/buzz">block/buzz</a></td><td>Rust</td><td>20,569</td><td>Trending #2</td><td>人机协作工作空间</td></tr>
+        <tr><td><a href="https://github.com/citrolabs/ego-lite">citrolabs/ego-lite</a></td><td>JavaScript</td><td>7,431</td><td>Trending #3</td><td>AI 浏览器自动化</td></tr>
+        <tr><td><a href="https://github.com/ayghri/i-have-adhd">ayghri/i-have-adhd</a></td><td>Python</td><td>15,314</td><td>Trending #4</td><td>ADHD 友好型编码助手</td></tr>
+        <tr><td><a href="https://github.com/alibaba/open-code-review">alibaba/open-code-review</a></td><td>Go</td><td>17,558</td><td>Trending #5</td><td>企业级 AI 代码审查</td></tr>
+        <tr><td><a href="https://github.com/virgiliojr94/book-to-skill">virgiliojr94/book-to-skill</a></td><td>Python</td><td>14,945</td><td>Trending #6</td><td>PDF 转 Agent 技能工具</td></tr>
+        <tr><td><a href="https://github.com/pascalorg/editor">pascalorg/editor</a></td><td>TypeScript</td><td>20,627</td><td>Trending #7</td><td>3D 建筑编辑器</td></tr>
+        <tr><td><a href="https://github.com/1jehuang/jcode">1jehuang/jcode</a></td><td>Rust</td><td>14,994</td><td>Trending #8 / +9,734⭐</td><td>内存高效 AI 编码工具</td></tr>
+        <tr><td><a href="https://github.com/NousResearch/hermes-agent">NousResearch/hermes-agent</a></td><td>Python</td><td>223,915</td><td>+45,782⭐</td><td>自改进 AI Agent</td></tr>
+        <tr><td><a href="https://github.com/opengeos/GeoLibre">opengeos/GeoLibre</a></td><td>TypeScript</td><td>4,869</td><td>Trending #9</td><td>云原生 GIS 平台</td></tr>
+        </tbody>
+      </table>
+      <hr>
+      <h3>3. 重点项目分析</h3>
+      <p><strong>permissionlesstech/bitchat</strong></p>
+      <p>进入 GitHub Trending 周榜第 1 位，是本期最重要的热度信号。该 Swift 项目构建了一个去中心化点对点消息应用，采用双传输架构：本地蓝牙网状网络实现离线通信，结合 Nostr 协议实现全球可达。无需账户、手机号或中心服务器，质量评分 100 分，适合关注隐私通信与去中心化网络技术的开发者研究。</p>
+      <p><strong>NousResearch/hermes-agent</strong></p>
+      <p>较上次记录新增 Star 45,782，近期热度显著上升。作为 Python 构建的自改进型 AI Agent，其具备内置学习循环：能从经验创建技能、在使用过程中持续优化、自动持久化知识，并建立跨会话的用户画像模型。尽管未进入本周 Trending 前十，但庞大的社区基数（223k+ stars）和持续的高增长表明其作为 Agent 架构参考标的的重要价值。</p>
+      <p><strong>alibaba/open-code-review</strong></p>
+      <p>进入 GitHub Trending 周榜第 5 位。这是阿里巴巴开源的 AI 代码审查 CLI 工具，已在阿里内部服务数万开发者两年。采用确定性流水线 + LLM Agent 混合架构，支持精确到行级的评论，内置针对 NPE、线程安全、XSS、SQL 注入的微调规则集，兼容 OpenAI 与 Anthropic API，quality_score 100 分，适合企业级 DevOps 集成参考。</p>
+      <p><strong>block/buzz</strong></p>
+      <p>进入 GitHub Trending 周榜第 2 位。由 Block 推出的自托管工作空间，定位为&quot;人类与 Agent 共同构建的蜂巢思维平台&quot;。基于 Rust 开发，支持人与 AI Agent 在同一&quot;房间&quot;内协作，反映出去中心化组织与 AI 协作的前沿探索方向，质量评分 92 分。</p>
+      <p><strong>citrolabs/ego-lite</strong></p>
+      <p>进入 GitHub Trending 周榜第 3 位。专为 AI Agent 设计的浏览器自动化工具，基于 JavaScript 开发。核心创新在于允许用户与 AI Agent 并行工作：Agent 在独立 Space 中运行浏览器任务，而用户标签页保持独立，实现零成本、零配置的浏览器状态共享，适配 Claude Code 与 Codex 等主流编码 Agent。</p>
+      <p><strong>1jehuang/jcode</strong></p>
+      <p>进入 GitHub Trending 周榜第 8 位，且较上次记录新增 Star 9,734。这是一个 Rust 编写的内存高效 AI 编码工具（AI Harness），主打低内存占用与高性能。支持 MCP 协议，提供 TUI 界面，适合资源受限环境下的 AI 辅助编程场景，质量评分 100 分。</p>
+      <hr>
+      <h3>4. 最适合用户学习的项目</h3>
+      <p>根据您的技术背景（Java 后端、Python 工具开发、Agent 开发、关注 CLI 与自动化），以下项目建议优先学习：</p>
+      <p><strong>入门实践：virgiliojr94/book-to-skill</strong></p>
+      <p>Python 项目，适合快速上手。可将技术书籍 PDF 转换为 Claude Code 或 Copilot CLI 的 Skill 文件，帮助您建立个人知识库与 AI 助手的深度集成。代码结构清晰，MIT 协议，适合作为 Python 自动化工具开发的参考实现。</p>
+      <p><strong>架构进阶：alibaba/open-code-review</strong></p>
+      <p>Go 语言编写的生产级工具，适合学习如何将 LLM 集成到现有工程流程。其&quot;确定性流水线 + LLM Agent&quot;的混合架构设计，以及针对 Java 等语言的静态分析规则实现，对后端开发者具有直接参考价值。</p>
+      <p><strong>Agent 深度开发：NousResearch/hermes-agent</strong></p>
+      <p>Python 项目，虽然规模庞大，但其&quot;内置学习循环&quot;与技能自动进化机制代表了当前 Agent 开发的前沿方向。建议重点研究其知识持久化与会话建模的实现逻辑，而非直接部署使用。</p>
+      <hr>
+      <h3>5. 本周结论</h3>
+      <p>本周开源生态的显著趋势是 <strong>AI Agent 从概念验证走向工程化工具</strong>。不再局限于通用对话，而是深入特定场景：浏览器自动化（ego-lite）、代码审查（open-code-review）、知识管理（book-to-skill）、人机协作（buzz）等。</p>
+      <p><strong>技术选型建议</strong>：Rust 与 Python 成为 Agent 开发的双主流，前者主打性能（jcode、buzz），后者占据生态灵活性（hermes-agent、i-have-adhd）。对于 Java 开发者，可关注 OpenCodeReview 的混合架构设计，作为将 AI 集成到现有 Spring 生态的参考模式。</p>
+      <p><strong>风险提示</strong>：本周入选项目 security_flags 均为空，安全评级均为 low（低风险），但建议在生产环境部署前自行审计依赖库与网络通信实现。</p>
+      <h2>附录：项目链接与来源补全</h2>
+      <p>• permissionlesstech/bitchat；<a href="https://github.com/permissionlesstech/bitchat">https://github.com/permissionlesstech/bitchat</a>；来源：GitHub Trending；Trending 排名：1</p>
+      <p>• block/buzz；<a href="https://github.com/block/buzz">https://github.com/block/buzz</a>；来源：GitHub Trending；Trending 排名：2</p>
+      <p>• citrolabs/ego-lite；<a href="https://github.com/citrolabs/ego-lite">https://github.com/citrolabs/ego-lite</a>；来源：GitHub Trending；Trending 排名：3</p>
+      <p>• ayghri/i-have-adhd；<a href="https://github.com/ayghri/i-have-adhd">https://github.com/ayghri/i-have-adhd</a>；来源：GitHub Trending；Trending 排名：4</p>
+      <p>• alibaba/open-code-review；<a href="https://github.com/alibaba/open-code-review">https://github.com/alibaba/open-code-review</a>；来源：GitHub Trending；Trending 排名：5</p>
+      <p>• virgiliojr94/book-to-skill；<a href="https://github.com/virgiliojr94/book-to-skill">https://github.com/virgiliojr94/book-to-skill</a>；来源：GitHub Trending；Trending 排名：6</p>
+      <p>• pascalorg/editor；<a href="https://github.com/pascalorg/editor">https://github.com/pascalorg/editor</a>；来源：GitHub Trending；Trending 排名：7</p>
+      <p>• 1jehuang/jcode；<a href="https://github.com/1jehuang/jcode">https://github.com/1jehuang/jcode</a>；来源：GitHub Trending；Trending 排名：8</p>
+      <p>• NousResearch/hermes-agent；<a href="https://github.com/NousResearch/hermes-agent">https://github.com/NousResearch/hermes-agent</a>；来源：GitHub Search</p>
+      <p>• opengeos/GeoLibre；<a href="https://github.com/opengeos/GeoLibre">https://github.com/opengeos/GeoLibre</a>；来源：GitHub Trending；Trending 排名：9</p>
+    </article>
+  </main>
+</body>
+</html>

@@ -4,6 +4,16 @@
 
 | 日期 | 项目 | 来源 | Trending 排名 | 方向 | 语言 | Star | 新增 Star | 风险提示 | 链接 |
 |---|---|---|---:|---|---|---:|---:|---:|---|
+| 2026-08-02 | permissionlesstech/bitchat | GitHub Trending | 1 | Other | Swift | 33998 | 0 | 0 | [https://github.com/permissionlesstech/bitchat](https://github.com/permissionlesstech/bitchat) |
+| 2026-08-02 | block/buzz | GitHub Trending | 2 | Other | Rust | 20569 | 0 | 0 | [https://github.com/block/buzz](https://github.com/block/buzz) |
+| 2026-08-02 | citrolabs/ego-lite | GitHub Trending | 3 | AI Agent | JavaScript | 7431 | 0 | 0 | [https://github.com/citrolabs/ego-lite](https://github.com/citrolabs/ego-lite) |
+| 2026-08-02 | ayghri/i-have-adhd | GitHub Trending | 4 | AI Agent | Python | 15314 | 0 | 0 | [https://github.com/ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) |
+| 2026-08-02 | alibaba/open-code-review | GitHub Trending | 5 | AI Agent | Go | 17558 | 0 | 0 | [https://github.com/alibaba/open-code-review](https://github.com/alibaba/open-code-review) |
+| 2026-08-02 | virgiliojr94/book-to-skill | GitHub Trending | 6 | LLM Tooling | Python | 14945 | 0 | 0 | [https://github.com/virgiliojr94/book-to-skill](https://github.com/virgiliojr94/book-to-skill) |
+| 2026-08-02 | pascalorg/editor | GitHub Trending | 7 | Other | TypeScript | 20627 | 0 | 0 | [https://github.com/pascalorg/editor](https://github.com/pascalorg/editor) |
+| 2026-08-02 | 1jehuang/jcode | GitHub Trending | 8 | AI Agent | Rust | 14994 | 9734 | 0 | [https://github.com/1jehuang/jcode](https://github.com/1jehuang/jcode) |
+| 2026-08-02 | NousResearch/hermes-agent | GitHub Search | - | AI Agent | Python | 223915 | 45782 | 0 | [https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) |
+| 2026-08-02 | opengeos/GeoLibre | GitHub Trending | 9 | Other | TypeScript | 4869 | 0 | 0 | [https://github.com/opengeos/GeoLibre](https://github.com/opengeos/GeoLibre) |
 | 2026-07-20 | OpenCut-app/OpenCut | GitHub Trending | 2 | Other | TypeScript | 75957 | 0 | 0 | [https://github.com/OpenCut-app/OpenCut](https://github.com/OpenCut-app/OpenCut) |
 | 2026-07-20 | Shubhamsaboo/awesome-llm-apps | GitHub Search + GitHub Trending | 3 | AI Agent | Python | 124626 | 11919 | 0 | [https://github.com/Shubhamsaboo/awesome-llm-apps](https://github.com/Shubhamsaboo/awesome-llm-apps) |
 | 2026-07-20 | HKUDS/Vibe-Trading | GitHub Trending | 4 | AI Agent | Python | 25353 | 0 | 0 | [https://github.com/HKUDS/Vibe-Trading](https://github.com/HKUDS/Vibe-Trading) |

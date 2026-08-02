@@ -1,7 +1,314 @@
 {
   "schema_version": 1,
-  "count": 190,
+  "count": 200,
   "projects": [
+    {
+      "run_date": "2026-08-02",
+      "full_name": "permissionlesstech/bitchat",
+      "html_url": "https://github.com/permissionlesstech/bitchat",
+      "description": "bluetooth mesh chat, IRC vibes",
+      "readme_summary": "A decentralized peer-to-peer messaging app with dual transport architecture: local Bluetooth mesh networks for offline communication and internet-based Nostr protocol for global reach. No accounts, no phone numbers, no central servers. It's the side-groupchat.",
+      "category": "Other",
+      "language": "Swift",
+      "stargazers_count": 33998,
+      "forks_count": 5421,
+      "star_growth": 0,
+      "score": 0.5171,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 1,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 1 位，是本期最重要的热度信号。",
+        "当前累计 Star 33998，具备一定社区关注度。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-08-02.html"
+    },
+    {
+      "run_date": "2026-08-02",
+      "full_name": "block/buzz",
+      "html_url": "https://github.com/block/buzz",
+      "description": "A hive mind communication platform",
+      "readme_summary": "Buzz 🐝 A workspace where humans and agents build together, on a relay you own. People and agents building together in the same room. Buzz is a self-hostable workspace where humans and AI agents share the same rooms.",
+      "category": "Other",
+      "language": "Rust",
+      "stargazers_count": 20569,
+      "forks_count": 2166,
+      "star_growth": 0,
+      "score": 0.4912,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 2,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 2 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：开发者工具。",
+        "当前累计 Star 20569，具备一定社区关注度。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+      ],
+      "quality_score": 92,
+      "quality_level": "high",
+      "report_url": "weekly/2026-08-02.html"
+    },
+    {
+      "run_date": "2026-08-02",
+      "full_name": "citrolabs/ego-lite",
+      "html_url": "https://github.com/citrolabs/ego-lite",
+      "description": "The fastest browser for AI agents to run browser automation, built for sharing your logged-in browser state with your AI agents, like Codex or Claude Code, without disturbing you. Zero cost, zero config.",
+      "readme_summary": "The fastest browser for AI agents to run browser automation** ego (lite) is a browser where you and your AI agents work in parallel. Your agents run multiple browser tasks in their own Spaces while your tabs stay yours, and tasks complete faster on fewer tokens.",
+      "category": "AI Agent",
+      "language": "JavaScript",
+      "stargazers_count": 7431,
+      "forks_count": 370,
+      "star_growth": 0,
+      "score": 0.6508,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 3,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 3 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 7431，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-08-02.html"
+    },
+    {
+      "run_date": "2026-08-02",
+      "full_name": "ayghri/i-have-adhd",
+      "html_url": "https://github.com/ayghri/i-have-adhd",
+      "description": "A skill to stop your coding agent from burying the answer. ADHD-friendly output.",
+      "readme_summary": "ADHD-friendly outputs. No ADHD diagnosis needed! English · Claude Code Then type /i-have-adhd.",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 15314,
+      "forks_count": 850,
+      "star_growth": 0,
+      "score": 0.5737,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 4,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 4 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 15314，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-08-02.html"
+    },
+    {
+      "run_date": "2026-08-02",
+      "full_name": "alibaba/open-code-review",
+      "html_url": "https://github.com/alibaba/open-code-review",
+      "description": "Open-source & free — Battle-tested at Alibaba's scale. Hybrid architecture code review tool: deterministic pipelines + LLM Agent, precise line-level comments, built-in fine-tuned ruleset (NPE, thread-safety, XSS, SQL injection), OpenAI & Anthropic compatible.",
+      "readme_summary": "OpenCodeReview English | 简体中文 | 日本語 | 한국어 | Русский Open Code Review is an AI-powered code review CLI tool. It originated as Alibaba Group's internal official AI code review assistant — over the past two years, it has served tens of thousands of developers and identified millions of code defects.",
+      "category": "AI Agent",
+      "language": "Go",
+      "stargazers_count": 17558,
+      "forks_count": 1193,
+      "star_growth": 0,
+      "score": 0.4962,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 5,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 5 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Agent 开发、开发者工具。",
+        "当前累计 Star 17558，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-08-02.html"
+    },
+    {
+      "run_date": "2026-08-02",
+      "full_name": "virgiliojr94/book-to-skill",
+      "html_url": "https://github.com/virgiliojr94/book-to-skill",
+      "description": "Turn any technical book PDF into a Claude Code skill — ready to study, reference, and use while you work.",
+      "readme_summary": "book-to-skill Turn any technical book, document folder, or collection of sources into a unified agent skill — ready to study, reference, and use while you work in GitHub Copilot CLI, Amp, or Claude Code.",
+      "category": "LLM Tooling",
+      "language": "Python",
+      "stargazers_count": 14945,
+      "forks_count": 1613,
+      "star_growth": 0,
+      "score": 0.4584,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 6,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 6 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 14945，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+      ],
+      "quality_score": 92,
+      "quality_level": "high",
+      "report_url": "weekly/2026-08-02.html"
+    },
+    {
+      "run_date": "2026-08-02",
+      "full_name": "pascalorg/editor",
+      "html_url": "https://github.com/pascalorg/editor",
+      "description": "Create and share 3D architectural projects.",
+      "readme_summary": "A 3D building editor built with React Three Fiber and WebGPU. Install the full built-in viewer set, then load the built-in plugin once before mounting : See the @pascal-app/viewer quick start for a React example.",
+      "category": "Other",
+      "language": "TypeScript",
+      "stargazers_count": 20627,
+      "forks_count": 2656,
+      "star_growth": 0,
+      "score": 0.3543,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 7,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 7 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Agent 开发、开发者工具。",
+        "当前累计 Star 20627，具备一定社区关注度。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+      ],
+      "quality_score": 92,
+      "quality_level": "high",
+      "report_url": "weekly/2026-08-02.html"
+    },
+    {
+      "run_date": "2026-08-02",
+      "full_name": "1jehuang/jcode",
+      "html_url": "https://github.com/1jehuang/jcode",
+      "description": "The most RAM efficient harness",
+      "readme_summary": "The most RAM efficient harness The most most intelligent harness Website · Docs · Benchmarks · Features · Install · Quick Start · Further Reading · Contributing Need Homebrew, source builds, provider setup, or want an agent to set it up for you? Jump to detailed installation.",
+      "category": "AI Agent",
+      "language": "Rust",
+      "stargazers_count": 14994,
+      "forks_count": 1663,
+      "star_growth": 9734,
+      "score": 0.5892,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 8,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 8 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 9734，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-08-02.html"
+    },
+    {
+      "run_date": "2026-08-02",
+      "full_name": "NousResearch/hermes-agent",
+      "html_url": "https://github.com/NousResearch/hermes-agent",
+      "description": "The agent that grows with you",
+      "readme_summary": "The self-improving AI agent built by Nous Research.** It's the only agent with a built-in learning loop — it creates skills from experience, improves them during use, nudges itself to persist knowledge, searches its own past conversations, and builds a deepening model of who you are across sessions.",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 223915,
+      "forks_count": 43231,
+      "star_growth": 45782,
+      "score": 0.3647,
+      "sources": [
+        "github_search"
+      ],
+      "trending_rank": 0,
+      "selection_reasons": [
+        "较上次记录新增 Star 45782，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 223915，具备一定社区关注度。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库简介较短，项目定位信息有限。"
+      ],
+      "quality_score": 92,
+      "quality_level": "high",
+      "report_url": "weekly/2026-08-02.html"
+    },
+    {
+      "run_date": "2026-08-02",
+      "full_name": "opengeos/GeoLibre",
+      "html_url": "https://github.com/opengeos/GeoLibre",
+      "description": "A lightweight, cloud-native GIS platform for visualizing, exploring, and analyzing geospatial data. It runs in the web browser, on the desktop, on mobile, and inside Jupyter notebooks.",
+      "readme_summary": "A free and open-source, lightweight, cloud-native GIS platform for visualizing, exploring, and analyzing geospatial data. It runs everywhere you do, in the web browser, on the desktop, on mobile, and inside Jupyter notebooks, all while keeping your data local and private.",
+      "category": "Other",
+      "language": "TypeScript",
+      "stargazers_count": 4869,
+      "forks_count": 487,
+      "star_growth": 0,
+      "score": 0.3381,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 9,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 9 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 4869，具备一定社区关注度。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-08-02.html"
+    },
     {
       "run_date": "2026-07-20",
       "full_name": "OpenCut-app/OpenCut",
