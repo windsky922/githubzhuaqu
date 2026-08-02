@@ -1,5 +1,22 @@
 # 操作日志
 
+## 2026-08-02 追加：V6 下一阶段开发交接
+
+1. 新增 `docs/project-review-agent-v6-handoff.md`，以当前 `d638dae` 功能基线和未提交 V6 审查文档为起点，固定 P0-1 历史只读核验、P0-2 CI/分支治理的执行顺序。
+2. 交接明确：生产继续 fail-closed；本机历史只读模式必须保留证据核验但不得写入 SQLite 或归档；历史候选永不作为当前首选。
+3. README 更新至 V6 审查与交接入口。交接文件不等同于新的代码基线；下次工作先检查工作树并决定是否单独提交文档。
+
+验证：`git diff --check` 通过；已核对交接包含阅读顺序、当前状态、P0 工作包、命令、环境变量、验证矩阵和禁止项。未运行额外代码测试，未修改产品代码、数据、工作流、`output/` 或 `tmp/`。
+
+
+## 2026-08-02 追加：V6 只读增量完整审查
+
+1. 新增 `docs/project-review-agent-v6-roadmap.md`，以 `d638dae32d20bf73a0153576e45adbef38c89d64` 为新基线，覆盖产品主链、双源 Ask、约束、前端、测试、CI、weekly 和分支治理。
+2. 审查发现：本机历史只读 Ask 跳过 `verify_project_requirements`，不能基于历史证据确认或淘汰条件；固定评估仍断言旧的默认硬约束，导致当前 `main` CI 失败；数据契约并存 30 天与 8 天 freshness 阈值；`main` 未启用分支保护。
+3. 本轮只读运行定向 Python 测试、前端 lint/test 与远端 GitHub 状态查询；未修改产品代码、工作流、SQLite、历史归档、`output/` 或 `tmp/`。完整结果、证据边界和整改路线见 V6 报告。
+
+验证：`python -m unittest tests.test_contextual_ask tests.test_p1_data_trust tests.test_rag_freshness tests.test_data_contracts -q`、`npm.cmd run lint`、`npm.cmd run test` 通过；`git diff --check` 与 `git diff --exit-code -- docs/app` 通过。远端 `main` 的提交质量检查 `30737083119` 失败，原因见 V6 报告。
+
 ## 2026-08-02 追加：偏好优先的 Agent 约束
 
 1. 自然语言条件默认记为偏好；只有“必须、仅、不得、排除、不能接受、只要、必须满足”等同一短语内的明确措辞才生成硬约束。
