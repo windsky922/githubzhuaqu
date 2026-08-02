@@ -1,5 +1,12 @@
 # 操作日志
 
+## 2026-08-02 追加：P1-2 JSON 回退并发安全
+
+1. 历史 JSON 回退不再临时改写共享的 `ApiRepository.self.root`。
+2. `_local_json_rag_retrieve` 接收请求局部 `root` 参数；混合来源的历史读取显式传入 `history_root`，避免并发请求互相串扰。
+
+验证：`python -m unittest tests.test_p1_data_trust tests.test_contextual_ask -q` 通过（17 tests）；`git diff --check` 通过。未修改 SQLite、JSON 归档、`output/` 或 `tmp/`。
+
 ## 2026-08-02 追加：P1-1 freshness 契约统一
 
 1. 核对运行时默认值 `DEFAULT_STALE_AFTER_DAYS=30`、本机历史来源 attestation 与 API 归一化逻辑均为 30 天。

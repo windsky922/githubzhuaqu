@@ -1073,14 +1073,13 @@ class ApiRepository:
             except sqlite3.Error:
                 contexts = []
         if not contexts:
-            original_root = self.root
-            try:
-                self.root = self.history_root or original_root
-                result = self._local_json_rag_retrieve(query=" ".join(terms), terms=terms, language=language, category=category, source=source, limit=limit * 3, repository_ids=repository_ids)
-                contexts = result["contexts"]
-                history["kind"] = "local_archive_json"
-            finally:
-                self.root = original_root
+            result = self._local_json_rag_retrieve(
+                root=self.history_root or self.root,
+                query=" ".join(terms), terms=terms, language=language, category=category,
+                source=source, limit=limit * 3, repository_ids=repository_ids,
+            )
+            contexts = result["contexts"]
+            history["kind"] = "local_archive_json"
         history["history_only"] = True
         history["read_only"] = True
         contexts = self._tag_contexts(contexts, history)
@@ -1089,6 +1088,7 @@ class ApiRepository:
     def _local_json_rag_retrieve(
         self,
         *,
+        root: Path | None = None,
         query: str,
         terms: list[str],
         language: str | None,
@@ -1099,7 +1099,7 @@ class ApiRepository:
     ) -> dict[str, Any]:
         """Read selected JSON files directly without creating a derived index."""
         contexts: list[dict[str, Any]] = []
-        selected_dir = self.root / "data" / "selected"
+        selected_dir = (root or self.root) / "data" / "selected"
         for path in sorted(selected_dir.glob("*.json"), reverse=True):
             try:
                 items = json.loads(path.read_text(encoding="utf-8"))
