@@ -2938,6 +2938,20 @@ tests/test_sender.py
 
 ---
 
+## 2026-08-02 追加：GitHub Actions 内置令牌与 weekly 工作流修复
+
+### 1. 修改内容
+
+1. 将周报采集和 Secrets 检查从 `GH_SEARCH_TOKEN` 迁移到 Actions 内置 `GITHUB_TOKEN`；Secrets 检查补充仓库检出步骤。
+2. 周报工作流改为直接运行 `main.py`，移除对易失 planned-job 队列的依赖；失败会停止后续 freshness 步骤。
+3. 为 weekly Job 绑定 `GITHUB_WEEKLY_SNAPSHOT_ROOT=${{ github.workspace }}`，使 freshness 后的 RAG 计划与 runner 使用同一经验证的工作区数据源。
+
+### 2. 验证与后续
+
+1. YAML 解析、令牌引用扫描、差异检查，以及 28 项聚焦测试通过；用户已确认从 `main` 手动运行 weekly 端到端成功。
+2. 旧 `GH_SEARCH_TOKEN` Secret 和即将过期 PAT 尚待在 GitHub 页面手动移除；移除前应确认不再需要旧分支的工作流。
+3. RAG 维护 planned 任务仍只创建、不消费；Telegram 链接默认发送、令牌健康检查范围和 Job 权限拆分仍是后续优化项。
+
 ## 2026-05-07 追加：前端质量信号可视化
 
 ### 1. 开发目的
