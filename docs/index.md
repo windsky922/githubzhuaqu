@@ -4,26 +4,27 @@
 
 ## 最新周报
 
-- [2026-08-02](weekly/2026-08-02.html)
+- [2026-08-03](weekly/2026-08-03.html)
 
 ## 最新运行摘要
 
 - 入选项目：10 个
 - 采集候选：318 个
 - 生成方式：Kimi
-- Telegram：已推送
+- Telegram：未推送
 - 采集错误：0 条
 
 ## 最新趋势要点
 
 - AI Agent 是本期最集中的方向，共 5 个项目。
 - Python 是本期出现最多的主要语言，共 3 个项目。
-- 本期入选项目累计新增 Star 55516。
-- permissionlesstech/bitchat 是本期 GitHub Trending 排名最高的项目，周榜排名 1。
-- NousResearch/hermes-agent 是本期新增 Star 最高的项目，新增 45782。
+- 本期入选项目累计新增 Star 56238。
+- block/buzz 是本期 GitHub Trending 排名最高的项目，周榜排名 1。
+- NousResearch/hermes-agent 是本期新增 Star 最高的项目，新增 46213。
 
 ## 全部周报
 
+- [2026-08-03](weekly/2026-08-03.html)：10 个项目，Kimi，Telegram 未推送，主语言 Python，主方向 AI Agent，新增 Star 56238，Trending 项目 9
 - [2026-08-02](weekly/2026-08-02.html)：10 个项目，Kimi，Telegram 已推送，主语言 Python，主方向 AI Agent，新增 Star 55516，Trending 项目 9
 - [2026-07-20](weekly/2026-07-20.html)：10 个项目，Kimi，Telegram 已推送，主语言 Python，主方向 AI Agent，新增 Star 207665，Trending 项目 7
 - [2026-07-13](weekly/2026-07-13.html)：10 个项目，Kimi，Telegram 已推送，主语言 TypeScript，主方向 AI Agent，新增 Star 31073，Trending 项目 10

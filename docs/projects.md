@@ -4,6 +4,16 @@
 
 | 日期 | 项目 | 来源 | Trending 排名 | 方向 | 语言 | Star | 新增 Star | 风险提示 | 链接 |
 |---|---|---|---:|---|---|---:|---:|---:|---|
+| 2026-08-03 | block/buzz | GitHub Trending | 1 | Other | Rust | 21146 | 0 | 0 | [https://github.com/block/buzz](https://github.com/block/buzz) |
+| 2026-08-03 | virgiliojr94/book-to-skill | GitHub Trending | 2 | LLM Tooling | Python | 15407 | 0 | 0 | [https://github.com/virgiliojr94/book-to-skill](https://github.com/virgiliojr94/book-to-skill) |
+| 2026-08-03 | ayghri/i-have-adhd | GitHub Trending | 3 | AI Agent | Python | 15723 | 0 | 0 | [https://github.com/ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) |
+| 2026-08-03 | 1jehuang/jcode | GitHub Trending | 5 | AI Agent | Rust | 15285 | 10025 | 0 | [https://github.com/1jehuang/jcode](https://github.com/1jehuang/jcode) |
+| 2026-08-03 | pascalorg/editor | GitHub Trending | 6 | Other | TypeScript | 20755 | 0 | 0 | [https://github.com/pascalorg/editor](https://github.com/pascalorg/editor) |
+| 2026-08-03 | alibaba/open-code-review | GitHub Trending | 7 | AI Agent | Go | 17935 | 0 | 0 | [https://github.com/alibaba/open-code-review](https://github.com/alibaba/open-code-review) |
+| 2026-08-03 | permissionlesstech/bitchat | GitHub Trending | 8 | Other | Swift | 34166 | 0 | 0 | [https://github.com/permissionlesstech/bitchat](https://github.com/permissionlesstech/bitchat) |
+| 2026-08-03 | citrolabs/ego-lite | GitHub Trending | 12 | AI Agent | JavaScript | 7693 | 0 | 0 | [https://github.com/citrolabs/ego-lite](https://github.com/citrolabs/ego-lite) |
+| 2026-08-03 | NousResearch/hermes-agent | GitHub Search | - | AI Agent | Python | 224346 | 46213 | 0 | [https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) |
+| 2026-08-03 | moeru-ai/airi | GitHub Trending | 9 | Other | TypeScript | 46557 | 0 | 0 | [https://github.com/moeru-ai/airi](https://github.com/moeru-ai/airi) |
 | 2026-08-02 | permissionlesstech/bitchat | GitHub Trending | 1 | Other | Swift | 33998 | 0 | 0 | [https://github.com/permissionlesstech/bitchat](https://github.com/permissionlesstech/bitchat) |
 | 2026-08-02 | block/buzz | GitHub Trending | 2 | Other | Rust | 20569 | 0 | 0 | [https://github.com/block/buzz](https://github.com/block/buzz) |
 | 2026-08-02 | citrolabs/ego-lite | GitHub Trending | 3 | AI Agent | JavaScript | 7431 | 0 | 0 | [https://github.com/citrolabs/ego-lite](https://github.com/citrolabs/ego-lite) |

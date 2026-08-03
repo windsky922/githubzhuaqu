@@ -1,7 +1,314 @@
 {
   "schema_version": 1,
-  "count": 200,
+  "count": 210,
   "projects": [
+    {
+      "run_date": "2026-08-03",
+      "full_name": "block/buzz",
+      "html_url": "https://github.com/block/buzz",
+      "description": "A hive mind communication platform",
+      "readme_summary": "Buzz 🐝 A workspace where humans and agents build together, on a relay you own. People and agents building together in the same room. Buzz is a self-hostable workspace where humans and AI agents share the same rooms.",
+      "category": "Other",
+      "language": "Rust",
+      "stargazers_count": 21146,
+      "forks_count": 2264,
+      "star_growth": 0,
+      "score": 0.5133,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 1,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 1 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：开发者工具。",
+        "当前累计 Star 21146，具备一定社区关注度。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+      ],
+      "quality_score": 92,
+      "quality_level": "high",
+      "report_url": "weekly/2026-08-03.html"
+    },
+    {
+      "run_date": "2026-08-03",
+      "full_name": "virgiliojr94/book-to-skill",
+      "html_url": "https://github.com/virgiliojr94/book-to-skill",
+      "description": "Turn any technical book PDF into a Claude Code skill — ready to study, reference, and use while you work.",
+      "readme_summary": "book-to-skill Turn any technical book, document folder, or collection of sources into a unified agent skill — ready to study, reference, and use while you work in GitHub Copilot CLI, Amp, or Claude Code.",
+      "category": "LLM Tooling",
+      "language": "Python",
+      "stargazers_count": 15407,
+      "forks_count": 1662,
+      "star_growth": 0,
+      "score": 0.533,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 2,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 2 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 15407，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+      ],
+      "quality_score": 92,
+      "quality_level": "high",
+      "report_url": "weekly/2026-08-03.html"
+    },
+    {
+      "run_date": "2026-08-03",
+      "full_name": "ayghri/i-have-adhd",
+      "html_url": "https://github.com/ayghri/i-have-adhd",
+      "description": "A skill to stop your coding agent from burying the answer. ADHD-friendly output.",
+      "readme_summary": "ADHD-friendly outputs. No ADHD diagnosis needed! English · Claude Code Then type /i-have-adhd.",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 15723,
+      "forks_count": 880,
+      "star_growth": 0,
+      "score": 0.5822,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 3,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 3 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 15723，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-08-03.html"
+    },
+    {
+      "run_date": "2026-08-03",
+      "full_name": "1jehuang/jcode",
+      "html_url": "https://github.com/1jehuang/jcode",
+      "description": "The most RAM efficient harness",
+      "readme_summary": "The most RAM efficient harness The most most intelligent harness Website · Docs · Benchmarks · Features · Install · Quick Start · Further Reading · Contributing Need Homebrew, source builds, provider setup, or want an agent to set it up for you? Jump to detailed installation.",
+      "category": "AI Agent",
+      "language": "Rust",
+      "stargazers_count": 15285,
+      "forks_count": 1693,
+      "star_growth": 10025,
+      "score": 0.6558,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 5,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 5 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 10025，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-08-03.html"
+    },
+    {
+      "run_date": "2026-08-03",
+      "full_name": "pascalorg/editor",
+      "html_url": "https://github.com/pascalorg/editor",
+      "description": "Create and share 3D architectural projects.",
+      "readme_summary": "A 3D building editor built with React Three Fiber and WebGPU. Install the full built-in viewer set, then load the built-in plugin once before mounting : See the @pascal-app/viewer quick start for a React example.",
+      "category": "Other",
+      "language": "TypeScript",
+      "stargazers_count": 20755,
+      "forks_count": 2664,
+      "star_growth": 0,
+      "score": 0.4033,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 6,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 6 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Agent 开发、开发者工具。",
+        "当前累计 Star 20755，具备一定社区关注度。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+      ],
+      "quality_score": 92,
+      "quality_level": "high",
+      "report_url": "weekly/2026-08-03.html"
+    },
+    {
+      "run_date": "2026-08-03",
+      "full_name": "alibaba/open-code-review",
+      "html_url": "https://github.com/alibaba/open-code-review",
+      "description": "Open-source & free — Battle-tested at Alibaba's scale. Hybrid architecture code review tool: deterministic pipelines + LLM Agent, precise line-level comments, built-in multi-language ruleset (NPE, thread-safety, XSS, SQL injection), OpenAI & Anthropic compatible.",
+      "readme_summary": "OpenCodeReview English | 简体中文 | 日本語 | 한국어 | Русский Open Code Review is an AI-powered code review CLI tool. It originated as Alibaba Group's internal official AI code review assistant — over the past two years, it has served tens of thousands of developers and identified millions of code defects.",
+      "category": "AI Agent",
+      "language": "Go",
+      "stargazers_count": 17935,
+      "forks_count": 1208,
+      "star_growth": 0,
+      "score": 0.4522,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 7,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 7 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Agent 开发、开发者工具。",
+        "当前累计 Star 17935，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-08-03.html"
+    },
+    {
+      "run_date": "2026-08-03",
+      "full_name": "permissionlesstech/bitchat",
+      "html_url": "https://github.com/permissionlesstech/bitchat",
+      "description": "bluetooth mesh chat, IRC vibes",
+      "readme_summary": "A decentralized peer-to-peer messaging app with dual transport architecture: local Bluetooth mesh networks for offline communication and internet-based Nostr protocol for global reach. No accounts, no phone numbers, no central servers. It's the side-groupchat.",
+      "category": "Other",
+      "language": "Swift",
+      "stargazers_count": 34166,
+      "forks_count": 5457,
+      "star_growth": 0,
+      "score": 0.3631,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 8,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 8 位，是本期最重要的热度信号。",
+        "当前累计 Star 34166，具备一定社区关注度。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-08-03.html"
+    },
+    {
+      "run_date": "2026-08-03",
+      "full_name": "citrolabs/ego-lite",
+      "html_url": "https://github.com/citrolabs/ego-lite",
+      "description": "The fastest browser for AI agents to run browser automation, built for sharing your logged-in browser state with your AI agents, like Codex or Claude Code, without disturbing you. Zero cost, zero config.",
+      "readme_summary": "The fastest browser for AI agents to run browser automation** ego (lite) is a browser where you and your AI agents work in parallel. Your agents run multiple browser tasks in their own Spaces while your tabs stay yours, and tasks complete faster on fewer tokens.",
+      "category": "AI Agent",
+      "language": "JavaScript",
+      "stargazers_count": 7693,
+      "forks_count": 381,
+      "star_growth": 0,
+      "score": 0.4797,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 12,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 12 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 7693，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-08-03.html"
+    },
+    {
+      "run_date": "2026-08-03",
+      "full_name": "NousResearch/hermes-agent",
+      "html_url": "https://github.com/NousResearch/hermes-agent",
+      "description": "The agent that grows with you",
+      "readme_summary": "The self-improving AI agent built by Nous Research.** It's the only agent with a built-in learning loop — it creates skills from experience, improves them during use, nudges itself to persist knowledge, searches its own past conversations, and builds a deepening model of who you are across sessions.",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 224346,
+      "forks_count": 43389,
+      "star_growth": 46213,
+      "score": 0.3649,
+      "sources": [
+        "github_search"
+      ],
+      "trending_rank": 0,
+      "selection_reasons": [
+        "较上次记录新增 Star 46213，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 224346，具备一定社区关注度。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库简介较短，项目定位信息有限。"
+      ],
+      "quality_score": 92,
+      "quality_level": "high",
+      "report_url": "weekly/2026-08-03.html"
+    },
+    {
+      "run_date": "2026-08-03",
+      "full_name": "moeru-ai/airi",
+      "html_url": "https://github.com/moeru-ai/airi",
+      "description": "💖🧸 Self hosted, you-owned Grok Companion, a container of souls of waifu, cyber livings to bring them into our worlds, wishing to achieve Neuro-sama's altitude. Capable of realtime voice chat, Minecraft, Factorio playing. Web / macOS / Windows supported.",
+      "readme_summary": "Please check the information and proceed with caution. [!NOTE] We've got a whole dedicated organization @proj-airi for all the sub-projects born from Project AIRI. RAG, memory system, embedded database, icons, Live2D utilities, and more!",
+      "category": "Other",
+      "language": "TypeScript",
+      "stargazers_count": 46557,
+      "forks_count": 4592,
+      "star_growth": 0,
+      "score": 0.3414,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 9,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 9 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 46557，具备一定社区关注度。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-08-03.html"
+    },
     {
       "run_date": "2026-08-02",
       "full_name": "permissionlesstech/bitchat",
