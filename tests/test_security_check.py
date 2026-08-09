@@ -88,6 +88,21 @@ class SecurityCheckTest(unittest.TestCase):
         finally:
             shutil.rmtree(root, ignore_errors=True)
 
+    def test_detects_token_like_secret_in_frontend_source_suffixes(self):
+        root = Path.cwd() / f".tmp-security-test-{uuid.uuid4().hex}"
+        try:
+            frontend = root / "frontend" / "src"
+            frontend.mkdir(parents=True)
+            for suffix in (".js", ".ts", ".tsx"):
+                (frontend / f"bad{suffix}").write_text("const token = 'ghp_" + "F" * 36 + "';\n", encoding="utf-8")
+
+            findings = scan_repository(root)
+
+            for suffix in (".js", ".ts", ".tsx"):
+                self.assertTrue(any(f"frontend/src/bad{suffix}" in finding and "github_token" in finding for finding in findings), findings)
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
     def test_rejects_browser_admin_token_url_and_storage_transport(self):
         root = Path.cwd() / f".tmp-security-test-{uuid.uuid4().hex}"
         cases = {

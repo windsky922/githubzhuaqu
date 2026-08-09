@@ -1,5 +1,12 @@
 # 操作日志
 
+## 2026-08-09 追加：P1 前端源码密钥扫描覆盖
+
+1. 通用密钥扫描纳入 `.js`、`.ts`、`.tsx`，与 Python、工作流和文档适用相同规则。
+2. 新增三种前端源码后缀的 GitHub Token 样式检测回归；既有 `node_modules` 与生成周报排除边界不变。
+
+验证：`python -m unittest tests.test_security_check tests.test_security -q` 通过（17 tests）；`python scripts/security_check.py` 与 `git diff --check` 通过。未触碰 `output/`、`tmp/`。
+
 ## 2026-08-09 追加：P1 weekly 核心发布与辅助任务解耦
 
 1. RAG 维护计划、RAG 检索评估与开发上下文索引均改为 `continue-on-error: true`。
