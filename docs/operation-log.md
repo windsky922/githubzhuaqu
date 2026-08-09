@@ -1,5 +1,16 @@
 # 操作日志
 
+## 2026-08-09 追加：Assistant V1 后端编排与自然追问
+
+1. 新增只读 `/v1/assistant/turn` 与 `/v1/assistant/turn/stream`，复用 contextual RAG 并保持旧 Ask 契约不变。
+2. 新增 schema-v1 最小 Assistant 状态、领域意图路由、AI Agent 教学 Prompt 和分段知识来源；模型不可用时显式降级，不伪造教程。
+3. “刚才推荐、这些项目、其中、哪个项目”等自然指代限定上一轮候选，只有显式重置才回到全归档。
+4. Assistant 使用独立只读 repository：禁止 `auto_build`，只读打开既有 SQLite，缺库时退回 JSON 只读检索；不会初始化、重建或写 embedding。
+5. Assistant 响应改为显式白名单，不透传 `contexts`、`prompt_context` 或内部 explanation；缺失/变化来源、质量失败或非 fresh 数据均清空 resumable 候选。
+6. README、API、架构和数据契约同步；无服务端聊天会话、无工具写入或外发。
+
+验证：Assistant、API、自然追问、contextual Ask、RAG answering 分组回归通过（76 tests）；follow-up 固定 evaluator 60 条全指标 `1.0`、raw violation `0.0`；`python scripts/security_check.py` 与 `git diff --check` 通过。
+
 ## 2026-08-09 追加：V1 发布安全与评估门禁修复
 
 1. 公开归档发布前的 staged tree 扫描改为识别 canary、GitHub/Telegram 令牌形态以及带实际值的敏感字段，覆盖 JSON quoted key 和常见赋值格式。

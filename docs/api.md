@@ -1,5 +1,15 @@
 # 后端 API 说明
 
+## 本机项目研究导师 V1（2026-08-09）
+
+`POST /v1/assistant/turn` 与 `POST /v1/assistant/turn/stream` 是只读领域助手入口。请求只接收当前 `q`、检索参数和服务端上一轮生成的最小 `state`；不得提交历史 assistant 回答、引用、证据或 `prompt_context`。流式顺序固定为 `meta → delta* → final`，只有 `final` 是正式结果。
+
+响应在既有 RAG 字段之上追加 `assistant_mode`、`knowledge_basis`、`sections[]` 与 `assistant_state`。通用教学内容标记为 `model_general`，具体仓库事实仍必须来自 `project_evidence` 并通过既有 claim、约束和 freshness 闸门。Assistant 首版不调用任何写接口。
+
+`assistant_state` schema-v1 只包含 revision、目标、结构化约束、有序候选 ID、已确认首选、上一意图、待澄清问题、来源身份、检索模式和 resumable。客户端状态是不可信提示；服务端每轮重新校验候选格式、来源和资格。
+
+Assistant 拒绝 `auto_build`，并使用独立只读 repository；不会初始化 SQLite、构建 embedding 或触发其他写操作。响应采用显式字段白名单，不返回底层 `contexts`、`prompt_context` 或内部 explanation。
+
 ## 偏好优先约束（2026-08-02）
 
 Ask/SSE 保持现有字段和事件顺序。自然语言识别的条件默认作为偏好；只有“必须、仅、不得、排除、不能接受、只要、必须满足”等明确表达会成为硬约束。`recommendations[].preferences` 为兼容新增字段，展示偏好状态和证据。待核实偏好或待核实硬约束不会触发 clarification；只有所有候选明确冲突时才 no_match。

@@ -36,6 +36,9 @@ PRIMARY_WORDS = {"那个呢", "那个项目呢", "这个呢", "这个项目呢",
 RESET_MARKERS = ("重新找", "换一批", "搜索其他", "找别的", "重新搜索")
 AMBIGUOUS_WORDS = {"哪个好", "还有吗", "怎么选", "可以吗", "怎么样", "还有呢"}
 PREVIOUS_CANDIDATE_WORDS = {"上一个", "上一个呢", "上一个项目", "上一个项目呢", "看上一个项目", "看看上一个项目"}
+NATURAL_CONTEXT_MARKERS = (
+    "刚才", "之前推荐", "这些项目", "上述项目", "其中", "候选项目", "推荐的项目", "哪个项目", "哪一个项目",
+)
 ORDINAL_RE = re.compile(r"第\s*([一二三四五六七八九十]|\d{1,2})\s*个?")
 ORDINAL_VALUES = {"一": 1, "二": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9, "十": 10}
 ORDINAL_COMPARISON_MARKERS = ("比较", "对比", "和", "与", "跟", "、")
@@ -149,6 +152,17 @@ def route_follow_up(
     ordinal_route = _ordinal_candidate_route(normalized, context, requirements, has_context=has_context)
     if ordinal_route is not None:
         return ordinal_route
+    if any(marker in normalized for marker in NATURAL_CONTEXT_MARKERS):
+        if has_context:
+            return _route(
+                "refine" if requirements else "resume",
+                "natural_previous_candidates_reference",
+                _combine_query(context["previous_user_goal"], query),
+                "previous_candidates",
+                requirements,
+                selected_repository_ids=list(context.get("candidate_repository_ids") or []),
+            )
+        return _clarify("你提到了之前的项目，但当前没有可恢复的候选。请先描述要寻找的项目。", "natural_reference_without_context")
     if normalized in PRIMARY_WORDS:
         primary = str(context.get("primary_repository_id") or "")
         if has_context and primary:

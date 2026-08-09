@@ -143,7 +143,13 @@ PROJECT_AGENT_TASK_TRANSITIONS = {
 class ApiRepository:
     """面向后端 API 的归档访问层。"""
 
-    def __init__(self, root: Path = ROOT, db_path: Path | None = None) -> None:
+    def __init__(
+        self,
+        root: Path = ROOT,
+        db_path: Path | None = None,
+        *,
+        force_read_only: bool = False,
+    ) -> None:
         self.app_root = root
         explicit_local = root.resolve() != ROOT.resolve()
         local_mode = os.getenv("GITHUB_WEEKLY_DATA_MODE", "").strip().lower() == "local"
@@ -159,14 +165,20 @@ class ApiRepository:
         else:
             self.data_source = verified_source
         self.root = self.data_source["root"] if self.data_source["available"] else (root if explicit_local else root / ".unavailable-weekly-snapshot")
+        if force_read_only:
+            self.data_source = {**self.data_source, "read_only": True}
         self.local_read_only = bool(self.data_source.get("read_only"))
-        self.local_json_archive = self.local_read_only and self.data_source.get("kind") == "local_archive_json"
+        self.local_json_archive = bool(
+            self.local_read_only and self.data_source.get("kind") == "local_archive_json"
+        )
         self.history_root = root.resolve() if local_mode and self.data_source.get("kind") == "weekly_snapshot" else None
         self.history_db_path = self.history_root / "data" / "github_weekly.sqlite" if self.history_root else None
         self.db_path = db_path or (
             self.root / "data" / "github_weekly.sqlite" if explicit_local or self.data_source["available"]
             else Path(tempfile.gettempdir()) / "github-weekly-agent" / "unavailable.sqlite"
         )
+        if force_read_only and not self.db_path.is_file():
+            self.local_json_archive = True
 
     def health(self) -> dict[str, Any]:
         return {
@@ -379,7 +391,8 @@ class ApiRepository:
         source: str | None = None,
         limit: int = 20,
     ) -> dict[str, Any]:
-        self.ensure_sqlite_index()
+        if not self.local_read_only:
+            self.ensure_sqlite_index()
         normalized_query = (_blank_to_none(query) or "").strip()
         terms = _search_terms(normalized_query)
         limit = max(1, min(int(limit or 20), 100))
@@ -985,7 +998,8 @@ class ApiRepository:
                 limit=limit,
                 repository_ids=normalized_repository_ids,
             )
-        self.ensure_sqlite_index()
+        if not self.local_read_only:
+            self.ensure_sqlite_index()
 
         connection = connect(self.db_path, read_only=self.local_read_only)
         retrieval_mode = "fts5"

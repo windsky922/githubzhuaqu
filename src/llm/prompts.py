@@ -38,3 +38,20 @@ def follow_up_route_messages(*, root: Path, query: str, context: dict[str, Any])
         {"role": "system", "content": prompt},
         {"role": "user", "content": json.dumps(payload, ensure_ascii=False, sort_keys=True)},
     ]
+
+
+def assistant_route_messages(*, root: Path, query: str, state: dict[str, Any]) -> list[dict[str, str]]:
+    prompt = (root / "prompts" / "assistant_router.md").read_text(encoding="utf-8")
+    payload = {"query": query, "state": state}
+    return [
+        {"role": "system", "content": prompt},
+        {"role": "user", "content": json.dumps(payload, ensure_ascii=False, sort_keys=True)},
+    ]
+
+
+def assistant_knowledge_messages(*, root: Path, question: str) -> list[dict[str, str]]:
+    prompt = (root / "prompts" / "assistant_answer.md").read_text(encoding="utf-8")
+    return [
+        {"role": "system", "content": prompt},
+        {"role": "user", "content": json.dumps({"question": question}, ensure_ascii=False, sort_keys=True)},
+    ]

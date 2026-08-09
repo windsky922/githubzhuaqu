@@ -1,5 +1,7 @@
 # GitHub Weekly Agent
 
+> 本机 Assistant V1 新增 `/v1/assistant/turn` 与 `/v1/assistant/turn/stream`：它把 AI Agent 通用学习指导与证据约束项目推荐分段组合，并通过服务端生成的最小 `assistant_state` 支持自然追问。旧 `/v1/rag/ask` 契约保持不变；Assistant 首版只读，不创建任务、订阅或通知，也不保存服务端聊天会话。
+
 > Agent 条件默认是偏好而不是拦截器：如需严格筛选，请使用“必须、仅、不得、排除、不能接受”等明确措辞。多 Agent、本地部署、成本和离线等偏好会显示匹配或待核实状态；只有明确硬冲突才淘汰候选。
 
 > 本机历史 Ask：只有显式设置 `GITHUB_WEEKLY_DATA_MODE=local` 时，服务才会在没有 30 天内 verified weekly snapshot 时只读使用本机历史数据。它优先读取 `data/github_weekly.sqlite`，不可读或缺失时只读 `data/selected/*.json`；历史候选会显示来源和日期，且永不标记为当前首选。生产环境仍必须配置 `GITHUB_WEEKLY_SNAPSHOT_ROOT`，不会回退 checkout 数据。

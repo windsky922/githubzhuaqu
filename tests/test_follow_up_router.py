@@ -34,6 +34,21 @@ class FollowUpRouterTest(unittest.TestCase):
         self.assertEqual(result["selected_repository_ids"], ["owner/agent", "owner/other"])
         self.assertEqual(client.calls, 0)
 
+    def test_natural_reference_keeps_previous_candidate_scope(self):
+        result = route_follow_up(
+            root=Path.cwd(),
+            query="在刚才推荐的项目里，我应该先从哪个项目开始学习，为什么？",
+            context=_context(),
+        )
+        self.assertEqual(result["route"], "resume")
+        self.assertEqual(result["candidate_scope"], "previous_candidates")
+        self.assertEqual(result["selected_repository_ids"], ["owner/agent", "owner/other"])
+
+    def test_natural_reference_without_context_clarifies(self):
+        result = route_follow_up(root=Path.cwd(), query="这些项目有什么区别？", context=_empty_context())
+        self.assertEqual(result["route"], "clarify")
+        self.assertTrue(result["clarification_required"])
+
     def test_follow_up_without_context_clarifies_without_model(self):
         client = _Client()
         result = route_follow_up(root=Path.cwd(), query="展开", context=_empty_context(), client=client)

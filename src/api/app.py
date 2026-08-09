@@ -10,6 +10,7 @@ from fastapi import Body, Depends, FastAPI, Header, HTTPException, Query, status
 from fastapi.responses import RedirectResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
+from src.assistant import AssistantOrchestrator
 from src.api.repository import ROOT, ApiRepository
 from src.rag.follow_up_router import normalize_contextual_request
 
@@ -38,7 +39,10 @@ def require_admin_token(
 
 def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
     repository = ApiRepository(root=root, db_path=db_path)
+    assistant_repository = ApiRepository(root=root, db_path=db_path, force_read_only=True)
+    assistant = AssistantOrchestrator(assistant_repository, prompt_root=ROOT)
     app = FastAPI(title="GitHub Weekly Agent API", version="0.1.0")
+    app.state.assistant_repository = assistant_repository
     admin_write_dependencies = [Depends(require_admin_token)]
 
     @app.middleware("http")
@@ -529,6 +533,31 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
                 yield 'event: error\ndata: {"message": "流式问答连接中断，请重试。"}\n\n'
 
         return StreamingResponse(event_stream(), media_type="text/event-stream")
+
+    @app.post("/v1/assistant/turn")
+    def v1_assistant_turn(payload: dict[str, Any] | None = Body(default=None)) -> dict[str, Any]:
+        try:
+            return assistant.turn(payload)
+        except ValueError as error:
+            raise HTTPException(status_code=422, detail=str(error)) from error
+
+    @app.post("/v1/assistant/turn/stream")
+    def v1_assistant_turn_stream(payload: dict[str, Any] | None = Body(default=None)) -> StreamingResponse:
+        try:
+            request = assistant.normalize_request(payload)
+        except ValueError as error:
+            raise HTTPException(status_code=422, detail=str(error)) from error
+
+        def assistant_event_stream():
+            try:
+                for event in assistant.turn_stream(request):
+                    name = str(event.get("event") or "error")
+                    data = event.get("data") if isinstance(event.get("data"), dict) else {"message": "流式响应格式异常"}
+                    yield f"event: {name}\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
+            except (OSError, ValueError):
+                yield 'event: error\ndata: {"message": "助手连接中断，请重试。"}\n\n'
+
+        return StreamingResponse(assistant_event_stream(), media_type="text/event-stream")
 
     @app.get("/v1/rag/explanations")
     def v1_rag_explanations(

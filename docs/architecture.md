@@ -1,5 +1,13 @@
 # GitHub Weekly Agent 架构说明
 
+## 本机 Assistant 编排层（2026-08-09）
+
+Assistant 编排层位于 React 工作台与既有 contextual RAG 之间。它先校验无状态 `assistant_state`，确定 `knowledge`、`project_search`、`project_follow_up`、`project_compare`、`help` 或 `clarify`，再把项目类意图投影为旧 contextual Ask 请求；不复制检索、freshness、eligibility、claim ledger 或 decision ID 逻辑。
+
+AI Agent 通用学习指导由独立 Prompt 生成，禁止包含具体 `owner/repository` 事实；项目建议继续来自 RAG。混合回答以 `sections[]` 明确分开两类来源。模型未配置或失败时只保留项目证据和可见降级说明，不伪造完整教程。首版没有工具执行、服务端聊天会话或外发权限。
+
+HTTP Assistant 使用独立的强制只读 repository：已有 SQLite 以 `mode=ro` + `query_only` 查询，缺库时使用 JSON 只读检索；`auto_build` 不属于 Assistant 契约。编排层对底层 RAG 结果执行响应白名单，内部上下文与 Prompt 不进入对话响应。
+
 ## 偏好优先约束（2026-08-02）
 
 约束解析将自然语言条件分成偏好和明确硬约束。核验器继续只接收可引用的项目级证据；偏好证据不足时保留候选并标为待核实，硬约束明确冲突时才淘汰。`multi_agent` 是可检索、可核验但默认不阻断的偏好。
