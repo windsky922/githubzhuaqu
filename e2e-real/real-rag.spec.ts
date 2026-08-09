@@ -151,7 +151,6 @@ test("序号追问只提交最小上下文并只检索第二个候选", async ({
     "candidate_repository_ids",
     "mode",
     "previous_user_goal",
-    "primary_repository_id",
     "resumable",
   ]);
   const serialized = JSON.stringify(secondBody);
@@ -166,7 +165,7 @@ test("序号追问只提交最小上下文并只检索第二个候选", async ({
 
 test("正交能力冲突不能成为 eligible 或首选", async ({ page }) => {
   const result = await postJson(page, {
-    q: "不要云 API",
+    q: "必须不依赖外部模型 API",
     context: {
       previous_user_goal: "找 Python 多 Agent 编排项目",
       candidate_repository_ids: ["eval/agent-orchestrator"],

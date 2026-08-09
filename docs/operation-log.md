@@ -1,5 +1,13 @@
 # 操作日志
 
+## 2026-08-09 追加：真实 E2E 契约同步
+
+1. 序号追问 E2E 不再要求显式本地快照产生 `primary_repository_id`；候选列表仍完整保留并限定第二个候选检索。
+2. 正交能力冲突用例改用“必须不依赖外部模型 API”，与“普通表达默认偏好、明确强制才是硬约束”的当前语义一致。
+3. 未修改前端上下文生成、约束解析或推荐资格生产逻辑。
+
+验证：`CI=1 npm.cmd run test:e2e:real` 通过（6 tests）；`python -m unittest -v tests.test_follow_up_router tests.test_contextual_ask` 通过（30 tests）；`git diff --check` 通过。`output/`、`tmp/` 未纳入提交。
+
 ## 2026-08-09 追加：Agent 条件编辑与一键放宽重试
 
 1. Agent 回答展示本轮结构化检索条件，支持删除条件及硬约束 / 偏好切换；全部删除后仍可执行宽泛搜索。
