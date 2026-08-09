@@ -14,6 +14,7 @@ from .state import build_assistant_state, contextual_payload, normalize_assistan
 ASSISTANT_MODES = {"knowledge", "project_search", "project_follow_up", "project_compare", "help", "clarify"}
 RESET_MARKERS = ("重新搜索", "重新找", "换一批", "不限刚才", "搜索其他", "找别的")
 CONTEXT_MARKERS = ("刚才", "之前推荐", "这些项目", "上述项目", "其中", "候选项目", "推荐的项目", "哪个项目")
+CONTINUATION_MARKERS = ("继续", "接着说", "展开", "还有吗", "还有呢", "然后呢")
 KNOWLEDGE_MARKERS = ("学习", "知识", "概念", "原理", "路线", "教程", "怎么入门", "如何入门", "开发方向", "实践方法")
 PROJECT_MARKERS = ("项目", "仓库", "github", "推荐", "比较", "对比", "适合", "选择")
 COMPARE_MARKERS = ("比较", "对比", "区别", "差异", "哪个好", "更适合")
@@ -98,6 +99,8 @@ class AssistantOrchestrator:
             return "project_search"
         if has_context and any(marker in normalized for marker in CONTEXT_MARKERS):
             return "project_compare" if any(marker in normalized for marker in COMPARE_MARKERS) else "project_follow_up"
+        if has_context and normalized in CONTINUATION_MARKERS:
+            return "project_follow_up"
         if any(marker in normalized for marker in KNOWLEDGE_MARKERS):
             return "knowledge"
         if any(marker in normalized for marker in COMPARE_MARKERS):
@@ -168,19 +171,28 @@ class AssistantOrchestrator:
         guidance: dict[str, Any] | None,
     ) -> dict[str, Any]:
         project = dict(project_response or {})
+        project_clarification = bool(
+            project.get("answer_mode") == "clarification" or project.get("clarification_required") is True
+        )
+        effective_mode = "clarify" if project_clarification else assistant_mode
         sections: list[dict[str, Any]] = []
-        if assistant_mode == "help":
+        if effective_mode == "help":
             sections.append({
                 "kind": "guidance",
                 "title": "我能帮助你的内容",
                 "content": "我可以解释 AI Agent 学习路线，并基于本地 GitHub 归档推荐、比较和追问项目；当前版本只读，不执行任务、订阅或通知。",
                 "citation_indexes": [],
             })
-        elif assistant_mode == "clarify":
+        elif effective_mode == "clarify":
+            clarification_text = str(
+                project.get("clarification_question")
+                or project.get("answer")
+                or "请说明你想学习的 AI Agent 主题，或描述要寻找、比较的 GitHub 项目。"
+            ).strip()
             sections.append({
                 "kind": "limitations",
                 "title": "请补充目标",
-                "content": "请说明你想学习的 AI Agent 主题，或描述要寻找、比较的 GitHub 项目。",
+                "content": clarification_text,
                 "citation_indexes": [],
             })
         if guidance:
@@ -191,8 +203,10 @@ class AssistantOrchestrator:
                 "citation_indexes": [],
             })
         project_answer = str(project.get("answer") or "").strip()
-        citations = project.get("citations") if isinstance(project.get("citations"), list) else []
-        if project_answer:
+        citations = [] if project_clarification else project.get("citations") if isinstance(project.get("citations"), list) else []
+        recommendations = [] if project_clarification else project.get("recommendations") if isinstance(project.get("recommendations"), list) else []
+        evidence = [] if project_clarification else project.get("evidence") if isinstance(project.get("evidence"), list) else []
+        if project_answer and not project_clarification:
             sections.append({
                 "kind": "project_evidence",
                 "title": "证据支持的项目建议",
@@ -201,28 +215,39 @@ class AssistantOrchestrator:
             })
         answer = "\n\n".join(f"## {item['title']}\n\n{item['content']}" for item in sections)
         guidance_used = bool(guidance and guidance.get("used"))
-        has_project_evidence = bool(citations or project.get("recommendations"))
+        has_project_evidence = bool(citations or recommendations)
         knowledge_basis = "mixed" if guidance_used and has_project_evidence else "model_general" if guidance_used else "project_evidence" if has_project_evidence else "none"
         quality = project.get("answer_quality") if isinstance(project.get("answer_quality"), dict) else {}
         response = {
             "query": request["q"],
             "resolved_query": str(project.get("resolved_query") or request["q"]),
             "answer": answer,
-            "answer_mode": "llm" if guidance_used else str(project.get("answer_mode") or "fallback_rule"),
+            "answer_mode": "clarification" if effective_mode == "clarify" else "llm" if guidance_used else str(project.get("answer_mode") or "fallback_rule"),
             "fallback_reason": str(project.get("fallback_reason") or (guidance or {}).get("reason") or ""),
-            "assistant_mode": assistant_mode,
+            "assistant_mode": effective_mode,
             "knowledge_basis": knowledge_basis,
             "sections": sections,
             "citations": citations,
-            "evidence": project.get("evidence") if isinstance(project.get("evidence"), list) else [],
-            "recommendations": project.get("recommendations") if isinstance(project.get("recommendations"), list) else [],
-            "answer_quality": {**quality, "assistant_mode": assistant_mode, "general_knowledge_disclosed": guidance_used},
+            "evidence": evidence,
+            "recommendations": recommendations,
+            "answer_quality": {**quality, "assistant_mode": effective_mode, "general_knowledge_disclosed": guidance_used},
             "model_status": (guidance or {}).get("model_status") or project.get("model_status") or self.model_client.status(),
             "input_route": project.get("input_route") if isinstance(project.get("input_route"), dict) else {},
             "data_source": project.get("data_source") if isinstance(project.get("data_source"), dict) else {},
             "freshness": project.get("freshness") if isinstance(project.get("freshness"), dict) else {},
         }
-        response["assistant_state"] = build_assistant_state(request, assistant_mode=assistant_mode, response=response)
+        if effective_mode == "clarify":
+            route = response["input_route"]
+            response["clarification_required"] = True
+            response["clarification_question"] = sections[0]["content"]
+            response["input_route"] = {
+                **route,
+                "route": "clarify",
+                "retrieval_performed": bool(route.get("retrieval_performed", False)),
+                "candidate_scope": "none",
+                "requirements": route.get("requirements") if isinstance(route.get("requirements"), list) else [],
+            }
+        response["assistant_state"] = build_assistant_state(request, assistant_mode=effective_mode, response=response)
         return response
 
 

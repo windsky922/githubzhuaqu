@@ -438,7 +438,7 @@ Ask 现在返回当前归档内的可审计 `recommendations[]`：后端按仓�
 
 POST Ask 支持无状态追问和自然语言硬约束。resume/refine 在 SQL 或向量候选读取阶段限制到上一轮仓库，明确“重新找”才扩大到全归档。`input_route.requirement_schema_version=capability-v1`；托管方式、离线能力、联网要求、外部 API 依赖和 API Key 依赖分别由 `hosting_mode/offline_capable/network_required/external_api_required/api_key_required` 表达，避免把 self-hosted、cloud hosting 和外部模型 API 混成一个 deployment 字段。旧 deployment 仅作后端兼容输入。language、license、category、source 和 tech_stack 只由确定性元数据验证；能力和 cost 只接受非 `model_enrichment` 清洗 chunk 的句子级证据。recommendation 的 `requirement_evaluations[]` 逐项公开 matched/unmet/unknown、原因和证据 chunk IDs。任一冲突为 rejected，证据不足或冲突保持 unknown；没有 eligible 且全冲突时返回 `answer_mode=no_match`，存在 unknown 时返回 clarification。既有 GET/POST 契约与 SSE 事件顺序保持不变。
 
-候选序号追问不做全归档重搜：“第二个呢”只检索上一轮第二个仓库，“比较第一个和第二个”只检索这两个仓库。后端通过 `selected_candidate_indexes[]` 和权威 `selected_repository_ids[]` 公开实际范围；越界、无上下文或未确认 primary 的“上一个项目”先澄清，检索调用为 0。`evals/follow_up_cases.jsonl` 当前包含 60 条样本，其中 20 条覆盖序号、比较、越界和不可恢复状态；`python scripts/evaluate_follow_up_routing.py` 同时输出序号索引与仓库范围准确率。
+候选序号追问不做全归档重搜：“第二个呢”只检索上一轮第二个仓库，“比较第一个和第二个”只检索这两个仓库。后端通过 `selected_candidate_indexes[]` 和权威 `selected_repository_ids[]` 公开实际范围；越界、无上下文或未确认 primary 的“上一个项目”先澄清，检索调用为 0。`evals/follow_up_cases.jsonl` 当前包含 62 条样本，其中 20 条覆盖序号、比较、越界和不可恢复状态，另含“刚才推荐”“这些项目”等自然指代；`python scripts/evaluate_follow_up_routing.py` 同时输出序号索引与仓库范围准确率。
 
 回填缺少解释历史的项目：
 

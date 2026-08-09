@@ -137,7 +137,70 @@ class AssistantOrchestratorTest(unittest.TestCase):
                 assistant = AssistantOrchestrator(_Repository(), prompt_root=Path.cwd(), model_client=client)
                 result = assistant.turn({"q": "继续说说"})
                 self.assertEqual(result["assistant_mode"], "clarify")
+                self.assertEqual(result["answer_mode"], "clarification")
+                self.assertTrue(result["clarification_required"])
+                self.assertFalse(result["input_route"]["retrieval_performed"])
+                self.assertEqual(result["recommendations"], [])
                 self.assertNotIn("secret route", str(result))
+
+    def test_short_continuation_with_candidates_never_depends_on_model_route(self):
+        repository = _Repository()
+        client = _Client(configured=False)
+        assistant = AssistantOrchestrator(repository, prompt_root=Path.cwd(), model_client=client)
+        state = {
+            "goal": "找 AI Agent 项目",
+            "candidate_repository_ids": ["owner/agent"],
+            "primary_repository_id": "owner/agent",
+            "source_identity": {"source_id": "source:1", "run_date": "2026-08-09"},
+            "resumable": True,
+        }
+
+        for query in ("继续", "接着说", "展开", "还有吗"):
+            with self.subTest(query=query):
+                result = assistant.turn({"q": query, "state": state})
+                self.assertEqual(result["assistant_mode"], "project_follow_up")
+                self.assertEqual(repository.payloads[-1]["context"]["candidate_repository_ids"], ["owner/agent"])
+        self.assertEqual(client.calls, 0)
+
+    def test_project_clarification_is_normalized_and_stream_equivalent(self):
+        project = _project_response()
+        project.update({
+            "answer": "请补充必须支持的部署方式。",
+            "answer_mode": "clarification",
+            "clarification_required": True,
+            "clarification_question": "请补充必须支持的部署方式。",
+            "input_route": {
+                "route": "clarify",
+                "retrieval_performed": True,
+                "candidate_scope": "archive",
+                "requirements": [{"field": "deployment", "operator": "eq", "value": "local", "hard": True}],
+            },
+        })
+        repository = _Repository()
+        repository.rag_ask_contextual = lambda payload, router_client=None: project
+        repository.rag_ask_contextual_stream = lambda payload, router_client=None: iter([
+            {"event": "meta", "data": {"query": payload["q"]}},
+            {"event": "final", "data": project},
+        ])
+        assistant = AssistantOrchestrator(repository, prompt_root=Path.cwd(), model_client=_Client(configured=False))
+        payload = {"q": "哪个项目更适合"}
+
+        normal = assistant.turn(payload)
+        final = list(assistant.turn_stream(assistant.normalize_request(payload)))[-1]["data"]
+
+        self.assertEqual(normal, final)
+        self.assertEqual(normal["assistant_mode"], "clarify")
+        self.assertEqual(normal["answer_mode"], "clarification")
+        self.assertTrue(normal["clarification_required"])
+        self.assertEqual(normal["clarification_question"], "请补充必须支持的部署方式。")
+        self.assertEqual([section["kind"] for section in normal["sections"]], ["limitations"])
+        self.assertEqual(normal["citations"], [])
+        self.assertEqual(normal["evidence"], [])
+        self.assertEqual(normal["recommendations"], [])
+        self.assertEqual(normal["input_route"]["candidate_scope"], "none")
+        self.assertTrue(normal["input_route"]["retrieval_performed"])
+        self.assertEqual(normal["input_route"]["requirements"], project["input_route"]["requirements"])
+        self.assertFalse(normal["assistant_state"]["resumable"])
 
     def test_state_rejects_invalid_mode_and_sanitizes_primary(self):
         assistant = AssistantOrchestrator(_Repository(), prompt_root=Path.cwd(), model_client=_Client())

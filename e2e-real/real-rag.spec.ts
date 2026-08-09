@@ -126,41 +126,51 @@ test("无上下文短追问直接澄清且页面不展示项目卡", async ({ pa
   await expect(page.getByText("质量校验未通过")).toHaveCount(0);
 });
 
-test("序号追问只提交最小上下文并只检索第二个候选", async ({ page }) => {
+test("AI Agent 学习、候选追问与显式重置完成真实三轮对话", async ({ page }) => {
   const bodies: Array<Record<string, unknown>> = [];
   page.on("request", (request) => {
-    if (new URL(request.url()).pathname !== "/v1/rag/ask/stream") return;
+    if (new URL(request.url()).pathname !== "/v1/assistant/turn/stream") return;
     const body = request.postDataJSON();
     if (body && typeof body === "object") bodies.push(body as Record<string, unknown>);
   });
 
-  await submit(page, "工作流 自动化");
-  await expect(page.locator(".answer-status")).toHaveCount(1);
-  const responsePromise = page.waitForResponse((response) => {
-    if (new URL(response.url()).pathname !== "/v1/rag/ask/stream") return false;
-    return response.request().postData()?.includes("第二个呢") === true;
-  });
-  await submit(page, "第二个呢");
-  const response = await responsePromise;
-  const events = parseSse(await response.text());
-  await expect(page.locator(".answer-status")).toHaveCount(2);
+  const firstPromise = page.waitForResponse((response) => new URL(response.url()).pathname === "/v1/assistant/turn/stream");
+  await submit(page, "我想学习 AI Agent 开发方向的知识。");
+  const first = parseSse(await (await firstPromise).text()).at(-1)?.data || {};
+  expect(first.assistant_mode).toBe("knowledge");
+  expect(first.knowledge_basis).toBe("mixed");
+  expect(String(first.answer)).toContain("学习路线");
+  expect((first.citations as unknown[]).length).toBeGreaterThan(0);
+  const firstIds = (first.assistant_state as { candidate_repository_ids: string[] }).candidate_repository_ids;
+  expect(firstIds.length).toBeGreaterThan(0);
+  await expect(page.getByText("模式：教学", { exact: true })).toBeVisible();
+  await expect(page.getByText("来源：通用知识 + 项目证据", { exact: true })).toBeVisible();
 
-  const secondBody = bodies.at(-1) || {};
-  const context = secondBody.context as Record<string, unknown>;
-  expect(Object.keys(context).sort()).toEqual([
-    "candidate_repository_ids",
-    "mode",
-    "previous_user_goal",
-    "resumable",
-  ]);
+  const secondPromise = page.waitForResponse((response) => response.request().postData()?.includes("在刚才推荐的项目里") === true);
+  await submit(page, "在刚才推荐的项目里，我应该先学哪个，为什么？");
+  const second = parseSse(await (await secondPromise).text()).at(-1)?.data || {};
+  expect(second.assistant_mode).toBe("project_follow_up");
+  expect((second.input_route as { candidate_scope: string; retrieval_performed: boolean }).candidate_scope).toBe("previous_candidates");
+  expect((second.input_route as { retrieval_performed: boolean }).retrieval_performed).toBe(true);
+  const secondIds = (second.assistant_state as { candidate_repository_ids: string[] }).candidate_repository_ids;
+  expect(secondIds.length).toBeGreaterThan(0);
+  expect(secondIds.every((id) => firstIds.includes(id))).toBe(true);
+
+  const secondBody = bodies[1] || {};
+  expect(Object.keys(secondBody).sort()).toEqual(["limit", "mode", "q", "state"]);
+  expect((secondBody.state as { candidate_repository_ids: string[] }).candidate_repository_ids).toEqual(firstIds);
   const serialized = JSON.stringify(secondBody);
-  for (const forbidden of ["assistant", "citations", "evidence", "prompt_context"]) expect(serialized).not.toContain(forbidden);
+  for (const forbidden of ["citations", "evidence", "prompt_context", "contexts", "answer"]) expect(serialized).not.toContain(`\"${forbidden}\"`);
 
-  const expected = (context.candidate_repository_ids as string[])[1];
-  const final = events.at(-1)?.data || {};
-  expect((final.input_route as { selected_repository_ids: string[] }).selected_repository_ids).toEqual([expected]);
-  expect((final.recommendations as Array<{ full_name: string }>).map((item) => item.full_name)).toEqual([expected]);
-  await expect(page.locator(".assistant-message").last().getByText(expected, { exact: true }).first()).toBeVisible();
+  const thirdPromise = page.waitForResponse((response) => response.request().postData()?.includes("重新搜索适合 Python 的项目") === true);
+  await submit(page, "重新搜索适合 Python 的项目");
+  const third = parseSse(await (await thirdPromise).text()).at(-1)?.data || {};
+  expect(third.assistant_mode).toBe("project_search");
+  expect((third.input_route as { candidate_scope: string }).candidate_scope).toBe("archive");
+  expect((third.input_route as { retrieval_performed: boolean }).retrieval_performed).toBe(true);
+  expect((third.input_route as { requirements: Array<{ field: string; value: string }> }).requirements).toContainEqual(
+    expect.objectContaining({ field: "language", value: "Python" }),
+  );
 });
 
 test("正交能力冲突不能成为 eligible 或首选", async ({ page }) => {

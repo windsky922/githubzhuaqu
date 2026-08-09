@@ -28,7 +28,12 @@ E2E_CAPABILITY_READMES = {
 }
 
 
-def write_project_match_fixture(root: Path, *, include_e2e_capabilities: bool = False) -> None:
+def write_project_match_fixture(
+    root: Path,
+    *,
+    include_e2e_capabilities: bool = False,
+    run_date: str = "2026-01-01",
+) -> None:
     """Write the fixed selected-project archive under ``root``.
 
     Capability sentences are opt-in so the historical retrieval baselines keep
@@ -60,4 +65,4 @@ def write_project_match_fixture(root: Path, *, include_e2e_capabilities: bool = 
         if include_e2e_capabilities and name in E2E_CAPABILITY_READMES:
             record["readme_summary"] = E2E_CAPABILITY_READMES[name]
         records.append(record)
-    (selected / "2026-01-01.json").write_text(json.dumps(records, ensure_ascii=False), encoding="utf-8")
+    (selected / f"{run_date}.json").write_text(json.dumps(records, ensure_ascii=False), encoding="utf-8")

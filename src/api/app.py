@@ -43,6 +43,7 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
     assistant = AssistantOrchestrator(assistant_repository, prompt_root=ROOT)
     app = FastAPI(title="GitHub Weekly Agent API", version="0.1.0")
     app.state.assistant_repository = assistant_repository
+    app.state.assistant = assistant
     admin_write_dependencies = [Depends(require_admin_token)]
 
     @app.middleware("http")

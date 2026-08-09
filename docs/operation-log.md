@@ -1,5 +1,15 @@
 # 操作日志
 
+## 2026-08-09 追加：Assistant V1 精确对话 E2E 与发布收口
+
+1. mock Playwright 服务同步 Assistant SSE 契约，覆盖教学、上一轮候选追问、显式重置和最小本机历史。
+2. 真实 FastAPI E2E 使用当日临时归档、完整 freshness attestation、只读 SQLite 和确定性教学模型；不读取真实凭证、不调用外网。
+3. 浏览器精确执行“学习 AI Agent → 刚才候选中选择 → 重新搜索 Python”，验证候选不漂移、请求不上传回答/引用/证据、重置才回全归档。
+4. follow-up 固定 fixture 增加“刚才推荐的项目”和“这些项目有什么区别”自然表达，并同步固定哈希。
+5. 有可恢复候选时，“继续、接着说、展开、还有吗”改为确定性候选追问；底层 RAG 的 clarification 统一提升为完整 Assistant clarify 契约，清空候选证据并保留已解析 requirements。
+
+验证：`npm.cmd run lint`、25 项 Vitest、生产构建、18 项 mock Playwright、6 项真实 FastAPI Playwright 与 334 项 Python unittest 全部通过；项目匹配/推荐 52 条基线、62 条追问、100 条约束解析、60 条约束证据、14 条 claim 和 6 条 capability scope 固定评估通过，核心硬约束/作用域违规率为 0；安全检查、`git diff --check`、`git diff --exit-code -- docs/app` 通过。Playwright 仅输出 `NO_COLOR` 被 `FORCE_COLOR` 忽略的 Node 警告，不影响退出码。
+
 ## 2026-08-09 追加：Assistant V1 前端对话与最小本机历史
 
 1. React 工作台切换到 `/v1/assistant/turn/stream`，普通降级也只调用 `/v1/assistant/turn`；下一轮仅上传服务端生成的最小 `assistant_state`，不再自行拼装 RAG 上下文。

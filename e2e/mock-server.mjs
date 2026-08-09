@@ -105,6 +105,76 @@ function answerPayload(mode) {
   };
 }
 
+function assistantPayload(query, state, base) {
+  const previousIds = Array.isArray(state?.candidate_repository_ids) ? state.candidate_repository_ids : [];
+  const reset = query.includes("重新搜索") || query.includes("换一批");
+  const followUp = previousIds.length > 0 && (query.includes("刚才") || query.includes("这些项目") || query.includes("其中"));
+  const knowledge = query.includes("学习 AI Agent") || query.includes("AI Agent 开发方向");
+  let recommendations = base.recommendations;
+  let answer = base.answer;
+  let assistantMode = "project_search";
+  let knowledgeBasis = recommendations.length ? "project_evidence" : "none";
+  let candidateScope = base.input_route.candidate_scope;
+
+  if (knowledge) {
+    assistantMode = "knowledge";
+    knowledgeBasis = "mixed";
+    answer = "结论：先学习 Agent 循环、工具调用和状态管理。学习路线：Python 与 API → 单 Agent → RAG 与评估 → 多 Agent 编排。最小实践：完成一个只读项目研究助手。项目证据建议从固定候选开始。[1]";
+  } else if (followUp) {
+    assistantMode = query.includes("区别") || query.includes("比较") ? "project_compare" : "project_follow_up";
+    const selected = { ...recommendation(), full_name: previousIds[0] };
+    recommendations = [selected];
+    answer = `在上一轮候选中，建议先学习 ${previousIds[0]}，因为它最适合先验证单 Agent 到编排的最小闭环。[1]`;
+    candidateScope = "previous_candidates";
+  } else if (reset) {
+    const selected = { ...recommendation(), full_name: "fixture/python-agent-new" };
+    recommendations = [selected];
+    answer = "已脱离上一轮候选并重新搜索 Python 项目，当前优先关注 fixture/python-agent-new。[1]";
+    candidateScope = "archive";
+  }
+
+  const citations = recommendations.map((item, index) => ({ index: index + 1, full_name: item.full_name, chunk_id: `fixture:chunk:${index + 1}` }));
+  const evidence = recommendations.map((item, index) => ({ index: index + 1, full_name: item.full_name, chunk_id: `fixture:chunk:${index + 1}`, quote: "固定可引用证据" }));
+  const candidateIds = recommendations.filter((item) => item.eligibility === "eligible" && item.current_eligible === true).map((item) => item.full_name);
+  const revision = Number.isInteger(state?.revision) ? state.revision + 1 : 1;
+  return {
+    ...base,
+    query,
+    resolved_query: query,
+    answer,
+    assistant_mode: assistantMode,
+    knowledge_basis: knowledgeBasis,
+    sections: [
+      ...(knowledge ? [{ kind: "guidance", title: "AI Agent 学习建议", content: "先学习 Agent 循环、工具调用和状态管理，再完成可评估的最小实践。", citation_indexes: [] }] : []),
+      ...(recommendations.length ? [{ kind: "project_evidence", title: "证据支持的项目建议", content: answer, citation_indexes: citations.map((item) => item.index) }] : []),
+    ],
+    citations,
+    evidence,
+    recommendations,
+    count: recommendations.length,
+    input_route: {
+      ...base.input_route,
+      route: followUp ? "resume" : "new_search",
+      candidate_scope: candidateScope,
+      selected_repository_ids: followUp ? candidateIds : [],
+    },
+    assistant_state: {
+      schema_version: 1,
+      revision,
+      goal: query,
+      constraints: reset ? [{ field: "language", operator: "eq", value: "Python", hard: false }] : [],
+      candidate_repository_ids: candidateIds,
+      primary_repository_id: candidateIds[0] || "",
+      last_intent: assistantMode,
+      pending_question: "",
+      source_identity: { kind: "fixture", source_id: "fixture-current", run_date: "2026-08-09", as_of: "2026-08-09" },
+      mode: "hybrid",
+      resumable: candidateIds.length > 0,
+    },
+    model_status: { provider: "fixture", configured: knowledge, used: knowledge, model: knowledge ? "fixture-knowledge-v1" : "" },
+  };
+}
+
 function sseEvent(response, event, data) {
   response.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
 }
@@ -127,7 +197,7 @@ async function handleAsk(request, response) {
         : query.includes("模型降级")
           ? "fallback_rule"
           : "llm";
-  const final = answerPayload(mode);
+  const final = assistantPayload(query, body.state, answerPayload(mode));
   response.writeHead(200, {
     "Cache-Control": "no-cache",
     "Content-Type": "text/event-stream; charset=utf-8",
@@ -197,7 +267,7 @@ async function handleStatic(url, response) {
 createServer(async (request, response) => {
   try {
     const url = new URL(request.url || "/", `http://127.0.0.1:${port}`);
-    if (request.method === "POST" && url.pathname === "/v1/rag/ask/stream") return await handleAsk(request, response);
+    if (request.method === "POST" && ["/v1/rag/ask/stream", "/v1/assistant/turn/stream"].includes(url.pathname)) return await handleAsk(request, response);
     if (request.method === "GET" && url.pathname === "/api/projects/compare") return handleComparison(url, response);
     if (request.method === "GET" && url.pathname === "/api/projects") return handleProjects(url, response);
     return await handleStatic(url, response);
