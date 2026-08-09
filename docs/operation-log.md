@@ -1,5 +1,13 @@
 # 操作日志
 
+## 2026-08-09 追加：P1 Ask SSE 降级与尾帧可靠性
+
+1. SSE 返回非成功状态或无响应 body 时，前端使用相同请求体回退到 POST `/v1/rag/ask` 并交付 final 响应。
+2. 流结束时显式消费未以空行结束的残余 SSE frame，避免最终结论被静默丢弃。
+3. 新增 SSE 不可用回退和 EOF 尾帧解析前端测试。
+
+验证：`npm.cmd run test -- --run frontend/src/lib/api.test.ts` 通过（2 tests）；`npm.cmd run lint` 与 `git diff --check` 通过。未触碰 `output/`、`tmp/`。
+
 ## 2026-08-09 追加：P1 前端源码密钥扫描覆盖
 
 1. 通用密钥扫描纳入 `.js`、`.ts`、`.tsx`，与 Python、工作流和文档适用相同规则。

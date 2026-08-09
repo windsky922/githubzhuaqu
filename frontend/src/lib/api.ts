@@ -89,6 +89,16 @@ export function contextualAskBody(question: string, context?: AskIntentContext) 
   return { q: question, ...(context ? { context } : {}), mode: context?.mode || "hybrid", limit: 3, auto_build: true };
 }
 
+async function fallbackRagAsk(question: string, context: AskIntentContext | undefined, signal: AbortSignal, onEvent: (event: StreamEvent) => void) {
+  const response = await fetch("/v1/rag/ask", {
+    method: "POST", signal,
+    headers: { Accept: "application/json", "Content-Type": "application/json" },
+    body: JSON.stringify(contextualAskBody(question, context)),
+  });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  onEvent({ event: "final", data: await response.json() as Record<string, unknown> });
+}
+
 export async function streamRagAsk(question: string, context: AskIntentContext | undefined, signal: AbortSignal, onEvent: (event: StreamEvent) => void) {
   const response = await fetch("/v1/rag/ask/stream", {
     method: "POST",
@@ -96,7 +106,10 @@ export async function streamRagAsk(question: string, context: AskIntentContext |
     headers: { Accept: "text/event-stream", "Content-Type": "application/json" },
     body: JSON.stringify(contextualAskBody(question, context)),
   });
-  if (!response.ok || !response.body) throw new Error(`HTTP ${response.status}`);
+  if (!response.ok || !response.body) {
+    await fallbackRagAsk(question, context, signal, onEvent);
+    return;
+  }
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
@@ -122,6 +135,18 @@ export async function streamRagAsk(question: string, context: AskIntentContext |
         }
       }
       boundary = buffer.indexOf("\n\n");
+    }
+  }
+  buffer += decoder.decode();
+  if (buffer.trim()) {
+    const dataLine = buffer.split("\n").find((line) => line.startsWith("data:"));
+    const eventLine = buffer.split("\n").find((line) => line.startsWith("event:"));
+    if (dataLine) {
+      try {
+        onEvent({ event: (eventLine ? eventLine.slice(6).trim() : currentEvent) as StreamEvent["event"], data: JSON.parse(dataLine.slice(5).trim()) as Record<string, unknown> });
+      } catch {
+        onEvent({ event: "error", data: { message: "流式响应解析失败" } });
+      }
     }
   }
 }
