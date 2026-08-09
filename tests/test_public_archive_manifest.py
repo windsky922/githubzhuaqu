@@ -60,3 +60,25 @@ class PublicArchiveManifestTest(unittest.TestCase):
 
         summary = audit_public_archive.audit_archive(FakeApi(), "owner/repo", "weekly-archive")
         self.assertEqual(summary["latest_forbidden_paths"], ["docs/link.html", "legacy/notes.txt"])
+
+    def test_publisher_rejects_secret_shapes_inside_allowed_content(self) -> None:
+        samples = (
+            '{"to' + 'ken":"fake-secret-value-123456"}',
+            "gh" + "p_FAKECANARY12345678901234567890",
+            "to" + "ken: fake-secret-value-123456",
+        )
+        for index, sample in enumerate(samples):
+            with self.subTest(sample=index):
+                root = Path(tempfile.mkdtemp(prefix="archive-secret-test-"))
+                worktree = root / "worktree"
+                try:
+                    (root / "reports").mkdir()
+                    (root / "reports" / "canary.md").write_text(sample, encoding="utf-8")
+                    worktree.mkdir()
+                    subprocess.run(["git", "init"], cwd=worktree, check=True, capture_output=True)
+                    sources = public_source_files(root)
+                    expected = publish_archive_branch._synchronize_archive_tree(worktree, sources, source_root=root)
+                    with self.assertRaisesRegex(ValueError, "敏感内容"):
+                        publish_archive_branch._stage_and_validate(worktree, expected)
+                finally:
+                    shutil.rmtree(root, ignore_errors=True)

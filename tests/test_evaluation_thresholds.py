@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 import unittest
 from pathlib import Path
 
@@ -27,6 +28,13 @@ class EvaluationThresholdTest(unittest.TestCase):
         violations = check_results(self.config, results)
         self.assertTrue(any(item.get("metric") == "modes.local-hash-v1.recall_at_3" for item in violations))
         self.assertTrue(any(item.get("reason") == "missing_result" for item in violations))
+
+    def test_non_finite_and_boolean_metrics_are_rejected(self) -> None:
+        for actual in (math.nan, math.inf, -math.inf, True, False):
+            with self.subTest(actual=actual):
+                results = {"project_match": {"modes": {"local-hash-v1": {"recall_at_3": actual}}}}
+                violations = check_results(self.config, results)
+                self.assertTrue(any(item.get("metric") == "modes.local-hash-v1.recall_at_3" for item in violations))
 
     def test_ci_runs_all_fixed_evaluators_and_threshold_checker(self) -> None:
         workflow = Path(".github/workflows/ci.yml").read_text(encoding="utf-8")

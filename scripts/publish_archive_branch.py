@@ -27,9 +27,15 @@ PUBLIC_DATA_DIRECTORIES = tuple(
     for path in _MANIFEST["recursive_paths"]
     if path.startswith("data/")
 )
-FORBIDDEN_CONTENT_PATTERN = re.compile(
-    rb"(?:archive-(?:secret|query|note)-canary|(?:api[_-]?key|secret|token|password|webhook)\\s*[:=])",
-    re.IGNORECASE,
+FORBIDDEN_CONTENT_PATTERNS = (
+    re.compile(rb"archive-(?:secret|query|note)-canary", re.IGNORECASE),
+    re.compile(rb"\b(?:gh[pousr]_|github_pat_)[A-Za-z0-9_]{20,}\b"),
+    re.compile(rb"\b\d{6,12}:[A-Za-z0-9_-]{30,}\b"),
+    re.compile(
+        rb"(?:[\"']?(?:api[_-]?key|secret|token|password|webhook)[\"']?\s*[:=]\s*[\"']?)"
+        rb"[A-Za-z0-9_./:+-]{12,}",
+        re.IGNORECASE,
+    ),
 )
 
 
@@ -169,7 +175,8 @@ def _scan_staged_tree(worktree: Path, expected: set[str] | None = None) -> None:
         path = worktree / relative
         if path.is_symlink() or not path.is_file():
             raise ValueError("公开归档暂存区包含无效文件。")
-        if FORBIDDEN_CONTENT_PATTERN.search(path.read_bytes()):
+        content = path.read_bytes()
+        if any(pattern.search(content) for pattern in FORBIDDEN_CONTENT_PATTERNS):
             raise ValueError("公开归档暂存区包含敏感内容标记。")
 
 

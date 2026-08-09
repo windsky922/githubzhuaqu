@@ -1,5 +1,13 @@
 # 操作日志
 
+## 2026-08-09 追加：V1 发布安全与评估门禁修复
+
+1. 公开归档发布前的 staged tree 扫描改为识别 canary、GitHub/Telegram 令牌形态以及带实际值的敏感字段，覆盖 JSON quoted key 和常见赋值格式。
+2. 固定评估阈值只接受有限的 `int`/`float`；`NaN`、正负无穷、布尔值和缺失指标全部失败关闭。
+3. 新增临时 Git worktree 发布拒绝测试和非有限指标回归测试；不读取真实归档正文，不触碰 `output/`、`tmp/`。
+
+验证：`python -m unittest -q tests.test_public_archive_manifest tests.test_evaluation_thresholds` 通过（8 tests）；`python scripts/security_check.py` 与 `git diff --check` 通过。
+
 ## 2026-08-09 追加：私有 blind RAG 完整链 baseline runner
 
 1. `scripts/evaluate_blind_rag.py` 升级为仓库外 schema-v2 pack + frozen weekly snapshot 的无阈值 runner：冻结评估日期、禁用模型、使用临时 SQLite，并执行 contextual normal/SSE 服务路径。

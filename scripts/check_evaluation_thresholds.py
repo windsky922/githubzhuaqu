@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import os
 import sys
 from pathlib import Path
@@ -54,11 +55,15 @@ def check_results(config: dict[str, Any], results: dict[str, dict[str, Any]]) ->
                 raise ValueError(f"{name}.{kind} 必须是对象")
             for dotted_path, expected in thresholds.items():
                 actual = _metric_at(result, dotted_path)
-                if not isinstance(expected, (int, float)) or not isinstance(actual, (int, float)):
+                if not _is_finite_number(expected) or not _is_finite_number(actual):
                     violations.append({"evaluation": name, "metric": dotted_path, "rule": kind, "expected": expected, "actual": actual})
                 elif comparator(actual, expected):
                     violations.append({"evaluation": name, "metric": dotted_path, "rule": kind, "expected": expected, "actual": actual})
     return violations
+
+
+def _is_finite_number(value: Any) -> bool:
+    return type(value) in (int, float) and math.isfinite(float(value))
 
 
 def _metric_at(result: dict[str, Any], dotted_path: str) -> Any:
