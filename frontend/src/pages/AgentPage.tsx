@@ -7,7 +7,7 @@ import { AgentTopbar, AnswerSummary, ChatComposer, ConversationSidebar, type Can
 const examples = ["我需要一个适合本地部署的多 Agent 自动化项目", "团队想跟踪值得长期关注的 RAG 基础设施", "适合 Python 团队的 AI 编程工具有哪些？"];
 
 export function matchProjects(answer?: RagAnswer): Candidate[] {
-  return (answer?.recommendations || []).slice(0, 3).map((recommendation) => ({
+  return (answer?.recommendations || []).map((recommendation) => ({
     full_name: recommendation.full_name,
     html_url: `https://github.com/${recommendation.full_name}`,
     rag_reason: recommendation.reasons[0] || "基于本轮可审计排序进入候选。",
@@ -29,7 +29,9 @@ export function matchProjects(answer?: RagAnswer): Candidate[] {
 export function followUpContext(answer: RagAnswer | undefined, previousQuestion: string): AskIntentContext | undefined {
   if (!answer) return undefined;
   const candidateIds = (answer.recommendations || []).map((item) => item.full_name).filter(Boolean).slice(0, 10);
-  const first = answer.recommendations?.[0];
+  const primary = (answer.recommendations || []).find(
+    (item) => item.eligibility === "eligible" && item.current_eligible === true,
+  );
   const mode = answer.retrieval?.mode;
   const normalizedMode: AskIntentContext["mode"] = mode === "fts5" || mode === "vector" ? mode : "hybrid";
   const resumable = Boolean(candidateIds.length && !["clarification", "no_match", "refusal"].includes(answer.answer_mode));
@@ -37,10 +39,9 @@ export function followUpContext(answer: RagAnswer | undefined, previousQuestion:
     previous_user_goal: answer.resolved_query || previousQuestion,
     candidate_repository_ids: candidateIds,
     ...(answer.answer_quality?.passed === true
-      && first?.eligibility === "eligible"
-      && first?.current_eligible === true
+      && primary
       && (!answer.freshness_required || answer.freshness?.data_freshness === "fresh")
-      ? { primary_repository_id: first.full_name }
+      ? { primary_repository_id: primary.full_name }
       : {}),
     mode: normalizedMode,
     resumable,

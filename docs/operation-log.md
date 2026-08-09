@@ -1,5 +1,13 @@
 # 操作日志
 
+## 2026-08-09 追加：P0 首选候选与展示截断解耦
+
+1. `matchProjects` 保留完整后端候选集，不再在候选资格判断前截断为前三项。
+2. 首选与追问上下文均在完整候选集内查找第一个 `eligible && current_eligible` 项；历史第一项或 unknown 第一项不再阻断后续当前候选。
+3. 首选从备选列表排除后才截断 UI 展示，避免首选不在第一位时重复展示或丢失后续合法候选。
+
+验证：`npm.cmd run test -- --run frontend/src/pages/AgentPage.test.ts` 通过（8 tests）；`npm.cmd run lint` 与 `git diff --check` 通过。未触碰 `output/`、`tmp/`。
+
 ## 2026-08-02 追加：P1-2 JSON 回退并发安全
 
 1. 历史 JSON 回退不再临时改写共享的 `ApiRepository.self.root`。

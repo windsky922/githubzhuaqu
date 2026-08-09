@@ -12,9 +12,7 @@ export function selectPrimaryRecommendation(answer: RagAnswer, candidates: Candi
   return !["clarification", "no_match"].includes(answer.answer_mode)
     && answer.answer_quality?.passed === true
     && (!answer.freshness_required || answer.answer_quality?.data_freshness === "fresh")
-    && candidates[0]?.eligibility === "eligible"
-    && candidates[0]?.current_eligible === true
-    ? candidates[0]
+    ? candidates.find((candidate) => candidate.eligibility === "eligible" && candidate.current_eligible === true)
     : undefined;
 }
 
@@ -46,7 +44,7 @@ export function answerConfidenceSemantics(answer: Pick<RagAnswer, "confidence" |
 
 export function AnswerSummary({ answer, candidates }: { answer: RagAnswer; candidates: Candidate[] }) {
   const primary = selectPrimaryRecommendation(answer, candidates);
-  const rest = primary ? candidates.slice(1) : candidates;
+  const rest = primary ? candidates.filter((candidate) => candidate.full_name !== primary.full_name) : candidates;
   const semantics = answerConfidenceSemantics(answer);
   const clarification = answer.answer_mode === "clarification";
   const noMatch = answer.answer_mode === "no_match";

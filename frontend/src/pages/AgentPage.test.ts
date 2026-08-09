@@ -28,14 +28,16 @@ describe("项目匹配回答状态", () => {
     ]);
   });
 
-  it("只有质量与新鲜度通过且第一项 eligible 时确认首选", () => {
+  it("只有质量与新鲜度通过且存在当前 eligible 候选时确认首选", () => {
     const eligible = { full_name: "org/eligible", evidenceCount: 1, eligibility: "eligible", current_eligible: true } as never;
     const unknown = { full_name: "org/unknown", evidenceCount: 1, eligibility: "unknown" } as never;
     expect(selectPrimaryRecommendation({ answer_quality: { passed: true, data_freshness: "fresh" } } as never, [eligible])).toBe(eligible);
     expect(selectPrimaryRecommendation({ answer_quality: { passed: false } } as never, [eligible])).toBeUndefined();
     expect(selectPrimaryRecommendation({ freshness_required: true, answer_quality: { passed: true, data_freshness: "stale" } } as never, [eligible])).toBeUndefined();
     expect(selectPrimaryRecommendation({ freshness_required: false, answer_quality: { passed: true, data_freshness: "stale" } } as never, [eligible])).toBe(eligible);
-    expect(selectPrimaryRecommendation({ answer_quality: { passed: true } } as never, [unknown, eligible])).toBeUndefined();
+    const historical = { full_name: "org/history", evidenceCount: 1, eligibility: "eligible", current_eligible: false } as never;
+    const fourth = { full_name: "org/fourth", evidenceCount: 1, eligibility: "eligible", current_eligible: true } as never;
+    expect(selectPrimaryRecommendation({ answer_quality: { passed: true } } as never, [unknown, historical, eligible, fourth])).toBe(eligible);
   });
 
   it("历史候选可展示但绝不成为当前首选", () => {
@@ -59,6 +61,7 @@ describe("项目匹配回答状态", () => {
       evidence: [{ quote: "secret-evidence" }],
       prompt_context: "secret-prompt-context",
       recommendations: [
+        { full_name: "org/history", eligibility: "eligible", current_eligible: false },
         { full_name: "org/repo", eligibility: "eligible", current_eligible: true },
         { full_name: "org/other", eligibility: "unknown" },
       ],
@@ -67,7 +70,7 @@ describe("项目匹配回答状态", () => {
     const body = contextualAskBody("继续", context);
     expect(body.context).toEqual({
       previous_user_goal: "找适合 Python 团队的项目",
-      candidate_repository_ids: ["org/repo", "org/other"],
+      candidate_repository_ids: ["org/history", "org/repo", "org/other"],
       primary_repository_id: "org/repo",
       mode: "hybrid",
       resumable: true,
