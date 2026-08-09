@@ -1,5 +1,14 @@
 # 操作日志
 
+## 2026-08-09 追加：私有 blind RAG 完整链 baseline runner
+
+1. `scripts/evaluate_blind_rag.py` 升级为仓库外 schema-v2 pack + frozen weekly snapshot 的无阈值 runner：冻结评估日期、禁用模型、使用临时 SQLite，并执行 contextual normal/SSE 服务路径。
+2. 独立标签覆盖 route、freshness、coverage、首选、Recall@3、候选资格与质量；关键 category 与标签强绑定，完整 final 等值、固定失败类别及各指标分母进入聚合报告。
+3. pack/snapshot 在运行前后复核 hash；snapshot hash 只覆盖稳定事实 JSON。输出必须为仓库、pack、snapshot 外的全新文件，非 runner 异常统一脱敏为固定错误码。
+4. README、架构与数据契约同步说明：当前只建立 runner 与合成真实链烟测；未提供私有 blind pack，fresh/stale 需分别冻结运行，不宣称泛化通过。
+
+验证：blind evaluator 13 tests 通过；`python -m unittest discover -q` 通过（312 tests）；`npm.cmd run lint`、`npm.cmd run test`（15 tests）、`npm.cmd run build`、`CI=1 npm.cmd run test:e2e`（14 tests）、`CI=1 npm.cmd run test:e2e:real`（6 tests）通过；安全检查、五套固定 evaluator、`git diff --check`、`git diff --exit-code -- docs/app` 通过。组合验证进程中的安全检查曾单次异常退出 `0xC0000005` 且无错误文本，随后独立重跑通过，未复现。`output/`、`tmp/` 未纳入提交。
+
 ## 2026-08-09 追加：真实 E2E 契约同步
 
 1. 序号追问 E2E 不再要求显式本地快照产生 `primary_repository_id`；候选列表仍完整保留并限定第二个候选检索。
