@@ -37,8 +37,17 @@ test("无匹配轮展示拒绝候选和硬约束原因", async ({ page }) => {
   await submit(page, "没有匹配");
   await expect(page.getByText("硬约束下无匹配")).toBeVisible();
   await expect(page.getByText("fixture/rejected", { exact: true })).toBeVisible();
-  await expect(page.getByText("许可证=MIT", { exact: true })).toBeVisible();
+  await expect(page.locator(".project-card").getByText("许可证=MIT", { exact: true })).toBeVisible();
   await expect(page.getByText("当前归档内最匹配候选")).toHaveCount(0);
+});
+
+test("可将硬约束一键放宽后沿用该轮上下文重试", async ({ page }) => {
+  await submit(page, "没有匹配");
+  const editor = page.getByLabel("检索条件编辑器");
+  await expect(editor.getByText("许可证=MIT", { exact: true })).toBeVisible();
+  await editor.getByRole("button", { name: "一键放宽并重试" }).click();
+  await expect(page.getByText("使用这些条件重新搜索：偏好许可证=MIT", { exact: true })).toBeVisible();
+  await expect(page.getByText("当前归档内最匹配候选")).toBeVisible();
 });
 
 test("拒答和模型降级使用独立状态", async ({ page }) => {

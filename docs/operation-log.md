@@ -1,5 +1,13 @@
 # 操作日志
 
+## 2026-08-09 追加：Agent 条件编辑与一键放宽重试
+
+1. Agent 回答展示本轮结构化检索条件，支持删除条件及硬约束 / 偏好切换；全部删除后仍可执行宽泛搜索。
+2. 新增“应用条件重新搜索”和“一键放宽并重试”，重试显式沿用被编辑回答所属轮次的候选上下文，不误用最新轮次。
+3. 补充查询转换单测和桌面 / 移动端 Playwright 用例，并修正 mock 候选的 `current_eligible` 契约与重复文本断言作用域。
+
+验证：`npm.cmd run lint`、`npm.cmd run test`（15 tests）、`CI=1 npm.cmd run test:e2e`（14 tests）、`npm.cmd run build` 与 `git diff --check` 通过。`docs/app` 已随源码重建；`output/`、`tmp/` 未纳入提交。
+
 ## 2026-08-09 追加：P1 Ask SSE 降级与尾帧可靠性
 
 1. SSE 返回非成功状态或无响应 body 时，前端使用相同请求体回退到 POST `/v1/rag/ask` 并交付 final 响应。

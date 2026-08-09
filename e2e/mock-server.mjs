@@ -40,6 +40,7 @@ function recommendation(eligibility = "eligible") {
     citation_indexes: [1],
     evidence_chunk_ids: ["fixture:chunk:1"],
     eligibility,
+    current_eligible: eligibility === "eligible",
   };
 }
 

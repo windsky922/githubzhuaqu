@@ -42,7 +42,55 @@ export function answerConfidenceSemantics(answer: Pick<RagAnswer, "confidence" |
   return { coverageLabel: `证据覆盖：${coverageLabel}`, matchLabel: "匹配把握：尚未校准" };
 }
 
-export function AnswerSummary({ answer, candidates }: { answer: RagAnswer; candidates: Candidate[] }) {
+type EditableRequirement = NonNullable<NonNullable<RagAnswer["input_route"]>["requirements"]>[number];
+
+const requirementFieldLabels: Record<string, string> = {
+  language: "语言",
+  license: "许可证",
+  hosting_mode: "部署方式",
+  multi_agent: "多 Agent",
+  offline_capable: "离线运行",
+  network_required: "需要联网",
+  external_api_required: "外部模型 API",
+  api_key_required: "API Key",
+  cost: "成本",
+};
+
+const requirementValueLabels: Record<string, string> = {
+  self_hosted: "本地部署",
+  cloud_hosted: "云端部署",
+  free: "免费",
+  paid: "付费",
+  true: "是",
+  false: "否",
+};
+
+function requirementLabel(requirement: EditableRequirement) {
+  const field = requirementFieldLabels[requirement.field] || requirement.field;
+  const value = requirementValueLabels[String(requirement.value)] || String(requirement.value);
+  return `${field}${requirement.operator === "not_eq" ? "不等于" : "="}${value}`;
+}
+
+function requirementClause(requirement: EditableRequirement) {
+  const field = requirementFieldLabels[requirement.field] || requirement.field;
+  const value = requirementValueLabels[String(requirement.value)] || String(requirement.value);
+  if (requirement.operator === "not_eq") return requirement.hard ? `不得满足${field}=${value}` : `${field}最好不是${value}`;
+  return requirement.hard ? `必须满足${field}=${value}` : `偏好${field}=${value}`;
+}
+
+export function constraintRetryQuery(requirements: EditableRequirement[], relaxHard = false) {
+  const normalized = requirements.map((requirement) => relaxHard ? { ...requirement, hard: false } : requirement);
+  return normalized.length ? `使用这些条件重新搜索：${normalized.map(requirementClause).join("；")}` : "重新搜索并给出当前最匹配的项目";
+}
+
+function ConstraintEditor({ requirements, disabled, onRetry }: { requirements: EditableRequirement[]; disabled: boolean; onRetry?: (query: string) => void }) {
+  const [items, setItems] = useState(requirements);
+  if (!requirements.length) return null;
+  const hasHard = items.some((item) => item.hard);
+  return <section className="constraint-editor" aria-label="检索条件编辑器"><div className="constraint-editor-head"><strong>本轮检索条件</strong><span>可删除或切换硬约束 / 偏好</span></div><div className="constraint-chips">{items.length ? items.map((item, index) => <span className={`constraint-chip ${item.hard ? "hard" : "preference"}`} key={`${item.field}-${item.operator}-${String(item.value)}-${index}`}><button type="button" className="constraint-kind" disabled={disabled} onClick={() => setItems((current) => current.map((entry, entryIndex) => entryIndex === index ? { ...entry, hard: !entry.hard } : entry))} aria-label={`将${requirementLabel(item)}切换为${item.hard ? "偏好" : "硬约束"}`} title={`切换为${item.hard ? "偏好" : "硬约束"}`}>{item.hard ? "硬约束" : "偏好"}</button><span>{requirementLabel(item)}</span><button type="button" className="constraint-remove" disabled={disabled} onClick={() => setItems((current) => current.filter((_, entryIndex) => entryIndex !== index))} aria-label={`删除条件${requirementLabel(item)}`} title="删除条件"><X size={13} /></button></span>) : <span className="constraint-empty">已移除全部条件，将执行宽泛搜索。</span>}</div><div className="constraint-editor-actions"><button className="button" type="button" disabled={disabled || !onRetry} onClick={() => onRetry?.(constraintRetryQuery(items))}>应用条件重新搜索</button>{hasHard ? <button className="button constraint-relax" type="button" disabled={disabled || !onRetry} onClick={() => onRetry?.(constraintRetryQuery(items, true))}>一键放宽并重试</button> : null}</div></section>;
+}
+
+export function AnswerSummary({ answer, candidates, onRetry, retryDisabled = false }: { answer: RagAnswer; candidates: Candidate[]; onRetry?: (query: string) => void; retryDisabled?: boolean }) {
   const primary = selectPrimaryRecommendation(answer, candidates);
   const rest = primary ? candidates.filter((candidate) => candidate.full_name !== primary.full_name) : candidates;
   const semantics = answerConfidenceSemantics(answer);
@@ -51,7 +99,7 @@ export function AnswerSummary({ answer, candidates }: { answer: RagAnswer; candi
   const freshness = answer.answer_quality || answer.freshness;
   const freshnessText = freshness?.data_freshness === "fresh" ? "资料新鲜：三层水位已对齐" : `资料新鲜度：${freshness?.data_freshness || "unknown"}${freshness?.as_of ? `（核验日 ${freshness.as_of}）` : ""}`;
   const sourceText = answer.source_notice || (answer.data_source?.history_only ? "本机历史归档，仅作历史候选，无法确认当前状态。" : "来源状态待核实。");
-  return <section className="answer-summary"><div className="answer-meta"><AnswerStatus mode={answer.answer_mode} quality={answer.answer_quality?.passed} /><span className="badge">{semantics.coverageLabel}</span><span className="badge">{semantics.matchLabel}</span><span className="badge">{freshnessText}</span></div><div className={`answer-notice ${answer.data_source?.history_only ? "warn" : ""}`}><strong>数据来源{answer.data_source?.run_date ? ` · ${answer.data_source.run_date}` : ""}</strong><span>{sourceText}</span></div>{clarification ? <div className="answer-notice warn"><strong>需要补充需求</strong><span>{answer.clarification_question || answer.answer}</span></div> : noMatch ? <div className="answer-notice bad"><strong>当前条件下没有匹配项目</strong><span>{answer.answer}</span></div> : primary ? <><div className="recommendation-title"><CheckCircle2 size={17} /><span>当前归档内最匹配候选</span></div><PrimaryProjectCard project={primary} evidenceCount={primary.evidenceCount} /></> : <div className="answer-notice warn"><strong>暂无可确认首选</strong><span>历史候选与待核实候选会保留展示，但不会标记为当前首选。</span></div>}{!clarification ? <><div className="answer-text"><p>{reasonSummary(answer)}</p></div><div className="answer-notice"><strong>质量边界</strong><span>当前闸门校验引用绑定、极性、结构化作用域、语义字段一致性和归档新鲜度；不代表 blind 泛化或真实需求匹配正确率。</span></div><details className="expanded-analysis"><summary>展开完整分析</summary><div className="answer-text">{answer.answer.replace(/\[\d+\]/g, "").split(/\n+/).map((paragraph, index) => <p key={index}>{paragraph}</p>)}</div></details>{answer.fallback_reason && !noMatch ? <div className="answer-notice warn"><strong>已采用保守结论</strong><span>{friendlyFallback(answer.fallback_reason)}</span></div> : null}{answer.answer_quality?.applicable !== false && answer.answer_quality?.passed === false ? <div className="answer-notice bad"><strong>质量校验未通过</strong><span>{(answer.answer_quality.issues || []).join("；") || "模型回答未通过证据质量闸门。"}</span></div> : null}{rest.length ? <div className="candidate-section"><div className="candidate-heading">{primary ? "其他可考虑项目" : "当前候选及约束状态"}</div><div className="project-grid">{rest.slice(0, primary ? 2 : 3).map((project) => <CandidateProjectCard key={project.full_name} project={project} evidenceCount={project.evidenceCount} />)}</div></div> : null}<EvidenceDrawer answer={answer} trigger={<button className="button evidence-trigger" type="button"><MessageSquareText size={15} />查看依据</button>} /></> : null}</section>;
+  return <section className="answer-summary"><ConstraintEditor requirements={answer.input_route?.requirements || []} disabled={retryDisabled} onRetry={onRetry} /><div className="answer-meta"><AnswerStatus mode={answer.answer_mode} quality={answer.answer_quality?.passed} /><span className="badge">{semantics.coverageLabel}</span><span className="badge">{semantics.matchLabel}</span><span className="badge">{freshnessText}</span></div><div className={`answer-notice ${answer.data_source?.history_only ? "warn" : ""}`}><strong>数据来源{answer.data_source?.run_date ? ` · ${answer.data_source.run_date}` : ""}</strong><span>{sourceText}</span></div>{clarification ? <div className="answer-notice warn"><strong>需要补充需求</strong><span>{answer.clarification_question || answer.answer}</span></div> : noMatch ? <div className="answer-notice bad"><strong>当前条件下没有匹配项目</strong><span>{answer.answer}</span></div> : primary ? <><div className="recommendation-title"><CheckCircle2 size={17} /><span>当前归档内最匹配候选</span></div><PrimaryProjectCard project={primary} evidenceCount={primary.evidenceCount} /></> : <div className="answer-notice warn"><strong>暂无可确认首选</strong><span>历史候选与待核实候选会保留展示，但不会标记为当前首选。</span></div>}{!clarification ? <><div className="answer-text"><p>{reasonSummary(answer)}</p></div><div className="answer-notice"><strong>质量边界</strong><span>当前闸门校验引用绑定、极性、结构化作用域、语义字段一致性和归档新鲜度；不代表 blind 泛化或真实需求匹配正确率。</span></div><details className="expanded-analysis"><summary>展开完整分析</summary><div className="answer-text">{answer.answer.replace(/\[\d+\]/g, "").split(/\n+/).map((paragraph, index) => <p key={index}>{paragraph}</p>)}</div></details>{answer.fallback_reason && !noMatch ? <div className="answer-notice warn"><strong>已采用保守结论</strong><span>{friendlyFallback(answer.fallback_reason)}</span></div> : null}{answer.answer_quality?.applicable !== false && answer.answer_quality?.passed === false ? <div className="answer-notice bad"><strong>质量校验未通过</strong><span>{(answer.answer_quality.issues || []).join("；") || "模型回答未通过证据质量闸门。"}</span></div> : null}{rest.length ? <div className="candidate-section"><div className="candidate-heading">{primary ? "其他可考虑项目" : "当前候选及约束状态"}</div><div className="project-grid">{rest.slice(0, primary ? 2 : 3).map((project) => <CandidateProjectCard key={project.full_name} project={project} evidenceCount={project.evidenceCount} />)}</div></div> : null}<EvidenceDrawer answer={answer} trigger={<button className="button evidence-trigger" type="button"><MessageSquareText size={15} />查看依据</button>} /></> : null}</section>;
 }
 
 export function StreamDraft({ draft, stage }: { draft: string; stage: string }) { return <section className="assistant-message stream-draft"><span className="message-label">研究 Agent</span><span className="stream-stage"><i />{stage}</span>{draft ? <div className="answer-text draft">{draft}</div> : <div className="draft">正在分析本轮证据…</div>}</section>; }

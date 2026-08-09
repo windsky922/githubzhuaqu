@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { answerStatus } from "../components/StatusBadge";
-import { answerConfidenceSemantics, selectPrimaryRecommendation } from "../components/AgentWorkspace";
+import { answerConfidenceSemantics, constraintRetryQuery, selectPrimaryRecommendation } from "../components/AgentWorkspace";
 import { eligibilityLabel } from "../components/ProjectCard";
 import { contextualAskBody } from "../lib/api";
 import { followUpContext, matchProjects } from "./AgentPage";
@@ -11,6 +11,17 @@ describe("项目匹配回答状态", () => {
     expect(answerStatus("fallback_rule").label).toBe("已切换为证据约束结论");
     expect(answerStatus("refusal").label).toBe("当前归档没有足够证据");
     expect(answerStatus("llm", false).label).toBe("模型回答未通过质量校验");
+  });
+
+  it("把编辑后的硬约束和偏好转换为可重试查询", () => {
+    const requirements = [
+      { field: "language", operator: "eq", value: "Python", hard: true },
+      { field: "hosting_mode", operator: "eq", value: "self_hosted", hard: false },
+      { field: "language", operator: "not_eq", value: "Java", hard: false },
+    ];
+    expect(constraintRetryQuery(requirements)).toBe("使用这些条件重新搜索：必须满足语言=Python；偏好部署方式=本地部署；语言最好不是Java");
+    expect(constraintRetryQuery(requirements, true)).toBe("使用这些条件重新搜索：偏好语言=Python；偏好部署方式=本地部署；语言最好不是Java");
+    expect(constraintRetryQuery([])).toBe("重新搜索并给出当前最匹配的项目");
   });
 
   it("只按后端 recommendations 组装候选，不让引用顺序决定首选", () => {
