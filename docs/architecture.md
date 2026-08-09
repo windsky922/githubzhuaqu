@@ -8,6 +8,8 @@ AI Agent 通用学习指导由独立 Prompt 生成，禁止包含具体 `owner/r
 
 HTTP Assistant 使用独立的强制只读 repository：已有 SQLite 以 `mode=ro` + `query_only` 查询，缺库时使用 JSON 只读检索；`auto_build` 不属于 Assistant 契约。编排层对底层 RAG 结果执行响应白名单，内部上下文与 Prompt 不进入对话响应。
 
+React 工作台只把上一轮权威 `final.assistant_state` 回传给 Assistant，不上传历史回答。运行中可显示完整本轮结果；localStorage 默认禁用，开启后由独立投影层移除证据、Prompt、内部状态和错误，仅保留 30 天内的最小展示历史。
+
 ## 偏好优先约束（2026-08-02）
 
 约束解析将自然语言条件分成偏好和明确硬约束。核验器继续只接收可引用的项目级证据；偏好证据不足时保留候选并标为待核实，硬约束明确冲突时才淘汰。`multi_agent` 是可检索、可核验但默认不阻断的偏好。
@@ -38,7 +40,7 @@ FastAPI 管理写接口继续接受 `X-Admin-Token` 或 `Authorization: Bearer`�
 
 ## React 项目匹配工作台
 
-`docs/app/#/agent` 是面向普通用户的 React 项目匹配入口。前端只在浏览器 `localStorage` 保存有限的会话标题、问题和最终响应；不创建后端会话表，也不把历史回答视为事实证据。它通过 POST `/v1/rag/ask/stream` 提交当前输入和最小用户意图上下文，只包含上一轮用户目标、候选 ID、确认首选、模式和 resumable。历史 assistant answer、citations、evidence、prompt_context 均不进入请求。页面只从后端 `recommendations[]` 读取候选顺序和资格状态。
+`docs/app/#/agent` 是面向普通用户的 React 学习与项目研究导师。前端通过 POST `/v1/assistant/turn/stream` 提交当前输入和白名单化的上一轮 `assistant_state`；历史 assistant answer、citations、evidence、`prompt_context` 均不进入请求。浏览器历史默认关闭，开启后仅保存会话元数据、问题、展示回答、助手模式、仓库 ID 和最小状态；不创建后端会话表，也不把历史回答视为事实证据。页面只从后端 `recommendations[]` 读取候选顺序和资格状态。
 
 Agent 路由使用独立的全高工作区，消息列表是唯一可滚动区域，输入框固定在工作区底部。项目筛选通过 `offset` 分页从 SQLite 归档读取项目；对比选择只保存在浏览器并同步到 `repos` URL 参数，对比结果复用既有只读项目对比 API，不增加用户数据或后端状态。
 

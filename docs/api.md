@@ -90,7 +90,7 @@ Authorization: Bearer <本地管理口令>
 
 管理首页的 GPT 式 RAG 对话工作台仍然逐轮调用 `/v1/rag/ask`。对话历史只保存在浏览器 `localStorage.github_weekly_rag_chat_history`，最多 20 轮；后端不保存会话，不把历史回答作为事实证据，也不写入 SQLite。
 
-React 项目匹配工作台位于 `app/#/agent?api=1`，旧 `agent.html?api=1` 自动跳转。它默认 POST `/v1/rag/ask/stream`，并把回答渲染为“最匹配项目、候选项目、折叠证据”。SSE 草稿只标记为质量校验中，`final` 到达后才成为正式结论；clarification、no_match、拒答和规则降级均显示独立状态。会话只保存在浏览器 `localStorage.github_weekly_agent_match_conversations_v1`；下一轮只提交上一轮用户目标、候选 ID、确认首选、模式和 resumable，不提交历史回答、citations、evidence 或 prompt_context。
+React 学习与项目研究导师位于 `app/#/agent?api=1`，旧 `agent.html?api=1` 自动跳转。它默认 POST `/v1/assistant/turn/stream`，失败时只回退 `/v1/assistant/turn`；SSE 只有 `final` 是权威结果。下一轮只提交当前问题和白名单化的上一轮 `assistant_state`，不上传历史回答、citations、evidence 或 `prompt_context`。浏览器历史默认关闭；显式开启后使用 `localStorage.github_weekly_agent_assistant_conversations_v2` 保存 30 天内的最小展示记录，关闭即删除，旧完整 RagAnswer 键启动时清理。
 
 `GET /api/projects` 与 `GET /v1/projects` 支持可选 `offset`（默认 0）和既有 `limit`（最大 200）。响应保留 `projects` 与 `count`，并新增 `total`、`offset`、`limit`、`has_more`，供 React 筛选页按每页 50 条展示完整历史归档。项目对比选择只保存在浏览器 `localStorage.github_weekly_project_compare_v1`，最多 3 个仓库；URL 中的 `repos` 参数优先于本地暂存。
 

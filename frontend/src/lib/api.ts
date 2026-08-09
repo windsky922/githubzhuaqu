@@ -1,4 +1,4 @@
-import type { AskIntentContext, Comparison, Project, ProjectPage, RagAnswer } from "./types";
+import type { AskIntentContext, AssistantState, Comparison, Project, ProjectPage, RagAnswer } from "./types";
 
 type JsonEnvelope<T> = { projects?: T[]; profiles?: unknown[]; recommendations?: T[]; total?: number; offset?: number; limit?: number; has_more?: boolean; count?: number };
 export type StreamEvent = { event: "meta" | "delta" | "final" | "error"; data: Record<string, unknown> };
@@ -149,6 +149,107 @@ export async function streamRagAsk(question: string, context: AskIntentContext |
       }
     }
   }
+}
+
+function assistantText(value: unknown, limit: number) {
+  return typeof value === "string" ? value.trim().slice(0, limit) : "";
+}
+
+function assistantRepositoryIds(value: unknown) {
+  if (!Array.isArray(value)) return [];
+  const ids: string[] = [];
+  for (const item of value) {
+    const id = assistantText(item, 200);
+    if (/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(id) && !ids.includes(id)) ids.push(id);
+  }
+  return ids.slice(0, 10);
+}
+
+export function projectAssistantState(value?: AssistantState): AssistantState | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const raw = value as unknown as Record<string, unknown>;
+  const candidates = assistantRepositoryIds(raw.candidate_repository_ids);
+  const primary = assistantText(raw.primary_repository_id, 200);
+  const source = raw.source_identity && typeof raw.source_identity === "object" && !Array.isArray(raw.source_identity)
+    ? raw.source_identity as Record<string, unknown> : {};
+  const constraints: AssistantState["constraints"] = Array.isArray(raw.constraints) ? raw.constraints.slice(0, 20).flatMap((item) => {
+    if (!item || typeof item !== "object" || Array.isArray(item)) return [];
+    const constraint = item as Record<string, unknown>;
+    const constraintValue = typeof constraint.value === "string" || typeof constraint.value === "boolean" ? constraint.value : "";
+    return [{ field: assistantText(constraint.field, 50), operator: assistantText(constraint.operator, 20), value: constraintValue, hard: constraint.hard === true }];
+  }) : [];
+  const mode = raw.mode === "fts5" || raw.mode === "vector" ? raw.mode : "hybrid";
+  return {
+    schema_version: 1,
+    revision: Math.max(0, Math.min(Number.isInteger(raw.revision) ? Number(raw.revision) : 0, 1_000_000)),
+    goal: assistantText(raw.goal, 2000), constraints,
+    candidate_repository_ids: candidates,
+    primary_repository_id: candidates.includes(primary) ? primary : "",
+    last_intent: assistantText(raw.last_intent, 50),
+    pending_question: assistantText(raw.pending_question, 500),
+    source_identity: {
+      kind: assistantText(source.kind, 50), source_id: assistantText(source.source_id, 200),
+      run_date: assistantText(source.run_date, 50), as_of: assistantText(source.as_of, 50),
+    },
+    mode,
+    resumable: raw.resumable === true,
+  };
+}
+
+export function assistantTurnBody(question: string, state?: AssistantState) {
+  const projected = projectAssistantState(state);
+  return { q: question, ...(projected ? { state: projected } : {}), mode: projected?.mode || "hybrid", limit: 3 };
+}
+
+async function fallbackAssistantTurn(question: string, state: AssistantState | undefined, signal: AbortSignal, onEvent: (event: StreamEvent) => void) {
+  const response = await fetch("/v1/assistant/turn", {
+    method: "POST", signal,
+    headers: { Accept: "application/json", "Content-Type": "application/json" },
+    body: JSON.stringify(assistantTurnBody(question, state)),
+  });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  onEvent({ event: "final", data: await response.json() as Record<string, unknown> });
+}
+
+export async function streamAssistantTurn(question: string, state: AssistantState | undefined, signal: AbortSignal, onEvent: (event: StreamEvent) => void) {
+  const response = await fetch("/v1/assistant/turn/stream", {
+    method: "POST",
+    signal,
+    headers: { Accept: "text/event-stream", "Content-Type": "application/json" },
+    body: JSON.stringify(assistantTurnBody(question, state)),
+  });
+  if (!response.ok || !response.body) {
+    await fallbackAssistantTurn(question, state, signal, onEvent);
+    return;
+  }
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let currentEvent = "error";
+  const emit = (frame: string) => {
+    const dataLine = frame.split("\n").find((line) => line.startsWith("data:"));
+    const eventLine = frame.split("\n").find((line) => line.startsWith("event:"));
+    currentEvent = eventLine ? eventLine.slice(6).trim() : currentEvent;
+    if (!dataLine) return;
+    try {
+      onEvent({ event: currentEvent as StreamEvent["event"], data: JSON.parse(dataLine.slice(5).trim()) as Record<string, unknown> });
+    } catch {
+      onEvent({ event: "error", data: { message: "流式响应解析失败" } });
+    }
+  };
+  while (true) {
+    const chunk = await reader.read();
+    if (chunk.done) break;
+    buffer += decoder.decode(chunk.value, { stream: true });
+    let boundary = buffer.indexOf("\n\n");
+    while (boundary >= 0) {
+      emit(buffer.slice(0, boundary));
+      buffer = buffer.slice(boundary + 2);
+      boundary = buffer.indexOf("\n\n");
+    }
+  }
+  buffer += decoder.decode();
+  if (buffer.trim()) emit(buffer);
 }
 
 export function answerFromEvent(data: Record<string, unknown>) {

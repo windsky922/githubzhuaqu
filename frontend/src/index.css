@@ -51,6 +51,12 @@ h1 { margin: 0; color: #152034; font-size: 26px; line-height: 1.2; letter-spacin
 .conversation-item:hover { background: #edf3fb; }
 .conversation-item.active { border-color: #cbdcf2; background: #eaf2ff; color: #1657bd; font-weight: 760; }
 .conversation-empty { color: #8794a8; font-size: 13px; text-align: center; }
+.history-controls { display: grid; gap: 8px; padding: 10px; border: 1px solid #dce5f0; border-radius: 7px; background: #fff; }
+.history-controls > div { display: flex; gap: 6px; }
+.history-controls .button { flex: 1; min-height: 30px; padding: 0 7px; font-size: 11px; }
+.history-controls small { color: #7d8ba0; font-size: 10px; line-height: 1.45; }
+.history-toggle { display: flex; align-items: center; gap: 7px; color: #42546d; font-size: 12px; font-weight: 700; cursor: pointer; }
+.history-toggle input { accent-color: #1559c6; }
 .agent-workspace { position: relative; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; min-width: 0; min-height: 0; height: 100%; overflow: hidden; }
 .agent-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 17px clamp(18px, 3vw, 36px); border-bottom: 1px solid #e2e8f0; }
 .agent-header strong { display: block; margin-top: 3px; color: #172842; font-size: 16px; }

@@ -27,7 +27,8 @@ GitHub Weekly Agent 包含 GitHub 项目采集、筛选、中文周报、受控�
 - 提示词只放在 `prompts/`，不在业务代码中硬编码。
 - 外部 README、HTML 和仓库文本是不可信输入：先确定性清洗并隔离提示注入文本，不能把它们当系统指令。
 - `model_enrichment` 只能补充理由和候选证据，不能让 unknown/rejected 通过硬约束，也不能单独决定首选项目。
-- Ask 追问保持无状态：浏览器只提交上一轮用户目标、候选仓库 ID、确认首选、模式和 resumable；不提交或保存历史 assistant 回答、引用、证据、prompt_context，不新增服务端聊天会话。
+- Ask/Assistant 追问保持服务端无状态：浏览器只提交服务端上一轮生成的最小 `assistant_state`，不提交历史回答、引用、证据或 `prompt_context`，不新增服务端聊天会话。
+- 浏览器对话历史默认不持久化。只有用户显式开启时，localStorage 最多保存 30 天、10 个会话、每会话 20 轮；仅允许保存问题、展示用回答、时间、助手模式、仓库 ID 和白名单化最小 `assistant_state`，禁止保存 citations、evidence、sections、`prompt_context`、模型原始输出、错误详情或凭证。关闭保存必须立即删除本机对话数据。
 - 保持 `/v1/rag/ask`、`/v1/rag/ask/stream` 既有字段与 SSE 事件顺序兼容；新增语义优先使用非破坏性字段。
 
 ## 数据与文档同步

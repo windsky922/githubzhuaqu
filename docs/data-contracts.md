@@ -8,6 +8,8 @@
 
 Assistant 请求禁止 `auto_build`。响应仅允许公开回答、分段、引用/证据、推荐、质量、路由、来源/freshness、模型状态及最小状态字段；`contexts`、`prompt_context`、内部 explanation/cache/provider 原始字段不得出现。只有质量通过、freshness 为 `fresh`、来源身份完整且仓库 `current_eligible=true` 时，仓库 ID 才能进入下一轮 resumable 状态。
 
+浏览器历史使用 `github_weekly_agent_assistant_conversations_v2`，默认关闭。显式开启后，每轮只保存 `question`、展示用 `answer`、时间、`assistantMode`、规范仓库 ID 和白名单化 `assistantState`；不保存 citations、evidence、sections、`prompt_context`、contexts、模型/provider 原始输出或错误详情。每次加载和保存均执行 30 天 TTL、最近 10 个会话、每会话最近 20 轮限制。单会话删除、全部清空、关闭保存都会物理删除对应本机数据；旧完整 RagAnswer 键在启动时删除。
+
 ## Freshness 权威阈值（2026-08-02）
 
 `DEFAULT_STALE_AFTER_DAYS` 是唯一默认值，当前为 30 天。本文任何历史的 8 天描述均已废弃，不得作为 API、attestation 或测试阈值。

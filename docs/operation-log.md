@@ -1,5 +1,15 @@
 # 操作日志
 
+## 2026-08-09 追加：Assistant V1 前端对话与最小本机历史
+
+1. React 工作台切换到 `/v1/assistant/turn/stream`，普通降级也只调用 `/v1/assistant/turn`；下一轮仅上传服务端生成的最小 `assistant_state`，不再自行拼装 RAG 上下文。
+2. 回答区显示助手模式、模型状态和知识来源；欢迎场景覆盖 AI Agent 教学、项目推荐和显式重新搜索。
+3. 本机历史默认关闭；显式开启后使用 schema-v2 白名单投影，保存 30 天、最近 10 个会话和每会话最近 20 轮，支持删除当前、全部清空和关闭即删除。
+4. 启动时删除旧完整 RagAnswer 键；落盘禁止 citations、evidence、sections、`prompt_context`、contexts、provider 原始输出、错误详情和凭证。
+5. 更新 `AGENTS.md`、README、架构和数据契约；构建产物同步到 `docs/app`。
+
+验证：`npm.cmd run lint`、`npm.cmd run test`（25 tests）、`npm.cmd run build`、`python scripts/security_check.py` 与 `git diff --check` 通过；浏览器 E2E 留在下一阶段统一执行。
+
 ## 2026-08-09 追加：Assistant V1 后端编排与自然追问
 
 1. 新增只读 `/v1/assistant/turn` 与 `/v1/assistant/turn/stream`，复用 contextual RAG 并保持旧 Ask 契约不变。

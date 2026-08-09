@@ -1,6 +1,6 @@
 # GitHub Weekly Agent
 
-> 本机 Assistant V1 新增 `/v1/assistant/turn` 与 `/v1/assistant/turn/stream`：它把 AI Agent 通用学习指导与证据约束项目推荐分段组合，并通过服务端生成的最小 `assistant_state` 支持自然追问。旧 `/v1/rag/ask` 契约保持不变；Assistant 首版只读，不创建任务、订阅或通知，也不保存服务端聊天会话。
+> 本机 Assistant V1 新增 `/v1/assistant/turn` 与 `/v1/assistant/turn/stream`：它把 AI Agent 通用学习指导与证据约束项目推荐分段组合，并通过服务端生成的最小 `assistant_state` 支持自然追问。旧 `/v1/rag/ask` 契约保持不变；Assistant 首版只读，不创建任务、订阅或通知，也不保存服务端聊天会话。浏览器历史默认关闭；显式开启后只保存最小展示记录 30 天（最多 10 个会话、每会话 20 轮），关闭即删除。
 
 > Agent 条件默认是偏好而不是拦截器：如需严格筛选，请使用“必须、仅、不得、排除、不能接受”等明确措辞。多 Agent、本地部署、成本和离线等偏好会显示匹配或待核实状态；只有明确硬冲突才淘汰候选。
 
@@ -412,7 +412,7 @@ python scripts/query_archive.py --profile agent_development --query workflow --f
 python scripts/build_rag_embeddings.py
 ```
 
-本地前端现在提供两个 RAG 入口：`admin.html?api=1` 用于管理、诊断和证据检查；`app/#/agent?api=1` 是 React 项目匹配工作台，旧 `agent.html?api=1` 会自动跳转。工作台使用顶部导航、会话历史、移动端抽屉和 GPT 式输入区；候选集合、顺序和首选状态只读取 Ask `final` 的后端 `recommendations[]`，不再从 citations 或 contexts 第一项推断。它默认 POST `/v1/rag/ask/stream`，使用 hybrid、limit=3 和 auto_build；每轮只提交上一轮用户目标、候选仓库 ID、确认首选、模式和 resumable，不提交历史模型回答、citations、evidence 或 prompt_context。对话只保存在浏览器 `localStorage`，不保存密钥，不新增后端会话。
+本地前端提供管理 RAG 与自然对话两个入口：`admin.html?api=1` 用于管理、诊断和证据检查；`app/#/agent?api=1` 是 AI Agent 学习与项目研究导师，旧 `agent.html?api=1` 会自动跳转。导师默认 POST `/v1/assistant/turn/stream`，降级只调用 `/v1/assistant/turn`，每轮只提交当前问题和上一轮权威 `assistant_state`；不提交历史回答、citations、evidence 或 `prompt_context`，也不允许 `auto_build`。浏览器历史默认关闭，显式开启后按白名单保存最小展示记录，关闭即删除，不新增后端会话。
 
 React 开发入口为 `http://127.0.0.1:5173/#/agent?api=1`，发布构建入口为 `http://127.0.0.1:8000/app/#/agent?api=1`；页面会标记当前环境。项目筛选使用后端分页，每页 50 条，不再受默认 20 条项目限制。项目可加入浏览器本地对比暂存，最多 3 个，并通过 URL `repos` 参数分享对比视图。
 

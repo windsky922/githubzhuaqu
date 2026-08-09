@@ -86,14 +86,14 @@ export type Comparison = {
 export type RagAnswer = {
   query: string;
   answer: string;
-  answer_model: string;
+  answer_model?: string;
   answer_mode: "llm" | "fallback_rule" | "refusal" | string;
   freshness_required?: boolean;
   fallback_reason: string;
-  confidence: string;
-  evidence_coverage: string;
-  match_confidence: string;
-  count: number;
+  confidence?: string;
+  evidence_coverage?: string;
+  match_confidence?: string;
+  count?: number;
   citations: Citation[];
   evidence: Evidence[];
   recommendations: RagRecommendation[];
@@ -118,7 +118,7 @@ export type RagAnswer = {
     requirement_schema_version?: "capability-v1" | string;
     requirements?: Array<{ field: string; operator: string; value: RequirementValue; hard: boolean }>;
   };
-  prompt_context: string;
+  prompt_context?: string;
   answer_quality: {
     applicable?: boolean;
     passed?: boolean;
@@ -156,8 +156,26 @@ export type RagAnswer = {
     reasons?: string[];
   };
   retrieval?: { mode?: string };
-  model_status?: { configured?: boolean; used?: boolean };
+  model_status?: { provider?: string; configured?: boolean; used?: boolean; model?: string };
+  assistant_mode?: "knowledge" | "project_search" | "project_follow_up" | "project_compare" | "help" | "clarify" | string;
+  knowledge_basis?: "model_general" | "project_evidence" | "mixed" | "none" | string;
+  sections?: Array<{ kind: "guidance" | "project_evidence" | "limitations" | string; title: string; content: string; citation_indexes?: number[] }>;
+  assistant_state?: AssistantState;
   [key: string]: unknown;
+};
+
+export type AssistantState = {
+  schema_version: number;
+  revision: number;
+  goal: string;
+  constraints: Array<{ field?: string; operator?: string; value?: RequirementValue; hard?: boolean }>;
+  candidate_repository_ids: string[];
+  primary_repository_id: string;
+  last_intent: string;
+  pending_question: string;
+  source_identity: { kind: string; source_id: string; run_date: string; as_of: string };
+  mode: "fts5" | "vector" | "hybrid";
+  resumable: boolean;
 };
 
 export type AskIntentContext = {
