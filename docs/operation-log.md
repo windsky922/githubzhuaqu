@@ -1,5 +1,12 @@
 # 操作日志
 
+## 2026-08-09 追加：P1 freshness 文档契约去漂移
+
+1. 删除 `docs/data-contracts.md` 中遗留的“默认阈值为 8 天”，运行时、来源字段与详细契约统一为 30 天。
+2. 新增数据契约测试，要求出现 `DEFAULT_STALE_AFTER_DAYS` 与 30 天默认值，且禁止旧 8 天表述。
+
+验证：`python -m unittest tests.test_data_contracts tests.test_rag_freshness tests.test_rag_freshness_attestation -q` 通过（12 tests）；旧阈值文本检索无结果；`git diff --check` 通过。未触碰 `output/`、`tmp/`。
+
 ## 2026-08-09 追加：P0 首选候选与展示截断解耦
 
 1. `matchProjects` 保留完整后端候选集，不再在候选资格判断前截断为前三项。

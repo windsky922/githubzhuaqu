@@ -473,6 +473,12 @@ SQLITE_COLUMNS = {
 
 
 class DataContractsTest(unittest.TestCase):
+    def test_freshness_default_is_documented_once_without_legacy_threshold(self):
+        contract = (Path(__file__).parents[1] / "docs" / "data-contracts.md").read_text(encoding="utf-8")
+        self.assertIn("DEFAULT_STALE_AFTER_DAYS", contract)
+        self.assertIn("默认阈值为 30 天", contract)
+        self.assertNotIn("默认阈值为 8 天", contract)
+
     def test_contextual_ask_capability_contract_is_documented(self):
         contract = (Path(__file__).parents[1] / "docs" / "data-contracts.md").read_text(encoding="utf-8")
         for expected in (
