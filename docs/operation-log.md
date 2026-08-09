@@ -1,5 +1,13 @@
 # 操作日志
 
+## 2026-08-09 追加：P1 weekly 核心发布与辅助任务解耦
+
+1. RAG 维护计划、RAG 检索评估与开发上下文索引均改为 `continue-on-error: true`。
+2. 安全检查、测试、周报生成、freshness attestation、Pages 构建、归档发布与远端公开归档审计仍保持 fail-closed。
+3. 新增工作流测试，防止三项辅助 RAG 步骤重新阻断归档发布。
+
+验证：`python -m unittest tests.test_workflows -q` 通过（16 tests）；`git diff --check` 通过。未触碰 `output/`、`tmp/`。
+
 ## 2026-08-09 追加：P1 freshness 文档契约去漂移
 
 1. 删除 `docs/data-contracts.md` 中遗留的“默认阈值为 8 天”，运行时、来源字段与详细契约统一为 30 天。

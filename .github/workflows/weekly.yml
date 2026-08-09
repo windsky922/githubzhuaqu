@@ -130,6 +130,7 @@ jobs:
           --run-date "$(date -u +%F)"
 
       - name: 创建 RAG 维护计划
+        continue-on-error: true
         env:
           WORKFLOW_PLAN_RAG_MAINTENANCE: ${{ inputs.plan_rag_maintenance || 'true' }}
           RAG_MAINTENANCE_LIMIT: ${{ vars.RAG_MAINTENANCE_LIMIT || '10' }}
@@ -147,6 +148,7 @@ jobs:
             --requested-by "github_actions"
 
       - name: 执行 RAG 检索质量评估
+        continue-on-error: true
         env:
           WORKFLOW_RUN_RAG_EVALUATION: ${{ inputs.run_rag_evaluation || 'true' }}
           RAG_EVALUATION_QUERIES: ${{ vars.RAG_EVALUATION_QUERIES }}
@@ -170,6 +172,7 @@ jobs:
             --requested-by "github_actions"
 
       - name: 刷新开发上下文索引
+        continue-on-error: true
         env:
           WORKFLOW_RUN_DEV_CONTEXT_INDEX: ${{ inputs.run_dev_context_index || 'true' }}
         run: |

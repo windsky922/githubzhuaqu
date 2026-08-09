@@ -111,6 +111,12 @@ class WorkflowTest(unittest.TestCase):
             workflow.index("scripts/build_pages.py"),
         )
 
+    def test_weekly_auxiliary_rag_steps_do_not_block_archive_publish(self) -> None:
+        workflow = (ROOT / ".github" / "workflows" / "weekly.yml").read_text(encoding="utf-8")
+        for step_name in ("创建 RAG 维护计划", "执行 RAG 检索质量评估", "刷新开发上下文索引"):
+            step = workflow.split(f"- name: {step_name}", 1)[1].split("- name:", 1)[0]
+            self.assertIn("continue-on-error: true", step)
+
     def test_weekly_workflow_checks_and_builds_react_workbench_before_publish(self) -> None:
         workflow = (ROOT / ".github" / "workflows" / "weekly.yml").read_text(encoding="utf-8")
 
