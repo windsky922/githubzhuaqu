@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GitHub 周报 2026-08-10</title>
+  <style>
+    body { margin: 0; background: #f6f7f9; color: #1f2933; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height: 1.7; }
+    main { max-width: 960px; margin: 0 auto; padding: 32px 20px 56px; }
+    article { background: #fff; border: 1px solid #d8dee8; padding: 28px; }
+    h1, h2, h3, h4 { line-height: 1.3; }
+    a { color: #0969da; }
+    code { background: #eef2f7; padding: 2px 5px; }
+    table { width: 100%; border-collapse: collapse; margin: 18px 0; display: block; overflow-x: auto; }
+    th, td { border: 1px solid #d8dee8; padding: 8px 10px; text-align: left; vertical-align: top; }
+    th { background: #f1f4f8; }
+    hr { border: 0; border-top: 1px solid #d8dee8; margin: 24px 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <article>
+      <p><strong>GitHub 每周热点项目周报</strong></p>
+      <p>*统计周期：2026-08-03 至 2026-08-10*</p>
+      <hr>
+      <h3>1. 本周总体趋势</h3>
+      <p>本周开源社区聚焦于 <strong>AI Agent 基础设施</strong>与<strong>开发者工具链</strong>的深度融合。在入选的 10 个活跃项目中，<strong>AI Agent</strong> 与 <strong>LLM Tooling</strong> 两大类别平分秋色（各占 4 席），累计新增 Star 达 <strong>49,870</strong>，显示出极强的社区参与度。</p>
+      <p>语言分布呈现多极化：<strong>Python</strong>（4 个项目）凭借其在 AI 生态的主导地位继续领跑；<strong>TypeScript</strong>（2 个）在 Agent 记忆与项目管理工具中表现活跃；<strong>Rust</strong>、<strong>Go</strong>、<strong>PowerShell</strong> 及 <strong>Jupyter Notebook</strong> 各有 1 个代表项目，分别覆盖底层 PDF 处理、高性能 CLI 代理及安全研究工具。</p>
+      <p>值得注意的是，<strong>GitHub Trending 周榜</strong>贡献了 9 个项目，其中前 5 名均被 AI 基础设施相关项目占据，表明 Agent 技术正从实验阶段向工程化落地快速演进。</p>
+      <hr>
+      <h3>2. 热点项目总览</h3>
+      <table>
+        <thead><tr><th>项目</th><th>周榜排名</th><th>语言</th><th>Star 数</th><th>简介</th></tr></thead>
+        <tbody>
+        <tr><td><a href="https://github.com/firecrawl/pdf-inspector">firecrawl/pdf-inspector</a></td><td><strong>1</strong></td><td>Rust</td><td>13,879</td><td>快速 PDF 检查、分类与文本提取库，支持智能识别扫描件与文本型 PDF</td></tr>
+        <tr><td><a href="https://github.com/zhaoxuya520/reverse-skill">zhaoxuya520/reverse-skill</a></td><td><strong>2</strong></td><td>PowerShell</td><td>22,522</td><td>逆向工程/渗透测试技能路由包，支持 Claude Code、Cursor 等 AI 客户端</td></tr>
+        <tr><td><a href="https://github.com/TencentCloud/TencentDB-Agent-Memory">TencentCloud/TencentDB-Agent-Memory</a></td><td><strong>3</strong></td><td>TypeScript</td><td>18,773</td><td>团队级 AI Agent 记忆中心，支持对话、文档与代码四种记忆资产</td></tr>
+        <tr><td><a href="https://github.com/lyogavin/airllm">lyogavin/airllm</a></td><td><strong>4</strong></td><td>Jupyter Notebook</td><td>30,376</td><td>单张 4GB GPU 运行 70B 大模型推理，无需量化或剪枝</td></tr>
+        <tr><td><a href="https://github.com/esengine/DeepSeek-Reasonix">esengine/DeepSeek-Reasonix</a></td><td><strong>5</strong></td><td>Go</td><td>33,453</td><td>DeepSeek 原生终端 AI 编码代理，基于前缀缓存稳定性设计</td></tr>
+        <tr><td><a href="https://github.com/usekaneo/kaneo">usekaneo/kaneo</a></td><td><strong>7</strong></td><td>TypeScript</td><td>7,906</td><td>极简开源项目管理工具，强调&quot;所需皆有，无需皆无&quot;</td></tr>
+        <tr><td><a href="https://github.com/virgiliojr94/book-to-skill">virgiliojr94/book-to-skill</a></td><td><strong>8</strong></td><td>Python</td><td>19,444</td><td>将技术书籍 PDF 转换为 Claude Code 可用 Skill</td></tr>
+        <tr><td><a href="https://github.com/google/skills">google/skills</a></td><td><strong>9</strong></td><td>Python</td><td>17,237</td><td>Google 产品与技术官方 Agent Skills 集合</td></tr>
+        <tr><td><a href="https://github.com/vitali87/code-graph-rag">vitali87/code-graph-rag</a></td><td><strong>15</strong></td><td>Python</td><td>2,997</td><td>基于知识图谱的单体仓库 RAG 系统，支持多语言代码理解</td></tr>
+        <tr><td><a href="https://github.com/Panniantong/Agent-Reach">Panniantong/Agent-Reach</a></td><td>-</td><td>Python</td><td>69,740</td><td>为 AI Agent 提供互联网访问能力，支持 Twitter、Reddit、Bilibili 等平台</td></tr>
+        </tbody>
+      </table>
+      <p>*注：Panniantong/Agent-Reach 虽未进入本周 Trending 前 10，但单周新增 Star 高达 49,870，为本周增长最快项目。*</p>
+      <hr>
+      <h3>3. 重点项目分析</h3>
+      <p><strong>firecrawl/pdf-inspector</strong></p>
+      <p>作为本周 GitHub Trending <strong>周榜第 1 位</strong>，该项目是本期最重要的热度信号。这是一个基于 Rust 的高性能 PDF 处理库，核心能力在于智能区分扫描件与文本型 PDF，并能在无需 OCR 的情况下提取带位置信息的文本并转换为 Markdown。项目提供 Python、Node.js 及 WebAssembly 绑定，质量评分为 100（High），适合需要大规模文档处理的开发者集成。</p>
+      <p><strong>Panniantong/Agent-Reach</strong></p>
+      <p>本周新增 Star <strong>49,870</strong>，为所有项目中增长最快。该 Python 项目为 AI Agent 提供零 API 费用的互联网访问能力，支持 Twitter、Reddit、YouTube、GitHub、Bilibili 等平台的数据抓取与搜索。作为 Agent 基础设施层工具，它解决了大模型无法实时访问外部信息的痛点，质量评分 100，适合构建需要实时网络能力的 Agent 应用。</p>
+      <p><strong>esengine/DeepSeek-Reasonix</strong></p>
+      <p>位列周榜第 5，是一个基于 Go 开发的 DeepSeek 原生终端编码代理。其核心创新在于针对前缀缓存（prefix-cache）稳定性进行工程优化，允许开发者长期保持代理运行状态而不丢失上下文。项目支持多种 AI 客户端集成，质量评分 100，体现了 Go 在高性能 CLI 工具领域的优势。</p>
+      <p><strong>TencentCloud/TencentDB-Agent-Memory</strong></p>
+      <p>周榜第 3 的 TypeScript 项目，定位为团队级 Agent 记忆中心。它将对话、文档和代码转化为四种可复用记忆资产（Chat Memory、Skill、LLM-Wiki、Code-Graph），支持跨 Agent 和框架共享。该项目填补了多 Agent 协作中的状态持久化空白，质量评分 100，适合企业级 Agent 部署场景。</p>
+      <p><strong>zhaoxuya520/reverse-skill</strong></p>
+      <p>周榜第 2 的 PowerShell 项目，专注于安全研究与逆向工程领域。它通过 AI 自动路由机制，为 Claude Code、Cursor 等编码客户端提供针对 APK、二进制文件、前端加密及 CTF 挑战的标准化工作流程。项目累计 Star 22,522，质量评分 92（High），是安全工程师提升 AI 辅助效率的实用工具。</p>
+      <hr>
+      <h3>4. 最适合用户学习的项目</h3>
+      <p>根据您关注的 <strong>Python 工具开发</strong>、<strong>Agent 架构</strong>及<strong>开发者工具</strong>方向，本周推荐以下学习路径：</p>
+      <p><strong>入门首选：virgiliojr94/book-to-skill</strong></p>
+      <p>如果您希望快速将现有技术文档转化为 AI 可用的结构化知识，这个 Python 项目提供了完整的 PDF 解析与 Skill 生成流程。代码结构清晰，适合学习如何为 Claude Code 等客户端构建自定义 Skills，且 MIT 协议允许自由修改。</p>
+      <p><strong>进阶实践：esengine/DeepSeek-Reasonix</strong></p>
+      <p>对于想深入理解 Agent 架构的开发者，这个 Go 语言项目展示了如何构建长期运行的终端编码代理。重点学习其前缀缓存管理、TUI 设计模式及工具调用（Tool Use）实现，适合提升 CLI 工具开发能力。</p>
+      <p><strong>工程参考：usekaneo/kaneo</strong></p>
+      <p>如果您关注开发者工具的产品化，这个 TypeScript 项目（React + Hono）展示了如何构建简洁高效的项目管理系统。其&quot;反臃肿&quot;设计理念与自托管架构，对构建内部效率工具具有直接参考价值。</p>
+      <hr>
+      <h3>5. 本周结论</h3>
+      <p>本周开源生态呈现出 <strong>&quot;Agent 基础设施化&quot;</strong> 的明确趋势：从 Firecrawl 的文档解析、TencentDB 的记忆管理到 Google 的官方 Skills，围绕大模型能力的工程化封装正在加速成熟。</p>
+      <p><strong>关键信号：</strong></p>
+      <p>• <strong>Skills 生态爆发</strong>：Google、Claude Code 及社区共同推动的 Skill 标准化（reverse-skill、book-to-skill、google/skills）表明，将专业知识编码为 Agent 可调用模块已成为主流实践。</p>
+      <p>• <strong>多语言协同</strong>：Rust 负责高性能底层（PDF 处理）、Go 承担长时运行服务（Reasonix）、Python 主导 AI 逻辑（Agent-Reach）、TypeScript 覆盖前端与记忆层，多语言协作范式已然形成。</p>
+      <p>• <strong>记忆与上下文成为焦点</strong>：TencentDB-Agent-Memory 等项目表明，随着 Agent 复杂度提升，长期记忆管理与团队知识共享将成为下一个技术制高点。</p>
+      <p>建议持续关注 Agent 基础设施层的标准化进展，特别是 MCP（Model Context Protocol）相关项目的演进。</p>
+      <h2>附录：项目链接与来源补全</h2>
+      <p>• firecrawl/pdf-inspector；<a href="https://github.com/firecrawl/pdf-inspector">https://github.com/firecrawl/pdf-inspector</a>；来源：GitHub Trending；Trending 排名：1</p>
+      <p>• zhaoxuya520/reverse-skill；<a href="https://github.com/zhaoxuya520/reverse-skill">https://github.com/zhaoxuya520/reverse-skill</a>；来源：GitHub Trending；Trending 排名：2</p>
+      <p>• TencentCloud/TencentDB-Agent-Memory；<a href="https://github.com/TencentCloud/TencentDB-Agent-Memory">https://github.com/TencentCloud/TencentDB-Agent-Memory</a>；来源：GitHub Trending；Trending 排名：3</p>
+      <p>• lyogavin/airllm；<a href="https://github.com/lyogavin/airllm">https://github.com/lyogavin/airllm</a>；来源：GitHub Trending；Trending 排名：4</p>
+      <p>• esengine/DeepSeek-Reasonix；<a href="https://github.com/esengine/DeepSeek-Reasonix">https://github.com/esengine/DeepSeek-Reasonix</a>；来源：GitHub Search + GitHub Trending；Trending 排名：5</p>
+      <p>• usekaneo/kaneo；<a href="https://github.com/usekaneo/kaneo">https://github.com/usekaneo/kaneo</a>；来源：GitHub Trending；Trending 排名：7</p>
+      <p>• virgiliojr94/book-to-skill；<a href="https://github.com/virgiliojr94/book-to-skill">https://github.com/virgiliojr94/book-to-skill</a>；来源：GitHub Trending；Trending 排名：8</p>
+      <p>• google/skills；<a href="https://github.com/google/skills">https://github.com/google/skills</a>；来源：GitHub Trending；Trending 排名：9</p>
+      <p>• vitali87/code-graph-rag；<a href="https://github.com/vitali87/code-graph-rag">https://github.com/vitali87/code-graph-rag</a>；来源：GitHub Trending；Trending 排名：15</p>
+      <p>• Panniantong/Agent-Reach；<a href="https://github.com/Panniantong/Agent-Reach">https://github.com/Panniantong/Agent-Reach</a>；来源：GitHub Search</p>
+    </article>
+  </main>
+</body>
+</html>

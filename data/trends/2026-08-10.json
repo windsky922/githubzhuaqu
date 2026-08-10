@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "summary_points": [
+    "LLM Tooling 是本期最集中的方向，共 4 个项目。",
+    "Python 是本期出现最多的主要语言，共 4 个项目。",
+    "本期入选项目累计新增 Star 49870。",
+    "firecrawl/pdf-inspector 是本期 GitHub Trending 排名最高的项目，周榜排名 1。",
+    "Panniantong/Agent-Reach 是本期新增 Star 最高的项目，新增 49870。"
+  ],
+  "top_categories": [
+    {
+      "count": 4,
+      "name": "LLM Tooling"
+    },
+    {
+      "count": 4,
+      "name": "AI Agent"
+    },
+    {
+      "count": 2,
+      "name": "Other"
+    }
+  ],
+  "top_languages": [
+    {
+      "count": 4,
+      "name": "Python"
+    },
+    {
+      "count": 2,
+      "name": "TypeScript"
+    },
+    {
+      "count": 1,
+      "name": "Rust"
+    },
+    {
+      "count": 1,
+      "name": "PowerShell"
+    },
+    {
+      "count": 1,
+      "name": "Jupyter Notebook"
+    },
+    {
+      "count": 1,
+      "name": "Go"
+    }
+  ],
+  "top_star_growth": [
+    {
+      "category": "AI Agent",
+      "full_name": "Panniantong/Agent-Reach",
+      "html_url": "https://github.com/Panniantong/Agent-Reach",
+      "language": "Python",
+      "star_growth": 49870,
+      "stargazers_count": 69740
+    }
+  ],
+  "top_trending": [
+    {
+      "category": "Other",
+      "full_name": "firecrawl/pdf-inspector",
+      "html_url": "https://github.com/firecrawl/pdf-inspector",
+      "language": "Rust",
+      "stargazers_count": 13879
+    },
+    {
+      "category": "LLM Tooling",
+      "full_name": "zhaoxuya520/reverse-skill",
+      "html_url": "https://github.com/zhaoxuya520/reverse-skill",
+      "language": "PowerShell",
+      "stargazers_count": 22522
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "TencentCloud/TencentDB-Agent-Memory",
+      "html_url": "https://github.com/TencentCloud/TencentDB-Agent-Memory",
+      "language": "TypeScript",
+      "stargazers_count": 18773
+    },
+    {
+      "category": "LLM Tooling",
+      "full_name": "lyogavin/airllm",
+      "html_url": "https://github.com/lyogavin/airllm",
+      "language": "Jupyter Notebook",
+      "stargazers_count": 30376
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "esengine/DeepSeek-Reasonix",
+      "html_url": "https://github.com/esengine/DeepSeek-Reasonix",
+      "language": "Go",
+      "stargazers_count": 33453
+    }
+  ],
+  "total_projects": 10,
+  "total_star_growth": 49870,
+  "trending_project_count": 9,
+  "trending_selected_rate": 0.9,
+  "trending_top10_selected_count": 8
+}

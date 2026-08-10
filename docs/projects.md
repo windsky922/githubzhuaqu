@@ -4,6 +4,16 @@
 
 | 日期 | 项目 | 来源 | Trending 排名 | 方向 | 语言 | Star | 新增 Star | 风险提示 | 链接 |
 |---|---|---|---:|---|---|---:|---:|---:|---|
+| 2026-08-10 | firecrawl/pdf-inspector | GitHub Trending | 1 | Other | Rust | 13879 | 0 | 0 | [https://github.com/firecrawl/pdf-inspector](https://github.com/firecrawl/pdf-inspector) |
+| 2026-08-10 | zhaoxuya520/reverse-skill | GitHub Trending | 2 | LLM Tooling | PowerShell | 22522 | 0 | 0 | [https://github.com/zhaoxuya520/reverse-skill](https://github.com/zhaoxuya520/reverse-skill) |
+| 2026-08-10 | TencentCloud/TencentDB-Agent-Memory | GitHub Trending | 3 | AI Agent | TypeScript | 18773 | 0 | 0 | [https://github.com/TencentCloud/TencentDB-Agent-Memory](https://github.com/TencentCloud/TencentDB-Agent-Memory) |
+| 2026-08-10 | lyogavin/airllm | GitHub Trending | 4 | LLM Tooling | Jupyter Notebook | 30376 | 0 | 0 | [https://github.com/lyogavin/airllm](https://github.com/lyogavin/airllm) |
+| 2026-08-10 | esengine/DeepSeek-Reasonix | GitHub Search + GitHub Trending | 5 | AI Agent | Go | 33453 | 0 | 0 | [https://github.com/esengine/DeepSeek-Reasonix](https://github.com/esengine/DeepSeek-Reasonix) |
+| 2026-08-10 | usekaneo/kaneo | GitHub Trending | 7 | Other | TypeScript | 7906 | 0 | 0 | [https://github.com/usekaneo/kaneo](https://github.com/usekaneo/kaneo) |
+| 2026-08-10 | virgiliojr94/book-to-skill | GitHub Trending | 8 | LLM Tooling | Python | 19444 | 0 | 0 | [https://github.com/virgiliojr94/book-to-skill](https://github.com/virgiliojr94/book-to-skill) |
+| 2026-08-10 | google/skills | GitHub Trending | 9 | AI Agent | Python | 17237 | 0 | 0 | [https://github.com/google/skills](https://github.com/google/skills) |
+| 2026-08-10 | vitali87/code-graph-rag | GitHub Trending | 15 | LLM Tooling | Python | 2997 | 0 | 0 | [https://github.com/vitali87/code-graph-rag](https://github.com/vitali87/code-graph-rag) |
+| 2026-08-10 | Panniantong/Agent-Reach | GitHub Search | - | AI Agent | Python | 69740 | 49870 | 0 | [https://github.com/Panniantong/Agent-Reach](https://github.com/Panniantong/Agent-Reach) |
 | 2026-08-03 | block/buzz | GitHub Trending | 1 | Other | Rust | 21146 | 0 | 0 | [https://github.com/block/buzz](https://github.com/block/buzz) |
 | 2026-08-03 | virgiliojr94/book-to-skill | GitHub Trending | 2 | LLM Tooling | Python | 15407 | 0 | 0 | [https://github.com/virgiliojr94/book-to-skill](https://github.com/virgiliojr94/book-to-skill) |
 | 2026-08-03 | ayghri/i-have-adhd | GitHub Trending | 3 | AI Agent | Python | 15723 | 0 | 0 | [https://github.com/ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) |
