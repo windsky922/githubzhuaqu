@@ -65,6 +65,16 @@ class _Repository:
         yield {"event": "final", "data": _project_response()}
 
 
+class _FailingRepository(_Repository):
+    def rag_ask_contextual(self, payload, *, router_client=None):
+        self.payloads.append(payload)
+        raise OSError("secret repository failure")
+
+    def rag_ask_contextual_stream(self, payload, *, router_client=None):
+        self.payloads.append(payload)
+        raise OSError("secret repository stream failure")
+
+
 def _project_response():
     return {
         "query": "AI Agent 学习项目",
@@ -107,6 +117,91 @@ class AssistantOrchestratorTest(unittest.TestCase):
         self.assertFalse(repository.payloads[0]["auto_build"])
         for forbidden in ("contexts", "prompt_context", "explanation"):
             self.assertNotIn(forbidden, result)
+
+    def test_pure_teaching_survives_repository_failure_in_turn_and_stream(self):
+        payload = {"q": "解释 ReAct 的原理"}
+        normal_repository = _FailingRepository()
+        normal = AssistantOrchestrator(
+            normal_repository, prompt_root=Path.cwd(), model_client=_Client()
+        ).turn(payload)
+        stream_repository = _FailingRepository()
+        stream_assistant = AssistantOrchestrator(
+            stream_repository, prompt_root=Path.cwd(), model_client=_Client()
+        )
+        events = list(stream_assistant.turn_stream(stream_assistant.normalize_request(payload)))
+        final = events[-1]["data"]
+
+        self.assertEqual(normal, final)
+        self.assertEqual(normal["answer_mode"], "llm")
+        self.assertEqual(normal["knowledge_basis"], "model_general")
+        self.assertEqual(normal["fallback_reason"], "project_enhancement_unavailable")
+        self.assertEqual([section["kind"] for section in normal["sections"]], ["guidance", "limitations"])
+        self.assertNotIn("secret repository", str(normal))
+        self.assertEqual([event["event"] for event in events if event["event"] in {"meta", "final"}], ["meta", "final"])
+        self.assertNotIn("error", [event["event"] for event in events])
+
+    def test_knowledge_follow_up_without_repository_context_stays_pure_teaching(self):
+        repository = _FailingRepository()
+        assistant = AssistantOrchestrator(repository, prompt_root=Path.cwd(), model_client=_TeachingClient())
+        first = assistant.turn({"q": "解释 ReAct 的原理"})
+        follow_up = assistant.turn({
+            "q": "继续，并举一个不涉及具体仓库的例子",
+            "state": first["assistant_state"],
+        })
+
+        self.assertEqual(follow_up["assistant_mode"], "knowledge")
+        self.assertEqual(follow_up["knowledge_basis"], "model_general")
+        self.assertEqual(repository.payloads[-1]["q"], "AI Agent")
+        self.assertEqual(follow_up["assistant_state"]["candidate_repository_ids"], [])
+
+    def test_mixed_teaching_project_query_preserves_original_hard_requirements(self):
+        query = "我想学习一个必须完全离线、无需 API Key 的 Python Agent 项目"
+        repository = _Repository()
+        project = _project_response()
+        project.update({
+            "answer": "没有符合全部硬约束的候选。",
+            "citations": [],
+            "evidence": [],
+            "recommendations": [
+                {"full_name": "owner/conflict", "eligibility": "rejected", "current_eligible": False}
+            ],
+            "input_route": {
+                "route": "new_search",
+                "resolved_query": query,
+                "requirements": [
+                    {"field": "offline_capable", "operator": "eq", "value": True, "hard": True},
+                    {"field": "api_key_required", "operator": "eq", "value": False, "hard": True},
+                    {"field": "language", "operator": "eq", "value": "Python", "hard": True},
+                ],
+            },
+            "resolved_query": query,
+        })
+        repository.rag_ask_contextual = lambda payload, router_client=None: (
+            repository.payloads.append(payload) or project
+        )
+        assistant = AssistantOrchestrator(repository, prompt_root=Path.cwd(), model_client=_Client())
+
+        result = assistant.turn({"q": query})
+
+        self.assertEqual(result["assistant_mode"], "knowledge")
+        self.assertEqual(repository.payloads[-1]["q"], query)
+        self.assertEqual(
+            {item["field"] for item in result["input_route"]["requirements"] if item["hard"]},
+            {"offline_capable", "api_key_required", "language"},
+        )
+        self.assertEqual(result["assistant_state"]["candidate_repository_ids"], [])
+        self.assertFalse(result["assistant_state"]["resumable"])
+
+    def test_concrete_project_request_still_fails_closed(self):
+        repository = _FailingRepository()
+        assistant = AssistantOrchestrator(repository, prompt_root=Path.cwd(), model_client=_Client())
+
+        with self.assertRaises(OSError):
+            assistant.turn({"q": "推荐一个 Agent 项目"})
+        events = list(assistant.turn_stream(assistant.normalize_request({"q": "推荐一个 Agent 项目"})))
+        self.assertEqual(events[-1]["event"], "error")
+        self.assertNotIn("final", [event["event"] for event in events])
+        self.assertNotIn("secret repository", str(events))
 
     def test_unconfigured_model_is_disclosed_without_fake_tutorial(self):
         assistant = AssistantOrchestrator(_Repository(), prompt_root=Path.cwd(), model_client=_Client(configured=False))

@@ -18,6 +18,8 @@ CONTINUATION_MARKERS = ("继续", "接着说", "展开", "还有吗", "还有呢
 KNOWLEDGE_FOLLOW_UP_MARKERS = ("继续", "接着", "展开", "举例", "例子", "为什么", "换种说法", "换个说法", "回到")
 KNOWLEDGE_MARKERS = ("学习", "知识", "概念", "原理", "路线", "教程", "怎么入门", "如何入门", "开发方向", "实践方法")
 PROJECT_MARKERS = ("项目", "仓库", "github", "推荐", "比较", "对比", "适合", "选择")
+NON_PROJECT_CONTEXT_MARKERS = ("不涉及具体仓库", "不涉及仓库", "无需具体仓库", "不需要具体仓库")
+HARD_REQUIREMENT_MARKERS = ("必须", "完全离线", "离线", "无需", "不需要", "不能", "只允许", "仅限", "api key", "apikey")
 COMPARE_MARKERS = ("比较", "对比", "区别", "差异", "哪个好", "更适合")
 HELP_MARKERS = ("你能做什么", "怎么使用", "帮助", "功能介绍")
 GREETING_RE = re.compile(r"^(你好|您好|hi|hello|嗨)[！!。.]?$", re.IGNORECASE)
@@ -60,34 +62,68 @@ class AssistantOrchestrator:
     def turn(self, payload: dict[str, Any] | None) -> dict[str, Any]:
         request = self.normalize_request(payload)
         assistant_mode = self._assistant_mode(request)
-        project_response = self._project_response(request, assistant_mode)
         guidance = self._knowledge_guidance(request) if assistant_mode == "knowledge" else None
-        return self._compose(request, assistant_mode, project_response, guidance)
+        project_unavailable = False
+        if assistant_mode == "knowledge":
+            try:
+                project_response = self._project_response(request, assistant_mode)
+            except (OSError, ValueError):
+                project_response = None
+                project_unavailable = True
+        else:
+            project_response = self._project_response(request, assistant_mode)
+        return self._compose(
+            request,
+            assistant_mode,
+            project_response,
+            guidance,
+            project_unavailable=project_unavailable,
+        )
 
     def turn_stream(self, request: dict[str, Any]) -> Iterator[dict[str, Any]]:
         assistant_mode = self._assistant_mode(request)
         project_response: dict[str, Any] | None = None
+        guidance = self._knowledge_guidance(request) if assistant_mode == "knowledge" else None
+        project_unavailable = False
         meta_sent = False
         if assistant_mode not in {"help", "clarify"}:
             rag_payload = self._rag_payload(request, assistant_mode)
-            for event in self.repository.rag_ask_contextual_stream(rag_payload, router_client=self.router_client):
-                name = str(event.get("event") or "error")
-                data = event.get("data") if isinstance(event.get("data"), dict) else {}
-                if name == "meta" and not meta_sent:
-                    yield {"event": "meta", "data": {**data, "assistant_mode": assistant_mode}}
-                    meta_sent = True
-                elif name == "final":
-                    project_response = data
-                elif name == "error":
+            try:
+                for event in self.repository.rag_ask_contextual_stream(rag_payload, router_client=self.router_client):
+                    name = str(event.get("event") or "error")
+                    data = event.get("data") if isinstance(event.get("data"), dict) else {}
+                    if name == "meta" and not meta_sent:
+                        yield {"event": "meta", "data": {**data, "assistant_mode": assistant_mode}}
+                        meta_sent = True
+                    elif name == "final":
+                        project_response = data
+                    elif name == "error":
+                        if assistant_mode == "knowledge":
+                            project_unavailable = True
+                            break
+                        yield {"event": "error", "data": {"message": "助手连接中断，请重试。"}}
+                        return
+            except (OSError, ValueError):
+                if assistant_mode != "knowledge":
                     yield {"event": "error", "data": {"message": "助手连接中断，请重试。"}}
                     return
+                project_unavailable = True
         if not meta_sent:
             yield {
                 "event": "meta",
-                "data": {"query": request["q"], "assistant_mode": assistant_mode, "retrieval": {"mode": "not_run"}},
+                "data": {
+                    "query": request["q"],
+                    "assistant_mode": assistant_mode,
+                    "retrieval": {"mode": "optional_failed" if project_unavailable else "not_run"},
+                },
             }
-        guidance = self._knowledge_guidance(request) if assistant_mode == "knowledge" else None
-        response = self._compose(request, assistant_mode, project_response, guidance)
+        response = self._compose(
+            request,
+            assistant_mode,
+            project_response,
+            guidance,
+            project_unavailable=project_unavailable,
+        )
         if response.get("answer_mode") == "llm":
             for chunk in _chunks(str(response.get("answer") or ""), 180):
                 yield {"event": "delta", "data": {"text": chunk}}
@@ -138,7 +174,8 @@ class AssistantOrchestrator:
 
     def _rag_payload(self, request: dict[str, Any], assistant_mode: str) -> dict[str, Any]:
         query = request["q"]
-        if assistant_mode == "knowledge":
+        preserve_requirements = _has_project_intent(request["q"]) and _has_hard_requirements(request["q"])
+        if assistant_mode == "knowledge" and not preserve_requirements:
             query = "AI Agent"
             for language in ("Python", "TypeScript", "JavaScript", "Go", "Rust"):
                 if language.casefold() in request["q"].casefold():
@@ -194,6 +231,8 @@ class AssistantOrchestrator:
         assistant_mode: str,
         project_response: dict[str, Any] | None,
         guidance: dict[str, Any] | None,
+        *,
+        project_unavailable: bool = False,
     ) -> dict[str, Any]:
         project = dict(project_response or {})
         project_clarification = bool(
@@ -227,6 +266,13 @@ class AssistantOrchestrator:
                 "content": guidance["content"],
                 "citation_indexes": [],
             })
+        if project_unavailable:
+            sections.append({
+                "kind": "limitations",
+                "title": "项目证据状态",
+                "content": "项目证据暂不可用；通用教学仍可继续。具体仓库判断请稍后重试。",
+                "citation_indexes": [],
+            })
         project_answer = str(project.get("answer") or "").strip()
         citations = [] if project_clarification else project.get("citations") if isinstance(project.get("citations"), list) else []
         recommendations = [] if project_clarification else project.get("recommendations") if isinstance(project.get("recommendations"), list) else []
@@ -248,7 +294,11 @@ class AssistantOrchestrator:
             "resolved_query": str(project.get("resolved_query") or request["q"]),
             "answer": answer,
             "answer_mode": "clarification" if effective_mode == "clarify" else "llm" if guidance_used else str(project.get("answer_mode") or "fallback_rule"),
-            "fallback_reason": str(project.get("fallback_reason") or (guidance or {}).get("reason") or ""),
+            "fallback_reason": str(
+                project.get("fallback_reason")
+                or (guidance or {}).get("reason")
+                or ("project_enhancement_unavailable" if project_unavailable else "")
+            ),
             "assistant_mode": effective_mode,
             "knowledge_basis": knowledge_basis,
             "sections": sections,
@@ -287,12 +337,24 @@ class AssistantOrchestrator:
 JsonError = json.JSONDecodeError
 
 
+def _has_project_intent(query: str) -> bool:
+    normalized = query.casefold()
+    if any(marker in normalized for marker in NON_PROJECT_CONTEXT_MARKERS):
+        return False
+    return any(marker in normalized for marker in PROJECT_MARKERS)
+
+
+def _has_hard_requirements(query: str) -> bool:
+    normalized = query.casefold()
+    return any(marker in normalized for marker in HARD_REQUIREMENT_MARKERS)
+
+
 def _is_knowledge_follow_up(query: str, state: dict[str, Any]) -> bool:
     context = state.get("knowledge_context")
-    if not isinstance(context, dict) or not context.get("outline"):
+    if not isinstance(context, dict) or not (context.get("topic") or context.get("outline")):
         return False
     normalized = query.casefold()
-    if any(marker in normalized for marker in PROJECT_MARKERS):
+    if _has_project_intent(query):
         return False
     if any(marker in normalized for marker in KNOWLEDGE_FOLLOW_UP_MARKERS):
         return True

@@ -8,6 +8,8 @@
 
 Assistant 请求禁止 `auto_build`。响应仅允许公开回答、分段、引用/证据、推荐、质量、路由、来源/freshness、模型状态及最小状态字段；`contexts`、`prompt_context`、内部 explanation/cache/provider 原始字段不得出现。只有质量通过、freshness 为 `fresh`、来源身份完整且仓库 `current_eligible=true` 时，仓库 ID 才能进入下一轮 resumable 状态。
 
+`knowledge` 模式中的项目检索属于可选增强。受控 RAG 故障时，响应保留 `knowledge_basis=model_general` 的教学内容，新增 `limitations` 分段并使用固定 `fallback_reason=project_enhancement_unavailable`；不得返回异常正文。含明确硬条件的教学+项目查询必须保留原始 `q` 或等价结构化 requirements，冲突、unknown 或 `current_eligible=false` 的候选不得进入 `assistant_state.candidate_repository_ids`。纯项目模式不适用该降级，继续失败关闭。普通与 SSE 的 `final` 公共字段保持等价。
+
 浏览器历史使用 `github_weekly_agent_assistant_conversations_v2`，默认关闭。显式开启后，每轮只保存 `question`、展示用 `answer`、时间、`assistantMode`、规范仓库 ID 和白名单化 `assistantState`；不保存 citations、evidence、sections、`prompt_context`、contexts、模型/provider 原始输出或错误详情。每次加载和保存均执行 30 天 TTL、最近 10 个会话、每会话最近 20 轮限制。单会话删除、全部清空、关闭保存都会物理删除对应本机数据；旧完整 RagAnswer 键在启动时删除。
 
 ## Freshness 权威阈值（2026-08-02）

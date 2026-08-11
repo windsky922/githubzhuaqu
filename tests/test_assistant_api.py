@@ -62,7 +62,74 @@ def _contains_key(value: object, forbidden: set[str]) -> bool:
     return False
 
 
+class _TeachingClient:
+    def status(self):
+        return {"provider": "test", "configured": True, "model": "test"}
+
+    def chat(self, messages):
+        return "ReAct 把推理与行动交替组织，并用观察结果修正下一步决策。"
+
+
 class AssistantApiTest(unittest.TestCase):
+    def test_pure_teaching_api_returns_final_when_project_rag_fails(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="assistant-api-teaching-") as directory:
+            root = Path(directory)
+            client = TestClient(create_app(root=root, db_path=root / "data" / "assistant.sqlite"))
+            client.app.state.assistant.model_client = _TeachingClient()
+            repository = client.app.state.assistant_repository
+            with patch.object(
+                repository,
+                "rag_ask_contextual",
+                side_effect=OSError("secret repository failure"),
+            ), patch.object(
+                repository,
+                "rag_ask_contextual_stream",
+                side_effect=OSError("secret repository stream failure"),
+            ):
+                normal = client.post("/v1/assistant/turn", json={"q": "解释 ReAct 的原理"})
+                stream = client.post("/v1/assistant/turn/stream", json={"q": "解释 ReAct 的原理"})
+
+        self.assertEqual(normal.status_code, 200)
+        self.assertEqual(normal.json()["knowledge_basis"], "model_general")
+        self.assertEqual(normal.json()["fallback_reason"], "project_enhancement_unavailable")
+        self.assertNotIn("secret repository", normal.text)
+        events = _sse_events(stream.text)
+        self.assertEqual(events[0]["event"], "meta")
+        self.assertEqual(events[-1]["event"], "final")
+        self.assertNotIn("error", [event["event"] for event in events])
+        self.assertEqual(events[-1]["data"], normal.json())
+
+    def test_mixed_teaching_project_api_preserves_hard_requirements(self) -> None:
+        query = "我想学习一个必须完全离线、无需 API Key 的 Python Agent 项目"
+        with tempfile.TemporaryDirectory(prefix="assistant-api-constraints-") as directory:
+            root = Path(directory)
+            write_project_match_fixture(root, include_e2e_capabilities=True)
+            with patch.dict(
+                os.environ,
+                {"KIMI_API_KEY": "", "KIMI_MODEL": "", "KIMI_BASE_URL": ""},
+                clear=False,
+            ):
+                client = _client(root)
+                client.app.state.assistant.model_client = _TeachingClient()
+                with patch("src.api.repository.archive_freshness", return_value=FRESHNESS):
+                    response = client.post("/v1/assistant/turn", json={"q": query, "mode": "hybrid"})
+
+        self.assertEqual(response.status_code, 200)
+        body = response.json()
+        self.assertEqual(body["assistant_mode"], "knowledge")
+        self.assertEqual(body["resolved_query"], query)
+        self.assertEqual(
+            {
+                (item["field"], item["value"])
+                for item in body["input_route"]["requirements"]
+                if item["hard"]
+            },
+            {("language", "Python"), ("offline_capable", True), ("api_key_required", False)},
+        )
+        self.assertEqual(body["recommendations"], [])
+        self.assertEqual(body["assistant_state"]["candidate_repository_ids"], [])
+        self.assertFalse(body["assistant_state"]["resumable"])
+
     def test_turn_and_stream_keep_compatible_final_shape(self) -> None:
         with tempfile.TemporaryDirectory(prefix="assistant-api-") as directory:
             root = Path(directory)

@@ -1,5 +1,14 @@
 # 操作日志
 
+## 2026-08-11 追加：V8 P0-B 教学与项目 RAG 解耦
+
+1. `knowledge` 正常与 SSE 链路改为先生成通用教学；项目 RAG 抛出受控异常或返回 `error` 时，追加固定限制、保留教学 `final`，不输出底层错误详情。
+2. 含明确硬条件的教学+项目问题保留原始查询，确保 Python、完全离线、无需 API Key 等条件进入既有 requirement/eligibility 闸门；冲突候选不进入 resumable 状态。
+3. 明确“不涉及具体仓库”的教学追问保持在教学模式；纯项目请求继续失败关闭。旧 `/v1/rag/ask` 与 Assistant 公共字段、`meta → delta* → final` 顺序不变。
+4. 新增编排器与真实 FastAPI fixture 回归，覆盖纯教学 RAG 故障、普通/SSE `final` 等价、教学追问、混合硬约束和纯项目失败关闭。
+
+验证：`npm run lint`、25 个 Vitest、`npm run build`、20 个 mock Chromium E2E、6 个真实 FastAPI E2E、342 个 Python unittest、安全检查和六套固定 evaluator 全部通过；`docs/app` 与源码构建一致。远端 CI 在推送后核验。
+
 ## 2026-08-11 追加：V8 P0-A schema-v2 教学对话帧
 
 1. Assistant 兼容接收 schema-v1 并统一发出 schema-v2；最小状态新增严格限长、逐项白名单化的 `knowledge_context.topic`、`outline[{id,title}]` 与 `focus_id`，未知字段、无效/重复 ID、超量条目和越界焦点均被丢弃。

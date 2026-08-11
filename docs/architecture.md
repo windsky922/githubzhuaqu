@@ -4,7 +4,7 @@
 
 Assistant 编排层位于 React 工作台与既有 contextual RAG 之间。它先校验无状态 `assistant_state`，确定 `knowledge`、`project_search`、`project_follow_up`、`project_compare`、`help` 或 `clarify`，再把项目类意图投影为旧 contextual Ask 请求；不复制检索、freshness、eligibility、claim ledger 或 decision ID 逻辑。schema-v2 的最小教学帧只保存主题、编号提纲短标题和当前焦点；编排层先在上一轮提纲内确定性解析序号与继续/举例/换说法，再把结构校验后的不可信导航传给教学 Prompt，不传历史回答。
 
-AI Agent 通用学习指导由独立 Prompt 生成，禁止包含具体 `owner/repository` 事实；项目建议继续来自 RAG。混合回答以 `sections[]` 明确分开两类来源。模型未配置或失败时只保留项目证据和可见降级说明，不伪造完整教程。首版没有工具执行、服务端聊天会话或外发权限。
+AI Agent 通用学习指导由独立 Prompt 先生成，禁止包含具体 `owner/repository` 事实；项目 RAG 是 `knowledge` 模式的可失败增强。RAG 故障时保留通用教学、追加固定限制并继续产出权威 `final`，不泄露底层错误；纯项目模式仍失败关闭。含明确硬条件的混合问题保留原始查询，使 language、offline 与 API Key 等约束继续经过既有 eligibility 闸门。混合回答以 `sections[]` 明确分开两类来源。模型未配置或失败时只保留项目证据和可见降级说明，不伪造完整教程。首版没有工具执行、服务端聊天会话或外发权限。
 
 HTTP Assistant 使用独立的强制只读 repository：已有 SQLite 以 `mode=ro` + `query_only` 查询，缺库时使用 JSON 只读检索；`auto_build` 不属于 Assistant 契约。编排层对底层 RAG 结果执行响应白名单，内部上下文与 Prompt 不进入对话响应。
 
