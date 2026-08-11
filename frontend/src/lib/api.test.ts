@@ -4,6 +4,7 @@ import type { AssistantState } from "./types";
 
 const state: AssistantState = {
   schema_version: 1, revision: 1, goal: "找 Agent", constraints: [],
+  knowledge_context: { topic: "Agent 核心组成", outline: [{ id: "k1", title: "模型" }, { id: "k2", title: "工具" }], focus_id: "k2" },
   candidate_repository_ids: ["owner/agent"], primary_repository_id: "owner/agent",
   last_intent: "project_search", pending_question: "",
   source_identity: { kind: "weekly_snapshot", source_id: "source:1", run_date: "2026-08-09", as_of: "2026-08-09" },
@@ -11,6 +12,7 @@ const state: AssistantState = {
 };
 const dirtyState = {
   ...state,
+  knowledge_context: { ...(state.knowledge_context || {}), history: "forbidden-knowledge", focus_id: "missing" },
   constraints: [{ field: "language", operator: "eq", value: "Python", hard: true, evidence: "forbidden-constraint" }],
   source_identity: { ...state.source_identity, prompt_context: "forbidden-source" },
   answer: "forbidden-answer", citations: ["forbidden-citation"], evidence: ["forbidden-evidence"],
@@ -56,7 +58,9 @@ describe("streamAssistantTurn", () => {
     const body = assistantTurnBody("刚才哪个更适合", dirtyState);
     expect(body).toEqual({ q: "刚才哪个更适合", state: projected, mode: "hybrid", limit: 3 });
     const raw = JSON.stringify(body);
-    for (const forbidden of ["forbidden-answer", "forbidden-citation", "forbidden-evidence", "forbidden-source", "forbidden-constraint", "prompt_context", "auto_build"]) expect(raw).not.toContain(forbidden);
+    for (const forbidden of ["forbidden-answer", "forbidden-citation", "forbidden-evidence", "forbidden-source", "forbidden-constraint", "forbidden-knowledge", "prompt_context", "auto_build"]) expect(raw).not.toContain(forbidden);
+    expect(projected?.schema_version).toBe(2);
+    expect(projected?.knowledge_context).toEqual({ topic: "Agent 核心组成", outline: [{ id: "k1", title: "模型" }, { id: "k2", title: "工具" }], focus_id: "" });
     expect(projected?.constraints).toEqual([{ field: "language", operator: "eq", value: "Python", hard: true }]);
   });
 

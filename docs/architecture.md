@@ -2,13 +2,13 @@
 
 ## 本机 Assistant 编排层（2026-08-09）
 
-Assistant 编排层位于 React 工作台与既有 contextual RAG 之间。它先校验无状态 `assistant_state`，确定 `knowledge`、`project_search`、`project_follow_up`、`project_compare`、`help` 或 `clarify`，再把项目类意图投影为旧 contextual Ask 请求；不复制检索、freshness、eligibility、claim ledger 或 decision ID 逻辑。
+Assistant 编排层位于 React 工作台与既有 contextual RAG 之间。它先校验无状态 `assistant_state`，确定 `knowledge`、`project_search`、`project_follow_up`、`project_compare`、`help` 或 `clarify`，再把项目类意图投影为旧 contextual Ask 请求；不复制检索、freshness、eligibility、claim ledger 或 decision ID 逻辑。schema-v2 的最小教学帧只保存主题、编号提纲短标题和当前焦点；编排层先在上一轮提纲内确定性解析序号与继续/举例/换说法，再把结构校验后的不可信导航传给教学 Prompt，不传历史回答。
 
 AI Agent 通用学习指导由独立 Prompt 生成，禁止包含具体 `owner/repository` 事实；项目建议继续来自 RAG。混合回答以 `sections[]` 明确分开两类来源。模型未配置或失败时只保留项目证据和可见降级说明，不伪造完整教程。首版没有工具执行、服务端聊天会话或外发权限。
 
 HTTP Assistant 使用独立的强制只读 repository：已有 SQLite 以 `mode=ro` + `query_only` 查询，缺库时使用 JSON 只读检索；`auto_build` 不属于 Assistant 契约。编排层对底层 RAG 结果执行响应白名单，内部上下文与 Prompt 不进入对话响应。
 
-React 工作台只把上一轮权威 `final.assistant_state` 回传给 Assistant，不上传历史回答。运行中可显示完整本轮结果；localStorage 默认禁用，开启后由独立投影层移除证据、Prompt、内部状态和错误，仅保留 30 天内的最小展示历史。
+React 工作台只把上一轮权威 `final.assistant_state` 回传给 Assistant，不上传历史回答。请求投影与可选 localStorage 投影都会重新白名单化 schema-v2 教学帧，并丢弃未知字段、无效 ID、重复/超量条目和不在提纲内的焦点。运行中可显示完整本轮结果；localStorage 默认禁用，开启后由独立投影层移除证据、Prompt、内部状态和错误，仅保留 30 天内的最小展示历史。
 
 ## 偏好优先约束（2026-08-02）
 

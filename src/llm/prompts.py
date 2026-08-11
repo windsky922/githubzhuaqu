@@ -49,9 +49,21 @@ def assistant_route_messages(*, root: Path, query: str, state: dict[str, Any]) -
     ]
 
 
-def assistant_knowledge_messages(*, root: Path, question: str) -> list[dict[str, str]]:
+def assistant_knowledge_messages(
+    *,
+    root: Path,
+    question: str,
+    knowledge_context: dict[str, Any] | None = None,
+) -> list[dict[str, str]]:
     prompt = (root / "prompts" / "assistant_answer.md").read_text(encoding="utf-8")
     return [
         {"role": "system", "content": prompt},
-        {"role": "user", "content": json.dumps({"question": question}, ensure_ascii=False, sort_keys=True)},
+        {
+            "role": "user",
+            "content": json.dumps(
+                {"question": question, "knowledge_context": knowledge_context or {}},
+                ensure_ascii=False,
+                sort_keys=True,
+            ),
+        },
     ]

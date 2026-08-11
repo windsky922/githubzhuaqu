@@ -107,9 +107,13 @@ function answerPayload(mode) {
 
 function assistantPayload(query, state, base) {
   const previousIds = Array.isArray(state?.candidate_repository_ids) ? state.candidate_repository_ids : [];
+  const previousKnowledge = state?.knowledge_context && typeof state.knowledge_context === "object"
+    ? state.knowledge_context : { topic: "", outline: [], focus_id: "" };
+  const previousOutline = Array.isArray(previousKnowledge.outline) ? previousKnowledge.outline : [];
   const reset = query.includes("重新搜索") || query.includes("换一批");
   const followUp = previousIds.length > 0 && (query.includes("刚才") || query.includes("这些项目") || query.includes("其中"));
-  const knowledge = query.includes("学习 AI Agent") || query.includes("AI Agent 开发方向");
+  const knowledgeFollowUp = previousOutline.length > 0 && ["展开", "继续", "举例", "换种说法", "回到"].some((marker) => query.includes(marker));
+  const knowledge = query.includes("学习 AI Agent") || query.includes("AI Agent 开发方向") || knowledgeFollowUp;
   let recommendations = base.recommendations;
   let answer = base.answer;
   let assistantMode = "project_search";
@@ -119,7 +123,9 @@ function assistantPayload(query, state, base) {
   if (knowledge) {
     assistantMode = "knowledge";
     knowledgeBasis = "mixed";
-    answer = "结论：先学习 Agent 循环、工具调用和状态管理。学习路线：Python 与 API → 单 Agent → RAG 与评估 → 多 Agent 编排。最小实践：完成一个只读项目研究助手。项目证据建议从固定候选开始。[1]";
+    answer = knowledgeFollowUp
+      ? `继续讲解 ${query.includes("回到第一点") ? "模型与推理" : "记忆与反馈"}，并保持上一轮教学提纲。`
+      : "结论：先学习 Agent 循环、工具调用和状态管理。学习路线：1. 模型与推理 2. 工具与行动 3. 记忆与反馈。最小实践：完成一个只读项目研究助手。[1]";
   } else if (followUp) {
     assistantMode = query.includes("区别") || query.includes("比较") ? "project_compare" : "project_follow_up";
     const selected = { ...recommendation(), full_name: previousIds[0] };
@@ -137,6 +143,16 @@ function assistantPayload(query, state, base) {
   const evidence = recommendations.map((item, index) => ({ index: index + 1, full_name: item.full_name, chunk_id: `fixture:chunk:${index + 1}`, quote: "固定可引用证据" }));
   const candidateIds = recommendations.filter((item) => item.eligibility === "eligible" && item.current_eligible === true).map((item) => item.full_name);
   const revision = Number.isInteger(state?.revision) ? state.revision + 1 : 1;
+  const defaultOutline = [
+    { id: "k1", title: "模型与推理" },
+    { id: "k2", title: "工具与行动" },
+    { id: "k3", title: "记忆与反馈" },
+  ];
+  const knowledgeContext = knowledge ? {
+    topic: previousKnowledge.topic || "Agent 核心组成",
+    outline: previousOutline.length ? previousOutline : defaultOutline,
+    focus_id: query.includes("第三点") ? "k3" : query.includes("回到第一点") ? "k1" : previousKnowledge.focus_id || "",
+  } : previousKnowledge;
   return {
     ...base,
     query,
@@ -159,9 +175,10 @@ function assistantPayload(query, state, base) {
       selected_repository_ids: followUp ? candidateIds : [],
     },
     assistant_state: {
-      schema_version: 1,
+      schema_version: 2,
       revision,
       goal: query,
+      knowledge_context: knowledgeContext,
       constraints: reset ? [{ field: "language", operator: "eq", value: "Python", hard: false }] : [],
       candidate_repository_ids: candidateIds,
       primary_repository_id: candidateIds[0] || "",

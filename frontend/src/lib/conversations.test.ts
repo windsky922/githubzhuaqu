@@ -10,6 +10,7 @@ const now = Date.parse("2026-08-09T12:00:00.000Z");
 function state(): AssistantState {
   return {
     schema_version: 1, revision: 2, goal: "学习 Agent", constraints: [],
+    knowledge_context: { topic: "Agent 核心组成", outline: [{ id: "k1", title: "模型" }, { id: "k2", title: "工具" }], focus_id: "k2" },
     candidate_repository_ids: ["owner/agent"], primary_repository_id: "owner/agent",
     last_intent: "knowledge", pending_question: "",
     source_identity: { kind: "weekly_snapshot", source_id: "source:1", run_date: "2026-08-09", as_of: "2026-08-09" },
@@ -49,6 +50,8 @@ describe("assistant conversation storage", () => {
     const raw = localStorage.getItem(STORAGE_KEY) || "";
     expect(raw).toContain("允许保存的展示回答");
     expect(raw).toContain("owner/agent");
+    expect(raw).toContain("Agent 核心组成");
+    expect(raw).toContain('"schema_version":2');
     for (const forbidden of ["secret/citation", "secret-evidence", "secret-prompt", "secret-context", "secret-provider", "citations", "evidence", "prompt_context", "contexts", "internal_payload"])
       expect(raw).not.toContain(forbidden);
   });

@@ -1,10 +1,10 @@
 # 数据契约说明
 
-## Assistant turn schema-v1（2026-08-09）
+## Assistant turn schema-v2（2026-08-11）
 
 `POST /v1/assistant/turn` 与流式同名入口接受当前问题和可选 `state`。稳定响应新增 `assistant_mode`、`knowledge_basis`、`sections[]` 与 `assistant_state`，同时保留 `answer`、`citations`、`evidence`、`recommendations`、`answer_quality` 和既有来源/freshness 字段。`sections[].kind` 只能是 `guidance`、`project_evidence` 或 `limitations`。
 
-`assistant_state` 固定为 schema-v1：`schema_version`、`revision`、`goal`、`constraints`、`candidate_repository_ids`、`primary_repository_id`、`last_intent`、`pending_question`、`source_identity`、`mode`、`resumable`。它不包含历史 assistant 回答、citations、evidence、`prompt_context`、provider 原始输出、请求头、凭证或写操作确认。客户端回传值不是事实或授权，服务端必须重新校验。
+`assistant_state` 兼容接收 schema-v1，响应固定为 schema-v2：`schema_version`、`revision`、`goal`、`knowledge_context`、`constraints`、`candidate_repository_ids`、`primary_repository_id`、`last_intent`、`pending_question`、`source_identity`、`mode`、`resumable`。`knowledge_context` 只允许 `topic`（最多 200 字符）、`outline`（最多 12 个 `{id,title}`，ID 最多 24 字符、标题最多 120 字符）和必须命中 outline 的 `focus_id`；缺少有效主题或提纲时整体归一为空。它不包含历史 assistant 回答、citations、evidence、sections、`prompt_context`、provider 原始输出、请求头、凭证或写操作确认。客户端回传值不是事实、证据或授权，服务端和前端投影都必须重新校验。
 
 Assistant 请求禁止 `auto_build`。响应仅允许公开回答、分段、引用/证据、推荐、质量、路由、来源/freshness、模型状态及最小状态字段；`contexts`、`prompt_context`、内部 explanation/cache/provider 原始字段不得出现。只有质量通过、freshness 为 `fresh`、来源身份完整且仓库 `current_eligible=true` 时，仓库 ID 才能进入下一轮 resumable 状态。
 

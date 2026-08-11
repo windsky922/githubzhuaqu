@@ -15,12 +15,15 @@ ASSISTANT_MODES = {"knowledge", "project_search", "project_follow_up", "project_
 RESET_MARKERS = ("重新搜索", "重新找", "换一批", "不限刚才", "搜索其他", "找别的")
 CONTEXT_MARKERS = ("刚才", "之前推荐", "这些项目", "上述项目", "其中", "候选项目", "推荐的项目", "哪个项目")
 CONTINUATION_MARKERS = ("继续", "接着说", "展开", "还有吗", "还有呢", "然后呢")
+KNOWLEDGE_FOLLOW_UP_MARKERS = ("继续", "接着", "展开", "举例", "例子", "为什么", "换种说法", "换个说法", "回到")
 KNOWLEDGE_MARKERS = ("学习", "知识", "概念", "原理", "路线", "教程", "怎么入门", "如何入门", "开发方向", "实践方法")
 PROJECT_MARKERS = ("项目", "仓库", "github", "推荐", "比较", "对比", "适合", "选择")
 COMPARE_MARKERS = ("比较", "对比", "区别", "差异", "哪个好", "更适合")
 HELP_MARKERS = ("你能做什么", "怎么使用", "帮助", "功能介绍")
 GREETING_RE = re.compile(r"^(你好|您好|hi|hello|嗨)[！!。.]?$", re.IGNORECASE)
 REPOSITORY_REFERENCE_RE = re.compile(r"\b[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+\b")
+OUTLINE_LINE_RE = re.compile(r"^\s*(?:[-*]\s*)?(?:第)?([一二三四五六七八九十\d]+)(?:点|[、.)）:：])\s*(.+?)\s*$")
+ORDINALS = {"一": 1, "二": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9, "十": 10}
 
 
 class AssistantOrchestrator:
@@ -58,7 +61,7 @@ class AssistantOrchestrator:
         request = self.normalize_request(payload)
         assistant_mode = self._assistant_mode(request)
         project_response = self._project_response(request, assistant_mode)
-        guidance = self._knowledge_guidance(request["q"]) if assistant_mode == "knowledge" else None
+        guidance = self._knowledge_guidance(request) if assistant_mode == "knowledge" else None
         return self._compose(request, assistant_mode, project_response, guidance)
 
     def turn_stream(self, request: dict[str, Any]) -> Iterator[dict[str, Any]]:
@@ -83,7 +86,7 @@ class AssistantOrchestrator:
                 "event": "meta",
                 "data": {"query": request["q"], "assistant_mode": assistant_mode, "retrieval": {"mode": "not_run"}},
             }
-        guidance = self._knowledge_guidance(request["q"]) if assistant_mode == "knowledge" else None
+        guidance = self._knowledge_guidance(request) if assistant_mode == "knowledge" else None
         response = self._compose(request, assistant_mode, project_response, guidance)
         if response.get("answer_mode") == "llm":
             for chunk in _chunks(str(response.get("answer") or ""), 180):
@@ -97,6 +100,8 @@ class AssistantOrchestrator:
         has_context = bool(state.get("resumable") and state.get("candidate_repository_ids"))
         if any(marker in normalized for marker in RESET_MARKERS):
             return "project_search"
+        if _is_knowledge_follow_up(query, state):
+            return "knowledge"
         if has_context and any(marker in normalized for marker in CONTEXT_MARKERS):
             return "project_compare" if any(marker in normalized for marker in COMPARE_MARKERS) else "project_follow_up"
         if has_context and normalized in CONTINUATION_MARKERS:
@@ -141,7 +146,9 @@ class AssistantOrchestrator:
                     break
         return contextual_payload(request, query=query)
 
-    def _knowledge_guidance(self, query: str) -> dict[str, Any]:
+    def _knowledge_guidance(self, request: dict[str, Any]) -> dict[str, Any]:
+        query = request["q"]
+        knowledge_context = _resolved_knowledge_context(query, request["state"].get("knowledge_context"))
         status = self.model_client.status()
         if not status.get("configured"):
             return {
@@ -149,18 +156,36 @@ class AssistantOrchestrator:
                 "content": "通用教学模型当前未配置；下面仅展示本地项目证据，不把规则降级结果伪装成完整教程。",
                 "reason": "model_not_configured",
                 "model_status": status,
+                "knowledge_context": knowledge_context,
             }
         try:
-            content = self.model_client.chat(assistant_knowledge_messages(root=self.prompt_root, question=query))
+            content = self.model_client.chat(assistant_knowledge_messages(
+                root=self.prompt_root,
+                question=query,
+                knowledge_context=knowledge_context,
+            ))
             if not content or REPOSITORY_REFERENCE_RE.search(content):
                 raise ValueError("general_guidance_contains_repository_reference")
-            return {"used": True, "content": content, "reason": "", "model_status": status}
+            if not knowledge_context["outline"]:
+                knowledge_context = {
+                    "topic": query[:200],
+                    "outline": _extract_outline(content),
+                    "focus_id": "",
+                }
+            return {
+                "used": True,
+                "content": content,
+                "reason": "",
+                "model_status": status,
+                "knowledge_context": knowledge_context,
+            }
         except (LlmClientError, OSError, ValueError):
             return {
                 "used": False,
                 "content": "通用教学模型本轮不可用；下面仅展示本地项目证据，请稍后重试教学回答。",
                 "reason": "model_unavailable",
                 "model_status": status,
+                "knowledge_context": knowledge_context,
             }
 
     def _compose(
@@ -247,11 +272,80 @@ class AssistantOrchestrator:
                 "candidate_scope": "none",
                 "requirements": route.get("requirements") if isinstance(route.get("requirements"), list) else [],
             }
-        response["assistant_state"] = build_assistant_state(request, assistant_mode=effective_mode, response=response)
+        state_response = {
+            **response,
+            "knowledge_context": (guidance or {}).get("knowledge_context"),
+        }
+        response["assistant_state"] = build_assistant_state(
+            request,
+            assistant_mode=effective_mode,
+            response=state_response,
+        )
         return response
 
 
 JsonError = json.JSONDecodeError
+
+
+def _is_knowledge_follow_up(query: str, state: dict[str, Any]) -> bool:
+    context = state.get("knowledge_context")
+    if not isinstance(context, dict) or not context.get("outline"):
+        return False
+    normalized = query.casefold()
+    if any(marker in normalized for marker in PROJECT_MARKERS):
+        return False
+    if any(marker in normalized for marker in KNOWLEDGE_FOLLOW_UP_MARKERS):
+        return True
+    return _ordinal_index(normalized) is not None
+
+
+def _resolved_knowledge_context(query: str, value: Any) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        return {"topic": "", "outline": [], "focus_id": ""}
+    topic = str(value.get("topic") or "")[:200]
+    outline = [
+        {"id": str(item.get("id") or "")[:24], "title": str(item.get("title") or "")[:120]}
+        for item in value.get("outline", [])[:12]
+        if isinstance(item, dict) and item.get("id") and item.get("title")
+    ]
+    focus_id = str(value.get("focus_id") or "")[:24]
+    ordinal = _ordinal_index(query)
+    if ordinal is not None and 0 <= ordinal < len(outline):
+        focus_id = outline[ordinal]["id"]
+    else:
+        for item in outline:
+            if item["title"] and item["title"] in query:
+                focus_id = item["id"]
+                break
+    if focus_id not in {item["id"] for item in outline}:
+        focus_id = ""
+    return {"topic": topic, "outline": outline, "focus_id": focus_id}
+
+
+def _ordinal_index(value: str) -> int | None:
+    match = re.search(r"第\s*([一二三四五六七八九十]|\d{1,2})\s*点", value)
+    if not match:
+        return None
+    raw = match.group(1)
+    number = int(raw) if raw.isdigit() else ORDINALS.get(raw, 0)
+    return number - 1 if number > 0 else None
+
+
+def _extract_outline(content: str) -> list[dict[str, str]]:
+    titles: list[str] = []
+    for line in content.splitlines():
+        match = OUTLINE_LINE_RE.match(line)
+        if match:
+            title = match.group(2).strip().rstrip("。；;")[:120]
+            if title and title not in titles:
+                titles.append(title)
+    if len(titles) < 2:
+        first_paragraph = next((part.strip() for part in content.splitlines() if part.strip()), "")
+        for part in re.split(r"[、，；;。]", first_paragraph):
+            title = re.sub(r"^(先|再|然后|最后|需要|可以|建议)\s*", "", part).strip()[:120]
+            if 1 < len(title) <= 120 and title not in titles:
+                titles.append(title)
+    return [{"id": f"k{index}", "title": title} for index, title in enumerate(titles[:12], start=1)]
 
 
 def _strip_code_fence(value: str) -> str:

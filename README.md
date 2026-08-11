@@ -414,7 +414,7 @@ python scripts/query_archive.py --profile agent_development --query workflow --f
 python scripts/build_rag_embeddings.py
 ```
 
-本地前端提供管理 RAG 与自然对话两个入口：`admin.html?api=1` 用于管理、诊断和证据检查；`app/#/agent?api=1` 是 AI Agent 学习与项目研究导师，旧 `agent.html?api=1` 会自动跳转。导师默认 POST `/v1/assistant/turn/stream`，降级只调用 `/v1/assistant/turn`，每轮只提交当前问题和上一轮权威 `assistant_state`；不提交历史回答、citations、evidence 或 `prompt_context`，也不允许 `auto_build`。浏览器历史默认关闭，显式开启后按白名单保存最小展示记录，关闭即删除，不新增后端会话。
+本地前端提供管理 RAG 与自然对话两个入口：`admin.html?api=1` 用于管理、诊断和证据检查；`app/#/agent?api=1` 是 AI Agent 学习与项目研究导师，旧 `agent.html?api=1` 会自动跳转。导师默认 POST `/v1/assistant/turn/stream`，降级只调用 `/v1/assistant/turn`，每轮只提交当前问题和上一轮权威 `assistant_state`；不提交历史回答、citations、evidence 或 `prompt_context`，也不允许 `auto_build`。Assistant 兼容接收 schema-v1 状态并统一返回 schema-v2；新增的 `knowledge_context` 仅保留严格限长的主题、编号提纲短标题和当前焦点，使“第三点展开、继续、举例、换种说法、回到第一点”可确定性续接。浏览器历史默认关闭，显式开启后按同一白名单保存最小展示记录，关闭即删除，不新增后端会话。
 
 React 开发入口为 `http://127.0.0.1:5173/#/agent?api=1`，发布构建入口为 `http://127.0.0.1:8000/app/#/agent?api=1`；页面会标记当前环境。项目筛选使用后端分页，每页 50 条，不再受默认 20 条项目限制。项目可加入浏览器本地对比暂存，最多 3 个，并通过 URL `repos` 参数分享对比视图。
 

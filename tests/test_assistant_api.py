@@ -81,6 +81,11 @@ class AssistantApiTest(unittest.TestCase):
             body = normal.json()
             self.assertEqual(body["assistant_mode"], "knowledge")
             self.assertIn("assistant_state", body)
+            self.assertEqual(body["assistant_state"]["schema_version"], 2)
+            self.assertEqual(
+                set(body["assistant_state"]["knowledge_context"]),
+                {"topic", "outline", "focus_id"},
+            )
             self.assertIn("sections", body)
             self.assertIn("recommendations", body)
             self.assertEqual(stream.status_code, 200)

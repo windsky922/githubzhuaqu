@@ -168,6 +168,11 @@ export type AssistantState = {
   schema_version: number;
   revision: number;
   goal: string;
+  knowledge_context?: {
+    topic: string;
+    outline: Array<{ id: string; title: string }>;
+    focus_id: string;
+  };
   constraints: Array<{ field?: string; operator?: string; value?: RequirementValue; hard?: boolean }>;
   candidate_repository_ids: string[];
   primary_repository_id: string;

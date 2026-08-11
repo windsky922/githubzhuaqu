@@ -6,7 +6,7 @@
 
 响应在既有 RAG 字段之上追加 `assistant_mode`、`knowledge_basis`、`sections[]` 与 `assistant_state`。通用教学内容标记为 `model_general`，具体仓库事实仍必须来自 `project_evidence` 并通过既有 claim、约束和 freshness 闸门。Assistant 首版不调用任何写接口。
 
-`assistant_state` schema-v1 只包含 revision、目标、结构化约束、有序候选 ID、已确认首选、上一意图、待澄清问题、来源身份、检索模式和 resumable。客户端状态是不可信提示；服务端每轮重新校验候选格式、来源和资格。
+`assistant_state` 兼容接收 schema-v1 并统一返回 schema-v2。schema-v2 在原有 revision、目标、结构化约束、有序候选 ID、已确认首选、上一意图、待澄清问题、来源身份、检索模式和 resumable 之外，新增 `knowledge_context={topic, outline:[{id,title}], focus_id}`。主题、条目数量、ID 和标题均严格限长；序号只能命中回传提纲，不能凭空构造上下文。客户端状态仍是不可信提示；服务端每轮重新校验教学帧、候选格式、来源和资格。
 
 Assistant 拒绝 `auto_build`，并使用独立只读 repository；不会初始化 SQLite、构建 embedding 或触发其他写操作。响应采用显式字段白名单，不返回底层 `contexts`、`prompt_context` 或内部 explanation。
 

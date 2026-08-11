@@ -4,9 +4,10 @@ import re
 from typing import Any
 
 
-STATE_SCHEMA_VERSION = 1
+STATE_SCHEMA_VERSION = 2
 ALLOWED_MODES = {"fts5", "vector", "hybrid"}
 REPOSITORY_RE = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
+KNOWLEDGE_ID_RE = re.compile(r"^[A-Za-z0-9_-]{1,24}$")
 
 
 def normalize_assistant_request(payload: dict[str, Any] | None) -> dict[str, Any]:
@@ -43,6 +44,7 @@ def normalize_assistant_state(value: Any) -> dict[str, Any]:
     if not isinstance(value, dict):
         raise ValueError("state 必须是对象")
     candidates = _repository_ids(value.get("candidate_repository_ids"))
+    knowledge_context = _knowledge_context(value.get("knowledge_context"))
     primary = _optional_text(value.get("primary_repository_id"), 200)
     if primary and (not REPOSITORY_RE.fullmatch(primary) or primary not in candidates):
         primary = ""
@@ -57,6 +59,7 @@ def normalize_assistant_state(value: Any) -> dict[str, Any]:
         "schema_version": STATE_SCHEMA_VERSION,
         "revision": max(0, min(_int_value(value.get("revision"), 0), 1_000_000)),
         "goal": _optional_text(value.get("goal"), 2000),
+        "knowledge_context": knowledge_context,
         "constraints": [_constraint(item) for item in constraints[:20] if isinstance(item, dict)],
         "candidate_repository_ids": candidates,
         "primary_repository_id": primary,
@@ -138,6 +141,11 @@ def build_assistant_state(
         "schema_version": STATE_SCHEMA_VERSION,
         "revision": previous["revision"] + 1,
         "goal": goal[:2000],
+        "knowledge_context": _knowledge_context(
+            response.get("knowledge_context")
+            if assistant_mode == "knowledge"
+            else previous.get("knowledge_context")
+        ),
         "constraints": [_constraint(item) for item in constraints[:20] if isinstance(item, dict)],
         "candidate_repository_ids": candidates,
         "primary_repository_id": primary,
@@ -159,6 +167,7 @@ def _empty_state() -> dict[str, Any]:
         "schema_version": STATE_SCHEMA_VERSION,
         "revision": 0,
         "goal": "",
+        "knowledge_context": {"topic": "", "outline": [], "focus_id": ""},
         "constraints": [],
         "candidate_repository_ids": [],
         "primary_repository_id": "",
@@ -190,6 +199,31 @@ def _constraint(value: dict[str, Any]) -> dict[str, Any]:
         "value": value.get("value") if isinstance(value.get("value"), bool) else _optional_text(value.get("value"), 200),
         "hard": bool(value.get("hard", False)),
     }
+
+
+def _knowledge_context(value: Any) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        return {"topic": "", "outline": [], "focus_id": ""}
+    topic = _optional_text(value.get("topic"), 200)
+    raw_outline = value.get("outline")
+    outline: list[dict[str, str]] = []
+    seen: set[str] = set()
+    if isinstance(raw_outline, list):
+        for raw_item in raw_outline[:12]:
+            if not isinstance(raw_item, dict):
+                continue
+            item_id = _optional_text(raw_item.get("id"), 24)
+            title = _optional_text(raw_item.get("title"), 120)
+            if not KNOWLEDGE_ID_RE.fullmatch(item_id) or not title or item_id in seen:
+                continue
+            outline.append({"id": item_id, "title": title})
+            seen.add(item_id)
+    focus_id = _optional_text(value.get("focus_id"), 24)
+    if focus_id not in seen:
+        focus_id = ""
+    if not topic or not outline:
+        return {"topic": "", "outline": [], "focus_id": ""}
+    return {"topic": topic, "outline": outline, "focus_id": focus_id}
 
 
 def _optional_text(value: Any, limit: int) -> str:

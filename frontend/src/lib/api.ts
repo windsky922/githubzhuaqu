@@ -165,6 +165,25 @@ function assistantRepositoryIds(value: unknown) {
   return ids.slice(0, 10);
 }
 
+function assistantKnowledgeContext(value: unknown): AssistantState["knowledge_context"] {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return { topic: "", outline: [], focus_id: "" };
+  }
+  const raw = value as Record<string, unknown>;
+  const topic = assistantText(raw.topic, 200);
+  const outline = Array.isArray(raw.outline) ? raw.outline.slice(0, 12).flatMap((item) => {
+    if (!item || typeof item !== "object" || Array.isArray(item)) return [];
+    const entry = item as Record<string, unknown>;
+    const id = assistantText(entry.id, 24);
+    const title = assistantText(entry.title, 120);
+    return /^[A-Za-z0-9_-]{1,24}$/.test(id) && title ? [{ id, title }] : [];
+  }).filter((item, index, items) => items.findIndex((candidate) => candidate.id === item.id) === index) : [];
+  const focus = assistantText(raw.focus_id, 24);
+  return topic && outline.length
+    ? { topic, outline, focus_id: outline.some((item) => item.id === focus) ? focus : "" }
+    : { topic: "", outline: [], focus_id: "" };
+}
+
 export function projectAssistantState(value?: AssistantState): AssistantState | undefined {
   if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
   const raw = value as unknown as Record<string, unknown>;
@@ -180,9 +199,11 @@ export function projectAssistantState(value?: AssistantState): AssistantState | 
   }) : [];
   const mode = raw.mode === "fts5" || raw.mode === "vector" ? raw.mode : "hybrid";
   return {
-    schema_version: 1,
+    schema_version: 2,
     revision: Math.max(0, Math.min(Number.isInteger(raw.revision) ? Number(raw.revision) : 0, 1_000_000)),
-    goal: assistantText(raw.goal, 2000), constraints,
+    goal: assistantText(raw.goal, 2000),
+    knowledge_context: assistantKnowledgeContext(raw.knowledge_context),
+    constraints,
     candidate_repository_ids: candidates,
     primary_repository_id: candidates.includes(primary) ? primary : "",
     last_intent: assistantText(raw.last_intent, 50),

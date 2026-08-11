@@ -31,6 +31,24 @@ class _FailingClient(_Client):
         raise self.error
 
 
+class _TeachingClient(_Client):
+    def __init__(self) -> None:
+        super().__init__()
+        self.messages = []
+        self.answers = [
+            "1. 模型与推理\n2. 工具与行动\n3. 记忆与反馈",
+            "第三点关注如何保存最小状态并根据反馈修正行为。",
+            "例如只保存主题、提纲和当前焦点，不保存整段历史回答。",
+            "换句话说，记住导航坐标，不复制整本对话记录。",
+            "第一点是模型如何理解目标并选择下一步推理。",
+        ]
+
+    def chat(self, messages):
+        self.messages.append(messages)
+        self.calls += 1
+        return self.answers[min(self.calls - 1, len(self.answers) - 1)]
+
+
 class _Repository:
     def __init__(self) -> None:
         self.payloads = []
@@ -283,13 +301,71 @@ class AssistantOrchestratorTest(unittest.TestCase):
             },
         })
         state = request["state"]
-        self.assertEqual(state["schema_version"], 1)
+        self.assertEqual(state["schema_version"], 2)
         self.assertEqual(state["revision"], 0)
         self.assertEqual(len(state["goal"]), 2000)
         self.assertEqual(len(state["constraints"]), 20)
         self.assertEqual(state["candidate_repository_ids"], candidates[:10])
         self.assertEqual(state["primary_repository_id"], "")
         self.assertNotIn("forbidden_history", state)
+
+    def test_schema_v1_input_is_upgraded_and_knowledge_context_is_sanitized(self):
+        assistant = AssistantOrchestrator(_Repository(), prompt_root=Path.cwd(), model_client=_Client())
+        request = assistant.normalize_request({
+            "q": "继续",
+            "state": {
+                "schema_version": 1,
+                "goal": "学习 Agent",
+                "knowledge_context": {
+                    "topic": "t" * 250,
+                    "outline": [
+                        {"id": "k1", "title": "第一点"},
+                        {"id": "bad id", "title": "丢弃"},
+                        {"id": "k1", "title": "重复"},
+                        {"id": "k2", "title": "x" * 150},
+                    ],
+                    "focus_id": "missing",
+                    "history": "不得保留",
+                },
+            },
+        })
+        state = request["state"]
+        self.assertEqual(state["schema_version"], 2)
+        self.assertEqual(len(state["knowledge_context"]["topic"]), 200)
+        self.assertEqual([item["id"] for item in state["knowledge_context"]["outline"]], ["k1", "k2"])
+        self.assertEqual(len(state["knowledge_context"]["outline"][1]["title"]), 120)
+        self.assertEqual(state["knowledge_context"]["focus_id"], "")
+        self.assertNotIn("history", state["knowledge_context"])
+
+    def test_five_turn_knowledge_context_keeps_outline_and_switches_focus(self):
+        repository = _Repository()
+        client = _TeachingClient()
+        assistant = AssistantOrchestrator(repository, prompt_root=Path.cwd(), model_client=client)
+        questions = [
+            "我想学习 AI Agent 的核心组成",
+            "把第三点展开",
+            "继续，并举例",
+            "换种说法",
+            "回到第一点",
+        ]
+        state = None
+        results = []
+        for question in questions:
+            payload = {"q": question, **({"state": state} if state else {})}
+            result = assistant.turn(payload)
+            results.append(result)
+            state = result["assistant_state"]
+
+        self.assertTrue(all(result["assistant_mode"] == "knowledge" for result in results))
+        first_outline = results[0]["assistant_state"]["knowledge_context"]["outline"]
+        self.assertEqual([item["id"] for item in first_outline], ["k1", "k2", "k3"])
+        self.assertEqual(results[1]["assistant_state"]["knowledge_context"]["focus_id"], "k3")
+        self.assertEqual(results[2]["assistant_state"]["knowledge_context"]["focus_id"], "k3")
+        self.assertEqual(results[3]["assistant_state"]["knowledge_context"]["focus_id"], "k3")
+        self.assertEqual(results[4]["assistant_state"]["knowledge_context"]["focus_id"], "k1")
+        self.assertTrue(all(result["assistant_state"]["candidate_repository_ids"] == ["owner/agent"] for result in results))
+        self.assertIn('\"focus_id\": \"k3\"', client.messages[2][1]["content"])
+        self.assertNotIn(client.answers[0], client.messages[1][1]["content"])
 
 
 if __name__ == "__main__":

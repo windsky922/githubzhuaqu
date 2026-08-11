@@ -1,5 +1,14 @@
 # 操作日志
 
+## 2026-08-11 追加：V8 P0-A schema-v2 教学对话帧
+
+1. Assistant 兼容接收 schema-v1 并统一发出 schema-v2；最小状态新增严格限长、逐项白名单化的 `knowledge_context.topic`、`outline[{id,title}]` 与 `focus_id`，未知字段、无效/重复 ID、超量条目和越界焦点均被丢弃。
+2. 编排层在上一轮教学提纲内确定性解析“第三点展开、继续、举例、换种说法、回到第一点”；教学 Prompt 只接收当前问题和最小导航，不接收历史回答、引用、证据、sections、`prompt_context` 或模型原始输出。
+3. React 请求投影和 opt-in localStorage 投影同步 schema-v2 白名单；浏览器历史的 30 天、10 会话、每会话 20 轮、默认关闭和关闭即删除边界不变。
+4. 新增五轮教学轨迹、schema-v1 升级、恶意/超长教学帧、HTTP 响应和前端投影断言；既有项目候选资格、freshness、只读 repository、Ask/SSE 兼容边界未改。
+
+验证：TypeScript lint、25 项 Vitest、生产构建、20 项 mock Playwright、6 项真实 FastAPI + 临时 SQLite Playwright、336 项 Python unittest、安全检查和六套固定 evaluator 全部通过；项目匹配/推荐 52 条、追问 62 条、约束解析 100 条、约束证据 60 条、claim 14 条、capability scope 6 条基线无回归，硬约束/作用域违规率为 0。`git diff --check` 通过；二次构建前后 `docs/app` 差异哈希同为 `7fa1486ca19b959bc6d4f03d517cc849acffb36d`，确认产物与源码稳定一致。Playwright 仅保留 `NO_COLOR` 被 `FORCE_COLOR` 忽略的既有 Node 警告。E2E 按既有配置在未跟踪 `output/` 中产生临时结果，但 `output/`、`tmp/` 均未纳入改动范围或暂存；未读取运行态 SQLite、真实历史 blob、凭证，也未调用外部网络。
+
 ## 2026-08-11 追加：V7 流畅对话目标审查与开发交接
 
 1. 结合 2026-08-11 每日对抗审查报告与当前 `9d54346000c8668102305ce69342aa066896fd77` 基线，重新按“个人本机流畅 AI Agent 学习与 GitHub 项目研究对话”审查 Assistant V1。

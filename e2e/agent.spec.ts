@@ -113,6 +113,46 @@ test("AI Agent 学习、候选追问和显式重置保持作用域", async ({ pa
   expect(thirdIds.some((id) => !secondIds.includes(id))).toBe(true);
 });
 
+test("五轮教学通过 schema-v2 提纲连续解析指代", async ({ page }) => {
+  const requestBodies: Array<Record<string, unknown>> = [];
+  page.on("request", (request) => {
+    if (new URL(request.url()).pathname !== "/v1/assistant/turn/stream") return;
+    const body = request.postDataJSON();
+    if (body && typeof body === "object") requestBodies.push(body as Record<string, unknown>);
+  });
+  const runTurn = async (question: string) => {
+    const responsePromise = page.waitForResponse((response) =>
+      new URL(response.url()).pathname === "/v1/assistant/turn/stream"
+      && response.request().postData()?.includes(question) === true);
+    await submit(page, question);
+    const final = parseSse(await (await responsePromise).text()).at(-1)?.data || {};
+    await expect(page.getByLabel("输入项目需求")).toBeEnabled();
+    return final;
+  };
+
+  const first = await runTurn("我想学习 AI Agent 的核心组成");
+  const second = await runTurn("把第三点展开");
+  const third = await runTurn("继续，并举例");
+  const fourth = await runTurn("换种说法");
+  const fifth = await runTurn("回到第一点");
+  const contexts = [first, second, third, fourth, fifth].map((result) =>
+    (result.assistant_state as { knowledge_context: { outline: Array<{ id: string }>; focus_id: string } }).knowledge_context);
+
+  expect([first, second, third, fourth, fifth].every((result) => result.assistant_mode === "knowledge")).toBe(true);
+  expect(contexts[0].outline.map((item) => item.id)).toEqual(["k1", "k2", "k3"]);
+  expect(contexts.map((context) => context.focus_id)).toEqual(["", "k3", "k3", "k3", "k1"]);
+  expect(requestBodies).toHaveLength(5);
+  for (const body of requestBodies.slice(1)) {
+    expect(Object.keys(body).sort()).toEqual(["limit", "mode", "q", "state"]);
+    const serialized = JSON.stringify(body);
+    for (const forbidden of ["citations", "evidence", "prompt_context", "contexts", "sections", "answer"]) {
+      expect(serialized).not.toContain(`\"${forbidden}\"`);
+    }
+  }
+  expect((requestBodies[1].state as { schema_version: number }).schema_version).toBe(2);
+  expect((requestBodies[4].state as { knowledge_context: { focus_id: string } }).knowledge_context.focus_id).toBe("k3");
+});
+
 test("本机历史默认关闭，开启后只保存最小展示字段，关闭即删除", async ({ page }) => {
   const storageKey = "github_weekly_agent_assistant_conversations_v2";
   expect(await page.evaluate((key) => window.localStorage.getItem(key), storageKey)).toBeNull();

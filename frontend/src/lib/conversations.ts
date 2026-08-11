@@ -55,14 +55,29 @@ function assistantState(value: unknown): AssistantState | undefined {
   const candidates = repositoryIds(state.candidate_repository_ids);
   const primary = bounded(state.primary_repository_id, 200);
   const goal = bounded(state.goal, 2000);
+  const rawKnowledge = state.knowledge_context && typeof state.knowledge_context === "object" && !Array.isArray(state.knowledge_context)
+    ? state.knowledge_context as Record<string, unknown> : {};
+  const outline = Array.isArray(rawKnowledge.outline) ? rawKnowledge.outline.slice(0, 12).flatMap((item) => {
+    if (!item || typeof item !== "object" || Array.isArray(item)) return [];
+    const entry = item as Record<string, unknown>;
+    const id = bounded(entry.id, 24);
+    const title = bounded(entry.title, 120);
+    return /^[A-Za-z0-9_-]{1,24}$/.test(id) && title ? [{ id, title }] : [];
+  }).filter((item, index, items) => items.findIndex((candidate) => candidate.id === item.id) === index) : [];
+  const topic = bounded(rawKnowledge.topic, 200);
+  const focus = bounded(rawKnowledge.focus_id, 24);
+  const knowledgeContext = topic && outline.length
+    ? { topic, outline, focus_id: outline.some((item) => item.id === focus) ? focus : "" }
+    : { topic: "", outline: [], focus_id: "" };
   const sourceIdentity = {
     kind: bounded(source.kind, 50), source_id: bounded(source.source_id, 200),
     run_date: bounded(source.run_date, 50), as_of: bounded(source.as_of, 50),
   };
   return {
-    schema_version: 1,
+    schema_version: 2,
     revision: Math.max(0, Math.min(Number.isInteger(state.revision) ? Number(state.revision) : 0, 1_000_000)),
     goal,
+    knowledge_context: knowledgeContext,
     constraints,
     candidate_repository_ids: candidates,
     primary_repository_id: candidates.includes(primary) ? primary : "",
