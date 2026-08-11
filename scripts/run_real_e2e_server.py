@@ -7,6 +7,7 @@ import os
 import shutil
 import sys
 import tempfile
+from collections.abc import Iterator
 from datetime import date
 from pathlib import Path
 
@@ -50,6 +51,10 @@ class _FakeKnowledgeClient:
             "最小实践：做一个只读研究助手，为每条项目结论绑定证据并加入失败降级。\n"
             "常见误区：先堆框架、忽略评估，或把模型常识当作实时项目事实。"
         )
+
+    def stream_chat(self, messages: list[dict[str, str]]) -> Iterator[str]:
+        for line in self.chat(messages).splitlines(keepends=True):
+            yield line
 
 
 def _isolate_environment() -> None:

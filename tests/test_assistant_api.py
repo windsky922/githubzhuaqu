@@ -69,6 +69,10 @@ class _TeachingClient:
     def chat(self, messages):
         return "ReAct 把推理与行动交替组织，并用观察结果修正下一步决策。"
 
+    def stream_chat(self, messages):
+        yield "ReAct 把推理与行动交替组织，"
+        yield "并用观察结果修正下一步决策。"
+
 
 class AssistantApiTest(unittest.TestCase):
     def test_pure_teaching_api_returns_final_when_project_rag_fails(self) -> None:
@@ -96,6 +100,10 @@ class AssistantApiTest(unittest.TestCase):
         events = _sse_events(stream.text)
         self.assertEqual(events[0]["event"], "meta")
         self.assertEqual(events[-1]["event"], "final")
+        self.assertEqual(
+            [event["data"]["text"] for event in events if event["event"] == "delta"],
+            ["ReAct 把推理与行动交替组织，", "并用观察结果修正下一步决策。"],
+        )
         self.assertNotIn("error", [event["event"] for event in events])
         self.assertEqual(events[-1]["data"], normal.json())
 

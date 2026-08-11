@@ -105,7 +105,7 @@ class KimiChatClient:
                             yield safe_delta
                 if not emitted:
                     raise LlmClientError("Kimi API 流式响应提前结束且没有文本内容")
-                return
+                raise LlmClientError("Kimi API 流式响应提前结束且缺少完成标记")
             except urllib.error.HTTPError as error:
                 body = error.read().decode("utf-8", errors="replace")
                 message = redact_sensitive_text(f"Kimi API error {error.code}: {body}")

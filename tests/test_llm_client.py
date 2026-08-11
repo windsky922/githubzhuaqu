@@ -89,6 +89,26 @@ class LlmClientTest(unittest.TestCase):
         payload = json.loads(urlopen.call_args.args[0].data.decode("utf-8"))
         self.assertTrue(payload["stream"])
 
+    def test_stream_chat_rejects_partial_eof_without_done_marker(self):
+        config = LlmConfig(
+            api_key="x",
+            base_url="https://api.example.com/v1",
+            model="moonshot-test",
+            timeout_seconds=3,
+            max_retries=0,
+            retry_seconds=0,
+        )
+        client = KimiChatClient(config)
+
+        with patch(
+            "urllib.request.urlopen",
+            return_value=_StreamResponse(['data: {"choices":[{"delta":{"content":"partial"}}]}\n']),
+        ):
+            stream = client.stream_chat([{"role": "user", "content": "hi"}])
+            self.assertEqual(next(stream), "partial")
+            with self.assertRaisesRegex(LlmClientError, "缺少完成标记"):
+                next(stream)
+
 
 if __name__ == "__main__":
     unittest.main()

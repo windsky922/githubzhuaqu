@@ -1,5 +1,15 @@
 # 操作日志
 
+## 2026-08-11 追加：V8 P1-A SSE final 强校验与真实模型流式
+
+1. Assistant `knowledge` 流式入口接入 `KimiChatClient.stream_chat()`，按 `meta → provider delta* → final` 输出；项目 RAG 保持后置可选增强，只有 final 携带权威回答和状态。
+2. Provider 已输出 partial delta 但缺少 `[DONE]` 时不再视为成功；模型断流以固定说明安全降级，异常正文不进入响应。
+3. 前端暂存 SSE final 到 EOF 后再验收。静默 EOF、partial delta、SSE error、重复/畸形 final 均复用字节相同请求体走普通 POST；恢复也失败时不产生 final，不把未完成轮次作为成功。
+4. 新增 provider 截断、真实教学 delta、静默 EOF、partial EOF、重复/畸形 final 与恢复失败回归；旧 Assistant/RAG 字段和只读边界不变。
+5. 完整验证首轮真实 E2E 暴露确定性教学 fixture 仅实现 `chat()`；为同一 fixture 补齐分段 `stream_chat()` 后，真实三轮 Assistant 链路恢复 6/6 通过。
+
+验证：TypeScript、30 个 Vitest、生产构建、20 个 mock Chromium E2E、6 个真实 FastAPI E2E、345 个 Python unittest、安全检查和六套固定 evaluator 全部通过。远端 CI 在推送后核验。
+
 ## 2026-08-11 追加：V8 P0-B 教学与项目 RAG 解耦
 
 1. `knowledge` 正常与 SSE 链路改为先生成通用教学；项目 RAG 抛出受控异常或返回 `error` 时，追加固定限制、保留教学 `final`，不输出底层错误详情。

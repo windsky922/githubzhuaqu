@@ -88,4 +88,104 @@ describe("streamAssistantTurn", () => {
     await streamAssistantTurn("继续", state, new AbortController().signal, (event) => events.push(event));
     expect(events).toEqual([{ event: "final", data: { answer: "tail", assistant_state: state } }]);
   });
+
+  it("recovers a silent EOF with the identical POST body", async () => {
+    const stream = new ReadableStream({ start(controller) {
+      controller.enqueue(new TextEncoder().encode('event: meta\ndata: {"assistant_mode":"knowledge"}\n\n'));
+      controller.close();
+    } });
+    const fallback = { answer: "recovered", assistant_state: state };
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(stream, { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify(fallback), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    const events: unknown[] = [];
+
+    await streamAssistantTurn("继续", dirtyState, new AbortController().signal, (event) => events.push(event));
+
+    expect(fetchMock.mock.calls.map(([url]) => url)).toEqual(["/v1/assistant/turn/stream", "/v1/assistant/turn"]);
+    expect(fetchMock.mock.calls[0][1].body).toBe(fetchMock.mock.calls[1][1].body);
+    expect(events).toEqual([
+      { event: "meta", data: { assistant_mode: "knowledge" } },
+      { event: "final", data: fallback },
+    ]);
+  });
+
+  it("recovers after partial delta EOF without accepting the incomplete turn", async () => {
+    const stream = new ReadableStream({ start(controller) {
+      controller.enqueue(new TextEncoder().encode(
+        'event: meta\ndata: {"assistant_mode":"knowledge"}\n\nevent: delta\ndata: {"text":"partial"}\n\n',
+      ));
+      controller.close();
+    } });
+    const fallback = { answer: "complete", assistant_state: state };
+    vi.stubGlobal("fetch", vi.fn()
+      .mockResolvedValueOnce(new Response(stream, { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify(fallback), { status: 200 })));
+    const events: unknown[] = [];
+
+    await streamAssistantTurn("继续", state, new AbortController().signal, (event) => events.push(event));
+
+    expect(events).toEqual([
+      { event: "meta", data: { assistant_mode: "knowledge" } },
+      { event: "delta", data: { text: "partial" } },
+      { event: "final", data: fallback },
+    ]);
+  });
+
+  it("rejects duplicate final frames and uses one authoritative POST final", async () => {
+    const streamed = { answer: "streamed", assistant_state: state };
+    const fallback = { answer: "authoritative", assistant_state: state };
+    const stream = new ReadableStream({ start(controller) {
+      controller.enqueue(new TextEncoder().encode(
+        `event: final\ndata: ${JSON.stringify(streamed)}\n\nevent: final\ndata: ${JSON.stringify(streamed)}\n\n`,
+      ));
+      controller.close();
+    } });
+    vi.stubGlobal("fetch", vi.fn()
+      .mockResolvedValueOnce(new Response(stream, { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify(fallback), { status: 200 })));
+    const events: unknown[] = [];
+
+    await streamAssistantTurn("继续", state, new AbortController().signal, (event) => events.push(event));
+
+    expect(events).toEqual([{ event: "final", data: fallback }]);
+  });
+
+  it("rejects malformed final data and recovers through POST", async () => {
+    const stream = new ReadableStream({ start(controller) {
+      controller.enqueue(new TextEncoder().encode('event: final\ndata: {"answer":"missing state"}\n\n'));
+      controller.close();
+    } });
+    const fallback = { answer: "valid", assistant_state: state };
+    vi.stubGlobal("fetch", vi.fn()
+      .mockResolvedValueOnce(new Response(stream, { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify(fallback), { status: 200 })));
+    const events: unknown[] = [];
+
+    await streamAssistantTurn("继续", state, new AbortController().signal, (event) => events.push(event));
+
+    expect(events).toEqual([{ event: "final", data: fallback }]);
+  });
+
+  it("does not mark an incomplete stream successful when POST recovery also fails", async () => {
+    const stream = new ReadableStream({ start(controller) {
+      controller.enqueue(new TextEncoder().encode('event: delta\ndata: {"text":"partial"}\n\n'));
+      controller.close();
+    } });
+    vi.stubGlobal("fetch", vi.fn()
+      .mockResolvedValueOnce(new Response(stream, { status: 200 }))
+      .mockResolvedValueOnce(new Response(null, { status: 503 })));
+    const events: Array<{ event: string }> = [];
+
+    await expect(streamAssistantTurn(
+      "继续",
+      state,
+      new AbortController().signal,
+      (event) => events.push(event),
+    )).rejects.toThrow("HTTP 503");
+
+    expect(events).toEqual([{ event: "delta", data: { text: "partial" } }]);
+    expect(events.some((event) => event.event === "final")).toBe(false);
+  });
 });

@@ -8,6 +8,8 @@
 
 `knowledge` 模式先生成通用教学，再把项目 RAG 作为可选增强。RAG 抛出受控异常或 SSE `error` 时，普通与流式入口仍返回教学 `final`，追加 `limitations` 分段并设置 `fallback_reason=project_enhancement_unavailable`；底层错误详情不进入响应。包含明确硬条件的教学+项目问题把原始 `q` 交给 contextual RAG，确保语言、离线和 API Key 等要求继续参与硬约束与 eligibility 判定；纯项目模式维持失败关闭。SSE 事件顺序仍为 `meta → delta* → final`。
 
+教学 SSE 直接消费 `KimiChatClient.stream_chat()`：先发一个 `meta`，再转发脱敏模型 delta，最后用完整累积结果构造唯一权威 `final`；provider 已输出 partial delta 但未给出 `[DONE]` 时视为截断并安全降级。浏览器暂存而不立即采用 SSE final，只有流结束时恰好存在一个结构合法的 final 才更新权威回答和 `assistant_state`。静默 EOF、partial delta 后 EOF、SSE `error`、重复或畸形 final 均使用字节相同的请求体调用 `/v1/assistant/turn` 恢复；恢复失败时抛出失败且不产生 final。
+
 `assistant_state` 兼容接收 schema-v1 并统一返回 schema-v2。schema-v2 在原有 revision、目标、结构化约束、有序候选 ID、已确认首选、上一意图、待澄清问题、来源身份、检索模式和 resumable 之外，新增 `knowledge_context={topic, outline:[{id,title}], focus_id}`。主题、条目数量、ID 和标题均严格限长；序号只能命中回传提纲，不能凭空构造上下文。客户端状态仍是不可信提示；服务端每轮重新校验教学帧、候选格式、来源和资格。
 
 Assistant 拒绝 `auto_build`，并使用独立只读 repository；不会初始化 SQLite、构建 embedding 或触发其他写操作。响应采用显式字段白名单，不返回底层 `contexts`、`prompt_context` 或内部 explanation。

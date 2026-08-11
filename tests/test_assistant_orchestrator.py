@@ -20,6 +20,9 @@ class _Client:
         self.calls += 1
         return self.answer
 
+    def stream_chat(self, messages):
+        yield self.chat(messages)
+
 
 class _FailingClient(_Client):
     def __init__(self, error: Exception) -> None:
@@ -27,6 +30,10 @@ class _FailingClient(_Client):
         self.error = error
 
     def chat(self, messages):
+        self.calls += 1
+        raise self.error
+
+    def stream_chat(self, messages):
         self.calls += 1
         raise self.error
 
@@ -218,6 +225,55 @@ class AssistantOrchestratorTest(unittest.TestCase):
         self.assertEqual(events[-1]["event"], "final")
         self.assertEqual(sum(event["event"] == "meta" for event in events), 1)
         self.assertNotIn("旧 RAG 草稿", "".join(str(event.get("data")) for event in events))
+
+    def test_knowledge_stream_uses_provider_deltas_before_optional_repository(self):
+        order: list[str] = []
+
+        class StreamingClient(_Client):
+            def chat(self, messages):
+                raise AssertionError("streaming turn must not call chat")
+
+            def stream_chat(self, messages):
+                order.append("model:first")
+                yield "先理解推理，"
+                order.append("model:second")
+                yield "再根据观察行动。"
+
+        class OrderedRepository(_Repository):
+            def rag_ask_contextual_stream(self, payload, *, router_client=None):
+                order.append("repository")
+                yield from super().rag_ask_contextual_stream(payload, router_client=router_client)
+
+        assistant = AssistantOrchestrator(
+            OrderedRepository(), prompt_root=Path.cwd(), model_client=StreamingClient()
+        )
+        events = list(assistant.turn_stream(assistant.normalize_request({"q": "解释 ReAct 的原理"})))
+
+        self.assertEqual(order, ["model:first", "model:second", "repository"])
+        self.assertEqual(events[0]["event"], "meta")
+        self.assertEqual(
+            [event["data"]["text"] for event in events if event["event"] == "delta"],
+            ["先理解推理，", "再根据观察行动。"],
+        )
+        self.assertEqual(events[-1]["event"], "final")
+        self.assertEqual(events[-1]["data"]["knowledge_basis"], "mixed")
+
+    def test_partial_model_stream_failure_ends_with_safe_authoritative_final(self):
+        class PartialFailureClient(_Client):
+            def stream_chat(self, messages):
+                yield "尚未完成的片段"
+                raise LlmClientError("secret provider disconnect")
+
+        assistant = AssistantOrchestrator(
+            _Repository(), prompt_root=Path.cwd(), model_client=PartialFailureClient()
+        )
+        events = list(assistant.turn_stream(assistant.normalize_request({"q": "解释 ReAct 的原理"})))
+
+        self.assertEqual(events[0]["event"], "meta")
+        self.assertEqual(events[-1]["event"], "final")
+        self.assertNotIn("error", [event["event"] for event in events])
+        self.assertEqual(events[-1]["data"]["fallback_reason"], "model_unavailable")
+        self.assertNotIn("secret provider disconnect", str(events))
 
     def test_turn_and_stream_final_are_equivalent(self):
         payload = {"q": "推荐适合学习的 Agent 项目"}

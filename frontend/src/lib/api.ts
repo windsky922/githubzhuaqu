@@ -222,55 +222,107 @@ export function assistantTurnBody(question: string, state?: AssistantState) {
   return { q: question, ...(projected ? { state: projected } : {}), mode: projected?.mode || "hybrid", limit: 3 };
 }
 
-async function fallbackAssistantTurn(question: string, state: AssistantState | undefined, signal: AbortSignal, onEvent: (event: StreamEvent) => void) {
+function validAssistantFinal(value: unknown): value is Record<string, unknown> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const data = value as Record<string, unknown>;
+  return typeof data.answer === "string"
+    && Boolean(data.assistant_state)
+    && typeof data.assistant_state === "object"
+    && !Array.isArray(data.assistant_state);
+}
+
+async function fallbackAssistantTurn(body: string, signal: AbortSignal, onEvent: (event: StreamEvent) => void) {
   const response = await fetch("/v1/assistant/turn", {
     method: "POST", signal,
     headers: { Accept: "application/json", "Content-Type": "application/json" },
-    body: JSON.stringify(assistantTurnBody(question, state)),
+    body,
   });
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
-  onEvent({ event: "final", data: await response.json() as Record<string, unknown> });
+  const data: unknown = await response.json();
+  if (!validAssistantFinal(data)) throw new Error("助手普通响应缺少有效 final");
+  onEvent({ event: "final", data });
 }
 
 export async function streamAssistantTurn(question: string, state: AssistantState | undefined, signal: AbortSignal, onEvent: (event: StreamEvent) => void) {
+  const body = JSON.stringify(assistantTurnBody(question, state));
   const response = await fetch("/v1/assistant/turn/stream", {
     method: "POST",
     signal,
     headers: { Accept: "text/event-stream", "Content-Type": "application/json" },
-    body: JSON.stringify(assistantTurnBody(question, state)),
+    body,
   });
   if (!response.ok || !response.body) {
-    await fallbackAssistantTurn(question, state, signal, onEvent);
+    await fallbackAssistantTurn(body, signal, onEvent);
     return;
   }
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
   let currentEvent = "error";
+  let pendingFinal: Record<string, unknown> | undefined;
+  let finalCount = 0;
+  let streamInvalid = false;
+  let streamError = false;
   const emit = (frame: string) => {
     const dataLine = frame.split("\n").find((line) => line.startsWith("data:"));
     const eventLine = frame.split("\n").find((line) => line.startsWith("event:"));
     currentEvent = eventLine ? eventLine.slice(6).trim() : currentEvent;
-    if (!dataLine) return;
+    if (!dataLine || !["meta", "delta", "final", "error"].includes(currentEvent)) {
+      streamInvalid = true;
+      return;
+    }
     try {
-      onEvent({ event: currentEvent as StreamEvent["event"], data: JSON.parse(dataLine.slice(5).trim()) as Record<string, unknown> });
+      const data: unknown = JSON.parse(dataLine.slice(5).trim());
+      if (!data || typeof data !== "object" || Array.isArray(data)) {
+        streamInvalid = true;
+        return;
+      }
+      if (currentEvent === "final") {
+        finalCount += 1;
+        if (finalCount !== 1 || !validAssistantFinal(data)) streamInvalid = true;
+        else pendingFinal = data;
+        return;
+      }
+      if (pendingFinal) {
+        streamInvalid = true;
+        return;
+      }
+      if (currentEvent === "error") {
+        streamError = true;
+        return;
+      }
+      onEvent({ event: currentEvent as StreamEvent["event"], data: data as Record<string, unknown> });
     } catch {
-      onEvent({ event: "error", data: { message: "流式响应解析失败" } });
+      streamInvalid = true;
     }
   };
-  while (true) {
-    const chunk = await reader.read();
-    if (chunk.done) break;
-    buffer += decoder.decode(chunk.value, { stream: true });
-    let boundary = buffer.indexOf("\n\n");
-    while (boundary >= 0) {
-      emit(buffer.slice(0, boundary));
-      buffer = buffer.slice(boundary + 2);
-      boundary = buffer.indexOf("\n\n");
+  try {
+    while (true) {
+      const chunk = await reader.read();
+      if (chunk.done) break;
+      buffer += decoder.decode(chunk.value, { stream: true });
+      let boundary = buffer.indexOf("\n\n");
+      while (boundary >= 0) {
+        emit(buffer.slice(0, boundary));
+        buffer = buffer.slice(boundary + 2);
+        boundary = buffer.indexOf("\n\n");
+      }
+      if (streamInvalid || streamError) {
+        await reader.cancel();
+        break;
+      }
     }
+    buffer += decoder.decode();
+    if (!streamInvalid && !streamError && buffer.trim()) emit(buffer);
+  } catch (error) {
+    if (signal.aborted || (error instanceof Error && error.name === "AbortError")) throw error;
+    streamInvalid = true;
   }
-  buffer += decoder.decode();
-  if (buffer.trim()) emit(buffer);
+  if (!streamInvalid && !streamError && finalCount === 1 && pendingFinal) {
+    onEvent({ event: "final", data: pendingFinal });
+    return;
+  }
+  await fallbackAssistantTurn(body, signal, onEvent);
 }
 
 export function answerFromEvent(data: Record<string, unknown>) {

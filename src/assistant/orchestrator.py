@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import re
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any, Generator, Iterator
 
 from src.llm.client import KimiChatClient, LlmClientError
 from src.llm.prompts import assistant_knowledge_messages, assistant_route_messages
@@ -83,9 +83,20 @@ class AssistantOrchestrator:
     def turn_stream(self, request: dict[str, Any]) -> Iterator[dict[str, Any]]:
         assistant_mode = self._assistant_mode(request)
         project_response: dict[str, Any] | None = None
-        guidance = self._knowledge_guidance(request) if assistant_mode == "knowledge" else None
+        guidance: dict[str, Any] | None = None
         project_unavailable = False
         meta_sent = False
+        if assistant_mode == "knowledge":
+            yield {
+                "event": "meta",
+                "data": {
+                    "query": request["q"],
+                    "assistant_mode": assistant_mode,
+                    "retrieval": {"mode": "optional_pending"},
+                },
+            }
+            meta_sent = True
+            guidance = yield from self._knowledge_guidance_stream(request)
         if assistant_mode not in {"help", "clarify"}:
             rag_payload = self._rag_payload(request, assistant_mode)
             try:
@@ -124,7 +135,7 @@ class AssistantOrchestrator:
             guidance,
             project_unavailable=project_unavailable,
         )
-        if response.get("answer_mode") == "llm":
+        if response.get("answer_mode") == "llm" and assistant_mode != "knowledge":
             for chunk in _chunks(str(response.get("answer") or ""), 180):
                 yield {"event": "delta", "data": {"text": chunk}}
         yield {"event": "final", "data": response}
@@ -201,6 +212,59 @@ class AssistantOrchestrator:
                 question=query,
                 knowledge_context=knowledge_context,
             ))
+            if not content or REPOSITORY_REFERENCE_RE.search(content):
+                raise ValueError("general_guidance_contains_repository_reference")
+            if not knowledge_context["outline"]:
+                knowledge_context = {
+                    "topic": query[:200],
+                    "outline": _extract_outline(content),
+                    "focus_id": "",
+                }
+            return {
+                "used": True,
+                "content": content,
+                "reason": "",
+                "model_status": status,
+                "knowledge_context": knowledge_context,
+            }
+        except (LlmClientError, OSError, ValueError):
+            return {
+                "used": False,
+                "content": "通用教学模型本轮不可用；下面仅展示本地项目证据，请稍后重试教学回答。",
+                "reason": "model_unavailable",
+                "model_status": status,
+                "knowledge_context": knowledge_context,
+            }
+
+    def _knowledge_guidance_stream(
+        self,
+        request: dict[str, Any],
+    ) -> Generator[dict[str, Any], None, dict[str, Any]]:
+        query = request["q"]
+        knowledge_context = _resolved_knowledge_context(query, request["state"].get("knowledge_context"))
+        status = self.model_client.status()
+        if not status.get("configured"):
+            return {
+                "used": False,
+                "content": "通用教学模型当前未配置；下面仅展示本地项目证据，不把规则降级结果伪装成完整教程。",
+                "reason": "model_not_configured",
+                "model_status": status,
+                "knowledge_context": knowledge_context,
+            }
+        try:
+            parts: list[str] = []
+            messages = assistant_knowledge_messages(
+                root=self.prompt_root,
+                question=query,
+                knowledge_context=knowledge_context,
+            )
+            for delta in self.model_client.stream_chat(messages):
+                text = str(delta or "")
+                if not text:
+                    continue
+                parts.append(text)
+                yield {"event": "delta", "data": {"text": text}}
+            content = "".join(parts).strip()
             if not content or REPOSITORY_REFERENCE_RE.search(content):
                 raise ValueError("general_guidance_contains_repository_reference")
             if not knowledge_context["outline"]:
