@@ -59,6 +59,7 @@ python scripts\evaluate_project_recommendations.py
 python scripts\evaluate_follow_up_routing.py
 python scripts\evaluate_constraint_parsing.py
 python scripts\evaluate_claim_support.py
+python scripts\evaluate_capability_scope.py
 git diff --check
 git diff --exit-code -- docs/app
 git status --short --branch

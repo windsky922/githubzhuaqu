@@ -14,9 +14,11 @@ GitHub Weekly Agent 的长期定位是 GitHub 项目研究 Agent：持续采集�
 
 项目目标不是简单按总 Star 排名，而是形成“采集项目 -> 建立知识库 -> RAG 检索解释 -> Agent 判断推荐 -> 用户反馈记忆 -> 订阅推送分发”的闭环。每周推送后续会作为可订阅模块存在，用于按用户关注方向定期分发项目研究结果和推荐摘要。
 
-最新 V6 只读增量完整审查、当前最大遗漏与整改路线见：[GitHub 项目研究 Agent V6 审查与路线图](docs/project-review-agent-v6-roadmap.md)。
+最新 V7 对抗审查以“个人本机流畅 AI Agent 学习与 GitHub 项目研究对话”为核心，当前最大遗漏、失败链与收敛路线见：[GitHub 项目研究导师 V7 审查与路线图](docs/project-review-agent-v7-roadmap.md)。
 
-V6 下一阶段的当前基线、必读顺序、P0 工作包、测试矩阵、完整验证和可复制启动提示见：[GitHub 项目研究 Agent V6 开发交接报告](docs/project-review-agent-v6-handoff.md)。
+V7 的当前基线、必读顺序、教学多轮 P0 工作包、验证矩阵和可复制启动提示见：[GitHub 项目研究导师 V7 开发交接摘要](docs/project-review-agent-v7-handoff.md)。
+
+V6 审查与交接保留为历史只读取证材料：[V6 审查](docs/project-review-agent-v6-roadmap.md)、[V6 交接](docs/project-review-agent-v6-handoff.md)。
 
 V4 审查与交接保留为历史路线和 P0-14 取证材料：[V4 审查](docs/project-review-agent-v4-roadmap.md)、[V4 交接](docs/project-review-agent-v4-handoff.md)。
 
