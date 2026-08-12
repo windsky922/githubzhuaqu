@@ -1,5 +1,7 @@
 # GitHub Weekly Agent
 
+> 本机 Assistant 启动时会读取 `GET /v1/assistant/readiness`，分别展示 API、Kimi 配置、verified snapshot/freshness、只读 RAG 与只读访问状态；`ready/degraded/unavailable` 由真实依赖聚合，不再仅按 URL 显示“已连接”。普通 readiness 不建库、不迁移、不调用外网。`python scripts/check_assistant_readiness.py --json` 可运行同一脱敏探针。真实 Kimi canary 仅允许手工执行 `python scripts/run_kimi_canary.py --confirm-real-kimi`，且还必须显式设置 `KIMI_CANARY_ENABLED=1`；固定 CI 不调用 canary，也不输出模型正文、provider 原始异常、凭证、base URL 或本机路径。
+
 > 本机 Assistant V1 新增 `/v1/assistant/turn` 与 `/v1/assistant/turn/stream`：它把 AI Agent 通用学习指导与证据约束项目推荐分段组合，并通过服务端生成的最小 `assistant_state` 支持自然追问。纯教学先通过真实模型流生成通用指导，项目 RAG 仅作可失败增强；RAG 故障会返回固定限制说明但不阻断教学 `final`。客户端只接受唯一且结构合法的 SSE `final`；静默 EOF、partial delta、重复/畸形 `final` 会用完全相同请求体回退普通 POST，恢复也失败则该轮不算成功。通用教学在普通与流式展示前统一经过事实闸门；命名框架、仓库实体/URL、版本、Star、许可证和当前维护声明不能绕过项目证据。带明确硬条件的教学+项目问题保留原始问题供约束解析，具体项目请求仍失败关闭。旧 `/v1/rag/ask` 契约保持不变；Assistant 首版只读，不创建任务、订阅或通知，也不保存服务端聊天会话。浏览器历史默认关闭；显式开启后只保存最小展示记录 30 天（最多 10 个会话、每会话 20 轮），关闭即删除。
 
 > Agent 条件默认是偏好而不是拦截器：如需严格筛选，请使用“必须、仅、不得、排除、不能接受”等明确措辞。多 Agent、本地部署、成本和离线等偏好会显示匹配或待核实状态；只有明确硬冲突才淘汰候选。
@@ -15,6 +17,8 @@ GitHub Weekly Agent 的长期定位是 GitHub 项目研究 Agent：持续采集�
 项目目标不是简单按总 Star 排名，而是形成“采集项目 -> 建立知识库 -> RAG 检索解释 -> Agent 判断推荐 -> 用户反馈记忆 -> 订阅推送分发”的闭环。每周推送后续会作为可订阅模块存在，用于按用户关注方向定期分发项目研究结果和推荐摘要。
 
 最新 V7 对抗审查以“个人本机流畅 AI Agent 学习与 GitHub 项目研究对话”为核心，当前最大遗漏、失败链与收敛路线见：[GitHub 项目研究导师 V7 审查与路线图](docs/project-review-agent-v7-roadmap.md)。
+
+V8 当前已完成 P0-A 至 P1-C；实际状态、验证入口、剩余 P1-D 与安全边界见：[GitHub 项目研究导师 V8 开发交接摘要](docs/project-review-agent-v8-handoff.md)。
 
 V7 的当前基线、必读顺序、教学多轮 P0 工作包、验证矩阵和可复制启动提示见：[GitHub 项目研究导师 V7 开发交接摘要](docs/project-review-agent-v7-handoff.md)。
 
@@ -136,6 +140,8 @@ GitHub Actions
 | `scripts/backfill_rag_explanations.py` | 为缺少解释历史的项目批量生成规则版 RAG 解释 |
 | `scripts/plan_rag_maintenance.py` | 检查 RAG 诊断与覆盖缺口，并按需创建语料重建、embedding 构建或解释回填 planned 任务 |
 | `scripts/plan_dev_context_index.py` | 创建开发上下文索引 planned 任务，供本地命令或 GitHub Actions 执行 |
+| `scripts/check_assistant_readiness.py` | 脱敏检查本机 Assistant 的 API、模型、snapshot/freshness、只读 RAG 与访问模式 |
+| `scripts/run_kimi_canary.py` | 双重 opt-in 的单次真实 Kimi 连通性检查；固定 CI 不调用 |
 | `scripts/run_project_agent_tasks.py` | 限量执行优先级 1/2 的项目 Agent 只读任务，支持 dry-run 和任务类型过滤 |
 | `scripts/manage_notifications.py` | 检测订阅事件、构建推送候选，并以默认 dry-run 和双重确认门禁执行通知投递 |
 | `scripts/create_planned_job.py` | 创建 planned 周报任务 |

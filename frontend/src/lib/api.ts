@@ -1,4 +1,4 @@
-import type { AskIntentContext, AssistantState, Comparison, Project, ProjectPage, RagAnswer } from "./types";
+import type { AskIntentContext, AssistantReadiness, AssistantState, Comparison, Project, ProjectPage, RagAnswer } from "./types";
 
 type JsonEnvelope<T> = { projects?: T[]; profiles?: unknown[]; recommendations?: T[]; total?: number; offset?: number; limit?: number; has_more?: boolean; count?: number };
 export type StreamEvent = { event: "meta" | "delta" | "final" | "error"; data: Record<string, unknown> };
@@ -20,10 +20,50 @@ function publicUrl(name: string) {
   return new URL(`../${name}`, window.location.href).toString();
 }
 
-async function readJson<T>(url: string): Promise<T> {
-  const response = await fetch(url);
+async function readJson<T>(url: string, init?: RequestInit): Promise<T> {
+  const response = await fetch(url, init);
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   return response.json() as Promise<T>;
+}
+
+function validAssistantReadiness(value: unknown): value is AssistantReadiness {
+  if (!value || typeof value !== "object") return false;
+  const readiness = value as Partial<AssistantReadiness>;
+  const capabilities = readiness.capabilities;
+  const components = readiness.components;
+  const validComponent = (name: string) => {
+    const component = components?.[name];
+    return Boolean(component)
+      && ["ready", "degraded", "unavailable"].includes(String(component?.status))
+      && typeof component?.code === "string"
+      && typeof component?.message === "string"
+      && typeof component?.recovery === "string";
+  };
+  return readiness.schema_version === 1
+    && ["ready", "degraded", "unavailable"].includes(String(readiness.status))
+    && typeof readiness.summary === "string"
+    && Boolean(capabilities)
+    && typeof capabilities?.can_chat === "boolean"
+    && typeof capabilities?.knowledge_available === "boolean"
+    && typeof capabilities?.project_available === "boolean"
+    && typeof capabilities?.current_project_available === "boolean"
+    && Boolean(components && typeof components === "object")
+    && ["api", "model", "snapshot", "rag", "access"].every(validComponent)
+    && Array.isArray(readiness.issues)
+    && readiness.issues.every((issue) => Boolean(issue)
+      && typeof issue.component === "string"
+      && typeof issue.code === "string"
+      && typeof issue.message === "string"
+      && typeof issue.recovery === "string");
+}
+
+export async function assistantReadiness(signal?: AbortSignal): Promise<AssistantReadiness> {
+  const result = await readJson<unknown>("/v1/assistant/readiness", {
+    signal,
+    headers: { Accept: "application/json" },
+  });
+  if (!validAssistantReadiness(result)) throw new Error("Invalid Assistant readiness response");
+  return result;
 }
 
 export async function projects(filters: Record<string, string> = {}) {

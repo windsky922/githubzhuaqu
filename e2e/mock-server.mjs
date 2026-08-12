@@ -261,6 +261,28 @@ function handleComparison(url, response) {
   });
 }
 
+function handleReadiness(response) {
+  json(response, {
+    schema_version: 1,
+    status: "ready",
+    summary: "本机模型配置与当前项目证据已就绪；模型连通性未执行。",
+    capabilities: {
+      can_chat: true,
+      knowledge_available: true,
+      project_available: true,
+      current_project_available: true,
+    },
+    components: {
+      api: { status: "ready", code: "api_process_ready", message: "本机 API 已响应。", recovery: "" },
+      model: { status: "ready", code: "model_configured", message: "模型已配置。", recovery: "" },
+      snapshot: { status: "ready", code: "snapshot_fresh", message: "snapshot 已验证。", recovery: "" },
+      rag: { status: "ready", code: "rag_read_only_ready", message: "RAG 可查询。", recovery: "" },
+      access: { status: "ready", code: "assistant_read_only", message: "访问只读。", recovery: "" },
+    },
+    issues: [],
+  });
+}
+
 async function handleStatic(url, response) {
   const requestPath = url.pathname === "/" ? "/app/" : decodeURIComponent(url.pathname);
   let filePath = resolve(join(docsRoot, requestPath.replace(/^\/+/, "")));
@@ -285,6 +307,7 @@ createServer(async (request, response) => {
   try {
     const url = new URL(request.url || "/", `http://127.0.0.1:${port}`);
     if (request.method === "POST" && ["/v1/rag/ask/stream", "/v1/assistant/turn/stream"].includes(url.pathname)) return await handleAsk(request, response);
+    if (request.method === "GET" && url.pathname === "/v1/assistant/readiness") return handleReadiness(response);
     if (request.method === "GET" && url.pathname === "/api/projects/compare") return handleComparison(url, response);
     if (request.method === "GET" && url.pathname === "/api/projects") return handleProjects(url, response);
     return await handleStatic(url, response);

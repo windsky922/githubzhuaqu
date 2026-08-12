@@ -1,0 +1,1 @@
+This is a minimal connectivity check. Reply with exactly CANARY_OK and nothing else.

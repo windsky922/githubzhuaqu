@@ -1,5 +1,15 @@
 # 数据契约说明
 
+## Assistant readiness schema-v1（2026-08-12）
+
+`GET /v1/assistant/readiness` 返回易漂移、只读且脱敏的本机运行态，不属于对话状态。顶层固定包含 `schema_version=1`、`status`、`summary`、`capabilities`、`components` 与 `issues[]`；`status` 只能是 `ready`、`degraded`、`unavailable`。
+
+`capabilities` 固定包含四个布尔值：`can_chat`、`knowledge_available`、`project_available`、`current_project_available`。`components` 固定包含 `api/model/snapshot/rag/access`，每项至少含 `status/code/message/recovery`；模型项可追加脱敏 `provider/configured/model/live_check`，snapshot 项可追加既有公开 `data_source`，RAG 项可追加 `mode=sqlite|local_archive_json|none`，access 项可追加 `read_only/history_only`。`issues[]` 只投影非 ready 组件的固定 `component/code/message/recovery`。
+
+HTTP `ready` 要求 API 已响应、模型已配置、fresh verified snapshot、至少一条有效 RAG 证据与强制只读访问同时成立；空表、缺必需列、空/坏 JSON 都不得令项目 capability 可用。保留至少一条安全回答链时为 `degraded`；模型与项目证据链均不可用时为 `unavailable`。CLI 不执行 listener 网络探测，API 组件固定为 `api_listener_not_checked/degraded`，因此整体不会报告 `ready`。模型已配置不等于在线，普通 readiness 的 `live_check.checked=false/status=not_run`。stale、lagging 或历史归档不得令 `current_project_available=true`。
+
+readiness 禁止包含 API key、Authorization、base URL、provider 原始正文/异常、绝对 snapshot/SQLite 路径，也不得进入 `assistant_state`、SSE final 或浏览器持久化。真实 canary 的输出是独立命令契约：仅允许 `schema_version/status/code/configured/request_sent/latency_ms`，其中 `status=passed|refused|failed`；默认与单门禁状态必须 `request_sent=false`。
+
 ## Assistant turn schema-v2（2026-08-11）
 
 `POST /v1/assistant/turn` 与流式同名入口接受当前问题和可选 `state`。稳定响应新增 `assistant_mode`、`knowledge_basis`、`sections[]` 与 `assistant_state`，同时保留 `answer`、`citations`、`evidence`、`recommendations`、`answer_quality` 和既有来源/freshness 字段。`sections[].kind` 只能是 `guidance`、`project_evidence` 或 `limitations`。

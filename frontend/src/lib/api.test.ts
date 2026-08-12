@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { assistantTurnBody, projectAssistantState, streamAssistantTurn, streamRagAsk } from "./api";
+import { assistantReadiness, assistantTurnBody, projectAssistantState, streamAssistantTurn, streamRagAsk } from "./api";
 import type { AssistantState } from "./types";
 
 const state: AssistantState = {
@@ -20,6 +20,41 @@ const dirtyState = {
   source_identity: { ...state.source_identity, prompt_context: "forbidden-source" },
   answer: "forbidden-answer", citations: ["forbidden-citation"], evidence: ["forbidden-evidence"],
 } as unknown as AssistantState;
+
+const readiness = {
+  schema_version: 1 as const,
+  status: "degraded" as const,
+  summary: "Project evidence is available; model is not configured.",
+  capabilities: {
+    can_chat: true,
+    knowledge_available: false,
+    project_available: true,
+    current_project_available: true,
+  },
+  components: Object.fromEntries(["api", "model", "snapshot", "rag", "access"].map((name) => [name, {
+    status: name === "model" ? "unavailable" as const : "ready" as const,
+    code: `${name}_fixture`,
+    message: `${name} status`,
+    recovery: name === "model" ? "Configure the model." : "",
+  }])),
+  issues: [{ component: "model", code: "model_not_configured", message: "Model is not configured.", recovery: "Configure the model." }],
+};
+
+describe("assistantReadiness", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("reads the redacted startup contract without posting data", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify(readiness), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    await expect(assistantReadiness()).resolves.toEqual(readiness);
+    expect(fetchMock).toHaveBeenCalledWith("/v1/assistant/readiness", expect.objectContaining({ headers: { Accept: "application/json" } }));
+  });
+
+  it("fails closed when the response is malformed", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ status: "ready" }), { status: 200 })));
+    await expect(assistantReadiness()).rejects.toThrow("Invalid Assistant readiness response");
+  });
+});
 
 describe("streamRagAsk", () => {
   afterEach(() => vi.unstubAllGlobals());

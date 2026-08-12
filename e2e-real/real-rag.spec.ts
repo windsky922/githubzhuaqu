@@ -69,6 +69,21 @@ test("真实 FastAPI 同源提供静态应用、SQLite 和流式 RAG", async ({ 
   expect(String(health.root)).toContain("github-weekly-real-e2e-");
   expect(String(health.root)).not.toContain("New project 3");
 
+  const readiness = await page.evaluate(async () => (await fetch("/v1/assistant/readiness")).json());
+  expect(readiness.status).toBe("ready");
+  expect(readiness.capabilities).toEqual({
+    can_chat: true,
+    knowledge_available: true,
+    project_available: true,
+    current_project_available: true,
+  });
+  expect(readiness.components.model.live_check).toEqual({ checked: false, status: "not_run", code: "live_check_not_run" });
+  const readinessText = JSON.stringify(readiness);
+  expect(readinessText).not.toContain("github-weekly-real-e2e-");
+  expect(readinessText).not.toContain("KIMI_API_KEY");
+  expect(readinessText).not.toContain("base_url");
+  await expect(page.locator(".connection-status")).toHaveText("本机依赖已就绪");
+
   const events = await postSse(page, {
     q: "找 Python 多 Agent 编排项目",
     mode: "hybrid",

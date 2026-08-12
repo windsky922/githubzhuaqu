@@ -5,6 +5,7 @@ import re
 from pathlib import Path
 from typing import Any, Generator, Iterator
 
+from src.api.readiness import build_assistant_readiness
 from src.llm.client import KimiChatClient, LlmClientError
 from src.llm.prompts import assistant_knowledge_messages, assistant_route_messages
 
@@ -72,6 +73,13 @@ class AssistantOrchestrator:
         self.prompt_root = prompt_root
         self.model_client = model_client or KimiChatClient()
         self.router_client = router_client or self.model_client
+
+    def readiness(self, *, api_responded: bool = False) -> dict[str, Any]:
+        return build_assistant_readiness(
+            self.repository,
+            self.model_client,
+            api_responded=api_responded,
+        )
 
     def normalize_request(self, payload: dict[str, Any] | None) -> dict[str, Any]:
         request = normalize_assistant_request(payload)

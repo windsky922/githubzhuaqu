@@ -146,6 +146,10 @@ def create_app(root: Path = ROOT, db_path: Path | None = None) -> FastAPI:
     def v1_health() -> dict[str, Any]:
         return repository.v1_health()
 
+    @app.get("/v1/assistant/readiness")
+    def v1_assistant_readiness() -> dict[str, Any]:
+        return assistant.readiness(api_responded=True)
+
     @app.get("/v1/database/summary")
     def v1_database_summary() -> dict[str, Any]:
         return repository.database_summary()

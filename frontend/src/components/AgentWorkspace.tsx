@@ -1,7 +1,7 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { ArrowDown, CheckCircle2, CircleStop, MessageSquareText, PanelLeft, Plus, Send, ShieldCheck, Trash2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import type { Conversation, Project, RagAnswer } from "../lib/types";
+import type { AssistantReadiness, Conversation, Project, RagAnswer } from "../lib/types";
 import { AnswerStatus } from "./StatusBadge";
 import { CandidateProjectCard, PrimaryProjectCard } from "./ProjectCard";
 import { EvidenceDrawer } from "./EvidenceDrawer";
@@ -26,14 +26,36 @@ export function ConversationSidebar({ conversations, activeId, historyGroups, on
   return <Dialog.Root open={open} onOpenChange={setOpen}><Dialog.Trigger asChild><button className="icon-button session-menu" type="button" aria-label="打开对话历史" title="对话历史"><PanelLeft size={17} /></button></Dialog.Trigger><Dialog.Portal><Dialog.Overlay className="dialog-overlay" /><Dialog.Content className="mobile-nav-drawer sessions-drawer" aria-describedby={undefined}><div className="dialog-head"><Dialog.Title>对话</Dialog.Title><Dialog.Close className="icon-button" aria-label="关闭对话历史" title="关闭对话历史"><X size={17} /></Dialog.Close></div>{content}</Dialog.Content></Dialog.Portal></Dialog.Root>;
 }
 
-export function AgentTopbar({ apiEnabled, conversations, activeId, historyGroups, onCreate, onSelect, historyEnabled, onHistoryChange, onDelete, onClear }: { apiEnabled: boolean; conversations: Conversation[]; activeId?: string; historyGroups: Record<string, Conversation[]>; onCreate: () => void; onSelect: (id: string) => void } & ConversationControls) {
-  return <header className="agent-header"><div><span className="agent-eyebrow"><ShieldCheck size={14} />AI Agent 学习与项目研究导师</span><strong>告诉我你想学习或研究什么</strong><p>通用教学与可核验项目事实分开标注。</p></div><div className="agent-header-actions"><span className={`connection-status${apiEnabled ? " online" : ""}`}><i />{apiEnabled ? "助手已连接" : "需要本地 API"}</span><ConversationSidebar mobile conversations={conversations} activeId={activeId} historyGroups={historyGroups} onCreate={onCreate} onSelect={onSelect} historyEnabled={historyEnabled} onHistoryChange={onHistoryChange} onDelete={onDelete} onClear={onClear} /></div></header>;
+export function readinessPresentation(apiEnabled: boolean, readiness: AssistantReadiness | null, loading = false) {
+  if (!apiEnabled) return { label: "需要本地 API", tone: "unavailable", detail: "请在本地 API 模式打开。" };
+  if (loading) return { label: "正在检查依赖", tone: "", detail: "正在读取脱敏 readiness。" };
+  if (!readiness) return { label: "本机 API 不可达", tone: "unavailable", detail: "启动本机 API 后重试。" };
+  const capabilities = readiness.capabilities;
+  const capabilityDetail = `能力：通用教学${capabilities.knowledge_available ? "可用" : "不可用"}；项目证据${capabilities.project_available ? "可用" : "不可用"}；当前项目事实${capabilities.current_project_available ? "可用" : "不可用"}。`;
+  const recoveries = [...new Set(readiness.issues.map((issue) => issue.recovery).filter(Boolean))];
+  const model = readiness.components.model as { live_check?: { status?: string } } | undefined;
+  const liveCheck = model?.live_check?.status === "not_run" ? "模型只检查了配置，未做联网验证。" : "";
+  const detail = [readiness.summary, capabilityDetail, liveCheck, ...recoveries].filter(Boolean).join(" ");
+  if (readiness.status === "ready") return { label: "本机依赖已就绪", tone: "online", detail };
+  if (readiness.status === "degraded") return { label: "助手部分可用", tone: "degraded", detail };
+  return { label: "助手不可用", tone: "unavailable", detail };
 }
 
-export function ChatComposer({ value, status, busy, apiEnabled, onChange, onSubmit, onStop }: { value: string; status: string; busy: boolean; apiEnabled: boolean; onChange: (value: string) => void; onSubmit: () => void; onStop: () => void }) {
+export function ReadinessNotice({ apiEnabled, readiness, loading, onRetry }: { apiEnabled: boolean; readiness: AssistantReadiness | null; loading: boolean; onRetry: () => void }) {
+  const presentation = readinessPresentation(apiEnabled, readiness, loading);
+  if (!apiEnabled || readiness?.status === "ready") return null;
+  return <div className={`readiness-notice ${presentation.tone || "loading"}`} role="status"><strong>{presentation.label}</strong><span>{presentation.detail}</span><button type="button" onClick={onRetry} disabled={loading}>重新检查</button></div>;
+}
+
+export function AgentTopbar({ apiEnabled, readiness, readinessLoading, conversations, activeId, historyGroups, onCreate, onSelect, historyEnabled, onHistoryChange, onDelete, onClear }: { apiEnabled: boolean; readiness: AssistantReadiness | null; readinessLoading: boolean; conversations: Conversation[]; activeId?: string; historyGroups: Record<string, Conversation[]>; onCreate: () => void; onSelect: (id: string) => void } & ConversationControls) {
+  const presentation = readinessPresentation(apiEnabled, readiness, readinessLoading);
+  return <header className="agent-header"><div><span className="agent-eyebrow"><ShieldCheck size={14} />AI Agent 学习与项目研究导师</span><strong>告诉我你想学习或研究什么</strong><p>通用教学与可核验项目事实分开标注。</p></div><div className="agent-header-actions"><span className={`connection-status ${presentation.tone}`} title={presentation.detail}><i />{presentation.label}</span><ConversationSidebar mobile conversations={conversations} activeId={activeId} historyGroups={historyGroups} onCreate={onCreate} onSelect={onSelect} historyEnabled={historyEnabled} onHistoryChange={onHistoryChange} onDelete={onDelete} onClear={onClear} /></div></header>;
+}
+
+export function ChatComposer({ value, status, busy, apiEnabled, disabledReason = "请先恢复本机 Assistant 依赖", onChange, onSubmit, onStop }: { value: string; status: string; busy: boolean; apiEnabled: boolean; disabledReason?: string; onChange: (value: string) => void; onSubmit: () => void; onStop: () => void }) {
   const ref = useRef<HTMLTextAreaElement | null>(null);
   useEffect(() => { const node = ref.current; if (!node) return; node.style.height = "0"; node.style.height = `${Math.min(Math.max(node.scrollHeight, 54), 180)}px`; }, [value]);
-  return <div className="composer-wrap"><form className="composer" onSubmit={(event) => { event.preventDefault(); onSubmit(); }}><textarea ref={ref} value={value} disabled={!apiEnabled || busy} placeholder={apiEnabled ? "例如：我需要一个可本地部署的多 Agent 自动化项目" : "请在本地 API 模式打开"} onChange={(event) => onChange(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); onSubmit(); } }} aria-label="输入项目需求" /><div className="composer-bottom"><span className="composer-status">{status}</span>{busy ? <button className="icon-button stop-button" type="button" onClick={onStop} aria-label="停止生成" title="停止生成"><CircleStop size={17} /></button> : <button className="icon-button send-button" type="submit" disabled={!apiEnabled || !value.trim()} aria-label="发送需求" title="发送需求"><Send size={17} /></button>}</div></form><span className="composer-hint">Enter 发送，Shift + Enter 换行</span></div>;
+  return <div className="composer-wrap"><form className="composer" onSubmit={(event) => { event.preventDefault(); onSubmit(); }}><textarea ref={ref} value={value} disabled={!apiEnabled || busy} placeholder={apiEnabled ? "例如：我需要一个可本地部署的多 Agent 自动化项目" : disabledReason} onChange={(event) => onChange(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); onSubmit(); } }} aria-label="输入项目需求" /><div className="composer-bottom"><span className="composer-status">{status}</span>{busy ? <button className="icon-button stop-button" type="button" onClick={onStop} aria-label="停止生成" title="停止生成"><CircleStop size={17} /></button> : <button className="icon-button send-button" type="submit" disabled={!apiEnabled || !value.trim()} aria-label="发送需求" title="发送需求"><Send size={17} /></button>}</div></form><span className="composer-hint">Enter 发送，Shift + Enter 换行</span></div>;
 }
 
 function reasonSummary(answer: RagAnswer) { return answer.answer.replace(/\[\d+\]/g, "").split(/\n+/).find((item) => item.trim()) || "已根据本轮召回证据形成项目建议。"; }

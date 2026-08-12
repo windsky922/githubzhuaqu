@@ -14,6 +14,14 @@ HTTP Assistant 使用独立的强制只读 repository：已有 SQLite 以 `mode=
 
 React 工作台只把上一轮权威 `final.assistant_state` 回传给 Assistant，不上传历史回答。请求投影与可选 localStorage 投影都会重新白名单化 schema-v2 教学帧，并丢弃未知字段、无效 ID、重复/超量条目和不在提纲内的焦点。运行中可显示完整本轮结果；localStorage 默认禁用，开启后由独立投影层移除证据、Prompt、内部状态和错误，仅保留 30 天内的最小展示历史。
 
+## 本机 readiness 与 Kimi canary（2026-08-12）
+
+Assistant readiness 由 `src/api/readiness.py` 的纯聚合器提供，HTTP `GET /v1/assistant/readiness` 与 `scripts/check_assistant_readiness.py` 共用依赖判定。探针读取强制只读 Assistant repository 的公开 data source 与 freshness；SQLite 只以 `mode=ro`、`query_only` 校验 `rag_chunks` 必需列和至少一条非空证据，显式历史 JSON 必须解析出至少一个规范 `owner/repository`，空表、坏 schema、空或畸形 JSON 全部失败关闭。它不会调用会初始化或迁移派生索引的 diagnostics/summary 路径。模型组件只调用 `KimiChatClient.status()`；`configured` 表示配置存在，不代表 provider 在线，普通 GET 的 `live_check` 固定为 `not_run`。HTTP 路由可证明本次 API 已响应；CLI 不探测 listener，固定报告 `api_listener_not_checked/degraded`。
+
+整体状态按安全主链聚合：HTTP 已响应、模型已配置且 fresh verified snapshot/只读 RAG 同时可用为 `ready`；至少保留通用教学或项目证据链之一，或 CLI 尚未证明 listener 时为 `degraded`；两条回答链均不可用为 `unavailable`。stale/lagging 或显式历史归档仍可提供受限项目证据，但 `current_project_available=false`。React 启动时读取该契约，区分 API 不可达、依赖降级与完全不可用；三个细分 capability 分别控制教学、项目证据和当前项目事实入口，修复依赖后可原地重新检查。readiness 是易漂移运行态，不进入 `assistant_state` 或 localStorage。
+
+真实 Kimi canary 与 readiness 分离。`scripts/run_kimi_canary.py` 同时要求命令行确认和 `KIMI_CANARY_ENABLED=1`，任一缺失都在读取 Kimi 配置或构造 client 前拒绝。获准后只发送固定 Prompt，一次请求、短 timeout、零重试；输出仅含固定状态码、`configured`、`request_sent` 与 latency，不回显正文、凭证、base URL、绝对路径、provider body 或异常文本。固定业务测试使用 stub，CI 不调用 canary；CI 的依赖和 Chromium 安装仍会联网，因此这里只保证业务测试不访问真实 Kimi，而不宣称整个 CI 物理断网。
+
 ## 偏好优先约束（2026-08-02）
 
 约束解析将自然语言条件分成偏好和明确硬约束。核验器继续只接收可引用的项目级证据；偏好证据不足时保留候选并标为待核实，硬约束明确冲突时才淘汰。`multi_agent` 是可检索、可核验但默认不阻断的偏好。

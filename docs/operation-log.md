@@ -1,5 +1,14 @@
 # 操作日志
 
+## 2026-08-12 追加：V8 P1-C 本机 readiness 与显式 Kimi canary
+
+1. 新增无副作用的 Assistant readiness 聚合与 `GET /v1/assistant/readiness`：分别报告 API、Kimi 配置、verified snapshot/freshness、只读 RAG 和只读访问，并以 capability 级语义聚合 `ready/degraded/unavailable`。
+2. React 工作台启动时读取真实 readiness；区分 API 不可达、依赖降级和完全不可用。无模型但项目证据可用、或无 snapshot 但模型可用时保留安全回答链；stale/lagging 与历史归档不再伪装为当前事实。
+3. 新增 CLI preflight 与双重 opt-in Kimi canary。canary 默认在配置读取和 client 构造前拒绝；获准后固定短 Prompt、15 秒以内 timeout、零重试，只输出固定状态码、请求标记和耗时，不泄露正文、异常、凭证、base URL 或路径。
+4. 新增 readiness 状态矩阵、只读/脱敏、默认拒绝、timeout/429 固定错误码和 CI 不启用 canary 回归；同步 README、API、架构、数据契约和 V8 交接。真实 Kimi 本阶段未调用。
+
+阶段验证：readiness/canary 定向 23 项、Python 全量 378 项、前端单元 34 项、mock Chromium 28 项、真实 FastAPI + 临时 SQLite E2E 6 项全部通过；lint/build、安全检查与六组固定 evaluator 通过。空/坏 RAG、无模型、无 snapshot、stale、历史只读、两链均无、CLI listener 未检查、canary 默认拒绝/timeout/429/非预期异常均有回归；`hybrid/local-hash-v1` Recall@3 保持 0.9231、Top-1 保持 0.8654。真实 Kimi 未调用；远端 CI 在推送后核验。
+
 ## 2026-08-12 追加：V8 P1-B2 capability-v2 组合约束
 
 1. 将自然语言约束升级为向后兼容的 `capability-v2`：保留四字段 requirement，新增 `group_id`、`all_of|any_of` 与 `optional`，支持“Python 或 TypeScript”“本地部署或 Docker”和“不要求本地部署”。

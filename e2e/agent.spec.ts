@@ -2,6 +2,55 @@ import { expect, test, type Page } from "@playwright/test";
 
 type SseEvent = { event: string; data: Record<string, unknown> };
 
+function readinessFixture({
+  status,
+  knowledge,
+  project,
+  current,
+  code,
+  recovery,
+}: {
+  status: "ready" | "degraded" | "unavailable";
+  knowledge: boolean;
+  project: boolean;
+  current: boolean;
+  code: string;
+  recovery: string;
+}) {
+  const component = (componentStatus: "ready" | "degraded" | "unavailable", componentCode: string) => ({
+    status: componentStatus,
+    code: componentCode,
+    message: `${componentCode} fixture`,
+    recovery: componentStatus === "ready" ? "" : recovery,
+  });
+  return {
+    schema_version: 1,
+    status,
+    summary: `${code} readiness fixture.`,
+    capabilities: {
+      can_chat: knowledge || project,
+      knowledge_available: knowledge,
+      project_available: project,
+      current_project_available: current,
+    },
+    components: {
+      api: component("ready", "api_process_ready"),
+      model: component(knowledge ? "ready" : "unavailable", knowledge ? "model_configured" : "model_not_configured"),
+      snapshot: component(current ? "ready" : project ? "degraded" : "unavailable", current ? "snapshot_fresh" : code),
+      rag: component(project ? "ready" : "unavailable", project ? "rag_read_only_ready" : "rag_source_unavailable"),
+      access: component("ready", "assistant_read_only"),
+    },
+    issues: status === "ready" ? [] : [{ component: knowledge ? "snapshot" : "model", code, message: `${code} fixture`, recovery }],
+  };
+}
+
+async function useReadiness(page: Page, getPayload: () => Record<string, unknown>) {
+  await page.route("**/v1/assistant/readiness", async (route) => {
+    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(getPayload()) });
+  });
+  await page.reload();
+}
+
 function parseSse(text: string): SseEvent[] {
   return text.split(/\r?\n\r?\n/).map((block) => block.trim()).filter(Boolean).map((block) => {
     const lines = block.split(/\r?\n/);
@@ -78,6 +127,8 @@ test("AI Agent 学习、候选追问和显式重置保持作用域", async ({ pa
     if (body && typeof body === "object") requestBodies.push(body as Record<string, unknown>);
   });
 
+  await expect(page.locator(".connection-status")).toHaveText("本机依赖已就绪");
+
   const firstResponse = page.waitForResponse((response) => new URL(response.url()).pathname === "/v1/assistant/turn/stream");
   await submit(page, "我想学习 AI Agent 开发方向的知识。");
   const firstFinal = parseSse(await (await firstResponse).text()).at(-1)?.data || {};
@@ -111,6 +162,65 @@ test("AI Agent 学习、候选追问和显式重置保持作用域", async ({ pa
   expect((thirdFinal.input_route as { candidate_scope: string }).candidate_scope).toBe("archive");
   const thirdIds = (thirdFinal.assistant_state as { candidate_repository_ids: string[] }).candidate_repository_ids;
   expect(thirdIds.some((id) => !secondIds.includes(id))).toBe(true);
+});
+
+test("无模型时只开放项目证据入口", async ({ page }) => {
+  const payload = readinessFixture({
+    status: "degraded", knowledge: false, project: true, current: true,
+    code: "model_not_configured", recovery: "配置 KIMI_API_KEY 与 KIMI_MODEL 后重新检查。",
+  });
+  await useReadiness(page, () => payload);
+
+  await expect(page.locator(".readiness-notice")).toContainText("通用教学不可用");
+  await expect(page.getByRole("button", { name: "我想学习 AI Agent 开发方向的知识。" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "推荐适合入门和实践的 AI Agent 项目" })).toBeEnabled();
+  await expect(page.getByLabel("输入项目需求")).toBeEnabled();
+});
+
+test("无 snapshot 时只开放通用教学入口", async ({ page }) => {
+  const payload = readinessFixture({
+    status: "degraded", knowledge: true, project: false, current: false,
+    code: "missing_verified_weekly_snapshot", recovery: "配置 verified weekly snapshot。",
+  });
+  await useReadiness(page, () => payload);
+
+  await expect(page.locator(".readiness-notice")).toContainText("项目证据不可用");
+  await expect(page.getByRole("button", { name: "我想学习 AI Agent 开发方向的知识。" })).toBeEnabled();
+  await expect(page.getByRole("button", { name: "推荐适合入门和实践的 AI Agent 项目" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "重新搜索适合 Python 的项目" })).toBeDisabled();
+  await expect(page.getByLabel("输入项目需求")).toBeEnabled();
+});
+
+test("stale snapshot 保留历史项目检索但禁用当前项目推荐", async ({ page }) => {
+  const payload = readinessFixture({
+    status: "degraded", knowledge: true, project: true, current: false,
+    code: "snapshot_stale", recovery: "刷新三层 freshness attestation。",
+  });
+  await useReadiness(page, () => payload);
+
+  await expect(page.locator(".readiness-notice")).toContainText("当前项目事实不可用");
+  await expect(page.getByRole("button", { name: "推荐适合入门和实践的 AI Agent 项目" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "重新搜索适合 Python 的项目" })).toBeEnabled();
+  await expect(page.getByLabel("输入项目需求")).toBeEnabled();
+});
+
+test("两条回答链均不可用时禁用输入并支持重新检查", async ({ page }) => {
+  let payload = readinessFixture({
+    status: "unavailable", knowledge: false, project: false, current: false,
+    code: "dependencies_unavailable", recovery: "恢复模型或项目证据链。",
+  });
+  await useReadiness(page, () => payload);
+
+  await expect(page.locator(".readiness-notice")).toContainText("助手不可用");
+  await expect(page.getByLabel("输入项目需求")).toBeDisabled();
+
+  payload = readinessFixture({
+    status: "ready", knowledge: true, project: true, current: true,
+    code: "ready", recovery: "",
+  });
+  await page.getByRole("button", { name: "重新检查" }).click();
+  await expect(page.locator(".connection-status")).toHaveText("本机依赖已就绪");
+  await expect(page.getByLabel("输入项目需求")).toBeEnabled();
 });
 
 test("五轮教学通过 schema-v2 提纲连续解析指代", async ({ page }) => {

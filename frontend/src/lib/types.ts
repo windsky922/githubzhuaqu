@@ -214,3 +214,32 @@ export type Conversation = {
   updatedAt: string;
   turns: ChatTurn[];
 };
+
+export type ReadinessStatus = "ready" | "degraded" | "unavailable";
+
+export type ReadinessComponent = {
+  status: ReadinessStatus;
+  code: string;
+  message: string;
+  recovery: string;
+  [key: string]: unknown;
+};
+
+export type AssistantReadiness = {
+  schema_version: 1;
+  status: ReadinessStatus;
+  summary: string;
+  capabilities: {
+    can_chat: boolean;
+    knowledge_available: boolean;
+    project_available: boolean;
+    current_project_available: boolean;
+  };
+  components: Record<string, ReadinessComponent>;
+  issues: Array<{
+    component: string;
+    code: string;
+    message: string;
+    recovery: string;
+  }>;
+};

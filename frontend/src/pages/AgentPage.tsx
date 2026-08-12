@@ -1,16 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { answerFromEvent, shouldUseApi, streamAssistantTurn } from "../lib/api";
+import { answerFromEvent, assistantReadiness, shouldUseApi, streamAssistantTurn } from "../lib/api";
 import {
   clearConversationHistory, isHistoryEnabled, loadConversations, newConversation,
   saveConversations, setHistoryEnabled as persistHistoryEnabled,
 } from "../lib/conversations";
-import type { AskIntentContext, AssistantState, Conversation, RagAnswer } from "../lib/types";
-import { AgentTopbar, AnswerSummary, ChatComposer, ConversationSidebar, type Candidate, ScrollToLatestButton, StreamDraft } from "../components/AgentWorkspace";
+import type { AskIntentContext, AssistantReadiness, AssistantState, Conversation, RagAnswer } from "../lib/types";
+import { AgentTopbar, AnswerSummary, ChatComposer, ConversationSidebar, type Candidate, ReadinessNotice, ScrollToLatestButton, StreamDraft } from "../components/AgentWorkspace";
 
-const examples = [
-  "我想学习 AI Agent 开发方向的知识。",
-  "推荐适合入门和实践的 AI Agent 项目",
-  "重新搜索适合 Python 的项目",
+const examples: Array<{ question: string; capability: "knowledge" | "project" | "current_project" }> = [
+  { question: "我想学习 AI Agent 开发方向的知识。", capability: "knowledge" },
+  { question: "推荐适合入门和实践的 AI Agent 项目", capability: "current_project" },
+  { question: "重新搜索适合 Python 的项目", capability: "project" },
 ];
 
 export function matchProjects(answer?: RagAnswer): Candidate[] {
@@ -74,14 +74,22 @@ export function AgentPage() {
   const [stage, setStage] = useState("正在准备回答");
   const [busy, setBusy] = useState(false);
   const [showLatest, setShowLatest] = useState(false);
+  const [readiness, setReadiness] = useState<AssistantReadiness | null>(null);
+  const [readinessLoading, setReadinessLoading] = useState(() => shouldUseApi());
   const controllerRef = useRef<AbortController | null>(null);
+  const readinessControllerRef = useRef<AbortController | null>(null);
   const messagesRef = useRef<HTMLDivElement | null>(null);
   const messageEndRef = useRef<HTMLDivElement | null>(null);
   const apiEnabled = shouldUseApi();
+  const chatEnabled = apiEnabled && readiness?.capabilities.can_chat === true;
+  const knowledgeEnabled = chatEnabled && readiness?.capabilities.knowledge_available === true;
+  const projectEnabled = chatEnabled && readiness?.capabilities.project_available === true;
+  const currentProjectEnabled = projectEnabled && readiness?.capabilities.current_project_available === true;
   const active = conversations.find((item) => item.id === activeId) || conversations[0];
   const historyGroups = useMemo(() => history(conversations), [conversations]);
 
   useEffect(() => { saveConversations(conversations, historyEnabled); }, [conversations, historyEnabled]);
+  useEffect(() => { refreshReadiness(); return () => readinessControllerRef.current?.abort(); }, [apiEnabled]);
   useEffect(() => { if (busy && !showLatest) messageEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" }); }, [busy, draft, showLatest]);
   useEffect(() => {
     const node = messagesRef.current;
@@ -114,9 +122,32 @@ export function AgentPage() {
   }
   function scrollToLatest() { messageEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" }); setShowLatest(false); }
 
+  function refreshReadiness() {
+    readinessControllerRef.current?.abort();
+    if (!apiEnabled) { setReadiness(null); setReadinessLoading(false); return; }
+    const controller = new AbortController();
+    readinessControllerRef.current = controller;
+    setReadinessLoading(true);
+    assistantReadiness(controller.signal)
+      .then((result) => { if (!controller.signal.aborted) setReadiness(result); })
+      .catch(() => { if (!controller.signal.aborted) setReadiness(null); })
+      .finally(() => {
+        if (readinessControllerRef.current === controller) {
+          readinessControllerRef.current = null;
+          setReadinessLoading(false);
+        }
+      });
+  }
+
+  function exampleEnabled(capability: "knowledge" | "project" | "current_project") {
+    if (capability === "knowledge") return knowledgeEnabled;
+    if (capability === "current_project") return currentProjectEnabled;
+    return projectEnabled;
+  }
+
   async function submit(rawQuestion?: string, stateOverride?: AssistantState) {
     const nextQuestion = (rawQuestion || question).trim();
-    if (!nextQuestion || busy || !active || !apiEnabled) return;
+    if (!nextQuestion || busy || !active || !chatEnabled) return;
     const previousTurn = [...active.turns].reverse().find((turn) => turn.response?.assistant_state);
     const state = stateOverride ?? assistantStateFromAnswer(previousTurn?.response);
     const turnId = crypto.randomUUID(); const now = new Date().toISOString();
@@ -153,14 +184,15 @@ export function AgentPage() {
   };
   return <main className="agent-page-shell"><section className="agent-page">
     <ConversationSidebar {...workspaceProps} />
-    <section className="agent-workspace"><AgentTopbar {...workspaceProps} />
+    <section className="agent-workspace"><AgentTopbar {...workspaceProps} readiness={readiness} readinessLoading={readinessLoading} />
+      <ReadinessNotice apiEnabled={apiEnabled} readiness={readiness} loading={readinessLoading} onRetry={refreshReadiness} />
       <div className="messages" ref={messagesRef}><div className="message-stack">
-        {!active?.turns.length ? <div className="welcome"><span className="agent-eyebrow">AI Agent 学习与项目研究导师</span><h1>你想学习什么，或研究哪个项目？</h1><p>通用知识由模型讲解；具体 GitHub 事实只使用本机归档证据。</p><div className="suggestions">{examples.map((example) => <button className="suggestion" type="button" key={example} disabled={!apiEnabled} onClick={() => void submit(example)}>{example}</button>)}</div></div> : null}
-        {active?.turns.map((turn) => <div className="turn" key={turn.id}><span className="message-label">你的问题</span><div className="user-message">{turn.question}</div>{turn.response ? <div className="assistant-message"><span className="message-label">研究导师</span><AnswerSummary answer={turn.response} candidates={matchProjects(turn.response)} retryDisabled={busy || !apiEnabled} onRetry={(retryQuestion) => void submit(retryQuestion, assistantStateFromAnswer(turn.response))} /></div> : null}</div>)}
+        {!active?.turns.length ? <div className="welcome"><span className="agent-eyebrow">AI Agent 学习与项目研究导师</span><h1>你想学习什么，或研究哪个项目？</h1><p>通用知识由模型讲解；具体 GitHub 事实只使用本机归档证据。</p><div className="suggestions">{examples.map((example) => <button className="suggestion" type="button" key={example.question} disabled={!exampleEnabled(example.capability)} onClick={() => void submit(example.question)}>{example.question}</button>)}</div></div> : null}
+        {active?.turns.map((turn) => <div className="turn" key={turn.id}><span className="message-label">你的问题</span><div className="user-message">{turn.question}</div>{turn.response ? <div className="assistant-message"><span className="message-label">研究导师</span><AnswerSummary answer={turn.response} candidates={matchProjects(turn.response)} retryDisabled={busy || !projectEnabled} onRetry={(retryQuestion) => void submit(retryQuestion, assistantStateFromAnswer(turn.response))} /></div> : null}</div>)}
         {busy ? <StreamDraft draft={draft} stage={stage} /> : null}<div ref={messageEndRef} />
       </div></div>
       <ScrollToLatestButton visible={showLatest} onClick={scrollToLatest} />
-      <ChatComposer value={question} status={apiEnabled ? status : "公开归档模式无法对话，请在本地 API 模式打开。"} busy={busy} apiEnabled={apiEnabled} onChange={setQuestion} onSubmit={() => void submit()} onStop={() => controllerRef.current?.abort()} />
+      <ChatComposer value={question} status={chatEnabled ? status : readinessLoading ? "正在检查本机依赖…" : readiness?.summary || "本机 API 不可达。"} busy={busy} apiEnabled={chatEnabled} disabledReason={readiness?.issues.find((issue) => issue.recovery)?.recovery || "请先恢复本机 Assistant 依赖"} onChange={setQuestion} onSubmit={() => void submit()} onStop={() => controllerRef.current?.abort()} />
     </section>
   </section></main>;
 }

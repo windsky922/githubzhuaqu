@@ -98,6 +98,10 @@ Authorization: Bearer <本地管理口令>
 
 React 学习与项目研究导师位于 `app/#/agent?api=1`，旧 `agent.html?api=1` 自动跳转。它默认 POST `/v1/assistant/turn/stream`，失败时只回退 `/v1/assistant/turn`；SSE 只有 `final` 是权威结果。下一轮只提交当前问题和白名单化的上一轮 `assistant_state`，不上传历史回答、citations、evidence 或 `prompt_context`。浏览器历史默认关闭；显式开启后使用 `localStorage.github_weekly_agent_assistant_conversations_v2` 保存 30 天内的最小展示记录，关闭即删除，旧完整 RagAnswer 键启动时清理。
 
+`GET /v1/assistant/readiness` 是无副作用、无需鉴权的本机启动探针。它返回 `schema_version=1`、整体 `status=ready|degraded|unavailable`、`summary`、`capabilities`、`components` 与 `issues[]`。`components` 固定分为 `api`、`model`、`snapshot`、`rag`、`access`；每项至少包含 `status/code/message/recovery`。`capabilities` 分别公开 `can_chat`、`knowledge_available`、`project_available` 与 `current_project_available`，前端按能力分别控制教学示例、项目检索、当前项目推荐和项目约束重试，并保留“重新检查”入口。探针只检查脱敏模型配置、公开 data source/freshness、只读 SQLite 是否具备 RAG 必需列和至少一条有效证据，或显式历史 JSON 是否能解析出有效仓库；不建库、不迁移、不调用 Kimi，也不返回绝对路径、API key、base URL 或 provider 原始错误。
+
+同一契约可由 `python scripts/check_assistant_readiness.py --json` 读取；CLI 只证明本地依赖可检查，API 组件固定为 `api_listener_not_checked/degraded`，不会在 listener 未启动时谎报已响应。`python scripts/run_kimi_canary.py` 默认拒绝；真实请求必须同时提供 `--confirm-real-kimi` 且设置 `KIMI_CANARY_ENABLED=1`。canary 固定短 Prompt、15 秒以内 timeout、零重试，只输出固定状态码、是否已发请求和耗时；不输出模型正文或原始异常。固定 CI 和 `package.json` 测试链不调用或启用 canary。
+
 `GET /api/projects` 与 `GET /v1/projects` 支持可选 `offset`（默认 0）和既有 `limit`（最大 200）。响应保留 `projects` 与 `count`，并新增 `total`、`offset`、`limit`、`has_more`，供 React 筛选页按每页 50 条展示完整历史归档。项目对比选择只保存在浏览器 `localStorage.github_weekly_project_compare_v1`，最多 3 个仓库；URL 中的 `repos` 参数优先于本地暂存。
 
 如果本地没有 `data/github_weekly.sqlite`，查询项目接口会从 `data/` 下的 JSON 归档自动重建 SQLite 派生索引。

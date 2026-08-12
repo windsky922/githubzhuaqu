@@ -1,11 +1,27 @@
 import { describe, expect, it } from "vitest";
 import { answerStatus } from "../components/StatusBadge";
-import { answerConfidenceSemantics, constraintRetryQuery, selectPrimaryRecommendation } from "../components/AgentWorkspace";
+import { answerConfidenceSemantics, constraintRetryQuery, readinessPresentation, selectPrimaryRecommendation } from "../components/AgentWorkspace";
 import { eligibilityLabel } from "../components/ProjectCard";
 import { contextualAskBody } from "../lib/api";
+import type { AssistantReadiness } from "../lib/types";
 import { followUpContext, matchProjects } from "./AgentPage";
 
 describe("项目匹配回答状态", () => {
+  it("maps readiness to dependency-backed connection status", () => {
+    const degraded: AssistantReadiness = {
+      schema_version: 1,
+      status: "degraded",
+      summary: "Project evidence is available.",
+      capabilities: { can_chat: true, knowledge_available: false, project_available: true, current_project_available: true },
+      components: {},
+      issues: [{ component: "model", code: "model_not_configured", message: "Model missing.", recovery: "Configure model." }],
+    };
+    expect(readinessPresentation(true, degraded).label).toBe("助手部分可用");
+    expect(readinessPresentation(true, degraded).detail).toContain("Configure model");
+    expect(readinessPresentation(true, null).label).toBe("本机 API 不可达");
+    expect(readinessPresentation(false, null).label).toBe("需要本地 API");
+  });
+
   it("给出用户可理解的降级和拒答状态", () => {
     expect(answerStatus("llm", true).label).toBe("证据已校验");
     expect(answerStatus("fallback_rule").label).toBe("已切换为证据约束结论");
