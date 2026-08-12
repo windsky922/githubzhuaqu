@@ -24,6 +24,7 @@ export function matchProjects(answer?: RagAnswer): Candidate[] {
     unmet_requirements: recommendation.unmet_requirements,
     unknown_requirements: recommendation.unknown_requirements,
     preferences: recommendation.preferences,
+    optional_requirements: recommendation.optional_requirements,
     eligibility: recommendation.eligibility,
     recommendation_rank: recommendation.rank,
     source_kind: recommendation.source_kind,
@@ -43,6 +44,7 @@ export function followUpContext(answer: RagAnswer | undefined, previousQuestion:
   return {
     previous_user_goal: answer.resolved_query || previousQuestion,
     candidate_repository_ids: candidateIds,
+    requirements: answer.input_route?.requirements || [],
     ...(answer.answer_quality?.passed === true && primary && (!answer.freshness_required || answer.freshness?.data_freshness === "fresh")
       ? { primary_repository_id: primary.full_name } : {}),
     mode: normalizedMode,

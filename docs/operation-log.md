@@ -1,5 +1,14 @@
 # 操作日志
 
+## 2026-08-12 追加：V8 P1-B2 capability-v2 组合约束
+
+1. 将自然语言约束升级为向后兼容的 `capability-v2`：保留四字段 requirement，新增 `group_id`、`all_of|any_of` 与 `optional`，支持“Python 或 TypeScript”“本地部署或 Docker”和“不要求本地部署”。
+2. 路由器在无状态上下文中合并上一轮白名单 constraints；“取消之前的离线要求”生成可审计 remove operation，并同步普通 POST、SSE final 和 `assistant_state`，不新增服务端会话。
+3. 约束验证和推荐按组聚合：硬 `any_of` 任一满足即通过、全部冲突才拒绝，其余保持 unknown；可选条件不参与资格或排序。React 编辑器、重试查询、项目卡和本机最小状态同步组合语义。
+4. 约束评估集迁移到 capability-v2，并新增组合结构准确率；README、API、架构、数据契约和路由 prompt 同步更新，旧四字段 requirement 与 deployment 继续兼容。
+
+阶段验证：capability-v2 定向 75 项、Python 全量 355 项、前端单测 31 项、mock Chromium E2E 20 项、真实 FastAPI + 临时 SQLite E2E 6 项全部通过；lint/build、安全检查与 6 组固定 fixture 评估通过。100 条约束解析与 60 条句子证据样本全部通过，约束精确匹配、operator、结构、澄清、证据状态准确率均为 1.0，错误合格率、错误拒绝率和硬约束违规率均为 0；`hybrid/local-hash-v1` Recall@3 保持 0.9231、Top-1 保持 0.8654。远端 CI 在推送后核验。
+
 ## 2026-08-12 追加：V8 P1-B1 通用教学具体事实闸门
 
 1. 将原有单一 `owner/repo` 正则扩展为分类事实闸门，覆盖命名框架、仓库实体/空格斜杠、项目 URL、版本、Star、许可证和当前维护/发布声明。

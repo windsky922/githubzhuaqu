@@ -8,6 +8,12 @@ STATE_SCHEMA_VERSION = 2
 ALLOWED_MODES = {"fts5", "vector", "hybrid"}
 REPOSITORY_RE = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 KNOWLEDGE_ID_RE = re.compile(r"^[A-Za-z0-9_-]{1,24}$")
+GROUP_ID_RE = re.compile(r"^[A-Za-z0-9_-]{1,24}$")
+CONSTRAINT_FIELDS = {
+    "language", "category", "source", "license", "cost", "tech_stack", "hosting_mode",
+    "offline_capable", "network_required", "external_api_required", "api_key_required", "multi_agent",
+}
+CONSTRAINT_OPERATORS = {"eq", "not_eq", "contains"}
 
 
 def normalize_assistant_request(payload: dict[str, Any] | None) -> dict[str, Any]:
@@ -60,7 +66,7 @@ def normalize_assistant_state(value: Any) -> dict[str, Any]:
         "revision": max(0, min(_int_value(value.get("revision"), 0), 1_000_000)),
         "goal": _optional_text(value.get("goal"), 2000),
         "knowledge_context": knowledge_context,
-        "constraints": [_constraint(item) for item in constraints[:20] if isinstance(item, dict)],
+        "constraints": _constraints(constraints),
         "candidate_repository_ids": candidates,
         "primary_repository_id": primary,
         "last_intent": _optional_text(value.get("last_intent"), 50),
@@ -84,6 +90,7 @@ def contextual_payload(request: dict[str, Any], *, query: str | None = None) -> 
             "previous_user_goal": state["goal"],
             "candidate_repository_ids": state["candidate_repository_ids"],
             "primary_repository_id": state["primary_repository_id"],
+            "requirements": state["constraints"],
             "mode": state.get("mode") or request["mode"],
             "resumable": state["resumable"],
         },
@@ -146,7 +153,7 @@ def build_assistant_state(
             if assistant_mode == "knowledge"
             else previous.get("knowledge_context")
         ),
-        "constraints": [_constraint(item) for item in constraints[:20] if isinstance(item, dict)],
+        "constraints": _constraints(constraints),
         "candidate_repository_ids": candidates,
         "primary_repository_id": primary,
         "last_intent": assistant_mode,
@@ -193,12 +200,39 @@ def _repository_ids(value: Any) -> list[str]:
 
 
 def _constraint(value: dict[str, Any]) -> dict[str, Any]:
-    return {
+    result = {
         "field": _optional_text(value.get("field"), 50),
         "operator": _optional_text(value.get("operator"), 20),
         "value": value.get("value") if isinstance(value.get("value"), bool) else _optional_text(value.get("value"), 200),
         "hard": bool(value.get("hard", False)),
     }
+    group_id = _optional_text(value.get("group_id"), 24)
+    if group_id and GROUP_ID_RE.fullmatch(group_id):
+        result.update({
+            "group_id": group_id,
+            "logic": "any_of" if value.get("logic") == "any_of" else "all_of",
+            "optional": bool(value.get("optional", False)),
+        })
+    elif value.get("optional") is True:
+        result["optional"] = True
+    if result.get("optional") is True:
+        result["hard"] = False
+    return result
+
+
+def _constraints(value: list[Any]) -> list[dict[str, Any]]:
+    result: list[dict[str, Any]] = []
+    for raw in value[:20]:
+        if not isinstance(raw, dict):
+            continue
+        item = _constraint(raw)
+        if item["field"] not in CONSTRAINT_FIELDS or item["operator"] not in CONSTRAINT_OPERATORS:
+            continue
+        if item["value"] in (None, ""):
+            continue
+        if item not in result:
+            result.append(item)
+    return result
 
 
 def _knowledge_context(value: Any) -> dict[str, Any]:

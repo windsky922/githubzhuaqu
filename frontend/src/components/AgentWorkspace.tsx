@@ -73,23 +73,64 @@ function requirementLabel(requirement: EditableRequirement) {
   return `${field}${requirement.operator === "not_eq" ? "不等于" : "="}${value}`;
 }
 
-function requirementClause(requirement: EditableRequirement) {
+function requirementDescriptor(requirement: EditableRequirement) {
   const field = requirementFieldLabels[requirement.field] || requirement.field;
   const value = requirementValueLabels[String(requirement.value)] || String(requirement.value);
-  if (requirement.operator === "not_eq") return requirement.hard ? `不得满足${field}=${value}` : `${field}最好不是${value}`;
-  return requirement.hard ? `必须满足${field}=${value}` : `偏好${field}=${value}`;
+  return `${field}${requirement.operator === "not_eq" ? "不等于" : "="}${value}`;
+}
+
+function requirementClause(requirement: EditableRequirement) {
+  const descriptor = requirementDescriptor(requirement);
+  if (requirement.optional) return `不要求${descriptor}`;
+  if (requirement.operator === "not_eq") {
+    const field = requirementFieldLabels[requirement.field] || requirement.field;
+    const value = requirementValueLabels[String(requirement.value)] || String(requirement.value);
+    return requirement.hard ? `不得满足${field}=${value}` : `${field}最好不是${value}`;
+  }
+  return requirement.hard ? `必须满足${descriptor}` : `偏好${descriptor}`;
+}
+
+function requirementQueryClauses(requirements: EditableRequirement[]) {
+  const clauses: string[] = [];
+  const seenGroups = new Set<string>();
+  for (const requirement of requirements) {
+    const groupId = requirement.logic === "any_of" ? requirement.group_id : undefined;
+    if (!groupId) {
+      clauses.push(requirementClause(requirement));
+      continue;
+    }
+    if (seenGroups.has(groupId)) continue;
+    seenGroups.add(groupId);
+    const members = requirements.filter((item) => item.group_id === groupId && item.logic === "any_of");
+    if (members.length < 2) {
+      clauses.push(requirementClause(members[0]));
+      continue;
+    }
+    const alternatives = members.map(requirementDescriptor).join("或");
+    clauses.push(members.every((item) => item.optional) ? `不要求${alternatives}` : members.some((item) => item.hard) ? `必须满足${alternatives}` : `偏好${alternatives}`);
+  }
+  return clauses;
 }
 
 export function constraintRetryQuery(requirements: EditableRequirement[], relaxHard = false) {
   const normalized = requirements.map((requirement) => relaxHard ? { ...requirement, hard: false } : requirement);
-  return normalized.length ? `使用这些条件重新搜索：${normalized.map(requirementClause).join("；")}` : "重新搜索并给出当前最匹配的项目";
+  return normalized.length ? `使用这些条件重新搜索：${requirementQueryClauses(normalized).join("；")}` : "重新搜索并给出当前最匹配的项目";
 }
 
 function ConstraintEditor({ requirements, disabled, onRetry }: { requirements: EditableRequirement[]; disabled: boolean; onRetry?: (query: string) => void }) {
   const [items, setItems] = useState(requirements);
   if (!requirements.length) return null;
   const hasHard = items.some((item) => item.hard);
-  return <section className="constraint-editor" aria-label="检索条件编辑器"><div className="constraint-editor-head"><strong>本轮检索条件</strong><span>可删除或切换硬约束 / 偏好</span></div><div className="constraint-chips">{items.length ? items.map((item, index) => <span className={`constraint-chip ${item.hard ? "hard" : "preference"}`} key={`${item.field}-${item.operator}-${String(item.value)}-${index}`}><button type="button" className="constraint-kind" disabled={disabled} onClick={() => setItems((current) => current.map((entry, entryIndex) => entryIndex === index ? { ...entry, hard: !entry.hard } : entry))} aria-label={`将${requirementLabel(item)}切换为${item.hard ? "偏好" : "硬约束"}`} title={`切换为${item.hard ? "偏好" : "硬约束"}`}>{item.hard ? "硬约束" : "偏好"}</button><span>{requirementLabel(item)}</span><button type="button" className="constraint-remove" disabled={disabled} onClick={() => setItems((current) => current.filter((_, entryIndex) => entryIndex !== index))} aria-label={`删除条件${requirementLabel(item)}`} title="删除条件"><X size={13} /></button></span>) : <span className="constraint-empty">已移除全部条件，将执行宽泛搜索。</span>}</div><div className="constraint-editor-actions"><button className="button" type="button" disabled={disabled || !onRetry} onClick={() => onRetry?.(constraintRetryQuery(items))}>应用条件重新搜索</button>{hasHard ? <button className="button constraint-relax" type="button" disabled={disabled || !onRetry} onClick={() => onRetry?.(constraintRetryQuery(items, true))}>一键放宽并重试</button> : null}</div></section>;
+  return <section className="constraint-editor" aria-label="检索条件编辑器"><div className="constraint-editor-head"><strong>本轮检索条件</strong><span>保留任一组，可删除或切换硬约束 / 偏好 / 可选</span></div><div className="constraint-chips">{items.length ? items.map((item, index) => {
+    const kind = item.optional ? "可选" : item.hard ? "硬约束" : "偏好";
+    const groupedLabel = item.logic === "any_of" && item.group_id ? `${kind}·任一` : kind;
+    const nextKind = item.optional || item.hard ? "偏好" : "硬约束";
+    return <span className={`constraint-chip ${item.optional ? "optional" : item.hard ? "hard" : "preference"}`} key={`${item.group_id || "single"}-${item.field}-${item.operator}-${String(item.value)}-${index}`}><button type="button" className="constraint-kind" disabled={disabled} onClick={() => setItems((current) => current.map((entry, entryIndex) => {
+      const sameGroup = item.group_id && entry.group_id === item.group_id;
+      if (entryIndex !== index && !sameGroup) return entry;
+      return { ...entry, optional: false, hard: item.optional ? false : !item.hard };
+    }))} aria-label={`将${requirementLabel(item)}切换为${nextKind}`} title={`切换为${nextKind}`}>{groupedLabel}</button><span>{requirementLabel(item)}</span><button type="button" className="constraint-remove" disabled={disabled} onClick={() => setItems((current) => current.filter((_, entryIndex) => entryIndex !== index))} aria-label={`删除条件${requirementLabel(item)}`} title="删除条件"><X size={13} /></button></span>;
+  }) : <span className="constraint-empty">已移除全部条件，将执行宽泛搜索。</span>}</div><div className="constraint-editor-actions"><button className="button" type="button" disabled={disabled || !onRetry} onClick={() => onRetry?.(constraintRetryQuery(items))}>应用条件重新搜索</button>{hasHard ? <button className="button constraint-relax" type="button" disabled={disabled || !onRetry} onClick={() => onRetry?.(constraintRetryQuery(items, true))}>一键放宽并重试</button> : null}</div></section>;
 }
 
 export function AnswerSummary({ answer, candidates, onRetry, retryDisabled = false }: { answer: RagAnswer; candidates: Candidate[]; onRetry?: (query: string) => void; retryDisabled?: boolean }) {

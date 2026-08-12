@@ -68,14 +68,13 @@ def build_project_recommendations(
         requirement_evaluations = [
             dict(item) for item in verified.get("requirement_evaluations", []) if isinstance(item, dict)
         ]
-        matched.extend(item for item in _strings(verified.get("matched_requirements")) if item not in matched)
-        unmet.extend(item for item in _strings(verified.get("unmet_requirements")) if item not in unmet)
-        unknown.extend(item for item in _strings(verified.get("unknown_requirements")) if item not in unknown)
+        for index, evaluation in enumerate(requirement_evaluations):
+            source_requirement = requirements[index] if requirements and index < len(requirements) else {}
+            if "hard" not in evaluation:
+                evaluation["hard"] = bool(source_requirement.get("hard"))
+            for key, value in _requirement_group_fields(source_requirement).items():
+                evaluation.setdefault(key, value)
         if requirements and not verified:
-            unknown.extend(
-                item for item in (_requirement_label(requirement) for requirement in requirements)
-                if item not in unknown
-            )
             requirement_evaluations = [
                 {
                     "field": str(requirement.get("field") or ""),
@@ -85,14 +84,23 @@ def build_project_recommendations(
                     "reason": "未找到可验证该要求的可信证据。",
                     "evidence_chunk_ids": [],
                     "hard": bool(requirement.get("hard")),
+                    **_requirement_group_fields(requirement),
                 }
                 for requirement in requirements
             ]
-        hard_evaluations = [item for item in requirement_evaluations if bool(item.get("hard"))]
-        preferences = [item for item in requirement_evaluations if not bool(item.get("hard"))]
-        hard_matched = [item for item in matched if item not in _evaluation_labels(preferences, "matched")]
-        hard_unmet = [item for item in unmet if item not in _evaluation_labels(preferences, "unmet")]
-        hard_unknown = [item for item in unknown if item not in _evaluation_labels(preferences, "unknown")]
+        hard_evaluations = [
+            item for item in requirement_evaluations
+            if bool(item.get("hard")) and item.get("optional") is not True
+        ]
+        preferences = [
+            item for item in requirement_evaluations
+            if not bool(item.get("hard")) and item.get("optional") is not True
+        ]
+        optional_requirements = [item for item in requirement_evaluations if item.get("optional") is True]
+        hard_outcomes = _evaluation_outcomes(hard_evaluations)
+        hard_matched = [*matched, *hard_outcomes["matched"]]
+        hard_unmet = [*unmet, *hard_outcomes["unmet"]]
+        hard_unknown = [*unknown, *hard_outcomes["unknown"]]
         eligibility = "rejected" if hard_unmet else "unknown" if hard_unknown else "eligible"
         if max_score > 0:
             match_score = round(candidate["best_score"] / max_score, 4)
@@ -119,6 +127,7 @@ def build_project_recommendations(
                 "unmet_requirements": hard_unmet,
                 "unknown_requirements": hard_unknown,
                 "preferences": preferences,
+                "optional_requirements": optional_requirements,
                 "reasons": reasons,
                 "citation_indexes": citation_indexes,
                 "evidence_chunk_ids": evidence_chunk_ids,
@@ -130,8 +139,8 @@ def build_project_recommendations(
     recommendations.sort(
         key=lambda item: (
             ELIGIBILITY_ORDER[item["eligibility"]],
-            -sum(1 for preference in item.get("preferences", []) if preference.get("status") == "matched"),
-            sum(1 for preference in item.get("preferences", []) if preference.get("status") == "unmet"),
+            -_preference_counts(item.get("preferences", []))[0],
+            _preference_counts(item.get("preferences", []))[1],
             -item["match_score"],
             grouped[item["full_name"]]["first_position"],
             item["full_name"],
@@ -200,6 +209,43 @@ def _evaluation_labels(evaluations: list[dict[str, Any]], status: str) -> list[s
         for item in evaluations
         if str(item.get("status") or "") == status
     ]
+
+
+def _requirement_group_fields(requirement: dict[str, Any]) -> dict[str, Any]:
+    group_id = str(requirement.get("group_id") or "")
+    if group_id:
+        return {
+            "group_id": group_id,
+            "logic": "any_of" if requirement.get("logic") == "any_of" else "all_of",
+            "optional": bool(requirement.get("optional", False)),
+        }
+    return {"optional": True} if requirement.get("optional") is True else {}
+
+
+def _evaluation_outcomes(evaluations: list[dict[str, Any]]) -> dict[str, list[str]]:
+    outcomes: dict[str, list[str]] = {"matched": [], "unmet": [], "unknown": []}
+    grouped: dict[str, list[dict[str, Any]]] = {}
+    singles: list[dict[str, Any]] = []
+    for item in evaluations:
+        group_id = str(item.get("group_id") or "")
+        if group_id and item.get("logic") == "any_of":
+            grouped.setdefault(group_id, []).append(item)
+        else:
+            singles.append(item)
+    for item in singles:
+        status = str(item.get("status") or "unknown")
+        outcomes[status if status in outcomes else "unknown"].append(_requirement_label(item))
+    for members in grouped.values():
+        statuses = [str(item.get("status") or "unknown") for item in members]
+        status = "matched" if "matched" in statuses else "unmet" if statuses and all(value == "unmet" for value in statuses) else "unknown"
+        label = "任一（" + "；".join(_requirement_label(item) for item in members) + "）"
+        outcomes[status].append(label)
+    return outcomes
+
+
+def _preference_counts(evaluations: list[dict[str, Any]]) -> tuple[int, int]:
+    outcomes = _evaluation_outcomes([item for item in evaluations if isinstance(item, dict)])
+    return len(outcomes["matched"]), len(outcomes["unmet"])
 
 
 def _strings(value: Any) -> list[str]:

@@ -44,6 +44,10 @@ def load_cases(path: Path, *, enforce_counts: bool = True) -> list[dict[str, Any
             raise ValueError(f"line {line_number} missing: {sorted(missing)}")
         if row["id"] in seen:
             raise ValueError(f"duplicate id: {row['id']}")
+        if row.get("expected_logic") not in (None, "all_of", "any_of"):
+            raise ValueError(f"invalid expected_logic: {row['id']}")
+        if "expected_optional" in row and not isinstance(row["expected_optional"], bool):
+            raise ValueError(f"invalid expected_optional: {row['id']}")
         if row["split"] not in EXPECTED_SPLITS:
             raise ValueError(f"invalid split: {row['split']}")
         seen.add(row["id"])
@@ -103,6 +107,7 @@ def evaluate(cases: list[dict[str, Any]]) -> dict[str, Any]:
             "constraint_exact_match": _requirements_without_hard(parsed["requirements"]) == _requirements_without_hard(expected),
             "operator_score": operator_correct / target_total,
             "clarification_correct": bool(parsed["clarification_required"]) == bool(case["expect_clarification"]),
+            "structure_correct": _structure_correct(parsed["requirements"], case),
             "expected": expected,
             "actual": parsed["requirements"],
             "actual_reason": parsed["reason"],
@@ -111,14 +116,14 @@ def evaluate(cases: list[dict[str, Any]]) -> dict[str, Any]:
     split_metrics = {split: _metrics([item for item in items if item["split"] == split]) for split in EXPECTED_SPLITS}
     return {
         "schema_version": 2,
-        "requirement_schema_version": "capability-v1",
+        "requirement_schema_version": "capability-v2",
         "sample_count": len(items),
         "metrics": _metrics(items),
         "splits": split_metrics,
         "failures": [
             item
             for item in items
-            if not item["constraint_exact_match"] or item["operator_score"] != 1 or not item["clarification_correct"]
+            if not item["constraint_exact_match"] or item["operator_score"] != 1 or not item["clarification_correct"] or not item["structure_correct"]
         ],
     }
 
@@ -165,7 +170,25 @@ def _requirement(value: str) -> dict[str, Any]:
 
 
 def _requirements_without_hard(requirements: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    return [{key: value for key, value in item.items() if key != "hard"} for item in requirements]
+    return [
+        {key: item.get(key) for key in ("field", "operator", "value")}
+        for item in requirements
+    ]
+
+
+def _structure_correct(requirements: list[dict[str, Any]], case: dict[str, Any]) -> bool:
+    expected_logic = case.get("expected_logic")
+    if expected_logic:
+        group_ids = {str(item.get("group_id") or "") for item in requirements}
+        if len(group_ids) != 1 or "" in group_ids or any(item.get("logic") != expected_logic for item in requirements):
+            return False
+    if "expected_optional" in case:
+        expected_optional = bool(case["expected_optional"])
+        if any(bool(item.get("optional", False)) != expected_optional for item in requirements):
+            return False
+        if expected_optional and any(bool(item.get("hard")) for item in requirements):
+            return False
+    return True
 
 
 def _metrics(items: list[dict[str, Any]]) -> dict[str, float]:
@@ -174,6 +197,7 @@ def _metrics(items: list[dict[str, Any]]) -> dict[str, float]:
         "constraint_exact_match_accuracy": round(sum(item["constraint_exact_match"] for item in items) / total, 4),
         "operator_accuracy": round(sum(item["operator_score"] for item in items) / total, 4),
         "clarification_accuracy": round(sum(item["clarification_correct"] for item in items) / total, 4),
+        "structure_accuracy": round(sum(item["structure_correct"] for item in items) / total, 4),
     }
 
 

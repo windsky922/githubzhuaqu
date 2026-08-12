@@ -146,7 +146,7 @@ class FollowUpRouterTest(unittest.TestCase):
         )
         self.assertFalse(parsed["ambiguous"])
 
-    def test_capability_v1_separates_hosting_offline_and_external_dependencies(self):
+    def test_capability_v2_separates_hosting_offline_and_external_dependencies(self):
         self.assertEqual(
             parse_requirements("可以部署在云端，但不能依赖外部模型 API")["requirements"],
             [
@@ -162,7 +162,7 @@ class FollowUpRouterTest(unittest.TestCase):
             ],
         )
         result = route_follow_up(root=Path.cwd(), query="不要云 API", context=_context())
-        self.assertEqual(result["requirement_schema_version"], "capability-v1")
+        self.assertEqual(result["requirement_schema_version"], "capability-v2")
 
     def test_kimi_legacy_deployment_is_canonicalized(self):
         client = _Client(json.dumps({
@@ -177,12 +177,41 @@ class FollowUpRouterTest(unittest.TestCase):
             [{"field": "hosting_mode", "operator": "contains", "value": "self_hosted", "hard": True}],
         )
 
-    def test_conflict_disjunction_and_optional_constraint_clarify(self):
-        for query in ("必须 Python 但不要 Python", "Python 或 Java", "不要求 Python"):
-            with self.subTest(query=query):
-                result = route_follow_up(root=Path.cwd(), query=query, context=_context())
-                self.assertEqual(result["route"], "clarify")
-                self.assertTrue(result["clarification_required"])
+    def test_only_directly_conflicting_constraints_clarify(self):
+        result = route_follow_up(root=Path.cwd(), query="必须 Python 但不要 Python", context=_context())
+        self.assertEqual(result["route"], "clarify")
+        self.assertTrue(result["clarification_required"])
+
+    def test_capability_v2_parses_any_of_and_optional_without_hard_drift(self):
+        language = parse_requirements("Python 或 TypeScript")["requirements"]
+        deployment = parse_requirements("本地部署或 Docker")["requirements"]
+        optional = parse_requirements("不要求本地部署")["requirements"]
+        hard_language = parse_requirements("必须 Python 或 TypeScript")["requirements"]
+
+        self.assertEqual([(item["field"], item["value"]) for item in language], [("language", "Python"), ("language", "TypeScript")])
+        self.assertEqual({item["group_id"] for item in language}, {"g1"})
+        self.assertTrue(all(item["logic"] == "any_of" and item["optional"] is False and item["hard"] is False for item in language))
+        self.assertEqual([(item["field"], item["value"]) for item in deployment], [("hosting_mode", "self_hosted"), ("tech_stack", "Docker")])
+        self.assertTrue(all(item["logic"] == "any_of" for item in deployment))
+        self.assertEqual(optional, [{
+            "field": "hosting_mode", "operator": "contains", "value": "self_hosted", "hard": False,
+            "group_id": "g1", "logic": "all_of", "optional": True,
+        }])
+        self.assertTrue(all(item["hard"] is True and item["logic"] == "any_of" for item in hard_language))
+
+    def test_cancellation_removes_previous_constraint_and_is_auditable(self):
+        context = {
+            **_context(),
+            "requirements": [
+                {"field": "language", "operator": "eq", "value": "Python", "hard": False},
+                {"field": "offline_capable", "operator": "eq", "value": True, "hard": True},
+            ],
+        }
+        result = route_follow_up(root=Path.cwd(), query="取消之前的离线要求", context=context)
+        self.assertEqual(result["route"], "refine")
+        self.assertEqual(result["requirements"], [{"field": "language", "operator": "eq", "value": "Python", "hard": False}])
+        self.assertEqual(result["requirement_operations"], [{"operation": "remove", "field": "offline_capable", "value": True}])
+        self.assertFalse(result["clarification_required"])
 
     def test_explicit_reset_searches_archive(self):
         result = route_follow_up(root=Path.cwd(), query="换一批适合 Python 的项目", context=_context())
@@ -228,6 +257,15 @@ class FollowUpRouterTest(unittest.TestCase):
             normalize_contextual_request({"q": "继续", "context": {**_context(), "candidate_repository_ids": ["bad"]}})
         with self.assertRaisesRegex(ValueError, "2000"):
             normalize_contextual_request({"q": "x" * 2001})
+        inconsistent_group = {
+            **_context(),
+            "requirements": [
+                {"field": "language", "operator": "eq", "value": "Python", "hard": True, "group_id": "g1", "logic": "any_of"},
+                {"field": "language", "operator": "eq", "value": "TypeScript", "hard": False, "group_id": "g1", "logic": "any_of"},
+            ],
+        }
+        with self.assertRaisesRegex(ValueError, "group mode"):
+            normalize_contextual_request({"q": "继续", "context": inconsistent_group})
 
 
 def _context():
@@ -235,6 +273,7 @@ def _context():
         "previous_user_goal": "找 Python 多 Agent 项目",
         "candidate_repository_ids": ["owner/agent", "owner/other"],
         "primary_repository_id": "owner/agent",
+        "requirements": [],
         "mode": "hybrid",
         "resumable": True,
     }
@@ -245,6 +284,7 @@ def _empty_context():
         "previous_user_goal": "",
         "candidate_repository_ids": [],
         "primary_repository_id": "",
+        "requirements": [],
         "mode": "",
         "resumable": False,
     }

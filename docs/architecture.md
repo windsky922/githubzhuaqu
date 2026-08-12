@@ -92,7 +92,7 @@ RAG 语料先经过确定性清洗和版本化，再进入 FTS5、local-hash 与
 
 `/v1/rag/ask` 不是普通聊天接口。它必须先有 RAG 证据，再尝试真实模型回答；没有证据时直接拒答。模型失败不会阻断接口，响应会保留 `citations`、`evidence`、`answer_mode`、`fallback_reason` 和 `model_status`，管理页据此展示模型状态和降级原因。提示词保存在 `prompts/rag_ask.md`，业务代码只负责装配结构化证据。
 
-POST Ask 在检索前经过 `follow_up_router`。确定性规则优先识别 resume/refine/new_search/clarify，并按分句、连接词和谓词限定否定作用域；同一目标冲突、析取或无法表达的可选条件直接澄清。`capability-v1` 将托管方式、离线能力、联网要求、外部 API 依赖和 API Key 依赖分别建模，旧 deployment 只在验证器入口规范化。规则无法判断时才调用 Kimi 严格 JSON 路由；模型只能建议路由、改写和约束，不能选择项目。候选范围直接下推到 FTS5 SQL、vector 行过滤和 hybrid 两路召回。`constraint_verifier` 从仓库/语料确定性元数据及非模型增强 chunk 计算能力事实，按句子区分支持、冲突、条件、仅试用、外部依赖或未知；模型增强不能覆盖硬约束结论。`project_recommendations` 统一生成 eligible/unknown/rejected，并通过 `requirement_evaluations[]` 公开逐条件状态、原因和证据；没有合格候选时由规则闸门返回 clarification 或 no_match，不调用回答模型。
+POST Ask 在检索前经过 `follow_up_router`。确定性规则优先识别 resume/refine/new_search/clarify，并按分句、连接词和谓词限定否定作用域；真正的同一目标冲突才直接澄清。`capability-v2` 在 v1 正交能力字段上增加 `group_id`、`all_of|any_of`、`optional` 与可审计取消操作：析取同组聚合，可选条件不参与资格/排序，显式取消从上一轮白名单状态移除目标条件。浏览器只回传服务端生成并再次投影的最小 requirements；旧四字段 requirement 和 deployment 继续兼容。规则无法判断时才调用 Kimi 严格 JSON 路由；模型只能建议路由、改写和约束，不能选择项目。候选范围直接下推到 FTS5 SQL、vector 行过滤和 hybrid 两路召回。`constraint_verifier` 从仓库/语料确定性元数据及非模型增强 chunk 计算能力事实，按句子区分支持、冲突、条件、仅试用、外部依赖或未知；模型增强不能覆盖硬约束结论。`project_recommendations` 按组生成 eligible/unknown/rejected，并通过 `requirement_evaluations[]` 公开逐条件状态、原因和证据；硬 `any_of` 任一满足即通过、全部冲突才拒绝，否则保持 unknown。没有合格候选时由规则闸门返回 clarification 或 no_match，不调用回答模型。
 
 候选序号同样在 `follow_up_router` 中确定性解析。序号先映射到上一轮有序 `candidate_repository_ids`，再生成 `selected_candidate_indexes[]` 和权威 `selected_repository_ids[]`；repository 层只把这些 ID 下推到实际检索，不先取大 Top-K 再过滤。越界、无上下文和不确定引用在检索前短路为 clarification。浏览器只负责回传最小无状态上下文，不根据 citations、evidence 或历史 assistant 文本解释序号。
 

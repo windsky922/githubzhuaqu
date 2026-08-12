@@ -4,6 +4,7 @@ import unittest
 from pathlib import Path
 
 from src.assistant import AssistantOrchestrator
+from src.assistant.state import contextual_payload
 from src.llm.client import LlmClientError
 
 
@@ -506,10 +507,31 @@ class AssistantOrchestratorTest(unittest.TestCase):
         self.assertEqual(state["schema_version"], 2)
         self.assertEqual(state["revision"], 0)
         self.assertEqual(len(state["goal"]), 2000)
-        self.assertEqual(len(state["constraints"]), 20)
+        self.assertEqual(state["constraints"], [])
         self.assertEqual(state["candidate_repository_ids"], candidates[:10])
         self.assertEqual(state["primary_repository_id"], "")
         self.assertNotIn("forbidden_history", state)
+
+    def test_capability_v2_constraints_are_sanitized_and_forwarded(self):
+        assistant = AssistantOrchestrator(_Repository(), prompt_root=Path.cwd(), model_client=_Client())
+        request = assistant.normalize_request({
+            "q": "继续",
+            "state": {
+                "schema_version": 2,
+                "goal": "找 Python 或 TypeScript 项目",
+                "constraints": [
+                    {"field": "language", "operator": "eq", "value": "Python", "hard": True, "group_id": "g1", "logic": "any_of", "optional": False},
+                    {"field": "language", "operator": "eq", "value": "TypeScript", "hard": True, "group_id": "g1", "logic": "any_of", "optional": False},
+                    {"field": "hosting_mode", "operator": "contains", "value": "self_hosted", "hard": True, "group_id": "g2", "logic": "all_of", "optional": True},
+                ],
+                "candidate_repository_ids": ["owner/agent"],
+                "resumable": True,
+            },
+        })
+        constraints = request["state"]["constraints"]
+        self.assertEqual([item["group_id"] for item in constraints], ["g1", "g1", "g2"])
+        self.assertFalse(constraints[2]["hard"])
+        self.assertEqual(contextual_payload(request)["context"]["requirements"], constraints)
 
     def test_schema_v1_input_is_upgraded_and_knowledge_context_is_sanitized(self):
         assistant = AssistantOrchestrator(_Repository(), prompt_root=Path.cwd(), model_client=_Client())

@@ -165,6 +165,11 @@ function assistantRepositoryIds(value: unknown) {
   return ids.slice(0, 10);
 }
 
+const assistantConstraintFields = new Set([
+  "language", "category", "source", "license", "cost", "tech_stack", "hosting_mode",
+  "offline_capable", "network_required", "external_api_required", "api_key_required", "multi_agent",
+]);
+
 function assistantKnowledgeContext(value: unknown): AssistantState["knowledge_context"] {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     return { topic: "", outline: [], focus_id: "" };
@@ -195,7 +200,15 @@ export function projectAssistantState(value?: AssistantState): AssistantState | 
     if (!item || typeof item !== "object" || Array.isArray(item)) return [];
     const constraint = item as Record<string, unknown>;
     const constraintValue = typeof constraint.value === "string" || typeof constraint.value === "boolean" ? constraint.value : "";
-    return [{ field: assistantText(constraint.field, 50), operator: assistantText(constraint.operator, 20), value: constraintValue, hard: constraint.hard === true }];
+    const field = assistantText(constraint.field, 50);
+    const operator = assistantText(constraint.operator, 20);
+    if (!assistantConstraintFields.has(field) || !["eq", "not_eq", "contains"].includes(operator) || constraintValue === "") return [];
+    const groupId = assistantText(constraint.group_id, 24);
+    const optional = constraint.optional === true;
+    return [{
+      field, operator, value: constraintValue, hard: !optional && constraint.hard === true,
+      ...(/^[A-Za-z0-9_-]{1,24}$/.test(groupId) ? { group_id: groupId, logic: constraint.logic === "any_of" ? "any_of" as const : "all_of" as const, optional } : optional ? { optional: true } : {}),
+    }];
   }) : [];
   const mode = raw.mode === "fts5" || raw.mode === "vector" ? raw.mode : "hybrid";
   return {

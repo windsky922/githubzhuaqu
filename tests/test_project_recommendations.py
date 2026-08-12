@@ -76,10 +76,44 @@ class ProjectRecommendationsTest(unittest.TestCase):
             },
         )
         self.assertEqual(result[0]["eligibility"], "unknown")
-        self.assertEqual(result[0]["unknown_requirements"], ["部署方式=local"])
+        self.assertEqual(result[0]["unknown_requirements"], ["托管方式包含self_hosted"])
         self.assertEqual(result[0]["evidence_chunk_ids"], ["chunk:1", "chunk:deployment"])
         self.assertEqual(result[0]["requirement_evaluations"][0]["field"], "hosting_mode")
         self.assertEqual(result[0]["requirement_evaluations"][0]["status"], "unknown")
+
+    def test_any_of_hard_group_accepts_one_match_and_fails_closed_otherwise(self):
+        requirements = [
+            {"field": "language", "operator": "eq", "value": "Python", "hard": True, "group_id": "g1", "logic": "any_of", "optional": False},
+            {"field": "language", "operator": "eq", "value": "TypeScript", "hard": True, "group_id": "g1", "logic": "any_of", "optional": False},
+        ]
+        verification = {
+            "owner/python": {"requirement_evaluations": [_evaluation(requirements[0], "matched"), _evaluation(requirements[1], "unmet")]},
+            "owner/unknown": {"requirement_evaluations": [_evaluation(requirements[0], "unknown"), _evaluation(requirements[1], "unmet")]},
+            "owner/rust": {"requirement_evaluations": [_evaluation(requirements[0], "unmet"), _evaluation(requirements[1], "unmet")]},
+        }
+        result = build_project_recommendations(
+            contexts=[_context("owner/rust", "chunk:3", 3), _context("owner/unknown", "chunk:2", 2), _context("owner/python", "chunk:1", 1)],
+            citations=[], requirements=requirements, requirement_verification=verification,
+        )
+        self.assertEqual([(item["full_name"], item["eligibility"]) for item in result], [
+            ("owner/python", "eligible"), ("owner/unknown", "unknown"), ("owner/rust", "rejected"),
+        ])
+        self.assertEqual(result[0]["matched_requirements"], ["任一（语言=Python；语言=TypeScript）"])
+        self.assertEqual(result[1]["unknown_requirements"], ["任一（语言=Python；语言=TypeScript）"])
+        self.assertEqual(result[2]["unmet_requirements"], ["任一（语言=Python；语言=TypeScript）"])
+
+    def test_optional_requirement_is_visible_but_neutral(self):
+        requirement = {
+            "field": "hosting_mode", "operator": "contains", "value": "self_hosted", "hard": False,
+            "group_id": "g1", "logic": "all_of", "optional": True,
+        }
+        result = build_project_recommendations(
+            contexts=[_context("owner/project", "chunk:1", 1)], citations=[], requirements=[requirement],
+            requirement_verification={"owner/project": {"requirement_evaluations": [_evaluation(requirement, "unmet")]}},
+        )
+        self.assertEqual(result[0]["eligibility"], "eligible")
+        self.assertEqual(result[0]["preferences"], [])
+        self.assertEqual(result[0]["optional_requirements"][0]["status"], "unmet")
 
 
 def _context(full_name, chunk_id, score, *, language="Python", source_type="identity"):
@@ -94,6 +128,15 @@ def _context(full_name, chunk_id, score, *, language="Python", source_type="iden
             "sources": ["github_trending"],
             "source_type": source_type,
         },
+    }
+
+
+def _evaluation(requirement, status):
+    return {
+        **requirement,
+        "status": status,
+        "reason": "test",
+        "evidence_chunk_ids": [],
     }
 
 

@@ -134,6 +134,33 @@ class ContextualAskTest(unittest.TestCase):
         self.assertEqual(events[-1]["event"], "final")
         self.assertEqual(events[-1]["data"], normal)
 
+    def test_normal_and_stream_apply_constraint_cancellation(self):
+        payload = {
+            "q": "取消之前的离线要求",
+            "context": {
+                "previous_user_goal": "找必须完全离线的 Python Agent 项目",
+                "candidate_repository_ids": ["eval/agent-orchestrator"],
+                "primary_repository_id": "eval/agent-orchestrator",
+                "requirements": [
+                    {"field": "language", "operator": "eq", "value": "Python", "hard": True},
+                    {"field": "offline_capable", "operator": "eq", "value": True, "hard": True},
+                ],
+                "mode": "hybrid",
+                "resumable": True,
+            },
+            "mode": "hybrid",
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            repository = self._repository(Path(directory))
+            with patch.dict(os.environ, {"KIMI_API_KEY": "", "KIMI_MODEL": ""}, clear=False):
+                normal = repository.rag_ask_contextual(payload)
+                events = list(repository.rag_ask_contextual_stream(payload))
+        route = normal["input_route"]
+        self.assertEqual(route["requirement_schema_version"], "capability-v2")
+        self.assertEqual(route["requirements"], [{"field": "language", "operator": "eq", "value": "Python", "hard": True}])
+        self.assertEqual(route["requirement_operations"], [{"operation": "remove", "field": "offline_capable", "value": True}])
+        self.assertEqual(events[-1], {"event": "final", "data": normal})
+
     def test_refine_rejects_conflicting_candidate_without_calling_answer_model(self):
         payload = {
             "q": "必须使用 Java",

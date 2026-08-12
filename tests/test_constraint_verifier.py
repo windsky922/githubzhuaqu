@@ -47,6 +47,20 @@ class ConstraintVerifierTest(unittest.TestCase):
             ["matched", "unmet", "unknown"],
         )
 
+    def test_verification_preserves_group_and_optional_metadata(self):
+        contexts = [{
+            "chunk_id": "chunk:1",
+            "text": '{"full_name":"owner/project","language":"Python"}',
+            "metadata": {"full_name": "owner/project", "language": "Python"},
+        }]
+        requirements = [
+            {"field": "language", "operator": "eq", "value": "Python", "hard": True, "group_id": "g1", "logic": "any_of", "optional": False},
+            {"field": "language", "operator": "eq", "value": "TypeScript", "hard": True, "group_id": "g1", "logic": "any_of", "optional": False},
+        ]
+        result = verify_context_requirements(contexts, requirements)["owner/project"]
+        self.assertEqual([item["group_id"] for item in result["requirement_evaluations"]], ["g1", "g1"])
+        self.assertTrue(all(item["logic"] == "any_of" and item["optional"] is False for item in result["requirement_evaluations"]))
+
     def test_uses_canonical_metadata_and_non_model_clean_chunks(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

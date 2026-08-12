@@ -94,6 +94,7 @@ h1 { margin: 0; color: #152034; font-size: 26px; line-height: 1.2; letter-spacin
 .constraint-chip { display: inline-flex; align-items: center; overflow: hidden; border: 1px solid #ccd9e8; border-radius: 999px; background: #fff; color: #40536d; font-size: 11px; }
 .constraint-chip.hard { border-color: #e3bd86; background: #fff9ed; color: #805414; }
 .constraint-chip.preference { border-color: #bcd0e9; background: #f2f7fd; color: #315f98; }
+.constraint-chip.optional { border-color: #cbd3dc; background: #f7f8fa; color: #59697d; }
 .constraint-kind, .constraint-remove { align-self: stretch; border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer; }
 .constraint-kind { border-right: 1px solid currentColor; padding: 5px 7px; font-weight: 800; opacity: .82; }
 .constraint-chip > span { padding: 5px 7px; }

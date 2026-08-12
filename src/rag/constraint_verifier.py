@@ -216,7 +216,7 @@ def _verify_evidence(metadata: dict[str, Any], chunks: list[Any], requirements: 
         for chunk_id in evidence:
             if chunk_id not in evidence_chunk_ids:
                 evidence_chunk_ids.append(chunk_id)
-        requirement_evaluations.append({
+        evaluation = {
             "field": field,
             "operator": operator,
             "value": expected,
@@ -224,7 +224,16 @@ def _verify_evidence(metadata: dict[str, Any], chunks: list[Any], requirements: 
             "reason": _evaluation_reason(status, bool(evidence)),
             "evidence_chunk_ids": evidence,
             "hard": bool(requirement.get("hard")),
-        })
+        }
+        if requirement.get("group_id"):
+            evaluation.update({
+                "group_id": str(requirement.get("group_id") or "")[:24],
+                "logic": "any_of" if requirement.get("logic") == "any_of" else "all_of",
+                "optional": bool(requirement.get("optional", False)),
+            })
+        elif requirement.get("optional") is True:
+            evaluation["optional"] = True
+        requirement_evaluations.append(evaluation)
     return {
         "matched_requirements": matched,
         "unmet_requirements": unmet,

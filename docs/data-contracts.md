@@ -24,6 +24,12 @@ Assistant SSE 成功契约要求事件顺序为一个 `meta`、零个或多个 `
 
 `requirements[].hard` 保持兼容：自然语言默认 `false`，仅明确强制措辞为 `true`。`input_route` 与每项 `recommendations[]` 可追加 `preferences[]`；每项包含 `field`、`operator`、`value`、`status`（`matched`、`unknown`、`unmet`）、`reason`、`evidence_chunk_ids` 与 `hard=false`。偏好不影响 `eligibility`；`eligibility` 仅由硬约束的明确冲突或待核实状态决定。
 
+## capability-v2 组合约束（2026-08-12）
+
+`requirements[]` 和 `assistant_state.constraints[]` 保留 v1 的 `field/operator/value/hard`，可追加 `group_id`、`logic=all_of|any_of` 和 `optional`。缺少组合字段的旧输入按独立 `all_of` 条件处理；`optional=true` 必须归一为 `hard=false`，且不影响资格或排序。客户端只能回传服务端上一轮生成并经字段、operator、值、分组格式、数量白名单化的 constraints。
+
+`input_route.requirement_operations[]` 是非破坏性审计字段；当前仅允许 `{operation:"remove", field, value}`。取消只修改本轮合并后的最小 constraints，不修改归档、SQLite 或服务端会话。普通 POST 与 SSE `final` 必须返回同一组合结构和操作结果。
+
 ## 双源 Ask 来源字段（2026-08-02）
 
 Ask/SSE 的既有契约不变。`data_source` 可追加 `history_only`、`read_only`；`recommendations[]` 可追加 `source_kind`、`source_date`、`current_eligible`、`source_notice`。`source_kind` 的稳定值为 `verified_snapshot`、`local_archive_sqlite`、`local_archive_json`。freshness 阈值为 30 天。历史来源只能提供历史参考，`current_eligible` 必须为 `false`。
@@ -239,7 +245,7 @@ GET /v1/dev-context/runs/{id}
 
 `POST /v1/rag/ask` 与 `POST /v1/rag/ask/stream` 接收当前用户输入、筛选参数和浏览器提供的最小上下文。服务端不保存聊天会话，也不把历史 assistant 回答、引用或证据作为请求上下文。流式接口只在既有 `final` 事件中返回完整结果，事件名和顺序保持兼容。
 
-`input_route.requirement_schema_version` 当前固定为 `capability-v1`。`requirements[]` 的稳定字段为 `field`、`operator`、`value` 和 `hard`，其中 `value` 为 `string | boolean`。项目能力使用相互独立的字段表达：
+`input_route.requirement_schema_version` 当前固定为 `capability-v2`。`requirements[]` 的兼容字段为 `field`、`operator`、`value` 和 `hard`，其中 `value` 为 `string | boolean`；组合字段为 `group_id`、`logic` 和 `optional`。项目能力继续使用相互独立的字段表达：
 
 ```text
 hosting_mode: self_hosted | cloud_hosted
@@ -249,9 +255,9 @@ external_api_required: boolean
 api_key_required: boolean
 ```
 
-语言、分类、来源、许可证、成本和技术栈继续使用 `language/category/source/license/cost/tech_stack`。旧 `deployment` 只作为后端兼容输入，进入验证器前转换为上述能力字段；新规则路由和 Kimi 路由不得生成 `deployment`。
+语言、分类、来源、许可证、成本和技术栈继续使用 `language/category/source/license/cost/tech_stack`。旧 `deployment` 和缺少组合字段的 v1 requirement 只作为后端兼容输入；deployment 进入验证器前转换为上述能力字段，新规则路由和 Kimi 路由不得生成它。
 
-每个 recommendation 除已有排序、满足/不满足/未知要求和证据字段外，还返回 `requirement_evaluations[]`。每项包含原条件的 `field/operator/value`、`status: matched | unmet | unknown`、可审计 `reason` 和 `evidence_chunk_ids[]`。能力事实只从可信元数据及非 `model_enrichment` 清洗 chunk 确定性计算；模型增强不能把 unknown 或 rejected 改成 eligible。本阶段不新增 SQLite 表或第二套能力缓存。
+每个 recommendation 除已有排序、满足/不满足/未知要求和证据字段外，还返回 `requirement_evaluations[]` 和可选的 `optional_requirements[]`。evaluation 保留原条件及组合字段，并追加 `status: matched | unmet | unknown`、可审计 `reason` 和 `evidence_chunk_ids[]`。硬 `all_of` 逐项成立；硬 `any_of` 任一 matched 即整组 matched，全部 unmet 才为 unmet，其余为 unknown。非硬、非可选组按相同逻辑聚合后参与偏好排序；可选组不参与资格或排序。能力事实只从可信元数据及非 `model_enrichment` 清洗 chunk 确定性计算；模型增强不能把 unknown 或 rejected 改成 eligible。本阶段不新增 SQLite 表或第二套能力缓存。
 
 候选序号追问扩展 `input_route`，不改变请求体：
 
@@ -261,7 +267,7 @@ selected_candidate_indexes: number[]
 selected_repository_ids: string[]
 ```
 
-`selected_candidate_indexes` 使用上一轮 `candidate_repository_ids` 的零基索引；`selected_repository_ids` 是后端实际传入 FTS5、vector 和 hybrid 候选过滤的权威范围。无上下文、序号越界或无法唯一解释时两者为空，并返回 clarification 且不检索。浏览器仍只提交上一轮用户目标、有序候选仓库 ID、确认的 primary、mode 和 resumable，不提交 assistant 文本、citations、evidence 或 prompt_context。
+`selected_candidate_indexes` 使用上一轮 `candidate_repository_ids` 的零基索引；`selected_repository_ids` 是后端实际传入 FTS5、vector 和 hybrid 候选过滤的权威范围。无上下文、序号越界或无法唯一解释时两者为空，并返回 clarification 且不检索。浏览器仍只提交上一轮用户目标、有序候选仓库 ID、确认的 primary、白名单 requirements、mode 和 resumable，不提交 assistant 文本、citations、evidence 或 prompt_context。
 
 `/api/projects` 复用历史归档查询能力，支持按语言、方向、profile、来源、风险提示、质量分、Trending 排名和关键词筛选。返回结构保持为：
 

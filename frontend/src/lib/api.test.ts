@@ -13,7 +13,10 @@ const state: AssistantState = {
 const dirtyState = {
   ...state,
   knowledge_context: { ...(state.knowledge_context || {}), history: "forbidden-knowledge", focus_id: "missing" },
-  constraints: [{ field: "language", operator: "eq", value: "Python", hard: true, evidence: "forbidden-constraint" }],
+  constraints: [
+    { field: "language", operator: "eq", value: "Python", hard: true, group_id: "g1", logic: "any_of", optional: false, evidence: "forbidden-constraint" },
+    { field: "tool", operator: "eq", value: "shell", hard: true },
+  ],
   source_identity: { ...state.source_identity, prompt_context: "forbidden-source" },
   answer: "forbidden-answer", citations: ["forbidden-citation"], evidence: ["forbidden-evidence"],
 } as unknown as AssistantState;
@@ -61,7 +64,7 @@ describe("streamAssistantTurn", () => {
     for (const forbidden of ["forbidden-answer", "forbidden-citation", "forbidden-evidence", "forbidden-source", "forbidden-constraint", "forbidden-knowledge", "prompt_context", "auto_build"]) expect(raw).not.toContain(forbidden);
     expect(projected?.schema_version).toBe(2);
     expect(projected?.knowledge_context).toEqual({ topic: "Agent 核心组成", outline: [{ id: "k1", title: "模型" }, { id: "k2", title: "工具" }], focus_id: "" });
-    expect(projected?.constraints).toEqual([{ field: "language", operator: "eq", value: "Python", hard: true }]);
+    expect(projected?.constraints).toEqual([{ field: "language", operator: "eq", value: "Python", hard: true, group_id: "g1", logic: "any_of", optional: false }]);
   });
 
   it("uses assistant endpoints for stream and fallback with identical state", async () => {

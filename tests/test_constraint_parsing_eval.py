@@ -13,6 +13,8 @@ class ConstraintParsingEvaluationTest(unittest.TestCase):
         self.assertGreaterEqual(result["splits"]["adversarial"]["constraint_exact_match_accuracy"], 0.95)
         self.assertEqual(result["metrics"]["operator_accuracy"], 1)
         self.assertEqual(result["metrics"]["clarification_accuracy"], 1)
+        self.assertEqual(result["metrics"]["structure_accuracy"], 1)
+        self.assertEqual(result["splits"]["locked"]["structure_accuracy"], 1)
 
     def test_sentence_evidence_semantics_have_no_false_eligible_result(self):
         result = evaluate_evidence(load_evidence_cases(Path("evals/constraint_evidence_cases.jsonl")))

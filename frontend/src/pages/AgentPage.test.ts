@@ -24,6 +24,16 @@ describe("项目匹配回答状态", () => {
     expect(constraintRetryQuery([])).toBe("重新搜索并给出当前最匹配的项目");
   });
 
+  it("重试查询保留任一组和可选条件语义", () => {
+    const requirements = [
+      { field: "language", operator: "eq", value: "Python", hard: true, group_id: "g1", logic: "any_of", optional: false },
+      { field: "language", operator: "eq", value: "TypeScript", hard: true, group_id: "g1", logic: "any_of", optional: false },
+      { field: "hosting_mode", operator: "contains", value: "self_hosted", hard: false, group_id: "g2", logic: "all_of", optional: true },
+    ] as const;
+    expect(constraintRetryQuery(requirements as never)).toBe("使用这些条件重新搜索：必须满足语言=Python或语言=TypeScript；不要求部署方式=本地部署");
+    expect(constraintRetryQuery(requirements as never, true)).toBe("使用这些条件重新搜索：偏好语言=Python或语言=TypeScript；不要求部署方式=本地部署");
+  });
+
   it("只按后端 recommendations 组装候选，不让引用顺序决定首选", () => {
     const projects = matchProjects({
       recommendations: [
@@ -71,6 +81,7 @@ describe("项目匹配回答状态", () => {
       citations: [{ chunk_id: "secret-citation" }],
       evidence: [{ quote: "secret-evidence" }],
       prompt_context: "secret-prompt-context",
+      input_route: { requirements: [{ field: "language", operator: "eq", value: "Python", hard: true }] },
       recommendations: [
         { full_name: "org/history", eligibility: "eligible", current_eligible: false },
         { full_name: "org/repo", eligibility: "eligible", current_eligible: true },
@@ -83,6 +94,7 @@ describe("项目匹配回答状态", () => {
       previous_user_goal: "找适合 Python 团队的项目",
       candidate_repository_ids: ["org/history", "org/repo", "org/other"],
       primary_repository_id: "org/repo",
+      requirements: [{ field: "language", operator: "eq", value: "Python", hard: true }],
       mode: "hybrid",
       resumable: true,
     });

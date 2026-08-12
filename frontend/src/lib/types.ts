@@ -12,14 +12,20 @@ export type Citation = Pick<Evidence, "index" | "full_name" | "html_url" | "run_
 
 export type RequirementValue = string | boolean;
 
-export type RequirementEvaluation = {
+export type Requirement = {
   field: string;
   operator: string;
   value: RequirementValue;
+  hard: boolean;
+  group_id?: string;
+  logic?: "all_of" | "any_of";
+  optional?: boolean;
+};
+
+export type RequirementEvaluation = Requirement & {
   status: "matched" | "unmet" | "unknown";
   reason: string;
   evidence_chunk_ids: string[];
-  hard?: boolean;
 };
 
 export type RagRecommendation = {
@@ -34,6 +40,7 @@ export type RagRecommendation = {
   evidence_chunk_ids: string[];
   requirement_evaluations: RequirementEvaluation[];
   preferences?: RequirementEvaluation[];
+  optional_requirements?: RequirementEvaluation[];
   eligibility: "eligible" | "rejected" | "unknown";
   source_kind?: "verified_snapshot" | "local_archive_sqlite" | "local_archive_json" | string;
   source_date?: string;
@@ -62,6 +69,7 @@ export type Project = {
   unmet_requirements?: string[];
   unknown_requirements?: string[];
   preferences?: RequirementEvaluation[];
+  optional_requirements?: RequirementEvaluation[];
   eligibility?: RagRecommendation["eligibility"];
   recommendation_rank?: number;
   source_kind?: RagRecommendation["source_kind"];
@@ -115,8 +123,9 @@ export type RagAnswer = {
     candidate_scope?: "archive" | "previous_candidates" | "primary_candidate" | "selected_candidates" | "none";
     selected_candidate_indexes?: number[];
     selected_repository_ids?: string[];
-    requirement_schema_version?: "capability-v1" | string;
-    requirements?: Array<{ field: string; operator: string; value: RequirementValue; hard: boolean }>;
+    requirement_schema_version?: "capability-v1" | "capability-v2" | string;
+    requirements?: Requirement[];
+    requirement_operations?: Array<{ operation: "remove" | string; field: string; value?: RequirementValue }>;
   };
   prompt_context?: string;
   answer_quality: {
@@ -173,7 +182,7 @@ export type AssistantState = {
     outline: Array<{ id: string; title: string }>;
     focus_id: string;
   };
-  constraints: Array<{ field?: string; operator?: string; value?: RequirementValue; hard?: boolean }>;
+  constraints: Requirement[];
   candidate_repository_ids: string[];
   primary_repository_id: string;
   last_intent: string;
@@ -187,6 +196,7 @@ export type AskIntentContext = {
   previous_user_goal: string;
   candidate_repository_ids: string[];
   primary_repository_id?: string;
+  requirements?: Requirement[];
   mode: "fts5" | "vector" | "hybrid";
   resumable: boolean;
 };
