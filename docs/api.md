@@ -10,6 +10,8 @@
 
 教学 SSE 直接消费 `KimiChatClient.stream_chat()`：先发一个 `meta`，再转发脱敏模型 delta，最后用完整累积结果构造唯一权威 `final`；provider 已输出 partial delta 但未给出 `[DONE]` 时视为截断并安全降级。浏览器暂存而不立即采用 SSE final，只有流结束时恰好存在一个结构合法的 final 才更新权威回答和 `assistant_state`。静默 EOF、partial delta 后 EOF、SSE `error`、重复或畸形 final 均使用字节相同的请求体调用 `/v1/assistant/turn` 恢复；恢复失败时抛出失败且不产生 final。
 
+通用教学使用与传输方式无关的确定性事实闸门。普通回答在进入 `sections` 前检查完整文本；流式回答在每个 provider delta 展示前检查累计文本。命名框架、仓库实体（含空格斜杠）、项目/GitHub URL、语义版本、Star 数、许可证和项目当前维护/发布声明命中后不展示模型文本，返回固定 `fallback_reason=unsafe_general_knowledge`，并在 `answer_quality.general_knowledge_fact_gate={status:"blocked",reason}` 公开类别但不公开原文。具体事实只能由 `project_evidence` 提供。
+
 `assistant_state` 兼容接收 schema-v1 并统一返回 schema-v2。schema-v2 在原有 revision、目标、结构化约束、有序候选 ID、已确认首选、上一意图、待澄清问题、来源身份、检索模式和 resumable 之外，新增 `knowledge_context={topic, outline:[{id,title}], focus_id}`。主题、条目数量、ID 和标题均严格限长；序号只能命中回传提纲，不能凭空构造上下文。客户端状态仍是不可信提示；服务端每轮重新校验教学帧、候选格式、来源和资格。
 
 Assistant 拒绝 `auto_build`，并使用独立只读 repository；不会初始化 SQLite、构建 embedding 或触发其他写操作。响应采用显式字段白名单，不返回底层 `contexts`、`prompt_context` 或内部 explanation。

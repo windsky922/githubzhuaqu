@@ -1,5 +1,14 @@
 # 操作日志
 
+## 2026-08-12 追加：V8 P1-B1 通用教学具体事实闸门
+
+1. 将原有单一 `owner/repo` 正则扩展为分类事实闸门，覆盖命名框架、仓库实体/空格斜杠、项目 URL、版本、Star、许可证和当前维护/发布声明。
+2. 普通回答在组成 guidance 前检查完整模型文本；SSE 对累计文本先检查再展示每个 provider delta，阻止拆分 token 绕过。命中后固定降级为 `unsafe_general_knowledge`，不返回模型原文。
+3. `answer_quality.general_knowledge_fact_gate` 公开 passed/blocked/not_run 与固定风险类别；具体项目事实仍只能来自 RAG 项目证据。
+4. Prompt 同步禁止命名框架、URL 和时效性项目事实；新增正常、SSE 与 FastAPI 对抗回归，同时保留泛化“工具调用框架”概念回答。
+
+阶段验证：Assistant 编排器/API 定向 31 项、Python 全量 348 项、前端单测 30 项、mock Chromium E2E 20 项、真实 FastAPI + 临时 SQLite E2E 6 项全部通过；lint/build、安全检查与 6 组固定 fixture 评估通过，`hybrid/local-hash-v1` Recall@3 保持 0.9231、Top-1 保持 0.8654、硬约束违规率保持 0；远端 CI 在推送后核验。
+
 ## 2026-08-11 追加：V8 P1-A SSE final 强校验与真实模型流式
 
 1. Assistant `knowledge` 流式入口接入 `KimiChatClient.stream_chat()`，按 `meta → provider delta* → final` 输出；项目 RAG 保持后置可选增强，只有 final 携带权威回答和状态。

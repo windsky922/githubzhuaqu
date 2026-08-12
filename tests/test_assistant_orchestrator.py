@@ -288,7 +288,7 @@ class AssistantOrchestratorTest(unittest.TestCase):
         self.assertEqual(normal, final)
 
     def test_configured_knowledge_model_failures_are_safe(self):
-        for answer in ("", "请学习 owner/private-repo", LlmClientError("secret provider body"), OSError("secret socket")):
+        for answer in ("", LlmClientError("secret provider body"), OSError("secret socket")):
             with self.subTest(answer=answer):
                 client = _FailingClient(answer) if isinstance(answer, Exception) else _Client(answer=answer)
                 assistant = AssistantOrchestrator(_Repository(), prompt_root=Path.cwd(), model_client=client)
@@ -298,6 +298,57 @@ class AssistantOrchestratorTest(unittest.TestCase):
                 rendered = str(result)
                 self.assertNotIn("secret provider body", rendered)
                 self.assertNotIn("secret socket", rendered)
+
+    def test_specific_project_facts_never_escape_as_model_general(self):
+        cases = {
+            "LangChain 是当前最适合入门的框架。": "named_framework",
+            "详情见 https://github.com/example/agent。": "repository_url",
+            "建议研究 example / agent 的实现。": "repository_reference",
+            "该项目当前版本是 v1.2.3。": "version_claim",
+            "这个仓库已有 12,345 Stars。": "star_claim",
+            "它采用 MIT 许可证。": "license_claim",
+            "该框架目前仍在活跃维护。": "current_project_claim",
+        }
+        for answer, expected_reason in cases.items():
+            with self.subTest(answer=answer):
+                normal = AssistantOrchestrator(
+                    _Repository(), prompt_root=Path.cwd(), model_client=_Client(answer=answer)
+                ).turn({"q": "解释 Agent 工具调用的原理"})
+                stream_assistant = AssistantOrchestrator(
+                    _Repository(), prompt_root=Path.cwd(), model_client=_Client(answer=answer)
+                )
+                events = list(stream_assistant.turn_stream(
+                    stream_assistant.normalize_request({"q": "解释 Agent 工具调用的原理"})
+                ))
+                final = events[-1]["data"]
+
+                for result in (normal, final):
+                    self.assertEqual(result["knowledge_basis"], "project_evidence")
+                    self.assertEqual(result["fallback_reason"], "unsafe_general_knowledge")
+                    self.assertFalse(result["answer_quality"]["general_knowledge_disclosed"])
+                    self.assertEqual(
+                        result["answer_quality"]["general_knowledge_fact_gate"],
+                        {"status": "blocked", "reason": expected_reason},
+                    )
+                    self.assertNotIn(answer, str(result))
+                self.assertNotIn(answer, "".join(
+                    str(event.get("data", {}).get("text", "")) for event in events if event["event"] == "delta"
+                ))
+
+    def test_generic_framework_concepts_remain_valid_general_knowledge(self):
+        answer = "工具调用框架通常包含参数校验、执行边界和观察反馈。"
+        assistant = AssistantOrchestrator(
+            _Repository(), prompt_root=Path.cwd(), model_client=_Client(answer=answer)
+        )
+
+        result = assistant.turn({"q": "解释 Agent 工具调用的原理"})
+
+        self.assertEqual(result["knowledge_basis"], "mixed")
+        self.assertTrue(result["answer_quality"]["general_knowledge_disclosed"])
+        self.assertEqual(
+            result["answer_quality"]["general_knowledge_fact_gate"],
+            {"status": "passed", "reason": ""},
+        )
 
     def test_router_bad_output_falls_back_to_clarify(self):
         for answer in ("not-json", '{"assistant_mode":"unknown"}', LlmClientError("secret route")):

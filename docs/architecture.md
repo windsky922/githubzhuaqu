@@ -8,6 +8,8 @@ AI Agent 通用学习指导由独立 Prompt 先生成，禁止包含具体 `owne
 
 教学流式链路按 `meta → provider delta* → final` 运行：Assistant 直接累积 `stream_chat()` 的脱敏文本，模型流失败时以固定限制构造最终权威结果；项目 RAG 随后作为可选增强。Provider 流必须出现 `[DONE]`，partial EOF 不得进入 final。前端将 SSE final 暂存到流结束后再验收，唯一、对象结构及 `assistant_state` 均有效才提交到会话；否则复用同一序列化请求体走普通 POST。因而 partial 草稿可展示但不成为下一轮状态，重复或畸形 final 也不能抢先写入会话。
 
+通用教学事实闸门位于模型输出与公开 guidance 之间，正常和 SSE 共用同一分类器。它不依赖单一 `owner/repo` 正则，而是分别识别仓库实体/URL、命名框架、版本、Star、许可证和时效性项目声明；流式路径对累计内容先检查再展示当前 delta，阻止拆分 token 绕过。命中时整段通用 guidance 降为固定 limitation，`general_knowledge_disclosed=false`，具体项目部分仍只能经过 RAG 的 freshness、eligibility 与 claim 闸门。
+
 HTTP Assistant 使用独立的强制只读 repository：已有 SQLite 以 `mode=ro` + `query_only` 查询，缺库时使用 JSON 只读检索；`auto_build` 不属于 Assistant 契约。编排层对底层 RAG 结果执行响应白名单，内部上下文与 Prompt 不进入对话响应。
 
 React 工作台只把上一轮权威 `final.assistant_state` 回传给 Assistant，不上传历史回答。请求投影与可选 localStorage 投影都会重新白名单化 schema-v2 教学帧，并丢弃未知字段、无效 ID、重复/超量条目和不在提纲内的焦点。运行中可显示完整本轮结果；localStorage 默认禁用，开启后由独立投影层移除证据、Prompt、内部状态和错误，仅保留 30 天内的最小展示历史。

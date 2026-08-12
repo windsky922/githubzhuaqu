@@ -74,7 +74,39 @@ class _TeachingClient:
         yield "并用观察结果修正下一步决策。"
 
 
+class _UnsafeTeachingClient(_TeachingClient):
+    def chat(self, messages):
+        return "LangChain 当前版本 v1.2.3，采用 MIT 许可证。"
+
+    def stream_chat(self, messages):
+        yield "LangChain 当前版本 v1.2.3，采用 MIT 许可证。"
+
+
 class AssistantApiTest(unittest.TestCase):
+    def test_specific_project_facts_are_blocked_in_normal_and_stream_api(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="assistant-api-fact-gate-") as directory:
+            root = Path(directory)
+            client = TestClient(create_app(root=root, db_path=root / "data" / "assistant.sqlite"))
+            client.app.state.assistant.model_client = _UnsafeTeachingClient()
+            normal = client.post("/v1/assistant/turn", json={"q": "解释 Agent 工具调用的原理"})
+            stream = client.post("/v1/assistant/turn/stream", json={"q": "解释 Agent 工具调用的原理"})
+
+        self.assertEqual(normal.status_code, 200)
+        self.assertEqual(normal.json()["fallback_reason"], "unsafe_general_knowledge")
+        self.assertEqual(
+            normal.json()["answer_quality"]["general_knowledge_fact_gate"],
+            {"status": "blocked", "reason": "named_framework"},
+        )
+        self.assertNotIn("LangChain", normal.text)
+        events = _sse_events(stream.text)
+        self.assertEqual(events[-1]["event"], "final")
+        self.assertFalse(any(
+            "LangChain" in str(event["data"].get("text", ""))
+            for event in events
+            if event["event"] == "delta"
+        ))
+        self.assertNotIn("LangChain", str(events[-1]["data"]))
+
     def test_pure_teaching_api_returns_final_when_project_rag_fails(self) -> None:
         with tempfile.TemporaryDirectory(prefix="assistant-api-teaching-") as directory:
             root = Path(directory)

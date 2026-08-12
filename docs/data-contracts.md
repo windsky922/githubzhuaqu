@@ -12,6 +12,8 @@ Assistant 请求禁止 `auto_build`。响应仅允许公开回答、分段、引
 
 Assistant SSE 成功契约要求事件顺序为一个 `meta`、零个或多个 `delta`、一个且仅一个结构合法的 `final`；只有 final 可更新回答、候选或 `assistant_state`。客户端必须把无 final EOF、partial delta EOF、`error`、重复 final、非法事件/JSON 或缺少 `answer`/`assistant_state` 的 final 视为可恢复失败，并以完全相同的白名单请求体调用普通 POST。POST 恢复结果也必须含字符串 `answer` 与对象 `assistant_state`；否则本轮失败，不持久化为成功轮次。Provider SSE 的 `[DONE]` 是模型流完成标记，缺失时不得把 partial 文本作为完整教学 final。
 
+`answer_quality.general_knowledge_fact_gate` 是非破坏性对象：`status=passed|blocked|not_run`，`reason` 在 blocked 时只能是 `repository_url`、`repository_reference`、`named_framework`、`version_claim`、`star_claim`、`license_claim` 或 `current_project_claim`。blocked 时 `general_knowledge_disclosed=false`、`fallback_reason=unsafe_general_knowledge`，模型原文不得进入 `answer`、`sections`、delta、状态或本机历史。该闸门不证明通用知识绝对正确，只负责阻止需具体项目证据或时效来源的事实越权。
+
 浏览器历史使用 `github_weekly_agent_assistant_conversations_v2`，默认关闭。显式开启后，每轮只保存 `question`、展示用 `answer`、时间、`assistantMode`、规范仓库 ID 和白名单化 `assistantState`；不保存 citations、evidence、sections、`prompt_context`、contexts、模型/provider 原始输出或错误详情。每次加载和保存均执行 30 天 TTL、最近 10 个会话、每会话最近 20 轮限制。单会话删除、全部清空、关闭保存都会物理删除对应本机数据；旧完整 RagAnswer 键在启动时删除。
 
 ## Freshness 权威阈值（2026-08-02）

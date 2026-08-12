@@ -23,7 +23,38 @@ HARD_REQUIREMENT_MARKERS = ("必须", "完全离线", "离线", "无需", "不�
 COMPARE_MARKERS = ("比较", "对比", "区别", "差异", "哪个好", "更适合")
 HELP_MARKERS = ("你能做什么", "怎么使用", "帮助", "功能介绍")
 GREETING_RE = re.compile(r"^(你好|您好|hi|hello|嗨)[！!。.]?$", re.IGNORECASE)
-REPOSITORY_REFERENCE_RE = re.compile(r"\b[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+\b")
+GENERAL_FACT_PATTERNS = (
+    ("repository_url", re.compile(r"(?:https?://|www\.|github\.com)", re.IGNORECASE)),
+    ("repository_reference", re.compile(r"\b[A-Za-z0-9_.-]+\s*/\s*[A-Za-z0-9_.-]+\b")),
+    (
+        "named_framework",
+        re.compile(
+            r"\b(?:LangChain|LangGraph|AutoGen|CrewAI|Semantic\s+Kernel|Haystack|LlamaIndex|OpenAI\s+Agents\s+SDK)\b"
+            r"|\b[A-Z][A-Za-z0-9_.-]{2,}\b\s*(?:框架|framework)",
+            re.IGNORECASE,
+        ),
+    ),
+    ("version_claim", re.compile(r"(?:\bversion\s*|\bv\s*|版本\s*)\d+(?:\.\d+){1,3}\b", re.IGNORECASE)),
+    (
+        "star_claim",
+        re.compile(
+            r"(?:\d[\d,.]*\s*(?:stars?|星标)|(?:stars?|星标|新增\s*star)[^。！？\n]{0,16}\d)",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "license_claim",
+        re.compile(r"\b(?:MIT|Apache(?:-2\.0)?|GPL(?:v?\d)?|AGPL|BSD|MPL)\b|许可证|licen[cs]e", re.IGNORECASE),
+    ),
+    (
+        "current_project_claim",
+        re.compile(
+            r"(?:当前|目前|最新|现在|截至)[^。！？\n]{0,36}(?:项目|仓库|框架|版本|发布|维护|star|许可证|licen[cs]e)"
+            r"|(?:项目|仓库|框架|版本|发布|维护|star|许可证|licen[cs]e)[^。！？\n]{0,36}(?:当前|目前|最新|现在|截至|活跃|停止)",
+            re.IGNORECASE,
+        ),
+    ),
+)
 OUTLINE_LINE_RE = re.compile(r"^\s*(?:[-*]\s*)?(?:第)?([一二三四五六七八九十\d]+)(?:点|[、.)）:：])\s*(.+?)\s*$")
 ORDINALS = {"一": 1, "二": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9, "十": 10}
 
@@ -212,8 +243,11 @@ class AssistantOrchestrator:
                 question=query,
                 knowledge_context=knowledge_context,
             ))
-            if not content or REPOSITORY_REFERENCE_RE.search(content):
-                raise ValueError("general_guidance_contains_repository_reference")
+            if not content:
+                raise ValueError("general_guidance_is_empty")
+            fact_risk = _general_fact_risk(content)
+            if fact_risk:
+                return _unsafe_general_guidance(status, knowledge_context, fact_risk)
             if not knowledge_context["outline"]:
                 knowledge_context = {
                     "topic": query[:200],
@@ -262,11 +296,14 @@ class AssistantOrchestrator:
                 text = str(delta or "")
                 if not text:
                     continue
+                fact_risk = _general_fact_risk("".join(parts) + text)
+                if fact_risk:
+                    return _unsafe_general_guidance(status, knowledge_context, fact_risk)
                 parts.append(text)
                 yield {"event": "delta", "data": {"text": text}}
             content = "".join(parts).strip()
-            if not content or REPOSITORY_REFERENCE_RE.search(content):
-                raise ValueError("general_guidance_contains_repository_reference")
+            if not content:
+                raise ValueError("general_guidance_is_empty")
             if not knowledge_context["outline"]:
                 knowledge_context = {
                     "topic": query[:200],
@@ -353,23 +390,37 @@ class AssistantOrchestrator:
         has_project_evidence = bool(citations or recommendations)
         knowledge_basis = "mixed" if guidance_used and has_project_evidence else "model_general" if guidance_used else "project_evidence" if has_project_evidence else "none"
         quality = project.get("answer_quality") if isinstance(project.get("answer_quality"), dict) else {}
+        guidance_reason = str((guidance or {}).get("reason") or "")
+        fallback_reason = (
+            guidance_reason
+            if guidance_reason == "unsafe_general_knowledge"
+            else str(
+                project.get("fallback_reason")
+                or guidance_reason
+                or ("project_enhancement_unavailable" if project_unavailable else "")
+            )
+        )
         response = {
             "query": request["q"],
             "resolved_query": str(project.get("resolved_query") or request["q"]),
             "answer": answer,
             "answer_mode": "clarification" if effective_mode == "clarify" else "llm" if guidance_used else str(project.get("answer_mode") or "fallback_rule"),
-            "fallback_reason": str(
-                project.get("fallback_reason")
-                or (guidance or {}).get("reason")
-                or ("project_enhancement_unavailable" if project_unavailable else "")
-            ),
+            "fallback_reason": fallback_reason,
             "assistant_mode": effective_mode,
             "knowledge_basis": knowledge_basis,
             "sections": sections,
             "citations": citations,
             "evidence": evidence,
             "recommendations": recommendations,
-            "answer_quality": {**quality, "assistant_mode": effective_mode, "general_knowledge_disclosed": guidance_used},
+            "answer_quality": {
+                **quality,
+                "assistant_mode": effective_mode,
+                "general_knowledge_disclosed": guidance_used,
+                "general_knowledge_fact_gate": (guidance or {}).get("fact_gate") or {
+                    "status": "passed" if guidance_used else "not_run",
+                    "reason": "",
+                },
+            },
             "model_status": (guidance or {}).get("model_status") or project.get("model_status") or self.model_client.status(),
             "input_route": project.get("input_route") if isinstance(project.get("input_route"), dict) else {},
             "data_source": project.get("data_source") if isinstance(project.get("data_source"), dict) else {},
@@ -399,6 +450,28 @@ class AssistantOrchestrator:
 
 
 JsonError = json.JSONDecodeError
+
+
+def _general_fact_risk(content: str) -> str:
+    for reason, pattern in GENERAL_FACT_PATTERNS:
+        if pattern.search(content):
+            return reason
+    return ""
+
+
+def _unsafe_general_guidance(
+    model_status: dict[str, Any],
+    knowledge_context: dict[str, Any],
+    fact_risk: str,
+) -> dict[str, Any]:
+    return {
+        "used": False,
+        "content": "通用教学输出包含需要项目证据核验的具体事实，本轮未展示；请改为检索具体项目或换成不涉及具体仓库的概念问题。",
+        "reason": "unsafe_general_knowledge",
+        "fact_gate": {"status": "blocked", "reason": fact_risk},
+        "model_status": model_status,
+        "knowledge_context": knowledge_context,
+    }
 
 
 def _has_project_intent(query: str) -> bool:
