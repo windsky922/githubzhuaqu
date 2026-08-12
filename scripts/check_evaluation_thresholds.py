@@ -87,6 +87,11 @@ def _parse_results(items: list[str]) -> dict[str, dict[str, Any]]:
             raise ValueError(f"无法读取评估结果：{name}") from error
         if not isinstance(payload, dict):
             raise ValueError(f"评估结果必须是对象：{name}")
+        kind = payload.get("kind")
+        if kind is not None and not isinstance(kind, str):
+            raise ValueError(f"评估结果 kind 必须是字符串：{name}")
+        if isinstance(kind, str) and kind.startswith("blind_"):
+            raise ValueError("私有 blind 结果不得进入公开固定阈值检查。")
         results[name] = payload
     return results
 

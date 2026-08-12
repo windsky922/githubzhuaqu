@@ -18,7 +18,7 @@ GitHub Weekly Agent 的长期定位是 GitHub 项目研究 Agent：持续采集�
 
 最新 V7 对抗审查以“个人本机流畅 AI Agent 学习与 GitHub 项目研究对话”为核心，当前最大遗漏、失败链与收敛路线见：[GitHub 项目研究导师 V7 审查与路线图](docs/project-review-agent-v7-roadmap.md)。
 
-V8 当前已完成 P0-A 至 P1-C；实际状态、验证入口、剩余 P1-D 与安全边界见：[GitHub 项目研究导师 V8 开发交接摘要](docs/project-review-agent-v8-handoff.md)。
+V8 当前已完成 P0-A 至 P1-D1（五轮真实主链与私有 blind 证据工具）；真实独立 fresh/stale blind 验收仍未执行。实际状态、验证入口和安全边界见：[GitHub 项目研究导师 V8 开发交接摘要](docs/project-review-agent-v8-handoff.md)。
 
 V7 的当前基线、必读顺序、教学多轮 P0 工作包、验证矩阵和可复制启动提示见：[GitHub 项目研究导师 V7 开发交接摘要](docs/project-review-agent-v7-handoff.md)。
 
@@ -434,7 +434,7 @@ RAG Ask 的旧 `confidence` 字段继续保留以兼容现有客户端，但它�
 
 `evals/project_match_cases.jsonl` 保存 52 条中文项目需求及其期望仓库、硬约束和是否应澄清。运行 `python scripts/evaluate_project_match.py` 会在固定 fixture 语料上输出 FTS5、`local-hash-v1` 和 hybrid 的 Recall@3、Recall@10、MRR@10、硬约束违反率、零命中率和澄清正确率；不调用问答接口，也不保存模型回答。传入 `--root <weekly-archive-root>` 可测量指定归档，但只有期望仓库与该归档一致时才适合作为对比基线。
 
-私有 blind baseline 使用仓库外的 schema-v2 JSONL pack、仓库外的全新输出路径和冻结 weekly snapshot：每条样本包含相同的 `evaluation_date`、唯一 `id`、唯一规范化查询、完整 `request`、独立 `expected` 标签与固定枚举 `categories`，且 pack 至少 20 条并覆盖澄清、无匹配、source freshness、freshness required/not required、unknown/rejected、跨 chunk、中英文否定、比较、解释与 SSE 等边界。`expected` 使用 `input_route`、`data_freshness`、`evidence_coverage`、`acceptable_primary_ids`、`relevant_repository_ids` 与 `candidate_eligibility`，不依赖响应自证；runner 还拒绝 freshness、clarification、no-match、unknown/rejected 分类与对应标签不一致，以及首选不属于 `eligible` 标签的 pack。单个 pack 绑定一个 snapshot 和日期，因此只验证一种实际 source freshness；fresh 与 stale 必须用两个分别冻结的 baseline 验证。运行 `python scripts/evaluate_blind_rag.py --blind-pack <private.jsonl> --snapshot-root <frozen-snapshot> --output <new-private-baseline.json>` 会绑定 `GITHUB_WEEKLY_SNAPSHOT_ROOT`、冻结 freshness 时钟、禁用模型调用，在临时 SQLite 上执行真实 contextual normal 与 SSE 服务路径；runner 同时复核 pack hash，并只哈希 snapshot 的 `data/raw`、`data/runs`、`data/selected`、`data/trends` JSON，在执行前后验证输入未变。baseline 仅输出输入哈希、冻结日期、各指标分母和 route、answer mode、freshness、coverage、首选、Recall@3、候选资格、质量闸门、硬约束违规、完整 final 等值与事件顺序等聚合指标；异常只透传 runner 固定错误码，不输出题目、标签、回答、仓库级失败、路径或阈值。当前只完成 runner 与合成集成烟测；在独立持有者提供并冻结真实 pack 前，仍不得宣称 blind 泛化能力已经验证。
+私有 blind 流程使用仓库外的 schema-v2 JSONL pack、独立 fresh/stale weekly snapshot、预冻结 policy、人审清单和全新输出。runner 固定 `hybrid/local-hash-v1/limit=3/auto_build=true`，pack 只能提供 `q` 与可选 `context`，关键标签各覆盖至少 25%；schema-v4 baseline 绑定外部输入与执行源码清单 hash，并输出聚合指标及精确 numerator/denominator。`scripts/check_blind_rag_acceptance.py` 校验 fresh/stale 成对证据、Top-1 人审完整性和 policy 门槛，但固定返回 `accepted=false`、`verification_level=self_attested`：机器无法证明外部持有人或审查者事实上独立。完整命令、退出语义和人工边界见 [Private blind RAG 与 Top-1 人工验收准备](docs/private-blind-acceptance.md)。仓库内合成测试或 `policy_passed=true` 均不能冒充独立 blind 已验收。
 
 `evals/constraint_parsing_cases.jsonl` 保存 100 条 capability-v2 分句级约束样本，固定划分为 60 条 development、20 条 locked regression 和 20 条 adversarial，并覆盖 `all_of`、`any_of`、可选条件与显式取消；`evals/constraint_evidence_cases.jsonl` 保存 60 条能力/成本句子证据。运行 `python scripts/evaluate_constraint_parsing.py` 会输出约束精确匹配、operator、结构、澄清、证据状态准确率、错误合格率、错误拒绝率和硬约束违反率；可通过 `--blind-dataset <path>` 接入由独立审查者提供的未见样本。未完成 blind 验证前，不宣称能力模型已经校准。
 

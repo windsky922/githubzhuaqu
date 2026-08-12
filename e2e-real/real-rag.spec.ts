@@ -209,3 +209,88 @@ test("正交能力冲突不能成为 eligible 或首选", async ({ page }) => {
   expect(result.recommendations.some((item: { eligibility: string }) => item.eligibility === "eligible")).toBe(false);
   expect(result.recommendations[0].requirement_evaluations[0].status).toBe("unmet");
 });
+
+test("真实 FastAPI 五轮教学保持最小状态与指代焦点", async ({ page }) => {
+  const requestBodies: Array<Record<string, unknown>> = [];
+  page.on("request", (request) => {
+    if (new URL(request.url()).pathname !== "/v1/assistant/turn/stream") return;
+    const body = request.postDataJSON();
+    if (body && typeof body === "object") requestBodies.push(body as Record<string, unknown>);
+  });
+  const questions = [
+    "我想学习 AI Agent 的核心组成，请先列出三点提纲。",
+    "把第三点展开",
+    "针对这一点举例",
+    "换种说法",
+    "回到第一点",
+  ];
+  const results: Array<Record<string, unknown>> = [];
+  for (const question of questions) {
+    const responsePromise = page.waitForResponse((response) =>
+      new URL(response.url()).pathname === "/v1/assistant/turn/stream"
+      && response.request().postData()?.includes(question) === true);
+    await submit(page, question);
+    const events = parseSse(await (await responsePromise).text());
+    expect(events[0]?.event).toBe("meta");
+    expect(events.at(-1)?.event).toBe("final");
+    expect(events.filter((event) => event.event === "final")).toHaveLength(1);
+    results.push(events.at(-1)?.data || {});
+  }
+
+  const states = results.map((result) => result.assistant_state as Record<string, unknown>);
+  const contexts = states.map((state) => state.knowledge_context as {
+    outline: Array<{ id: string; title: string }>;
+    focus_id: string;
+    topic: string;
+  });
+  const stateKeys = [
+    "candidate_repository_ids", "constraints", "goal", "knowledge_context", "last_intent",
+    "mode", "pending_question", "primary_repository_id", "resumable", "revision",
+    "schema_version", "source_identity",
+  ].sort();
+  const forbidden = ["answer", "citations", "evidence", "sections", "contexts", "prompt_context", "model_status", "error"];
+
+  expect(results.every((result) => result.assistant_mode === "knowledge")).toBe(true);
+  expect(contexts[0].outline).toEqual([
+    { id: "k1", title: "模型与推理" },
+    { id: "k2", title: "工具与行动" },
+    { id: "k3", title: "记忆与反馈" },
+  ]);
+  expect(contexts.map((context) => context.focus_id)).toEqual(["", "k3", "k3", "k3", "k1"]);
+  expect(results.map((result) => String(result.answer))).toEqual([
+    expect.stringContaining("1. 模型与推理"),
+    expect.stringContaining("第三点"),
+    expect.stringContaining("例如"),
+    expect.stringContaining("换句话说"),
+    expect.stringContaining("第一点"),
+  ]);
+  expect(requestBodies).toHaveLength(5);
+  for (let index = 0; index < states.length; index += 1) {
+    expect(Object.keys(requestBodies[index]).sort()).toEqual(
+      index === 0 ? ["limit", "mode", "q"] : ["limit", "mode", "q", "state"],
+    );
+    expect(Object.keys(states[index]).sort()).toEqual(stateKeys);
+    expect(Object.keys(contexts[index]).sort()).toEqual(["focus_id", "outline", "topic"]);
+    for (const item of contexts[index].outline) expect(Object.keys(item).sort()).toEqual(["id", "title"]);
+    expect(Object.keys(states[index].source_identity as Record<string, unknown>).sort()).toEqual([
+      "as_of", "kind", "run_date", "source_id",
+    ]);
+    expect(states[index].schema_version).toBe(2);
+    expect(states[index].revision).toBe(index + 1);
+    expect(contexts[index].outline).toEqual(contexts[0].outline);
+    const serialized = JSON.stringify(requestBodies[index]);
+    for (const key of forbidden) expect(serialized).not.toContain(`\"${key}\"`);
+    if (index === 0) expect(requestBodies[index]).not.toHaveProperty("state");
+    else expect(requestBodies[index].state).toEqual(states[index - 1]);
+  }
+  expect((states[0].candidate_repository_ids as string[]).length).toBeGreaterThan(0);
+  for (const state of states.slice(1)) {
+    expect(state.candidate_repository_ids).toEqual(states[0].candidate_repository_ids);
+    expect(state.constraints).toEqual(states[0].constraints);
+    expect(state.source_identity).toEqual(states[0].source_identity);
+    expect(state.primary_repository_id).toEqual(states[0].primary_repository_id);
+    expect(state.resumable).toEqual(states[0].resumable);
+  }
+  expect(results.map((result) => (result.input_route as { candidate_scope: string }).candidate_scope))
+    .toEqual(["archive", "archive", "archive", "archive", "archive"]);
+});

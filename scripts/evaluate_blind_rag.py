@@ -3,12 +3,14 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import os
+import socket
 import sys
 import tempfile
 from collections import Counter, defaultdict
-from contextlib import contextmanager
-from datetime import date
+from contextlib import ExitStack, contextmanager
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any, Iterator
 from unittest.mock import patch
@@ -19,9 +21,14 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.api.repository import ApiRepository
+from scripts.check_blind_rag_acceptance import validate_policy
 
 
 MINIMUM_BASELINE_CASES = 20
+MINIMUM_METRIC_COVERAGE_RATE = 0.25
+BLIND_COHORTS = frozenset({"fresh", "stale"})
+ALLOWED_REQUEST_KEYS = frozenset({"q", "context"})
+RUNNER_REQUEST = {"mode": "hybrid", "model": "local-hash-v1", "limit": 3, "auto_build": True}
 ELIGIBILITY_LABELS = frozenset({"eligible", "unknown", "rejected"})
 FRESHNESS_LABELS = frozenset({"fresh", "lagging", "stale", "unknown", "not_applicable"})
 COVERAGE_LABELS = frozenset({"high", "medium", "low", "none", "unknown"})
@@ -52,6 +59,7 @@ OFFLINE_ENVIRONMENT = (
     "KIMI_API_KEY",
     "KIMI_BASE_URL",
     "KIMI_MODEL",
+    "KIMI_CANARY_ENABLED",
     "GITHUB_TOKEN",
     "GH_TOKEN",
     "GH_SEARCH_TOKEN",
@@ -92,6 +100,74 @@ def _is_within(path: Path, parent: Path) -> bool:
 
 def _normalize_query(value: str) -> str:
     return " ".join(value.casefold().split())
+
+
+def _subject_commitment(subjects: list[dict[str, Any]]) -> str:
+    payload = json.dumps(subjects, ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
+
+
+def _validate_metric_coverage(cases: list[dict[str, Any]]) -> None:
+    minimum = math.ceil(len(cases) * MINIMUM_METRIC_COVERAGE_RATE)
+    if sum(bool(case["expected"]["relevant_repository_ids"]) for case in cases) < minimum:
+        raise BlindBaselineError("blind_pack_recall_labels_missing")
+    if sum(bool(case["expected"]["candidate_eligibility"]) for case in cases) < minimum:
+        raise BlindBaselineError("blind_pack_eligibility_labels_missing")
+    if sum(isinstance(case["expected"].get("quality_passed"), bool) for case in cases) < minimum:
+        raise BlindBaselineError("blind_pack_answer_quality_labels_missing")
+
+
+def _execution_manifest_sha256() -> str:
+    files = [
+        Path(__file__).resolve(),
+        (PROJECT_ROOT / "scripts" / "check_blind_rag_acceptance.py").resolve(),
+        (PROJECT_ROOT / "requirements.txt").resolve(),
+        (PROJECT_ROOT / "src" / "storage" / "schema.sql").resolve(),
+    ]
+    files.extend(sorted((PROJECT_ROOT / "src").rglob("*.py")))
+    files.extend(sorted(path for path in (PROJECT_ROOT / "prompts").rglob("*") if path.is_file()))
+    digest = hashlib.sha256()
+    for path in sorted(set(files), key=lambda item: item.relative_to(PROJECT_ROOT).as_posix()):
+        relative = path.relative_to(PROJECT_ROOT).as_posix().encode("utf-8")
+        payload = path.read_bytes()
+        digest.update(len(relative).to_bytes(8, "big"))
+        digest.update(relative)
+        digest.update(len(payload).to_bytes(8, "big"))
+        digest.update(payload)
+    return digest.hexdigest()
+
+
+def _load_frozen_policy(path: Path) -> tuple[str, datetime, bytes]:
+    if path.is_symlink():
+        raise BlindBaselineError("blind_policy_invalid")
+    resolved = path.resolve()
+    if _is_within(resolved, PROJECT_ROOT) or not resolved.is_file():
+        raise BlindBaselineError("blind_policy_invalid")
+    try:
+        payload = resolved.read_bytes()
+        value = json.loads(payload.decode("utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as error:
+        raise BlindBaselineError("blind_policy_invalid") from error
+    if not isinstance(value, dict):
+        raise BlindBaselineError("blind_policy_invalid")
+    try:
+        validate_policy(value)
+        frozen_at = datetime.fromisoformat(value["frozen_at"])
+    except (TypeError, ValueError) as error:
+        raise BlindBaselineError("blind_policy_invalid") from error
+    return hashlib.sha256(payload).hexdigest(), frozen_at, payload
+
+
+def _validate_cohort(cases: list[dict[str, Any]], cohort: str) -> None:
+    if cohort not in BLIND_COHORTS:
+        raise BlindBaselineError("blind_cohort_invalid")
+    source_labels = {
+        case["expected"]["data_freshness"]
+        for case in cases
+        if "source-freshness" in case["categories"]
+    }
+    if source_labels != {cohort}:
+        raise BlindBaselineError("blind_cohort_freshness_mismatch")
 
 
 def _load_blind_pack(path: Path, *, minimum_cases: int) -> tuple[list[dict[str, Any]], str]:
@@ -139,6 +215,7 @@ def _load_blind_pack(path: Path, *, minimum_cases: int) -> tuple[list[dict[str, 
         raise BlindBaselineError("blind_pack_evaluation_date_mismatch")
     if not REQUIRED_CATEGORIES.issubset(categories):
         raise BlindBaselineError("blind_pack_category_coverage_incomplete")
+    _validate_metric_coverage(cases)
     return cases, hashlib.sha256(payload).hexdigest()
 
 
@@ -159,6 +236,10 @@ def _validate_case(case: Any, line_number: int) -> None:
     request = case.get("request")
     if not isinstance(request, dict) or not isinstance(request.get("q"), str) or not request["q"].strip():
         raise BlindBaselineError(f"blind_pack_request_invalid_line_{line_number}")
+    if not set(request).issubset(ALLOWED_REQUEST_KEYS) or (
+        "context" in request and not isinstance(request["context"], dict)
+    ):
+        raise BlindBaselineError(f"blind_pack_request_fields_invalid_line_{line_number}")
     expected = case.get("expected")
     if not isinstance(expected, dict):
         raise BlindBaselineError(f"blind_pack_expected_invalid_line_{line_number}")
@@ -200,7 +281,12 @@ def _validate_case(case: Any, line_number: int) -> None:
         raise BlindBaselineError(f"blind_pack_quality_label_invalid_line_{line_number}")
 
     categories = case.get("categories")
-    if not isinstance(categories, list) or not categories or any(category not in REQUIRED_CATEGORIES for category in categories):
+    if (
+        not isinstance(categories, list)
+        or not categories
+        or len(categories) != len(set(categories))
+        or any(category not in REQUIRED_CATEGORIES for category in categories)
+    ):
         raise BlindBaselineError(f"blind_pack_categories_invalid_line_{line_number}")
 
     category_set = set(categories)
@@ -282,10 +368,19 @@ def offline_snapshot_environment(snapshot_root: Path, evaluation_date: date) -> 
             return cls(evaluation_date.year, evaluation_date.month, evaluation_date.day)
 
     client = _DisabledModelClient()
+
+    def deny_network(*_args: Any, **_kwargs: Any) -> None:
+        raise BlindBaselineError("blind_network_disabled")
+
     try:
-        with patch("src.rag.freshness.date", _FrozenDate), patch(
-            "src.rag.answering.KimiChatClient", return_value=client
-        ):
+        with ExitStack() as stack:
+            stack.enter_context(patch("src.rag.freshness.date", _FrozenDate))
+            stack.enter_context(patch("src.rag.answering.KimiChatClient", return_value=client))
+            stack.enter_context(patch("socket.create_connection", deny_network))
+            stack.enter_context(patch("socket.getaddrinfo", deny_network))
+            for method in ("connect", "connect_ex", "sendto", "sendmsg"):
+                if hasattr(socket.socket, method):
+                    stack.enter_context(patch.object(socket.socket, method, deny_network))
             yield client
     finally:
         for name, value in old_values.items():
@@ -324,7 +419,11 @@ def _rate(values: list[bool | float]) -> float | None:
 
 
 def evaluate_blind_cases(
-    repository: ApiRepository, cases: list[dict[str, Any]], *, model_client: _DisabledModelClient | None = None
+    repository: ApiRepository,
+    cases: list[dict[str, Any]],
+    *,
+    model_client: _DisabledModelClient | None = None,
+    subject_collector: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     client = model_client or _DisabledModelClient()
     checks: dict[str, list[bool | float]] = defaultdict(list)
@@ -332,9 +431,10 @@ def evaluate_blind_cases(
     categories: Counter[str] = Counter()
     coverage: dict[str, list[bool]] = defaultdict(list)
     hard_violations: list[bool] = []
+    subjects: list[dict[str, Any]] = []
 
     for case in cases:
-        request = {"mode": "hybrid", "model": "local-hash-v1", "limit": 3, "auto_build": True, **case["request"]}
+        request = {**case["request"], **RUNNER_REQUEST}
         expected = case["expected"]
         categories.update(case["categories"])
         response = repository.rag_ask_contextual(request, router_client=client)
@@ -343,6 +443,7 @@ def evaluate_blind_cases(
         recommendations = _recommendations(response)
         returned = [str(item.get("full_name") or "") for item in recommendations]
         primary = _confirmed_primary(response)
+        subjects.append({"case_id": case["id"], "primary_repository_id": primary})
         acceptable_primary = expected["acceptable_primary_ids"]
         relevant = expected["relevant_repository_ids"]
         eligibility_labels = expected["candidate_eligibility"]
@@ -398,8 +499,29 @@ def evaluate_blind_cases(
                 failures[name] += 1
         coverage[coverage_label].append(case_checks["primary"])
 
+    if subject_collector is not None:
+        subject_collector.extend(subjects)
+    emitted_primary_count = sum(subject["primary_repository_id"] is not None for subject in subjects)
+    metric_numerators = {
+        "answer_mode_accuracy": sum(checks["answer_mode"]),
+        "freshness_required_exact_rate": sum(checks["freshness_required"]),
+        "data_freshness_exact_rate": sum(checks["data_freshness"]),
+        "evidence_coverage_exact_rate": sum(checks["evidence_coverage"]),
+        "input_route_exact_rate": sum(checks["input_route"]),
+        "primary_accuracy": sum(checks["primary"]),
+        "recall_at_3": sum(checks["recall_at_3"]),
+        "candidate_eligibility_accuracy": sum(checks["candidate_eligibility"]),
+        "quality_gate_accuracy": sum(checks["quality_gate"]),
+        "hard_constraint_violation_rate": sum(hard_violations),
+        "sse_final_parity_rate": sum(checks["sse_final_parity"]),
+        "stream_contract_rate": sum(checks["stream_contract"]),
+        "top_1_coverage_rate": emitted_primary_count,
+    }
     return {
         "case_count": len(cases),
+        "top_1_subject_count": len(subjects),
+        "top_1_emitted_count": emitted_primary_count,
+        "top_1_subjects_sha256": _subject_commitment(subjects),
         "category_counts": dict(sorted(categories.items())),
         "metrics": {
             "answer_mode_accuracy": _rate(checks["answer_mode"]),
@@ -414,6 +536,7 @@ def evaluate_blind_cases(
             "hard_constraint_violation_rate": _rate(hard_violations),
             "sse_final_parity_rate": _rate(checks["sse_final_parity"]),
             "stream_contract_rate": _rate(checks["stream_contract"]),
+            "top_1_coverage_rate": round(emitted_primary_count / len(subjects), 4) if subjects else None,
         },
         "metric_denominators": {
             "answer_mode_accuracy": len(checks["answer_mode"]),
@@ -428,7 +551,9 @@ def evaluate_blind_cases(
             "hard_constraint_violation_rate": len(hard_violations),
             "sse_final_parity_rate": len(checks["sse_final_parity"]),
             "stream_contract_rate": len(checks["stream_contract"]),
+            "top_1_coverage_rate": len(subjects),
         },
+        "metric_numerators": metric_numerators,
         "coverage_buckets": {
             name: {"case_count": len(values), "primary_accuracy": _rate(values)}
             for name, values in sorted(coverage.items())
@@ -437,8 +562,44 @@ def evaluate_blind_cases(
     }
 
 
-def run_baseline(*, pack: Path, snapshot_root: Path) -> dict[str, Any]:
+def build_judgment_template(report: dict[str, Any], subjects: list[dict[str, Any]]) -> dict[str, Any]:
+    if _subject_commitment(subjects) != report.get("top_1_subjects_sha256"):
+        raise BlindBaselineError("blind_judgment_subject_mismatch")
+    return {
+        "schema_version": 1,
+        "kind": "blind_top_1_human_judgments",
+        "cohort": report["cohort"],
+        "pack_sha256": report["pack_sha256"],
+        "snapshot_sha256": report["snapshot_sha256"],
+        "top_1_subjects_sha256": report["top_1_subjects_sha256"],
+        "rubric_version": "top-1-acceptance-v1",
+        "review_protocol": "independent-blind-v1",
+        "status": "draft",
+        "reviewer_count": 0,
+        "reviewer_set_sha256": "",
+        "frozen_at": "",
+        "subjects": [
+            {**subject, "judgment": "pending"}
+            for subject in subjects
+        ],
+    }
+
+
+def run_baseline(
+    *,
+    pack: Path,
+    snapshot_root: Path,
+    cohort: str,
+    policy: Path,
+    subject_collector: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
+    policy_hash, policy_frozen_at, policy_payload = _load_frozen_policy(policy)
+    execution_hash = _execution_manifest_sha256()
+    baseline_started_at = datetime.now(timezone.utc)
+    if policy_frozen_at > baseline_started_at:
+        raise BlindBaselineError("blind_policy_not_precommitted")
     cases, pack_hash = _load_blind_pack(pack, minimum_cases=MINIMUM_BASELINE_CASES)
+    _validate_cohort(cases, cohort)
     snapshot_hash = snapshot_tree_sha256(snapshot_root)
     evaluation_date = date.fromisoformat(cases[0]["evaluation_date"])
     try:
@@ -446,7 +607,10 @@ def run_baseline(*, pack: Path, snapshot_root: Path) -> dict[str, Any]:
             db_path = Path(directory) / "blind.sqlite"
             with offline_snapshot_environment(snapshot_root, evaluation_date) as client:
                 repository = ApiRepository(db_path=db_path)
-                result = evaluate_blind_cases(repository, cases, model_client=client)
+                evaluation_kwargs: dict[str, Any] = {"model_client": client}
+                if subject_collector is not None:
+                    evaluation_kwargs["subject_collector"] = subject_collector
+                result = evaluate_blind_cases(repository, cases, **evaluation_kwargs)
     finally:
         try:
             current_pack_hash = hashlib.sha256(pack.resolve().read_bytes()).hexdigest()
@@ -456,11 +620,19 @@ def run_baseline(*, pack: Path, snapshot_root: Path) -> dict[str, Any]:
             raise BlindBaselineError("blind_pack_mutated_during_baseline")
         if snapshot_tree_sha256(snapshot_root) != snapshot_hash:
             raise BlindBaselineError("snapshot_mutated_during_baseline")
+        if policy.resolve().read_bytes() != policy_payload:
+            raise BlindBaselineError("blind_policy_mutated_during_baseline")
+        if _execution_manifest_sha256() != execution_hash:
+            raise BlindBaselineError("blind_execution_manifest_mutated_during_baseline")
     return {
-        "schema_version": 2,
+        "schema_version": 4,
         "kind": "blind_rag_full_chain_baseline",
+        "cohort": cohort,
         "pack_sha256": pack_hash,
         "snapshot_sha256": snapshot_hash,
+        "runner_sha256": execution_hash,
+        "policy_sha256": policy_hash,
+        "baseline_started_at": baseline_started_at.isoformat(),
         "evaluation_date": evaluation_date.isoformat(),
         **result,
         "threshold": None,
@@ -472,15 +644,49 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="运行私有冻结样本的完整 RAG blind baseline")
     parser.add_argument("--blind-pack", required=True, type=Path)
     parser.add_argument("--snapshot-root", required=True, type=Path)
+    parser.add_argument("--cohort", required=True, choices=sorted(BLIND_COHORTS))
+    parser.add_argument("--policy", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--judgment-template", type=Path)
     args = parser.parse_args()
     try:
         output = validate_output_path(args.output, pack=args.blind_pack, snapshot_root=args.snapshot_root)
-        report = run_baseline(pack=args.blind_pack, snapshot_root=args.snapshot_root)
+        judgment_output = (
+            validate_output_path(args.judgment_template, pack=args.blind_pack, snapshot_root=args.snapshot_root)
+            if args.judgment_template
+            else None
+        )
+        if judgment_output == output:
+            raise BlindBaselineError("blind_output_conflict")
+        subjects: list[dict[str, Any]] | None = [] if judgment_output else None
+        report = run_baseline(
+            pack=args.blind_pack,
+            snapshot_root=args.snapshot_root,
+            cohort=args.cohort,
+            policy=args.policy,
+            subject_collector=subjects,
+        )
         output = validate_output_path(output, pack=args.blind_pack, snapshot_root=args.snapshot_root)
-        output.parent.mkdir(parents=True, exist_ok=True)
-        with output.open("x", encoding="utf-8") as handle:
-            handle.write(json.dumps(report, ensure_ascii=False, indent=2) + "\n")
+        template = build_judgment_template(report, subjects or []) if judgment_output else None
+        writes: list[tuple[Path, dict[str, Any]]] = [(output, report)]
+        if judgment_output and template:
+            judgment_output = validate_output_path(
+                judgment_output,
+                pack=args.blind_pack,
+                snapshot_root=args.snapshot_root,
+            )
+            writes.append((judgment_output, template))
+        created: list[Path] = []
+        try:
+            for target, payload in writes:
+                target.parent.mkdir(parents=True, exist_ok=True)
+                with target.open("x", encoding="utf-8") as handle:
+                    created.append(target)
+                    handle.write(json.dumps(payload, ensure_ascii=False, indent=2) + "\n")
+        except Exception:
+            for target in created:
+                target.unlink(missing_ok=True)
+            raise
     except (OSError, UnicodeError):
         raise SystemExit("blind_baseline_io_error") from None
     except BlindBaselineError as error:
@@ -493,12 +699,17 @@ def main() -> int:
         json.dumps(
             {
                 "kind": report["kind"],
+                "cohort": report["cohort"],
                 "pack_sha256": report["pack_sha256"],
                 "snapshot_sha256": report["snapshot_sha256"],
+                "runner_sha256": report["runner_sha256"],
+                "policy_sha256": report["policy_sha256"],
                 "evaluation_date": report["evaluation_date"],
                 "case_count": report["case_count"],
                 "metrics": report["metrics"],
                 "failure_category_counts": report["failure_category_counts"],
+                "top_1_subject_count": report["top_1_subject_count"],
+                "top_1_emitted_count": report["top_1_emitted_count"],
                 "threshold": report["threshold"],
             },
             ensure_ascii=False,

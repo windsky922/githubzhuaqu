@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import math
+import json
+import tempfile
 import unittest
 from pathlib import Path
 
-from scripts.check_evaluation_thresholds import check_results, load_config, verify_fixture_hashes
+from scripts.check_evaluation_thresholds import _parse_results, check_results, load_config, verify_fixture_hashes
 
 
 class EvaluationThresholdTest(unittest.TestCase):
@@ -49,3 +51,24 @@ class EvaluationThresholdTest(unittest.TestCase):
         ):
             self.assertIn(script, workflow)
         self.assertIn("fixed-evaluation-results-${{ github.sha }}", workflow)
+        self.assertNotIn("evaluate_blind_rag.py", workflow)
+        self.assertNotIn("check_blind_rag_acceptance.py", workflow)
+
+    def test_private_blind_results_cannot_enter_public_threshold_checker(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "private.json"
+            path.write_text(json.dumps({"schema_version": 1, "metrics": {}}), encoding="utf-8")
+            self.assertEqual(_parse_results([f"project_match={path}"])["project_match"]["schema_version"], 1)
+            for kind in (
+                "blind_rag_full_chain_baseline",
+                "blind_rag_acceptance",
+                "blind_top_1_human_judgments",
+                "blind_rag_acceptance_policy",
+                "blind_future_private_artifact",
+            ):
+                path.write_text(json.dumps({"kind": kind}), encoding="utf-8")
+                with self.subTest(kind=kind), self.assertRaisesRegex(ValueError, "不得进入"):
+                    _parse_results([f"project_match={path}"])
+            path.write_text(json.dumps({"kind": []}), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "kind 必须是字符串"):
+                _parse_results([f"project_match={path}"])

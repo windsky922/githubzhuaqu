@@ -45,7 +45,18 @@ class _FakeKnowledgeClient:
         return {"provider": "fixture", "configured": True, "model": "fixture-knowledge-v1"}
 
     def chat(self, messages: list[dict[str, str]]) -> str:
-        del messages
+        payload = json.loads(messages[-1]["content"])
+        question = str(payload.get("question") or "")
+        if "第三点" in question:
+            return "第三点关注如何保存最小状态，并根据反馈修正下一步行为。"
+        if "举例" in question:
+            return "例如只保存主题、提纲和当前焦点，不保存整段历史回答。"
+        if "换种说法" in question:
+            return "换句话说，记住导航坐标，不复制整本对话记录。"
+        if "第一点" in question:
+            return "第一点是模型如何理解目标并选择下一步推理。"
+        if "核心组成" in question:
+            return "1. 模型与推理\n2. 工具与行动\n3. 记忆与反馈"
         return (
             "结论：先掌握 Agent 的目标、状态、工具调用与反馈循环，再学习多 Agent 协作。\n"
             "学习路线：Python 基础与 API → 单 Agent 循环 → 受控工具 → RAG 与评估 → 多 Agent 编排。\n"

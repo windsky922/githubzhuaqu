@@ -1,5 +1,15 @@
 # 操作日志
 
+## 2026-08-13 追加：V8 P1-D1 五轮真实主链与私有 blind 证据工具
+
+1. 真实 FastAPI + 临时 SQLite E2E 新增五轮教学 journey：列三点提纲、展开第三点、举例、换种说法、回到第一点；逐轮锁定 SSE 唯一 final、schema-v2 最小 state、请求体白名单、提纲焦点和候选/来源作用域不漂移。
+2. 私有 blind runner 固定 `hybrid/local-hash-v1/limit=3/auto_build=true`，拒绝 pack 覆盖运行参数；fresh/stale 各自绑定仓库外 pack、snapshot 和预冻结 policy，并阻断 runner 进程内受控 Python socket/DNS 路径。
+3. schema-v4 baseline 绑定 pack/snapshot/policy/执行源码清单 hash 与开始时间，输出聚合 rate 及精确 numerator/denominator；空/越界/错配分母、舍入掩盖 hard violation、运行中输入或源码变化均失败关闭。
+4. 新增 Top-1 人审与成对 policy 检查器。它验证 subject commitment、完整判断、freshness 等冻结门槛和 fresh/stale 隔离，但固定输出 `accepted=false`、`verification_level=self_attested`；公开阈值检查器拒绝全部 `blind_*` artifact，CI 不运行或上传私有输入。
+5. README、架构、数据契约、P1-D1 操作手册和 V8 交接同步声明：当前只完成工具链准备与合成验证，真实独立 private blind 仍为 `not_verified`，不能用 `policy_passed` 或公开 fixture 冒充。
+
+阶段验证：P1-D 定向 Python 35 项、Python 全量 396 项、前端单元 34 项、mock Chromium 28 项、真实 FastAPI + 临时 SQLite E2E 7 项全部通过；lint、生产构建、安全检查、六组固定 evaluator 与公开阈值门禁、`docs/app` 一致性和 `git diff --check` 通过。`hybrid/local-hash-v1` Recall@3 保持 0.9231、Top-1 保持 0.8654，硬约束违规率为 0。未调用真实 Kimi，未读取或生成真实 private pack/snapshot/人审；`output/`、`tmp/` 未纳入提交。远端 CI 在推送后核验。
+
 ## 2026-08-12 追加：V8 P1-C 本机 readiness 与显式 Kimi canary
 
 1. 新增无副作用的 Assistant readiness 聚合与 `GET /v1/assistant/readiness`：分别报告 API、Kimi 配置、verified snapshot/freshness、只读 RAG 和只读访问，并以 capability 级语义聚合 `ready/degraded/unavailable`。
