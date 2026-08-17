@@ -1,7 +1,313 @@
 {
   "schema_version": 1,
-  "count": 220,
+  "count": 230,
   "projects": [
+    {
+      "run_date": "2026-08-17",
+      "full_name": "cathrynlavery/diagram-design",
+      "html_url": "https://github.com/cathrynlavery/diagram-design",
+      "description": "29 editorial diagram types for Claude Code. Self-contained HTML + SVG. No shadows, no Mermaid-slop.",
+      "readme_summary": "Editorial diagrams your designer won't hate.** New in 2.0 — the Loop: flywheels with a shared-memory hub. The dashed lines are the write-backs.* New in 2.3: semantic system patterns and optional accessible motion, while static output stays the default.* visual types.",
+      "category": "LLM Tooling",
+      "language": "HTML",
+      "stargazers_count": 19524,
+      "forks_count": 1200,
+      "star_growth": 0,
+      "score": 0.4858,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 1,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 1 位，是本期最重要的热度信号。",
+        "当前累计 Star 19524，具备一定社区关注度。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+      ],
+      "quality_score": 92,
+      "quality_level": "high",
+      "report_url": "weekly/2026-08-17.html"
+    },
+    {
+      "run_date": "2026-08-17",
+      "full_name": "semantica-agi/semantica",
+      "html_url": "https://github.com/semantica-agi/semantica",
+      "description": "Graph-Native Infrastructure for Context and Accountable AI Systems",
+      "readme_summary": "Ingest your enterprise data, extract what matters, build a Context Graph and knowledge graph (KG), and run graph analytics and causal reasoning over all of it, with full decision provenance baked in. Explainable, traceable, and trustworthy by design.",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 8184,
+      "forks_count": 838,
+      "star_growth": 0,
+      "score": 0.6972,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 2,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 2 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 8184，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-08-17.html"
+    },
+    {
+      "run_date": "2026-08-17",
+      "full_name": "PrimeIntellect-ai/prime-agent",
+      "html_url": "https://github.com/PrimeIntellect-ai/prime-agent",
+      "description": "A self-improving RLM agent for coding workflows and long-running autonomous tasks.",
+      "readme_summary": "Prime Agent: A Self-Improving RLM Agent Prime Agent is an open-source coding and research agent for general and long-running work.",
+      "category": "AI Agent",
+      "language": "TypeScript",
+      "stargazers_count": 16570,
+      "forks_count": 1786,
+      "star_growth": 0,
+      "score": 0.4632,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 3,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 3 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 16570，具备一定社区关注度。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+      ],
+      "quality_score": 92,
+      "quality_level": "high",
+      "report_url": "weekly/2026-08-17.html"
+    },
+    {
+      "run_date": "2026-08-17",
+      "full_name": "NVIDIA-NeMo/Switchyard",
+      "html_url": "https://github.com/NVIDIA-NeMo/Switchyard",
+      "description": "Switchyard lets LLM applications route traffic across models and providers while preserving native OpenAI and Anthropic API compatibility - enabling flexible model selection, benchmarking, and cost/performance optimization.",
+      "readme_summary": "Switchyard is a Rust proxy and library for LLM traffic. It routes requests across providers, translates between OpenAI and Anthropic APIs, records operational metrics, and provides typed, composable routing algorithms.",
+      "category": "LLM Tooling",
+      "language": "Rust",
+      "stargazers_count": 1686,
+      "forks_count": 153,
+      "star_growth": 0,
+      "score": 0.4373,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 4,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 4 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Agent 开发、开发者工具。",
+        "当前累计 Star 1686，具备一定社区关注度。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+      ],
+      "quality_score": 92,
+      "quality_level": "high",
+      "report_url": "weekly/2026-08-17.html"
+    },
+    {
+      "run_date": "2026-08-17",
+      "full_name": "cactus-compute/needle",
+      "html_url": "https://github.com/cactus-compute/needle",
+      "description": "14MB foundation model for tiny devices; phones, wearables, smart home, and robots.",
+      "readme_summary": "Needle 2 is an open 45M-parameter model for tool calling, device use and structured extraction. The whole model is a single 14MB binary that runs a full session in about 28MB of RAM.",
+      "category": "LLM Tooling",
+      "language": "Python",
+      "stargazers_count": 6569,
+      "forks_count": 433,
+      "star_growth": 0,
+      "score": 0.5153,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 6,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 6 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 6569，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-08-17.html"
+    },
+    {
+      "run_date": "2026-08-17",
+      "full_name": "macro-inc/macro",
+      "html_url": "https://github.com/macro-inc/macro",
+      "description": "Macro is a unified workspace for teams: email, chat, docs, tasks, agents, calls, and CRM — @-linked together with shared AI memory.",
+      "readme_summary": "· · · · · · Macro is the all-in-one workspace for you and your team. It unifies email + messages + docs + tasks + agents + CRM into a single fast interface with shared team-level memory. Everything in your workspace is @linked and searchable so your team (and your agents) never have to switch tools.",
+      "category": "AI Agent",
+      "language": "Rust",
+      "stargazers_count": 3407,
+      "forks_count": 338,
+      "star_growth": 0,
+      "score": 0.5038,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 7,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 7 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 3407，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-08-17.html"
+    },
+    {
+      "run_date": "2026-08-17",
+      "full_name": "vitali87/code-graph-rag",
+      "html_url": "https://github.com/vitali87/code-graph-rag",
+      "description": "The ultimate RAG for your monorepo. Query, understand, and edit multi-language codebases with the power of AI and knowledge graphs",
+      "readme_summary": "Code-Graph-RAG parses a multi-language codebase with Tree-sitter, builds a knowledge graph of its structure in Memgraph, and lets you query, edit, and optimise that code in plain English. It works across a monorepo of mixed languages under one unified graph schema.",
+      "category": "LLM Tooling",
+      "language": "Python",
+      "stargazers_count": 4428,
+      "forks_count": 598,
+      "star_growth": 0,
+      "score": 0.5483,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 8,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 8 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 4428，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-08-17.html"
+    },
+    {
+      "run_date": "2026-08-17",
+      "full_name": "addyosmani/agent-skills",
+      "html_url": "https://github.com/addyosmani/agent-skills",
+      "description": "Production-grade engineering skills for AI coding agents.",
+      "readme_summary": "Production-grade engineering skills for AI coding agents.** Skills encode the workflows, quality gates, and best practices that senior engineers use when building software. These ones are packaged so AI agents follow them consistently across every phase of development.",
+      "category": "AI Agent",
+      "language": "JavaScript",
+      "stargazers_count": 87758,
+      "forks_count": 9404,
+      "star_growth": 62128,
+      "score": 0.5201,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 10,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 10 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 62128，近期热度上升。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发。",
+        "当前累计 Star 87758，具备一定社区关注度。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-08-17.html"
+    },
+    {
+      "run_date": "2026-08-17",
+      "full_name": "Panniantong/Agent-Reach",
+      "html_url": "https://github.com/Panniantong/Agent-Reach",
+      "description": "Give your AI agent eyes to see the entire internet. Read & search Twitter, Reddit, YouTube, GitHub, Bilibili, XiaoHongShu — one CLI, zero API fees.",
+      "readme_summary": "👁️ Agent Reach 给你的 AI Agent 一键装上互联网能力 当下最稳的接入方式，替你选好、装好、体检好——接入方式会换代，你不用操心 想出现在这里？",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 72317,
+      "forks_count": 6148,
+      "star_growth": 52447,
+      "score": 0.3702,
+      "sources": [
+        "github_search"
+      ],
+      "trending_rank": 0,
+      "selection_reasons": [
+        "较上次记录新增 Star 52447，近期热度上升。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 72317，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-08-17.html"
+    },
+    {
+      "run_date": "2026-08-17",
+      "full_name": "unslothai/unsloth",
+      "html_url": "https://github.com/unslothai/unsloth",
+      "description": "Local UI to run and train LLMs and diffusion models, including Qwen3.8, Kimi K3, MiniMax-H3, Gemma 4, DeepSeek-V4, FLUX and more.",
+      "readme_summary": "Unsloth is the first desktop app to run and train models. Download the native Unsloth Desktop app for your operating system: Platform Link Windows Download macOS Download Linux / Ubuntu (deb) Download Linux (AppImage) Download Linux (Arm64) Download Download from Unsloth or GitHub Releases.",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 72582,
+      "forks_count": 6547,
+      "star_growth": 6957,
+      "score": 0.3617,
+      "sources": [
+        "github_search",
+        "github_trending"
+      ],
+      "trending_rank": 13,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 13 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 6957，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-08-17.html"
+    },
     {
       "run_date": "2026-08-10",
       "full_name": "firecrawl/pdf-inspector",

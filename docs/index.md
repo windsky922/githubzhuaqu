@@ -4,26 +4,27 @@
 
 ## 最新周报
 
-- [2026-08-10](weekly/2026-08-10.html)
+- [2026-08-17](weekly/2026-08-17.html)
 
 ## 最新运行摘要
 
 - 入选项目：10 个
-- 采集候选：318 个
+- 采集候选：316 个
 - 生成方式：Kimi
-- Telegram：已推送
+- Telegram：未推送
 - 采集错误：0 条
 
 ## 最新趋势要点
 
-- LLM Tooling 是本期最集中的方向，共 4 个项目。
-- Python 是本期出现最多的主要语言，共 4 个项目。
-- 本期入选项目累计新增 Star 49870。
-- firecrawl/pdf-inspector 是本期 GitHub Trending 排名最高的项目，周榜排名 1。
-- Panniantong/Agent-Reach 是本期新增 Star 最高的项目，新增 49870。
+- AI Agent 是本期最集中的方向，共 6 个项目。
+- Python 是本期出现最多的主要语言，共 5 个项目。
+- 本期入选项目累计新增 Star 121532。
+- cathrynlavery/diagram-design 是本期 GitHub Trending 排名最高的项目，周榜排名 1。
+- addyosmani/agent-skills 是本期新增 Star 最高的项目，新增 62128。
 
 ## 全部周报
 
+- [2026-08-17](weekly/2026-08-17.html)：10 个项目，Kimi，Telegram 未推送，主语言 Python，主方向 AI Agent，新增 Star 121532，Trending 项目 9
 - [2026-08-10](weekly/2026-08-10.html)：10 个项目，Kimi，Telegram 已推送，主语言 Python，主方向 LLM Tooling，新增 Star 49870，Trending 项目 9
 - [2026-08-03](weekly/2026-08-03.html)：10 个项目，Kimi，Telegram 已推送，主语言 Python，主方向 AI Agent，新增 Star 56238，Trending 项目 9
 - [2026-08-02](weekly/2026-08-02.html)：10 个项目，Kimi，Telegram 已推送，主语言 Python，主方向 AI Agent，新增 Star 55516，Trending 项目 9

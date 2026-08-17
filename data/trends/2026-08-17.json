@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "summary_points": [
+    "AI Agent 是本期最集中的方向，共 6 个项目。",
+    "Python 是本期出现最多的主要语言，共 5 个项目。",
+    "本期入选项目累计新增 Star 121532。",
+    "cathrynlavery/diagram-design 是本期 GitHub Trending 排名最高的项目，周榜排名 1。",
+    "addyosmani/agent-skills 是本期新增 Star 最高的项目，新增 62128。"
+  ],
+  "top_categories": [
+    {
+      "count": 6,
+      "name": "AI Agent"
+    },
+    {
+      "count": 4,
+      "name": "LLM Tooling"
+    }
+  ],
+  "top_languages": [
+    {
+      "count": 5,
+      "name": "Python"
+    },
+    {
+      "count": 2,
+      "name": "Rust"
+    },
+    {
+      "count": 1,
+      "name": "HTML"
+    },
+    {
+      "count": 1,
+      "name": "TypeScript"
+    },
+    {
+      "count": 1,
+      "name": "JavaScript"
+    }
+  ],
+  "top_star_growth": [
+    {
+      "category": "AI Agent",
+      "full_name": "addyosmani/agent-skills",
+      "html_url": "https://github.com/addyosmani/agent-skills",
+      "language": "JavaScript",
+      "star_growth": 62128,
+      "stargazers_count": 87758
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "Panniantong/Agent-Reach",
+      "html_url": "https://github.com/Panniantong/Agent-Reach",
+      "language": "Python",
+      "star_growth": 52447,
+      "stargazers_count": 72317
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "unslothai/unsloth",
+      "html_url": "https://github.com/unslothai/unsloth",
+      "language": "Python",
+      "star_growth": 6957,
+      "stargazers_count": 72582
+    }
+  ],
+  "top_trending": [
+    {
+      "category": "LLM Tooling",
+      "full_name": "cathrynlavery/diagram-design",
+      "html_url": "https://github.com/cathrynlavery/diagram-design",
+      "language": "HTML",
+      "stargazers_count": 19524
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "semantica-agi/semantica",
+      "html_url": "https://github.com/semantica-agi/semantica",
+      "language": "Python",
+      "stargazers_count": 8184
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "PrimeIntellect-ai/prime-agent",
+      "html_url": "https://github.com/PrimeIntellect-ai/prime-agent",
+      "language": "TypeScript",
+      "stargazers_count": 16570
+    },
+    {
+      "category": "LLM Tooling",
+      "full_name": "NVIDIA-NeMo/Switchyard",
+      "html_url": "https://github.com/NVIDIA-NeMo/Switchyard",
+      "language": "Rust",
+      "stargazers_count": 1686
+    },
+    {
+      "category": "LLM Tooling",
+      "full_name": "cactus-compute/needle",
+      "html_url": "https://github.com/cactus-compute/needle",
+      "language": "Python",
+      "stargazers_count": 6569
+    }
+  ],
+  "total_projects": 10,
+  "total_star_growth": 121532,
+  "trending_project_count": 9,
+  "trending_selected_rate": 0.9,
+  "trending_top10_selected_count": 8
+}

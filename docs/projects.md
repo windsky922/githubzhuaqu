@@ -4,6 +4,16 @@
 
 | 日期 | 项目 | 来源 | Trending 排名 | 方向 | 语言 | Star | 新增 Star | 风险提示 | 链接 |
 |---|---|---|---:|---|---|---:|---:|---:|---|
+| 2026-08-17 | cathrynlavery/diagram-design | GitHub Trending | 1 | LLM Tooling | HTML | 19524 | 0 | 0 | [https://github.com/cathrynlavery/diagram-design](https://github.com/cathrynlavery/diagram-design) |
+| 2026-08-17 | semantica-agi/semantica | GitHub Trending | 2 | AI Agent | Python | 8184 | 0 | 0 | [https://github.com/semantica-agi/semantica](https://github.com/semantica-agi/semantica) |
+| 2026-08-17 | PrimeIntellect-ai/prime-agent | GitHub Trending | 3 | AI Agent | TypeScript | 16570 | 0 | 0 | [https://github.com/PrimeIntellect-ai/prime-agent](https://github.com/PrimeIntellect-ai/prime-agent) |
+| 2026-08-17 | NVIDIA-NeMo/Switchyard | GitHub Trending | 4 | LLM Tooling | Rust | 1686 | 0 | 0 | [https://github.com/NVIDIA-NeMo/Switchyard](https://github.com/NVIDIA-NeMo/Switchyard) |
+| 2026-08-17 | cactus-compute/needle | GitHub Trending | 6 | LLM Tooling | Python | 6569 | 0 | 0 | [https://github.com/cactus-compute/needle](https://github.com/cactus-compute/needle) |
+| 2026-08-17 | macro-inc/macro | GitHub Trending | 7 | AI Agent | Rust | 3407 | 0 | 0 | [https://github.com/macro-inc/macro](https://github.com/macro-inc/macro) |
+| 2026-08-17 | vitali87/code-graph-rag | GitHub Trending | 8 | LLM Tooling | Python | 4428 | 0 | 0 | [https://github.com/vitali87/code-graph-rag](https://github.com/vitali87/code-graph-rag) |
+| 2026-08-17 | addyosmani/agent-skills | GitHub Trending | 10 | AI Agent | JavaScript | 87758 | 62128 | 0 | [https://github.com/addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) |
+| 2026-08-17 | Panniantong/Agent-Reach | GitHub Search | - | AI Agent | Python | 72317 | 52447 | 0 | [https://github.com/Panniantong/Agent-Reach](https://github.com/Panniantong/Agent-Reach) |
+| 2026-08-17 | unslothai/unsloth | GitHub Search + GitHub Trending | 13 | AI Agent | Python | 72582 | 6957 | 0 | [https://github.com/unslothai/unsloth](https://github.com/unslothai/unsloth) |
 | 2026-08-10 | firecrawl/pdf-inspector | GitHub Trending | 1 | Other | Rust | 13879 | 0 | 0 | [https://github.com/firecrawl/pdf-inspector](https://github.com/firecrawl/pdf-inspector) |
 | 2026-08-10 | zhaoxuya520/reverse-skill | GitHub Trending | 2 | LLM Tooling | PowerShell | 22522 | 0 | 0 | [https://github.com/zhaoxuya520/reverse-skill](https://github.com/zhaoxuya520/reverse-skill) |
 | 2026-08-10 | TencentCloud/TencentDB-Agent-Memory | GitHub Trending | 3 | AI Agent | TypeScript | 18773 | 0 | 0 | [https://github.com/TencentCloud/TencentDB-Agent-Memory](https://github.com/TencentCloud/TencentDB-Agent-Memory) |
