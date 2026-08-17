@@ -11,7 +11,7 @@
 - 入选项目：10 个
 - 采集候选：316 个
 - 生成方式：Kimi
-- Telegram：未推送
+- Telegram：已推送
 - 采集错误：0 条
 
 ## 最新趋势要点
@@ -24,7 +24,7 @@
 
 ## 全部周报
 
-- [2026-08-17](weekly/2026-08-17.html)：10 个项目，Kimi，Telegram 未推送，主语言 Python，主方向 AI Agent，新增 Star 121532，Trending 项目 9
+- [2026-08-17](weekly/2026-08-17.html)：10 个项目，Kimi，Telegram 已推送，主语言 Python，主方向 AI Agent，新增 Star 121532，Trending 项目 9
 - [2026-08-10](weekly/2026-08-10.html)：10 个项目，Kimi，Telegram 已推送，主语言 Python，主方向 LLM Tooling，新增 Star 49870，Trending 项目 9
 - [2026-08-03](weekly/2026-08-03.html)：10 个项目，Kimi，Telegram 已推送，主语言 Python，主方向 AI Agent，新增 Star 56238，Trending 项目 9
 - [2026-08-02](weekly/2026-08-02.html)：10 个项目，Kimi，Telegram 已推送，主语言 Python，主方向 AI Agent，新增 Star 55516，Trending 项目 9
