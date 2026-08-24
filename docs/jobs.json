@@ -1,15 +1,15 @@
 {
   "schema_version": 1,
-  "count": 27,
+  "count": 28,
   "jobs": [
     {
-      "job_id": "dev-context-index-plan:20260817T005754221640:cd21131336",
+      "job_id": "dev-context-index-plan:20260824T005642030659:cd21131336",
       "kind": "dev_context_index",
       "status": "succeeded",
-      "run_date": "2026-08-17",
-      "submitted_at": "2026-08-17T00:57:54.221640Z",
-      "started_at": "2026-08-17T00:57:54.340423Z",
-      "finished_at": "2026-08-17T00:57:54.353691Z",
+      "run_date": "2026-08-24",
+      "submitted_at": "2026-08-24T00:56:42.030659Z",
+      "started_at": "2026-08-24T00:56:42.173806Z",
+      "finished_at": "2026-08-24T00:56:42.179875Z",
       "request": {
         "profile": "",
         "sources": [],
@@ -23,7 +23,7 @@
         "safety_warnings": []
       },
       "result": {
-        "run_date": "2026-08-17",
+        "run_date": "2026-08-24",
         "status": "succeeded",
         "selected_count": 0,
         "collected_count": 0,
@@ -41,13 +41,13 @@
       "report_url": ""
     },
     {
-      "job_id": "rag-search-eval-plan:2026-08-17:75ab84c91709",
+      "job_id": "rag-search-eval-plan:2026-08-24:dbfc64c3101f",
       "kind": "rag_search_evaluation",
       "status": "succeeded",
-      "run_date": "2026-08-17",
-      "submitted_at": "2026-08-17T00:57:53.256081Z",
-      "started_at": "2026-08-17T00:57:53.297684Z",
-      "finished_at": "2026-08-17T00:57:53.361873Z",
+      "run_date": "2026-08-24",
+      "submitted_at": "2026-08-24T00:56:40.875276Z",
+      "started_at": "2026-08-24T00:56:40.918511Z",
+      "finished_at": "2026-08-24T00:56:40.926366Z",
       "request": {
         "profile": "",
         "sources": [],
@@ -61,7 +61,7 @@
         "safety_warnings": []
       },
       "result": {
-        "run_date": "2026-08-17",
+        "run_date": "2026-08-24",
         "status": "ok",
         "selected_count": 0,
         "collected_count": 0,
@@ -79,11 +79,11 @@
       "report_url": ""
     },
     {
-      "job_id": "rag-backfill-plan:20260817T005753069068:547fb87cdc",
+      "job_id": "rag-backfill-plan:20260824T005640666972:547fb87cdc",
       "kind": "rag_backfill",
       "status": "planned",
       "run_date": "",
-      "submitted_at": "2026-08-17T00:57:53.069068Z",
+      "submitted_at": "2026-08-24T00:56:40.666972Z",
       "started_at": "",
       "finished_at": "",
       "request": {
@@ -115,6 +115,44 @@
       },
       "error": "",
       "report_url": ""
+    },
+    {
+      "job_id": "run:2026-08-24",
+      "kind": "weekly_report",
+      "status": "succeeded",
+      "run_date": "2026-08-24",
+      "submitted_at": "2026-08-24",
+      "started_at": "",
+      "finished_at": "2026-08-24",
+      "request": {
+        "profile": "",
+        "sources": [],
+        "dry_run": false,
+        "requested_dry_run": false,
+        "confirm_delivery": false,
+        "delivery_allowed": false,
+        "days_back": 0,
+        "trigger_source": "",
+        "requested_by": "",
+        "safety_warnings": []
+      },
+      "result": {
+        "run_date": "",
+        "status": "",
+        "selected_count": 10,
+        "collected_count": 311,
+        "kimi_used": true,
+        "fallback_used": false,
+        "telegram_sent": false,
+        "telegram_error": "",
+        "report_path": "reports/2026-08-24.md",
+        "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-08-24.html",
+        "sqlite_index_path": "",
+        "sqlite_error": "",
+        "error": ""
+      },
+      "error": "",
+      "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-08-24.html"
     },
     {
       "job_id": "run:2026-08-17",

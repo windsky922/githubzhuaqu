@@ -4,6 +4,16 @@
 
 | 日期 | 项目 | 来源 | Trending 排名 | 方向 | 语言 | Star | 新增 Star | 风险提示 | 链接 |
 |---|---|---|---:|---|---|---:|---:|---:|---|
+| 2026-08-24 | modular/modular | GitHub Trending | 1 | Machine Learning | Mojo | 28975 | 0 | 0 | [https://github.com/modular/modular](https://github.com/modular/modular) |
+| 2026-08-24 | harry0703/MoneyPrinterTurbo | GitHub Search + GitHub Trending | 2 | AI Agent | Python | 115301 | 36847 | 0 | [https://github.com/harry0703/MoneyPrinterTurbo](https://github.com/harry0703/MoneyPrinterTurbo) |
+| 2026-08-24 | basecamp/omarchy | GitHub Trending | 3 | Other | Shell | 29134 | 0 | 0 | [https://github.com/basecamp/omarchy](https://github.com/basecamp/omarchy) |
+| 2026-08-24 | AprilNEA/OpenLogi | GitHub Trending | 4 | Other | Rust | 14948 | 0 | 0 | [https://github.com/AprilNEA/OpenLogi](https://github.com/AprilNEA/OpenLogi) |
+| 2026-08-24 | cordiverse/cordis | GitHub Trending | 5 | Other | TypeScript | 7239 | 0 | 0 | [https://github.com/cordiverse/cordis](https://github.com/cordiverse/cordis) |
+| 2026-08-24 | volcengine/OpenViking | GitHub Trending | 6 | AI Agent | Python | 32487 | 7410 | 0 | [https://github.com/volcengine/OpenViking](https://github.com/volcengine/OpenViking) |
+| 2026-08-24 | public-apis/public-apis | GitHub Search + GitHub Trending | 7 | Other | Python | 469216 | 30220 | 0 | [https://github.com/public-apis/public-apis](https://github.com/public-apis/public-apis) |
+| 2026-08-24 | jundot/omlx | GitHub Trending | 8 | LLM Tooling | Python | 20448 | 0 | 0 | [https://github.com/jundot/omlx](https://github.com/jundot/omlx) |
+| 2026-08-24 | apache/maka | GitHub Trending | 11 | AI Agent | TypeScript | 2356 | 0 | 0 | [https://github.com/apache/maka](https://github.com/apache/maka) |
+| 2026-08-24 | NousResearch/hermes-agent | GitHub Search | - | AI Agent | Python | 234990 | 56857 | 0 | [https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) |
 | 2026-08-17 | cathrynlavery/diagram-design | GitHub Trending | 1 | LLM Tooling | HTML | 19524 | 0 | 0 | [https://github.com/cathrynlavery/diagram-design](https://github.com/cathrynlavery/diagram-design) |
 | 2026-08-17 | semantica-agi/semantica | GitHub Trending | 2 | AI Agent | Python | 8184 | 0 | 0 | [https://github.com/semantica-agi/semantica](https://github.com/semantica-agi/semantica) |
 | 2026-08-17 | PrimeIntellect-ai/prime-agent | GitHub Trending | 3 | AI Agent | TypeScript | 16570 | 0 | 0 | [https://github.com/PrimeIntellect-ai/prime-agent](https://github.com/PrimeIntellect-ai/prime-agent) |

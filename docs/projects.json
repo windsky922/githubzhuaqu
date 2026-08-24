@@ -1,7 +1,312 @@
 {
   "schema_version": 1,
-  "count": 230,
+  "count": 240,
   "projects": [
+    {
+      "run_date": "2026-08-24",
+      "full_name": "modular/modular",
+      "html_url": "https://github.com/modular/modular",
+      "description": "The Modular Platform (includes MAX & Mojo)",
+      "readme_summary": "[About Modular] | [MAX docs] | [Mojo docs] | [Contributing] This repo hosts open-source components of the Modular Platform, a unified platform for AI development and deployment, including the **MAX Framework**🧑‍🚀 and the **Mojo Language**🔥.",
+      "category": "Machine Learning",
+      "language": "Mojo",
+      "stargazers_count": 28975,
+      "forks_count": 3076,
+      "star_growth": 0,
+      "score": 0.6544,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 1,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 1 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发。",
+        "当前累计 Star 28975，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-08-24.html"
+    },
+    {
+      "run_date": "2026-08-24",
+      "full_name": "harry0703/MoneyPrinterTurbo",
+      "html_url": "https://github.com/harry0703/MoneyPrinterTurbo",
+      "description": "利用 AI 大模型和自动化工作流，根据主题或关键词一键生成高清短视频。Generate HD short videos from a topic or keyword with an automated AI workflow.",
+      "readme_summary": "只需提供视频 主题 或 关键词 ，即可自动生成视频脚本、匹配素材、生成字幕和背景音乐，并合成高清短视频。 简体中文 | English | 日本語 | 版本发布 | 问题反馈 WebUI API 感谢 Kimi 赞助本项目！Kimi K3 是 Moonshot AI 迄今能力最强的模型，也是全球首个开源 3T 级模型，拥有原生视觉能力与 100 万 Token 上下文，在知识工作、推理和长周期任务中展现前沿性能。在 MoneyPrinterTurbo 中，K3 能直接驱动视频创作，不仅撰写视频文案，还会提炼素材搜索关键词、决定成片画面；对内容理解越准确，匹配到的素材就越贴题。",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 115301,
+      "forks_count": 17515,
+      "star_growth": 36847,
+      "score": 0.6858,
+      "sources": [
+        "github_search",
+        "github_trending"
+      ],
+      "trending_rank": 2,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 2 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 36847，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-08-24.html"
+    },
+    {
+      "run_date": "2026-08-24",
+      "full_name": "basecamp/omarchy",
+      "html_url": "https://github.com/basecamp/omarchy",
+      "description": "Beautiful, Modern & Opinionated Linux",
+      "readme_summary": "Omarchy is a beautiful, modern & opinionated Linux distribution by DHH. Read more at omarchy.org. The manual lives in manual/, which is its authoritative source.",
+      "category": "Other",
+      "language": "Shell",
+      "stargazers_count": 29134,
+      "forks_count": 2960,
+      "star_growth": 0,
+      "score": 0.4417,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 3,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 3 位，是本期最重要的热度信号。",
+        "当前累计 Star 29134，具备一定社区关注度。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+      ],
+      "quality_score": 92,
+      "quality_level": "high",
+      "report_url": "weekly/2026-08-24.html"
+    },
+    {
+      "run_date": "2026-08-24",
+      "full_name": "AprilNEA/OpenLogi",
+      "html_url": "https://github.com/AprilNEA/OpenLogi",
+      "description": "⚡️A native, local-first alternative to Logitech Options+, written in Rust 🦀 — remap buttons, DPI, and SmartShift over HID++. No account, no telemetry.",
+      "readme_summary": "[!NOTE] 🚀 **OpenLogi is live on Product Hunt!** If you find it useful, we'd really appreciate your support and feedback. English | 简体中文 | 日本語 | Deutsch | Français | 한국어 OpenLogi [!WARNING] OpenLogi is under active development** and not yet stable — features and config may still change.",
+      "category": "Other",
+      "language": "Rust",
+      "stargazers_count": 14948,
+      "forks_count": 400,
+      "star_growth": 0,
+      "score": 0.4065,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 4,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 4 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：开发者工具。",
+        "当前累计 Star 14948，具备一定社区关注度。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-08-24.html"
+    },
+    {
+      "run_date": "2026-08-24",
+      "full_name": "cordiverse/cordis",
+      "html_url": "https://github.com/cordiverse/cordis",
+      "description": "Meta-Framework of Spatiotemporal Composability",
+      "readme_summary": "Cordis A Meta-Framework of Spatiotemporal Composability. Cordis is under active development. The API is not yet stable and may change without notice.** Paper: _A Programming Paradigm for Spatiotemporal Composability_ Documentation: cordis-primer",
+      "category": "Other",
+      "language": "TypeScript",
+      "stargazers_count": 7239,
+      "forks_count": 419,
+      "star_growth": 0,
+      "score": 0.3432,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 5,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 5 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Agent 开发、开发者工具。",
+        "当前累计 Star 7239，具备一定社区关注度。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-08-24.html"
+    },
+    {
+      "run_date": "2026-08-24",
+      "full_name": "volcengine/OpenViking",
+      "html_url": "https://github.com/volcengine/OpenViking",
+      "description": "Self-evolving Context Database for AI Agents. Unify Agent Memory, Knowledge RAG and Skills.",
+      "readme_summary": "English / 中文 / 日本語 👋 Join our Community 📱 Lark Group · WeChat · Discord · X OpenViking is an open-source context database for AI agents.",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 32487,
+      "forks_count": 2482,
+      "star_growth": 7410,
+      "score": 0.417,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 6,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 6 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 7410，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-08-24.html"
+    },
+    {
+      "run_date": "2026-08-24",
+      "full_name": "public-apis/public-apis",
+      "html_url": "https://github.com/public-apis/public-apis",
+      "description": "A collective list of free APIs",
+      "readme_summary": "APILayer unified suite allows you to integrate production-grade REST APIs using **One Account, One Dashboard, and One API key.** Whether you need to geocode an address, validate an email, fetch a flight, pull stock market data, or scrape a search result. Sign up and start building today!",
+      "category": "Other",
+      "language": "Python",
+      "stargazers_count": 469216,
+      "forks_count": 51756,
+      "star_growth": 30220,
+      "score": 0.3986,
+      "sources": [
+        "github_search",
+        "github_trending"
+      ],
+      "trending_rank": 7,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 7 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 30220，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-08-24.html"
+    },
+    {
+      "run_date": "2026-08-24",
+      "full_name": "jundot/omlx",
+      "html_url": "https://github.com/jundot/omlx",
+      "description": "LLM inference server with continuous batching & SSD caching for Apple Silicon — managed from the macOS menu bar",
+      "readme_summary": "oMLX English · Every LLM server I tried made me choose between convenience and control.",
+      "category": "LLM Tooling",
+      "language": "Python",
+      "stargazers_count": 20448,
+      "forks_count": 1731,
+      "star_growth": 0,
+      "score": 0.4015,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 8,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 8 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 20448，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-08-24.html"
+    },
+    {
+      "run_date": "2026-08-24",
+      "full_name": "apache/maka",
+      "html_url": "https://github.com/apache/maka",
+      "description": "Apache Maka (Incubating) is a local-first AI agent workspace. Model messages, tool calls, tool results, permission decisions, and termination events are recorded as an append-only log.",
+      "readme_summary": "A local-first Agent workspace built for real work. Maka inspects projects, runs tools under a sandbox boundary, and records model messages and tool calls as recoverable execution facts — on your machine, through one Runtime Host.",
+      "category": "AI Agent",
+      "language": "TypeScript",
+      "stargazers_count": 2356,
+      "forks_count": 269,
+      "star_growth": 0,
+      "score": 0.3613,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 11,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 11 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 2356，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-08-24.html"
+    },
+    {
+      "run_date": "2026-08-24",
+      "full_name": "NousResearch/hermes-agent",
+      "html_url": "https://github.com/NousResearch/hermes-agent",
+      "description": "The agent that grows with you",
+      "readme_summary": "The self-improving AI agent built by Nous Research.** It's the only agent with a built-in learning loop — it creates skills from experience, improves them during use, nudges itself to persist knowledge, searches its own past conversations, and builds a deepening model of who you are across sessions.",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 234990,
+      "forks_count": 47346,
+      "star_growth": 56857,
+      "score": 0.359,
+      "sources": [
+        "github_search"
+      ],
+      "trending_rank": 0,
+      "selection_reasons": [
+        "较上次记录新增 Star 56857，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 234990，具备一定社区关注度。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库简介较短，项目定位信息有限。"
+      ],
+      "quality_score": 92,
+      "quality_level": "high",
+      "report_url": "weekly/2026-08-24.html"
+    },
     {
       "run_date": "2026-08-17",
       "full_name": "cathrynlavery/diagram-design",
