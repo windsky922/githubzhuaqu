@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "summary_points": [
+    "AI Agent 是本期最集中的方向，共 7 个项目。",
+    "Python 是本期出现最多的主要语言，共 5 个项目。",
+    "本期入选项目累计新增 Star 187884。",
+    "freestylefly/awesome-gpt-image-2 是本期 GitHub Trending 排名最高的项目，周榜排名 1。",
+    "NousResearch/hermes-agent 是本期新增 Star 最高的项目，新增 60408。"
+  ],
+  "top_categories": [
+    {
+      "count": 7,
+      "name": "AI Agent"
+    },
+    {
+      "count": 2,
+      "name": "LLM Tooling"
+    },
+    {
+      "count": 1,
+      "name": "Other"
+    }
+  ],
+  "top_languages": [
+    {
+      "count": 5,
+      "name": "Python"
+    },
+    {
+      "count": 2,
+      "name": "JavaScript"
+    },
+    {
+      "count": 2,
+      "name": "TypeScript"
+    },
+    {
+      "count": 1,
+      "name": "Shell"
+    }
+  ],
+  "top_star_growth": [
+    {
+      "category": "AI Agent",
+      "full_name": "NousResearch/hermes-agent",
+      "html_url": "https://github.com/NousResearch/hermes-agent",
+      "language": "Python",
+      "star_growth": 60408,
+      "stargazers_count": 238541
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "Panniantong/Agent-Reach",
+      "html_url": "https://github.com/Panniantong/Agent-Reach",
+      "language": "Python",
+      "star_growth": 56948,
+      "stargazers_count": 76818
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "freestylefly/awesome-gpt-image-2",
+      "html_url": "https://github.com/freestylefly/awesome-gpt-image-2",
+      "language": "JavaScript",
+      "star_growth": 24415,
+      "stargazers_count": 25779
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "rohitg00/ai-engineering-from-scratch",
+      "html_url": "https://github.com/rohitg00/ai-engineering-from-scratch",
+      "language": "Python",
+      "star_growth": 23842,
+      "stargazers_count": 51326
+    },
+    {
+      "category": "LLM Tooling",
+      "full_name": "tashfeenahmed/freellmapi",
+      "html_url": "https://github.com/tashfeenahmed/freellmapi",
+      "language": "TypeScript",
+      "star_growth": 22271,
+      "stargazers_count": 22877
+    }
+  ],
+  "top_trending": [
+    {
+      "category": "AI Agent",
+      "full_name": "freestylefly/awesome-gpt-image-2",
+      "html_url": "https://github.com/freestylefly/awesome-gpt-image-2",
+      "language": "JavaScript",
+      "stargazers_count": 25779
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "tt-a1i/archify",
+      "html_url": "https://github.com/tt-a1i/archify",
+      "language": "JavaScript",
+      "stargazers_count": 35127
+    },
+    {
+      "category": "Other",
+      "full_name": "omacom/omarchy",
+      "html_url": "https://github.com/omacom/omarchy",
+      "language": "Shell",
+      "stargazers_count": 35605
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "apache/maka",
+      "html_url": "https://github.com/apache/maka",
+      "language": "TypeScript",
+      "stargazers_count": 4213
+    },
+    {
+      "category": "LLM Tooling",
+      "full_name": "tashfeenahmed/freellmapi",
+      "html_url": "https://github.com/tashfeenahmed/freellmapi",
+      "language": "TypeScript",
+      "stargazers_count": 22877
+    }
+  ],
+  "total_projects": 10,
+  "total_star_growth": 187884,
+  "trending_project_count": 8,
+  "trending_selected_rate": 0.8,
+  "trending_top10_selected_count": 8
+}

@@ -4,6 +4,16 @@
 
 | 日期 | 项目 | 来源 | Trending 排名 | 方向 | 语言 | Star | 新增 Star | 风险提示 | 链接 |
 |---|---|---|---:|---|---|---:|---:|---:|---|
+| 2026-08-31 | freestylefly/awesome-gpt-image-2 | GitHub Trending | 1 | AI Agent | JavaScript | 25779 | 24415 | 0 | [https://github.com/freestylefly/awesome-gpt-image-2](https://github.com/freestylefly/awesome-gpt-image-2) |
+| 2026-08-31 | tt-a1i/archify | GitHub Trending | 3 | AI Agent | JavaScript | 35127 | 0 | 0 | [https://github.com/tt-a1i/archify](https://github.com/tt-a1i/archify) |
+| 2026-08-31 | omacom/omarchy | GitHub Trending | 4 | Other | Shell | 35605 | 0 | 0 | [https://github.com/omacom/omarchy](https://github.com/omacom/omarchy) |
+| 2026-08-31 | apache/maka | GitHub Trending | 5 | AI Agent | TypeScript | 4213 | 0 | 0 | [https://github.com/apache/maka](https://github.com/apache/maka) |
+| 2026-08-31 | tashfeenahmed/freellmapi | GitHub Trending | 6 | LLM Tooling | TypeScript | 22877 | 22271 | 0 | [https://github.com/tashfeenahmed/freellmapi](https://github.com/tashfeenahmed/freellmapi) |
+| 2026-08-31 | MadsLorentzen/ai-job-search | GitHub Trending | 7 | AI Agent | Python | 38576 | 0 | 0 | [https://github.com/MadsLorentzen/ai-job-search](https://github.com/MadsLorentzen/ai-job-search) |
+| 2026-08-31 | anthropics/claude-plugins-official | GitHub Trending | 8 | LLM Tooling | Python | 35627 | 0 | 0 | [https://github.com/anthropics/claude-plugins-official](https://github.com/anthropics/claude-plugins-official) |
+| 2026-08-31 | rohitg00/ai-engineering-from-scratch | GitHub Trending | 10 | AI Agent | Python | 51326 | 23842 | 0 | [https://github.com/rohitg00/ai-engineering-from-scratch](https://github.com/rohitg00/ai-engineering-from-scratch) |
+| 2026-08-31 | NousResearch/hermes-agent | GitHub Search | - | AI Agent | Python | 238541 | 60408 | 0 | [https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) |
+| 2026-08-31 | Panniantong/Agent-Reach | GitHub Search | - | AI Agent | Python | 76818 | 56948 | 0 | [https://github.com/Panniantong/Agent-Reach](https://github.com/Panniantong/Agent-Reach) |
 | 2026-08-24 | modular/modular | GitHub Trending | 1 | Machine Learning | Mojo | 28975 | 0 | 0 | [https://github.com/modular/modular](https://github.com/modular/modular) |
 | 2026-08-24 | harry0703/MoneyPrinterTurbo | GitHub Search + GitHub Trending | 2 | AI Agent | Python | 115301 | 36847 | 0 | [https://github.com/harry0703/MoneyPrinterTurbo](https://github.com/harry0703/MoneyPrinterTurbo) |
 | 2026-08-24 | basecamp/omarchy | GitHub Trending | 3 | Other | Shell | 29134 | 0 | 0 | [https://github.com/basecamp/omarchy](https://github.com/basecamp/omarchy) |
