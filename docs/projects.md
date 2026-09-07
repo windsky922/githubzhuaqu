@@ -4,6 +4,16 @@
 
 | 日期 | 项目 | 来源 | Trending 排名 | 方向 | 语言 | Star | 新增 Star | 风险提示 | 链接 |
 |---|---|---|---:|---|---|---:|---:|---:|---|
+| 2026-09-07 | tt-a1i/archify | GitHub Trending | 1 | AI Agent | JavaScript | 50968 | 0 | 0 | [https://github.com/tt-a1i/archify](https://github.com/tt-a1i/archify) |
+| 2026-09-07 | magnitudedev/magnitude | GitHub Trending | 2 | AI Agent | TypeScript | 3711 | 0 | 0 | [https://github.com/magnitudedev/magnitude](https://github.com/magnitudedev/magnitude) |
+| 2026-09-07 | THU-MAIC/OpenMAIC | GitHub Trending | 3 | AI Agent | TypeScript | 32473 | 0 | 0 | [https://github.com/THU-MAIC/OpenMAIC](https://github.com/THU-MAIC/OpenMAIC) |
+| 2026-09-07 | Gitlawb/openclaude | GitHub Trending | 4 | AI Agent | TypeScript | 32850 | 0 | 0 | [https://github.com/Gitlawb/openclaude](https://github.com/Gitlawb/openclaude) |
+| 2026-09-07 | pollen-robotics/microduck_rl | GitHub Trending | 5 | Automation | Python | 1827 | 0 | 0 | [https://github.com/pollen-robotics/microduck_rl](https://github.com/pollen-robotics/microduck_rl) |
+| 2026-09-07 | google-research/timesfm | GitHub Trending | 6 | Other | Python | 31659 | 0 | 0 | [https://github.com/google-research/timesfm](https://github.com/google-research/timesfm) |
+| 2026-09-07 | jingyaogong/minimind | GitHub Trending | 7 | LLM Tooling | Python | 59181 | 0 | 0 | [https://github.com/jingyaogong/minimind](https://github.com/jingyaogong/minimind) |
+| 2026-09-07 | debpalash/VoiceStudio | GitHub Trending | 9 | AI Agent | Python | 19911 | 0 | 0 | [https://github.com/debpalash/VoiceStudio](https://github.com/debpalash/VoiceStudio) |
+| 2026-09-07 | handsomestWei/patent-disclosure-skill | GitHub Trending | 10 | Other | Python | 7886 | 0 | 0 | [https://github.com/handsomestWei/patent-disclosure-skill](https://github.com/handsomestWei/patent-disclosure-skill) |
+| 2026-09-07 | affaan-m/ECC | GitHub Search + GitHub Trending | 15 | AI Agent | JavaScript | 251460 | 46685 | 0 | [https://github.com/affaan-m/ECC](https://github.com/affaan-m/ECC) |
 | 2026-08-31 | freestylefly/awesome-gpt-image-2 | GitHub Trending | 1 | AI Agent | JavaScript | 25779 | 24415 | 0 | [https://github.com/freestylefly/awesome-gpt-image-2](https://github.com/freestylefly/awesome-gpt-image-2) |
 | 2026-08-31 | tt-a1i/archify | GitHub Trending | 3 | AI Agent | JavaScript | 35127 | 0 | 0 | [https://github.com/tt-a1i/archify](https://github.com/tt-a1i/archify) |
 | 2026-08-31 | omacom/omarchy | GitHub Trending | 4 | Other | Shell | 35605 | 0 | 0 | [https://github.com/omacom/omarchy](https://github.com/omacom/omarchy) |

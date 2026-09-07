@@ -1,7 +1,318 @@
 {
   "schema_version": 1,
-  "count": 250,
+  "count": 260,
   "projects": [
+    {
+      "run_date": "2026-09-07",
+      "full_name": "tt-a1i/archify",
+      "html_url": "https://github.com/tt-a1i/archify",
+      "description": "Agent skill for beautiful, verifiable architecture, workflow, sequence, data-flow, and lifecycle diagrams—self-contained HTML with motion and crisp export.",
+      "readme_summary": "English · 简体中文 Turn a codebase or system description into a polished, interactive system map — directly in chat.** Archify is a Node.js rendering and validation system for Cursor, Claude Code, Codex CLI, and OpenCode. Agents produce typed JSON IR; Archify deterministically compiles it into HTML/SVG.",
+      "category": "AI Agent",
+      "language": "JavaScript",
+      "stargazers_count": 50968,
+      "forks_count": 3324,
+      "star_growth": 0,
+      "score": 0.6555,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 1,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 1 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 50968，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-09-07.html"
+    },
+    {
+      "run_date": "2026-09-07",
+      "full_name": "magnitudedev/magnitude",
+      "html_url": "https://github.com/magnitudedev/magnitude",
+      "description": "Open source inference server that runs the best local models for your hardware, plugged into the agent you already use. Works with Pi, OpenCode, Hermes, OpenClaw, Codex, Claude Code, Oh My Pi, and Cline.",
+      "readme_summary": "Magnitude Magnitude is an open source inference server that runs the best local models for your hardware, plugged into the agent you already use. It profiles your machine, recommends the models that fit, then downloads, tunes, and runs them.",
+      "category": "AI Agent",
+      "language": "TypeScript",
+      "stargazers_count": 3711,
+      "forks_count": 263,
+      "star_growth": 0,
+      "score": 0.4929,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 2,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 2 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Agent 开发、开发者工具。",
+        "当前累计 Star 3711，具备一定社区关注度。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+      ],
+      "quality_score": 92,
+      "quality_level": "high",
+      "report_url": "weekly/2026-09-07.html"
+    },
+    {
+      "run_date": "2026-09-07",
+      "full_name": "THU-MAIC/OpenMAIC",
+      "html_url": "https://github.com/THU-MAIC/OpenMAIC",
+      "description": "Open Multi-Agent Interactive Classroom — Get an immersive, multi-agent learning experience in just one click",
+      "readme_summary": "> Get an immersive, multi-agent learning experience in just one click &nbsp;&nbsp; &nbsp; One prompt in, a whole course out — and now you can steer.** Released August 27, 2026, OpenMAIC v1.0.0 adds a **Pro workbench** alongside the classic one-click generator: chat with an agent that plans your curriculum, builds and revises every page, and works straight from your materials.",
+      "category": "AI Agent",
+      "language": "TypeScript",
+      "stargazers_count": 32473,
+      "forks_count": 5305,
+      "star_growth": 0,
+      "score": 0.4768,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 3,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 3 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Agent 开发、开发者工具。",
+        "当前累计 Star 32473，具备一定社区关注度。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+      ],
+      "quality_score": 92,
+      "quality_level": "high",
+      "report_url": "weekly/2026-09-07.html"
+    },
+    {
+      "run_date": "2026-09-07",
+      "full_name": "Gitlawb/openclaude",
+      "html_url": "https://github.com/Gitlawb/openclaude",
+      "description": "runs anywhere. uses anything",
+      "readme_summary": "OpenClaude is an open-source coding-agent CLI for cloud and local model providers.",
+      "category": "AI Agent",
+      "language": "TypeScript",
+      "stargazers_count": 32850,
+      "forks_count": 9059,
+      "star_growth": 0,
+      "score": 0.5974,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 4,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 4 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 32850，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库简介较短，项目定位信息有限。"
+      ],
+      "quality_score": 92,
+      "quality_level": "high",
+      "report_url": "weekly/2026-09-07.html"
+    },
+    {
+      "run_date": "2026-09-07",
+      "full_name": "pollen-robotics/microduck_rl",
+      "html_url": "https://github.com/pollen-robotics/microduck_rl",
+      "description": "RL training environments for Microduck (mjlab)",
+      "readme_summary": "RL training environments for Microduck — a ~800 g, ~25 cm tall bipedal robot — built on mjlab (MuJoCo Warp) with PPO. Policies are trained here at 50 Hz, exported to ONNX, and deployed on the real robot by the runtime in pollen-robotics/microduck.",
+      "category": "Automation",
+      "language": "Python",
+      "stargazers_count": 1827,
+      "forks_count": 364,
+      "star_growth": 0,
+      "score": 0.4919,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 5,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 5 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 1827，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+      ],
+      "quality_score": 92,
+      "quality_level": "high",
+      "report_url": "weekly/2026-09-07.html"
+    },
+    {
+      "run_date": "2026-09-07",
+      "full_name": "google-research/timesfm",
+      "html_url": "https://github.com/google-research/timesfm",
+      "description": "TimesFM (Time Series Foundation Model) is a pretrained time-series foundation model developed by Google Research for time-series forecasting.",
+      "readme_summary": "TimesFM (Time Series Foundation Model) is a pretrained time-series foundation model developed by Google Research for time-series forecasting. Paper: A decoder-only foundation model for time-series forecasting, ICML 2024. (NEW!) TimesFM 3.0 Checkpoint: google/timesfm-3.0-pytorch.",
+      "category": "Other",
+      "language": "Python",
+      "stargazers_count": 31659,
+      "forks_count": 3029,
+      "star_growth": 0,
+      "score": 0.4617,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 6,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 6 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 31659，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+      ],
+      "quality_score": 92,
+      "quality_level": "high",
+      "report_url": "weekly/2026-09-07.html"
+    },
+    {
+      "run_date": "2026-09-07",
+      "full_name": "jingyaogong/minimind",
+      "html_url": "https://github.com/jingyaogong/minimind",
+      "description": "🧠 Train a 64M-parameter LLM from scratch in just 2h!",
+      "readme_summary": "\"大道至简\" 中文 | English 此开源项目旨在完全从 0 开始，仅用 3 块钱成本与 2 小时训练时间，即可训练出规模约为 64M 的超小语言模型 MiniMind。 MiniMind 系列极其轻量，主线最小版本体积约为 GPT-3 的 $\\frac{1}{2700}$，力求让普通个人 GPU 也能快速完成训练与复现。",
+      "category": "LLM Tooling",
+      "language": "Python",
+      "stargazers_count": 59181,
+      "forks_count": 7687,
+      "star_growth": 0,
+      "score": 0.4478,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 7,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 7 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 59181，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-09-07.html"
+    },
+    {
+      "run_date": "2026-09-07",
+      "full_name": "debpalash/VoiceStudio",
+      "html_url": "https://github.com/debpalash/VoiceStudio",
+      "description": "VoiceStudio is the open-source, fully-local ElevenLabs alternative — voice cloning, voice design, video dubbing, dictation, transcription & audiobook creation in 646 languages.",
+      "readme_summary": "VoiceStudio Previously OmniVoice-Studio Clone voices, dub video, dictate, and produce long-form audio on your own hardware. 16 TTS engines · 11 ASR engines · 646-language catalogue · macOS, Windows, Linux, and Docker No account, API key, subscription, or usage meter for the local workflow.",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 19911,
+      "forks_count": 2519,
+      "star_growth": 0,
+      "score": 0.572,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 9,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 9 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 19911，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-09-07.html"
+    },
+    {
+      "run_date": "2026-09-07",
+      "full_name": "handsomestWei/patent-disclosure-skill",
+      "html_url": "https://github.com/handsomestWei/patent-disclosure-skill",
+      "description": "中国专利.skill：专利点挖掘与交底书（发明/实用/外观）编写，通俗解读专利，嗅探政策动向，辅助审查答复。",
+      "readme_summary": "专利点挖掘与交底书（发明/实用/外观）编写，已有交底改写成申请文件，公布公告著录检索，通俗解读专利，对照审查口径出政策简报，辅助审查答复。 有设计文档和代码，但**专利点还没梳**？交底书要**框图 + 可改 Word**？ 定稿后还要**多轮补材料、纠错**并留下修改追溯？",
+      "category": "Other",
+      "language": "Python",
+      "stargazers_count": 7886,
+      "forks_count": 850,
+      "star_growth": 0,
+      "score": 0.4138,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 10,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 10 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 7886，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-09-07.html"
+    },
+    {
+      "run_date": "2026-09-07",
+      "full_name": "affaan-m/ECC",
+      "html_url": "https://github.com/affaan-m/ECC",
+      "description": "The agent harness performance optimization system. Skills, instincts, memory, security, and research-first development for Claude Code, Codex, Opencode, Cursor and beyond.",
+      "readme_summary": "Language: [!WARNING] Official sources only.** Install ECC only from verified channels: the GitHub repository github.com/affaan-m/ECC, the npm packages ecc-universal and ecc-agentshield, the GitHub App, the plugin slug ecc@ecc, and the project website ecc.tools.",
+      "category": "AI Agent",
+      "language": "JavaScript",
+      "stargazers_count": 251460,
+      "forks_count": 37796,
+      "star_growth": 46685,
+      "score": 0.3824,
+      "sources": [
+        "github_search",
+        "github_trending"
+      ],
+      "trending_rank": 15,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 15 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 46685，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-09-07.html"
+    },
     {
       "run_date": "2026-08-31",
       "full_name": "freestylefly/awesome-gpt-image-2",

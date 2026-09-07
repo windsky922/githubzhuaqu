@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "summary_points": [
+    "AI Agent 是本期最集中的方向，共 6 个项目。",
+    "Python 是本期出现最多的主要语言，共 5 个项目。",
+    "本期入选项目累计新增 Star 46685。",
+    "tt-a1i/archify 是本期 GitHub Trending 排名最高的项目，周榜排名 1。",
+    "affaan-m/ECC 是本期新增 Star 最高的项目，新增 46685。"
+  ],
+  "top_categories": [
+    {
+      "count": 6,
+      "name": "AI Agent"
+    },
+    {
+      "count": 2,
+      "name": "Other"
+    },
+    {
+      "count": 1,
+      "name": "Automation"
+    },
+    {
+      "count": 1,
+      "name": "LLM Tooling"
+    }
+  ],
+  "top_languages": [
+    {
+      "count": 5,
+      "name": "Python"
+    },
+    {
+      "count": 3,
+      "name": "TypeScript"
+    },
+    {
+      "count": 2,
+      "name": "JavaScript"
+    }
+  ],
+  "top_star_growth": [
+    {
+      "category": "AI Agent",
+      "full_name": "affaan-m/ECC",
+      "html_url": "https://github.com/affaan-m/ECC",
+      "language": "JavaScript",
+      "star_growth": 46685,
+      "stargazers_count": 251460
+    }
+  ],
+  "top_trending": [
+    {
+      "category": "AI Agent",
+      "full_name": "tt-a1i/archify",
+      "html_url": "https://github.com/tt-a1i/archify",
+      "language": "JavaScript",
+      "stargazers_count": 50968
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "magnitudedev/magnitude",
+      "html_url": "https://github.com/magnitudedev/magnitude",
+      "language": "TypeScript",
+      "stargazers_count": 3711
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "THU-MAIC/OpenMAIC",
+      "html_url": "https://github.com/THU-MAIC/OpenMAIC",
+      "language": "TypeScript",
+      "stargazers_count": 32473
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "Gitlawb/openclaude",
+      "html_url": "https://github.com/Gitlawb/openclaude",
+      "language": "TypeScript",
+      "stargazers_count": 32850
+    },
+    {
+      "category": "Automation",
+      "full_name": "pollen-robotics/microduck_rl",
+      "html_url": "https://github.com/pollen-robotics/microduck_rl",
+      "language": "Python",
+      "stargazers_count": 1827
+    }
+  ],
+  "total_projects": 10,
+  "total_star_growth": 46685,
+  "trending_project_count": 10,
+  "trending_selected_rate": 1.0,
+  "trending_top10_selected_count": 9
+}
