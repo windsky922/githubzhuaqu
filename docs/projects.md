@@ -4,6 +4,16 @@
 
 | 日期 | 项目 | 来源 | Trending 排名 | 方向 | 语言 | Star | 新增 Star | 风险提示 | 链接 |
 |---|---|---|---:|---|---|---:|---:|---:|---|
+| 2026-09-14 | ayghri/i-have-adhd | GitHub Trending | 1 | AI Agent | Python | 44442 | 0 | 0 | [https://github.com/ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) |
+| 2026-09-14 | affaan-m/ECC | GitHub Search + GitHub Trending | 2 | AI Agent | JavaScript | 257796 | 53021 | 0 | [https://github.com/affaan-m/ECC](https://github.com/affaan-m/ECC) |
+| 2026-09-14 | openai/plugins | GitHub Trending | 3 | LLM Tooling | JavaScript | 6625 | 0 | 1 | [https://github.com/openai/plugins](https://github.com/openai/plugins) |
+| 2026-09-14 | bilawalsidhu/gods-eye-view | GitHub Trending | 4 | Other | JavaScript | 32073 | 0 | 0 | [https://github.com/bilawalsidhu/gods-eye-view](https://github.com/bilawalsidhu/gods-eye-view) |
+| 2026-09-14 | mksglu/context-mode | GitHub Trending | 5 | AI Agent | TypeScript | 22661 | 11574 | 0 | [https://github.com/mksglu/context-mode](https://github.com/mksglu/context-mode) |
+| 2026-09-14 | DietrichGebert/ponytail | GitHub Search + GitHub Trending | 6 | AI Agent | JavaScript | 137440 | 0 | 0 | [https://github.com/DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) |
+| 2026-09-14 | tt-a1i/archify | GitHub Trending | 7 | AI Agent | JavaScript | 60953 | 0 | 0 | [https://github.com/tt-a1i/archify](https://github.com/tt-a1i/archify) |
+| 2026-09-14 | obra/superpowers | GitHub Search + GitHub Trending | 11 | AI Agent | Shell | 286236 | 69785 | 0 | [https://github.com/obra/superpowers](https://github.com/obra/superpowers) |
+| 2026-09-14 | microsoft/markitdown | GitHub Search + GitHub Trending | 10 | LLM Tooling | Python | 183637 | 42118 | 0 | [https://github.com/microsoft/markitdown](https://github.com/microsoft/markitdown) |
+| 2026-09-14 | NousResearch/hermes-agent | GitHub Search | - | AI Agent | Python | 245191 | 67058 | 0 | [https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) |
 | 2026-09-07 | tt-a1i/archify | GitHub Trending | 1 | AI Agent | JavaScript | 50968 | 0 | 0 | [https://github.com/tt-a1i/archify](https://github.com/tt-a1i/archify) |
 | 2026-09-07 | magnitudedev/magnitude | GitHub Trending | 2 | AI Agent | TypeScript | 3711 | 0 | 0 | [https://github.com/magnitudedev/magnitude](https://github.com/magnitudedev/magnitude) |
 | 2026-09-07 | THU-MAIC/OpenMAIC | GitHub Trending | 3 | AI Agent | TypeScript | 32473 | 0 | 0 | [https://github.com/THU-MAIC/OpenMAIC](https://github.com/THU-MAIC/OpenMAIC) |

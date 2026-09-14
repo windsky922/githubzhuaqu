@@ -4,26 +4,27 @@
 
 ## 最新周报
 
-- [2026-09-07](weekly/2026-09-07.html)
+- [2026-09-14](weekly/2026-09-14.html)
 
 ## 最新运行摘要
 
 - 入选项目：10 个
-- 采集候选：321 个
+- 采集候选：323 个
 - 生成方式：降级模板
-- Telegram：已推送
+- Telegram：未推送
 - 采集错误：0 条
 
 ## 最新趋势要点
 
-- AI Agent 是本期最集中的方向，共 6 个项目。
-- Python 是本期出现最多的主要语言，共 5 个项目。
-- 本期入选项目累计新增 Star 46685。
-- tt-a1i/archify 是本期 GitHub Trending 排名最高的项目，周榜排名 1。
-- affaan-m/ECC 是本期新增 Star 最高的项目，新增 46685。
+- AI Agent 是本期最集中的方向，共 7 个项目。
+- JavaScript 是本期出现最多的主要语言，共 5 个项目。
+- 本期入选项目累计新增 Star 243556。
+- ayghri/i-have-adhd 是本期 GitHub Trending 排名最高的项目，周榜排名 1。
+- obra/superpowers 是本期新增 Star 最高的项目，新增 69785。
 
 ## 全部周报
 
+- [2026-09-14](weekly/2026-09-14.html)：10 个项目，降级模板，Telegram 未推送，主语言 JavaScript，主方向 AI Agent，新增 Star 243556，Trending 项目 9
 - [2026-09-07](weekly/2026-09-07.html)：10 个项目，降级模板，Telegram 已推送，主语言 Python，主方向 AI Agent，新增 Star 46685，Trending 项目 10
 - [2026-08-31](weekly/2026-08-31.html)：10 个项目，Kimi，Telegram 已推送，主语言 Python，主方向 AI Agent，新增 Star 187884，Trending 项目 8
 - [2026-08-24](weekly/2026-08-24.html)：10 个项目，Kimi，Telegram 已推送，主语言 Python，主方向 AI Agent，新增 Star 131334，Trending 项目 9

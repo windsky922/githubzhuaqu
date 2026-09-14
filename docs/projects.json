@@ -1,7 +1,318 @@
 {
   "schema_version": 1,
-  "count": 260,
+  "count": 270,
   "projects": [
+    {
+      "run_date": "2026-09-14",
+      "full_name": "ayghri/i-have-adhd",
+      "html_url": "https://github.com/ayghri/i-have-adhd",
+      "description": "A skill to stop your coding agent from burying the answer. ADHD-friendly output.",
+      "readme_summary": "ADHD-friendly outputs. No ADHD diagnosis needed! 🇬🇧 · Copy/paste into your CLI prompt: Or 🔗 check the installation instructions.",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 44442,
+      "forks_count": 2556,
+      "star_growth": 0,
+      "score": 0.6551,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 1,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 1 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 44442，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-09-14.html"
+    },
+    {
+      "run_date": "2026-09-14",
+      "full_name": "affaan-m/ECC",
+      "html_url": "https://github.com/affaan-m/ECC",
+      "description": "The agent harness performance optimization system. Skills, instincts, memory, security, and research-first development for Claude Code, Codex, Opencode, Cursor and beyond.",
+      "readme_summary": "Language: [!WARNING] Official sources only.** Install ECC only from verified channels: the GitHub repository github.com/affaan-m/ECC, the npm packages ecc-universal and ecc-agentshield, the GitHub App, the plugin slug ecc@ecc, and the project website ecc.tools.",
+      "category": "AI Agent",
+      "language": "JavaScript",
+      "stargazers_count": 257796,
+      "forks_count": 38554,
+      "star_growth": 53021,
+      "score": 0.8172,
+      "sources": [
+        "github_search",
+        "github_trending"
+      ],
+      "trending_rank": 2,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 2 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 53021，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-09-14.html"
+    },
+    {
+      "run_date": "2026-09-14",
+      "full_name": "openai/plugins",
+      "html_url": "https://github.com/openai/plugins",
+      "description": "OpenAI Plugins",
+      "readme_summary": "This repository contains a curated collection of Codex plugin examples.",
+      "category": "LLM Tooling",
+      "language": "JavaScript",
+      "stargazers_count": 6625,
+      "forks_count": 872,
+      "star_growth": 0,
+      "score": 0.445,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 3,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 3 位，是本期最重要的热度信号。",
+        "当前累计 Star 6625，具备一定社区关注度。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [
+        "未识别到许可证，复用代码前需要人工确认授权。"
+      ],
+      "security_score": 85,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库简介较短，项目定位信息有限。",
+        "许可证元数据缺失，复用代码前需要确认授权。",
+        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+      ],
+      "quality_score": 72,
+      "quality_level": "medium",
+      "report_url": "weekly/2026-09-14.html"
+    },
+    {
+      "run_date": "2026-09-14",
+      "full_name": "bilawalsidhu/gods-eye-view",
+      "html_url": "https://github.com/bilawalsidhu/gods-eye-view",
+      "description": "A spy satellite simulator in your browser, except the data is real. Live open source spatial intelligence on a photorealistic 3D globe.",
+      "readme_summary": "Photorealistic 3D globe. Live aircraft, ships, satellites, earthquakes, traffic, and public cameras. Hands-free voice control powered by a realtime AI agent.",
+      "category": "Other",
+      "language": "JavaScript",
+      "stargazers_count": 32073,
+      "forks_count": 6438,
+      "star_growth": 0,
+      "score": 0.4655,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 4,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 4 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发。",
+        "当前累计 Star 32073，具备一定社区关注度。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-09-14.html"
+    },
+    {
+      "run_date": "2026-09-14",
+      "full_name": "mksglu/context-mode",
+      "html_url": "https://github.com/mksglu/context-mode",
+      "description": "Context window optimization for AI coding agents. Sandboxes tool output (98% reduction), persists session memory, and   enforces routing across 17 platforms via MCP + hooks.",
+      "readme_summary": "The other half of the context problem.** Used across teams at Every MCP tool call dumps raw data into your context window. A Playwright snapshot costs 56 KB. Twenty GitHub issues cost 59 KB.",
+      "category": "AI Agent",
+      "language": "TypeScript",
+      "stargazers_count": 22661,
+      "forks_count": 1634,
+      "star_growth": 11574,
+      "score": 0.6224,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 5,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 5 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 11574，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-09-14.html"
+    },
+    {
+      "run_date": "2026-09-14",
+      "full_name": "DietrichGebert/ponytail",
+      "html_url": "https://github.com/DietrichGebert/ponytail",
+      "description": "Makes your AI agent think like the laziest senior dev in the room. The best code is the code you never wrote.",
+      "readme_summary": "Ponytail He says nothing. He writes one line. ~54% less code (up to 94%) &middot; ~20% cheaper &middot; ~27% faster &middot; 100% safe Measured on real Claude Code sessions editing a real open-source repo (FastAPI + React), against the same agent with no skill.",
+      "category": "AI Agent",
+      "language": "JavaScript",
+      "stargazers_count": 137440,
+      "forks_count": 7382,
+      "star_growth": 0,
+      "score": 0.494,
+      "sources": [
+        "github_search",
+        "github_trending"
+      ],
+      "trending_rank": 6,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 6 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 137440，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-09-14.html"
+    },
+    {
+      "run_date": "2026-09-14",
+      "full_name": "tt-a1i/archify",
+      "html_url": "https://github.com/tt-a1i/archify",
+      "description": "Agent skill for beautiful, verifiable architecture, workflow, sequence, data-flow, and lifecycle diagrams—self-contained HTML with motion and crisp export.",
+      "readme_summary": "English · 简体中文 Turn a codebase or system description into a polished, interactive system map — directly in chat.** Archify is a Node.js rendering and validation system for Cursor, Claude Code, Codex CLI, and OpenCode. Agents produce typed JSON IR; Archify deterministically compiles it into HTML/SVG.",
+      "category": "AI Agent",
+      "language": "JavaScript",
+      "stargazers_count": 60953,
+      "forks_count": 4007,
+      "star_growth": 0,
+      "score": 0.5529,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 7,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 7 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 60953，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-09-14.html"
+    },
+    {
+      "run_date": "2026-09-14",
+      "full_name": "obra/superpowers",
+      "html_url": "https://github.com/obra/superpowers",
+      "description": "An agentic skills framework & software development methodology that works.",
+      "readme_summary": "Superpowers is a complete software development methodology for your coding agents, built on top of a set of composable skills and some initial instructions that make sure your agent uses them.",
+      "category": "AI Agent",
+      "language": "Shell",
+      "stargazers_count": 286236,
+      "forks_count": 25604,
+      "star_growth": 69785,
+      "score": 0.6207,
+      "sources": [
+        "github_search",
+        "github_trending"
+      ],
+      "trending_rank": 11,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 11 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 69785，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-09-14.html"
+    },
+    {
+      "run_date": "2026-09-14",
+      "full_name": "microsoft/markitdown",
+      "html_url": "https://github.com/microsoft/markitdown",
+      "description": "Python tool for converting files and office documents to Markdown.",
+      "readme_summary": "[!IMPORTANT] MarkItDown performs I/O with the privileges of the current process. Like open() or requests.get(), it will access resources that the process itself can access.",
+      "category": "LLM Tooling",
+      "language": "Python",
+      "stargazers_count": 183637,
+      "forks_count": 13512,
+      "star_growth": 42118,
+      "score": 0.564,
+      "sources": [
+        "github_search",
+        "github_trending"
+      ],
+      "trending_rank": 10,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 10 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 42118，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-09-14.html"
+    },
+    {
+      "run_date": "2026-09-14",
+      "full_name": "NousResearch/hermes-agent",
+      "html_url": "https://github.com/NousResearch/hermes-agent",
+      "description": "The agent that grows with you",
+      "readme_summary": "The self-improving AI agent built by Nous Research.** It's the only agent with a built-in learning loop — it creates skills from experience, improves them during use, nudges itself to persist knowledge, searches its own past conversations, and builds a deepening model of who you are across sessions.",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 245191,
+      "forks_count": 51008,
+      "star_growth": 67058,
+      "score": 0.4871,
+      "sources": [
+        "github_search"
+      ],
+      "trending_rank": 0,
+      "selection_reasons": [
+        "较上次记录新增 Star 67058，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 245191，具备一定社区关注度。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库简介较短，项目定位信息有限。"
+      ],
+      "quality_score": 92,
+      "quality_level": "high",
+      "report_url": "weekly/2026-09-14.html"
+    },
     {
       "run_date": "2026-09-07",
       "full_name": "tt-a1i/archify",
