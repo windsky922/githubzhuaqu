@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GitHub 周报 2026-09-21</title>
+  <style>
+    body { margin: 0; background: #f6f7f9; color: #1f2933; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height: 1.7; }
+    main { max-width: 960px; margin: 0 auto; padding: 32px 20px 56px; }
+    article { background: #fff; border: 1px solid #d8dee8; padding: 28px; }
+    h1, h2, h3, h4 { line-height: 1.3; }
+    a { color: #0969da; }
+    code { background: #eef2f7; padding: 2px 5px; }
+    table { width: 100%; border-collapse: collapse; margin: 18px 0; display: block; overflow-x: auto; }
+    th, td { border: 1px solid #d8dee8; padding: 8px 10px; text-align: left; vertical-align: top; }
+    th { background: #f1f4f8; }
+    hr { border: 0; border-top: 1px solid #d8dee8; margin: 24px 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <article>
+      <h1>GitHub 每周热点项目周报 - 2026-09-21</h1>
+      <h2>一、本周趋势</h2>
+      <p>本周根据 GitHub Trending 与 GitHub Search 采集结果生成降级版周报。以下分析基于仓库名称、简介、README 摘要、语言、Star、Fork 和 Trending 排名；具体降级原因记录在本次运行摘要中。</p>
+      <p>• AI Agent 是本期最集中的方向，共 8 个项目。</p>
+      <p>• TypeScript 是本期出现最多的主要语言，共 3 个项目。</p>
+      <p>• 本期入选项目累计新增 Star 167713。</p>
+      <p>• alibaba/open-code-review 是本期 GitHub Trending 排名最高的项目，周榜排名 1。</p>
+      <p>• addyosmani/agent-skills 是本期新增 Star 最高的项目，新增 72123。</p>
+      <h2>二、热点项目总览</h2>
+      <table>
+        <thead><tr><th>序号</th><th>项目</th><th>来源</th><th>Trending 排名</th><th>方向</th><th>Star</th><th>新增 Star</th><th>Fork</th><th>语言</th><th>链接</th></tr></thead>
+        <tbody>
+        <tr><td>1</td><td>alibaba/open-code-review</td><td>GitHub Search + GitHub Trending</td><td>1</td><td>AI Agent</td><td>38482</td><td>0</td><td>2743</td><td>Go</td><td><a href="https://github.com/alibaba/open-code-review">https://github.com/alibaba/open-code-review</a></td></tr>
+        <tr><td>2</td><td>anthropics/claude-code</td><td>GitHub Search + GitHub Trending</td><td>2</td><td>AI Agent</td><td>147182</td><td>17441</td><td>24078</td><td>TypeScript</td><td><a href="https://github.com/anthropics/claude-code">https://github.com/anthropics/claude-code</a></td></tr>
+        <tr><td>3</td><td>affaan-m/ECC</td><td>GitHub Search + GitHub Trending</td><td>3</td><td>AI Agent</td><td>263843</td><td>59068</td><td>39475</td><td>JavaScript</td><td><a href="https://github.com/affaan-m/ECC">https://github.com/affaan-m/ECC</a></td></tr>
+        <tr><td>4</td><td>Tencent/WeKnora</td><td>GitHub Trending</td><td>4</td><td>AI Agent</td><td>28090</td><td>0</td><td>3776</td><td>Go</td><td><a href="https://github.com/Tencent/WeKnora">https://github.com/Tencent/WeKnora</a></td></tr>
+        <tr><td>5</td><td>addyosmani/agent-skills</td><td>GitHub Trending</td><td>5</td><td>AI Agent</td><td>97753</td><td>72123</td><td>10297</td><td>JavaScript</td><td><a href="https://github.com/addyosmani/agent-skills">https://github.com/addyosmani/agent-skills</a></td></tr>
+        <tr><td>6</td><td>anthropics/knowledge-work-plugins</td><td>GitHub Trending</td><td>6</td><td>LLM Tooling</td><td>25290</td><td>6390</td><td>3007</td><td>Python</td><td><a href="https://github.com/anthropics/knowledge-work-plugins">https://github.com/anthropics/knowledge-work-plugins</a></td></tr>
+        <tr><td>7</td><td>bilawalsidhu/gods-eye-view</td><td>GitHub Trending</td><td>7</td><td>Other</td><td>39712</td><td>0</td><td>8036</td><td>JavaScript</td><td><a href="https://github.com/bilawalsidhu/gods-eye-view">https://github.com/bilawalsidhu/gods-eye-view</a></td></tr>
+        <tr><td>8</td><td>max-sixty/worktrunk</td><td>GitHub Trending</td><td>9</td><td>AI Agent</td><td>8218</td><td>0</td><td>284</td><td>Rust</td><td><a href="https://github.com/max-sixty/worktrunk">https://github.com/max-sixty/worktrunk</a></td></tr>
+        <tr><td>9</td><td>mksglu/context-mode</td><td>GitHub Trending</td><td>8</td><td>AI Agent</td><td>23778</td><td>12691</td><td>1716</td><td>TypeScript</td><td><a href="https://github.com/mksglu/context-mode">https://github.com/mksglu/context-mode</a></td></tr>
+        <tr><td>10</td><td>stablyai/orca</td><td>GitHub Trending</td><td>12</td><td>AI Agent</td><td>73726</td><td>0</td><td>4830</td><td>TypeScript</td><td><a href="https://github.com/stablyai/orca">https://github.com/stablyai/orca</a></td></tr>
+        </tbody>
+      </table>
+      <h2>三、重点项目分析</h2>
+      <h3>1. alibaba/open-code-review</h3>
+      <p>• 项目定位：仅根据仓库名称和简介判断，属于 AI Agent 方向。</p>
+      <p>• 简介：Secure, fast, efficient, battle-tested at Alibaba&#x27;s scale. Hybrid architecture code review tool: deterministic pipelines + LLM Agent, precise line-level comments, built-in multi-language ruleset (NPE, thread-safety, XSS, SQL injection), OpenAI &amp; Anthropic compatible.</p>
+      <p>• README 摘要：OpenCodeReview English | 简体中文 | 日本語 | 한국어 | Русский Open Code Review is an AI-powered code review CLI tool. It originated as Alibaba Group&#x27;s internal official AI code review assistant — over the past two years, it has served tens of thousands of developers and identified millions of code defects.</p>
+      <p>• 技术信息：主要语言 Go，Star 38482，Fork 2743，较上次记录新增 Star 0。</p>
+      <p>• 热度来源：GitHub Search + GitHub Trending，Trending 排名 1。</p>
+      <p>• 入选原因：进入 GitHub Trending 周榜第 1 位，是本期最重要的热度信号。；匹配当前个性化方向：Agent 开发、开发者工具。；当前累计 Star 38482，具备一定社区关注度。；仓库主题、语言或名称与关注方向匹配。</p>
+      <p>• 质量信号：高质量，质量分 100，暂未发现明显质量短板。</p>
+      <p>• 风险提示：未发现明显元数据风险，但仍需自行审查代码和依赖。</p>
+      <p>• 学习价值：可作为了解 AI Agent 相关开源实践的参考。</p>
+      <p>• 原链接：<a href="https://github.com/alibaba/open-code-review">https://github.com/alibaba/open-code-review</a></p>
+      <h3>2. anthropics/claude-code</h3>
+      <p>• 项目定位：仅根据仓库名称和简介判断，属于 AI Agent 方向。</p>
+      <p>• 简介：Claude Code is an agentic coding tool that lives in your terminal, understands your codebase, and helps you code faster by executing routine tasks, explaining complex code, and handling git workflows - all through natural language commands.</p>
+      <p>• README 摘要：Use it in your terminal, IDE, or tag @claude on Github. Learn more in the official documentation**. [!NOTE] Installation via npm is deprecated.</p>
+      <p>• 技术信息：主要语言 TypeScript，Star 147182，Fork 24078，较上次记录新增 Star 17441。</p>
+      <p>• 热度来源：GitHub Search + GitHub Trending，Trending 排名 2。</p>
+      <p>• 入选原因：进入 GitHub Trending 周榜第 2 位，是本期最重要的热度信号。；较上次记录新增 Star 17441，近期热度上升。；此前已经推送过，本次因仍然具备热点信号继续保留观察。；匹配当前个性化方向：Agent 开发、开发者工具。</p>
+      <p>• 质量信号：高质量，质量分 80；许可证元数据缺失，复用代码前需要确认授权。；仓库主题标签较少，垂直方向判断可能不够稳定。</p>
+      <p>• 风险提示：未识别到许可证，复用代码前需要人工确认授权。</p>
+      <p>• 学习价值：可作为了解 AI Agent 相关开源实践的参考。</p>
+      <p>• 原链接：<a href="https://github.com/anthropics/claude-code">https://github.com/anthropics/claude-code</a></p>
+      <h3>3. affaan-m/ECC</h3>
+      <p>• 项目定位：仅根据仓库名称和简介判断，属于 AI Agent 方向。</p>
+      <p>• 简介：The agent harness performance optimization system. Skills, instincts, memory, security, and research-first development for Claude Code, Codex, Opencode, Cursor and beyond.</p>
+      <p>• README 摘要：Language: [!WARNING] Official sources only.** Install ECC only from verified channels: the GitHub repository github.com/affaan-m/ECC, the npm packages ecc-universal and ecc-agentshield, the GitHub App, the plugin slug ecc@ecc, and the project website ecc.tools.</p>
+      <p>• 技术信息：主要语言 JavaScript，Star 263843，Fork 39475，较上次记录新增 Star 59068。</p>
+      <p>• 热度来源：GitHub Search + GitHub Trending，Trending 排名 3。</p>
+      <p>• 入选原因：进入 GitHub Trending 周榜第 3 位，是本期最重要的热度信号。；较上次记录新增 Star 59068，近期热度上升。；此前已经推送过，本次因仍然具备热点信号继续保留观察。；匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。</p>
+      <p>• 质量信号：高质量，质量分 100，暂未发现明显质量短板。</p>
+      <p>• 风险提示：未发现明显元数据风险，但仍需自行审查代码和依赖。</p>
+      <p>• 学习价值：可作为了解 AI Agent 相关开源实践的参考。</p>
+      <p>• 原链接：<a href="https://github.com/affaan-m/ECC">https://github.com/affaan-m/ECC</a></p>
+      <h3>4. Tencent/WeKnora</h3>
+      <p>• 项目定位：仅根据仓库名称和简介判断，属于 AI Agent 方向。</p>
+      <p>• 简介：Open-source LLM knowledge platform: turn raw documents into a queryable RAG, an autonomous reasoning agent, and a self-maintaining Wiki.</p>
+      <p>• README 摘要：Overview • Architecture • Key Features • Getting Started • API Reference • Developer Guide WeKnora** is an open-source, LLM-powered knowledge framework built for enterprise-grade document understanding, semantic retrieval, and autonomous reasoning.</p>
+      <p>• 技术信息：主要语言 Go，Star 28090，Fork 3776，较上次记录新增 Star 0。</p>
+      <p>• 热度来源：GitHub Trending，Trending 排名 4。</p>
+      <p>• 入选原因：进入 GitHub Trending 周榜第 4 位，是本期最重要的热度信号。；匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。；当前累计 Star 28090，具备一定社区关注度。；仓库主题、语言或名称与关注方向匹配。</p>
+      <p>• 质量信号：高质量，质量分 100，暂未发现明显质量短板。</p>
+      <p>• 风险提示：未发现明显元数据风险，但仍需自行审查代码和依赖。</p>
+      <p>• 学习价值：可作为了解 AI Agent 相关开源实践的参考。</p>
+      <p>• 原链接：<a href="https://github.com/Tencent/WeKnora">https://github.com/Tencent/WeKnora</a></p>
+      <h3>5. addyosmani/agent-skills</h3>
+      <p>• 项目定位：仅根据仓库名称和简介判断，属于 AI Agent 方向。</p>
+      <p>• 简介：Production-grade engineering skills for AI coding agents.</p>
+      <p>• README 摘要：Production-grade engineering skills for AI coding agents.** Skills encode the workflows, quality gates, and best practices that senior engineers use when building software. These ones are packaged so AI agents follow them consistently across every phase of development.</p>
+      <p>• 技术信息：主要语言 JavaScript，Star 97753，Fork 10297，较上次记录新增 Star 72123。</p>
+      <p>• 热度来源：GitHub Trending，Trending 排名 5。</p>
+      <p>• 入选原因：进入 GitHub Trending 周榜第 5 位，是本期最重要的热度信号。；较上次记录新增 Star 72123，近期热度上升。；匹配当前个性化方向：Python 工具与应用开发、Agent 开发。；当前累计 Star 97753，具备一定社区关注度。</p>
+      <p>• 质量信号：高质量，质量分 100，暂未发现明显质量短板。</p>
+      <p>• 风险提示：未发现明显元数据风险，但仍需自行审查代码和依赖。</p>
+      <p>• 学习价值：可作为了解 AI Agent 相关开源实践的参考。</p>
+      <p>• 原链接：<a href="https://github.com/addyosmani/agent-skills">https://github.com/addyosmani/agent-skills</a></p>
+      <h3>6. anthropics/knowledge-work-plugins</h3>
+      <p>• 项目定位：仅根据仓库名称和简介判断，属于 LLM Tooling 方向。</p>
+      <p>• 简介：Open source repository of plugins primarily intended for knowledge workers to use in Claude Cowork</p>
+      <p>• README 摘要：Plugins that turn Claude into a specialist for your role, team, and company. Built for Claude Cowork, also compatible with Claude Code. Cowork lets you set the goal and Claude delivers finished, professional work.</p>
+      <p>• 技术信息：主要语言 Python，Star 25290，Fork 3007，较上次记录新增 Star 6390。</p>
+      <p>• 热度来源：GitHub Trending，Trending 排名 6。</p>
+      <p>• 入选原因：进入 GitHub Trending 周榜第 6 位，是本期最重要的热度信号。；较上次记录新增 Star 6390，近期热度上升。；此前已经推送过，本次因仍然具备热点信号继续保留观察。；匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。</p>
+      <p>• 质量信号：高质量，质量分 92；仓库主题标签较少，垂直方向判断可能不够稳定。</p>
+      <p>• 风险提示：未发现明显元数据风险，但仍需自行审查代码和依赖。</p>
+      <p>• 学习价值：可作为了解 LLM Tooling 相关开源实践的参考。</p>
+      <p>• 原链接：<a href="https://github.com/anthropics/knowledge-work-plugins">https://github.com/anthropics/knowledge-work-plugins</a></p>
+      <h3>7. bilawalsidhu/gods-eye-view</h3>
+      <p>• 项目定位：仅根据仓库名称和简介判断，属于 Other 方向。</p>
+      <p>• 简介：A spy satellite simulator in your browser, except the data is real. Live open source spatial intelligence on a photorealistic 3D globe.</p>
+      <p>• README 摘要：Photorealistic 3D globe. Live aircraft, ships, satellites, earthquakes, traffic, and public cameras. Hands-free voice control powered by a realtime AI agent.</p>
+      <p>• 技术信息：主要语言 JavaScript，Star 39712，Fork 8036，较上次记录新增 Star 0。</p>
+      <p>• 热度来源：GitHub Trending，Trending 排名 7。</p>
+      <p>• 入选原因：进入 GitHub Trending 周榜第 7 位，是本期最重要的热度信号。；匹配当前个性化方向：Python 工具与应用开发。；当前累计 Star 39712，具备一定社区关注度。；最近一周仍有更新或维护活动。</p>
+      <p>• 质量信号：高质量，质量分 100，暂未发现明显质量短板。</p>
+      <p>• 风险提示：未发现明显元数据风险，但仍需自行审查代码和依赖。</p>
+      <p>• 学习价值：可作为了解 Other 相关开源实践的参考。</p>
+      <p>• 原链接：<a href="https://github.com/bilawalsidhu/gods-eye-view">https://github.com/bilawalsidhu/gods-eye-view</a></p>
+      <h3>8. max-sixty/worktrunk</h3>
+      <p>• 项目定位：仅根据仓库名称和简介判断，属于 AI Agent 方向。</p>
+      <p>• 简介：Worktrunk is a CLI for Git worktree management, designed for parallel AI agent workflows</p>
+      <p>• README 摘要：  Worktrunk AI agents like Claude Code and Codex can handle longer tasks without supervision, such that it&#x27;s possible to manage 5-10+ in parallel. Git&#x27;s native worktree feature gives each agent its own working directory, so they don&#x27;t step on each other&#x27;s changes.</p>
+      <p>• 技术信息：主要语言 Rust，Star 8218，Fork 284，较上次记录新增 Star 0。</p>
+      <p>• 热度来源：GitHub Trending，Trending 排名 9。</p>
+      <p>• 入选原因：进入 GitHub Trending 周榜第 9 位，是本期最重要的热度信号。；匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。；当前累计 Star 8218，具备一定社区关注度。；仓库主题、语言或名称与关注方向匹配。</p>
+      <p>• 质量信号：高质量，质量分 100，暂未发现明显质量短板。</p>
+      <p>• 风险提示：未发现明显元数据风险，但仍需自行审查代码和依赖。</p>
+      <p>• 学习价值：可作为了解 AI Agent 相关开源实践的参考。</p>
+      <p>• 原链接：<a href="https://github.com/max-sixty/worktrunk">https://github.com/max-sixty/worktrunk</a></p>
+      <h3>9. mksglu/context-mode</h3>
+      <p>• 项目定位：仅根据仓库名称和简介判断，属于 AI Agent 方向。</p>
+      <p>• 简介：Context window optimization for AI coding agents. Sandboxes tool output (98% reduction), persists session memory, and   enforces routing across 17 platforms via MCP + hooks.</p>
+      <p>• README 摘要：The other half of the context problem.** Used across teams at Every MCP tool call dumps raw data into your context window. A Playwright snapshot costs 56 KB. Twenty GitHub issues cost 59 KB.</p>
+      <p>• 技术信息：主要语言 TypeScript，Star 23778，Fork 1716，较上次记录新增 Star 12691。</p>
+      <p>• 热度来源：GitHub Trending，Trending 排名 8。</p>
+      <p>• 入选原因：进入 GitHub Trending 周榜第 8 位，是本期最重要的热度信号。；较上次记录新增 Star 12691，近期热度上升。；此前已经推送过，本次因仍然具备热点信号继续保留观察。；匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。</p>
+      <p>• 质量信号：高质量，质量分 100，暂未发现明显质量短板。</p>
+      <p>• 风险提示：未发现明显元数据风险，但仍需自行审查代码和依赖。</p>
+      <p>• 学习价值：可作为了解 AI Agent 相关开源实践的参考。</p>
+      <p>• 原链接：<a href="https://github.com/mksglu/context-mode">https://github.com/mksglu/context-mode</a></p>
+      <h3>10. stablyai/orca</h3>
+      <p>• 项目定位：仅根据仓库名称和简介判断，属于 AI Agent 方向。</p>
+      <p>• 简介：Orca is the ADE for working with a fleet of parallel agents. Run any coding agent with your own subscription. Available on desktop, mobile and remote runtime.</p>
+      <p>• README 摘要：中文 · 日本語 · 한국어 · Español · Français · Português The AI Orchestrator for 100x builders. Run Codex, ClaudeCode, OpenCode or Pi side-by-side — each in its own worktree, tracked in one place.</p>
+      <p>• 技术信息：主要语言 TypeScript，Star 73726，Fork 4830，较上次记录新增 Star 0。</p>
+      <p>• 热度来源：GitHub Trending，Trending 排名 12。</p>
+      <p>• 入选原因：进入 GitHub Trending 周榜第 12 位，是本期最重要的热度信号。；匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。；当前累计 Star 73726，具备一定社区关注度。；仓库主题、语言或名称与关注方向匹配。</p>
+      <p>• 质量信号：高质量，质量分 100，暂未发现明显质量短板。</p>
+      <p>• 风险提示：未发现明显元数据风险，但仍需自行审查代码和依赖。</p>
+      <p>• 学习价值：可作为了解 AI Agent 相关开源实践的参考。</p>
+      <p>• 原链接：<a href="https://github.com/stablyai/orca">https://github.com/stablyai/orca</a></p>
+      <h2>四、最适合关注的项目</h2>
+      <p>• alibaba/open-code-review：<a href="https://github.com/alibaba/open-code-review">https://github.com/alibaba/open-code-review</a></p>
+      <p>• anthropics/claude-code：<a href="https://github.com/anthropics/claude-code">https://github.com/anthropics/claude-code</a></p>
+      <p>• affaan-m/ECC：<a href="https://github.com/affaan-m/ECC">https://github.com/affaan-m/ECC</a></p>
+      <h2>五、本周结论</h2>
+      <p>建议优先查看 Trending 排名靠前、近期增长明显且与个人兴趣关键词匹配的项目。复用或运行项目前，仍需人工审查代码、依赖和许可证。</p>
+      <h2>附录：搜索条件与生成信息</h2>
+      <p>• 生成日期：2026-09-21</p>
+      <p>• 搜索起始日期：2026-09-14</p>
+      <p>• 最低 Star：20</p>
+      <p>• 最大项目数：10</p>
+      <p>• 搜索条件：</p>
+      <p>• <code>GitHub Trending weekly</code></p>
+      <p>• <code>pushed:&gt;=2026-09-14 stars:&gt;20</code></p>
+      <p>• <code>topic:ai pushed:&gt;=2026-09-14 stars:&gt;10</code></p>
+      <p>• <code>topic:agent pushed:&gt;=2026-09-14 stars:&gt;10</code></p>
+      <p>• <code>topic:llm pushed:&gt;=2026-09-14 stars:&gt;10</code></p>
+      <p>• <code>topic:automation pushed:&gt;=2026-09-14 stars:&gt;10</code></p>
+      <p>• <code>topic:java pushed:&gt;=2026-09-14 stars:&gt;10</code></p>
+      <p>• <code>topic:spring-boot pushed:&gt;=2026-09-14 stars:&gt;10</code></p>
+      <p>• <code>language:Python pushed:&gt;=2026-09-14 stars:&gt;20</code></p>
+      <p>• <code>language:TypeScript pushed:&gt;=2026-09-14 stars:&gt;20</code></p>
+      <p>• <code>language:Java pushed:&gt;=2026-09-14 stars:&gt;20</code></p>
+    </article>
+  </main>
+</body>
+</html>

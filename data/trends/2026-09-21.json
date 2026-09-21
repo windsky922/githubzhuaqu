@@ -1,0 +1,130 @@
+{
+  "schema_version": 1,
+  "summary_points": [
+    "AI Agent 是本期最集中的方向，共 8 个项目。",
+    "TypeScript 是本期出现最多的主要语言，共 3 个项目。",
+    "本期入选项目累计新增 Star 167713。",
+    "alibaba/open-code-review 是本期 GitHub Trending 排名最高的项目，周榜排名 1。",
+    "addyosmani/agent-skills 是本期新增 Star 最高的项目，新增 72123。"
+  ],
+  "top_categories": [
+    {
+      "count": 8,
+      "name": "AI Agent"
+    },
+    {
+      "count": 1,
+      "name": "LLM Tooling"
+    },
+    {
+      "count": 1,
+      "name": "Other"
+    }
+  ],
+  "top_languages": [
+    {
+      "count": 3,
+      "name": "TypeScript"
+    },
+    {
+      "count": 3,
+      "name": "JavaScript"
+    },
+    {
+      "count": 2,
+      "name": "Go"
+    },
+    {
+      "count": 1,
+      "name": "Python"
+    },
+    {
+      "count": 1,
+      "name": "Rust"
+    }
+  ],
+  "top_star_growth": [
+    {
+      "category": "AI Agent",
+      "full_name": "addyosmani/agent-skills",
+      "html_url": "https://github.com/addyosmani/agent-skills",
+      "language": "JavaScript",
+      "star_growth": 72123,
+      "stargazers_count": 97753
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "affaan-m/ECC",
+      "html_url": "https://github.com/affaan-m/ECC",
+      "language": "JavaScript",
+      "star_growth": 59068,
+      "stargazers_count": 263843
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "anthropics/claude-code",
+      "html_url": "https://github.com/anthropics/claude-code",
+      "language": "TypeScript",
+      "star_growth": 17441,
+      "stargazers_count": 147182
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "mksglu/context-mode",
+      "html_url": "https://github.com/mksglu/context-mode",
+      "language": "TypeScript",
+      "star_growth": 12691,
+      "stargazers_count": 23778
+    },
+    {
+      "category": "LLM Tooling",
+      "full_name": "anthropics/knowledge-work-plugins",
+      "html_url": "https://github.com/anthropics/knowledge-work-plugins",
+      "language": "Python",
+      "star_growth": 6390,
+      "stargazers_count": 25290
+    }
+  ],
+  "top_trending": [
+    {
+      "category": "AI Agent",
+      "full_name": "alibaba/open-code-review",
+      "html_url": "https://github.com/alibaba/open-code-review",
+      "language": "Go",
+      "stargazers_count": 38482
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "anthropics/claude-code",
+      "html_url": "https://github.com/anthropics/claude-code",
+      "language": "TypeScript",
+      "stargazers_count": 147182
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "affaan-m/ECC",
+      "html_url": "https://github.com/affaan-m/ECC",
+      "language": "JavaScript",
+      "stargazers_count": 263843
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "Tencent/WeKnora",
+      "html_url": "https://github.com/Tencent/WeKnora",
+      "language": "Go",
+      "stargazers_count": 28090
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "addyosmani/agent-skills",
+      "html_url": "https://github.com/addyosmani/agent-skills",
+      "language": "JavaScript",
+      "stargazers_count": 97753
+    }
+  ],
+  "total_projects": 10,
+  "total_star_growth": 167713,
+  "trending_project_count": 10,
+  "trending_selected_rate": 1.0,
+  "trending_top10_selected_count": 9
+}

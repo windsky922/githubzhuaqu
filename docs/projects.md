@@ -4,6 +4,16 @@
 
 | 日期 | 项目 | 来源 | Trending 排名 | 方向 | 语言 | Star | 新增 Star | 风险提示 | 链接 |
 |---|---|---|---:|---|---|---:|---:|---:|---|
+| 2026-09-21 | alibaba/open-code-review | GitHub Search + GitHub Trending | 1 | AI Agent | Go | 38482 | 0 | 0 | [https://github.com/alibaba/open-code-review](https://github.com/alibaba/open-code-review) |
+| 2026-09-21 | anthropics/claude-code | GitHub Search + GitHub Trending | 2 | AI Agent | TypeScript | 147182 | 17441 | 1 | [https://github.com/anthropics/claude-code](https://github.com/anthropics/claude-code) |
+| 2026-09-21 | affaan-m/ECC | GitHub Search + GitHub Trending | 3 | AI Agent | JavaScript | 263843 | 59068 | 0 | [https://github.com/affaan-m/ECC](https://github.com/affaan-m/ECC) |
+| 2026-09-21 | Tencent/WeKnora | GitHub Trending | 4 | AI Agent | Go | 28090 | 0 | 0 | [https://github.com/Tencent/WeKnora](https://github.com/Tencent/WeKnora) |
+| 2026-09-21 | addyosmani/agent-skills | GitHub Trending | 5 | AI Agent | JavaScript | 97753 | 72123 | 0 | [https://github.com/addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) |
+| 2026-09-21 | anthropics/knowledge-work-plugins | GitHub Trending | 6 | LLM Tooling | Python | 25290 | 6390 | 0 | [https://github.com/anthropics/knowledge-work-plugins](https://github.com/anthropics/knowledge-work-plugins) |
+| 2026-09-21 | bilawalsidhu/gods-eye-view | GitHub Trending | 7 | Other | JavaScript | 39712 | 0 | 0 | [https://github.com/bilawalsidhu/gods-eye-view](https://github.com/bilawalsidhu/gods-eye-view) |
+| 2026-09-21 | max-sixty/worktrunk | GitHub Trending | 9 | AI Agent | Rust | 8218 | 0 | 0 | [https://github.com/max-sixty/worktrunk](https://github.com/max-sixty/worktrunk) |
+| 2026-09-21 | mksglu/context-mode | GitHub Trending | 8 | AI Agent | TypeScript | 23778 | 12691 | 0 | [https://github.com/mksglu/context-mode](https://github.com/mksglu/context-mode) |
+| 2026-09-21 | stablyai/orca | GitHub Trending | 12 | AI Agent | TypeScript | 73726 | 0 | 0 | [https://github.com/stablyai/orca](https://github.com/stablyai/orca) |
 | 2026-09-14 | ayghri/i-have-adhd | GitHub Trending | 1 | AI Agent | Python | 44442 | 0 | 0 | [https://github.com/ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) |
 | 2026-09-14 | affaan-m/ECC | GitHub Search + GitHub Trending | 2 | AI Agent | JavaScript | 257796 | 53021 | 0 | [https://github.com/affaan-m/ECC](https://github.com/affaan-m/ECC) |
 | 2026-09-14 | openai/plugins | GitHub Trending | 3 | LLM Tooling | JavaScript | 6625 | 0 | 1 | [https://github.com/openai/plugins](https://github.com/openai/plugins) |
