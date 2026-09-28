@@ -4,6 +4,16 @@
 
 | 日期 | 项目 | 来源 | Trending 排名 | 方向 | 语言 | Star | 新增 Star | 风险提示 | 链接 |
 |---|---|---|---:|---|---|---:|---:|---:|---|
+| 2026-09-28 | paperclipai/paperclip | GitHub Search + GitHub Trending | 2 | AI Agent | TypeScript | 90226 | 0 | 0 | [https://github.com/paperclipai/paperclip](https://github.com/paperclipai/paperclip) |
+| 2026-09-28 | vectorize-io/hindsight | GitHub Trending | 3 | AI Agent | Python | 37643 | 0 | 0 | [https://github.com/vectorize-io/hindsight](https://github.com/vectorize-io/hindsight) |
+| 2026-09-28 | Tencent/WeKnora | GitHub Search + GitHub Trending | 5 | AI Agent | Go | 30670 | 0 | 0 | [https://github.com/Tencent/WeKnora](https://github.com/Tencent/WeKnora) |
+| 2026-09-28 | davila7/claude-code-templates | GitHub Trending | 6 | LLM Tooling | Python | 31996 | 0 | 0 | [https://github.com/davila7/claude-code-templates](https://github.com/davila7/claude-code-templates) |
+| 2026-09-28 | stablyai/orca | GitHub Trending | 7 | AI Agent | TypeScript | 79753 | 0 | 0 | [https://github.com/stablyai/orca](https://github.com/stablyai/orca) |
+| 2026-09-28 | vercel/next.js | GitHub Trending | 8 | Other | JavaScript | 142808 | 3588 | 0 | [https://github.com/vercel/next.js](https://github.com/vercel/next.js) |
+| 2026-09-28 | HKUDS/CLI-Anything | GitHub Trending | 9 | AI Agent | Python | 50767 | 0 | 0 | [https://github.com/HKUDS/CLI-Anything](https://github.com/HKUDS/CLI-Anything) |
+| 2026-09-28 | pytorch/pytorch | GitHub Search + GitHub Trending | 10 | Machine Learning | Python | 103426 | 3070 | 0 | [https://github.com/pytorch/pytorch](https://github.com/pytorch/pytorch) |
+| 2026-09-28 | affaan-m/ECC | GitHub Search + GitHub Trending | 12 | AI Agent | JavaScript | 268467 | 63692 | 0 | [https://github.com/affaan-m/ECC](https://github.com/affaan-m/ECC) |
+| 2026-09-28 | rohitg00/ai-engineering-from-scratch | GitHub Search + GitHub Trending | 13 | AI Agent | Python | 59454 | 31970 | 0 | [https://github.com/rohitg00/ai-engineering-from-scratch](https://github.com/rohitg00/ai-engineering-from-scratch) |
 | 2026-09-21 | alibaba/open-code-review | GitHub Search + GitHub Trending | 1 | AI Agent | Go | 38482 | 0 | 0 | [https://github.com/alibaba/open-code-review](https://github.com/alibaba/open-code-review) |
 | 2026-09-21 | anthropics/claude-code | GitHub Search + GitHub Trending | 2 | AI Agent | TypeScript | 147182 | 17441 | 1 | [https://github.com/anthropics/claude-code](https://github.com/anthropics/claude-code) |
 | 2026-09-21 | affaan-m/ECC | GitHub Search + GitHub Trending | 3 | AI Agent | JavaScript | 263843 | 59068 | 0 | [https://github.com/affaan-m/ECC](https://github.com/affaan-m/ECC) |

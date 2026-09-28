@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "summary_points": [
+    "AI Agent 是本期最集中的方向，共 7 个项目。",
+    "Python 是本期出现最多的主要语言，共 5 个项目。",
+    "本期入选项目累计新增 Star 102320。",
+    "paperclipai/paperclip 是本期 GitHub Trending 排名最高的项目，周榜排名 2。",
+    "affaan-m/ECC 是本期新增 Star 最高的项目，新增 63692。"
+  ],
+  "top_categories": [
+    {
+      "count": 7,
+      "name": "AI Agent"
+    },
+    {
+      "count": 1,
+      "name": "LLM Tooling"
+    },
+    {
+      "count": 1,
+      "name": "Other"
+    },
+    {
+      "count": 1,
+      "name": "Machine Learning"
+    }
+  ],
+  "top_languages": [
+    {
+      "count": 5,
+      "name": "Python"
+    },
+    {
+      "count": 2,
+      "name": "TypeScript"
+    },
+    {
+      "count": 2,
+      "name": "JavaScript"
+    },
+    {
+      "count": 1,
+      "name": "Go"
+    }
+  ],
+  "top_star_growth": [
+    {
+      "category": "AI Agent",
+      "full_name": "affaan-m/ECC",
+      "html_url": "https://github.com/affaan-m/ECC",
+      "language": "JavaScript",
+      "star_growth": 63692,
+      "stargazers_count": 268467
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "rohitg00/ai-engineering-from-scratch",
+      "html_url": "https://github.com/rohitg00/ai-engineering-from-scratch",
+      "language": "Python",
+      "star_growth": 31970,
+      "stargazers_count": 59454
+    },
+    {
+      "category": "Other",
+      "full_name": "vercel/next.js",
+      "html_url": "https://github.com/vercel/next.js",
+      "language": "JavaScript",
+      "star_growth": 3588,
+      "stargazers_count": 142808
+    },
+    {
+      "category": "Machine Learning",
+      "full_name": "pytorch/pytorch",
+      "html_url": "https://github.com/pytorch/pytorch",
+      "language": "Python",
+      "star_growth": 3070,
+      "stargazers_count": 103426
+    }
+  ],
+  "top_trending": [
+    {
+      "category": "AI Agent",
+      "full_name": "paperclipai/paperclip",
+      "html_url": "https://github.com/paperclipai/paperclip",
+      "language": "TypeScript",
+      "stargazers_count": 90226
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "vectorize-io/hindsight",
+      "html_url": "https://github.com/vectorize-io/hindsight",
+      "language": "Python",
+      "stargazers_count": 37643
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "Tencent/WeKnora",
+      "html_url": "https://github.com/Tencent/WeKnora",
+      "language": "Go",
+      "stargazers_count": 30670
+    },
+    {
+      "category": "LLM Tooling",
+      "full_name": "davila7/claude-code-templates",
+      "html_url": "https://github.com/davila7/claude-code-templates",
+      "language": "Python",
+      "stargazers_count": 31996
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "stablyai/orca",
+      "html_url": "https://github.com/stablyai/orca",
+      "language": "TypeScript",
+      "stargazers_count": 79753
+    }
+  ],
+  "total_projects": 10,
+  "total_star_growth": 102320,
+  "trending_project_count": 10,
+  "trending_selected_rate": 1.0,
+  "trending_top10_selected_count": 8
+}

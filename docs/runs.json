@@ -1,7 +1,90 @@
 {
   "schema_version": 1,
-  "count": 29,
+  "count": 30,
   "runs": [
+    {
+      "run_date": "2026-09-28",
+      "status": "success",
+      "run_schema_version": 1,
+      "report_url": "weekly/2026-09-28.html",
+      "selected_count": 10,
+      "collected_count": 318,
+      "previously_sent_selected_count": 3,
+      "previously_sent_selected_rate": 0.3,
+      "readme_fetched_count": 10,
+      "readme_fetch_rate": 1.0,
+      "star_history_updated_count": 215,
+      "kimi_used": false,
+      "fallback_used": true,
+      "telegram_sent": false,
+      "telegram_report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-09-28.html",
+      "telegram_explorer_url": "https://windsky922.github.io/githubzhuaqu/explorer.html?date=2026-09-28",
+      "telegram_runs_url": "https://windsky922.github.io/githubzhuaqu/runs.html",
+      "delivery_results": [
+        {
+          "channel": "telegram",
+          "sent": false,
+          "error": "Telegram send skipped",
+          "skipped": true
+        }
+      ],
+      "collector_error_count": 0,
+      "collector_failed_count": 0,
+      "collector_error_kinds": [],
+      "collector_error_summary": [],
+      "collector_query_count": 11,
+      "collector_success_count": 11,
+      "collector_success_rate": 1.0,
+      "top_languages": [
+        {
+          "name": "Python",
+          "count": 5
+        },
+        {
+          "name": "TypeScript",
+          "count": 2
+        },
+        {
+          "name": "JavaScript",
+          "count": 2
+        },
+        {
+          "name": "Go",
+          "count": 1
+        }
+      ],
+      "top_categories": [
+        {
+          "name": "AI Agent",
+          "count": 7
+        },
+        {
+          "name": "LLM Tooling",
+          "count": 1
+        },
+        {
+          "name": "Other",
+          "count": 1
+        },
+        {
+          "name": "Machine Learning",
+          "count": 1
+        }
+      ],
+      "total_star_growth": 102320,
+      "trending_project_count": 10,
+      "trending_top10_available_count": 10,
+      "trending_top10_selected_count": 8,
+      "trending_top10_fulfillment_rate": 1.1429,
+      "trending_selected_rate": 1.0,
+      "summary_points": [
+        "AI Agent 是本期最集中的方向，共 7 个项目。",
+        "Python 是本期出现最多的主要语言，共 5 个项目。",
+        "本期入选项目累计新增 Star 102320。",
+        "paperclipai/paperclip 是本期 GitHub Trending 排名最高的项目，周榜排名 2。",
+        "affaan-m/ECC 是本期新增 Star 最高的项目，新增 63692。"
+      ]
+    },
     {
       "run_date": "2026-09-21",
       "status": "success",
@@ -20,14 +103,7 @@
       "telegram_report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-09-21.html",
       "telegram_explorer_url": "https://windsky922.github.io/githubzhuaqu/explorer.html?date=2026-09-21",
       "telegram_runs_url": "https://windsky922.github.io/githubzhuaqu/runs.html",
-      "delivery_results": [
-        {
-          "channel": "telegram",
-          "sent": true,
-          "error": "",
-          "skipped": false
-        }
-      ],
+      "delivery_results": [],
       "collector_error_count": 0,
       "collector_failed_count": 0,
       "collector_error_kinds": [],
@@ -37,38 +113,38 @@
       "collector_success_rate": 1.0,
       "top_languages": [
         {
-          "name": "TypeScript",
-          "count": 3
+          "count": 3,
+          "name": "TypeScript"
         },
         {
-          "name": "JavaScript",
-          "count": 3
+          "count": 3,
+          "name": "JavaScript"
         },
         {
-          "name": "Go",
-          "count": 2
+          "count": 2,
+          "name": "Go"
         },
         {
-          "name": "Python",
-          "count": 1
+          "count": 1,
+          "name": "Python"
         },
         {
-          "name": "Rust",
-          "count": 1
+          "count": 1,
+          "name": "Rust"
         }
       ],
       "top_categories": [
         {
-          "name": "AI Agent",
-          "count": 8
+          "count": 8,
+          "name": "AI Agent"
         },
         {
-          "name": "LLM Tooling",
-          "count": 1
+          "count": 1,
+          "name": "LLM Tooling"
         },
         {
-          "name": "Other",
-          "count": 1
+          "count": 1,
+          "name": "Other"
         }
       ],
       "total_star_growth": 167713,
