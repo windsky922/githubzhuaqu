@@ -1,7 +1,315 @@
 {
   "schema_version": 1,
-  "count": 290,
+  "count": 300,
   "projects": [
+    {
+      "run_date": "2026-10-05",
+      "full_name": "paperclipai/paperclip",
+      "html_url": "https://github.com/paperclipai/paperclip",
+      "description": "The open-source app everyone uses to manage agents at work",
+      "readme_summary": "Open-source orchestration for teams of AI agents. If OpenClaw is an _employee_, Paperclip is the _company_.** Paperclip is a Node.js server and React UI that orchestrates a team of AI agents to run a business. Bring your own agents, assign goals, and track work and costs from one dashboard.",
+      "category": "AI Agent",
+      "language": "TypeScript",
+      "stargazers_count": 97245,
+      "forks_count": 16453,
+      "star_growth": 0,
+      "score": 0.5209,
+      "sources": [
+        "github_search",
+        "github_trending"
+      ],
+      "trending_rank": 1,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 1 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Agent 开发、开发者工具。",
+        "当前累计 Star 97245，具备一定社区关注度。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+      ],
+      "quality_score": 92,
+      "quality_level": "high",
+      "report_url": "weekly/2026-10-05.html"
+    },
+    {
+      "run_date": "2026-10-05",
+      "full_name": "vectorize-io/hindsight",
+      "html_url": "https://github.com/vectorize-io/hindsight",
+      "description": "Hindsight: Agent Memory That Learns",
+      "readme_summary": "Documentation • Integrations • Cookbook • Benchmarks • Paper • Hindsight Cloud Hindsight™ is an agent memory system built to create smarter agents that learn over time. Most agent memory systems focus on recalling conversation history.",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 45541,
+      "forks_count": 5917,
+      "star_growth": 0,
+      "score": 0.6071,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 2,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 2 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 45541，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-10-05.html"
+    },
+    {
+      "run_date": "2026-10-05",
+      "full_name": "pbakaus/impeccable",
+      "html_url": "https://github.com/pbakaus/impeccable",
+      "description": "The design language that makes your AI harness better at design.",
+      "readme_summary": "Design guidance for AI coding agents. 1 skill, 24 commands, live browser iteration, and 61 deterministic detector rules for AI-generated frontend design. Quick start:** From your project root, run npx impeccable install, then run /impeccable init inside your AI coding tool.",
+      "category": "Other",
+      "language": "JavaScript",
+      "stargazers_count": 76395,
+      "forks_count": 4558,
+      "star_growth": 0,
+      "score": 0.4725,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 3,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 3 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发。",
+        "当前累计 Star 76395，具备一定社区关注度。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库主题标签较少，垂直方向判断可能不够稳定。"
+      ],
+      "quality_score": 92,
+      "quality_level": "high",
+      "report_url": "weekly/2026-10-05.html"
+    },
+    {
+      "run_date": "2026-10-05",
+      "full_name": "debpalash/VoiceStudio",
+      "html_url": "https://github.com/debpalash/VoiceStudio",
+      "description": "VoiceStudio is the open-source, fully-local ElevenLabs alternative — voice cloning, voice design, video dubbing, dictation, transcription & audiobook creation in 646 languages.",
+      "readme_summary": "VoiceStudio Open-source voice cloning, voice design, video dubbing, dictation, transcription & audiobook creation in 646 languages. Start with **VoiceStudio** (default, powered by k2-fsa/OmniVoice), or choose another engine. Features & engine catalog.",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 53225,
+      "forks_count": 5928,
+      "star_growth": 0,
+      "score": 0.6596,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 4,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 4 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 53225，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-10-05.html"
+    },
+    {
+      "run_date": "2026-10-05",
+      "full_name": "heygen-com/hyperframes",
+      "html_url": "https://github.com/heygen-com/hyperframes",
+      "description": "Write HTML. Render video. Built for agents.",
+      "readme_summary": "HyperFrames is an open-source framework for turning HTML, CSS, media, and seekable animations into deterministic MP4 videos. Use it locally with the CLI, from AI coding agents with skills, or as the rendering core behind hosted authoring workflows.",
+      "category": "AI Agent",
+      "language": "TypeScript",
+      "stargazers_count": 56827,
+      "forks_count": 5100,
+      "star_growth": 0,
+      "score": 0.4991,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 5,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 5 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 56827，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-10-05.html"
+    },
+    {
+      "run_date": "2026-10-05",
+      "full_name": "Effect-TS/effect",
+      "html_url": "https://github.com/Effect-TS/effect",
+      "description": "Build production-ready applications in TypeScript",
+      "readme_summary": "Effect is a library for building robust, maintainable, type-safe, and production grade applications in TypeScript. It helps you handle the hard problems at scale: typed errors, dependency injection, structured concurrency, scheduling, tracing, and unified schema validation.",
+      "category": "AI Agent",
+      "language": "TypeScript",
+      "stargazers_count": 16979,
+      "forks_count": 819,
+      "star_growth": 0,
+      "score": 0.474,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 6,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 6 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 16979，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-10-05.html"
+    },
+    {
+      "run_date": "2026-10-05",
+      "full_name": "rohitg00/ai-engineering-from-scratch",
+      "html_url": "https://github.com/rohitg00/ai-engineering-from-scratch",
+      "description": "Learn it. Build it. Ship it for others.",
+      "readme_summary": "Read in your language: Thank you to our sponsors. Your support keeps every lesson free and open source. % of students already use AI tools.",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 63993,
+      "forks_count": 10951,
+      "star_growth": 36509,
+      "score": 0.6406,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 7,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 7 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 36509，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-10-05.html"
+    },
+    {
+      "run_date": "2026-10-05",
+      "full_name": "TencentCloud/Octop",
+      "html_url": "https://github.com/TencentCloud/Octop",
+      "description": "A smarter, self-hosted AI assistant — multi-user, multi-agent.",
+      "readme_summary": "A smarter, self-hosted AI assistant — multi-user, multi-agent. English · 中文 Octop** is an open-source, self-hosted AI assistant. It's not just a tool — it's a digital life form that can operate in parallel.",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 6768,
+      "forks_count": 838,
+      "star_growth": 0,
+      "score": 0.5018,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 11,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 11 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 6768，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-10-05.html"
+    },
+    {
+      "run_date": "2026-10-05",
+      "full_name": "harry0703/MoneyPrinterTurbo",
+      "html_url": "https://github.com/harry0703/MoneyPrinterTurbo",
+      "description": "利用 AI 大模型和自动化工作流，根据主题或关键词一键生成高清短视频。Generate HD short videos from a topic or keyword with an automated AI workflow.",
+      "readme_summary": "只需提供视频 主题 或 关键词 ，即可自动生成视频脚本、匹配素材、生成字幕和背景音乐，并合成高清短视频。 简体中文 | English | 日本語 | 版本发布 | 问题反馈 WebUI API 感谢 Kimi 赞助本项目！Kimi K3 是 Moonshot AI 迄今能力最强的模型，也是全球首个开源 3T 级模型，拥有原生视觉能力与 100 万 Token 上下文，在知识工作、推理和长周期任务中展现前沿性能。在 MoneyPrinterTurbo 中，K3 能直接驱动视频创作，不仅撰写视频文案，还会提炼素材搜索关键词、决定成片画面；对内容理解越准确，匹配到的素材就越贴题。",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 128478,
+      "forks_count": 20095,
+      "star_growth": 50024,
+      "score": 0.3818,
+      "sources": [
+        "github_search",
+        "github_trending"
+      ],
+      "trending_rank": 13,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 13 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 50024，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-10-05.html"
+    },
+    {
+      "run_date": "2026-10-05",
+      "full_name": "NousResearch/hermes-agent",
+      "html_url": "https://github.com/NousResearch/hermes-agent",
+      "description": "The agent that grows with you",
+      "readme_summary": "The self-improving AI agent built by Nous Research.** It's the only agent with a built-in learning loop — it creates skills from experience, improves them during use, nudges itself to persist knowledge, searches its own past conversations, and builds a deepening model of who you are across sessions.",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 251259,
+      "forks_count": 53931,
+      "star_growth": 73126,
+      "score": 0.3608,
+      "sources": [
+        "github_search"
+      ],
+      "trending_rank": 0,
+      "selection_reasons": [
+        "较上次记录新增 Star 73126，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 251259，具备一定社区关注度。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库简介较短，项目定位信息有限。"
+      ],
+      "quality_score": 92,
+      "quality_level": "high",
+      "report_url": "weekly/2026-10-05.html"
+    },
     {
       "run_date": "2026-09-28",
       "full_name": "paperclipai/paperclip",

@@ -4,6 +4,16 @@
 
 | 日期 | 项目 | 来源 | Trending 排名 | 方向 | 语言 | Star | 新增 Star | 风险提示 | 链接 |
 |---|---|---|---:|---|---|---:|---:|---:|---|
+| 2026-10-05 | paperclipai/paperclip | GitHub Search + GitHub Trending | 1 | AI Agent | TypeScript | 97245 | 0 | 0 | [https://github.com/paperclipai/paperclip](https://github.com/paperclipai/paperclip) |
+| 2026-10-05 | vectorize-io/hindsight | GitHub Trending | 2 | AI Agent | Python | 45541 | 0 | 0 | [https://github.com/vectorize-io/hindsight](https://github.com/vectorize-io/hindsight) |
+| 2026-10-05 | pbakaus/impeccable | GitHub Trending | 3 | Other | JavaScript | 76395 | 0 | 0 | [https://github.com/pbakaus/impeccable](https://github.com/pbakaus/impeccable) |
+| 2026-10-05 | debpalash/VoiceStudio | GitHub Trending | 4 | AI Agent | Python | 53225 | 0 | 0 | [https://github.com/debpalash/VoiceStudio](https://github.com/debpalash/VoiceStudio) |
+| 2026-10-05 | heygen-com/hyperframes | GitHub Trending | 5 | AI Agent | TypeScript | 56827 | 0 | 0 | [https://github.com/heygen-com/hyperframes](https://github.com/heygen-com/hyperframes) |
+| 2026-10-05 | Effect-TS/effect | GitHub Trending | 6 | AI Agent | TypeScript | 16979 | 0 | 0 | [https://github.com/Effect-TS/effect](https://github.com/Effect-TS/effect) |
+| 2026-10-05 | rohitg00/ai-engineering-from-scratch | GitHub Trending | 7 | AI Agent | Python | 63993 | 36509 | 0 | [https://github.com/rohitg00/ai-engineering-from-scratch](https://github.com/rohitg00/ai-engineering-from-scratch) |
+| 2026-10-05 | TencentCloud/Octop | GitHub Trending | 11 | AI Agent | Python | 6768 | 0 | 0 | [https://github.com/TencentCloud/Octop](https://github.com/TencentCloud/Octop) |
+| 2026-10-05 | harry0703/MoneyPrinterTurbo | GitHub Search + GitHub Trending | 13 | AI Agent | Python | 128478 | 50024 | 0 | [https://github.com/harry0703/MoneyPrinterTurbo](https://github.com/harry0703/MoneyPrinterTurbo) |
+| 2026-10-05 | NousResearch/hermes-agent | GitHub Search | - | AI Agent | Python | 251259 | 73126 | 0 | [https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) |
 | 2026-09-28 | paperclipai/paperclip | GitHub Search + GitHub Trending | 2 | AI Agent | TypeScript | 90226 | 0 | 0 | [https://github.com/paperclipai/paperclip](https://github.com/paperclipai/paperclip) |
 | 2026-09-28 | vectorize-io/hindsight | GitHub Trending | 3 | AI Agent | Python | 37643 | 0 | 0 | [https://github.com/vectorize-io/hindsight](https://github.com/vectorize-io/hindsight) |
 | 2026-09-28 | Tencent/WeKnora | GitHub Search + GitHub Trending | 5 | AI Agent | Go | 30670 | 0 | 0 | [https://github.com/Tencent/WeKnora](https://github.com/Tencent/WeKnora) |

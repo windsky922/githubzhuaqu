@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "summary_points": [
+    "AI Agent 是本期最集中的方向，共 9 个项目。",
+    "Python 是本期出现最多的主要语言，共 6 个项目。",
+    "本期入选项目累计新增 Star 159659。",
+    "paperclipai/paperclip 是本期 GitHub Trending 排名最高的项目，周榜排名 1。",
+    "NousResearch/hermes-agent 是本期新增 Star 最高的项目，新增 73126。"
+  ],
+  "top_categories": [
+    {
+      "count": 9,
+      "name": "AI Agent"
+    },
+    {
+      "count": 1,
+      "name": "Other"
+    }
+  ],
+  "top_languages": [
+    {
+      "count": 6,
+      "name": "Python"
+    },
+    {
+      "count": 3,
+      "name": "TypeScript"
+    },
+    {
+      "count": 1,
+      "name": "JavaScript"
+    }
+  ],
+  "top_star_growth": [
+    {
+      "category": "AI Agent",
+      "full_name": "NousResearch/hermes-agent",
+      "html_url": "https://github.com/NousResearch/hermes-agent",
+      "language": "Python",
+      "star_growth": 73126,
+      "stargazers_count": 251259
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "harry0703/MoneyPrinterTurbo",
+      "html_url": "https://github.com/harry0703/MoneyPrinterTurbo",
+      "language": "Python",
+      "star_growth": 50024,
+      "stargazers_count": 128478
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "rohitg00/ai-engineering-from-scratch",
+      "html_url": "https://github.com/rohitg00/ai-engineering-from-scratch",
+      "language": "Python",
+      "star_growth": 36509,
+      "stargazers_count": 63993
+    }
+  ],
+  "top_trending": [
+    {
+      "category": "AI Agent",
+      "full_name": "paperclipai/paperclip",
+      "html_url": "https://github.com/paperclipai/paperclip",
+      "language": "TypeScript",
+      "stargazers_count": 97245
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "vectorize-io/hindsight",
+      "html_url": "https://github.com/vectorize-io/hindsight",
+      "language": "Python",
+      "stargazers_count": 45541
+    },
+    {
+      "category": "Other",
+      "full_name": "pbakaus/impeccable",
+      "html_url": "https://github.com/pbakaus/impeccable",
+      "language": "JavaScript",
+      "stargazers_count": 76395
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "debpalash/VoiceStudio",
+      "html_url": "https://github.com/debpalash/VoiceStudio",
+      "language": "Python",
+      "stargazers_count": 53225
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "heygen-com/hyperframes",
+      "html_url": "https://github.com/heygen-com/hyperframes",
+      "language": "TypeScript",
+      "stargazers_count": 56827
+    }
+  ],
+  "total_projects": 10,
+  "total_star_growth": 159659,
+  "trending_project_count": 9,
+  "trending_selected_rate": 0.9,
+  "trending_top10_selected_count": 7
+}
