@@ -1,15 +1,15 @@
 {
   "schema_version": 1,
-  "count": 34,
+  "count": 35,
   "jobs": [
     {
-      "job_id": "dev-context-index-plan:20261005T033405977273:cd21131336",
+      "job_id": "dev-context-index-plan:20261012T034953548960:cd21131336",
       "kind": "dev_context_index",
       "status": "succeeded",
-      "run_date": "2026-10-05",
-      "submitted_at": "2026-10-05T03:34:05.977273Z",
-      "started_at": "2026-10-05T03:34:06.117760Z",
-      "finished_at": "2026-10-05T03:34:06.123511Z",
+      "run_date": "2026-10-12",
+      "submitted_at": "2026-10-12T03:49:53.548960Z",
+      "started_at": "2026-10-12T03:49:53.735188Z",
+      "finished_at": "2026-10-12T03:49:53.740218Z",
       "request": {
         "profile": "",
         "sources": [],
@@ -23,7 +23,7 @@
         "safety_warnings": []
       },
       "result": {
-        "run_date": "2026-10-05",
+        "run_date": "2026-10-12",
         "status": "succeeded",
         "selected_count": 0,
         "collected_count": 0,
@@ -41,13 +41,13 @@
       "report_url": ""
     },
     {
-      "job_id": "rag-search-eval-plan:2026-10-05:0c0346044d22",
+      "job_id": "rag-search-eval-plan:2026-10-12:fd0414dfc753",
       "kind": "rag_search_evaluation",
       "status": "succeeded",
-      "run_date": "2026-10-05",
-      "submitted_at": "2026-10-05T03:34:04.651900Z",
-      "started_at": "2026-10-05T03:34:04.694943Z",
-      "finished_at": "2026-10-05T03:34:04.700544Z",
+      "run_date": "2026-10-12",
+      "submitted_at": "2026-10-12T03:49:52.298429Z",
+      "started_at": "2026-10-12T03:49:52.418855Z",
+      "finished_at": "2026-10-12T03:49:52.511906Z",
       "request": {
         "profile": "",
         "sources": [],
@@ -61,7 +61,7 @@
         "safety_warnings": []
       },
       "result": {
-        "run_date": "2026-10-05",
+        "run_date": "2026-10-12",
         "status": "ok",
         "selected_count": 0,
         "collected_count": 0,
@@ -79,11 +79,11 @@
       "report_url": ""
     },
     {
-      "job_id": "rag-backfill-plan:20261005T033404447185:547fb87cdc",
+      "job_id": "rag-backfill-plan:20261012T034952116012:547fb87cdc",
       "kind": "rag_backfill",
       "status": "planned",
       "run_date": "",
-      "submitted_at": "2026-10-05T03:34:04.447185Z",
+      "submitted_at": "2026-10-12T03:49:52.116012Z",
       "started_at": "",
       "finished_at": "",
       "request": {
@@ -117,9 +117,47 @@
       "report_url": ""
     },
     {
-      "job_id": "run:2026-10-05",
+      "job_id": "run:2026-10-12",
       "kind": "weekly_report",
       "status": "failed",
+      "run_date": "2026-10-12",
+      "submitted_at": "2026-10-12",
+      "started_at": "",
+      "finished_at": "2026-10-12",
+      "request": {
+        "profile": "",
+        "sources": [],
+        "dry_run": false,
+        "requested_dry_run": false,
+        "confirm_delivery": false,
+        "delivery_allowed": false,
+        "days_back": 0,
+        "trigger_source": "",
+        "requested_by": "",
+        "safety_warnings": []
+      },
+      "result": {
+        "run_date": "",
+        "status": "",
+        "selected_count": 10,
+        "collected_count": 312,
+        "kimi_used": false,
+        "fallback_used": false,
+        "telegram_sent": false,
+        "telegram_error": "",
+        "report_path": "reports/2026-10-12.md",
+        "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-10-12.html",
+        "sqlite_index_path": "",
+        "sqlite_error": "",
+        "error": ""
+      },
+      "error": "Kimi API error 404: {\"error\":{\"message\":\"Not found the model kimi-k2.5 or Permission denied\",\"type\":\"resource_not_found_error\"}}",
+      "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-10-12.html"
+    },
+    {
+      "job_id": "run:2026-10-05",
+      "kind": "weekly_report",
+      "status": "succeeded",
       "run_date": "2026-10-05",
       "submitted_at": "2026-10-05",
       "started_at": "",
@@ -151,7 +189,7 @@
         "sqlite_error": "",
         "error": ""
       },
-      "error": "Kimi API error 404: {\"error\":{\"message\":\"Not found the model kimi-k2.5 or Permission denied\",\"type\":\"resource_not_found_error\"}}",
+      "error": "",
       "report_url": "https://windsky922.github.io/githubzhuaqu/weekly/2026-10-05.html"
     },
     {

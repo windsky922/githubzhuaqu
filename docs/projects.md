@@ -4,6 +4,16 @@
 
 | 日期 | 项目 | 来源 | Trending 排名 | 方向 | 语言 | Star | 新增 Star | 风险提示 | 链接 |
 |---|---|---|---:|---|---|---:|---:|---:|---|
+| 2026-10-12 | boykopovar/AnyPS5 | GitHub Trending | 1 | Other | C++ | 30508 | 0 | 0 | [https://github.com/boykopovar/AnyPS5](https://github.com/boykopovar/AnyPS5) |
+| 2026-10-12 | tester-army/e2e | GitHub Trending | 2 | Other | TypeScript | 9139 | 0 | 0 | [https://github.com/tester-army/e2e](https://github.com/tester-army/e2e) |
+| 2026-10-12 | mattpocock/skills | GitHub Search + GitHub Trending | 3 | AI Agent | Shell | 286478 | 193566 | 0 | [https://github.com/mattpocock/skills](https://github.com/mattpocock/skills) |
+| 2026-10-12 | thedotmack/claude-mem | GitHub Search + GitHub Trending | 4 | AI Agent | TypeScript | 99788 | 19416 | 0 | [https://github.com/thedotmack/claude-mem](https://github.com/thedotmack/claude-mem) |
+| 2026-10-12 | EpicGames/raddebugger | GitHub Trending | 5 | Other | C | 8408 | 0 | 0 | [https://github.com/EpicGames/raddebugger](https://github.com/EpicGames/raddebugger) |
+| 2026-10-12 | heygen-com/hyperframes | GitHub Trending | 6 | AI Agent | TypeScript | 61089 | 0 | 0 | [https://github.com/heygen-com/hyperframes](https://github.com/heygen-com/hyperframes) |
+| 2026-10-12 | cursor/plugins | GitHub Trending | 7 | Other | TypeScript | 10921 | 9176 | 1 | [https://github.com/cursor/plugins](https://github.com/cursor/plugins) |
+| 2026-10-12 | earthtojake/text-to-cad | GitHub Trending | 9 | AI Agent | Python | 19348 | 18373 | 0 | [https://github.com/earthtojake/text-to-cad](https://github.com/earthtojake/text-to-cad) |
+| 2026-10-12 | Panniantong/Agent-Reach | GitHub Search | - | AI Agent | Python | 96132 | 76262 | 0 | [https://github.com/Panniantong/Agent-Reach](https://github.com/Panniantong/Agent-Reach) |
+| 2026-10-12 | NousResearch/hermes-agent | GitHub Search | - | AI Agent | Python | 252854 | 74721 | 0 | [https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) |
 | 2026-10-05 | paperclipai/paperclip | GitHub Search + GitHub Trending | 1 | AI Agent | TypeScript | 97245 | 0 | 0 | [https://github.com/paperclipai/paperclip](https://github.com/paperclipai/paperclip) |
 | 2026-10-05 | vectorize-io/hindsight | GitHub Trending | 2 | AI Agent | Python | 45541 | 0 | 0 | [https://github.com/vectorize-io/hindsight](https://github.com/vectorize-io/hindsight) |
 | 2026-10-05 | pbakaus/impeccable | GitHub Trending | 3 | Other | JavaScript | 76395 | 0 | 0 | [https://github.com/pbakaus/impeccable](https://github.com/pbakaus/impeccable) |
