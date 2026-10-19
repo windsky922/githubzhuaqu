@@ -11,7 +11,7 @@
 - 入选项目：10 个
 - 采集候选：310 个
 - 生成方式：降级模板
-- Telegram：未推送
+- Telegram：已推送
 - 采集错误：0 条
 
 ## 最新趋势要点
@@ -24,7 +24,7 @@
 
 ## 全部周报
 
-- [2026-10-19](weekly/2026-10-19.html)：10 个项目，降级模板，Telegram 未推送，主语言 Python，主方向 AI Agent，新增 Star 198534，Trending 项目 7
+- [2026-10-19](weekly/2026-10-19.html)：10 个项目，降级模板，Telegram 已推送，主语言 Python，主方向 AI Agent，新增 Star 198534，Trending 项目 7
 - [2026-10-12](weekly/2026-10-12.html)：10 个项目，降级模板，Telegram 已推送，主语言 TypeScript，主方向 AI Agent，新增 Star 391514，Trending 项目 8
 - [2026-10-05](weekly/2026-10-05.html)：10 个项目，降级模板，Telegram 已推送，主语言 Python，主方向 AI Agent，新增 Star 159659，Trending 项目 9
 - [2026-09-28](weekly/2026-09-28.html)：10 个项目，降级模板，Telegram 已推送，主语言 Python，主方向 AI Agent，新增 Star 102320，Trending 项目 10
