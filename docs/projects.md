@@ -4,6 +4,16 @@
 
 | 日期 | 项目 | 来源 | Trending 排名 | 方向 | 语言 | Star | 新增 Star | 风险提示 | 链接 |
 |---|---|---|---:|---|---|---:|---:|---:|---|
+| 2026-10-19 | morluto/rea | GitHub Search + GitHub Trending | 1 | AI Agent | TypeScript | 323729 | 0 | 0 | [https://github.com/morluto/rea](https://github.com/morluto/rea) |
+| 2026-10-19 | storytold/artcraft | GitHub Trending | 2 | Other | Rust | 32835 | 0 | 0 | [https://github.com/storytold/artcraft](https://github.com/storytold/artcraft) |
+| 2026-10-19 | boykopovar/AnyPS5 | GitHub Trending | 3 | Other | C++ | 43301 | 0 | 0 | [https://github.com/boykopovar/AnyPS5](https://github.com/boykopovar/AnyPS5) |
+| 2026-10-19 | anthropics/claude-plugins-official | GitHub Trending | 4 | LLM Tooling | Python | 42765 | 0 | 0 | [https://github.com/anthropics/claude-plugins-official](https://github.com/anthropics/claude-plugins-official) |
+| 2026-10-19 | mksglu/context-mode | GitHub Trending | 5 | AI Agent | TypeScript | 30793 | 19706 | 0 | [https://github.com/mksglu/context-mode](https://github.com/mksglu/context-mode) |
+| 2026-10-19 | cathrynlavery/diagram-design | GitHub Trending | 6 | AI Agent | HTML | 57780 | 0 | 0 | [https://github.com/cathrynlavery/diagram-design](https://github.com/cathrynlavery/diagram-design) |
+| 2026-10-19 | NationalSecurityAgency/ghidra | GitHub Search + GitHub Trending | 7 | Other | Java | 90972 | 22738 | 0 | [https://github.com/NationalSecurityAgency/ghidra](https://github.com/NationalSecurityAgency/ghidra) |
+| 2026-10-19 | Panniantong/Agent-Reach | GitHub Search | - | AI Agent | Python | 99117 | 79247 | 0 | [https://github.com/Panniantong/Agent-Reach](https://github.com/Panniantong/Agent-Reach) |
+| 2026-10-19 | NousResearch/hermes-agent | GitHub Search | - | AI Agent | Python | 254976 | 76843 | 0 | [https://github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) |
+| 2026-10-19 | tt-a1i/archify | GitHub Search | - | AI Agent | JavaScript | 85446 | 0 | 0 | [https://github.com/tt-a1i/archify](https://github.com/tt-a1i/archify) |
 | 2026-10-12 | boykopovar/AnyPS5 | GitHub Trending | 1 | Other | C++ | 30508 | 0 | 0 | [https://github.com/boykopovar/AnyPS5](https://github.com/boykopovar/AnyPS5) |
 | 2026-10-12 | tester-army/e2e | GitHub Trending | 2 | Other | TypeScript | 9139 | 0 | 0 | [https://github.com/tester-army/e2e](https://github.com/tester-army/e2e) |
 | 2026-10-12 | mattpocock/skills | GitHub Search + GitHub Trending | 3 | AI Agent | Shell | 286478 | 193566 | 0 | [https://github.com/mattpocock/skills](https://github.com/mattpocock/skills) |

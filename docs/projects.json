@@ -1,7 +1,310 @@
 {
   "schema_version": 1,
-  "count": 310,
+  "count": 320,
   "projects": [
+    {
+      "run_date": "2026-10-19",
+      "full_name": "morluto/rea",
+      "html_url": "https://github.com/morluto/rea",
+      "description": "Reverse engineer anything with agents, from app behavior down to native binaries.",
+      "readme_summary": "English** · 简体中文 · 繁體中文 · 日本語 · 한국어 · Türkçe · Русский · Tiếng Việt · ไทย · Deutsch · Español · Français · Українська · Polski · Português (Brasil) · العربية · فارسی · Bahasa Indonesia · Italiano · Ελληνικά · മലയാളം See a feature you like.",
+      "category": "AI Agent",
+      "language": "TypeScript",
+      "stargazers_count": 323729,
+      "forks_count": 82008,
+      "star_growth": 0,
+      "score": 0.7548,
+      "sources": [
+        "github_search",
+        "github_trending"
+      ],
+      "trending_rank": 1,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 1 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 323729，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-10-19.html"
+    },
+    {
+      "run_date": "2026-10-19",
+      "full_name": "storytold/artcraft",
+      "html_url": "https://github.com/storytold/artcraft",
+      "description": "ArtCraft is an intentional crafting engine for artists, designers, and filmmakers",
+      "readme_summary": "Compose in 2D, stage scenes in 3D, and choose the models that fit your work. Turn prompting into *crafting* with visual tools for precise, repeatable results. Artists need control over composition, character identity, and camera placement.",
+      "category": "Other",
+      "language": "Rust",
+      "stargazers_count": 32835,
+      "forks_count": 5199,
+      "star_growth": 0,
+      "score": 0.546,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 2,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 2 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、开发者工具。",
+        "当前累计 Star 32835，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-10-19.html"
+    },
+    {
+      "run_date": "2026-10-19",
+      "full_name": "boykopovar/AnyPS5",
+      "html_url": "https://github.com/boykopovar/AnyPS5",
+      "description": "Tool for automatic PS5 executables porting to Linux and Windows",
+      "readme_summary": "Tool for automatic executables porting to Linux and Windows. The relinker-only build runs on macOS, including Apple silicon. Web converter** - files stay on your device.",
+      "category": "Other",
+      "language": "C++",
+      "stargazers_count": 43301,
+      "forks_count": 3933,
+      "star_growth": 0,
+      "score": 0.4375,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 3,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 3 位，是本期最重要的热度信号。",
+        "当前累计 Star 43301，具备一定社区关注度。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-10-19.html"
+    },
+    {
+      "run_date": "2026-10-19",
+      "full_name": "anthropics/claude-plugins-official",
+      "html_url": "https://github.com/anthropics/claude-plugins-official",
+      "description": "Official, Anthropic-managed directory of high quality Claude Code Plugins.",
+      "readme_summary": "A curated directory of high-quality plugins for Claude Code. ⚠️ Important:** Make sure you trust a plugin before installing, updating, or using it.",
+      "category": "LLM Tooling",
+      "language": "Python",
+      "stargazers_count": 42765,
+      "forks_count": 4538,
+      "star_growth": 0,
+      "score": 0.5363,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 4,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 4 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 42765，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-10-19.html"
+    },
+    {
+      "run_date": "2026-10-19",
+      "full_name": "mksglu/context-mode",
+      "html_url": "https://github.com/mksglu/context-mode",
+      "description": "Context window optimization for AI coding agents. Sandboxes tool output (98% reduction), persists session memory, and   enforces routing across 17 platforms via MCP + hooks.",
+      "readme_summary": "The other half of the context problem.** Used across teams at Every MCP tool call dumps raw data into your context window. A Playwright snapshot costs 56 KB. Twenty GitHub issues cost 59 KB.",
+      "category": "AI Agent",
+      "language": "TypeScript",
+      "stargazers_count": 30793,
+      "forks_count": 2283,
+      "star_growth": 19706,
+      "score": 0.5176,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 5,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 5 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 19706，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-10-19.html"
+    },
+    {
+      "run_date": "2026-10-19",
+      "full_name": "cathrynlavery/diagram-design",
+      "html_url": "https://github.com/cathrynlavery/diagram-design",
+      "description": "Editorial diagram design for Claude Code, Codex, GitHub Copilot, Cursor, Factory Droid, and Pi. 44 diagram types. Self-contained HTML + SVG. No shadows. No Mermaid slop.",
+      "readme_summary": "An agent skill that draws diagrams as one self-contained HTML + SVG file, in your brand.",
+      "category": "AI Agent",
+      "language": "HTML",
+      "stargazers_count": 57780,
+      "forks_count": 3701,
+      "star_growth": 0,
+      "score": 0.3615,
+      "sources": [
+        "github_trending"
+      ],
+      "trending_rank": 6,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 6 位，是本期最重要的热度信号。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发。",
+        "当前累计 Star 57780，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-10-19.html"
+    },
+    {
+      "run_date": "2026-10-19",
+      "full_name": "NationalSecurityAgency/ghidra",
+      "html_url": "https://github.com/NationalSecurityAgency/ghidra",
+      "description": "Ghidra is a software reverse engineering (SRE) framework",
+      "readme_summary": "Ghidra is a software reverse engineering (SRE) framework created and maintained by the [National Security Agency][nsa] Research Directorate.",
+      "category": "Other",
+      "language": "Java",
+      "stargazers_count": 90972,
+      "forks_count": 10186,
+      "star_growth": 22738,
+      "score": 0.3502,
+      "sources": [
+        "github_search",
+        "github_trending"
+      ],
+      "trending_rank": 7,
+      "selection_reasons": [
+        "进入 GitHub Trending 周榜第 7 位，是本期最重要的热度信号。",
+        "较上次记录新增 Star 22738，近期热度上升。",
+        "匹配当前个性化方向：Java 后端与工程实践。",
+        "当前累计 Star 90972，具备一定社区关注度。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-10-19.html"
+    },
+    {
+      "run_date": "2026-10-19",
+      "full_name": "Panniantong/Agent-Reach",
+      "html_url": "https://github.com/Panniantong/Agent-Reach",
+      "description": "Give your AI agent eyes to see the entire internet. Read & search Twitter, Reddit, YouTube, GitHub, Bilibili, XiaoHongShu — one CLI, zero API fees.",
+      "readme_summary": "👁️ Agent Reach 给你的 AI Agent 一键装上互联网能力 当下最稳的接入方式，替你选好、装好、体检好——接入方式会换代，你不用操心 想出现在这里？",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 99117,
+      "forks_count": 8731,
+      "star_growth": 79247,
+      "score": 0.3796,
+      "sources": [
+        "github_search"
+      ],
+      "trending_rank": 0,
+      "selection_reasons": [
+        "较上次记录新增 Star 79247，近期热度上升。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 99117，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-10-19.html"
+    },
+    {
+      "run_date": "2026-10-19",
+      "full_name": "NousResearch/hermes-agent",
+      "html_url": "https://github.com/NousResearch/hermes-agent",
+      "description": "The agent that grows with you",
+      "readme_summary": "The self-improving AI agent built by Nous Research.** It's the only agent with a built-in learning loop — it creates skills from experience, improves them during use, nudges itself to persist knowledge, searches its own past conversations, and builds a deepening model of who you are across sessions.",
+      "category": "AI Agent",
+      "language": "Python",
+      "stargazers_count": 254976,
+      "forks_count": 55474,
+      "star_growth": 76843,
+      "score": 0.3528,
+      "sources": [
+        "github_search"
+      ],
+      "trending_rank": 0,
+      "selection_reasons": [
+        "较上次记录新增 Star 76843，近期热度上升。",
+        "此前已经推送过，本次因仍然具备热点信号继续保留观察。",
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 254976，具备一定社区关注度。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [
+        "仓库简介较短，项目定位信息有限。"
+      ],
+      "quality_score": 92,
+      "quality_level": "high",
+      "report_url": "weekly/2026-10-19.html"
+    },
+    {
+      "run_date": "2026-10-19",
+      "full_name": "tt-a1i/archify",
+      "html_url": "https://github.com/tt-a1i/archify",
+      "description": "Turn any idea, plan, or codebase into a beautiful interactive diagram. An agent skill for Claude Code, Codex, and more.",
+      "readme_summary": "Turn anything you want to understand, plan, or share into an interactive visual. Your repo, mapped.** Watch the 35-second demo: explore the diagram, follow source links, and trace a path. Try the interactive examples ↗ Works with Cursor, Claude Code, Codex CLI, and OpenCode.",
+      "category": "AI Agent",
+      "language": "JavaScript",
+      "stargazers_count": 85446,
+      "forks_count": 5807,
+      "star_growth": 0,
+      "score": 0.3305,
+      "sources": [
+        "github_search"
+      ],
+      "trending_rank": 0,
+      "selection_reasons": [
+        "匹配当前个性化方向：Python 工具与应用开发、Agent 开发、开发者工具。",
+        "当前累计 Star 85446，具备一定社区关注度。",
+        "仓库主题、语言或名称与关注方向匹配。",
+        "最近一周仍有更新或维护活动。"
+      ],
+      "security_flags": [],
+      "security_score": 100,
+      "security_level": "low",
+      "quality_flags": [],
+      "quality_score": 100,
+      "quality_level": "high",
+      "report_url": "weekly/2026-10-19.html"
+    },
     {
       "run_date": "2026-10-12",
       "full_name": "boykopovar/AnyPS5",

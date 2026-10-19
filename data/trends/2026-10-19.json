@@ -1,0 +1,130 @@
+{
+  "schema_version": 1,
+  "summary_points": [
+    "AI Agent 是本期最集中的方向，共 6 个项目。",
+    "Python 是本期出现最多的主要语言，共 3 个项目。",
+    "本期入选项目累计新增 Star 198534。",
+    "morluto/rea 是本期 GitHub Trending 排名最高的项目，周榜排名 1。",
+    "Panniantong/Agent-Reach 是本期新增 Star 最高的项目，新增 79247。"
+  ],
+  "top_categories": [
+    {
+      "count": 6,
+      "name": "AI Agent"
+    },
+    {
+      "count": 3,
+      "name": "Other"
+    },
+    {
+      "count": 1,
+      "name": "LLM Tooling"
+    }
+  ],
+  "top_languages": [
+    {
+      "count": 3,
+      "name": "Python"
+    },
+    {
+      "count": 2,
+      "name": "TypeScript"
+    },
+    {
+      "count": 1,
+      "name": "Rust"
+    },
+    {
+      "count": 1,
+      "name": "C++"
+    },
+    {
+      "count": 1,
+      "name": "HTML"
+    },
+    {
+      "count": 1,
+      "name": "Java"
+    },
+    {
+      "count": 1,
+      "name": "JavaScript"
+    }
+  ],
+  "top_star_growth": [
+    {
+      "category": "AI Agent",
+      "full_name": "Panniantong/Agent-Reach",
+      "html_url": "https://github.com/Panniantong/Agent-Reach",
+      "language": "Python",
+      "star_growth": 79247,
+      "stargazers_count": 99117
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "NousResearch/hermes-agent",
+      "html_url": "https://github.com/NousResearch/hermes-agent",
+      "language": "Python",
+      "star_growth": 76843,
+      "stargazers_count": 254976
+    },
+    {
+      "category": "Other",
+      "full_name": "NationalSecurityAgency/ghidra",
+      "html_url": "https://github.com/NationalSecurityAgency/ghidra",
+      "language": "Java",
+      "star_growth": 22738,
+      "stargazers_count": 90972
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "mksglu/context-mode",
+      "html_url": "https://github.com/mksglu/context-mode",
+      "language": "TypeScript",
+      "star_growth": 19706,
+      "stargazers_count": 30793
+    }
+  ],
+  "top_trending": [
+    {
+      "category": "AI Agent",
+      "full_name": "morluto/rea",
+      "html_url": "https://github.com/morluto/rea",
+      "language": "TypeScript",
+      "stargazers_count": 323729
+    },
+    {
+      "category": "Other",
+      "full_name": "storytold/artcraft",
+      "html_url": "https://github.com/storytold/artcraft",
+      "language": "Rust",
+      "stargazers_count": 32835
+    },
+    {
+      "category": "Other",
+      "full_name": "boykopovar/AnyPS5",
+      "html_url": "https://github.com/boykopovar/AnyPS5",
+      "language": "C++",
+      "stargazers_count": 43301
+    },
+    {
+      "category": "LLM Tooling",
+      "full_name": "anthropics/claude-plugins-official",
+      "html_url": "https://github.com/anthropics/claude-plugins-official",
+      "language": "Python",
+      "stargazers_count": 42765
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "mksglu/context-mode",
+      "html_url": "https://github.com/mksglu/context-mode",
+      "language": "TypeScript",
+      "stargazers_count": 30793
+    }
+  ],
+  "total_projects": 10,
+  "total_star_growth": 198534,
+  "trending_project_count": 7,
+  "trending_selected_rate": 0.7,
+  "trending_top10_selected_count": 7
+}
