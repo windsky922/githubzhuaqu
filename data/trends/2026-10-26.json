@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "summary_points": [
+    "AI Agent 是本期最集中的方向，共 8 个项目。",
+    "TypeScript 是本期出现最多的主要语言，共 5 个项目。",
+    "本期入选项目累计新增 Star 208479。",
+    "ruvnet/ruflo 是本期 GitHub Trending 排名最高的项目，周榜排名 2。",
+    "Panniantong/Agent-Reach 是本期新增 Star 最高的项目，新增 82660。"
+  ],
+  "top_categories": [
+    {
+      "count": 8,
+      "name": "AI Agent"
+    },
+    {
+      "count": 1,
+      "name": "LLM Tooling"
+    },
+    {
+      "count": 1,
+      "name": "Machine Learning"
+    }
+  ],
+  "top_languages": [
+    {
+      "count": 5,
+      "name": "TypeScript"
+    },
+    {
+      "count": 4,
+      "name": "Python"
+    },
+    {
+      "count": 1,
+      "name": "Rust"
+    }
+  ],
+  "top_star_growth": [
+    {
+      "category": "AI Agent",
+      "full_name": "Panniantong/Agent-Reach",
+      "html_url": "https://github.com/Panniantong/Agent-Reach",
+      "language": "Python",
+      "star_growth": 82660,
+      "stargazers_count": 102530
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "anomalyco/opencode",
+      "html_url": "https://github.com/anomalyco/opencode",
+      "language": "TypeScript",
+      "star_growth": 52399,
+      "stargazers_count": 221561
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "ruvnet/ruflo",
+      "html_url": "https://github.com/ruvnet/ruflo",
+      "language": "TypeScript",
+      "star_growth": 31840,
+      "stargazers_count": 79310
+    },
+    {
+      "category": "Machine Learning",
+      "full_name": "Comfy-Org/ComfyUI",
+      "html_url": "https://github.com/Comfy-Org/ComfyUI",
+      "language": "Python",
+      "star_growth": 27467,
+      "stargazers_count": 142969
+    },
+    {
+      "category": "LLM Tooling",
+      "full_name": "anthropics/knowledge-work-plugins",
+      "html_url": "https://github.com/anthropics/knowledge-work-plugins",
+      "language": "Python",
+      "star_growth": 14113,
+      "stargazers_count": 33013
+    }
+  ],
+  "top_trending": [
+    {
+      "category": "AI Agent",
+      "full_name": "ruvnet/ruflo",
+      "html_url": "https://github.com/ruvnet/ruflo",
+      "language": "TypeScript",
+      "stargazers_count": 79310
+    },
+    {
+      "category": "LLM Tooling",
+      "full_name": "anthropics/knowledge-work-plugins",
+      "html_url": "https://github.com/anthropics/knowledge-work-plugins",
+      "language": "Python",
+      "stargazers_count": 33013
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "anomalyco/opencode",
+      "html_url": "https://github.com/anomalyco/opencode",
+      "language": "TypeScript",
+      "stargazers_count": 221561
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "stablyai/orca",
+      "html_url": "https://github.com/stablyai/orca",
+      "language": "TypeScript",
+      "stargazers_count": 105941
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "heygen-com/hyperframes",
+      "html_url": "https://github.com/heygen-com/hyperframes",
+      "language": "TypeScript",
+      "stargazers_count": 72236
+    }
+  ],
+  "total_projects": 10,
+  "total_star_growth": 208479,
+  "trending_project_count": 8,
+  "trending_selected_rate": 0.8,
+  "trending_top10_selected_count": 8
+}

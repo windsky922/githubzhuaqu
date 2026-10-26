@@ -4,6 +4,16 @@
 
 | 日期 | 项目 | 来源 | Trending 排名 | 方向 | 语言 | Star | 新增 Star | 风险提示 | 链接 |
 |---|---|---|---:|---|---|---:|---:|---:|---|
+| 2026-10-26 | ruvnet/ruflo | GitHub Trending | 2 | AI Agent | TypeScript | 79310 | 31840 | 0 | [https://github.com/ruvnet/ruflo](https://github.com/ruvnet/ruflo) |
+| 2026-10-26 | anthropics/knowledge-work-plugins | GitHub Trending | 3 | LLM Tooling | Python | 33013 | 14113 | 0 | [https://github.com/anthropics/knowledge-work-plugins](https://github.com/anthropics/knowledge-work-plugins) |
+| 2026-10-26 | anomalyco/opencode | GitHub Search + GitHub Trending | 4 | AI Agent | TypeScript | 221561 | 52399 | 0 | [https://github.com/anomalyco/opencode](https://github.com/anomalyco/opencode) |
+| 2026-10-26 | stablyai/orca | GitHub Search + GitHub Trending | 5 | AI Agent | TypeScript | 105941 | 0 | 0 | [https://github.com/stablyai/orca](https://github.com/stablyai/orca) |
+| 2026-10-26 | heygen-com/hyperframes | GitHub Trending | 6 | AI Agent | TypeScript | 72236 | 0 | 0 | [https://github.com/heygen-com/hyperframes](https://github.com/heygen-com/hyperframes) |
+| 2026-10-26 | Graphify-Labs/graphify | GitHub Search + GitHub Trending | 8 | AI Agent | Python | 135343 | 0 | 0 | [https://github.com/Graphify-Labs/graphify](https://github.com/Graphify-Labs/graphify) |
+| 2026-10-26 | akitaonrails/ai-memory | GitHub Trending | 9 | AI Agent | Rust | 13544 | 0 | 0 | [https://github.com/akitaonrails/ai-memory](https://github.com/akitaonrails/ai-memory) |
+| 2026-10-26 | Panniantong/Agent-Reach | GitHub Search | - | AI Agent | Python | 102530 | 82660 | 0 | [https://github.com/Panniantong/Agent-Reach](https://github.com/Panniantong/Agent-Reach) |
+| 2026-10-26 | Comfy-Org/ComfyUI | GitHub Search + GitHub Trending | 10 | Machine Learning | Python | 142969 | 27467 | 0 | [https://github.com/Comfy-Org/ComfyUI](https://github.com/Comfy-Org/ComfyUI) |
+| 2026-10-26 | morluto/rea | GitHub Search | - | AI Agent | TypeScript | 385211 | 0 | 0 | [https://github.com/morluto/rea](https://github.com/morluto/rea) |
 | 2026-10-19 | morluto/rea | GitHub Search + GitHub Trending | 1 | AI Agent | TypeScript | 323729 | 0 | 0 | [https://github.com/morluto/rea](https://github.com/morluto/rea) |
 | 2026-10-19 | storytold/artcraft | GitHub Trending | 2 | Other | Rust | 32835 | 0 | 0 | [https://github.com/storytold/artcraft](https://github.com/storytold/artcraft) |
 | 2026-10-19 | boykopovar/AnyPS5 | GitHub Trending | 3 | Other | C++ | 43301 | 0 | 0 | [https://github.com/boykopovar/AnyPS5](https://github.com/boykopovar/AnyPS5) |
