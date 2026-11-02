@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "summary_points": [
+    "AI Agent 是本期最集中的方向，共 9 个项目。",
+    "Python 是本期出现最多的主要语言，共 3 个项目。",
+    "本期入选项目累计新增 Star 248406。",
+    "Nutlope/hallmark 是本期 GitHub Trending 排名最高的项目，周榜排名 1。",
+    "obra/superpowers 是本期新增 Star 最高的项目，新增 94267。"
+  ],
+  "top_categories": [
+    {
+      "count": 9,
+      "name": "AI Agent"
+    },
+    {
+      "count": 1,
+      "name": "LLM Tooling"
+    }
+  ],
+  "top_languages": [
+    {
+      "count": 3,
+      "name": "Python"
+    },
+    {
+      "count": 3,
+      "name": "TypeScript"
+    },
+    {
+      "count": 1,
+      "name": "CSS"
+    },
+    {
+      "count": 1,
+      "name": "Rust"
+    },
+    {
+      "count": 1,
+      "name": "Shell"
+    },
+    {
+      "count": 1,
+      "name": "Markdown"
+    }
+  ],
+  "top_star_growth": [
+    {
+      "category": "AI Agent",
+      "full_name": "obra/superpowers",
+      "html_url": "https://github.com/obra/superpowers",
+      "language": "Shell",
+      "star_growth": 94267,
+      "stargazers_count": 310718
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "Panniantong/Agent-Reach",
+      "html_url": "https://github.com/Panniantong/Agent-Reach",
+      "language": "Python",
+      "star_growth": 87832,
+      "stargazers_count": 107702
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "TauricResearch/TradingAgents",
+      "html_url": "https://github.com/TauricResearch/TradingAgents",
+      "language": "Python",
+      "star_growth": 37113,
+      "stargazers_count": 119599
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "thedotmack/claude-mem",
+      "html_url": "https://github.com/thedotmack/claude-mem",
+      "language": "TypeScript",
+      "star_growth": 29194,
+      "stargazers_count": 109566
+    }
+  ],
+  "top_trending": [
+    {
+      "category": "LLM Tooling",
+      "full_name": "Nutlope/hallmark",
+      "html_url": "https://github.com/Nutlope/hallmark",
+      "language": "CSS",
+      "stargazers_count": 45063
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "pbakaus/impeccable",
+      "html_url": "https://github.com/pbakaus/impeccable",
+      "language": "Rust",
+      "stargazers_count": 99539
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "AgriciDaniel/claude-seo",
+      "html_url": "https://github.com/AgriciDaniel/claude-seo",
+      "language": "Python",
+      "stargazers_count": 25618
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "thedotmack/claude-mem",
+      "html_url": "https://github.com/thedotmack/claude-mem",
+      "language": "TypeScript",
+      "stargazers_count": 109566
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "obra/superpowers",
+      "html_url": "https://github.com/obra/superpowers",
+      "language": "Shell",
+      "stargazers_count": 310718
+    }
+  ],
+  "total_projects": 10,
+  "total_star_growth": 248406,
+  "trending_project_count": 8,
+  "trending_selected_rate": 0.8,
+  "trending_top10_selected_count": 7
+}

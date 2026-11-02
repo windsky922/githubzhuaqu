@@ -4,6 +4,16 @@
 
 | 日期 | 项目 | 来源 | Trending 排名 | 方向 | 语言 | Star | 新增 Star | 风险提示 | 链接 |
 |---|---|---|---:|---|---|---:|---:|---:|---|
+| 2026-11-02 | Nutlope/hallmark | GitHub Trending | 1 | LLM Tooling | CSS | 45063 | 0 | 0 | [https://github.com/Nutlope/hallmark](https://github.com/Nutlope/hallmark) |
+| 2026-11-02 | pbakaus/impeccable | GitHub Search + GitHub Trending | 2 | AI Agent | Rust | 99539 | 0 | 0 | [https://github.com/pbakaus/impeccable](https://github.com/pbakaus/impeccable) |
+| 2026-11-02 | AgriciDaniel/claude-seo | GitHub Trending | 3 | AI Agent | Python | 25618 | 0 | 0 | [https://github.com/AgriciDaniel/claude-seo](https://github.com/AgriciDaniel/claude-seo) |
+| 2026-11-02 | thedotmack/claude-mem | GitHub Search + GitHub Trending | 4 | AI Agent | TypeScript | 109566 | 29194 | 0 | [https://github.com/thedotmack/claude-mem](https://github.com/thedotmack/claude-mem) |
+| 2026-11-02 | obra/superpowers | GitHub Search + GitHub Trending | 6 | AI Agent | Shell | 310718 | 94267 | 0 | [https://github.com/obra/superpowers](https://github.com/obra/superpowers) |
+| 2026-11-02 | JetBrains/thinkrail | GitHub Trending | 7 | AI Agent | TypeScript | 7009 | 0 | 0 | [https://github.com/JetBrains/thinkrail](https://github.com/JetBrains/thinkrail) |
+| 2026-11-02 | jakubkrehel/skills | GitHub Trending | 10 | AI Agent | Markdown | 10133 | 0 | 0 | [https://github.com/jakubkrehel/skills](https://github.com/jakubkrehel/skills) |
+| 2026-11-02 | Panniantong/Agent-Reach | GitHub Search | - | AI Agent | Python | 107702 | 87832 | 0 | [https://github.com/Panniantong/Agent-Reach](https://github.com/Panniantong/Agent-Reach) |
+| 2026-11-02 | TauricResearch/TradingAgents | GitHub Search + GitHub Trending | 11 | AI Agent | Python | 119599 | 37113 | 0 | [https://github.com/TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents) |
+| 2026-11-02 | morluto/rea | GitHub Search | - | AI Agent | TypeScript | 419385 | 0 | 0 | [https://github.com/morluto/rea](https://github.com/morluto/rea) |
 | 2026-10-26 | ruvnet/ruflo | GitHub Trending | 2 | AI Agent | TypeScript | 79310 | 31840 | 0 | [https://github.com/ruvnet/ruflo](https://github.com/ruvnet/ruflo) |
 | 2026-10-26 | anthropics/knowledge-work-plugins | GitHub Trending | 3 | LLM Tooling | Python | 33013 | 14113 | 0 | [https://github.com/anthropics/knowledge-work-plugins](https://github.com/anthropics/knowledge-work-plugins) |
 | 2026-10-26 | anomalyco/opencode | GitHub Search + GitHub Trending | 4 | AI Agent | TypeScript | 221561 | 52399 | 0 | [https://github.com/anomalyco/opencode](https://github.com/anomalyco/opencode) |
