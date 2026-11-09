@@ -1,0 +1,134 @@
+{
+  "schema_version": 1,
+  "summary_points": [
+    "AI Agent 是本期最集中的方向，共 7 个项目。",
+    "Python 是本期出现最多的主要语言，共 4 个项目。",
+    "本期入选项目累计新增 Star 435136。",
+    "NVIDIA/auto-ontology 是本期 GitHub Trending 排名最高的项目，周榜排名 1。",
+    "mattpocock/skills 是本期新增 Star 最高的项目，新增 225785。"
+  ],
+  "top_categories": [
+    {
+      "count": 7,
+      "name": "AI Agent"
+    },
+    {
+      "count": 1,
+      "name": "LLM Tooling"
+    },
+    {
+      "count": 1,
+      "name": "Other"
+    },
+    {
+      "count": 1,
+      "name": "Developer Tools"
+    }
+  ],
+  "top_languages": [
+    {
+      "count": 4,
+      "name": "Python"
+    },
+    {
+      "count": 3,
+      "name": "TypeScript"
+    },
+    {
+      "count": 1,
+      "name": "Rust"
+    },
+    {
+      "count": 1,
+      "name": "CSS"
+    },
+    {
+      "count": 1,
+      "name": "Shell"
+    }
+  ],
+  "top_star_growth": [
+    {
+      "category": "AI Agent",
+      "full_name": "mattpocock/skills",
+      "html_url": "https://github.com/mattpocock/skills",
+      "language": "Shell",
+      "star_growth": 225785,
+      "stargazers_count": 318697
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "Panniantong/Agent-Reach",
+      "html_url": "https://github.com/Panniantong/Agent-Reach",
+      "language": "Python",
+      "star_growth": 90484,
+      "stargazers_count": 110354
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "anthropics/skills",
+      "html_url": "https://github.com/anthropics/skills",
+      "language": "Python",
+      "star_growth": 43905,
+      "stargazers_count": 189806
+    },
+    {
+      "category": "Developer Tools",
+      "full_name": "D4Vinci/Scrapling",
+      "html_url": "https://github.com/D4Vinci/Scrapling",
+      "language": "Python",
+      "star_growth": 40351,
+      "stargazers_count": 99984
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "thedotmack/claude-mem",
+      "html_url": "https://github.com/thedotmack/claude-mem",
+      "language": "TypeScript",
+      "star_growth": 34611,
+      "stargazers_count": 114983
+    }
+  ],
+  "top_trending": [
+    {
+      "category": "AI Agent",
+      "full_name": "NVIDIA/auto-ontology",
+      "html_url": "https://github.com/NVIDIA/auto-ontology",
+      "language": "Python",
+      "stargazers_count": 10525
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "thedotmack/claude-mem",
+      "html_url": "https://github.com/thedotmack/claude-mem",
+      "language": "TypeScript",
+      "stargazers_count": 114983
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "max-sixty/worktrunk",
+      "html_url": "https://github.com/max-sixty/worktrunk",
+      "language": "Rust",
+      "stargazers_count": 12154
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "anthropics/skills",
+      "html_url": "https://github.com/anthropics/skills",
+      "language": "Python",
+      "stargazers_count": 189806
+    },
+    {
+      "category": "AI Agent",
+      "full_name": "milind-soni/OpenMausBot",
+      "html_url": "https://github.com/milind-soni/OpenMausBot",
+      "language": "TypeScript",
+      "stargazers_count": 18562
+    }
+  ],
+  "total_projects": 10,
+  "total_star_growth": 435136,
+  "trending_project_count": 9,
+  "trending_selected_rate": 0.9,
+  "trending_top10_selected_count": 8
+}

@@ -4,6 +4,16 @@
 
 | 日期 | 项目 | 来源 | Trending 排名 | 方向 | 语言 | Star | 新增 Star | 风险提示 | 链接 |
 |---|---|---|---:|---|---|---:|---:|---:|---|
+| 2026-11-09 | NVIDIA/auto-ontology | GitHub Trending | 1 | AI Agent | Python | 10525 | 0 | 0 | [https://github.com/NVIDIA/auto-ontology](https://github.com/NVIDIA/auto-ontology) |
+| 2026-11-09 | thedotmack/claude-mem | GitHub Search + GitHub Trending | 2 | AI Agent | TypeScript | 114983 | 34611 | 0 | [https://github.com/thedotmack/claude-mem](https://github.com/thedotmack/claude-mem) |
+| 2026-11-09 | max-sixty/worktrunk | GitHub Trending | 3 | AI Agent | Rust | 12154 | 0 | 0 | [https://github.com/max-sixty/worktrunk](https://github.com/max-sixty/worktrunk) |
+| 2026-11-09 | anthropics/skills | GitHub Search + GitHub Trending | 4 | AI Agent | Python | 189806 | 43905 | 1 | [https://github.com/anthropics/skills](https://github.com/anthropics/skills) |
+| 2026-11-09 | milind-soni/OpenMausBot | GitHub Trending | 6 | AI Agent | TypeScript | 18562 | 0 | 0 | [https://github.com/milind-soni/OpenMausBot](https://github.com/milind-soni/OpenMausBot) |
+| 2026-11-09 | Nutlope/hallmark | GitHub Trending | 8 | LLM Tooling | CSS | 51080 | 0 | 0 | [https://github.com/Nutlope/hallmark](https://github.com/Nutlope/hallmark) |
+| 2026-11-09 | Renhuai123/ziwei-doushu | GitHub Trending | 9 | Other | TypeScript | 17063 | 0 | 0 | [https://github.com/Renhuai123/ziwei-doushu](https://github.com/Renhuai123/ziwei-doushu) |
+| 2026-11-09 | D4Vinci/Scrapling | GitHub Search + GitHub Trending | 10 | Developer Tools | Python | 99984 | 40351 | 0 | [https://github.com/D4Vinci/Scrapling](https://github.com/D4Vinci/Scrapling) |
+| 2026-11-09 | mattpocock/skills | GitHub Search + GitHub Trending | 12 | AI Agent | Shell | 318697 | 225785 | 0 | [https://github.com/mattpocock/skills](https://github.com/mattpocock/skills) |
+| 2026-11-09 | Panniantong/Agent-Reach | GitHub Search | - | AI Agent | Python | 110354 | 90484 | 0 | [https://github.com/Panniantong/Agent-Reach](https://github.com/Panniantong/Agent-Reach) |
 | 2026-11-02 | Nutlope/hallmark | GitHub Trending | 1 | LLM Tooling | CSS | 45063 | 0 | 0 | [https://github.com/Nutlope/hallmark](https://github.com/Nutlope/hallmark) |
 | 2026-11-02 | pbakaus/impeccable | GitHub Search + GitHub Trending | 2 | AI Agent | Rust | 99539 | 0 | 0 | [https://github.com/pbakaus/impeccable](https://github.com/pbakaus/impeccable) |
 | 2026-11-02 | AgriciDaniel/claude-seo | GitHub Trending | 3 | AI Agent | Python | 25618 | 0 | 0 | [https://github.com/AgriciDaniel/claude-seo](https://github.com/AgriciDaniel/claude-seo) |
